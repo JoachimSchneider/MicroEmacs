@@ -20,7 +20,7 @@ char msg[] = TEXT35;
 /*           "another user" */
 
 char *dolock(fname)
-char *fname;
+CONST char *fname;
 {
   int lun,status;
   status = _open(fname,OPREADACC|OPWRITEACC|OPWRITELOCK,-1,&lun);
@@ -30,7 +30,7 @@ char *fname;
 }
 
 char *undolock(fname)
-char *fname;
+CONST char *fname;
 {
   int i,j,k,lun,status;
   char xname[95],c;
@@ -68,7 +68,7 @@ char *fname;
 #   include     <dir.h>
 # endif
 # if  ( IS_UNIX() )
-#   include     <sys/dir.h>
+#   include     <dirent.h>
 #   include     <signal.h>
 # endif
 
@@ -210,7 +210,7 @@ char *buf;
 }
 
 char *dolock(filespec)
-char *filespec;   /* full file spec of file to lock */
+CONST char *filespec;   /* full file spec of file to lock */
 {
   struct stat sb;               /* stat buffer for info on files/dirs */
   FILE *fp;                     /* ptr to lock file */
@@ -414,7 +414,7 @@ char *filespec;   /* full file spec of file to lock */
  *********************/
 
   char *undolock(filespec)
-  char *filespec;   /* filespec to unlock */
+  CONST char *filespec;   /* filespec to unlock */
   {
     char filename[NFILEN];          /* name of file to lock */
     char pathname[NFILEN];          /* path leading to file to lock */

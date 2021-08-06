@@ -12,8 +12,8 @@
 
 #if     WINDOW_MSWIN
 extern char * PASCAL fullpathname (char *PathName, int Nbuf);
-extern int PASCAL NEAR vtinitscr (SCREEN *sp, int nrow, int ncol);
-extern int PASCAL NEAR vtsizescr (SCREEN *sp, int nrow, int ncol);
+extern int PASCAL NEAR vtinitscr (SCREEN_T *sp, int nrow, int ncol);
+extern int PASCAL NEAR vtsizescr (SCREEN_T *sp, int nrow, int ncol);
 extern int PASCAL cutregion (int f, int n);
 extern int PASCAL clipregion (int f, int n);
 extern int PASCAL insertclip (int f, int n);
@@ -29,11 +29,11 @@ extern int PASCAL unbindmenu (int f, int n);
 extern int PASCAL execmenu (int f, int n);
 extern int PASCAL longop (int f);
 extern int PASCAL filenamedlg (char *prompt, char *buf, int nbuf, int fullpath);
-extern int PASCAL NEAR vtfreescr (SCREEN *sp);
-extern int PASCAL NEAR unlist_screen(SCREEN *sp);
+extern int PASCAL NEAR vtfreescr (SCREEN_T *sp);
+extern int PASCAL NEAR unlist_screen(SCREEN_T *sp);
 extern int PASCAL mlhistory(VOID);
-extern int PASCAL updscrollbars (SCREEN *sp, char w_flag);
-extern VOID PASCAL NEAR vtscreen (SCREEN *sp);
+extern int PASCAL updscrollbars (SCREEN_T *sp, char w_flag);
+extern VOID PASCAL NEAR vtscreen (SCREEN_T *sp);
 #endif
 
 #if CALLED
@@ -41,7 +41,7 @@ extern int emacs(int argc, char *argv[]);
 #endif
 
 #if HANDLE_WINCH
-extern VOID winch_changed(VOID);
+extern VOID winch_changed(int);
 extern VOID winch_new_size(VOID);
 #endif
 
@@ -69,15 +69,15 @@ extern BUFFER *PASCAL NEAR bfind(char *bname, int cflag, int bflag);
 extern BUFFER *PASCAL NEAR getcbuf(char *prompt, char *defval, int createflag);
 extern BUFFER *PASCAL NEAR getdefb(VOID);
 extern BUFFER *PASCAL NEAR getoldb(VOID);
-extern SCREEN *PASCAL NEAR init_screen(char *, BUFFER *);
-extern SCREEN *PASCAL NEAR lookup_screen(char *scr_name);
-extern SCREEN *PASCAL NEAR index_screen(int scr_num);
-extern int PASCAL NEAR screen_index(SCREEN *sp);
-extern int PASCAL NEAR insert_screen(SCREEN *sp);
-extern int PASCAL NEAR select_screen(SCREEN *sp, int announce);
-extern int PASCAL NEAR free_screen(SCREEN *sp);
+extern SCREEN_T *PASCAL NEAR init_screen(char *, BUFFER *);
+extern SCREEN_T *PASCAL NEAR lookup_screen(char *scr_name);
+extern SCREEN_T *PASCAL NEAR index_screen(int scr_num);
+extern int PASCAL NEAR screen_index(SCREEN_T *sp);
+extern int PASCAL NEAR insert_screen(SCREEN_T *sp);
+extern int PASCAL NEAR select_screen(SCREEN_T *sp, int announce);
+extern int PASCAL NEAR free_screen(SCREEN_T *sp);
 extern char *Eallocate(unsigned nbytes);
-extern char *dolock(char *fname);
+extern char *dolock(CONST char *fname);
 extern char *getpath(char *filespec);
 extern char *gtname(char *filespec);
 extern char *PASCAL NEAR bytecopy(char *dst, CONST char *src, int maxlen);
@@ -112,7 +112,7 @@ extern char *PASCAL NEAR token(char *src, char *tok, int size);
 extern CONST char *PASCAL NEAR transbind(CONST char *skey);
 extern char *PASCAL NEAR trimstr(char *s);
 extern char *PASCAL NEAR xlat(char *source, char *lookup, char *trans);
-extern char *undolock(char *fname);
+extern char *undolock(CONST char *fname);
 extern char *PASCAL NEAR regtostr(char *buf, REGION *region);
 extern int PASCAL NEAR lowerc(char ch);
 extern int PASCAL NEAR cycle_ring(int f, int n);
@@ -203,7 +203,7 @@ extern int PASCAL NEAR pop(BUFFER *popbuffer);
 extern int PASCAL NEAR qreplace(int f, int n);
 extern int PASCAL NEAR readpattern(char *prompt, char apat[], int srch);
 #if     WINDOW_TEXT
-extern VOID PASCAL NEAR refresh_screen(SCREEN *sp);
+extern VOID PASCAL NEAR refresh_screen(SCREEN_T *sp);
 #endif
 extern int PASCAL NEAR reglines(VOID);
 extern int PASCAL NEAR rename_screen(int f, int n);
@@ -230,7 +230,7 @@ extern int PASCAL NEAR stopforw(VOID);
 extern int PASCAL NEAR svar(VDESC *var, char *value);
 extern int PASCAL NEAR tgetc(VOID);
 extern int PASCAL NEAR uneat(VOID);
-extern int PASCAL NEAR unlist_screen(SCREEN *sp);
+extern int PASCAL NEAR unlist_screen(SCREEN_T *sp);
 extern int PASCAL NEAR upscreen(int f, int n);
 extern int PASCAL NEAR vtinit(VOID);
 extern int PASCAL NEAR yank(int f, int n);
@@ -310,7 +310,7 @@ extern int PASCAL NEAR fileread(int f, int n);
 extern int PASCAL NEAR filesave(int f, int n);
 extern int PASCAL NEAR filewrite(int f, int n);
 extern int PASCAL NEAR fillpara(int f, int n);
-extern int PASCAL NEAR filter(int f, int n);
+extern int PASCAL NEAR f_filter(int f, int n);
 extern VOID PASCAL NEAR findvar(char *var, VDESC *vd, int size, int scope);
 extern int PASCAL NEAR fmatch(char ch);
 extern int PASCAL NEAR forwchar(int f, int n);
@@ -365,7 +365,7 @@ extern int PASCAL NEAR undolist();
 extern int PASCAL NEAR mouse_screen(VOID);
 extern int PASCAL NEAR screenlist(int iflag);
 extern int PASCAL NEAR meexit(int status);
-extern int PASCAL NEAR meta(int f, int n);
+extern int PASCAL NEAR f_meta(int f, int n);
 extern int PASCAL NEAR mlreply(char *prompt, char *buf, int nbuf);
 extern int PASCAL NEAR mlyesno(char *prompt);
 extern int PASCAL NEAR mouseoffset(EWINDOW *wp, LINE *lp, int col);
@@ -612,9 +612,9 @@ extern BUFFER *PASCAL NEAR bfind();
 extern BUFFER *PASCAL NEAR getcbuf();
 extern BUFFER *PASCAL NEAR getdefb();
 extern BUFFER *PASCAL NEAR getoldb();
-extern SCREEN *PASCAL NEAR init_screen();
-extern SCREEN *PASCAL NEAR lookup_screen();
-extern SCREEN *PASCAL NEAR index_screen();
+extern SCREEN_T *PASCAL NEAR init_screen();
+extern SCREEN_T *PASCAL NEAR lookup_screen();
+extern SCREEN_T *PASCAL NEAR index_screen();
 extern int PASCAL NEAR screen_index();
 extern int PASCAL NEAR insert_screen();
 extern int PASCAL NEAR select_screen();
@@ -845,7 +845,7 @@ extern int PASCAL NEAR fileread();
 extern int PASCAL NEAR filesave();
 extern int PASCAL NEAR filewrite();
 extern int PASCAL NEAR fillpara();
-extern int PASCAL NEAR filter();
+extern int PASCAL NEAR f_filter();
 extern VOID PASCAL NEAR findvar();
 extern int PASCAL NEAR fmatch();
 extern int PASCAL NEAR forwchar();
@@ -899,7 +899,7 @@ extern int PASCAL NEAR undolist();
 extern int PASCAL NEAR mouse_screen();
 extern int PASCAL NEAR screenlist();
 extern int PASCAL NEAR meexit();
-extern int PASCAL NEAR meta();
+extern int PASCAL NEAR f_meta();
 extern int PASCAL NEAR mlreply();
 extern int PASCAL NEAR mlyesno();
 extern int PASCAL NEAR mouseoffset();

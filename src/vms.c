@@ -733,7 +733,7 @@ int PASCAL NEAR pipecmd()
     return(TRUE);
 }
 
-int PASCAL NEAR filter(int f, int n)
+int PASCAL NEAR f_filter(int f, int n)
 {
         register int    s;	/* return status from CLI */
 	register BUFFER *bp;	/* pointer to buffer to zot */

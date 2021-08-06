@@ -12,6 +12,7 @@
  */
  
 #include	<stdio.h>
+#include	<assert.h>
 #include	"estruct.h"
 #include	"eproto.h"
 #include	"edef.h"
@@ -414,6 +415,9 @@ int nbytes;	/* number of bytes to malloc() */
 	UNDO_OBJ *up;	/* ptr to undo struct to free */
 	UNDO_OBJ *lp;	/* last undo struct before up */
 
+	assert(0 <= nbytes);
+	if ( 0 >= nbytes )	return (VOID *)0;
+
 	ptr = (char *)NULL;
 	while (ptr == (char *)NULL) {
 
@@ -468,6 +472,9 @@ void *orig_ptr;
 	BUFFER *bp;	/* buffer to dealloc memory from */
 	UNDO_OBJ *up;	/* ptr to undo struct to free */
 	UNDO_OBJ *lp;	/* last undo struct before up */
+
+	assert(0 <= nbytes);
+	if ( 0 >= nbytes )	return (VOID *)0;
 
 	/*
 	 * Avoid the whole problem of non-ANSI realloc() functions

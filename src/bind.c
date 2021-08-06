@@ -108,7 +108,7 @@ int f, n;	/* command arguments [IGNORED] */
 	}
 
 	/* get the command sequence to bind */
-	c = getckey((kfunc == meta) || (kfunc == cex) ||
+	c = getckey((kfunc == f_meta) || (kfunc == cex) ||
 		    (kfunc == unarg) || (kfunc == ctrlg));
 
 	if (clexec == FALSE) {
@@ -171,7 +171,7 @@ int f, n;	/* command arguments [IGNORED] */
 
 	/* if we have rebound the meta key, make the
 	   search terminators follow it			*/
-	if (kfunc == meta) {
+	if (kfunc == f_meta) {
 		sterm = c;
 		isterm = c;
 	}

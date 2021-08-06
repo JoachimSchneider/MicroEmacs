@@ -559,7 +559,7 @@ int f, n;
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-PASCAL NEAR filter(f, n)
+PASCAL NEAR f_filter(f, n)
 
 int f, n;
 

@@ -7,6 +7,12 @@
                                 Steve Wilhite and George Jones
 */
 
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 #ifdef  LATTICE
 #undef  LATTICE          /* don't use their definitions...use ours       */
 #endif
@@ -57,6 +63,7 @@
 #define OPENBSD 0                       /* OPENBSD 386                  */
 #define OS2     0                       /* Microsoft or IBM OS/2        */
 #define SMOS    0                       /* Supermax UNIX System V       */
+#define SOLARIS 0                       /* SUN Solaris (SYSV)           */
 #define SUN     0                       /* SUN v4.0                     */
 #define TOS     0                       /* ST520, TOS                   */
 #define USG     0                       /* UNIX system V                */
@@ -67,8 +74,8 @@
 #define XENIX   0                       /* IBM-PC SCO XENIX             */
 
 
-#define IS_UNIX() ( AIX || AIX5 || AUX || AVIION || BSD || FREEBSD || HPUX8 || HPUX9 || LINUX || OPENBSD || SMOS || SUN || USG || XENIX )
-#define IS_BSD_UNIX() ( AIX5 || BSD || FREEBSD || LINUX || OPENBSD || SUN )
+#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD || FREEBSD || HPUX8 || HPUX9 || LINUX || OPENBSD || SMOS || SOLARIS || SUN || USG || XENIX )
+#define IS_POSIX_UNIX() ( IS_UNIX() && !( USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX) )
 
 
 /*      Compiler definitions                    */
@@ -112,7 +119,7 @@
                                 /* but more efficient memory allocator  */
 
 /*      Terminal Output definitions             */
-/*      [Set one of these!!]                    */
+/*      [If not on UNIX: Set one of these!!]    */
 
 #define ANSI    0                       /* ANSI escape sequences        */
 #define DASHER  0                       /* DG Dasher 2xx/4xx crts       */
@@ -127,7 +134,6 @@
 #define OS2NPM  0                       /* OS/2 non-Presentation Mgr.   */
 #define SMG     0                       /* SMG library on VMS           */
 #define ST52    0                       /* Atari 520/1040ST screen      */
-#define TERMCAP 1                       /* Use TERMCAP                  */
 #define TIPC    0                       /* TI Profesional PC driver     */
 #define VT52    0                       /* VT52 terminal (Zenith).      */
 #define NTCON   0                       /* Windows NT console           */
@@ -155,6 +161,7 @@
 
 /*      Configuration options   */
 
+/* Does not work on SOLARIS:	*/
 #define TYPEAH  1       /* type ahead causes update to be skipped       */
 #define LOGFLG  0       /* send all executed commands to EMACS.LOG      */
 #define VISMAC  0       /* update display during keyboard macros        */
@@ -234,7 +241,7 @@
 
 /*      Can we catch the SIGWINCH (the window size change signal)? */
 
-#if AIX || HPUX9 || FREEBSD || LINUX
+#if	IS_UNIX()
 #define HANDLE_WINCH    1
 #else
 #define HANDLE_WINCH    0
@@ -418,13 +425,18 @@ struct SREGS {
 };
 #endif
 
+
+/*====================================================================*/
+#define movmem(a, b, c)	memcpy((b), (a), (c))
+/*====================================================================*/
+
+
 #if     MSDOS & MWC
 #include        <dos.h>
 #define int86(a, b, c)  intcall(b, c, a)
 #define intdos(a, b)    intcall(a, b, DOSINT)
 #define inp(a)          in(a)
 #define outp(a, b)      out(a, b)
-#define movmem(a, b, c) memcpy(b, a, c)
 
 struct XREG {
         unsigned int ax,bx,cx,dx,si,di,ds,es,flags;
@@ -446,7 +458,6 @@ union REGS {
 #include        <memory.h>
 #define peek(a,b,c,d)   movedata(a,b,FP_SEG(c),FP_OFF(c),d)
 #define poke(a,b,c,d)   movedata(FP_SEG(c),FP_OFF(c),a,b,d)
-#define movmem(a, b, c)         memcpy(b, a, c)
 #define _strrev(a)      strrev(a)
 #endif
 
@@ -455,11 +466,6 @@ union REGS {
 #undef  LATTICE
 #include        <dos.h>
 #undef  CPM
-#endif
-
-/* System V doesn't name this the same as others */
-#if     USG | AIX | AUX | FREEBSD | LINUX | SUN | (OS2 & MSC)
-#define movmem(a, b, c)         memcpy(b, a, c)
 #endif
 
 /* this keeps VMS happy */
@@ -523,7 +529,6 @@ union REGS {
 
 #if ZTC
 #include     <dos.h>
-#define      movmem(a, b, c) memcpy(b, a, c)
 #endif
 
 
@@ -803,7 +808,7 @@ typedef struct  EWINDOW {
  * lines. On systems that do not have direct access to display memory,
  * there is also an array of physical display lines used to minimize
  * video updating. In most cases, these two arrays are unique. If
- * WINDOW_MSWIN is 1, there is a pair of such arrays in each SCREEN
+ * WINDOW_MSWIN is 1, there is a pair of such arrays in each SCREEN_T
  * structure.
  */
 
@@ -841,8 +846,8 @@ typedef struct  VIDEO {
  *      window          pane
  */
 
-typedef struct SCREEN {
-        struct SCREEN *s_next_screen;   /* link to next screen in list */
+typedef struct SCREEN_T {
+        struct SCREEN_T *s_next_screen;   /* link to next screen in list */
         EWINDOW *s_first_window;        /* head of linked list of windows */
         EWINDOW *s_cur_window;          /* current window in this screen */
         char *s_screen_name;            /* name of the current window */
@@ -855,7 +860,7 @@ typedef struct SCREEN {
         VIDEO **s_physical;             /* physical screen contents */
         HWND s_drvhandle;               /* handle for the "term" driver */
 #endif
-} SCREEN;
+} SCREEN_T;
 
 /*
  * Text is kept in buffers. A buffer header, described below, exists for every
@@ -946,10 +951,10 @@ typedef struct  LINE {
 
 #define lforw(lp)       ((lp)->l_fp)
 #define lback(lp)       ((lp)->l_bp)
-#if UNIX && (SUN || HPUX8 || HPUX9 || BSD || FREEBSD || LINUX)
-#define lgetc(lp, n)    ((unsigned char)(lp)->l_text[(n)])
+#if ( IS_UNIX() )
+# define lgetc(lp, n)    ((unsigned char)(lp)->l_text[(n)])
 #else
-#define lgetc(lp, n)    ((lp)->l_text[(n)])
+# define lgetc(lp, n)    ((lp)->l_text[(n)])
 #endif
 #define lputc(lp, n, c) ((lp)->l_text[(n)]=(c))
 #define lused(lp)       ((lp)->l_used)
@@ -1029,11 +1034,11 @@ typedef struct  {
 #endif
 #if     WINDOW_MSWIN
         int (PASCAL NEAR *t_sleep)(int);   /* go to sleep for a while   */
-        int (PASCAL NEAR *t_newscr)(SCREEN *);  /* create new screen display */
-        int (PASCAL NEAR *t_delscr)(SCREEN *);  /* destroy screen display */
-        int (PASCAL NEAR *t_selscr)(SCREEN *);  /* select screen display */
-        int (PASCAL NEAR *t_sizscr)(SCREEN *);  /* resize screen display */
-        int (PASCAL NEAR *t_topscr)(SCREEN *);  /* bring screen to top  */
+        int (PASCAL NEAR *t_newscr)(SCREEN_T *);  /* create new screen display */
+        int (PASCAL NEAR *t_delscr)(SCREEN_T *);  /* destroy screen display */
+        int (PASCAL NEAR *t_selscr)(SCREEN_T *);  /* select screen display */
+        int (PASCAL NEAR *t_sizscr)(SCREEN_T *);  /* resize screen display */
+        int (PASCAL NEAR *t_topscr)(SCREEN_T *);  /* bring screen to top  */
 #endif
 }       TERM;
 #else   /* TERM structure, no prototyping.*/

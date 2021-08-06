@@ -621,7 +621,7 @@ int n;					/* Argument count		*/
 }
 
 /** Filter buffer through command **/
-int filter(f, n)
+int f_filter(f, n)
 int f;					/* Flags			*/
 int n;					/* Argument count		*/
 {

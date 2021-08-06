@@ -413,13 +413,13 @@ void FAR PASCAL ScrollBars (void)
     static int HScroll = TRUE;
     static int Enabled = TRUE;
     int     Quiescence;
-    SCREEN  *sp;
+    SCREEN_T  *sp;
 
     if (vscrollbar) vscrollbar = TRUE;  /* normalize... */
     if (hscrollbar) hscrollbar = TRUE;
     Quiescence = (notquiescent == 0);
 
-    for (sp = first_screen; sp != (SCREEN*)NULL; sp = sp->s_next_screen) {
+    for (sp = first_screen; sp != (SCREEN_T*)NULL; sp = sp->s_next_screen) {
         if (vscrollbar != VScroll) {
             ShowScrollBar ((HWND)sp->s_drvhandle, SB_VERT, vscrollbar);
         }
@@ -444,7 +444,7 @@ void FAR PASCAL ScrollBars (void)
 
 /* updscrollbars:      updates the scroll bars for a screen */
 /* =============                                            */
-PASCAL  updscrollbars (SCREEN *sp, char w_flag)
+PASCAL  updscrollbars (SCREEN_T *sp, char w_flag)
 
 /* the w_flag is used to determine what needs updating: if the WFHARD
    bit is set, both scroll bars need an update. If the WFMOVE bit

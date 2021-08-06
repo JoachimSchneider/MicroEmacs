@@ -164,7 +164,7 @@ NOSHARE int DNEAR ab_quick;	/* aggressive completion enabled? */
 NOSHARE char ab_word[NSTRING];	/* current word being typed */
 NOSHARE char *ab_pos;		/* current place in ab_word */
 NOSHARE char *ab_end;		/* ptr to physical end of ab_word */
-NOSHARE SCREEN *first_screen;	/* Head and current screen in list */
+NOSHARE SCREEN_T *first_screen;	/* Head and current screen in list */
 NOSHARE BUFFER *blistp;		/* Buffer for C-X C-B		*/
 NOSHARE BUFFER *ulistp;		/* Buffer for C-X U		*/
 NOSHARE BUFFER *slistp;		/* Buffer for A-B		*/
@@ -402,7 +402,7 @@ NOSHARE extern int DNEAR ab_quick;	/* aggressive completion enabled? */
 NOSHARE extern char ab_word[DUMMYSZ];	/* current word being typed */
 NOSHARE extern char *ab_pos;		/* current place in ab_word */
 NOSHARE extern char *ab_end;		/* ptr to physical end of ab_word */
-NOSHARE extern SCREEN *first_screen;	/* Head and current screen in list */
+NOSHARE extern SCREEN_T *first_screen;	/* Head and current screen in list */
 NOSHARE extern BUFFER *blistp;		/* Buffer for C-X C-B		*/
 NOSHARE extern BUFFER *ulistp;		/* Buffer for C-X U		*/
 NOSHARE extern BUFFER *slistp;		/* Buffer for A-B		*/

@@ -64,7 +64,7 @@ int PASCAL NEAR lfree(lp)
 register LINE	*lp;
 {
 	register BUFFER *bp;
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 	register EWINDOW *wp;
 	register int cmark;		/* current mark */
 
@@ -133,7 +133,7 @@ int PASCAL NEAR lchange(flag)
 register int	flag;
 {
 	register EWINDOW *wp;
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 
 	if (curbp->b_nwnd != 1) 		/* Ensure hard. 	*/
 		flag = WFHARD;
@@ -237,7 +237,7 @@ char	c;
 	register int	doto;
 	register int	i;
 	register EWINDOW *wp;
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 	int cmark;		/* current mark */
 
 	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
@@ -398,7 +398,7 @@ int PASCAL NEAR lnewline()
 	register LINE	*lp2;
 	register int	doto;
 	register EWINDOW *wp;
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 	int cmark;		/* current mark */
 
 	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/
@@ -765,7 +765,7 @@ int PASCAL NEAR ldelnewline()
 	register LINE	*lp2;
 	register LINE	*lp3;
 	register EWINDOW *wp;
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 	int cmark;		/* current mark */
 
 	if (curbp->b_mode&MDVIEW)	/* don't allow this command if	*/

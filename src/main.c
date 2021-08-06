@@ -65,7 +65,7 @@ extern unsigned int _stklen = 10000;
  * Systems that handle window size changes via signals.
  */
 #if HANDLE_WINCH
-#include <signal.h>
+# include <signal.h>
 #endif
 
 /*
@@ -170,7 +170,7 @@ int PASCAL NEAR clean()
 
 {
 	register BUFFER *bp;	/* buffer list pointer */
-	register SCREEN *scrp;	/* ptr to screen to dump */
+	register SCREEN_T *scrp;	/* ptr to screen to dump */
 
 	/* first clean up the screens */
 	scrp = first_screen;
@@ -698,9 +698,9 @@ char bname[];			/* name of buffer to initialize */
 		meexit(1);
 
 	/* and allocate the default screen */
-	first_screen = (SCREEN *) NULL;
+	first_screen = (SCREEN_T *) NULL;
 	init_screen("MAIN", bp);
-	if (first_screen == (SCREEN *) NULL)
+	if (first_screen == (SCREEN_T *) NULL)
 		meexit(1);
 
 	/* set the current default screen/buffer/window */
@@ -746,7 +746,7 @@ int n;					/* prefix value */
 
 		/* Don't reset the function type flags on a prefix */
 		if ((key->k_type == BINDFNC) &&
-			((key->k_ptr.fp == meta) || (key->k_ptr.fp == cex)))
+			((key->k_ptr.fp == f_meta) || (key->k_ptr.fp == cex)))
 			status = execkey(key, f, n);
 		else {
 			thisflag = 0;
@@ -1077,7 +1077,7 @@ int n, f;	/* yes, these are default and never used.. but MUST be here */
 	return(TRUE);
 }
 
-int PASCAL NEAR meta(f, n)	/* set META prefixing pending */
+int PASCAL NEAR f_meta(f, n)	/* set META prefixing pending */
 
 int f, n;				/* prefix flag and argument */
 

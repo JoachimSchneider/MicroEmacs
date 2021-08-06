@@ -154,7 +154,7 @@ int f,n;	/* prefix flag and argument */
 	register EWINDOW *wp;
 	register EWINDOW *lastwp;
 	register LINE	*lp;
-	SCREEN *sp;
+	SCREEN_T *sp;
 	char scr_name[12];		/* constructed temp screen name */
 	static int temp_count = 0;	/* next temp screen number! */
 
@@ -182,10 +182,10 @@ int f,n;	/* prefix flag and argument */
 	if (xpos == 0 && ypos == 0) {
 
 		/* get the name of the screen to create */
-		xstrcpy(scr_name, "SCREEN");
+		xstrcpy(scr_name, "SCREEN_T");
 		strcat(scr_name, int_asc(temp_count++));
-		while (lookup_screen(scr_name) != (SCREEN *)NULL) {
-			xstrcpy(scr_name, "SCREEN");
+		while (lookup_screen(scr_name) != (SCREEN_T *)NULL) {
+			xstrcpy(scr_name, "SCREEN_T");
 			strcat(scr_name, int_asc(temp_count++));
 		}
 	
@@ -262,7 +262,7 @@ int f,n;	/* prefix flag and argument */
 	register EWINDOW *wp;
 	register EWINDOW *lastwp;
 	register LINE *lp;
-	register SCREEN *sp;		/* ptr to screen to delete */
+	register SCREEN_T *sp;		/* ptr to screen to delete */
 	register int lastmodeline;	/* was the dowbclick on a modeline? */
 	register int lastcmdline;	/* was the downclick on the command line? */
 
@@ -312,7 +312,7 @@ int f,n;	/* prefix flag and argument */
 		else {
 
 			/* delete the screen last screen means exiting */
-			if (first_screen->s_next_screen == (SCREEN *)NULL)
+			if (first_screen->s_next_screen == (SCREEN_T *)NULL)
 				return(quit(FALSE, 0));
 
 			/* bring the second last screen to front*/
@@ -607,7 +607,7 @@ register int	col;
 int PASCAL NEAR mouse_screen()
 
 {
-	register SCREEN *screen_ptr;	/* screen to test mouse in */
+	register SCREEN_T *screen_ptr;	/* screen to test mouse in */
 
 	/* if we move the mouse off the windows, check for other windows */
 	if ((ypos < term.t_roworg) || (xpos < term.t_colorg) ||
@@ -616,7 +616,7 @@ int PASCAL NEAR mouse_screen()
 
 		/* scan through the other windows */
 		screen_ptr = first_screen->s_next_screen;
-		while (screen_ptr != (SCREEN *)NULL) {
+		while (screen_ptr != (SCREEN_T *)NULL) {
 
 			/* is the mouse in this window? */
 			if ((ypos >= screen_ptr->s_roworg) &&

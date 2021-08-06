@@ -183,7 +183,7 @@
  *	26-apr-86
  *	- added an output flush in vttidy(). Unix really appreciates this.
  *	- added filter-buffer (^X#) command to send a buffer through
- *	  a DOS filter
+ *	  a DOS filter 
  *	- made automatic CMODE on .c and .h file compilation dependant
  *	  in estruct.h
  *	1-may-86
@@ -1047,7 +1047,7 @@
  *	- added $sterm environmental variable. This hold the current
  *	  value of the keystroke needed to terminate search string
  *	  requests. The value in here is also automatically reset
- *	  any time the meta-prefix is rebound, the the meta-prefix's value
+ *	  any time the meta-prefix is rebound, to the meta-prefix's value
  *	06-feb-88
  *	- fixed bug in stock().. real control characters in command lines
  *	  now bind properly
@@ -1522,7 +1522,7 @@
  *	  $scrname		name of the current screen
  *	  $scrnum		ordinal number of the current screen
  *
- *	Most of the code for this is in the new source file SCREEN.C
+ *	Most of the code for this is in the new source file SCREEN_T.C
  *
  *	11-mar-91	Code from or suggested by Michael C. Andrews
  *	- getstring() now accepts ^K to return a non-default empty
@@ -1707,7 +1707,7 @@
  *	- screen resolution changes on the IBMPC force the screen back
  *	  to the upper left corner. This may change in the future.
  *	8-Oct-91
- *	- size and position of screen maintained in the SCREEN structure
+ *	- size and position of screen maintained in the SCREEN_T structure
  *	  so switching screen resets these.
  *	- Mousing code now switches screens if mouse is used outside of
  *	  current screen.

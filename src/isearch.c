@@ -437,7 +437,7 @@ int PASCAL NEAR get_char()
 		return (isterm);
 	if ((key = getbind(c)) != NULL)
 		{
-		if (key->k_ptr.fp == cex || key->k_ptr.fp == meta)
+		if (key->k_ptr.fp == cex || key->k_ptr.fp == f_meta)
 			{
 			c = get_key();
 #if	SMOS

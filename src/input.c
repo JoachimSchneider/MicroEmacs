@@ -962,7 +962,7 @@ int PASCAL NEAR getcmd()
 
 	/* resolve META and CTLX prefixes */
 	if (key) {
-		if (key->k_ptr.fp == meta) {
+		if (key->k_ptr.fp == f_meta) {
 			c = get_key();
 #if	SMOS
 			c = upperc(c&255) | (c & ~255); /* Force to upper */

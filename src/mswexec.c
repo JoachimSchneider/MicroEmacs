@@ -423,10 +423,10 @@ PASCAL pipecmd (int f, int n)
     return Result;
 } /* pipecmd */
 
-/* filter:  filter a buffer through a DOS box. Bound to ^X-# */
+/* f_filter:  filter a buffer through a DOS box. Bound to ^X-# */
 /* ======                                                    */
 
-PASCAL filter (int f, int n)
+PASCAL f_filter (int f, int n)
 {
     char    Line[NLINE];
     char    InFile[NFILEN];
@@ -485,4 +485,4 @@ PASCAL filter (int f, int n)
     }
     xstrcpy (bp->b_fname, fname);    /* restore original file name */
     return Result;
-} /* filter */
+} /* f_filter */

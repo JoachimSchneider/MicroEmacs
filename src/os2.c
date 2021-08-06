@@ -209,7 +209,7 @@ pipecmd(f, n)
  * We use unique temporary file names so that multiple instances of
  * MicroEMACS don't try to use the same file.
  */
-filter(f, n)
+f_filter(f, n)
 
 {
 	register int    s;	/* return status from CLI */

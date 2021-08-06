@@ -130,7 +130,7 @@ static MENUTAB MenuStaticBind [] = {
     {IDM_SPAWNCLI,	spawncli},
     {IDM_SPAWN,		spawn},
     {IDM_PIPECMD,	pipecmd},
-    {IDM_FILTER,	filter},
+    {IDM_FILTER,	f_filter},
     {IDM_CTLXE,		ctlxe},
     {IDM_CTLXLP,	ctlxlp},
     {IDM_CTLXRP,	ctlxrp},
@@ -453,7 +453,7 @@ int  PASCAL GetKeyText (int Key, char *Text, int TextLength)
 	if (*prefix_key_ptr == 0) {
 	    KEYTAB  *KTp;
 
-	    KTp = FindKeyBinding ((Key & CTLX) ? cex : meta);
+	    KTp = FindKeyBinding ((Key & CTLX) ? cex : f_meta);
 	    if (KTp->k_type == BINDNUL) return 0;
 	    *prefix_key_ptr = KTp->k_code;
 	}
@@ -898,11 +898,11 @@ InvokeHelp:
 
 	case IDM_NORMALIZE:
 	    {
-		SCREEN  *sp;
+		SCREEN_T  *sp;
 #if WINXP
-		sp = (SCREEN*)GetWindowLongPtr((HWND)(SendMessage(hMDIClientWnd, WM_MDIGETACTIVE, 0, 0)), GWL_SCRPTR);
+		sp = (SCREEN_T*)GetWindowLongPtr((HWND)(SendMessage(hMDIClientWnd, WM_MDIGETACTIVE, 0, 0)), GWL_SCRPTR);
 #else
-		sp = (SCREEN*)GetWindowLong((HWND)(SendMessage (hMDIClientWnd, WM_MDIGETACTIVE, 0, 0L)), GWL_SCRPTR);
+		sp = (SCREEN_T*)GetWindowLong((HWND)(SendMessage (hMDIClientWnd, WM_MDIGETACTIVE, 0, 0L)), GWL_SCRPTR);
 #endif
 		newsize (TRUE, sp->s_nrow);
 		newwidth (TRUE, sp->s_ncol);

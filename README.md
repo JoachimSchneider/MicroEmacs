@@ -9,6 +9,12 @@ I added are several bug-fixes that make the code compile and work on
 modern Linux and FreeBSD systems.
 
 
+## Change Log
+
+[2021-08-05.00]
+* It works on Linux, FreeBSD, OpenBSD and Solaris (tested with SunOS 5.7).
+* Unified ifdefs for Unix Operationg Systems.
+
 [2021-07-14.00]
 * Activated support for file locking.
 

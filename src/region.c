@@ -262,7 +262,7 @@ int f,n;	/* prefix flag and argument */
 {
 	register int status;	/* return status */
 	BUFFER *bp;		/* buffer being narrowed */
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 	EWINDOW *wp;		/* windows to fix up pointers in as well */
 	REGION creg;		/* region boundry structure */
 	int cmark;		/* current mark */
@@ -352,7 +352,7 @@ int f,n;	/* prefix flag and argument */
 {
 	LINE *lp;	/* temp line pointer */
 	BUFFER *bp;	/* buffer being narrowed */
-	SCREEN *scrp;	/* screen to fix pointers in */
+	SCREEN_T *scrp;	/* screen to fix pointers in */
 	EWINDOW *wp;	/* windows to fix up pointers in as well */
 	int cmark;	/* current mark */
 

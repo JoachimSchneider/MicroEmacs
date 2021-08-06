@@ -28,7 +28,7 @@
 	foreground colors, and 8 to 15 as background colors.
 	To add foreground color 0 for ansi terminals, issue:
 		"CLRMAP 0 ~e[30m".
-	
+
 	'Porting notes:
 
 	I have tried to create this file so that it should work
@@ -75,9 +75,30 @@
 #include <stdlib.h>		/* malloc(), ...		*/
 #include <time.h>		/* time(), ...			*/
 #include <errno.h>		/* errno, ...			*/
-#include <unistd.h>		/* getpid(), ...		*/
 #include <sys/stat.h>		/* stat(), ...			*/
 #include "estruct.h"		/* Emacs definitions		*/
+
+
+/*==============================================================*/
+/* FEATURES                                                     */
+/*==============================================================*/
+#define USE_CURSES		( 0 )	/* NOT WORKING */
+#if ( !IS_POSIX_UNIX() )
+# define USE_TERMIO_IOCTL	( 1 )
+# define USE_TERMIOS_TCXX	( 0 )
+#else
+# define USE_TERMIO_IOCTL	( 0 )
+# define USE_TERMIOS_TCXX	( 1 )
+#endif
+/* Enable/disable XON/XOFF: We want to use ^S/^Q.
+ * I do not believe the flow control settings of the OS should
+ * be diddled by an application program. But if you do, change this
+ * 1 to a 0, but be warned, all sorts of terminals will get grief
+ * with this
+ */
+#define USE_CTL_SQ              ( 0 )
+/*==============================================================*/
+
 
 /** Do nothing routine **/
 int scnothing()
@@ -86,7 +107,7 @@ int scnothing()
 }
 
 /** Only compile for UNIX machines **/
-#if BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS)
+#if ( IS_UNIX() )
 
 /** Include files **/
 #include "eproto.h"			/* Function definitions		*/
@@ -100,49 +121,32 @@ int scnothing()
 /** Overall include files **/
 #include <sys/types.h>			/* System type definitions	*/
 #include <sys/stat.h>			/* File status definitions	*/
-#include <sys/ioctl.h>			/* I/O control definitions	*/
-
-/** Additional include files **/
-#if	FREEBSD || LINUX
-#define TERMIOS 1
 #include <sys/time.h>
-#undef	BSD
 #include <sys/param.h>
-#undef BSD
-#define	BSD	0
-#endif
-#if (BSD && !TERMIOS)
-#include <sys/time.h>			/* Timer definitions		*/
-#endif /* (BSD && !TERMIOS) */
-#if BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) || AIX
+#include <sys/ioctl.h>			/* I/O control definitions	*/
 #include <signal.h>			/* Signal definitions		*/
-#endif /* BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX
-#include <termio.h>			/* Terminal I/O definitions	*/
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX */
-#if (AVVION || TERMIOS)
-#include <termios.h>			/* Terminal I/O definitions	*/
 #include <unistd.h>
-#endif /* (AVVION || TERMIOS) */
-#if CURSES
-#include <curses.h>			/* Curses screen output		*/
-#undef WINDOW				/* Oh no!			*/
-#endif /* CURSES */
+
+#if   ( USE_TERMIO_IOCTL )
+# include <termio.h>			/* Terminal I/O definitions	*/
+#elif ( USE_TERMIOS_TCXX )
+# include <termios.h>			/* Terminal I/O definitions	*/
+#elif ( USE_CURSES )
+# include <curses.h>			/* Curses screen output		*/
+# undef WINDOW				/* Oh no!			*/
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
 
 /** Completion include files **/
 /** Directory accessing: Try and figure this out... if you can! **/
-#if ((BSD || FREEBSD || LINUX) && !TERMIOS)
-#include <sys/dir.h>			/* Directory entry definitions	*/
-#define DIRENTRY	direct
-#endif /* (BSD && !TERMIOS) */
-#if XENIX || VAT
-#include <sys/ndir.h>			/* Directory entry definitions	*/
-#define DIRENTRY	direct
-#endif /* XENIX */
-#if ((USG || AIX || AUX) && !VAT) || SMOS || HPUX8 || HPUX9 || SUN || (AVVION || TERMIOS)
-#include <dirent.h>			/* Directory entry definitions	*/
-#define DIRENTRY	dirent
-#endif /* ((USG || AIX || AUX) && !VAT) || SMOS || HPUX8 || HPUX9 || SUN || (AVVION || TERMIOS) */
+#if ( XENIX || VAT )
+# include <sys/ndir.h>			/* Directory entry definitions	*/
+# define DIRENTRY	direct
+#else
+# include <dirent.h>			/* Directory entry definitions	*/
+# define DIRENTRY	dirent
+#endif /* XENIX || VAT */
 
 /** Restore predefined definitions **/
 #undef CTRL				/* Restore CTRL			*/
@@ -151,9 +155,7 @@ int scnothing()
 /** Parameters **/
 #define NINCHAR		64		/* Input buffer size		*/
 #define NOUTCHAR	256		/* Output buffer size		*/
-#if TERMCAP || TERMIOS
 #define NCAPBUF		1024		/* Termcap storage size		*/
-#endif /* TERMCAP */
 #define MARGIN		8		/* Margin size			*/
 #define SCRSIZ		64		/* Scroll for margin		*/
 #define NPAUSE		10		/* # times thru update to pause */
@@ -162,7 +164,6 @@ int scnothing()
 #define TIMEOUT		255		/* No character available	*/
 #define MLWAIT          3
 
-#if TERMCAP || TERMIOS
 struct capbind {			/* Capability binding entry	*/
 	char * name;			/* Termcap name			*/
 	char * store;			/* Storage variable		*/
@@ -171,27 +172,21 @@ struct keybind {			/* Keybinding entry		*/
 	char * name;			/* Termcap name			*/
 	int value;			/* Binding value		*/
 };
+#if ( !AIX )
 char *reset = (char*) NULL;		/* reset string kjc */
-#endif /* TERMCAP */
+#endif
 
 /** Local variables **/
-#if (BSD && !TERMIOS)
-static struct sgttyb cursgtty;		/* Current modes		*/
-static struct sgttyb oldsgtty;		/* Original modes		*/
-static struct tchars oldtchars;		/* Current tchars		*/
-static struct ltchars oldlchars;	/* Current ltchars		*/
-static char blank[6] =			/* Blank out character set	*/
-	{ -1, -1, -1, -1, -1, -1 };
-#endif /* (BSD && !TERMIOS) */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX
+#if ( USE_TERMIO_IOCTL )
 static struct termio curterm;		/* Current modes		*/
 static struct termio oldterm;		/* Original modes		*/
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX */
-#if (AVVION || TERMIOS)
+#elif ( USE_TERMIOS_TCXX )
 static struct termios curterm;		/* Current modes		*/
 static struct termios oldterm;		/* Original modes		*/
-#endif /* (AVVION || TERMIOS) */
-#if TERMCAP || TERMIOS
+#elif ( USE_CURSES )
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
 static char tcapbuf[NCAPBUF];		/* Termcap character storage	*/
 #define CAP_CL		0		/* Clear to end of page		*/
 #define CAP_CM		1		/* Cursor motion		*/
@@ -219,7 +214,7 @@ static char tcapbuf[NCAPBUF];		/* Termcap character storage	*/
 #define CAP_D5		22		/* Background color #5		*/
 #define CAP_D6		23		/* Background color #6		*/
 #define CAP_D7		24		/* Background color #7		*/
-#if USG || AIX || AUX
+#if ( USG || AIX || AUX )
 #define CAP_SF		25		/* Set foreground color		*/
 #define CAP_SB		26		/* Set background color		*/
 #endif /* USG || AIX || AUX */
@@ -251,7 +246,7 @@ static struct capbind capbind[] = {	/* Capability binding list	*/
 	{ "d5" },			/* Background color #5		*/
 	{ "d6" },			/* Background color #6		*/
 	{ "d7" },			/* Background color #7		*/
-#if USG || AIX || AUX
+#if ( USG || AIX || AUX )
 	{ "Sf" },			/* Set foreground color		*/
 	{ "Sb" },			/* Set background color		*/
 #endif /* USG || AIX || AUX */
@@ -309,17 +304,14 @@ static struct keybind keybind[] = {	/* Keybinding list		*/
         { "K5", CTRL|'V' },		/* Keypad 3 -> Page Down	*/
  	{ "kw", CTRL|'E' }		/* End of line			*/
 };
-#endif /* TERMCAP */
 static int inbuf[NINCHAR];		/* Input buffer			*/
 static int * inbufh =			/* Head of input buffer		*/
 	inbuf;
 static int * inbuft =			/* Tail of input buffer		*/
 	inbuf;
-#if TERMCAP
 static unsigned char outbuf[NOUTCHAR];	/* Output buffer		*/
 static unsigned char * outbuft = 	/* Output buffer tail		*/
 	outbuf;
-#endif /* TERMCAP */
 
 static DIR *dirptr = NULL;		/* Current directory stream	*/
 static char path[NFILEN];		/* Path of file to find		*/
@@ -334,7 +326,7 @@ int sckopen(), sckclose();
 int scfcol(), scbcol();
 #endif /* COLOR */
 
-#if	TERMCAP && FLABEL
+#if ( FLABEL )
 static void dis_sfk(), dis_ufk();
 #endif
 
@@ -377,27 +369,7 @@ int hpterm;				/* global flag braindead HP-terminal */
 int ttopen()
 {
 	xstrcpy(os, "UNIX");
-#if (BSD && !TERMIOS)
-	/* Get tty modes */
-	if (ioctl(0, TIOCGETP, &oldsgtty) ||
-		ioctl(0, TIOCGETC, &oldtchars) ||
-		ioctl(0, TIOCGLTC, &oldlchars))
-		return(-1);
-
-	/* Save to original mode variables */
-	cursgtty = oldsgtty;
-
-	/* Set new modes */
-	cursgtty.sg_flags |= CBREAK;
-	cursgtty.sg_flags &= ~(ECHO|CRMOD);
-
-	/* Set tty modes */
-	if (ioctl(0, TIOCSETP, &cursgtty) ||
-		ioctl(0, TIOCSETC, blank) ||
-		ioctl(0, TIOCSLTC, blank))
-		return(-1);
-#endif /* (BSD && !TERMIOS) */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX
+#if ( USE_TERMIO_IOCTL )
 
 #if SMOS
 	/* Extended settings; 890619mhs A3 */
@@ -414,16 +386,12 @@ int ttopen()
 	curterm = oldterm;
 
 	/* Set new modes */
-	/* I do not believe the flow control settings of the OS should
-	   be diddled by an application program. But if you do, change this
-	   1 to a 0, but be warned, all sorts of terminals will get grief
-	   with this */
-#if	1
+#if ( USE_CTL_SQ )
 	curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR);
 #else
 	curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
 #endif
-
+	curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
 	curterm.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
 	curterm.c_cc[VMIN] = 1;
 	curterm.c_cc[VTIME] = 0;
@@ -451,8 +419,7 @@ int ttopen()
 		perror("Cannot TCSETA");
 		return(-1);
 	}
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX */
-#if (AVVION || TERMIOS)
+#elif ( USE_TERMIOS_TCXX )
 	/* Get modes */
 	if (tcgetattr(0, &oldterm)) {
 		perror("Cannot tcgetattr");
@@ -463,7 +430,11 @@ int ttopen()
 	curterm = oldterm;
 
 	/* Set new modes */
-        /* disable XON/XOFF. We want to use ^S/^Q */
+#if ( USE_CTL_SQ )
+	curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR);
+#else
+	curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
+#endif
 	curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
 	curterm.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
 	curterm.c_cc[VMIN] = 1;
@@ -472,17 +443,16 @@ int ttopen()
 	curterm.c_cc[VLNEXT] = -1;
 #endif
 
-#if	AVVION
-	/* Set line discipline for Data General */
-	curterm.c_line = 0;
-#endif
-
 	/* Set tty mode */
 	if (tcsetattr(0, TCSANOW, &curterm)) {
 		perror("Cannot tcsetattr");
 		return(-1);
 	}
-#endif /* (AVVION || TERMIOS) */
+#elif ( USE_CURSES )
+	/* ? */
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
 
 	/* Success */
 	return(0);
@@ -491,35 +461,30 @@ int ttopen()
 /** Close terminal device **/
 int ttclose()
 {
-#if ((AIX == 0) && (TERMIOS == 0)) || (FREEBSD == 1) || (LINUX == 1)
+#if ( !AIX  )
 	/* Restore original terminal modes */
 	if (reset != (char*)NULL)
 		write(1, reset, strlen(reset));
 #endif
 
-#if (BSD && !TERMIOS)
-	if (ioctl(0, TIOCSETP, &oldsgtty) ||
-		ioctl(0, TIOCSETC, &oldtchars) ||
-		ioctl(0, TIOCSLTC, &oldlchars))
-		return(-1);
-#endif /* (BSD && !TERMIOS) */
-
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX
+#if ( USE_TERMIO_IOCTL )
 #if SMOS
 	/* Extended settings; 890619mhs A3 */
 	set_parm(0,-1,-1);
 #endif /* SMOS */
 	if (ioctl(0, TCSETA, &oldterm))
 		return(-1);
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX */
-
-#if (AVVION || TERMIOS)
+#elif ( USE_TERMIOS_TCXX )
 	/* Set tty mode */
 	if (tcsetattr(0, TCSANOW, &oldterm)) {
 		perror("Cannot tcsetattr");
 		return(-1);
 	}
-#endif /* (AVVION || TERMIOS) */
+#elif ( USE_CURSES )
+	/* ? */
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
 
 	/* Success */
 	return(0);
@@ -528,7 +493,7 @@ int ttclose()
 /** Flush output buffer to display **/
 int ttflush()
 {
-#if TERMCAP
+#if ( !USE_CURSES )
 	int len;
 
 	/* Compute length of write */
@@ -541,31 +506,28 @@ int ttflush()
 
 	/* Perform write to screen */
 	return(write(1, outbuf, len) != len);
-#else /* TERMCAP */
-#if	CURSES
+#else
 	refresh();
-#endif /* CURSES */
+
 	return(0);
-#endif	/* TERMCAP */
+#endif /* USE_CURSES */
 }
 
 /** Put character onto display **/
 int ttputc(ch)
 char ch;				/* Character to display		*/
 {
-#if TERMCAP
+#if ( !USE_CURSES )
 	/* Check for buffer full */
 	if (outbuft == &outbuf[sizeof(outbuf)])
 		ttflush();
 
 	/* Add to buffer */
 	*outbuft++ = ch;
-#endif /* TERMCAP */
-
-#if CURSES
+#else
 	/* Put character on screen */
 	addch(ch);
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 	return(0);
 }
@@ -574,29 +536,21 @@ char ch;				/* Character to display		*/
 /** Grab input characters, with wait **/
 unsigned char grabwait()
 {
-#if (BSD && !TERMIOS)
-	unsigned char ch;
-
-	/* Perform read */
-	if (read(0, &ch, 1) != 1) {
-		puts("** Horrible read error occured **");
-		exit(1);
-	}
-	return(ch);
-#endif /* (BSD && !TERMIOS) */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX || (AVVION || TERMIOS)
 	unsigned char ch;
 
 	/* Change mode, if necessary */
 	if (curterm.c_cc[VTIME]) {
 		curterm.c_cc[VMIN] = 1;
 		curterm.c_cc[VTIME] = 0;
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX
-		ioctl(0, TCSETA, &curterm);
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX */
-#if (AVVION || TERMIOS)
+#if   ( USE_TERMIOS_TCXX )
 		tcsetattr(0, TCSANOW, &curterm);
-#endif /* (AVVION || TERMIOS) */		
+#elif ( USE_TERMIO_IOCTL )
+		ioctl(0, TCSETA, &curterm);
+#elif ( USE_CURSES )
+	/* ? */
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
 	}
 
 	/* Perform read */
@@ -612,31 +566,13 @@ unsigned char grabwait()
 	}
 #endif
 	/* Return new character */
+
 	return(ch);
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX || (AVVION || TERMIOS) */
 }
 
 /** Grab input characters, short wait **/
 unsigned char grabnowait()
 {
-#if (BSD && !TERMIOS)
-	static struct timeval timout = { 0, 500000L };
-	int count, r;
-
-	/* Select input */
-	r = 1;
-	count = select(1, &r, NULL, NULL, &timout);
-	if (count == 0)
-		return(TIMEOUT);
-	if (count < 0) {
-		puts("** Horrible select error occured **");
-		exit(1);
-	}
-
-	/* Perform read */
-	return(grabwait());
-#endif /* (BSD && !TERMIOS) */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS)
 	int count;
 	unsigned char ch;
 
@@ -644,12 +580,15 @@ unsigned char grabnowait()
 	if (curterm.c_cc[VTIME] == 0) {
 		curterm.c_cc[VMIN] = 0;
 		curterm.c_cc[VTIME] = 5;
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX
-		ioctl(0, TCSETA, &curterm);
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX */
-#if (AVVION || TERMIOS)
+#if   ( USE_TERMIOS_TCXX )
 		tcsetattr(0, TCSANOW, &curterm);
-#endif /* (AVVION || TERMIOS) */		
+#elif ( USE_TERMIO_IOCTL )
+		ioctl(0, TCSETA, &curterm);
+#elif ( USE_CURSES )
+	/* ? */
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
 	}
 
 	/* Perform read */
@@ -670,7 +609,6 @@ unsigned char grabnowait()
 
 	/* Return new character */
 	return(ch);
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) */
 }
 
 /*
@@ -689,7 +627,7 @@ int ch;
 		scbeep();
 		return;
 	}
-	
+
 	/* Add character */
 	*inbuft++ = ch;
 }
@@ -717,7 +655,7 @@ ttflush();
 	/* Loop until character is in input buffer */
 	while (inbufh == inbuft)
 		cook();
-	
+
 	/* Get input from buffer, now that it is available */
 	ch = *inbufh++;
 
@@ -725,7 +663,7 @@ ttflush();
 	   pending characters */
 	if (inbufh == inbuft)
 		inbufh = inbuft = inbuf;
-	
+
 	/* Return next character */
 	return(ch);
 }
@@ -746,20 +684,23 @@ int typahead()
 		return(0);
 	return(count);
 #else /* not FIONREAD */
-#ifdef VAT
+# ifdef VAT
 	return(0);
-#else /* not VAT */
+# else /* not VAT */
+#  ifdef FIORDCHK
 	/* Ask hardware for count */
 	count = ioctl(0, FIORDCHK, 0);
 	if (count < 0)
 		return(0);
 	return(count);
-#endif	/* VAT */
+#  else
+	return(0);
+#  endif /* FIORDCHK */
+# endif	/* VAT */
 #endif /* FIONREAD */
 }
 #endif /* TYPEAH */
 
-#if TERMCAP || TERMIOS
 /** Put out sequence, with padding **/
 void putpad(seq)
 char * seq;				/* Character sequence		*/
@@ -772,12 +713,10 @@ char * seq;				/* Character sequence		*/
 	tputs(seq, 1, ttputc);
         TRC(("tputs(%s, 1, ttputc)", seq));
 }
-#endif /* TERMCAP */
 
 /** Initialize screen package **/
 int scopen()
 {
-#if TERMCAP || TERMIOS
 	char * cp, tcbuf[1024];
 	int status;
 	struct capbind * cb;
@@ -787,13 +726,12 @@ int scopen()
 	char  * tgetstr();
 
 #ifndef VAT
-#define TGETSTR(a,b)	tgetstr((a), (b))
+# define TGETSTR(a,b)	tgetstr((a), (b))
 #else
-#define TGETSTR(a,b)	tgetstr((a), *(b))
+# define TGETSTR(a,b)	tgetstr((a), *(b))
 #endif
 
-#if HPUX8 || HPUX9 || VAT || AUX || (AVVION || TERMIOS) || AIX
-
+#if ( HPUX8 || HPUX9 || VAT || AUX )
 	/* HP-UX and AUX doesn't seem to have these in the termcap library */
 	char PC, * UP;
 	short ospeed;
@@ -806,7 +744,7 @@ int scopen()
 	cp = getenv("TERM");
 	if (!cp) {
 		puts(TEXT182);
-/*		"Environment variable \"TERM\" not define!" */
+/*		"Environment variable \"TERM\" not defined!" */
 		exit(1);
 	}
 
@@ -884,25 +822,24 @@ int scopen()
 	}
 
 	/* Set speed for padding sequences */
-#if (BSD && !TERMIOS)
-	ospeed = cursgtty.sg_ospeed;
-#endif /* (BSD && !TERMIOS) */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX
-	ospeed = curterm.c_cflag & CBAUD;
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || (SUN && !TERMIOS) || XENIX */
-#if (AVVION || TERMIOS)
+#if   ( USE_TERMIOS_TCXX )
 	ospeed = cfgetospeed(&curterm);
-#endif /* (AVVION || TERMIOS) */
-	
+#elif ( USE_TERMIO_IOCTL )
+	ospeed = curterm.c_cflag & CBAUD;
+#elif ( USE_CURSES )
+	/* ? */
+#else
+# error MISSING TERMINAL CONTROL DEFINITION
+#endif
+
 	/* Send out initialization sequences */
-#if AIX == 0
+#if ( !AIX )
 	putpad(capbind[CAP_IS].store);
 #endif
 	putpad(capbind[CAP_KS].store);
 	sckopen();
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	/* Initialize screen */
 	initscr();
 
@@ -915,7 +852,7 @@ int scopen()
 		puts("Cannot open terminal");
 		exit(1);
 	}
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 	/* Success */
 	return(0);
@@ -924,30 +861,17 @@ int scopen()
 /** Close screen package **/
 int scclose()
 {
-#if TERMCAP
 	/* Turn off keypad mode */
 	putpad(capbind[CAP_KE].store);
 	sckclose();
 
-	/* Close terminal device */
-	ttflush();
-	ttclose();
-#endif /* TERMCAP */
-
-#if	TERMIOS
-	/* Close terminal device */
-	ttflush();
-	ttclose();
-#endif	/* TERMIOS */
-
-#if CURSES
+#if ( USE_CURSES )
 	/* Turn off curses */
 	endwin();
-
+#endif /* USE_CURSES */
 	/* Close terminal device */
 	ttflush();
 	ttclose();
-#endif /* CURSES */
 
 	/* Success */
 	return(0);
@@ -956,24 +880,20 @@ int scclose()
 /* open keyboard -hm */
 int sckopen()
 {
-#if TERMCAP
 	putpad(capbind[CAP_KS].store);
 	ttflush();
 #if	FLABEL
 	dis_ufk();
-#endif
 #endif
 }
 
 /* close keyboard -hm */
 int sckclose()
 {
-#if TERMCAP
 	putpad(capbind[CAP_KE].store);
 	ttflush();
 #if	FLABEL
 	dis_sfk();
-#endif
 #endif
 }
 
@@ -984,14 +904,12 @@ int col;				/* Column number		*/
 {
 	char *tgoto();
 
-#if TERMCAP || TERMIOS
 	/* Call on termcap to create move sequence */
 	putpad(tgoto(capbind[CAP_CM].store, col, row));
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	move(row, col);
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 	/* Success */
 	return(0);
@@ -1000,14 +918,12 @@ int col;				/* Column number		*/
 /** Erase to end of line **/
 int sceeol()
 {
-#if TERMCAP || TERMIOS
 	/* Send erase sequence */
 	putpad(capbind[CAP_CE].store);
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	clrtoeol();
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 	/* Success */
 	return(0);
@@ -1016,18 +932,16 @@ int sceeol()
 /** Clear screen **/
 int sceeop()
 {
-#if TERMCAP || TERMIOS
 #if COLOR
 	scfcol(gfcolor);
 	scbcol(gbcolor);
 #endif /* COLOR */
 	/* Send clear sequence */
 	putpad(capbind[CAP_CL].store);
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	erase();
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 
 	/* Success */
@@ -1038,7 +952,6 @@ int sceeop()
 int screv(state)
 int state;				/* New state			*/
 {
-#if TERMCAP || TERMIOS
 #if COLOR
 	int ftmp, btmp;		/* temporaries for colors */
 #endif /* COLOR */
@@ -1056,14 +969,13 @@ int state;				/* New state			*/
 		scbcol(btmp);
 	}
 #endif /* COLOR */
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	if (state)
 		standout();
 	else
 		standend();
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 	/* Success */
 	return(0);
@@ -1072,7 +984,6 @@ int state;				/* New state			*/
 /** Beep **/
 scbeep()
 {
-#if TERMCAP || TERMIOS
 #if !NOISY
 	/* Send out visible bell, if it exists */
 	if (capbind[CAP_VB].store)
@@ -1081,11 +992,10 @@ scbeep()
 #endif /* not NOISY */
 		/* The old standby method */
 		ttputc('\7');
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	addch('\7');		/* FIX THIS! beep() and flash comes up undefined */
-#endif /* CURSES */
+#endif /* USE_CURSES */
 
 	/* Success */
 	return(0);
@@ -1099,7 +1009,6 @@ int scfcol(color)
 int color;		/* Color to set			*/
 {
 	TRC(("scfcol(%d)", (int) color));
-#if TERMCAP || TERMIOS
 	/* Skip if already the correct color */
 	if (color == cfcolor)
 		return(0);
@@ -1118,11 +1027,10 @@ int color;		/* Color to set			*/
 		cfcolor = color;
 	}
 #endif /* USG || AUX */
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	/* ? */
-#endif /* CURSES */
+#endif /* USE_CURSES */
 	return(0);
 }
 
@@ -1131,7 +1039,6 @@ int scbcol(color)
 int color;			/* Color to set			*/
 {
 	TRC(("scbcol(%d)", (int) color));
-#if TERMCAP || TERMIOS
 	/* Skip if already the correct color */
 	if (color == cbcolor)
 		return(0);
@@ -1150,11 +1057,10 @@ int color;			/* Color to set			*/
 		cbcolor = color;
 	}
 #endif /* USG || AUX */
-#endif /* TERMCAP */
 
-#if CURSES
+#if ( USE_CURSES )
 	/* ? */
-#endif /* CURSES */
+#endif /* USE_CURSES */
 	return(0);
 }
 #endif /* COLOR */
@@ -1170,13 +1076,11 @@ char * cmd;				/* Palette command		*/
 	if (strncmp(cmd, "KEYMAP ", 7) == 0)
 		dokeymap = 1;
 	else
-#if TERMCAP
 #if COLOR
 	if (strncmp(cmd, "CLRMAP ", 7) == 0)
 		dokeymap = 0;
 	else
 #endif /* COLOR */
-#endif /* TERMCAP */
 		return(0);
 	cmd += 7;
 
@@ -1201,7 +1105,6 @@ char * cmd;				/* Palette command		*/
 		/* Add to tree */
 		addkey(cp, code);
 	}
-#if TERMCAP
 #if COLOR
 	else {
 
@@ -1218,11 +1121,9 @@ char * cmd;				/* Palette command		*/
 		}
 	}
 #endif /* COLOR */
-#endif /* TERMCAP */
 	return(0);
 }
 
-#if BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS)
 /* Surely more than just BSD systems do this */
 
 /** Perform a stop signal **/
@@ -1230,7 +1131,7 @@ int bktoshell(f, n)
 {
 	/* Reset the terminal and go to the last line */
 	vttidy();
-	
+
 	/* Okay, stop... */
 	kill(getpid(), SIGTSTP);
 
@@ -1244,8 +1145,6 @@ int bktoshell(f, n)
 	/* Success */
 	return(0);
 }
-
-#endif /* BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
 
 /** Get time of day **/
 char * timeset()
@@ -1270,7 +1169,10 @@ char * timeset()
 	return(sp);
 }
 
-#if USG || AUX || SMOS || HPUX8 || XENIX
+/*====================================================================*/
+/* Only to keep this very old code for documentation purposes:        */
+/*====================================================================*/
+#if ( 0 )
 /** Rename a file **/
 int rename(file1, file2)
 char * file1;				/* Old file name		*/
@@ -1304,7 +1206,8 @@ char * file2;				/* New file name		*/
 	/* Unlink original file */
 	return(unlink(file1));
 }
-#endif /* USG || AUX || SMOS || HPUX8 || XENIX */
+#endif
+/*====================================================================*/
 
 /** Callout to system to perform command **/
 int callout(cmd)
@@ -1347,15 +1250,13 @@ int n;					/* Argument count		*/
 	/* Get shell path */
 	sh = getenv("SHELL");
 	if (!sh)
-#if LINUX
+#if ( LINUX )
 		sh = "/bin/bash";
-#endif /* LINUX */
-#if BSD || FREEBSD || SUN
-		sh = "/bin/csh";
-#endif /* BSD || FREEBSD || SUN */
-#if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || XENIX || (AVVION || TERMIOS)
+#elif ( SOLARIS )
+		sh = "/usr/bin/ksh";
+#else
 		sh = "/bin/sh";
-#endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || XENIX || (AVVION || TERMIOS) */
+#endif
 
 	/* Do shell */
 	return(callout(sh));
@@ -1456,7 +1357,7 @@ static int LaunchPrg(const char *Cmd,
         if ( !Cmd )     {
                 return FALSE;
         }
-        
+
         if ( !InFile || !*InFile )      {
                 InFile  = "/dev/null";
         }
@@ -1470,7 +1371,7 @@ static int LaunchPrg(const char *Cmd,
 	xsnprintf(FullCmd, sizeof(FullCmd), "( %s ) < %s > %s 2>%s",
                 Cmd, InFile, OutFile, ErrFile);
 
-        return callout(FullCmd);                
+        return callout(FullCmd);
 } /* LaunchPrg */
 
 /*=============================================================================*/
@@ -1674,7 +1575,7 @@ int n;					/* Argument count		*/
 	} else {
 		return FALSE;
 	}
-	
+
 	/* Setup the proper file names */
 	bp = curbp;
 	xstrcpy(tmpnam, bp->b_fname);	/* Save the original name */
@@ -1686,7 +1587,7 @@ int n;					/* Argument count		*/
 		xstrcpy(bp->b_fname, tmpnam);
 		unlink(InFile);
 		sleep(MLWAIT);
-		
+
 		return FALSE;
 	}
 	/* Reset file name */
@@ -1701,14 +1602,14 @@ int n;					/* Argument count		*/
 	        return FALSE;
 	}
 #endif
-                                                               
+
 	/*-find the "command" buffer */
         if ( (bp = bfind (bname, FALSE, 0)) != NULL )	{
 		/*-make sure the contents can safely be blown away */
 		if ( bp->b_flag & BFCHG )	{
 	    		if ( mlyesno (TEXT32) != TRUE )	{
                 		unlink(InFile);
-	    			
+
 				return FALSE;
 			}
 		}
@@ -1718,7 +1619,7 @@ int n;					/* Argument count		*/
         	/* cannot create buffer */
 		unlink(InFile);
 		sleep(MLWAIT);
-        	
+
         	return FALSE;
 	}
 
@@ -1731,7 +1632,7 @@ int n;					/* Argument count		*/
 
 		return FALSE;
 	}
-	
+
 	{
 		BUFFER	*temp_bp = curbp;
 		int	bmode;
@@ -1743,7 +1644,7 @@ int n;					/* Argument count		*/
 		if ( !splitwind(FALSE, 1) )	{
         		unlink(InFile);
         		unlink(OutFile);
-        		
+
 			return FALSE;
 		}
 #endif
@@ -1771,7 +1672,7 @@ int n;					/* Argument count		*/
 }
 
 /** Filter buffer through command **/
-int filter(f, n)
+int f_filter(f, n)
 int f;					/* Flags			*/
 int n;					/* Argument count		*/
 {
@@ -1821,7 +1722,7 @@ int n;					/* Argument count		*/
 		xstrcpy(bp->b_fname, tmpnam);
 		unlink(InFile);
 		sleep(MLWAIT);
-		
+
 		return FALSE;
 	}
 
@@ -1835,7 +1736,7 @@ int n;					/* Argument count		*/
 			bp->b_flag |= BFCHG;
 		}
 	}
-			
+
 
 	/* Reset file name */
 	xstrcpy(bp->b_fname, tmpnam);
@@ -1849,7 +1750,7 @@ int n;					/* Argument count		*/
 		mlwrite("[Execution failed]");
 		sleep(MLWAIT);
 	}
-	
+
 	return s;
 }
 
@@ -2052,7 +1953,7 @@ char *name;	/* name of directory to delete */
 /*
  * Window size changes handled via signals.
  */
-void winch_changed()
+void winch_changed(int signo)
 {
 	signal(SIGWINCH,winch_changed);
 	winch_flag = 1;
@@ -2062,7 +1963,7 @@ void winch_new_size()
 {
 	EWINDOW *wp;
 	struct winsize win;
-  
+
 	winch_flag=0;
 	ioctl(fileno(stdin),TIOCGWINSZ,&win);
 	winch_vtresize(win.ws_row,win.ws_col);
@@ -2072,4 +1973,4 @@ void winch_new_size()
 }
 #endif
 
-#endif /* BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) */
+#endif /* IS_UNIX() */

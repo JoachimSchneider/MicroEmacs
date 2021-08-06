@@ -50,7 +50,7 @@ NOSHARE KEYTAB	keytab[NBINDS] = {
 	{CTRL|'X',				BINDFNC,	{cex}},
 	{CTRL|'Y',				BINDFNC,	{yank}},
 	{CTRL|'Z',				BINDFNC,	{backpage}},
-	{CTRL|'[',				BINDFNC,	{meta}},
+	{CTRL|'[',				BINDFNC,	{f_meta}},
 	{CTRL|'\\',				BINDFNC,	{forwsearch}},
 	{CTRL|'^',				BINDFNC,	{quote}},
 	{CTRL|'_',				BINDFNC,	{undo}},
@@ -79,7 +79,7 @@ NOSHARE KEYTAB	keytab[NBINDS] = {
 	{CTLX|'?',				BINDFNC,	{deskey}},
 	{CTLX|'!',				BINDFNC,	{spawn}},
 	{CTLX|'@',				BINDFNC,	{pipecmd}},
-	{CTLX|'#',				BINDFNC,	{filter}},
+	{CTLX|'#',				BINDFNC,	{f_filter}},
 	{CTLX|'$',				BINDFNC,	{execprg}},
 	{CTLX|'=',				BINDFNC,	{showcpos}},
 	{CTLX|'(',				BINDFNC,	{ctlxlp}},
@@ -94,7 +94,7 @@ NOSHARE KEYTAB	keytab[NBINDS] = {
 	{CTLX|'A',				BINDFNC,	{setvar}},
 	{CTLX|'B',				BINDFNC,	{usebuffer}},
 	{CTLX|'C',				BINDFNC,	{spawncli}},
-#if	BSD || FREEBSD || LINUX || VMS || SUN || HPUX8 || HPUX9 || AVIION
+#if ( IS_UNIX() || VMS )
 	{CTLX|'D',				BINDFNC,	{bktoshell}},
 #endif
 	{CTLX|'E',				BINDFNC,	{ctlxe}},
@@ -156,7 +156,7 @@ NOSHARE KEYTAB	keytab[NBINDS] = {
 	{META|'P',				BINDFNC,	{gotobop}},
 	{META|'Q',				BINDFNC,	{fillpara}},
 	{META|'R',				BINDFNC,	{sreplace}},
-#if	BSD || FREEBSD || LINUX || HPUX8 || HPUX9 || VMS || SUN || AVIION
+#if ( IS_UNIX() || VMS )
 	{META|'S',				BINDFNC,	{bktoshell}},
 #endif
 	{META|'U',				BINDFNC,	{upperword}},

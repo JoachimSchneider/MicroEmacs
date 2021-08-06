@@ -11,11 +11,8 @@
 #if	FILOCK
 
 #if ( IS_UNIX() || WMCS )
+# include <string.h>
 # include <sys/errno.h>
-# if ( !IS_BSD_UNIX() ) /* already defined  */
-extern int  sys_nerr;		/* number of system error messages defined */
-extern char *sys_errlist[];	/* list of message texts */
-# endif
 #endif
 
 #if	MSC
@@ -157,12 +154,13 @@ char *errstr;		/* lock error string to print out */
 
 {
 	char obuf[NSTRING];	/* output buffer for error message */
+	char *sys_errstr = strerror(errno);
 
 	xstrcpy(obuf, errstr);
 	strcat(obuf, " - ");
 #if ( IS_UNIX() || WMCS )
-	if (errno < sys_nerr)
-		strcat(obuf, sys_errlist[errno]);
+	if ( sys_errstr && *sys_errstr )
+		strcat(obuf, sys_errstr);
 	else
 		strcat(obuf, TEXT178);
 /*                           "[can not get system error message]" */

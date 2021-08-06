@@ -72,7 +72,7 @@ BUFFER *bp;
 
 {
 	register EWINDOW *wp;
-	SCREEN *scrp;		/* screen to fix pointers in */
+	SCREEN_T *scrp;		/* screen to fix pointers in */
 	register int cmark;		/* current mark */
 
 	/* let a user macro get hold of things...if he wants */

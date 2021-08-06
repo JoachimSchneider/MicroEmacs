@@ -831,7 +831,7 @@ fubar:
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-int filter(f, n)
+int f_filter(f, n)
 
 {
     mlwrite(TEXT217);

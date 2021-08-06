@@ -575,9 +575,9 @@ LONG EXPORT FAR PASCAL ScrWndProc (HWND hWnd, UINT wMsg, WPARAM wParam,
 	    SetWindowWord (hWnd, GWW_SCRCY, (WORD)Rect.bottom);
 	}
 	{   /*-setup the stuff for display.c */
-	    SCREEN  *sp;
+	    SCREEN_T  *sp;
 
-	    sp = (SCREEN*)(((MDICREATESTRUCT*)(((CREATESTRUCT*)lParam)->
+	    sp = (SCREEN_T*)(((MDICREATESTRUCT*)(((CREATESTRUCT*)lParam)->
 					       lpCreateParams))->lParam);
 #if WINXP
 		SetWindowLongPtr(hWnd, GWL_SCRPTR, (LONG_PTR)sp);
@@ -590,9 +590,9 @@ LONG EXPORT FAR PASCAL ScrWndProc (HWND hWnd, UINT wMsg, WPARAM wParam,
 	
     case WM_DESTROY:
 #if WINXP
-		vtfreescr((SCREEN*)GetWindowLongPtr(hWnd, GWL_SCRPTR));
+		vtfreescr((SCREEN_T*)GetWindowLongPtr(hWnd, GWL_SCRPTR));
 #else
-		vtfreescr((SCREEN*)GetWindowLong(hWnd, GWL_SCRPTR));
+		vtfreescr((SCREEN_T*)GetWindowLong(hWnd, GWL_SCRPTR));
 #endif
 	break;
 	
@@ -616,18 +616,18 @@ LONG EXPORT FAR PASCAL ScrWndProc (HWND hWnd, UINT wMsg, WPARAM wParam,
 	    if (!InternalRequest) {
 	        InternalRequest = TRUE;
 #if WINXP
-			select_screen((SCREEN*)GetWindowLongPtr(hWnd, GWL_SCRPTR), FALSE);
+			select_screen((SCREEN_T*)GetWindowLongPtr(hWnd, GWL_SCRPTR), FALSE);
 #else
-			select_screen((SCREEN*)GetWindowLong(hWnd, GWL_SCRPTR), FALSE);
+			select_screen((SCREEN_T*)GetWindowLong(hWnd, GWL_SCRPTR), FALSE);
 #endif
 		InternalRequest = FALSE;
 	    }
 	    else {
-		SCREEN  *sp;
+		SCREEN_T  *sp;
 #if WINXP
-		sp = (SCREEN*)GetWindowLongPtr(hWnd, GWL_SCRPTR);
+		sp = (SCREEN_T*)GetWindowLongPtr(hWnd, GWL_SCRPTR);
 #else
-		sp = (SCREEN*)GetWindowLong(hWnd, GWL_SCRPTR);
+		sp = (SCREEN_T*)GetWindowLong(hWnd, GWL_SCRPTR);
 #endif
 		if (sp->s_virtual == NULL) {
 		    /* this is initialization time! */
@@ -706,13 +706,13 @@ LONG EXPORT FAR PASCAL ScrWndProc (HWND hWnd, UINT wMsg, WPARAM wParam,
 	    goto DefaultProc;
 	case SC_CLOSE:
 	    if (!notquiescent) {
-		SCREEN  *sp;
+		SCREEN_T  *sp;
 
 		/* this must be done here, before any MDI mumbo-jumbo */
 #if WINXP
-		sp = (SCREEN*)GetWindowLongPtr(hWnd, GWL_SCRPTR);
+		sp = (SCREEN_T*)GetWindowLongPtr(hWnd, GWL_SCRPTR);
 #else
-		sp = (SCREEN*)GetWindowLong(hWnd, GWL_SCRPTR);
+		sp = (SCREEN_T*)GetWindowLong(hWnd, GWL_SCRPTR);
 #endif
 		if (sp == first_screen) {
 		    cycle_screens (FALSE, 0);

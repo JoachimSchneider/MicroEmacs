@@ -1022,7 +1022,7 @@ dinput:	outline[term.t_ncol - 1] = 0;
 
 	/* META key turns off debugging */
 	key = getbind(c);
-	if (key && key->k_type == BINDFNC && key && key->k_ptr.fp == meta)
+	if (key && key->k_type == BINDFNC && key && key->k_ptr.fp == f_meta)
 		macbug = FALSE;
 
 	else if (c == abortc) {

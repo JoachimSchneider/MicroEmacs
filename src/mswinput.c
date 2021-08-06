@@ -356,9 +356,9 @@ void FAR PASCAL DropMessage (HWND hWnd, HDROP hDrop)
         else {
             /* the drop occured on a screen */
 #if WINXP
-			addline(DropBuf, ((SCREEN*)GetWindowLongPtr(hWnd, GWL_SCRPTR))->s_screen_name);
+			addline(DropBuf, ((SCREEN_T*)GetWindowLongPtr(hWnd, GWL_SCRPTR))->s_screen_name);
 #else
-			addline(DropBuf, ((SCREEN*)GetWindowLong (hWnd, GWL_SCRPTR))->s_screen_name);
+			addline(DropBuf, ((SCREEN_T*)GetWindowLong (hWnd, GWL_SCRPTR))->s_screen_name);
 #endif
             if (DragQueryPoint (hDrop, &Point)) {
                 ClientToCell (hWnd, Point, &Point);

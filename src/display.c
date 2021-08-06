@@ -143,7 +143,7 @@ VOID PASCAL NEAR vtfree()
 /* vtscreen:	map a screen into the Virtual Terminal system */
 /* ======== 						      */
 
-VOID PASCAL NEAR vtscreen(SCREEN *sp)
+VOID PASCAL NEAR vtscreen(SCREEN_T *sp)
 {
 	TTflush();
 	term.t_roworg = sp->s_roworg;
@@ -160,7 +160,7 @@ VOID PASCAL NEAR vtscreen(SCREEN *sp)
 /* vtinitscr: build a virtual terminal resource for a new screen */
 /* =========													 */
 
-int PASCAL NEAR vtinitscr(SCREEN *sp, int nrow, int ncol)
+int PASCAL NEAR vtinitscr(SCREEN_T *sp, int nrow, int ncol)
 
 /* returns TRUE if successful */
 {
@@ -190,7 +190,7 @@ int PASCAL NEAR vtinitscr(SCREEN *sp, int nrow, int ncol)
 /* vtfreescr:  delete a virtual terminal resource for a dying screen */
 /* =========														 */
 
-int PASCAL NEAR vtfreescr(SCREEN *sp)
+int PASCAL NEAR vtfreescr(SCREEN_T *sp)
 {
 	vtscreen(sp);
 	vtfree();
@@ -200,7 +200,7 @@ int PASCAL NEAR vtfreescr(SCREEN *sp)
 /* vtsizescr:	resize the virtual terminal resources */
 /* =========										  */
 
-int PASCAL NEAR vtsizescr(SCREEN *sp, int nrow, int ncol)
+int PASCAL NEAR vtsizescr(SCREEN_T *sp, int nrow, int ncol)
 
 /* returns TRUE if successful. Otherwise, the old VIDEO structures are
    preserved. */
@@ -376,7 +376,7 @@ int force;	/* force update past type ahead? */
 {
 	register EWINDOW *wp;
 #if     WINDOW_MSWIN
-	SCREEN  *sp;
+	SCREEN_T  *sp;
 #endif
 
 #if	TYPEAH
@@ -410,7 +410,7 @@ int force;	/* force update past type ahead? */
 		static EWINDOW *scroll_wp = (EWINDOW *)NULL;
 	    
 		sp = sp->s_next_screen;
-		if (sp == (SCREEN *)NULL) {
+		if (sp == (SCREEN_T *)NULL) {
 			sp = first_screen;
 			sp->s_cur_window = curwp; /* not always up to date */
 		}
@@ -1371,7 +1371,7 @@ struct VIDEO *pp;       /* physical screen image */
                         old_rev_state = new_rev_state;
                 }
 
-#if	TERMCAP
+#if ( IS_UNIX() )
 	/* TERMCAP does not tell us if the current terminal propagates
 	   the current attributes to the end of the line when an erase
 	   to end of line sequence is sent. Don't let TERMCAP use EEOL
@@ -1617,14 +1617,14 @@ VOID PASCAL NEAR upmode()	/* update all the mode lines */
 {
 	register EWINDOW *wp;
 #if     WINDOW_MSWIN
-    SCREEN  *sp;
+    SCREEN_T  *sp;
 
     /* loop through all screens to update even partially hidden ones.
        Note that we process the "first" screen last */
     sp = first_screen;
     do {
         sp = sp->s_next_screen;
-        if (sp == (SCREEN *)NULL) sp = first_screen;
+        if (sp == (SCREEN_T *)NULL) sp = first_screen;
         vtscreen (sp);
         wheadp = sp->s_first_window;
 #endif
@@ -1644,14 +1644,14 @@ VOID PASCAL NEAR upwind()	/* force hard updates on all windows */
 {
 	register EWINDOW *wp;
 #if     WINDOW_MSWIN
-    SCREEN  *sp;
+    SCREEN_T  *sp;
 
     /* loop through all screens to update even partially hidden ones.
        Note that we process the "first" screen last */
     sp = first_screen;
     do {
         sp = sp->s_next_screen;
-        if (sp == (SCREEN *)NULL) sp = first_screen;
+        if (sp == (SCREEN_T *)NULL) sp = first_screen;
         vtscreen (sp);
         wheadp = sp->s_first_window;
 #endif

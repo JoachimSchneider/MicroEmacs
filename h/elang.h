@@ -8,7 +8,7 @@
 #define	LANGUAGE "english"
 #endif
 #if	FRENCH
-#if WINDOW_MSWIN || AIX || BSD || USG || SMOS || HPUX8 || HPUX9 || SUN || XENIX || AVIION
+#if ( WINDOW_MSWIN || IS_UNIX() )
 #include	"frenchis.h"	/* ISO version */
 #else
 #include	"french.h"	/* IBM-PC char set */

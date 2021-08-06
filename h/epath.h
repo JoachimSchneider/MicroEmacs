@@ -51,7 +51,7 @@ NOSHARE CONST char *pathname[] =
 };
 #endif
 
-#if OS2
+#if	OS2
 {
         "emacs.rc",
         "emacs.hlp",
@@ -64,7 +64,7 @@ NOSHARE CONST char *pathname[] =
 };
 #endif
 
-#if	V7 | BSD | FREEBSD | LINUX | USG | AIX | SMOS | HPUX8 | HPUX9 | XENIX | SUN | AVIION
+#if	IS_UNIX()
 {
 	".emacsrc",
 	"emacs.hlp",
@@ -84,7 +84,7 @@ NOSHARE CONST char *pathname[] =
 };
 #endif
 
-#if WMCS
+#if	WMCS
 {
 	"emacs.rc",
 	"emacs.hlp",
@@ -93,7 +93,7 @@ NOSHARE CONST char *pathname[] =
 };
 #endif
 
-#if AOSVS
+#if	AOSVS
 /*
     NOTE: you must use the Unix style pathnames here!
 */
@@ -106,7 +106,7 @@ NOSHARE CONST char *pathname[] =
 };
 #endif
 
-#if MPE
+#if	MPE
 {
 	"emacsrc",
 	"emacshlp",

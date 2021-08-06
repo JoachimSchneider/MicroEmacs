@@ -12,13 +12,15 @@
 		This table gives the names of all the bindable functions
 	end their C function address. These are used for the bind-to-key
 	function.
+
+	THE TABLE MUST BE SORTED ALPHABETICALLY.
 */
 
 NOSHARE NBIND	names[] = {
 	{"abort-command",		ctrlg},
 	{"add-abbrev",			add_abbrev},
 	{"add-global-mode",		setgmode},
-#if UNIX || (VMS && SMG) || MPE
+#if IS_UNIX() || (VMS && SMG) || MPE
 	{"add-keymap",			addkeymap},
 #endif
 	{"add-mode",			setmod},
@@ -99,7 +101,7 @@ NOSHARE NBIND	names[] = {
 	{"execute-program",		execprg},
 	{"exit-emacs",			quit},
 	{"fill-paragraph",		fillpara},
-	{"filter-buffer",		filter},
+	{"filter-buffer",		f_filter},
 	{"find-file",			filefind},
 	{"find-screen",			find_screen},
 	{"forward-character",		forwchar},
@@ -146,7 +148,7 @@ NOSHARE NBIND	names[] = {
 	{"macro-to-menu",		macrotomenu},
 	{"maximize-screen",		maximizescreen},
 #endif
-	{"meta-prefix", 		meta},
+	{"meta-prefix", 		f_meta},
 #if	WINDOW_MSWIN
 	{"minimize-screen",		minimizescreen},
 #endif
@@ -220,7 +222,7 @@ NOSHARE NBIND	names[] = {
 	{"source",			execfile},
 	{"split-current-window",	splitwind},
 	{"store-procedure",		storeproc},
-#if	BSD || FREEBSD || LINUX || VMS || SUN || HPUX8 || HPUX9 || AVIION
+#if ( IS_UNIX() || VMS )
 	{"suspend-emacs",		bktoshell},
 #endif
 #if	CTAGS

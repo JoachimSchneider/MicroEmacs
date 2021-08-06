@@ -171,7 +171,7 @@ int         lockfl;     /* check the file for locks? */
 	register LINE	*lp;
 	register int	i;
 	register int	s;
-	SCREEN		*sp;	/* screen pointer, if we need it */
+	SCREEN_T		*sp;	/* screen pointer, if we need it */
 	char bname[NBUFN];	/* buffer name to put file */
 	char prompt[NSTRING];	/* string for collisions prompt */
 
@@ -232,7 +232,7 @@ int         lockfl;     /* check the file for locks? */
 	 */
 	if (newscreenflag) {
 		sp = lookup_screen(bname);
-		if (sp == (SCREEN *)NULL) {
+		if (sp == (SCREEN_T *)NULL) {
 			/* screen does not exist, create it */
 			sp = init_screen(bname, bp);
 		}

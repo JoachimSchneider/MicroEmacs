@@ -287,7 +287,7 @@ pipecmd(f, n)
  * filter a buffer through an external DOS program
  * Bound to ^X #
  */
-filter(f, n)
+f_filter(f, n)
 
 {
         register int    s;	/* return status from CLI */
