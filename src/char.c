@@ -144,14 +144,14 @@ VOID PASCAL NEAR initchars()    /* initialize the character upper/lower case tab
                 lowcase[index] = index ^ DIFCASE;
                 upcase[index ^ DIFCASE] = index;
         }
-#if BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || AVIION
+#if ( IS_UNIX() )
         /* and for those international characters! */
         for (index = (unsigned char)'\340';
              index <= (unsigned char)'\375'; index++) {
                 lowcase[index] = index ^ DIFCASE;
                 upcase[index ^ DIFCASE] = index;
         }
-#endif /*  BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || AVIION */
+#endif
 
 #if     MSDOS
         /* setup various extended IBM-PC characters */

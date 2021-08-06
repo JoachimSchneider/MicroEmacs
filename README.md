@@ -9,6 +9,10 @@ I added are several bug-fixes that make the code compile and work on
 modern Linux and FreeBSD systems.
 
 
+[2021-07-14.00]
+* Activated support for file locking.
+
+
 
 For completeness I quote Peter Chapman's README.md here:
 ```

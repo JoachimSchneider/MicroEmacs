@@ -44,6 +44,7 @@
 #define AOSVS   0                       /* Data General AOS/VS          */
 #define AUX     0                       /* Apple UNIX for Macintosh     */
 #define AIX     0                       /* IBM UNIX for various machines*/
+#define AIX5    0                       /* IBM UNIX newer rs6000        */
 #define AVIION  0                       /* Data General AViiON          */
 #define BSD     0                       /* UNIX BSD 4.2 and ULTRIX      */
 #define FINDER  0                       /* Macintosh OS                 */
@@ -53,16 +54,22 @@
 #define HPUX9   0                       /* HPUX HP 9000 ver 9           */
 #define MPE     0                       /* HP MPE/XL                    */
 #define MSDOS   0                       /* MS-DOS                       */
-#define WINNT   0                       /* MS-Win NT                    */
-#define WINXP   0                       /* Windows XP/Visual studio 2008*/
+#define OPENBSD 0                       /* OPENBSD 386                  */
 #define OS2     0                       /* Microsoft or IBM OS/2        */
 #define SMOS    0                       /* Supermax UNIX System V       */
 #define SUN     0                       /* SUN v4.0                     */
 #define TOS     0                       /* ST520, TOS                   */
 #define USG     0                       /* UNIX system V                */
 #define VMS     0                       /* VAX/VMS                      */
+#define WINNT   0                       /* MS-Win NT                    */
+#define WINXP   0                       /* Windows XP/Visual studio 2008*/
 #define WMCS    0                       /* Wicat's MCS                  */
 #define XENIX   0                       /* IBM-PC SCO XENIX             */
+
+
+#define IS_UNIX() ( AIX || AIX5 || AUX || AVIION || BSD || FREEBSD || HPUX8 || HPUX9 || LINUX || OPENBSD || SMOS || SUN || USG || XENIX )
+#define IS_BSD_UNIX() ( AIX5 || BSD || FREEBSD || LINUX || OPENBSD || SUN )
+
 
 /*      Compiler definitions                    */
 /*      [Set one of these!!]                    */
@@ -158,7 +165,7 @@
 #define REVSTA  1       /* Status line appears in reverse video         */
 #define COLOR   1       /* color commands and windows                   */
 
-#define FILOCK  0       /* file locking under unix BSD 4.2              */
+#define FILOCK  1       /* generic file locking under unix              */
 #define ISRCH   1       /* Incremental searches like ITS EMACS          */
 #define FLABEL  0       /* function key label code [HP150]              */
 #define CRYPT   1       /* file encryption enabled?                     */
@@ -474,10 +481,11 @@ union REGS {
 #define MEMMAP  0
 #endif
 
-#if     MSDOS | WINNT | WINXP | OS2 | USG | AIX | AUX | SMOS | HPUX8 | HPUX9 | BSD | FREEBSD | LINUX | (TOS & MWC) | WMCS | SUN | MPE
-#define ENVFUNC 1
+
+#if ( IS_UNIX() || MSDOS || WINNT || WINXP || OS2 || (TOS && MWC) || WMCS  || MPE )
+# define ENVFUNC 1
 #else
-#define ENVFUNC 0
+# define ENVFUNC 0
 #endif
 
 #if     AUX
@@ -502,7 +510,7 @@ union REGS {
 #endif
 
 #if     VARARG
-#if     (GCC == 0) && (USG || AIX || AUX || BSD || FREEBSD || LINUX || SUN || XENIX || HPUX8 || HPUX9 || AVIION || MPE)
+#if ( (GCC == 0) && (IS_UNIX() || MPE) )
 #define VARG    1
 #define SARG    0
 #include        <varargs.h>
@@ -518,6 +526,12 @@ union REGS {
 #define      movmem(a, b, c) memcpy(b, a, c)
 #endif
 
+
+/*====================== global includes to get some constants ========*/
+#include <limits.h>
+/*=====================================================================*/
+
+
 /*      Emacs global flag bit definitions (for gflags)  */
 
 #define GFREAD  1       /* read first file in at startup */
@@ -527,10 +541,18 @@ union REGS {
 /*      internal constants      */
 
 #define NBINDS  300                     /* max # of bound keys          */
-#if     AOSVS | VMS | WINNT | WINXP | SUN | BSD | FREEBSD | LINUX | USG | ZENIX | HPUX8 | HPUX9 | OS2
-#define NFILEN  256
+#if ( defined(PATH_MAX) )
+# define NFILEN (PATH_MAX + 1)
+#elif ( defined(MAXPATHLEN) )
+# define NFILEN (MAXPATHLEN + 1)
+#elif ( defined(_POSIX_PATH_MAX) )
+# define NFILEN (_POSIX_PATH_MAX + 1)
 #else
-#define NFILEN  80                      /* # of bytes, file name        */
+# if ( AOSVS || VMS || WINNT || WINXP || OS2 || IS_UNIX() )
+#   define NFILEN  256
+# else
+#   define NFILEN  80                   /* # of bytes, file name        */
+# endif
 #endif
 #define NBUFN   128                     /* # of bytes, buffer name      */
 #define NLINE   512                     /* # of bytes, input line       */
@@ -634,14 +656,14 @@ union REGS {
 #define BELL    0x07                    /* a bell character             */
 #define TAB     0x09                    /* a tab character              */
 
-#if     USG | AIX | AUX | SMOS | HPUX8 | HPUX9 | BSD | FREEBSD | LINUX | SUN | XENIX | AVIION
-#define PATHCHR ':'
+#if ( IS_UNIX() )
+# define PATHCHR ':'
 #else
-#if     WMCS || MPE
-#define PATHCHR ','
-#else
-#define PATHCHR ';'
-#endif
+# if  ( WMCS || MPE )
+#   define PATHCHR ','
+# else
+#   define PATHCHR ';'
+# endif
 #endif
 
 #define INTWIDTH        sizeof(int) * 3

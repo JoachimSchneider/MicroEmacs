@@ -11,9 +11,9 @@
 #include	"eproto.h"
 #include	"edef.h"
 #include	"elang.h"
-#if	BSD | FREEBSD | LINUX | SUN | USG | AIX
-#include	<sys/types.h>
-#include	<sys/stat.h>
+#if ( IS_UNIX() )
+# include	<sys/types.h>
+# include	<sys/stat.h>
 #endif
 
 /*
@@ -270,7 +270,7 @@ int	        lockfl;		/* check for file locks? */
 	char mesg[NSTRING];
 
 #if	FILOCK
-	force_read = FALSE;
+	int force_read = FALSE;
 	if (lockfl && lockchk(fname) == ABORT)
 		force_read = TRUE;
 #endif
@@ -323,7 +323,7 @@ int	        lockfl;		/* check for file locks? */
 	}
 	ffclose();				/* Ignore errors.	*/
 
-#if	BSD || FREEBSD || LINUX || USG || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || AVION
+#if ( IS_UNIX() )
 	/* if we don't have write priviledges, make this in VIEW mode */
 	if (s !=FIOERR && s != FIOFNF) {
 		if (access(fname, 2 /* W_OK*/) != 0)
@@ -430,7 +430,7 @@ CONST char  *fname;
 	while (cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!='\\'&&cp1[-1]!='/')
 		--cp1;
 #endif
-#if	USG | AIX | AUX | SMOS | HPUX8 | HPUX9 | BSD | FREEBSD | LINUX | SUN | XENIX | AVIION
+#if ( IS_UNIX() )
 	while (cp1!=&fnameA[0] && cp1[-1]!='/')
 		--cp1;
 #endif
@@ -606,7 +606,7 @@ char *mode;	/* mode to open file (w = write a = append) */
 	int sflag;		/* are we safe saving? */
 	char tname[NSTRING];	/* temporary file name */
 	char buf[NSTRING];	/* message buffer */
-#if	BSD | FREEBSD | LINUX | SUN | XENIX | USG | AIX
+#if ( IS_UNIX() )
 	struct stat st;		/* we need info about the file permisions */
 #endif
 
@@ -686,14 +686,14 @@ char *mode;	/* mode to open file (w = write a = append) */
 			strcat(buf, "s");
 
 		if (sflag) {
-#if	BSD | FREEBSD | LINUX | SUN | XENIX | USG | AIX
+#if ( IS_UNIX() )
 			/* get the permisions on the original file */
 			stat(fn, &st);
 #endif
 			/* erase original file */
 			/* rename temporary file to original name */
 			if (unlink(fn) == 0 && rename(tname, fn) == 0) {
-#if	BSD | FREEBSD | LINUX | SUN | XENIX | USG | AIX
+#if ( IS_UNIX() )
 				chown(fn, (int)st.st_uid, (int)st.st_gid);
 				chmod(fn, (int)st.st_mode);
 #else

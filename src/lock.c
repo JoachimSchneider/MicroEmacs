@@ -10,10 +10,12 @@
 
 #if	FILOCK
 
-#if	BSD || FREEBSD || LINUX || WMCS || SUN || XENIX || HPUX8 || HPUX9 || AVIION || USG || AIX || AUX
-#include <sys/errno.h>
-extern int sys_nerr;		/* number of system error messages defined */
+#if ( IS_UNIX() || WMCS )
+# include <sys/errno.h>
+# if ( !IS_BSD_UNIX() ) /* already defined  */
+extern int  sys_nerr;		/* number of system error messages defined */
 extern char *sys_errlist[];	/* list of message texts */
+# endif
 #endif
 
 #if	MSC
@@ -109,9 +111,9 @@ CONST char  *fname;	/* file name to lock */
 		return(TRUE);
 
 	/* file failed...abort */
-	if (strncmp(locker, TEXT175, 4) == 0) {
-/*                          "LOCK" */
+	if (strncmp(locker, "LOCK", sizeof("LOCK") - 1) == 0) {
 		lckerror(locker);
+
 		return(ABORT);
 	}
 
@@ -158,7 +160,7 @@ char *errstr;		/* lock error string to print out */
 
 	xstrcpy(obuf, errstr);
 	strcat(obuf, " - ");
-#if	BSD || FREEBSD || LINUX || WMCS || SUN || XENIX || HPUX8 || HPUX9 || AVIION || USG || AIX || AUX
+#if ( IS_UNIX() || WMCS )
 	if (errno < sys_nerr)
 		strcat(obuf, sys_errlist[errno]);
 	else

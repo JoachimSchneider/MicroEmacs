@@ -47,8 +47,8 @@
 #include	"edef.h"
 #include	"elang.h"
 
-#if USG | AIX | AUX | BSD | FREEBSD | LINUX | SUN | HPUX8 | HPUX9
-#include	<pwd.h>
+#if ( IS_UNIX() )
+# include	<pwd.h>
 extern struct passwd *getpwnam();
 #endif
 
@@ -244,7 +244,7 @@ int maxlen;		/* maximum length of input field */
 	char *ptr;		/* string pointer */
 	char user_name[NSTRING]; /* user name for directory */
 	static char buf[NSTRING];/* buffer to hold tentative name */
-#if USG | AIX | AUX | BSD | FREEBSD | LINUX | SUN | HPUX8 | HPUX9
+#if ( IS_UNIX() )
 	struct passwd *pwd;	/* password structure */
 #endif
 
@@ -353,7 +353,7 @@ int maxlen;		/* maximum length of input field */
 				--ttcol;
 			}
 
-#if USG | AIX | AUX | BSD | FREEBSD | LINUX | SUN | HPUX8 | HPUX9
+#if ( IS_UNIX() )
 			/* lookup someone else's home directory! */
 			if (user_name[0] != 0) {
 				pwd = getpwnam(user_name);
