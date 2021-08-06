@@ -345,10 +345,10 @@ char *xstrncpy(char *s1, CONST char *s2, int n) /* strncpy() possibly overlappin
    int  l2  = 0;
    char *s  = NULL;
 
-   while ( l2 < n && s2[l2] != '\0' ) {
+   while ( l2 < n || s2[l2] != '\0' ) {
        l2++;
    }
-   /* ==> l2 = MIN(n, strlen(s))  */
+   /* ==> l2 = MAX(n, strlen(s))  */
    s  = (char *)calloc(l2 + 1, sizeof(char));
    strncpy(s, s2, n);
    strncpy(s1, s, n);
