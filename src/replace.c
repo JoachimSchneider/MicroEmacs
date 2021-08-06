@@ -83,7 +83,7 @@ int	n;					/* # of repetitions wanted */
 	/* Set up flags so we can make sure not to do a recursive
 	 * replace on the last line.
 	 */
-	nlflag = (pat[strlen(pat) - 1] == '\r');
+	nlflag = (pat[strlen((char *)pat) - 1] == '\r');
 	nlrepl = FALSE;
 
 	/* Save original . position, reset the number of matches and
@@ -270,7 +270,7 @@ qprompt:
 				mmove_flag = TRUE;
 				return(ABORT);
 			}
-			strcpy(oldpatmatch, patmatch);
+			xstrcpy(oldpatmatch, patmatch);
 		}
 		else if (matchlen == 0) {
 			mlwrite(TEXT91);
@@ -339,10 +339,10 @@ int	dlength;
 char	*instr;
 int	use_rmc;
 {
-	register int	status;
-	register char	*rstr;
+	register int	    status;
+	register CONST char	*rstr;
 #if	MAGIC
-	register RMC	*rmcptr;
+	register RMC	    *rmcptr;
 #endif
 
 	replen = 0;

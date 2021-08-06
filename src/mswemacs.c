@@ -210,12 +210,12 @@ int PASCAL helpengine (int f, int n)
     char    HelpKey [NLINE];
     BOOL    Result;
 
-    strcpy (OldHelpFile, HelpEngineFile);
+    xstrcpy (OldHelpFile, HelpEngineFile);
     SetWorkingDir ();
     if ((Result = FILENAMEREPLY (TEXT307, HelpEngineFile, NFILEN)) != TRUE) return Result;
         /* "Help file: " */
     if (HelpEngineFile[0] == '\0') {
-        strcpy (HelpEngineFile, OldHelpFile);
+        xstrcpy (HelpEngineFile, OldHelpFile);
         return FALSE;
     }
     else {

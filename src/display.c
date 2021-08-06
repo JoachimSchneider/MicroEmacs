@@ -190,7 +190,7 @@ int PASCAL NEAR vtinitscr(SCREEN *sp, int nrow, int ncol)
 /* vtfreescr:  delete a virtual terminal resource for a dying screen */
 /* =========														 */
 
-PASCAL NEAR vtfreescr(SCREEN *sp)
+int PASCAL NEAR vtfreescr(SCREEN *sp)
 {
 	vtscreen(sp);
 	vtfree();
@@ -250,7 +250,7 @@ int PASCAL NEAR vtsizescr(SCREEN *sp, int nrow, int ncol)
  * system prompt will be written in the line). Shut down the channel to the
  * terminal.
  */
-PASCAL NEAR vttidy()
+int PASCAL NEAR vttidy()
 {
     mlerase();
     movecursor(term.t_nrow, 0);
@@ -264,7 +264,7 @@ PASCAL NEAR vttidy()
  * screen. There is no checking for nonsense values; this might be a good
  * idea during the early stages.
  */
-PASCAL NEAR vtmove(row, col)
+int PASCAL NEAR vtmove(row, col)
 
 int row, col;
 
@@ -280,7 +280,7 @@ int row, col;
    terminal buffers. Only column overflow is checked.
 */
 
-PASCAL NEAR vtputc(c)
+int PASCAL NEAR vtputc(c)
 
 int c;
 
@@ -338,7 +338,7 @@ int c;
  * Erase from the end of the software cursor to the end of the line on which
  * the software cursor is located.
  */
-PASCAL NEAR vteeol()
+int PASCAL NEAR vteeol()
 {
     register VIDEO	*vp;
 
@@ -1474,7 +1474,7 @@ EWINDOW *wp;	/* window to update modeline for */
 	}
 
 	n  = 4;
-	strcpy(tline, " "); 			/* Buffer name. */
+	xstrcpy(tline, " "); 			/* Buffer name. */
 #if     !WINDOW_MSWIN
 	strcat(tline, PROGNAME);
 	strcat(tline, " ");
@@ -1492,7 +1492,7 @@ EWINDOW *wp;	/* window to update modeline for */
 			strcat(tline, "[");
 			strcat(tline, time);
 			strcat(tline, "] ");
-			strcpy(lasttime, time);
+			xstrcpy(lasttime, time);
 		}
 	}
 
@@ -1601,14 +1601,14 @@ char *ts;
 {
 	char buf[80];
 
-	strcpy(buf, timeset());
+	xstrcpy(buf, timeset());
 	if (strcmp(buf, errorm) == 0) {
 		*ts = 0;
 		return;
 	}
 
 	buf[16] = 0;
-	strcpy(ts, &buf[11]);
+	xstrcpy(ts, &buf[11]);
 	return;
 }
 

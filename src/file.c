@@ -11,7 +11,7 @@
 #include	"eproto.h"
 #include	"edef.h"
 #include	"elang.h"
-#if	BSD | FREEBSD | SUN | USG | AIX
+#if	BSD | FREEBSD | LINUX | SUN | USG | AIX
 #include	<sys/types.h>
 #include	<sys/stat.h>
 #endif
@@ -23,7 +23,7 @@
  * "read a file into the current buffer" code.
  * Bound to "C-X C-R".
  */
-PASCAL NEAR fileread(f, n)
+int PASCAL NEAR fileread(f, n)
 
 int f, n;	/* defualt and numeric arguments (unused) */
 
@@ -46,7 +46,7 @@ int f, n;	/* defualt and numeric arguments (unused) */
  * "insert a file into the current buffer" code.
  * Bound to "C-X C-I".
  */
-PASCAL NEAR insfile(f, n)
+int PASCAL NEAR insfile(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -89,7 +89,7 @@ int f,n;	/* prefix flag and argument */
  * text, and switch to the new buffer.
  * Bound to C-X C-F.
  */
-PASCAL NEAR filefind(f, n)
+int PASCAL NEAR filefind(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -105,7 +105,7 @@ int f,n;	/* prefix flag and argument */
 	return(getfile(fname, TRUE));
 }
 
-PASCAL NEAR viewfile(f, n)	/* visit a file in VIEW mode */
+int PASCAL NEAR viewfile(f, n)	/* visit a file in VIEW mode */
 
 int f,n;	/* prefix flag and argument */
 
@@ -128,7 +128,7 @@ int f,n;	/* prefix flag and argument */
 }
 
 #if	CRYPT
-PASCAL NEAR resetkey()	/* reset the encryption key if needed */
+int PASCAL NEAR resetkey()	/* reset the encryption key if needed */
 
 {
 	register int s; /* return status */
@@ -161,10 +161,10 @@ PASCAL NEAR resetkey()	/* reset the encryption key if needed */
 }
 #endif
 
-PASCAL NEAR getfile(fname, lockfl)
+int PASCAL NEAR getfile(fname, lockfl)
 
-char fname[];		/* file name to find */
-int lockfl;		/* check the file for locks? */
+CONST char  fname[];    /* file name to find */
+int         lockfl;     /* check the file for locks? */
 
 {
 	register BUFFER *bp;
@@ -203,9 +203,9 @@ int lockfl;		/* check the file for locks? */
 		/* if interactive, let em change it if they dislike our names */
 		if (clexec == FALSE) {
 
-			strcpy(prompt, TEXT136);
+			xstrcpy(prompt, TEXT136);
 /*				       "Buffer name: " */
-			strcpy(&prompt[strlen(prompt) - 2], "[");
+			xstrcpy(&prompt[strlen(prompt) - 2], "[");
 			strcat(prompt, bname);
 			strcat(prompt, "]: ");
 			s = mlreply(prompt, bname, NBUFN);
@@ -252,10 +252,10 @@ int lockfl;		/* check the file for locks? */
 	and before it is read. 
 */
 
-PASCAL NEAR readin(fname, lockfl)
+int PASCAL NEAR readin(fname, lockfl)
 
-char	fname[];	/* name of file to read */
-int	lockfl;		/* check for file locks? */
+CONST char	fname[];	/* name of file to read */
+int	        lockfl;		/* check for file locks? */
 
 {
 	register LINE *lp1;
@@ -279,7 +279,7 @@ int	lockfl;		/* check for file locks? */
 	if ((s=bclear(bp)) != TRUE)		/* Might be old.	*/
 		return(s);
 	bp->b_flag &= ~(BFINVS|BFCHG);
-	strcpy(bp->b_fname, fname);
+	xstrcpy(bp->b_fname, fname);
 
 	/* let a user macro get hold of things...if he wants */
 	execkey(&readhook, FALSE, 1);
@@ -323,7 +323,7 @@ int	lockfl;		/* check for file locks? */
 	}
 	ffclose();				/* Ignore errors.	*/
 
-#if	BSD || FREEBSD || USG || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || AVION
+#if	BSD || FREEBSD || LINUX || USG || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || AVION
 	/* if we don't have write priviledges, make this in VIEW mode */
 	if (s !=FIOERR && s != FIOFNF) {
 		if (access(fname, 2 /* W_OK*/) != 0)
@@ -331,7 +331,7 @@ int	lockfl;		/* check for file locks? */
 	}
 #endif
 
-	strcpy(mesg, "[");
+	xstrcpy(mesg, "[");
 	if (s==FIOERR) {
 		strcat(mesg, TEXT141);
 /*                           "I/O ERROR, " */
@@ -386,63 +386,69 @@ out:
  * Returns a pointer into fname indicating the end of the file path; i.e.,
  * 1 character BEYOND the path name.
  */
-char *PASCAL NEAR makename(bname, fname)
+CONST char *PASCAL NEAR makename(bname, fname)
 
-char *bname;
-char *fname;
+char        *bname;
+CONST char  *fname;
 
 {
-	register char *cp1;
-	register char *cp2;
-	register char *pathp;
+    register char       *fnameA = xstrdup(fname); 
+	register CONST char *cp1;
+	register char       *cp2;
+	register CONST char *pathp;
 
 #if     AOSVS | MV_UX
-        resolve_full_pathname(fname, fname);
-        mklower(fname);   /* aos/vs not case sensitive */
+        resolve_full_pathname(fnameA, fnameA);
+        mklower(fnameA);   /* aos/vs not case sensitive */
 #endif
-	cp1 = &fname[0];
+    /* Goto end of string: */
+	cp1 = &fnameA[0];
 	while (*cp1 != 0)
 		++cp1;
 
 #if	AMIGA
-	while (cp1!=&fname[0] && cp1[-1]!=':' && cp1[-1]!='/')
+	while (cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!='/')
 		--cp1;
 #endif
 #if     AOSVS | MV_UX
-        while (cp1!=&fname[0] && cp1[-1]!=':')
+        while (cp1!=&fnameA[0] && cp1[-1]!=':')
                 --cp1;
 #endif
 #if	VMS
-	while (cp1!=&fname[0] && cp1[-1]!=':' && cp1[-1]!=']')
+	while (cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!=']')
 		--cp1;
 #endif
 #if	MSDOS | OS2 | WINNT | WINXP
-	while (cp1!=&fname[0] && cp1[-1]!=':' && cp1[-1]!='\\'&&cp1[-1]!='/')
+	while (cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!='\\'&&cp1[-1]!='/')
 		--cp1;
 #endif
 #if	TOS
-	while (cp1!=&fname[0] && cp1[-1]!=':' && cp1[-1]!='\\')
+	while (cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!='\\')
 		--cp1;
 #endif
 #if	FINDER
-	while (cp1!=&fname[0] && cp1[-1]!=':' && cp1[-1]!='\\'&&cp1[-1]!='/')
+	while (cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!='\\'&&cp1[-1]!='/')
 		--cp1;
 #endif
-#if	USG | AIX | AUX | SMOS | HPUX8 | HPUX9 | BSD | FREEBSD | SUN | XENIX | AVIION
-	while (cp1!=&fname[0] && cp1[-1]!='/')
+#if	USG | AIX | AUX | SMOS | HPUX8 | HPUX9 | BSD | FREEBSD | LINUX | SUN | XENIX | AVIION
+	while (cp1!=&fnameA[0] && cp1[-1]!='/')
 		--cp1;
 #endif
 #if WMCS
-	while (cp1!=&fname[0] && cp1[-1]!='_' && cp1[-1]!='/')
+	while (cp1!=&fnameA[0] && cp1[-1]!='_' && cp1[-1]!='/')
 		--cp1;
 #endif
-	/* cp1 is pointing to the first real filename char */
+	/* cp1 is pointing to the first real filename char in fnameA */
+	/* Reset cp1 to the aquivalent position in fname: */
+	cp1 = fname + strlen(fname) - (fnameA + strlen(fnameA) - cp1);
 	pathp = cp1;
 
 	cp2 = &bname[0];
 	while (cp2!=&bname[NBUFN-1] && *cp1!=0 && *cp1!=';')
 		*cp2++ = *cp1++;
 	*cp2 = 0;
+
+	free(fnameA);
 
 	return(pathp);
 }
@@ -480,7 +486,7 @@ char *name;	/* name to check on */
  * and ^X^A for appending.
  */
 
-PASCAL NEAR filewrite(f, n)
+int PASCAL NEAR filewrite(f, n)
 
 int f, n;	/* emacs arguments */
 
@@ -495,7 +501,7 @@ int f, n;	/* emacs arguments */
 /*                     "Write file: " */
 		return(FALSE);
 	if ((s=writeout(fname, "w")) == TRUE) {
-		strcpy(curbp->b_fname, fname);
+		xstrcpy(curbp->b_fname, fname);
 		curbp->b_flag &= ~BFCHG;
 		/* Update mode lines.	*/
 		upmode();
@@ -503,7 +509,7 @@ int f, n;	/* emacs arguments */
 	return(s);
 }
 
-PASCAL NEAR fileapp(f, n)	/* append file */
+int PASCAL NEAR fileapp(f, n)	/* append file */
 
 int f, n;	/* emacs arguments */
 
@@ -532,7 +538,7 @@ int f, n;	/* emacs arguments */
  * name for the buffer. Bound to "C-X C-S". May
  * get called by "C-Z".
  */
-PASCAL NEAR filesave(f, n)
+int PASCAL NEAR filesave(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -588,7 +594,7 @@ int f,n;	/* prefix flag and argument */
  * a user specifyable routine (in $writehook) can be run.
  */
 
-PASCAL NEAR writeout(fn, mode)
+int PASCAL NEAR writeout(fn, mode)
 
 char *fn;	/* name of file to write current buffer to */
 char *mode;	/* mode to open file (w = write a = append) */
@@ -600,7 +606,7 @@ char *mode;	/* mode to open file (w = write a = append) */
 	int sflag;		/* are we safe saving? */
 	char tname[NSTRING];	/* temporary file name */
 	char buf[NSTRING];	/* message buffer */
-#if	BSD | FREEBSD | SUN | XENIX | USG | AIX
+#if	BSD | FREEBSD | LINUX | SUN | XENIX | USG | AIX
 	struct stat st;		/* we need info about the file permisions */
 #endif
 
@@ -626,7 +632,7 @@ char *mode;	/* mode to open file (w = write a = append) */
 	if (sflag) {
 		/* duplicate original file name, and find where to trunc it */
 		sp = tname + (makename(tname, fn) - fn) + 1;
-		strcpy(tname, fn);
+		xstrcpy(tname, fn);
 
 		/* create a unique name, using random numbers */
 		do {
@@ -671,7 +677,7 @@ char *mode;	/* mode to open file (w = write a = append) */
 	status |= ffclose();
 	if (status == FIOSUC) {
 		/* report on success (or lack therof) */
-		strcpy(buf, TEXT149);
+		xstrcpy(buf, TEXT149);
 /*                          "[Wrote " */
 		strcat(buf, long_asc(nline));
 		strcat(buf, TEXT143);
@@ -680,14 +686,14 @@ char *mode;	/* mode to open file (w = write a = append) */
 			strcat(buf, "s");
 
 		if (sflag) {
-#if	BSD | FREEBSD | SUN | XENIX | USG | AIX
+#if	BSD | FREEBSD | LINUX | SUN | XENIX | USG | AIX
 			/* get the permisions on the original file */
 			stat(fn, &st);
 #endif
 			/* erase original file */
 			/* rename temporary file to original name */
 			if (unlink(fn) == 0 && rename(tname, fn) == 0) {
-#if	BSD | FREEBSD | SUN | XENIX | USG | AIX
+#if	BSD | FREEBSD | LINUX | SUN | XENIX | USG | AIX
 				chown(fn, (int)st.st_uid, (int)st.st_gid);
 				chmod(fn, (int)st.st_mode);
 #else
@@ -719,7 +725,7 @@ char *mode;	/* mode to open file (w = write a = append) */
  * prompt if you wish.
  */
 
-PASCAL NEAR filename(f, n)
+int PASCAL NEAR filename(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -733,9 +739,9 @@ int f,n;	/* prefix flag and argument */
 /*                     "Name: " */
 		return(s);
 	if (s == FALSE)
-		strcpy(curbp->b_fname, "");
+		xstrcpy(curbp->b_fname, "");
 	else
-		strcpy(curbp->b_fname, fname);
+		xstrcpy(curbp->b_fname, fname);
 	/* Update mode lines.	*/
 	upmode();
 	curbp->b_mode &= ~MDVIEW;      /* no longer read only mode */
@@ -747,7 +753,7 @@ int f,n;	/* prefix flag and argument */
  * buffer, Called by insert file command. Return the final
  * status of the read.
  */
-PASCAL NEAR ifile(fname)
+int PASCAL NEAR ifile(fname)
 char	fname[];
 {
 	register LINE *lp0;
@@ -815,7 +821,7 @@ char	fname[];
 		if (curwp->w_markp[cmark] == lback(curwp->w_dotp))
 			curwp->w_markp[cmark] = lforw(curwp->w_markp[cmark]);
 
-	strcpy(mesg, "[");
+	xstrcpy(mesg, "[");
 	if (s==FIOERR) {
 		strcat(mesg, TEXT141);
 /*                           "I/O ERROR, " */
@@ -859,7 +865,7 @@ out:
 			names of all the files in a given directory
 */
 
-PASCAL NEAR showfiles(f, n)
+int PASCAL NEAR showfiles(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -892,7 +898,7 @@ int f,n;	/* prefix flag and argument */
 	while (sp) {
 
 		/* add a name to the buffer */
-		strcpy(outseq, sp);
+		xstrcpy(outseq, sp);
 		if (addline(dirbuf, outseq) != TRUE)
 			return(FALSE);
 

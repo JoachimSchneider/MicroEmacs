@@ -81,7 +81,7 @@ int scnothing()
 }
 
 /** Only compile for UNIX machines **/
-#if BSD || FREEBSD || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS)
+#if BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS)
 
 /** Include files **/
 #include "eproto.h"			/* Function definitions		*/
@@ -98,7 +98,7 @@ int scnothing()
 #include <sys/ioctl.h>			/* I/O control definitions	*/
 
 /** Additional include files **/
-#if	FREEBSD
+#if	FREEBSD || LINUX
 #define TERMIOS 1
 #include <sys/time.h>
 #undef	BSD
@@ -109,9 +109,9 @@ int scnothing()
 #if (BSD && !TERMIOS)
 #include <sys/time.h>			/* Timer definitions		*/
 #endif /* (BSD && !TERMIOS) */
-#if BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) || AIX
+#if BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) || AIX
 #include <signal.h>			/* Signal definitions		*/
-#endif /* BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
+#endif /* BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
 #if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX
 #include <termio.h>			/* Terminal I/O definitions	*/
 #endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX */
@@ -126,7 +126,7 @@ int scnothing()
 
 /** Completion include files **/
 /** Directory accessing: Try and figure this out... if you can! **/
-#if ((BSD || FREEBSD) && !TERMIOS)
+#if ((BSD || FREEBSD || LINUX) && !TERMIOS)
 #include <sys/dir.h>			/* Directory entry definitions	*/
 #define DIRENTRY	direct
 #endif /* (BSD && !TERMIOS) */
@@ -370,7 +370,7 @@ int hpterm;				/* global flag braindead HP-terminal */
 /** Open terminal device **/
 int ttopen()
 {
-	strcpy(os, "UNIX");
+	xstrcpy(os, "UNIX");
 #if (BSD && !TERMIOS)
 	/* Get tty modes */
 	if (ioctl(0, TIOCGETP, &oldsgtty) ||
@@ -485,7 +485,7 @@ int ttopen()
 /** Close terminal device **/
 int ttclose()
 {
-#if ((AIX == 0) && (TERMIOS == 0)) || (FREEBSD == 1)
+#if ((AIX == 0) && (TERMIOS == 0)) || (FREEBSD == 1) || (LINUX == 1)
 	/* Restore original terminal modes */
 	if (reset != (char*)NULL)
 		write(1, reset, strlen(reset));
@@ -1197,14 +1197,14 @@ char * cmd;				/* Palette command		*/
 		/* Move color code to capability structure */
 		capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
 		if (capbind[CAP_C0 + code].store)
-			strcpy(capbind[CAP_C0 + code].store, cp);
+			xstrcpy(capbind[CAP_C0 + code].store, cp);
 	}
 #endif /* COLOR */
 #endif /* TERMCAP */
 	return(0);
 }
 
-#if BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS)
+#if BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS)
 /* Surely more than just BSD systems do this */
 
 /** Perform a stop signal **/
@@ -1227,7 +1227,7 @@ int bktoshell(f, n)
 	return(0);
 }
 
-#endif /* BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
+#endif /* BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
 
 /** Get time of day **/
 char * timeset()
@@ -1329,9 +1329,9 @@ int n;					/* Argument count		*/
 	/* Get shell path */
 	sh = getenv("SHELL");
 	if (!sh)
-#if BSD || FREEBSD || SUN
+#if BSD || FREEBSD || LINUX || SUN
 		sh = "/bin/csh";
-#endif /* BSD || FREEBSD || SUN */
+#endif /* BSD || FREEBSD || LINUX || SUN */
 #if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || XENIX || (AVVION || TERMIOS)
 		sh = "/bin/sh";
 #endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || XENIX || (AVVION || TERMIOS) */
@@ -1471,13 +1471,13 @@ int n;					/* Argument count		*/
 
 	/* Setup the proper file names */
 	bp = curbp;
-	strcpy(tmpnam, bp->b_fname);	/* Save the original name */
-	strcpy(bp->b_fname, bname1);	/* Set it to our new one */
+	xstrcpy(tmpnam, bp->b_fname);	/* Save the original name */
+	xstrcpy(bp->b_fname, bname1);	/* Set it to our new one */
 
 	/* Write it out, checking for errors */
 	if (!writeout(filnam1, "w")) {
 		mlwrite("[Cannot write filter file]");
-		strcpy(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		return(0);
 	}
 
@@ -1497,7 +1497,7 @@ int n;					/* Argument count		*/
 			
 
 	/* Reset file name */
-	strcpy(bp->b_fname, tmpnam);
+	xstrcpy(bp->b_fname, tmpnam);
 
 	/* and get rid of the temporary file */
 	unlink(filnam1);
@@ -1516,7 +1516,7 @@ char *fspec;				/* Filename specification	*/
 	int index, point, extflag;
 
 	/* First parse the file path off the file spec */
-	strcpy(path, fspec);
+	xstrcpy(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != '/'))
 		--index;
@@ -1545,7 +1545,7 @@ char *fspec;				/* Filename specification	*/
 	if (!dirptr)
 		return(NULL);
 
-	strcpy(rbuf, path);
+	xstrcpy(rbuf, path);
 	nameptr = &rbuf[strlen(rbuf)];
 
 	/* ...and call for the first file */
@@ -1566,7 +1566,7 @@ char *getnfile()
 			return(NULL);
 
 		/* Check to make sure we skip all weird entries except directories */
-		strcpy(nameptr, dp->d_name);
+		xstrcpy(nameptr, dp->d_name);
 
 	} while (stat(rbuf, &fstat) ||
 		((fstat.st_mode & S_IFMT) & (S_IFREG | S_IFDIR)) == 0);
@@ -1686,7 +1686,7 @@ int mode;	/* umask for creation (which we blissfully ignore...) */
 {
 	char buf[80];
 
-	strcpy(buf, "mkdir ");
+	xstrcpy(buf, "mkdir ");
 	strcat(buf, name);
 	strcat(buf, " > /dev/null 2>&1");
 	return(system(buf));
@@ -1697,7 +1697,7 @@ char *name;	/* name of directory to delete */
 {
 	char buf[80];
 
-	strcpy(buf,"rmdir ");
+	xstrcpy(buf,"rmdir ");
 	strcat(buf, name);
 	strcat(buf, " > /dev/null 2>&1");
 	return(system(buf));
@@ -1728,4 +1728,4 @@ void winch_new_size()
 }
 #endif
 
-#endif /* BSD || FREEBSD || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) */
+#endif /* BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) */

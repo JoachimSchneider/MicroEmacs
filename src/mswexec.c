@@ -183,7 +183,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd, BOOL DOSApp,
                 char    *s;
 
                 if ((s = flook ("DOSEXEC.PIF", TRUE)) != NULL) {
-                    strcpy (FullCmd, s);
+                    xstrcpy (FullCmd, s);
                 }
             }
         }
@@ -196,9 +196,9 @@ static BOOL PASCAL  LaunchPrg (char *Cmd, BOOL DOSApp,
                 char    *s;
 
                 if ((s = flook ("DOSBOX.PIF", TRUE)) != NULL) {
-                    strcpy (FullCmd, s);
+                    xstrcpy (FullCmd, s);
                 }
-                else strcpy (FullCmd, "command.com");
+                else xstrcpy (FullCmd, "command.com");
             }
         }
 	/* the DOSBox profileString should be the name of a PIF file for
@@ -446,7 +446,7 @@ PASCAL filter (int f, int n)
     if (mlreply ("#", Line, NLINE) != TRUE) return FALSE;
 
     bp = curbp;
-    strcpy (fname, bp->b_fname);
+    xstrcpy (fname, bp->b_fname);
 #if WINDOW_MSWIN32
     GetTempPath (NFILEN, TempDir);
     GetTempFileName (TempDir, "UE", 0, InFile);
@@ -483,6 +483,6 @@ PASCAL filter (int f, int n)
 	    }
 	}
     }
-    strcpy (bp->b_fname, fname);    /* restore original file name */
+    xstrcpy (bp->b_fname, fname);    /* restore original file name */
     return Result;
 } /* filter */

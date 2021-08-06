@@ -60,7 +60,7 @@ register int used;
  * might be in. Release the memory. The buffers are updated too; the magic
  * conditions described in the above comments don't hold here.
  */
-PASCAL NEAR lfree(lp)
+int PASCAL NEAR lfree(lp)
 register LINE	*lp;
 {
 	register BUFFER *bp;
@@ -129,7 +129,7 @@ register LINE	*lp;
  * displayed in more than 1 window we change EDIT t HARD. Set MODE if the
  * mode line needs to be updated (the "*" has to be set).
  */
-PASCAL NEAR lchange(flag)
+int PASCAL NEAR lchange(flag)
 register int	flag;
 {
 	register EWINDOW *wp;
@@ -158,7 +158,7 @@ register int	flag;
 	}
 }
 
-PASCAL NEAR insspace(f, n)	/* insert spaces forward into text */
+int PASCAL NEAR insspace(f, n)	/* insert spaces forward into text */
 
 int f, n;	/* default flag and numeric argument */
 
@@ -175,10 +175,10 @@ int f, n;	/* default flag and numeric argument */
  */
 
 #if PROTO
-int PASCAL NEAR linstr(char *instr)
+int PASCAL NEAR linstr(CONST char *instr)
 #else
 int PASCAL NEAR linstr( instr)
-char *instr;
+CONST char *instr;
 #endif
 {
 	register int status;
@@ -220,9 +220,9 @@ char *instr;
  */
 
 #if	PROTO
-PASCAL NEAR linsert(int n, char c)
+int PASCAL NEAR linsert(int n, char c)
 #else
-PASCAL NEAR linsert(n, c)
+int PASCAL NEAR linsert(n, c)
 
 int	n;
 char	c;
@@ -341,9 +341,9 @@ char	c;
  */
 
 #if	PROTO
-PASCAL NEAR lowrite(char c)
+int PASCAL NEAR lowrite(char c)
 #else
-PASCAL NEAR lowrite(c)
+int PASCAL NEAR lowrite(c)
 
 char c;		/* character to overwrite on current position */
 #endif
@@ -470,7 +470,7 @@ should be put in the kill buffer.
 
 */
 
-PASCAL NEAR ldelete(n, kflag)
+int PASCAL NEAR ldelete(n, kflag)
 
 long n; 	/* # of chars to delete */
 int kflag;	/* put killed text in kill buffer flag */
@@ -728,7 +728,7 @@ char *rline;
 
 /* putctext:	replace the current line with the passed in text	*/
 
-PASCAL NEAR putctext(iline)
+int PASCAL NEAR putctext(iline)
 
 char *iline;	/* contents of new line */
 

@@ -80,17 +80,17 @@ static void PASCAL UpdateSample (HWND hDlg, HFONT hFont,
     int     i;
     char    c;
 
-    strcpy (SampleText, FaceName);
+    xstrcpy (SampleText, FaceName);
     i = strlen (SampleText);
-    strcpy (&SampleText[i], " (Height=");
+    xstrcpy (&SampleText[i], " (Height=");
     i += strlen (&SampleText[i]);
     itoa (m->tmHeight, &SampleText[i], 10);
     i += strlen (&SampleText[i]);
-    strcpy (&SampleText[i], ", Width=");
+    xstrcpy (&SampleText[i], ", Width=");
     i += strlen (&SampleText[i]);
     itoa (m->tmAveCharWidth, &SampleText[i], 10);
     i += strlen (&SampleText[i]);
-    strcpy (&SampleText[i], ") sample:");
+    xstrcpy (&SampleText[i], ") sample:");
     i += strlen (&SampleText[i]);
     for (c = 'A'; c <= 'Z'; c++) {
 	SampleText[i++] = ' ';
@@ -389,7 +389,7 @@ int EXPORT FAR PASCAL  FontDlgProc (HWND hDlg, UINT wMsg, WPARAM wParam,
 	{   /*-setup the dialog box's caption */
 	    char    s[40];
 
-	    strcpy (s, ProgName);
+	    xstrcpy (s, ProgName);
 	    strcat (s, " - Font selection");
 	    SetWindowText (hDlg, s);
 	}

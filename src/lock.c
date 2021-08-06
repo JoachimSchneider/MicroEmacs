@@ -10,7 +10,7 @@
 
 #if	FILOCK
 
-#if	BSD || FREEBSD || WMCS || SUN || XENIX || HPUX8 || HPUX9 || AVIION || USG || AIX || AUX
+#if	BSD || FREEBSD || LINUX || WMCS || SUN || XENIX || HPUX8 || HPUX9 || AVIION || USG || AIX || AUX
 #include <sys/errno.h>
 extern int sys_nerr;		/* number of system error messages defined */
 extern char *sys_errlist[];	/* list of message texts */
@@ -29,7 +29,7 @@ int numlocks;		/* # of current locks active */
 
 lockchk(fname)
 
-char *fname;	/* file to check for a lock */
+CONST char  *fname;	/* file to check for a lock */
 
 {
 	register int i;		/* loop indexes */
@@ -66,7 +66,7 @@ char *fname;	/* file to check for a lock */
 	}
 
 	/* everthing is cool, add it to the table */
-	strcpy(lname[numlocks-1], fname);
+	xstrcpy(lname[numlocks-1], fname);
 	return(TRUE);
 }
 
@@ -96,7 +96,7 @@ lockrel()
 
 xlock(fname)
 
-char *fname;	/* file name to lock */
+CONST char  *fname;	/* file name to lock */
 
 {
 	register char *locker;	/* lock error message */
@@ -116,7 +116,7 @@ char *fname;	/* file name to lock */
 	}
 
 	/* someone else has it....override? */
-	strcpy(msg, TEXT176);
+	xstrcpy(msg, TEXT176);
 /*                  "File in use by " */
 	strcat(msg, locker);
 	strcat(msg, TEXT177);
@@ -156,9 +156,9 @@ char *errstr;		/* lock error string to print out */
 {
 	char obuf[NSTRING];	/* output buffer for error message */
 
-	strcpy(obuf, errstr);
+	xstrcpy(obuf, errstr);
 	strcat(obuf, " - ");
-#if	BSD || FREEBSD || WMCS || SUN || XENIX || HPUX8 || HPUX9 || AVIION || USG || AIX || AUX
+#if	BSD || FREEBSD || LINUX || WMCS || SUN || XENIX || HPUX8 || HPUX9 || AVIION || USG || AIX || AUX
 	if (errno < sys_nerr)
 		strcat(obuf, sys_errlist[errno]);
 	else

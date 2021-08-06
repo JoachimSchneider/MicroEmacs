@@ -126,7 +126,7 @@ char * PASCAL   fullpathname (char *PathName, int Nbuf)
     char    FullName [_MAX_PATH];
 
     if (_fullpath(FullName, PathName, Nbuf) != NULL) {
-        strcpy (PathName, FullName);
+        xstrcpy (PathName, FullName);
     }
     return PathName;
 } /* fullpathname */
@@ -201,9 +201,9 @@ static BOOL PASCAL FileDlgOK (HWND hDlg)
 	    } while (++nl < FNAMELEN);
 	    return FALSE;
 ExtractedOK:
-	    strcpy (Par->Name, ++n);
+	    xstrcpy (Par->Name, ++n);
 	    if (n - &s[0] < NFILEN - 1 - strlen(StarName)) {
-		strcpy (n, StarName);
+		xstrcpy (n, StarName);
 		/* now, we use DlgDirList to generate the full directory
 		   path */
 		if (DlgDirList (hDlg, s, NULL, ID_PATH, ATTR_FIL)) {
@@ -290,7 +290,7 @@ int EXPORT FAR PASCAL  FileDlgProc (HWND hDlg, UINT wMsg, WPARAM wParam,
 	{   /* let's build the caption */
 	    char    DlgTitle [sizeof(PROGNAME) + 3 + 30];
 
-	    strcpy (DlgTitle, ProgName);
+	    xstrcpy (DlgTitle, ProgName);
 	    strcat (DlgTitle, " - ");
 	    strcat (DlgTitle, Par->Prompt); /* hopefully, the prompt is
 					       under 30 char! */
@@ -427,7 +427,7 @@ static void    CompletePath (char *s, char *FileName)
 /* s must be at least NFILEN characters long, while the length of Path +
    the length of FileName must be < NFILEN */
 {
-    strcpy (s, Path);
+    xstrcpy (s, Path);
     if ((*s != 0) && (s[strlen (s) - 1] != '\\')) strcat (s, "\\");
     strcat (s, FileName);
 } /* CompletePath */
@@ -442,7 +442,7 @@ static void    UpdateAll (HWND hDlg, char *s)
 {
     if (DlgDirList (hDlg, s, ID_DIRECTORIES, ID_PATH, ATTR_DIR)) {
         getcwd (Path, NFILEN);
-        strcpy (StarName, s);
+        xstrcpy (StarName, s);
 	DlgDirList (hDlg, s, ID_FILES, NULL, ATTR_FIL);
         SetDlgItemText (hDlg, ID_FILENAME, StarName);
 #if WINDOW_MSWIN32
@@ -473,7 +473,7 @@ char *fspec;	/* pattern to match */
 	char fname[NFILEN];		/* file/path for DOS call */
 
 	/* first parse the file path off the file spec */
-	strcpy(path, fspec);
+	xstrcpy(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != '/' &&
 				path[index] != '\\' && path[index] != ':'))
@@ -492,7 +492,7 @@ char *fspec;	/* pattern to match */
 	}
 
 	/* construct the composite wild card spec */
-	strcpy(fname, path);
+	xstrcpy(fname, path);
 	strcat(fname, &fspec[index+1]);
 	strcat(fname, "*");
 	if (extflag == FALSE)
@@ -503,7 +503,7 @@ char *fspec;	/* pattern to match */
 		return(NULL);
 
 	/* return the first file name! */
-	strcpy(rbuf, path);
+	xstrcpy(rbuf, path);
 	strcat(rbuf, fileblock.ff_name);
 	mklower(rbuf);
 	if (fileblock.ff_attrib == 16)
@@ -524,7 +524,7 @@ char *PASCAL getnfile()
 		return(NULL);
 
 	/* return the first file name! */
-	strcpy(rbuf, path);
+	xstrcpy(rbuf, path);
 	strcat(rbuf, fileblock.ff_name);
 	mklower(rbuf);
 	if (fileblock.ff_attrib == 16)
@@ -551,7 +551,7 @@ char *fspec;	/* pattern to match */
 	char fname[NFILEN];		/* file/path for DOS call */
 
 	/* first parse the file path off the file spec */
-	strcpy(path, fspec);
+	xstrcpy(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != '/' &&
 				path[index] != '\\' && path[index] != ':'))
@@ -570,7 +570,7 @@ char *fspec;	/* pattern to match */
 	}
 
 	/* construct the composite wild card spec */
-	strcpy(fname, path);
+	xstrcpy(fname, path);
 	strcat(fname, &fspec[index+1]);
 	strcat(fname, "*");
 	if (extflag == FALSE)
@@ -586,7 +586,7 @@ char *fspec;	/* pattern to match */
 		return(NULL);
 
 	/* return the first file name! */
-	strcpy(rbuf, path);
+	xstrcpy(rbuf, path);
 #if WINDOW_MSWIN32
         strcat(rbuf, fileblock.cFileName);
         mklower(rbuf);
@@ -620,7 +620,7 @@ char *PASCAL getnfile()
 #endif
 
 	/* return the first file name! */
-	strcpy(rbuf, path);
+	xstrcpy(rbuf, path);
 #if WINDOW_MSWIN32
         strcat(rbuf, fileblock.cFileName);
         mklower(rbuf);

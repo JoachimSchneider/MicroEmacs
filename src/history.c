@@ -414,7 +414,7 @@
  *	- changed version to 3.7i and froze for partial release via mail
  *	  and BBS
  *	05-oct-86
- *	- changed some strcpys in MAIN.C to bytecopys as suggested by John
+ *	- changed some xstrcpys in MAIN.C to bytecopys as suggested by John
  *	  Gamble
  *	- replaces SEARCH.C and ISEARCH.C with versions modified by
  *	  John Gamble
@@ -668,8 +668,8 @@
  *	15-apr-87
  *	- added 20 bytes of buffer in getval()'s local argument alloc so
  *	  when it returns a value, it has enough stack space to do at least
- *	  one strcpy() before stomping on the returned value. ALWAYS call
- *	  getval() ONLY from within a strcpy() call.
+ *	  one xstrcpy() before stomping on the returned value. ALWAYS call
+ *	  getval() ONLY from within a xstrcpy() call.
  *	- made $curcol return a 1 based value instead of a zero based one.
  *	  [changed this back later for 3.8o   it was simply wrong.....]
  *	16-apr-87
@@ -964,7 +964,7 @@
  *		atoi	=>	asc_int
  *		ltoi	=>	long_int
  *		setmode =>	setmod
- *		strncpy =>	bytecopy
+ *		xstrncpy =>	bytecopy
  *	25-jan-88	By Jeff Lomicka
  *	- Added parsing of keypad keys, LK201 function key sequences, mouse
  *	  sequences (VaxStation form and BBN BitGraph form), and the cursor
@@ -1247,7 +1247,7 @@
  *	  Kjartan R. Gudmundsson. Also eliminated some other 7 bit filters
  *	  in unix.c at the same time.
  *	- reading function keys into table has been fixed in TCAP.C.  It will
- *	  no longer attempt to strcpy NULL pointers.
+ *	  no longer attempt to xstrcpy NULL pointers.
  *	1-dec-88
  *	- multiple marks are now implemented. (What a task...). Set-mark
  *	  (M-<space>), remove-mark (^X<space>) and exchange-point-and-mark
@@ -1797,7 +1797,7 @@
  *	- all line number calculations are now in longs
  *	16-Feb-92 John Gamble
  *	- use strrev() (which is a library function for some compilers)
- *	  instead of rvstrcpy(), which bites the dust.
+ *	  instead of rvxstrcpy(), which bites the dust.
  *	- For compilers whose realloc() can handle NULL pointers, use that
  *	  instead of free()/malloc() combinations.  #if'd, of course.
  *	- isearch() understands prefix characters now.

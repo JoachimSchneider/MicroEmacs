@@ -5,13 +5,14 @@
 								*/
 
 #include	<stdio.h>
+#include    <stdlib.h>
 #include	"estruct.h"
 #include	"eproto.h"
 #include	"edef.h"
 #include	"elang.h"
 #include	"epath.h"
 
-PASCAL NEAR help(f, n)	/* give me some help!!!!!
+int PASCAL NEAR help(f, n)	/* give me some help!!!!!
 		   bring up a fake buffer and read the help file
 		   into it with view mode			*/
 
@@ -19,7 +20,7 @@ int f,n;	/* prefix flag and argument */
 
 {
 	register BUFFER *bp;	/* buffer pointer to help */
-	char *fname;		/* file name of help file */
+	CONST char      *fname; /* file name of help file */
 
 	/* first check if we are already here */
 	bp = bfind("emacs.hlp", FALSE, BFINVS);
@@ -51,7 +52,7 @@ int f,n;	/* prefix flag and argument */
 	return(TRUE);
 }
 
-PASCAL NEAR deskey(f, n)	/* describe the command for a certain key */
+int PASCAL NEAR deskey(f, n)	/* describe the command for a certain key */
 
 int f,n;	/* prefix flag and argument */
 
@@ -81,7 +82,7 @@ int f,n;	/* prefix flag and argument */
 
 /* bindtokey:	add a new key to the key binding table		*/
 
-PASCAL NEAR bindtokey(f, n)
+int PASCAL NEAR bindtokey(f, n)
 
 int f, n;	/* command arguments [IGNORED] */
 
@@ -180,7 +181,7 @@ int f, n;	/* command arguments [IGNORED] */
 
 /* macrotokey:	Bind a key to a macro in the key binding table */
 
-PASCAL NEAR macrotokey(f, n)
+int PASCAL NEAR macrotokey(f, n)
 
 int f, n;	/* command arguments [IGNORED] */
 
@@ -199,7 +200,7 @@ int f, n;	/* command arguments [IGNORED] */
 		return(status);
 
 	/* build the responce string for later */
-	strcpy(outseq, TEXT215);
+	xstrcpy(outseq, TEXT215);
 /*		   ": macro-to-key " */
 	strcat(outseq, &bufn[1]);
 
@@ -258,7 +259,7 @@ int f, n;	/* command arguments [IGNORED] */
 
 /* unbindkey:	delete a key from the key binding table */
 
-PASCAL NEAR unbindkey(f, n)
+int PASCAL NEAR unbindkey(f, n)
 
 int f, n;	/* command arguments [IGNORED] */
 
@@ -286,7 +287,7 @@ int f, n;	/* command arguments [IGNORED] */
 	return(TRUE);
 }
 
-PASCAL NEAR unbindchar(c)
+int PASCAL NEAR unbindchar(c)
 
 int c;		/* command key to unbind */
 
@@ -359,7 +360,7 @@ BUFFER *bp;	/* buffer to unbind all keys connected to */
 	   into it with view mode
 */
 
-PASCAL NEAR desbind(f, n)
+int PASCAL NEAR desbind(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -367,7 +368,7 @@ int f,n;	/* prefix flag and argument */
 	return(buildlist(TRUE, ""));
 }
 
-PASCAL NEAR apro(f, n)	/* Apropos (List functions that match a substring) */
+int PASCAL NEAR apro(f, n)	/* Apropos (List functions that match a substring) */
 
 int f,n;	/* prefix flag and argument */
 
@@ -383,7 +384,7 @@ int f,n;	/* prefix flag and argument */
 	return(buildlist(FALSE, mstring));
 }
 
-PASCAL NEAR buildlist(type, mstring)  /* build a binding list (limited or full) */
+int PASCAL NEAR buildlist(type, mstring)  /* build a binding list (limited or full) */
 
 int type;	/* true = full list,   false = partial list */
 char *mstring;	/* match string if a partial list */
@@ -415,7 +416,7 @@ char *mstring;	/* match string if a partial list */
 	while (nptr->n_func != NULL) {
 
 		/* add in the command name */
-		strcpy(outseq, nptr->n_name);
+		xstrcpy(outseq, nptr->n_name);
 		cpos = strlen(outseq);
 
 		/* if we are executing an apropos command..... */
@@ -466,7 +467,7 @@ fail:		/* and on to the next name */
 			goto bfail;
 
 		/* add in the command name */
-		strcpy(outseq, bp->b_bname);
+		xstrcpy(outseq, bp->b_bname);
 		cpos = strlen(outseq);
 
 		/* if we are executing an apropos command..... */
@@ -519,7 +520,7 @@ bfail:		/* and on to the next buffer */
 	return(TRUE);
 }
 
-PASCAL NEAR strinc(source, sub) /* does source include sub? */
+int PASCAL NEAR strinc(source, sub) /* does source include sub? */
 
 char *source;	/* string to search in */
 char *sub;	/* substring to look for */
@@ -579,19 +580,19 @@ int mflag;	/* going for a meta sequence? */
 
 /* execute the startup file */
 
-PASCAL NEAR startup(sfname)
+int PASCAL NEAR startup(sfname)
 
 char *sfname;	/* name of startup file (null if default) */
 
 {
-	char *fname;	/* resulting file name to execute */
-	char name[NSTRING];	/* name with extention */
+	CONST char  *fname;         /* resulting file name to execute */
+	char        name[NSTRING];	/* name with extention */
 
 	/* look up the startup file */
 	if (*sfname != 0) {
 
 	 	/* default the extention */
-		strcpy(name, sfname);
+		xstrcpy(name, sfname);
 		if (sindex(name, ".") == 0)
 			strcat(name, ".cmd");
 
@@ -623,29 +624,30 @@ char *sfname;	/* name of startup file (null if default) */
 			directories in table from EPATH.H
 */
 
-char *PASCAL NEAR flook(fname, hflag)
+CONST char *PASCAL NEAR flook(fname, hflag)
 
-char *fname;	/* base file name to search for */
-int hflag;	/* Look in the HOME environment variable first? */
+CONST char  *fname;	/* base file name to search for */
+int         hflag;	/* Look in the HOME environment variable first? */
 
 {
-	register char *home;	/* path to home directory */
-	register char *path;	/* environmental PATH variable */
-	register char *sp;	/* pointer into path spec */
-	register int i; 	/* index */
+	register char       *home;	/* path to home directory */
+	register char       *path;	/* environmental PATH variable */
+	register CONST char *cp;	/* temp pointer CONST str */
+	register char       *sp;	/* pointer into path spec */
+	register int        i; 	    /* index */
 	static char fspec[NFILEN];	/* full path spec to search */
 
 	/* if we have an absolute path.. check only there! */
-	sp = fname;
-	while (*sp) {
-		if (*sp == ':' || *sp == '\\' || *sp == '/') {
+	cp = fname;
+	while (*cp) {
+		if (*cp == ':' || *cp == '\\' || *cp == '/') {
 			if (ffropen(fname) == FIOSUC) {
 				ffclose();
 				return(fname);
 			} else
 				return(NULL);
 		}
-		++sp;
+		++cp;
 	}
 
 #if	ENVFUNC
@@ -658,7 +660,7 @@ int hflag;	/* Look in the HOME environment variable first? */
 #endif
 		if (home != NULL) {
 			/* build home dir file spec */
-			strcpy(fspec, home);
+			xstrcpy(fspec, home);
 #if WMCS
 			strcat(fspec,fname);
 #else
@@ -727,7 +729,7 @@ int hflag;	/* Look in the HOME environment variable first? */
 
 	/* look it up via the old table method */
 	for (i=2; i < NPNAMES; i++) {
-		strcpy(fspec, pathname[i]);
+		xstrcpy(fspec, pathname[i]);
 		strcat(fspec, fname);
 
 		/* and try it out */
@@ -920,82 +922,89 @@ int index;	/* index of name to fetch out of the name table */
 
 unsigned int PASCAL NEAR stock(keyname)
 
-unsigned char *keyname;	/* name of key to translate to Command key form */
+CONST char  *keyname;   /* name of key to translate to Command key form */
 
 {
-	register unsigned int c;	/* key sequence to return */
+    
+    char                    *keynameA   = xstrdup(keyname);
+    unsigned char           *keynamePtr = (unsigned char *)keynameA;
+	register unsigned int   c;  /* key sequence to return */
 
 	/* parse it up */
 	c = 0;
 
 	/* Do ^X prefix */
-	if(*keyname == '^' && *(keyname+1) == 'X') {
-		if(*(keyname+2) != 0) { /* Key is not bare ^X */
+	if(*keynamePtr == '^' && *(keynamePtr+1) == 'X') {
+		if(*(keynamePtr+2) != 0) { /* Key is not bare ^X */
 		    c |= CTLX;
-		    keyname += 2;
+		    keynamePtr += 2;
 		}
 	}
 
 	/* and the ALT key prefix */
-	if (*keyname == 'A' && *(keyname+1) == '-') {
+	if (*keynamePtr == 'A' && *(keynamePtr+1) == '-') {
 		c |= ALTD;
-		keyname += 2;
+		keynamePtr += 2;
 	}
 
 	/* and the SHIFTED prefix */
-	if (*keyname == 'S' && *(keyname+1) == '-') {
+	if (*keynamePtr == 'S' && *(keynamePtr+1) == '-') {
 		c |= SHFT;
-		keyname += 2;
+		keynamePtr += 2;
 	}
 
 	/* and the mouse (MOUS) prefix */
-	if (*keyname == 'M' && *(keyname+1) == 'S') {
+	if (*keynamePtr == 'M' && *(keynamePtr+1) == 'S') {
 		c |= MOUS;
-		keyname += 2;
+		keynamePtr += 2;
 	}
 
 	/* then the META prefix */
-	if (*keyname == 'M' && *(keyname+1) == '-') {
+	if (*keynamePtr == 'M' && *(keynamePtr+1) == '-') {
 		c |= META;
-		keyname += 2;
+		keynamePtr += 2;
 	}
 
 	/* next the function prefix */
-	if (*keyname == 'F' && *(keyname+1) == 'N') {
+	if (*keynamePtr == 'F' && *(keynamePtr+1) == 'N') {
 		c |= SPEC;
-		keyname += 2;
+		keynamePtr += 2;
 	}
 
 	/* a control char?  (NOT Always upper case anymore) */
-	if (*keyname == '^' && *(keyname+1) != 0) {
+	if (*keynamePtr == '^' && *(keynamePtr+1) != 0) {
 		c |= CTRL;
-		++keyname;
-		if (*keyname == '@')
-			*keyname = ' ';
+		++keynamePtr;
+		if (*keynamePtr == '@')
+			*keynamePtr = ' ';
 	}
 
 	/* A literal control character? (Boo, hiss) */
-	if (*keyname < 32) {
+	if (*keynamePtr < 32) {
 		c |= CTRL;
-		*keyname += '@';
+		*keynamePtr += '@';
 	}
 
 	/* make sure we are not lower case if used with ^X or M- */
-	if(!(c & (MOUS|SPEC|ALTD|SHFT)))	/* If not a special key */
-	    if( c & (CTLX|META))		/* If is a prefix */
-		uppercase((unsigned char *)keyname);		/* Then make sure it's upper case */
+	if(!(c & (MOUS|SPEC|ALTD|SHFT))) {  /* If not a special key */
+	    if( c & (CTLX|META)) {  /* If is a prefix */
+		    uppercase((unsigned char *)keynamePtr);   /* Then make sure it's upper case */
+		}
+	}
 
 	/* the final sequence... */
-	c |= *keyname;
+	c |= *keynamePtr;
+    free(keynameA);
+	
 	return(c);
 }
 
-char *PASCAL NEAR transbind(skey)	/* string key name to binding name.... */
+CONST char *PASCAL NEAR transbind(skey)	/* string key name to binding name.... */
 
-char *skey;	/* name of key to get binding for */
+CONST char *skey;   /* name of key to get binding for */
 
 {
-	char *bindname;
+	CONST char  *bindname;
 
 	bindname = getfname(getbind(stock(skey)));
 	if (bindname == NULL)
@@ -1070,7 +1079,7 @@ char *name;		/* name of function or buffer */
 	}
 
 	/* is it a procedure/macro? */
-	strcpy(bufn, "[");
+	xstrcpy(bufn, "[");
 	strcat(bufn, name);
 	strcat(bufn, "]");
 	if ((kmacro=bfind(bufn, FALSE, 0)) != NULL) {

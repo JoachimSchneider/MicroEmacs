@@ -27,7 +27,7 @@ ushort	xmdmask = 0xfe62;
  */
 ttopen()
 {
-	strcpy(os, "WMCS");
+	xstrcpy(os, "WMCS");
 
 	/* set device status */
 	_giodst(1,&dtable,sizeof(dtable),&dstat);
@@ -312,14 +312,14 @@ filter(f, n)
 
 	/* setup the proper file names */
 	bp = curbp;
-	strcpy(tmpnam, bp->b_fname);	/* save the original name */
-	strcpy(bp->b_fname, bname1);	/* set it to our new one */
+	xstrcpy(tmpnam, bp->b_fname);	/* save the original name */
+	xstrcpy(bp->b_fname, bname1);	/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1, "w") != TRUE) {
 		mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-		strcpy(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		return(FALSE);
 	}
 
@@ -337,14 +337,14 @@ filter(f, n)
 	if (s != TRUE || (readin(filnam2,FALSE) == FALSE)) {
 		mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-		strcpy(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		unlink(filnam1);
 		unlink(filnam2);
 		return(s);
 	}
 
 	/* reset file name */
-	strcpy(bp->b_fname, tmpnam);	/* restore name */
+	xstrcpy(bp->b_fname, tmpnam);	/* restore name */
 	bp->b_flag |= BFCHG;		/* flag it as changed */
 
 	/* and get rid of the temporary file */

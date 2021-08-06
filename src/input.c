@@ -47,7 +47,7 @@
 #include	"edef.h"
 #include	"elang.h"
 
-#if USG | AIX | AUX | BSD | FREEBSD | SUN | HPUX8 | HPUX9
+#if USG | AIX | AUX | BSD | FREEBSD | LINUX | SUN | HPUX8 | HPUX9
 #include	<pwd.h>
 extern struct passwd *getpwnam();
 #endif
@@ -59,7 +59,7 @@ extern struct passwd *getpwnam();
  */
 
 #if	!WINDOW_MSWIN	/* for MS Windows, mlyesno is defined in mswsys.c */
-PASCAL NEAR mlyesno(prompt)
+int PASCAL NEAR mlyesno(prompt)
 
 char *prompt;
 
@@ -69,7 +69,7 @@ char *prompt;
 
 	for (;;) {
 		/* build and prompt the user */
-		strcpy(buf, prompt);
+		xstrcpy(buf, prompt);
 		strcat(buf, TEXT162);
 /*                          " [y/n]? " */
 		mlwrite(buf);
@@ -106,7 +106,7 @@ char *prompt;
  * return. Handle erase, kill, and abort keys.
  */
 
-PASCAL NEAR mlreply(prompt, buf, nbuf)
+int PASCAL NEAR mlreply(prompt, buf, nbuf)
 
 char *prompt;
 char *buf;
@@ -119,7 +119,7 @@ int nbuf;
 /*	ectoc:	expanded character to character
 		collapse the CTRL and SPEC flags back into an ascii code   */
 
-PASCAL NEAR ectoc(c)
+int PASCAL NEAR ectoc(c)
 
 int c;
 
@@ -136,7 +136,7 @@ int c;
 /*	ctoec:	character to extended character
 		pull out the CTRL and SPEC prefixes (if possible)	*/
 
-PASCAL NEAR ctoec(c)
+int PASCAL NEAR ctoec(c)
 
 int c;
 
@@ -244,7 +244,7 @@ int maxlen;		/* maximum length of input field */
 	char *ptr;		/* string pointer */
 	char user_name[NSTRING]; /* user name for directory */
 	static char buf[NSTRING];/* buffer to hold tentative name */
-#if USG | AIX | AUX | BSD | FREEBSD | SUN | HPUX8 | HPUX9
+#if USG | AIX | AUX | BSD | FREEBSD | LINUX | SUN | HPUX8 | HPUX9
 	struct passwd *pwd;	/* password structure */
 #endif
 
@@ -342,7 +342,7 @@ int maxlen;		/* maximum length of input field */
 
 			/* save the user name! */
 			buf[cpos] = 0;
-			strcpy(user_name, &buf[1]);
+			xstrcpy(user_name, &buf[1]);
 
 			/* erase the chars on-screen */
 			while (cpos > 0) {
@@ -353,7 +353,7 @@ int maxlen;		/* maximum length of input field */
 				--ttcol;
 			}
 
-#if USG | AIX | AUX | BSD | FREEBSD | SUN | HPUX8 | HPUX9
+#if USG | AIX | AUX | BSD | FREEBSD | LINUX | SUN | HPUX8 | HPUX9
 			/* lookup someone else's home directory! */
 			if (user_name[0] != 0) {
 				pwd = getpwnam(user_name);
@@ -417,7 +417,7 @@ int maxlen;		/* maximum length of input field */
 			/* expand an environment variable reference */
 			/* save the variable name! */
 			buf[cpos] = 0;
-			strcpy(user_name, &buf[1]);
+			xstrcpy(user_name, &buf[1]);
 #if	MSDOS | OS2 | VMS
 			mkupper(user_name);
 #endif
@@ -757,7 +757,7 @@ int *cpos;	/* ptr to position of next character to insert */
 
 			/* if this is the first match, simply record it */
 			if (matches == 1) {
-				strcpy(longestmatch,fname);
+				xstrcpy(longestmatch,fname);
 				longestlen = strlen(longestmatch);
 			} else {
 
@@ -1139,7 +1139,7 @@ int eolchar;
 	}
 }
 
-PASCAL NEAR outstring(s) /* output a string of input characters */
+int PASCAL NEAR outstring(s) /* output a string of input characters */
 
 char *s;	/* string to output */
 
@@ -1149,7 +1149,7 @@ char *s;	/* string to output */
 			mlout(*s++);
 }
 
-PASCAL NEAR ostring(s)	/* output a string of output characters */
+int PASCAL NEAR ostring(s)	/* output a string of output characters */
 
 char *s;	/* string to output */
 

@@ -66,7 +66,7 @@ SCREEN *sp;	/* screen image to refresh */
 	to A-N on machines with an ALT key
 */
 
-PASCAL NEAR cycle_screens(f, n)
+int PASCAL NEAR cycle_screens(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -82,7 +82,7 @@ int f,n;	/* prefix flag and argument */
 	return(select_screen(sp, TRUE));
 }
 
-PASCAL NEAR find_screen(f, n)
+int PASCAL NEAR find_screen(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -113,7 +113,7 @@ int f,n;	/* prefix flag and argument */
 	return(select_screen(sp, TRUE));
 }
 
-PASCAL NEAR free_screen(sp)	/* free all resouces associated with a screen */
+int PASCAL NEAR free_screen(sp)	/* free all resouces associated with a screen */
 
 SCREEN *sp;	/* screen to dump */
 
@@ -164,7 +164,7 @@ SCREEN *sp;         /* screen to remove from the list */
 	last_scr->s_next_screen = sp->s_next_screen;
 }
 
-PASCAL NEAR delete_screen(f, n)
+int PASCAL NEAR delete_screen(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -396,7 +396,7 @@ int announce;	/* announce the selection? */
 	Bound to "A-B".
 */
 
-PASCAL NEAR list_screens(f, n)
+int PASCAL NEAR list_screens(f, n)
 
 int f,n;	/* prefix flag and argument */
 
@@ -418,7 +418,7 @@ int f,n;	/* prefix flag and argument */
  * is an error (if there is no memory). Iflag
  * indicates whether to list hidden screens.
  */
-PASCAL NEAR screenlist(iflag)
+int PASCAL NEAR screenlist(iflag)
 
 int iflag;	/* list hidden screen flag */
 
@@ -437,7 +437,7 @@ int iflag;	/* list hidden screen flag */
 		return(status);
 
 	/* there is no file connected with this buffer */
-	strcpy(slistp->b_fname, "");
+	xstrcpy(slistp->b_fname, "");
 
 	/* construct the header of this list */
 	if (addline(slistp, "Screen         Buffers") == FALSE
@@ -451,7 +451,7 @@ int iflag;	/* list hidden screen flag */
 	while (sp) {
 
 		/* construct the screen name */
-		strcpy(line, sp->s_screen_name);
+		xstrcpy(line, sp->s_screen_name);
 		strcat(line, "                ");
 		line[15] = 0;
 
@@ -460,13 +460,13 @@ int iflag;	/* list hidden screen flag */
 		while (wp) {
 
 			/* grab this window's buffer name */
-			strcpy(bname, wp->w_bufp->b_bname);
+			xstrcpy(bname, wp->w_bufp->b_bname);
 
 			/* handle full lines */
 			if (strlen(line) + strlen(bname) + 1 > 78) {
 				if (addline(slistp, line) == FALSE)
 					return(FALSE);
-				strcpy(line, "               ");
+				xstrcpy(line, "               ");
 			}
 
 			/* append this buffer name */

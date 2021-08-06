@@ -78,7 +78,7 @@ char path[NFILEN];
 		mlwrite("[OUT OF MEMORY]");
 		return (FALSE);
 		}
-	strcpy(tnewp->t_path, path);
+	xstrcpy(tnewp->t_path, path);
 	strcat(path, "tags");
 	if ((tnewp->t_fp = fopen(path, "r")) == NULL)
 		{
@@ -88,8 +88,8 @@ char path[NFILEN];
 
 	tnewp->t_tagp = theadp;
 	curtp = theadp = tnewp;
-	strcpy(tnewp->t_fname, curbp->b_fname);
-	strcpy(tnewp->t_wd, "");
+	xstrcpy(tnewp->t_fname, curbp->b_fname);
+	xstrcpy(tnewp->t_wd, "");
 
 	/* Initialize index...	*/
 	tnewp->t_indexed = FALSE;
@@ -122,9 +122,9 @@ lookup()
 
 	memset(cpath, '\0', NFILEN);
 	if (cp >= curbp->b_fname)
-		strncpy(cpath, curbp->b_fname, (int) (cp - curbp->b_fname));
+		xstrncpy(cpath, curbp->b_fname, (int) (cp - curbp->b_fname));
 	else
-		strcpy(cpath, ".");
+		xstrcpy(cpath, ".");
 	/* Append a DIRSEPCHAR character to the path...	*/
 	if (strlen(cpath) < NFILEN - 1)
 		cpath[strlen(cpath)] = DIRSEPCHAR;
@@ -284,9 +284,9 @@ char *filename;
 	if (*tp == DIRSEPCHAR)
 		return;
 
-	strcpy(temp, curtp->t_path);
+	xstrcpy(temp, curtp->t_path);
 	strcat(temp, filename);
-	strcpy(filename, temp);
+	xstrcpy(filename, temp);
 }
 
 /*
@@ -330,7 +330,7 @@ int  retag;
 		return (FALSE);
 		}
 
-	strcpy(pretagpat, (char *) pat);	/* Preserve old search pattern	*/
+	xstrcpy(pretagpat, (char *) pat);	/* Preserve old search pattern	*/
 
 	/* Scan line for file and pattern	*/
 	sscanf(line, "%s %s %[^\n]", curtp->t_wd, tagf, pat);
@@ -376,7 +376,7 @@ int  retag;
 			mlwrite("[Failed to tag '%s']", curtp->t_wd);
 			}
 		else {			/* We found the pattern.  Now point at word!	*/
-			strcpy((char *) pat, curtp->t_wd);
+			xstrcpy((char *) pat, curtp->t_wd);
 			setjtable();
 #if MAGIC
 			result = mcscanner(&mcdeltapat[0], FORWARD, PTBEG, 1);
@@ -388,7 +388,7 @@ int  retag;
 
 	curbp->b_mode = oldbmode;	/* Restore buffer mode		*/
 
-	strcpy((char *) pat, pretagpat);	/* Restore search pattern	*/
+	xstrcpy((char *) pat, pretagpat);	/* Restore search pattern	*/
 	setjtable();
 	return (result);
 	}
@@ -440,7 +440,7 @@ int f, n;
 		}
 	fseek(curtp->t_fp, curtp->t_dotos[i], 0);
 
-	strcpy(curtp->t_fname, curbp->b_fname);	/* Save name of current file */
+	xstrcpy(curtp->t_fname, curbp->b_fname);	/* Save name of current file */
 	return (tagvalid = tagger("[No tag entry for '%s' found]", FALSE));
 }
 

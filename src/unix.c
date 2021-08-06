@@ -71,8 +71,13 @@
 **/
 
 /** Include files **/
-#include <stdio.h>			/* Standard I/O definitions	*/
-#include "estruct.h"			/* Emacs definitions		*/
+#include <stdio.h>		/* Standard I/O definitions	*/
+#include <stdlib.h>		/* malloc(), ...		*/
+#include <time.h>		/* time(), ...			*/
+#include <errno.h>		/* errno, ...			*/
+#include <unistd.h>		/* getpid(), ...		*/
+#include <sys/stat.h>		/* stat(), ...			*/
+#include "estruct.h"		/* Emacs definitions		*/
 
 /** Do nothing routine **/
 int scnothing()
@@ -81,7 +86,7 @@ int scnothing()
 }
 
 /** Only compile for UNIX machines **/
-#if BSD || FREEBSD || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS)
+#if BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS)
 
 /** Include files **/
 #include "eproto.h"			/* Function definitions		*/
@@ -98,7 +103,7 @@ int scnothing()
 #include <sys/ioctl.h>			/* I/O control definitions	*/
 
 /** Additional include files **/
-#if	FREEBSD
+#if	FREEBSD || LINUX
 #define TERMIOS 1
 #include <sys/time.h>
 #undef	BSD
@@ -109,9 +114,9 @@ int scnothing()
 #if (BSD && !TERMIOS)
 #include <sys/time.h>			/* Timer definitions		*/
 #endif /* (BSD && !TERMIOS) */
-#if BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) || AIX
+#if BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) || AIX
 #include <signal.h>			/* Signal definitions		*/
-#endif /* BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
+#endif /* BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
 #if USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX
 #include <termio.h>			/* Terminal I/O definitions	*/
 #endif /* USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX */
@@ -126,7 +131,7 @@ int scnothing()
 
 /** Completion include files **/
 /** Directory accessing: Try and figure this out... if you can! **/
-#if ((BSD || FREEBSD) && !TERMIOS)
+#if ((BSD || FREEBSD || LINUX) && !TERMIOS)
 #include <sys/dir.h>			/* Directory entry definitions	*/
 #define DIRENTRY	direct
 #endif /* (BSD && !TERMIOS) */
@@ -155,6 +160,7 @@ int scnothing()
 
 /** CONSTANTS **/
 #define TIMEOUT		255		/* No character available	*/
+#define MLWAIT          3
 
 #if TERMCAP || TERMIOS
 struct capbind {			/* Capability binding entry	*/
@@ -370,7 +376,7 @@ int hpterm;				/* global flag braindead HP-terminal */
 /** Open terminal device **/
 int ttopen()
 {
-	strcpy(os, "UNIX");
+	xstrcpy(os, "UNIX");
 #if (BSD && !TERMIOS)
 	/* Get tty modes */
 	if (ioctl(0, TIOCGETP, &oldsgtty) ||
@@ -485,7 +491,7 @@ int ttopen()
 /** Close terminal device **/
 int ttclose()
 {
-#if ((AIX == 0) && (TERMIOS == 0)) || (FREEBSD == 1)
+#if ((AIX == 0) && (TERMIOS == 0)) || (FREEBSD == 1) || (LINUX == 1)
 	/* Restore original terminal modes */
 	if (reset != (char*)NULL)
 		write(1, reset, strlen(reset));
@@ -764,6 +770,7 @@ char * seq;				/* Character sequence		*/
 
 	/* Call on termcap to send sequence */
 	tputs(seq, 1, ttputc);
+        TRC(("tputs(%s, 1, ttputc)", seq));
 }
 #endif /* TERMCAP */
 
@@ -1091,13 +1098,17 @@ static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
 int scfcol(color)
 int color;		/* Color to set			*/
 {
+	TRC(("scfcol(%d)", (int) color));
 #if TERMCAP || TERMIOS
 	/* Skip if already the correct color */
 	if (color == cfcolor)
 		return(0);
+	TRC(("scfcol(): %s", "color != cfcolor"));
 
 	/* Send out color sequence */
+	TRC(("scfcol(): capbind[CAP_C0].store == %d", (int)(capbind[CAP_C0].store)));
 	if (capbind[CAP_C0].store) {
+		TRC(("scfcol(): capbind[CAP_C0 + (color & 7)].store = %s", STR(capbind[CAP_C0 + (color & 7)].store)));
 		putpad(capbind[CAP_C0 + (color & 7)].store);
 		cfcolor = color;
 	}
@@ -1119,13 +1130,17 @@ int color;		/* Color to set			*/
 int scbcol(color)
 int color;			/* Color to set			*/
 {
+	TRC(("scbcol(%d)", (int) color));
 #if TERMCAP || TERMIOS
 	/* Skip if already the correct color */
 	if (color == cbcolor)
 		return(0);
+	TRC(("scbcol(): %s", "color != cbcolor"));
 
 	/* Send out color sequence */
+	TRC(("scbcol(): capbind[CAP_C0].store == %d", (int)(capbind[CAP_C0].store)));
 	if (capbind[CAP_C0].store) {
+		TRC(("scbcol(): capbind[CAP_D0 + (color & 7)].store = %s", STR(capbind[CAP_D0 + (color & 7)].store)));
 		putpad(capbind[CAP_D0 + (color & 7)].store);
 		cbcolor = color;
 	}
@@ -1166,13 +1181,16 @@ char * cmd;				/* Palette command		*/
 	cmd += 7;
 
 	/* Look for space */
-	for (cp = cmd; *cp != '\0'; cp++)
+	for (cp = cmd; *cp == ' '; cp++);
+	for (; *cp != '\0'; cp++)
 		if (*cp == ' ') {
 			*cp++ = '\0';
 			break;
 		}
 	if (*cp == '\0')
 		return(1);
+
+	for (; *cp == ' '; cp++);
 
 	/* Perform operation */
 	if (dokeymap) {
@@ -1194,15 +1212,17 @@ char * cmd;				/* Palette command		*/
 
 		/* Move color code to capability structure */
 		capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
-		if (capbind[CAP_C0 + code].store)
-			strcpy(capbind[CAP_C0 + code].store, cp);
+		if (capbind[CAP_C0 + code].store)       {
+			xstrcpy(capbind[CAP_C0 + code].store, cp);
+			TRC(("capbind[CAP_C0 + %d].store = %s", (int)code, STR(capbind[CAP_C0 + code].store)));
+		}
 	}
 #endif /* COLOR */
 #endif /* TERMCAP */
 	return(0);
 }
 
-#if BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS)
+#if BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS)
 /* Surely more than just BSD systems do this */
 
 /** Perform a stop signal **/
@@ -1225,12 +1245,12 @@ int bktoshell(f, n)
 	return(0);
 }
 
-#endif /* BSD || FREEBSD || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
+#endif /* BSD || FREEBSD || LINUX || SUN || HPUX8 || HPUX9 || (AVVION || TERMIOS) */
 
 /** Get time of day **/
 char * timeset()
 {
-	long int buf; /* Should be time_t */
+	time_t buf;
 	char * sp, * cp;
 
 	char * ctime();
@@ -1327,6 +1347,9 @@ int n;					/* Argument count		*/
 	/* Get shell path */
 	sh = getenv("SHELL");
 	if (!sh)
+#if LINUX
+		sh = "/bin/bash";
+#endif /* LINUX */
 #if BSD || FREEBSD || SUN
 		sh = "/bin/csh";
 #endif /* BSD || FREEBSD || SUN */
@@ -1376,70 +1399,375 @@ int n;					/* Argument count		*/
 	return(spawn(f, n));
 }
 
+
+/*=============================================================================*/
+/* Joachim Schneider, 2018-11-02, joachim<at>hal.rhein-neckar.de               */
+/*=============================================================================*/
+
+/* Return in a static buffer the name of a temporary currently not existing     */
+/* file name containing ident in its name	                                */
+char *gettmpfname(char *ident)
+{
+	char str[NFILEN];
+	int i;
+	static int seed = 0;
+	static char res[NFILEN];
+
+	xsnprintf(str, sizeof(str), "/tmp/me-%s-%02x", ident, ((int)getpid() % 0x100));
+	for (i = 0; i < 0x100; i++) {
+		struct stat sb;
+
+		xsnprintf(res, sizeof(res), "%s-%02x", str, (seed + i) % 0x100);
+		if (0 > stat(res, &sb)) {
+			if (ENOENT == errno) {	/* found */
+				seed = (seed + i + 1) % 0x100;
+
+				return res;
+			}
+		}
+	}
+
+	return NULL;
+}
+
+/* LaunchPrg:   launches an external program    */
+/* =========                                    */
+
+static int LaunchPrg(const char *Cmd,
+	const char *InFile, const char *OutFile, const char *ErrFile)
+
+/* Returns TRUE if all went well, FALSE if failed to launch or return code
+   is not 0.
+
+   Cmd is the command string to launch. It must be a valid SH command.
+
+   InFile is the name of the file to pipe into stdin (if NULL, nothing
+   is piped in)
+
+   OutFile is the name of the file where stdout is expected to be
+   redirected. If it is NULL or an empty string, stdout is not redirected.
+
+   ErrFile is the name of the file where stderr is expected to be
+   redirected. If it is NULL or an empty string, stdout is not redirected.
+*/
+{
+        char    FullCmd [NLINE];
+
+        if ( !Cmd )     {
+                return FALSE;
+        }
+        
+        if ( !InFile || !*InFile )      {
+                InFile  = "/dev/null";
+        }
+        if ( !OutFile || !*OutFile )    {
+                OutFile  = "/dev/null";
+        }
+        if ( !ErrFile || !*ErrFile )    {
+                ErrFile  = "/dev/null";
+        }
+
+	xsnprintf(FullCmd, sizeof(FullCmd), "( %s ) < %s > %s 2>%s",
+                Cmd, InFile, OutFile, ErrFile);
+
+        return callout(FullCmd);                
+} /* LaunchPrg */
+
+/*=============================================================================*/
+/* Some helper functions that could also be in char.c/eproto.h                 */
+/* We do nit want to use the ctype.h functions as they depend on the locale.   */
+/*=============================================================================*/
+
+static int IsIn(const char c, const char *set, int len)
+{
+        int i   = 0;
+
+        if ( len <=0 || !set || !*set ) {
+                return FALSE;
+        }
+
+        for (i = 0; i < len; i++)       {
+                if ( c == set[i] )      {
+                        return TRUE;
+                }
+        }
+
+        return FALSE;
+}
+
+#define UPPERS_         "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define LOWERS_         "abcdefghijklmnopqrstuvwxyz"
+#define DIGITS_         "0123456789"
+#define SPACES_         " \t\r\n\v\f"
+#define UNDERSQS_       "_"
+
+#define IsUpper(c)      ( IsIn((c), UPPERS_,   sizeof(UPPERS_) - 1)  )
+#define IsLower(c)      ( IsIn((c), LOWERS_,   sizeof(LOWERS_) - 1)  )
+#define IsDigit(c)      ( IsIn((c), DIGITS_,   sizeof(DIGITS_) - 1) )
+#define IsSpace(c)      ( IsIn((c), SPACES_,   sizeof(SPACES_) - 1)  )
+#define IsUndersqr(c)   ( IsIn((c), UNDERSQS_, sizeof(UNDERSQS_) - 1)  )
+
+#define IsLetter(c)     ( IsUpper((c)) || IsLower((c)) )
+
+
+static char ToUpper(const char c)
+{
+        int i   = 0;
+
+        for (i = 0; i < sizeof(LOWERS_) - 1; i++)       {
+                if ( c == LOWERS_[i] )  {
+                        return UPPERS_[i];
+                }
+        }
+
+        return c;
+}
+
+static char ToLower(const char c)
+{
+        int i   = 0;
+
+        for (i = 0; i < sizeof(UPPERS_) - 1; i++)       {
+                if ( c == UPPERS_[i] )  {
+                        return LOWERS_[i];
+                }
+        }
+
+        return c;
+}
+
+/*=============================================================================*/
+
+#if ( 0 )
+static int makecmdbname(char *bname, int size, const char *cmd, const char *tag)
+/* Create a buffer name for the output of s shell command */
+{
+	static int	seed	= 0;
+	int		i	= 0;
+	int		j	= 0;
+	int		l	= 0;
+
+	if ( !bname || size <= 1 || !cmd || !*cmd )       {
+		return FALSE;
+	}
+	if ( !tag || !*tag )    {
+	        tag = "@cmd";
+	}
+	while ( !(IsLetter(cmd[j]) || IsDigit(cmd[j]) || IsUndersqr(cmd[j])) )     {
+	        j++;
+	}
+        while ( '\0' != cmd[j] && i < size - 1 ) {
+                if ( IsLetter(cmd[j]) || IsDigit(cmd[j]) || IsUndersqr(cmd[j]) )   {
+                        bname[i++] = ToLower(cmd[j++]);
+                } else if ( IsSpace(cmd[j]) )    {
+                        bname[i++] = '_';
+                	while ( IsSpace(cmd[j]) )        {
+	                        j++;
+	                }
+                } else {
+                        bname[i++] = '.';
+                	while ( !(IsLetter(cmd[j]) || IsDigit(cmd[j]) || IsUndersqr(cmd[j]) || IsSpace(cmd[j])) )   {
+	                        j++;
+	                }
+                }
+        }
+
+	bname[i] = '\0';
+	l = xsnprintf(bname, size, "%s@-%s-%02x", tag, bname, seed % 0x100);
+	seed++;
+
+	if ( l <= size - 1 ) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+#else
+static int makecmdbname(char *bname, int size, const char *cmd, const char *tag)
+/* Create a buffer name for the output of s shell command */
+{
+	static int	seed	= 0;
+	int		i	= 0;
+        int             i0      = 0;
+	int		l	= 0;
+        char            *xcmd   = NULL;
+
+	if ( !bname || size <= 1 || !cmd || !*cmd )       {
+		return FALSE;
+	}
+	if ( !tag || !*tag )    {
+	        tag = "@cmd";
+	}
+
+	while ( IsSpace(cmd[i]) )       {
+	        i++;
+	}
+
+        for (;;)        {
+	        i0 = i;
+	        while ( cmd[i] != '\0' && !IsSpace(cmd[i]) && cmd[i] != '/' )   {
+	                i++;
+	        }
+	        if ( '/' == cmd[i] )    {
+	                i++;
+	                continue;
+	        } else {
+	                break;
+	        }
+	}
+	xcmd = xstrdup(&cmd[i0]);
+	i = strlen(xcmd);
+	while ( 0 < i ) {
+	        if ( IsSpace(xcmd[i - 1]) )     {
+	                xcmd[i - 1] = '\0';
+	        } else {
+                        break;
+                }
+	        i--;
+	}
+
+	l = xsnprintf(bname, size, "%s-%02x: %s", tag, seed % 0x100, xcmd);
+	free(xcmd);
+	seed++;
+
+	if ( l <= size - 1 ) {
+		return TRUE;
+	} else {
+		return FALSE;
+	}
+}
+#endif
+
+/*=============================================================================*/
+
 /** Pipe output of program to buffer **/
 int pipecmd(f, n)
 int f;					/* Flags			*/
 int n;					/* Argument count		*/
 {
-	char line[NLINE];
-	int s;
-	BUFFER * bp;
-	EWINDOW * wp;
-	static char filnam[] = "command";
+	char    	Command[NLINE];
+	int		Result;
+	char            tmpnam[NFILEN];
+	char	        InFile[NFILEN];
+	char    	OutFile[NFILEN];
+	char            bname[NFILEN]   = "command";
+	char    	*cp;
+	BUFFER		*bp;
 
 	/* Don't allow this command if restricted */
-	if (restflag)
-		return(resterr());
+	if ( restflag )	{
+		return resterr();
+	}
 
 	/* Get pipe-in command */
-	s = mlreply("@", line, NLINE);
-	if (!s)
-		return(s);
+	if ( !mlreply("@", Command, NLINE) )    {
+		return FALSE;
+	}
 
-	/* Get rid of the command output buffer if it exists */
-	bp = bfind(filnam, FALSE, 0);
-	if (bp) {
-		/* Try to make sure we are off screen */
-		wp = wheadp;
-		while (wp) {
-			if (wp->w_bufp == bp) {
-				onlywind(FALSE, 1);
-				break;
+	if ( NULL != (cp = gettmpfname("fltinp")) ) {
+		xstrcpy(InFile, cp);
+	} else {
+		return FALSE;
+	}
+	if ( NULL != (cp = gettmpfname("command")) )	{
+		xstrcpy(OutFile, cp);
+	} else {
+		return FALSE;
+	}
+	
+	/* Setup the proper file names */
+	bp = curbp;
+	xstrcpy(tmpnam, bp->b_fname);	/* Save the original name */
+	xstrcpy(bp->b_fname, InFile);	/* Set it to our new one */
+
+	/* Write it out, checking for errors */
+	if ( !writeout(InFile, "w") )	{
+		mlwrite("[Cannot write filter file]");
+		xstrcpy(bp->b_fname, tmpnam);
+		unlink(InFile);
+		sleep(MLWAIT);
+		
+		return FALSE;
+	}
+	/* Reset file name */
+	xstrcpy(bp->b_fname, tmpnam);
+
+#if   ( 0 )	/* Activate multiple "command" buffers  */
+	makename(bname, OutFile);	/* New buffer name. */
+#elif ( !0 )
+	if ( !makecmdbname(bname, sizeof(bname), Command, "@Cmd") )     {
+		unlink(InFile);
+
+	        return FALSE;
+	}
+#endif
+                                                               
+	/*-find the "command" buffer */
+        if ( (bp = bfind (bname, FALSE, 0)) != NULL )	{
+		/*-make sure the contents can safely be blown away */
+		if ( bp->b_flag & BFCHG )	{
+	    		if ( mlyesno (TEXT32) != TRUE )	{
+                		unlink(InFile);
+	    			
+				return FALSE;
 			}
-			wp = wp->w_wndp;
 		}
-		if (!zotbuf(bp))
-			return(0);
+	    	/* discard changes */
+	} else if ( (bp = bfind (bname, TRUE, 0)) == NULL )	{
+		mlwrite (TEXT137);
+        	/* cannot create buffer */
+		unlink(InFile);
+		sleep(MLWAIT);
+        	
+        	return FALSE;
 	}
 
-	/* Add output specification */
-	strcat(line, ">");
-	strcat(line, filnam);
+	if ( !(Result = LaunchPrg (Command, InFile, OutFile, NULL)) )	{
+		mlwrite (TEXT3);
+		/* [execution failed] */
+		unlink(InFile);
+		unlink(OutFile);
+		sleep(MLWAIT);
 
-	/* Do command */
-	s = callout(line);
-	if (!s)
-		return(s);
+		return FALSE;
+	}
+	
+	{
+		BUFFER	*temp_bp = curbp;
+		int	bmode;
+		char	bflag;
+		int	Result;
 
-	/* Split the current window to make room for the command output */
-	if (!splitwind(FALSE, 1))
-		return(0);
-
-	/* ...and read the stuff in */
-	if (!getfile(filnam, FALSE))
-		return(0);
-
-	/* Make this window in VIEW mode, update all mode lines */
-	curwp->w_bufp->b_mode |= MDVIEW;
-	wp = wheadp;
-	while (wp) {
-		wp->w_flag |= WFMODE;
-		wp = wp->w_wndp;
+#if ( 0 )       /* Use multiple "command" windows       */
+		/* Split the current window to make room for the command output */
+		if ( !splitwind(FALSE, 1) )	{
+        		unlink(InFile);
+        		unlink(OutFile);
+        		
+			return FALSE;
+		}
+#endif
+		swbuffer(bp);			/* make this buffer the current one */
+		bmode = bp->b_mode;
+		bp->b_mode &= ~MDVIEW;
+		bflag = bp->b_flag;
+		bp->b_flag &= ~BFCHG;
+		Result = readin(OutFile, FALSE);
+		bp->b_fname[0] = '\0';  /* clear file name */
+		if ( Result )	{
+			bp->b_mode |= MDVIEW;	/* force VIEW mode */
+			lchange (WFMODE);	/* update all relevant mode lines */
+			bp->b_flag &= ~BFCHG;	/* remove by-product BFCHG flag */
+		} else {
+			bp->b_mode = bmode;	/* restore mode */
+			bp->b_flag = bflag;
+			swbuffer (temp_bp);
+		}
+		unlink(InFile);
+		unlink(OutFile);
 	}
 
-	/* ...and get rid of the temporary file */
-	unlink(filnam);
-	return(1);
+	return TRUE;
 }
 
 /** Filter buffer through command **/
@@ -1447,64 +1775,82 @@ int filter(f, n)
 int f;					/* Flags			*/
 int n;					/* Argument count		*/
 {
-	char line[NLINE], tmpnam[NFILEN];
-	int s;
-	BUFFER * bp;
-	static char bname1[] = "fltinp";
-	static char filnam1[] = "fltinp";
-	static char filnam2[] = "fltout";
+	char 	line[NLINE];
+	int 	s;
+	BUFFER	*bp;
+	char	*cp;
+	char	tmpnam[NFILEN];
+	char	InFile[NFILEN];
+	char	OutFile[NFILEN];
+
+	if ( NULL != (cp = gettmpfname("fltinp")) ) {
+		xstrcpy(InFile, cp);
+	} else {
+		return FALSE;
+	}
+	if ( NULL != (cp = gettmpfname("fltout")) ) {
+		xstrcpy(OutFile, cp);
+	} else {
+		return FALSE;
+	}
 
 	/* Don't allow this command if restricted */
-	if (restflag)
-		return(resterr());
+	if ( restflag )	{
+		return resterr();
+	}
 
 	/* Don't allow filtering of VIEW mode buffer */
-	if (curbp->b_mode & MDVIEW)
-		return(rdonly());
+	if ( curbp->b_mode & MDVIEW )	{
+		return rdonly();
+	}
 
 	/* Get the filter name and its args */
 	s = mlreply("#", line, NLINE);
-	if (!s)
-		return(s);
+	if (!s)	{
+		return FALSE;
+	}
 
 	/* Setup the proper file names */
 	bp = curbp;
-	strcpy(tmpnam, bp->b_fname);	/* Save the original name */
-	strcpy(bp->b_fname, bname1);	/* Set it to our new one */
+	xstrcpy(tmpnam, bp->b_fname);	/* Save the original name */
+	xstrcpy(bp->b_fname, InFile);	/* Set it to our new one */
 
 	/* Write it out, checking for errors */
-	if (!writeout(filnam1, "w")) {
+	if ( !writeout(InFile, "w") )	{
 		mlwrite("[Cannot write filter file]");
-		strcpy(bp->b_fname, tmpnam);
-		return(0);
+		xstrcpy(bp->b_fname, tmpnam);
+		unlink(InFile);
+		sleep(MLWAIT);
+		
+		return FALSE;
 	}
 
-	/* Setup input and output */
-	strcat(line," <fltinp >fltout");
-
 	/* Perform command */
-	s = callout(line);
-
+	s = LaunchPrg(line, InFile, OutFile, NULL);
 	/* If successful, read in file */
-	if (s) {
-		s = readin(filnam2, FALSE);
-		if (s)
+	if ( s ) {
+		s = readin(OutFile, FALSE);
+		if ( s )	{
 			/* Mark buffer as changed */
 			bp->b_flag |= BFCHG;
+		}
 	}
 			
 
 	/* Reset file name */
-	strcpy(bp->b_fname, tmpnam);
+	xstrcpy(bp->b_fname, tmpnam);
 
 	/* and get rid of the temporary file */
-	unlink(filnam1);
-	unlink(filnam2);
+	unlink(InFile);
+	unlink(OutFile);
 
 	/* Show status */
-	if (!s)
+	if ( !s )	{
 		mlwrite("[Execution failed]");
-	return(s);
+		sleep(MLWAIT);
+	}
+	
+	return s;
 }
 
 /** Get first filename from pattern **/
@@ -1514,7 +1860,7 @@ char *fspec;				/* Filename specification	*/
 	int index, point, extflag;
 
 	/* First parse the file path off the file spec */
-	strcpy(path, fspec);
+	xstrcpy(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != '/'))
 		--index;
@@ -1543,7 +1889,7 @@ char *fspec;				/* Filename specification	*/
 	if (!dirptr)
 		return(NULL);
 
-	strcpy(rbuf, path);
+	xstrcpy(rbuf, path);
 	nameptr = &rbuf[strlen(rbuf)];
 
 	/* ...and call for the first file */
@@ -1564,7 +1910,7 @@ char *getnfile()
 			return(NULL);
 
 		/* Check to make sure we skip all weird entries except directories */
-		strcpy(nameptr, dp->d_name);
+		xstrcpy(nameptr, dp->d_name);
 
 	} while (stat(rbuf, &fstat) ||
 		((fstat.st_mode & S_IFMT) & (S_IFREG | S_IFDIR)) == 0);
@@ -1684,7 +2030,7 @@ int mode;	/* umask for creation (which we blissfully ignore...) */
 {
 	char buf[80];
 
-	strcpy(buf, "mkdir ");
+	xstrcpy(buf, "mkdir ");
 	strcat(buf, name);
 	strcat(buf, " > /dev/null 2>&1");
 	return(system(buf));
@@ -1695,7 +2041,7 @@ char *name;	/* name of directory to delete */
 {
 	char buf[80];
 
-	strcpy(buf,"rmdir ");
+	xstrcpy(buf,"rmdir ");
 	strcat(buf, name);
 	strcat(buf, " > /dev/null 2>&1");
 	return(system(buf));
@@ -1726,4 +2072,4 @@ void winch_new_size()
 }
 #endif
 
-#endif /* BSD || FREEBSD || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) */
+#endif /* BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) */

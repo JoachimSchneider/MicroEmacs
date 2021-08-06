@@ -224,7 +224,7 @@ case 0x90:	return(SPEC | CTRL | '+');	/* ctrl grey + */
 #endif
 #endif
 
-#if BSD || FREEBSD || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) || (VMS && SMG) || MPE
+#if BSD || FREEBSD || LINUX || USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || SUN || XENIX || (AVVION || TERMIOS) || (VMS && SMG) || MPE
 
 #define NKEYSEQ		300		/* Number of keymap entries	*/
 
@@ -404,7 +404,7 @@ int fn;
 	KEYENT *cur, *nxtcur;
 
 	/* Skip on null sequences or single character sequences. */
-	if (seq == NULL || strlen(seq) < 2)
+	if (seq == NULL || strlen((char *)seq) < 2)
 		return FALSE;
 
 
@@ -440,7 +440,7 @@ int fn;
 	}
 
 	/* Check for room in keymap */
-	if (strlen(seq) > NKEYSEQ - (nxtkey - keymap)) {
+	if (strlen((char *)seq) > NKEYSEQ - (nxtkey - keymap)) {
 		mlwrite("No more room for key entries.");
 		return FALSE;
 	}

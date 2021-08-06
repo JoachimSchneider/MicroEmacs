@@ -618,7 +618,7 @@ PASCAL NEAR os2cres(char *res)		/* name of desired video mode	*/
 	newsize(TRUE, vioModeInfo.row);
 
 	/* reset the $sres environment variable */
-	strcpy(sres, drvname[type]);
+	xstrcpy(sres, drvname[type]);
 	dtype = type;				/* set the current mode	*/
 	
 	return TRUE;
@@ -676,7 +676,7 @@ PASCAL NEAR os2open()
 		default:
 			dtype = CDMONO;
 	}
-	strcpy(sres, drvname[dtype]);
+	xstrcpy(sres, drvname[dtype]);
 
 	initial.vioModeInfo.cb = 0x0E;
 	VioGetMode(&initial.vioModeInfo, 0);
@@ -692,7 +692,7 @@ PASCAL NEAR os2open()
 
 	/* initialize our character input queue */
 	in_init();
-	strcpy(os, "OS2");
+	xstrcpy(os, "OS2");
 
 #if	MOUSE
 	/* find out if we have a mouse */

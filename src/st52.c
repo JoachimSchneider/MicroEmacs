@@ -485,7 +485,7 @@ stopen()	/* open the screen */
 	register int i;
 
 	init();
-	strcpy(os, "TOS");
+	xstrcpy(os, "TOS");
 
 /*
 	Set up an interrupt handler for the mouse that performs both
@@ -559,24 +559,24 @@ stopen()	/* open the screen */
 
 	/* and find the current resolution */
 	initrez = currez = xbios(GETREZ);
-	strcpy(sres, resname[currez]);
+	xstrcpy(sres, resname[currez]);
 
 	/* set up the screen size and palette */
 	switch (currez) {
 		case 0: term.t_mrow = 25 - 1;
 			term.t_nrow = 25 - 1;
 			term.t_ncol = 40;
-			strcpy(palstr, LOWPAL);
+			xstrcpy(palstr, LOWPAL);
 			break;
 
 		case 1: term.t_mrow = 25 - 1;
 			term.t_nrow = 25 - 1;
-			strcpy(palstr, MEDPAL);
+			xstrcpy(palstr, MEDPAL);
 			break;
 
 		case 2: term.t_mrow = DENSIZE - 1;
 			term.t_nrow = 25 - 1;
-			strcpy(palstr, HIGHPAL);
+			xstrcpy(palstr, HIGHPAL);
 	}
 
 	/* and set up the default palette */
@@ -840,28 +840,28 @@ char *newrez;	/* requested resolution */
 	switch (nrez) {
 		case 0: /* low resolution - 16 colors */
 			newwidth(TRUE, 40);
-			strcpy(palstr, LOWPAL);
+			xstrcpy(palstr, LOWPAL);
 			xbios(SETSCREEN, -1L, -1L, 0);
 			g_wchar = g_hchar = 8;
 			break;
 
 		case 1: /* medium resolution - 4 colors */
 			newwidth(TRUE, 80);
-			strcpy(palstr, MEDPAL);
+			xstrcpy(palstr, MEDPAL);
 			xbios(SETSCREEN, -1L, -1L, 1);
 			g_wchar = g_hchar = 8;
 			break;
 
 		case 2: /* High resolution - 2 colors - 25 lines */
 			newsize(TRUE, 25);
-			strcpy(palstr, HIGHPAL);
+			xstrcpy(palstr, HIGHPAL);
 			switch_font(system_font);
 			g_wchar = g_hchar = 16;
 			break;
 
 		case 3: /* Dense resolution - 2 colors - 40 lines */
 			newsize(TRUE, DENSIZE);
-			strcpy(palstr, HIGHPAL);
+			xstrcpy(palstr, HIGHPAL);
 			switch_font(small_font);
 			g_wchar = g_hchar = 8;
 			break;
@@ -870,7 +870,7 @@ char *newrez;	/* requested resolution */
 	/* and set up the default palette */
 	spal(palstr);
 	currez = nrez;
-	strcpy(sres, resname[currez]);
+	xstrcpy(sres, resname[currez]);
 
 	stputc(ESC);	/* automatic overflow off */
 	stputc('w');

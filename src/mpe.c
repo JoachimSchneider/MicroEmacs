@@ -388,7 +388,7 @@ int typahead()
 /** Initialize screen package **/
 int scopen()
 {
-	strcpy(os, "MPE");
+	xstrcpy(os, "MPE");
 
 	/* Open terminal device */
 	if (ttopen()) {
@@ -755,13 +755,13 @@ int n;					/* Argument count		*/
 
 	/* Setup the proper file names */
 	bp = curbp;
-	strcpy(tmpnam, bp->b_fname);	/* Save the original name */
-	strcpy(bp->b_fname, bname1);	/* Set it to our new one */
+	xstrcpy(tmpnam, bp->b_fname);	/* Save the original name */
+	xstrcpy(bp->b_fname, bname1);	/* Set it to our new one */
 
 	/* Write it out, checking for errors */
 	if (!writeout(filnam1, "w")) {
 		mlwrite("[Cannot write filter file]");
-		strcpy(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		return(0);
 	}
 
@@ -781,7 +781,7 @@ int n;					/* Argument count		*/
 			
 
 	/* Reset file name */
-	strcpy(bp->b_fname, tmpnam);
+	xstrcpy(bp->b_fname, tmpnam);
 
 	/* and get rid of the temporary file */
 	unlink(filnam1);

@@ -11,7 +11,7 @@
 
 /* namedcmd:	execute a named command even if it is not bound */
 
-PASCAL NEAR namedcmd(f, n)
+int PASCAL NEAR namedcmd(f, n)
 
 int f, n;	/* command arguments [passed through to command executed] */
 
@@ -27,7 +27,7 @@ int f, n;	/* command arguments [passed through to command executed] */
 		execstr = token(execstr, buffer, NPAT);
 
 		/* evaluate it */
-		strcpy(buffer, fixnull(getval(buffer)));
+		xstrcpy(buffer, fixnull(getval(buffer)));
 		if (strcmp(buffer, errorm) == 0)
 			return(FALSE);
 
@@ -61,7 +61,7 @@ int f, n;	/* command arguments [passed through to command executed] */
 /*	execcmd:	Execute a command line command to be typed in
 			by the user					*/
 
-PASCAL NEAR execcmd(f, n)
+int PASCAL NEAR execcmd(f, n)
 
 int f, n;	/* default Flag and Numeric argument */
 
@@ -88,7 +88,7 @@ int f, n;	/* default Flag and Numeric argument */
 
 */
 
-PASCAL NEAR docmd(cline)
+int PASCAL NEAR docmd(cline)
 
 char *cline;	/* command line to execute */
 
@@ -124,7 +124,7 @@ char *cline;	/* command line to execute */
 	/* process leadin argument */
 	if (gettyp(tkn) != TKCMD) {
 		f = TRUE;
-		strcpy(tkn, fixnull(getval(tkn)));
+		xstrcpy(tkn, fixnull(getval(tkn)));
 		n = asc_int(tkn);
 
 		/* and now get the command to execute */
@@ -138,7 +138,7 @@ char *cline;	/* command line to execute */
 	if ((fnc = fncmatch(tkn)) == NULL) {
 
 		/* construct the buffer name */
-		strcpy(bufn, "[");
+		xstrcpy(bufn, "[");
 		strcat(bufn, tkn);
 		strcat(bufn, "]");
 
@@ -238,7 +238,7 @@ int size;		/* maximum size of token */
 	return(src);
 }
 
-PASCAL NEAR macarg(tok)	/* get a macro line argument */
+int PASCAL NEAR macarg(tok)	/* get a macro line argument */
 
 char *tok;	/* buffer to place argument */
 
@@ -255,7 +255,7 @@ char *tok;	/* buffer to place argument */
 
 /*	nextarg:	get the next argument	*/
 
-PASCAL NEAR nextarg(prompt, buffer, size, terminator)
+int PASCAL NEAR nextarg(prompt, buffer, size, terminator)
 
 char *prompt;		/* prompt to use if we must be interactive */
 char *buffer;		/* buffer to put token into */
@@ -263,7 +263,7 @@ int size;		/* size of the buffer */
 int terminator;		/* terminating char to be used on interactive fetch */
 
 {
-	register char *sp;	/* return pointer from getval() */
+	register CONST char *sp;    /* return pointer from getval() */
 
 	/* if we are interactive, go get it! */
 	if (clexec == FALSE) {
@@ -283,14 +283,14 @@ int terminator;		/* terminating char to be used on interactive fetch */
 	/* evaluate it */
 	if ((sp = getval(buffer)) == NULL)
 		return(FALSE);
-	strcpy(buffer, sp);
+	xstrcpy(buffer, sp);
 	return(TRUE);
 }
 
 /*	storeproc:	Set up a procedure buffer and flag to store all
 			executed command lines there			*/
 
-PASCAL NEAR storeproc(f, n)
+int PASCAL NEAR storeproc(f, n)
 
 int f;		/* default flag */
 int n;		/* macro number to use */
@@ -338,7 +338,7 @@ int n;		/* macro number to use */
 		}
 
 		/* and add it to the linked list of arguments for this buffer */
-		strcpy(cur_arg->name, bname);
+		xstrcpy(cur_arg->name, bname);
 		cur_arg->next = (PARG *)NULL;
 		if (last_arg == (PARG *)NULL)
 			bp->b_args = cur_arg;
@@ -361,7 +361,7 @@ int n;		/* macro number to use */
 
 /*	execproc:	Execute a procedure				*/
 
-PASCAL NEAR execproc(f, n)
+int PASCAL NEAR execproc(f, n)
 
 int f, n;	/* default flag and numeric arg */
 
@@ -395,7 +395,7 @@ int f, n;	/* default flag and numeric arg */
 
 /*	execbuf:	Execute the contents of a buffer of commands	*/
 
-PASCAL NEAR execbuf(f, n)
+int PASCAL NEAR execbuf(f, n)
 
 int f, n;	/* default flag and numeric arg */
 
@@ -436,7 +436,7 @@ int f, n;	/* default flag and numeric arg */
 	*LBL01
 */
 
-PASCAL NEAR dobuf(bp)
+int PASCAL NEAR dobuf(bp)
 
 BUFFER *bp;	/* buffer to execute */
 
@@ -650,7 +650,7 @@ nxtscan:	/* on to the next line */
 #if	LOGFLG
 		/* append the current command to the log file */
 		fp = fopen("emacs.log", "a");
-		strcpy(outline, eline);
+		xstrcpy(outline, eline);
 		fprintf(fp, "%s", outline);
 		fclose(fp);
 #endif
@@ -820,7 +820,7 @@ nxtscan:	/* on to the next line */
 
 					/* check for a return value */
 					if (macarg(tkn) == TRUE)
-						strcpy(rval, tkn);
+						xstrcpy(rval, tkn);
 
 					/* and free the line resources */
 					free(einit);
@@ -955,7 +955,7 @@ LINE *lp;	/* line " */
 	exec_error = TRUE;
 
 	/* build error message line */
-	strcpy(buf, "\n");
+	xstrcpy(buf, "\n");
 	strcat(buf, mesg);
 	strcat(buf, TEXT229);
 /*		" in < " */
@@ -971,7 +971,7 @@ LINE *lp;	/* line " */
 		if $debug == TRUE, The interactive debugger is invoked
 		commands are listed out with the ? key			*/
 
-PASCAL NEAR debug(bp, eline, skipflag)
+int PASCAL NEAR debug(bp, eline, skipflag)
 
 BUFFER *bp;	/* buffer to execute */
 char *eline;	/* text of line to debug */
@@ -988,7 +988,7 @@ int *skipflag;	/* are we skipping debugging? */
 
 dbuild:	/* Build the information line to be presented to the user */
 
-	strcpy(outline, "<<<");
+	xstrcpy(outline, "<<<");
 
 	/* display the tracked expression */
 	if (track[0] != 0) {
@@ -1031,7 +1031,7 @@ dinput:	outline[term.t_ncol - 1] = 0;
 	} else switch (c) {
 
 		case '?': /* list commands */
-			strcpy(outline, TEXT128);
+			xstrcpy(outline, TEXT128);
 /*"(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"*/
 			goto dinput;
 
@@ -1058,7 +1058,7 @@ dinput:	outline[term.t_ncol - 1] = 0;
 			goto dbuild;
 
 		case 'e': /* evaluate expresion */
-			strcpy(temp, "set %track ");
+			xstrcpy(temp, "set %track ");
 			oldinp = disinp;
 			disinp = TRUE;
 			mlwrite("Exp:");
@@ -1067,7 +1067,7 @@ dinput:	outline[term.t_ncol - 1] = 0;
 			oldstatus = cmdstatus;
 			docmd(temp);
 			cmdstatus = oldstatus;
-			strcpy(temp, " = [");
+			xstrcpy(temp, " = [");
 			strcat(temp, gtusr("track"));
 			strcat(temp, "]");
 			mlforce(temp);
@@ -1080,7 +1080,7 @@ dinput:	outline[term.t_ncol - 1] = 0;
 			mlwrite("Exp: ");
 			getstring(temp, NSTRING, ctoec(RETCHAR));
 			disinp = oldinp;
-			strcpy(track, "set %track ");
+			xstrcpy(track, "set %track ");
 			strcat(track, temp);
 			goto dbuild;
 
@@ -1110,14 +1110,14 @@ WHBLOCK *wp;	/* head of structure to free */
 	}
 }
 
-PASCAL NEAR execfile(f, n)	/* execute a series of commands in a file */
+int PASCAL NEAR execfile(f, n)	/* execute a series of commands in a file */
 
 int f, n;	/* default flag and numeric arg to pass on to file */
 
 {
-	register int status;	/* return status of name query */
-	char fname[NSTRING];	/* name of file to execute */
-	char *fspec;		/* full file spec */
+	register int    status;	        /* return status of name query */
+	char            fname[NSTRING]; /* name of file to execute */
+	CONST char      *fspec;		    /* full file spec */
 
 #if WINDOW_MSWIN
 	/* special case: we want filenamedlg to refrain from stuffing a
@@ -1161,9 +1161,9 @@ exec1:	/* otherwise, execute it */
 /*	dofile:	yank a file into a buffer and execute it
 		if there are no errors, delete the buffer on exit */
 
-PASCAL NEAR dofile(fname)
+int PASCAL NEAR dofile(fname)
 
-char *fname;	/* file name to execute */
+CONST char  *fname; /* file name to execute */
 
 {
 	register BUFFER *bp;	/* buffer to place file to exeute */

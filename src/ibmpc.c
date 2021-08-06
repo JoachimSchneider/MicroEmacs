@@ -516,7 +516,7 @@ int type;	/* type of adapter to init for */
 	maxlines(scr_drive[type].drv_rows);
  
 	/* reset the $sres environment variable */
-	strcpy(sres, scr_drive[type].drv_name);
+	xstrcpy(sres, scr_drive[type].drv_name);
 
 	/* resize any screens that need it! */
 	screen_init(dtype, type);

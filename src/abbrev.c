@@ -100,7 +100,7 @@ int f, n;	/* numeric flag and argument */
 
 	/* get the value for that expansion */
 	if (f == TRUE)
-		strcpy(value, int_asc(n));
+		xstrcpy(value, int_asc(n));
 	else {
 		status = mlreply(TEXT53, &value[0], NSTRING);
 /*				 "Value: " */
@@ -170,7 +170,7 @@ int f, n;	/* numeric flag and argument */
 	while (cur_node != (ABBREV *)NULL) {
 
 		/* add in the abbreviation symbol name */
-		strcpy(outseq, cur_node->ab_sym);
+		xstrcpy(outseq, cur_node->ab_sym);
 		pad(outseq, 20);
 	        
 		/* add it's expansion */
@@ -243,7 +243,7 @@ int f,n;	/* prefix flag and argument */
 		llength = lused(lp);
 		if (llength > MAXSYM)
 			llength = MAXSYM;
-		strncpy(cur_sym, ltext(lp), llength);
+		xstrncpy(cur_sym, ltext(lp), llength);
 		cur_sym[llength] = 0;
 
 		/* advance to the next line in the buffer */
@@ -255,7 +255,7 @@ int f,n;	/* prefix flag and argument */
 		llength = lused(lp);
 		if (llength > MAXSYM)
 			llength = MAXSYM;
-		strncpy(cur_exp, ltext(lp), llength);
+		xstrncpy(cur_exp, ltext(lp), llength);
 		cur_exp[llength] = 0;
 
 		/* add it to the current abbreviation list */
@@ -304,8 +304,8 @@ char *expansion;	/* string to expand to */
 		return(FALSE);
 
 	/* copy data to that node */
-	strcpy(new_node->ab_sym, sym);
-	strcpy(new_node->ab_exp, expansion);
+	xstrcpy(new_node->ab_sym, sym);
+	xstrcpy(new_node->ab_exp, expansion);
 
 	/* do we have an empty list */
 	if (ab_head == NULL) {

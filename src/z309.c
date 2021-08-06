@@ -296,9 +296,9 @@ int type;	/* type of adapter to init for */
 	int86(0x11, &rg, &rg);
 	dtype = CDCGA50;
 	scadd = SCADC;
-	strcpy(sres, "CGA50");
+	xstrcpy(sres, "CGA50");
 	if ((((rg.x.ax >> 4) & 11) == 3) || type == CDMONO) {
-		strcpy(sres, "MONO");
+		xstrcpy(sres, "MONO");
 		dtype = CDMONO;
 		scadd = SCADM;
 	}

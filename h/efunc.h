@@ -220,7 +220,7 @@ NOSHARE NBIND	names[] = {
 	{"source",			execfile},
 	{"split-current-window",	splitwind},
 	{"store-procedure",		storeproc},
-#if	BSD || FREEBSD || VMS || SUN || HPUX8 || HPUX9 || AVIION
+#if	BSD || FREEBSD || LINUX || VMS || SUN || HPUX8 || HPUX9 || AVIION
 	{"suspend-emacs",		bktoshell},
 #endif
 #if	CTAGS

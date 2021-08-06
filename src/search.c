@@ -765,7 +765,7 @@ DELTA *tbl;
 {
 	int	j, jump_by, ch;
 
-	strcpy(tbl->patrn, pstring);
+	xstrcpy(tbl->patrn, pstring);
 
 	jump_by = strlen(pstring);
 
@@ -808,7 +808,7 @@ DELTA *tbl;
 VOID PASCAL NEAR setjtable()
 {
 	make_delta(pat, &deltapat);
-	make_delta(strrev(strcpy((char *)tap, (char *)pat)), &tapatled);
+	make_delta(strrev(xstrcpy((char *)tap, (char *)pat)), &tapatled);
 }
 
 /*
@@ -864,7 +864,7 @@ int srch;
 	 */
 	if ((status = nextarg(NULL, tpat, NPAT, sterm)) == TRUE) {
 		lastflag &= ~CFSRCH;
-		strcpy(apat, tpat);
+		xstrcpy(apat, tpat);
 
 		if (srch)
 			setjtable();
@@ -1632,7 +1632,7 @@ int n;
 		return(status);
 
 	/* add in the header text */
-	strcpy(pline, "         Pattern = \"");
+	xstrcpy(pline, "         Pattern = \"");
 	strcat(pline, pat);
 	strcat(pline, "\"  (");
 	strcat(pline, int_asc(deltapat.jump));
@@ -1655,13 +1655,13 @@ int n;
 		while (mcptr->mc_type != MCNIL) {
 
 			if ((mcptr->mc_type) & CLOSURE)
-				strcpy(pline, "Zero to many    ");
+				xstrcpy(pline, "Zero to many    ");
 			else if ((mcptr->mc_type) & CLOSURE_1)
-				strcpy(pline, "One to many     ");
+				xstrcpy(pline, "One to many     ");
 			else if ((mcptr->mc_type) & ZEROONE)
-				strcpy(pline, "Optional        ");
+				xstrcpy(pline, "Optional        ");
 			else
-				strcpy(pline, "                ");
+				xstrcpy(pline, "                ");
 
 			/* next, the meta-character type */
 			mctype_cat(pline, (mcptr->mc_type) & MASKCLO);
@@ -1709,7 +1709,7 @@ int n;
 			mcptr++;
 		}
 		/* add in the header text */
-		strcpy(pline, " Reverse Pattern = \"");
+		xstrcpy(pline, " Reverse Pattern = \"");
 		strcat(pline, tap);
 		strcat(pline, "\"  (");
 		strcat(pline, int_asc(tapatled.jump));
@@ -1749,7 +1749,7 @@ int n;
 		return(status);
 
 	/* add in the header text */
-	strcpy(pline, "Replacement Pattern = \"");
+	xstrcpy(pline, "Replacement Pattern = \"");
 	strcat(pline, rpat);
 	strcat(pline, "\"");
 

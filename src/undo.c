@@ -85,7 +85,7 @@ OBJECT op_erand;	/* the operand of the operation */
 			break;
 
 		case OP_DSTR:
-			strncpy(up->undo_obj.obj_string,
+			xstrncpy(up->undo_obj.obj_string,
 				op_erand.obj_sptr, (int)count);
 			up->undo_obj.obj_string[(int)count] = 0;
 			break;
@@ -263,7 +263,7 @@ int f,n;	/* prefix flag and argument */
 	return(wpopup(ulistp));
 }
 
-PASCAL NEAR undolist()
+int PASCAL NEAR undolist()
 
 {
 	register char *cp1;	/* scanning pointer into line to build */
@@ -278,7 +278,7 @@ PASCAL NEAR undolist()
 	ulistp->b_flag &= ~BFCHG;		/* Don't complain!	*/
 	if ((status = bclear(ulistp)) != TRUE) 	/* Blow old text away	*/
 		return(status);
-	strcpy(ulistp->b_fname, "");
+	xstrcpy(ulistp->b_fname, "");
 
 	/* add in the header text */
 	if (addline(ulistp,
@@ -310,7 +310,7 @@ PASCAL NEAR undolist()
 		*cp1++ = '/';
 
 		/* and the offset into the line */
-		strcpy(b, int_asc(up->offset));
+		xstrcpy(b, int_asc(up->offset));
 		while (strlen(b) < 6)
 			strcat(b, " ");
 		cp2 = &b[0];
@@ -319,7 +319,7 @@ PASCAL NEAR undolist()
 		*cp1++ = ' ';
 
 		/* and the count */
-		strcpy(b, int_asc(up->count));
+		xstrcpy(b, int_asc(up->count));
 		while (strlen(b) < 3)
 			strcat(b, " ");
 		cp2 = &b[0];
@@ -331,20 +331,20 @@ PASCAL NEAR undolist()
 		switch (up->type) {
 	
 			case OP_CMND:
-				strcpy(cp1, "CMND  ");
+				xstrcpy(cp1, "CMND  ");
 				break;		
 	
 			case OP_CPOS:
-				strcpy(cp1, "CPOS  ");
+				xstrcpy(cp1, "CPOS  ");
 				break;		
 	
 			case OP_DELC:
-				strcpy(cp1, "DELC  ");
+				xstrcpy(cp1, "DELC  ");
 				cmdstr(up->undo_obj.obj_char, cp1 + 6);
 				break;
 
 			case OP_DSTR:
-				strcpy(cp1, "DSTR  ");
+				xstrcpy(cp1, "DSTR  ");
 				strcat(cp1, "\"");
 				strncat(cp1, up->undo_obj.obj_string, 40);
 				cp1[26] = '+';
@@ -353,16 +353,16 @@ PASCAL NEAR undolist()
 				break;
 
 			case OP_INSC:
-				strcpy(cp1, "INSC  ");
+				xstrcpy(cp1, "INSC  ");
 				cmdstr(up->undo_obj.obj_char, cp1 + 6);
 				break;
 
 			case OP_ISTR:
-				strcpy(cp1, "ISTR  ");
+				xstrcpy(cp1, "ISTR  ");
 				break;		
 
 			case OP_REPC:
-				strcpy(cp1, "REPC  ");
+				xstrcpy(cp1, "REPC  ");
 				cmdstr(up->undo_obj.obj_char, cp1 + 6);
 				break;		
 		}

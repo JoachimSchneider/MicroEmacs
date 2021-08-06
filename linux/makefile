@@ -1,7 +1,7 @@
-#		Linux makefile for
-#		MicroEMACS 4.00
-#		(C)Copyright 1995 by Daniel Lawrence
-#		all rights reserved
+#               Linux makefile for
+#               MicroEMACS 4.00
+#               (C)Copyright 1995 by Daniel Lawrence
+#               all rights reserved
 
 # modify the following lines with the proper relative directories
 
@@ -15,7 +15,10 @@ HDIR = ../h
 # options and arguments to the C compiler
 
 #CFLAGS += -I. -I$(HDIR)
-CFLAGS = -O -I. -I$(HDIR)
+#CFLAGS = -O -I. -I$(HDIR)
+#CFLAGS = -g -DEMACS_TRC -Wall -I. -I$(HDIR)
+#CFLAGS = -O2 -I. -I$(HDIR)
+CFLAGS = -g -Wall -I. -I$(HDIR)
 
 #list of object files
 
@@ -29,12 +32,12 @@ F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unix.o $(OBJD)/window.o $(OBJD)/word.
 
 # product list
 
-all:	emacs
+all:    emacs
 
-OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
+OFILES =        $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
 
-emacs:	$(OFILES)
-		$(CC) $(CFLAGS) $(OFILES) -lncurses -lc -o emacs
+emacs:  $(OFILES)
+	$(CC) $(CFLAGS) $(OFILES) -lncurses -lc -o emacs
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c
 	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c
@@ -96,3 +99,10 @@ $(OBJD)/window.o: $(SRCD)/window.c
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c
 	$(CC) $(CFLAGS) -c -o $(OBJD)/word.o $(SRCD)/word.c
+
+clean:
+	rm -f *.o
+	rm -f emacs
+
+
+# EOF

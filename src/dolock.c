@@ -53,8 +53,8 @@ char *fname;
 }
 #endif
 
-#if	FILOCK && (MSDOS || WINNT || WINXP || OS2 || SUN || USG || AIX || AUX || AVIION || BSD || FREEBSD || HPUX8 || HPUX9 || AMIGA)
-#if	OS2 || ((MSDOS || WINNT || WINXP) && MSC) || BSD || FREEBSD
+#if	FILOCK && (MSDOS || WINNT || WINXP || OS2 || SUN || USG || AIX || AUX || AVIION || BSD || FREEBSD || LINUX || HPUX8 || HPUX9 || AMIGA)
+#if	OS2 || ((MSDOS || WINNT || WINXP) && MSC) || BSD || FREEBSD || LINUX
 #include	<sys/types.h>
 #endif
 #include	<sys/stat.h>
@@ -62,7 +62,7 @@ char *fname;
 #if	MSDOS && TURBO
 #include	<dir.h>
 #endif
-#if	SUN
+#if	(SUN)
 #include	<sys/dir.h>
 #include	<signal.h>
 #endif
@@ -132,7 +132,7 @@ char *filespec;
 	char *rname;
 
 	/* make a copy we can mung */
-	strcpy(rbuff,filespec);
+	xstrcpy(rbuff,filespec);
 
 	/* starting from the end */
 	rname = &rbuff[strlen(rbuff)-1];
@@ -175,7 +175,7 @@ char *filespec;
 	char *rname;
 
 	/* search for a drive specifier */
-	strcpy(rbuff,filespec);
+	xstrcpy(rbuff,filespec);
 	rname = rbuff;
 	while (*rname) {
 		if (*rname == DRIVESEPCHAR) {
@@ -223,15 +223,15 @@ char *filespec;		/* full file spec of file to lock */
 	static char result[NSTRING];	/* error return string */
 
 	/* separate filespec into components */
-	strcpy(filename, parse_name(filespec));
-	strcpy(pathname, parse_path(filespec));
-	strcpy(drivename, parse_drive(filespec));
+	xstrcpy(filename, parse_name(filespec));
+	xstrcpy(pathname, parse_path(filespec));
+	xstrcpy(drivename, parse_drive(filespec));
 	if (pathname[0] == 0)
-		strcpy(pathname, ".");
+		xstrcpy(pathname, ".");
 
 	/* merge the drive into the pathname */
 	strcat(drivename, pathname);
-	strcpy(pathname, drivename);
+	xstrcpy(pathname, drivename);
 
 #if	LOCKDEBUG
 	printf("Locking [%s] [%s]\n", pathname, filename); tgetc();
@@ -243,19 +243,19 @@ char *filespec;		/* full file spec of file to lock */
 #if	LOCKDEBUG
 		printf("stat() = %u   errno = %u\n", stat(pathname, &sb), errno); tgetc();
 #endif
-		strcpy(result, LOCKMSG);
+		xstrcpy(result, LOCKMSG);
 		strcat(result, "Path not found");
 		return(result);
 	}
 	if ((sb.st_mode & S_IFDIR) == 0) {
-		strcpy(result, LOCKMSG);
+		xstrcpy(result, LOCKMSG);
 		strcat(result, "Illegal Path");
 		return(result);
 	}
 #endif
 
 	/* create the lock directory if it does not exist */
-	strcpy(lockpath, pathname);
+	xstrcpy(lockpath, pathname);
 	strcat(lockpath, DIRSEPSTR);
 	strcat(lockpath, LOCKDIR);
 #if	LOCKDEBUG
@@ -273,7 +273,7 @@ char *filespec;		/* full file spec of file to lock */
 #else
 		if (mkdir(lockpath, 0777) != 0) {
 #endif
-			strcpy(result, LOCKMSG);
+			xstrcpy(result, LOCKMSG);
 			switch (errno) {
 
 			    case EACCES:
@@ -289,7 +289,7 @@ char *filespec;		/* full file spec of file to lock */
 	}
 
 	/* check for the existance of this lockfile */
-	strcpy(lockfile, lockpath);
+	xstrcpy(lockfile, lockpath);
 	strcat(lockfile, DIRSEPSTR);
 	strcat(lockfile, filename);
 #if	LOCKDEBUG
@@ -301,7 +301,7 @@ char *filespec;		/* full file spec of file to lock */
 		/* create the lock file */
 		fp = fopen(lockfile, "w");
 		if (fp == (FILE *)NULL) {
-			strcpy(result, LOCKMSG);
+			xstrcpy(result, LOCKMSG);
 			strcat(result, "Can not open lock file");
 			return(result);
 		}
@@ -310,7 +310,7 @@ char *filespec;		/* full file spec of file to lock */
 #if	MSDOS || WINNT || WINXP || OS2
 		fprintf(fp, "0\n");		/* process ID */
 #endif
-#if	SUN
+#if	(SUN)
 		fprintf(fp, "%u\n", getpid());
 #endif
 
@@ -333,7 +333,7 @@ char *filespec;		/* full file spec of file to lock */
 #if	MSDOS || WINNT || WINXP || OS2
 			fprintf(fp, "<unknown>\n");
 #endif
-#if	SUN
+#if	(SUN)
 			gethostname(buf, NFILEN);
 			fprintf(fp, "%s\n", buf);
 #endif
@@ -350,7 +350,7 @@ char *filespec;		/* full file spec of file to lock */
 		/* get the existing lock info */
 		fp = fopen(lockfile, "r");
 		if (fp == (FILE *)NULL) {
-			strcpy(result, LOCKMSG);
+			xstrcpy(result, LOCKMSG);
 			strcat(result, "Can not read lock file");
 			return(result);
 		}
@@ -369,7 +369,7 @@ char *filespec;		/* full file spec of file to lock */
 		term_trim(buf);
 		strcat(result, buf);
 
-#if	SUN
+#if	(SUN)
 		/* is it the current host? */
 		gethostname(host, NFILEN);
 		if (strcmp(buf, host) == 0) {
@@ -417,29 +417,29 @@ char *filespec;		/* filespec to unlock */
 	static char result[NSTRING];	/* error return string */
 
 	/* separate filespec into components */
-	strcpy(filename, parse_name(filespec));
-	strcpy(pathname, parse_path(filespec));
-	strcpy(drivename, parse_drive(filespec));
+	xstrcpy(filename, parse_name(filespec));
+	xstrcpy(pathname, parse_path(filespec));
+	xstrcpy(drivename, parse_drive(filespec));
 	if (pathname[0] == 0)
-		strcpy(pathname, ".");
+		xstrcpy(pathname, ".");
 
 	/* merge the drive into the pathname */
 	strcat(drivename, pathname);
-	strcpy(pathname, drivename);
+	xstrcpy(pathname, drivename);
 
 #if	LOCKDEBUG
 	printf("\nUnLocking [%s] [%s]\n", pathname, filename); tgetc();
 #endif
 
 	/* create the lock directory if it does not exist */
-	strcpy(lockpath, pathname);
+	xstrcpy(lockpath, pathname);
 	strcat(lockpath, DIRSEPSTR);
 	strcat(lockpath, LOCKDIR);
 #if	LOCKDEBUG
 	printf("Lockdir [%s]\n", lockpath); tgetc();
 #endif
 	/* check for the existance of this lockfile */
-	strcpy(lockfile, lockpath);
+	xstrcpy(lockfile, lockpath);
 	strcat(lockfile, DIRSEPSTR);
 	strcat(lockfile, filename);
 #if	LOCKDEBUG

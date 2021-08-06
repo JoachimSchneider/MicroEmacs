@@ -213,7 +213,7 @@ ttopen()
 
 	Enable_Abort = 0;	/* for the Manx compiler */
 #endif
-	strcpy(os, "AMIGADOS");
+	xstrcpy(os, "AMIGADOS");
 
 	/* open the intuition library */
 	IntuitionBase = (struct IntuitionBase *)
@@ -739,14 +739,14 @@ filter(f, n)
 
 	/* setup the proper file names */
 	bp = curbp;
-	strcpy(tmpnam, bp->b_fname);	/* save the original name */
-	strcpy(bp->b_fname, bname1);	/* set it to our new one */
+	xstrcpy(tmpnam, bp->b_fname);	/* save the original name */
+	xstrcpy(bp->b_fname, bname1);	/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1, "w") != TRUE) {
 		mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-		strcpy(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		return(FALSE);
 	}
 
@@ -761,14 +761,14 @@ filter(f, n)
 	if (s != TRUE || (readin(filnam2,FALSE) == FALSE)) {
 		mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-		strcpy(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		unlink(filnam1);
 		unlink(filnam2);
 		return(s);
 	}
 
 	/* reset file name */
-	strcpy(bp->b_fname, tmpnam);	/* restore name */
+	xstrcpy(bp->b_fname, tmpnam);	/* restore name */
 	bp->b_flag |= BFCHG;		/* flag it as changed */
 
 	/* and get rid of the temporary file */
@@ -803,7 +803,7 @@ char *fspec;	/* pattern to match */
 	char fname[NFILEN];		/* file/path for DOS call */
 
 	/* first parse the file path off the file spec */
-	strcpy(path, fspec);
+	xstrcpy(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != '/' &&
 				path[index] != '\\' && path[index] != ':'))
@@ -811,12 +811,12 @@ char *fspec;	/* pattern to match */
 	path[index+1] = 0;
 
 	/* construct the composite wild card spec */
-	strcpy(fname, path);
+	xstrcpy(fname, path);
 	strcat(fname, &fspec[index+1]);
 	strcat(fname, "*.*");
 
 	/* save the path/wildcard off */
-	strcpy(path, fname);
+	xstrcpy(path, fname);
 
 	/* and call for the first file */
 	return(getnfile());
@@ -833,7 +833,7 @@ char *PASCAL NEAR getnfile()
 		return(NULL);
 
 	/* return the next file name! */
-	strcpy(rbuf, sp);
+	xstrcpy(rbuf, sp);
 	return(rbuf);
 }
 #else

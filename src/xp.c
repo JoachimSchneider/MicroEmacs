@@ -155,7 +155,7 @@ PASCAL NEAR pipecmd(f, n)
         if ((tmp = getenv("TMP")) == NULL)
                 filnam[0] = 0;
         else {
-                strcpy(filnam, tmp);
+                xstrcpy(filnam, tmp);
                 if (filnam[strlen(filnam) - 1] != '\\')
                         strcat(filnam, "\\");
         }
@@ -186,7 +186,7 @@ PASCAL NEAR pipecmd(f, n)
                 return(FALSE);
 
         /* rename the buffer */
-        strcpy( curwp->w_bufp->b_bname, "command");
+        xstrcpy( curwp->w_bufp->b_bname, "command");
         /* make this window in VIEW mode, update all mode lines */
         curwp->w_bufp->b_mode |= MDVIEW;
         wp = wheadp;
@@ -234,8 +234,8 @@ PASCAL NEAR filter(f, n)
         if ((tmp = getenv("TMP")) == NULL)
                 filnam1[0] = filnam2[0] = 0;
         else {
-                strcpy(filnam1, tmp);
-                strcpy(filnam2, tmp);
+                xstrcpy(filnam1, tmp);
+                xstrcpy(filnam2, tmp);
                 if (filnam1[strlen(filnam1) - 1] != '\\') {
                         strcat(filnam1, "\\");
                         strcat(filnam2, "\\");
@@ -247,14 +247,14 @@ PASCAL NEAR filter(f, n)
 
         /* setup the proper file names */
         bp = curbp;
-        strcpy(tmpnam, bp->b_fname);    /* save the original name */
-        strcpy(bp->b_fname, filnam1);   /* set it to our new one */
+        xstrcpy(tmpnam, bp->b_fname);    /* save the original name */
+        xstrcpy(bp->b_fname, filnam1);   /* set it to our new one */
 
         /* write it out, checking for errors */
         if (writeout(filnam1, "w") != TRUE) {
                 mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-                strcpy(bp->b_fname, tmpnam);
+                xstrcpy(bp->b_fname, tmpnam);
                 return(FALSE);
         }
 
@@ -275,14 +275,14 @@ PASCAL NEAR filter(f, n)
         if (s != TRUE || (readin(filnam2,FALSE) == FALSE)) {
                 mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-                strcpy(bp->b_fname, tmpnam);
+                xstrcpy(bp->b_fname, tmpnam);
                 unlink(filnam1);
                 unlink(filnam2);
                 return(s);
         }
 
         /* reset file name */
-        strcpy(bp->b_fname, tmpnam);    /* restore name */
+        xstrcpy(bp->b_fname, tmpnam);    /* restore name */
         bp->b_flag |= BFCHG;            /* flag it as changed */
 
         /* and get rid of the temporary file */
@@ -346,7 +346,7 @@ execprog( char *cmd)
                 if ((sp = flook(strcat(prog, ".exe"), TRUE)) == NULL) {
                         return(FALSE);
                 }
-        strcpy(prog, sp);
+        xstrcpy(prog, sp);
 
         /*
          * Execute the program synchronously.  We wait for child
@@ -378,7 +378,7 @@ char *fspec;    /* pattern to match */
         char fname[NFILEN];             /* file/path for DOS call */
 
         /* first parse the file path off the file spec */
-        strcpy(path, fspec);
+        xstrcpy(path, fspec);
         index = strlen(path) - 1;
         while (index >= 0 && (path[index] != '/' &&
                                 path[index] != '\\' && path[index] != ':'))
@@ -397,7 +397,7 @@ char *fspec;    /* pattern to match */
         }
 
         /* construct the composite wild card spec */
-        strcpy(fname, path);
+        xstrcpy(fname, path);
         strcat(fname, &fspec[index+1]);
         strcat(fname, "*");
         if (extflag == FALSE)
@@ -409,7 +409,7 @@ char *fspec;    /* pattern to match */
                 return(NULL);
 
         /* return the first file name! */
-        strcpy(rbuf, path);
+        xstrcpy(rbuf, path);
         strcat(rbuf, pBuf.name);
         mklower(rbuf);
         if (pBuf.attrib == _A_SUBDIR)
@@ -425,7 +425,7 @@ char *PASCAL NEAR getnfile()
                 return(NULL);
 
         /* return the first file name! */
-        strcpy(rbuf, path);
+        xstrcpy(rbuf, path);
         strcat(rbuf, pBuf.name);
         mklower(rbuf);
         if (pBuf.attrib == _A_SUBDIR)

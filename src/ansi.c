@@ -302,7 +302,7 @@ PASCAL NEAR ansiopen()
 	ttputs( s);
 	}
 #endif
-	strcpy(sres, "NORMAL");
+	xstrcpy(sres, "NORMAL");
 	revexist = TRUE;
         ttopen();
 

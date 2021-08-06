@@ -64,7 +64,7 @@ NOSHARE CONST char *pathname[] =
 };
 #endif
 
-#if	V7 | BSD | FREEBSD | USG | AIX | SMOS | HPUX8 | HPUX9 | XENIX | SUN | AVIION
+#if	V7 | BSD | FREEBSD | LINUX | USG | AIX | SMOS | HPUX8 | HPUX9 | XENIX | SUN | AVIION
 {
 	".emacsrc",
 	"emacs.hlp",
