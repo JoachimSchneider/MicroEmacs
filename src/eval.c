@@ -1553,7 +1553,7 @@ char *st;
  
 	/* scan digits */
 	period_flag = FALSE;
-	while ((*st >= '0') && (*st <= '9') ||
+	while ((*st >= '0' && *st <= '9') ||
 	       (*st == '.' && period_flag == FALSE)) {
 		if (*st == '.')
 			period_flag = TRUE;

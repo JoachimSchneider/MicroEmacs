@@ -410,7 +410,7 @@ int *pcwoff;
 		/* Is the current meta-character modified
 		 * by a closure?
 		 */
-		if (cl_type = (mcptr->mc_type & ALLCLOS)) {
+		if ( (cl_type = (mcptr->mc_type & ALLCLOS)) ) {
 
 			/* Minimum number of characters that may
 			 * match is 0 or 1.
@@ -876,13 +876,14 @@ int srch;
 	/* Only make the meta-pattern if in magic mode, since the
 	 * pattern in question might have an invalid meta combination.
 	 */
-	if (status == TRUE)
+	if (status == TRUE) {
 		if ((curwp->w_bufp->b_mode & MDMAGIC) == 0) {
 			mcclear();
 			rmcclear();
-		}
-		else
+		} else {
 			status = srch? mcstr(): rmcstr();
+		}
+	}
 #endif
 	return (status);
 }
@@ -1500,7 +1501,7 @@ MC *mcptr;
 	 * Now loop through the pattern, collecting characters until
 	 * we run into a meta-character.
 	 */
-	while (pchr = *++patptr)
+	while ( (pchr = *++patptr) )
 	{
 		/*
 		 * If the current character is a closure character,
