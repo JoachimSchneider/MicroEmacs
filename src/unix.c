@@ -622,7 +622,7 @@ int ch;
 #endif
 {
 	/* Check for overflow */
-	if (inbuft == &inbuf[sizeof(inbuf)]) {
+	if (inbuft == &inbuf[NELEM(inbuf)]) {
 		/* Annoy user */
 		scbeep();
 		return;

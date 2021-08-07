@@ -1106,9 +1106,10 @@ int  DebugMessage(CONST char *fmt, ...);
 # define  TRC(arg)  do {} while ( 0 )
 #endif
 
-#define STR(s)  ( (NULL == (s))? ((CONST char *)"@NIL@") : ((CONST char *)(s)) )
-#define MAX2(x, y)	( ((x) < (y))?	(y) : (x)	)
-#define MIN2(x, y)	( ((x) < (y))?	(x) : (y)	)
+#define STR(s)        ( (NULL == (s))? ((CONST char *)"@NIL@") : ((CONST char *)(s)) )
+#define MAX2(x, y)    ( ((x) < (y))?	(y) : (x) )
+#define MIN2(x, y)    ( ((x) < (y))?	(x) : (y) )
+#define NELEM(A)      ( sizeof((A))/sizeof((A)[0]) )
 
 
 /*
