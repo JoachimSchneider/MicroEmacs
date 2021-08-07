@@ -200,8 +200,8 @@ char *buf;
   char *c;    /* ptr to current character to examine */
 
   c = buf + strlen(buf) - 1;
-  while ((c >= buf) && (*c == '\r') || (*c == '\n') || (*c == ' ')
-         || (*c == '\t')) {
+  while ( (c >= buf) &&
+          ((*c == '\r') || (*c == '\n') || (*c == ' ') || (*c == '\t')) ) {
     *c = 0;
     c--;
   }
