@@ -40,12 +40,12 @@ modern Linux and FreeBSD systems:
   able to use complex shell constructs like "echo abc; sleep 10; date".
 
 * More defensive parsing of "set $palette" statements for screen colors
-    (e.g.. set ``$palette "CLRMAP  7 ~e[37m" ; white''): Use ``[ ][ ]*''
-    instead of ' ' as field separator.
+    (e.g.. set ``$palette "CLRMAP  7 ~e[37m" ; white``): Use ``[ ][ ]*``
+    instead of ``' '`` as field separator.
 
 * Color support by using .emacsrc statements. (XTerm as well as  Linux
-  and FreeBSD text console). Fiund the correct Escape-Sequences with ``tput
-    setf [1-7]'' or  ``tput setb [1-7]''.
+  and FreeBSD text console). Find the correct Escape-Sequences with ``tput
+    setf [1-7]`` or  ``tput setb [1-7]``.
 
 * Const-Correctness:
 
@@ -61,7 +61,7 @@ modern Linux and FreeBSD systems:
 
 
 
-# For completeness I quote Peter Chapman's README.md here:
+## For completeness I quote Peter Chapman's README.md here:
 ```
 ## Introduction
 I have found it hard to track down the source code for MicroEMACS, 
