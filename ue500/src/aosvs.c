@@ -194,7 +194,6 @@ extern int vttidy();            /* MicroEMACS routine to tidy up the screen */
 
 extern int              aosvs$expand_pathname();
 extern void             aosvs$unix_to_aosvs_path();
-#endif
 
 FILE *STDIN, *STDOUT;           /* Needed since the array of files went away.*/
                                 /* Of course, if _iob changes, we'll have to */
@@ -1929,4 +1928,4 @@ char *fn, *mode;
     return(fopen(tmppath, mode));           /* try to open expanded pathname */
 }
 
-#endif  /* AOSVS */
+#endif  /* AOSVS | MV_UX */

@@ -16,9 +16,8 @@ NOSHARE CONST char *pathname[] =
 	":t/",
 	":s/"
 };
-#endif
 
-#if	TOS
+#elif	TOS
 {
 	"emacs.rc",
 	"emacs.hlp",
@@ -27,9 +26,8 @@ NOSHARE CONST char *pathname[] =
 	"\\util\\",
 	""
 };
-#endif
  
-#if	FINDER
+#elif	FINDER
 {
 	"emacs.rc",
 	"emacs.hlp",
@@ -37,9 +35,8 @@ NOSHARE CONST char *pathname[] =
 	"/sys/public",
 	""
 };
-#endif
 
-#if	MSDOS || WINNT || WINXP
+#elif	MSDOS || WINNT || WINXP
 {
 	"emacs.rc",
 	"emacs.hlp",
@@ -49,9 +46,8 @@ NOSHARE CONST char *pathname[] =
 	"\\",
 	""
 };
-#endif
 
-#if	OS2
+#elif	OS2
 {
         "emacs.rc",
         "emacs.hlp",
@@ -62,9 +58,8 @@ NOSHARE CONST char *pathname[] =
         "\\",
         ""
 };
-#endif
 
-#if	IS_UNIX()
+#elif	IS_UNIX()
 {
 	".emacsrc",
 	"emacs.hlp",
@@ -72,9 +67,8 @@ NOSHARE CONST char *pathname[] =
 	"/usr/lib/",
 	""
 };
-#endif
 
-#if	VMS
+#elif	VMS
 {
 	"emacs.rc",
 	"emacs.hlp",
@@ -82,18 +76,16 @@ NOSHARE CONST char *pathname[] =
 	"SYS$LOGIN:",
 	""
 };
-#endif
 
-#if	WMCS
+#elif	WMCS
 {
 	"emacs.rc",
 	"emacs.hlp",
 	"",
 	"sys$disk/syslib.users/"
 };
-#endif
 
-#if	AOSVS
+#elif	AOSVS
 /*
     NOTE: you must use the Unix style pathnames here!
 */
@@ -104,9 +96,8 @@ NOSHARE CONST char *pathname[] =
     "/macros/",
     "/help/"
 };
-#endif
 
-#if	MPE
+#elif	MPE
 {
 	"emacsrc",
 	"emacshlp",
@@ -114,6 +105,15 @@ NOSHARE CONST char *pathname[] =
 	".pub.sys",
 	""
 };
-#endif /* MPE */
+
+#else
+{
+	"",
+	"",
+	"",
+	"",
+	""
+};
+#endif
 
 #define	NPNAMES	(sizeof(pathname)/sizeof(char *))

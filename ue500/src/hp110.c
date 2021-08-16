@@ -199,7 +199,7 @@ register int    n;
 PASCAL NEAR h110open()
 {
 	xstrcpy(sres, "15LINE");
-	xstrcpy(os, "MSDOS);
+	xstrcpy(os, "MSDOS");
 	revexist = TRUE;
         ttopen();
 }

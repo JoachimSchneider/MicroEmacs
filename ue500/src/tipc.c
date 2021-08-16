@@ -323,7 +323,7 @@ PASCAL NEAR tieeol()        /* erase to the end of the line */
     for (i=0; i < term.t_ncol; i++)
         *lnptr++ = SPACE;
 
-    _fmemset(attradd, cfcolor, 1);                /* write current attrs to latc
+    _fmemset(attradd, cfcolor, 1);                /* write current attrs to latch */
     movmem(&sline[0], scptr[crow]+ccol, term.t_ncol-ccol);
 
 }
@@ -435,7 +435,7 @@ PASCAL NEAR scinit()    /* initialize the screen head pointers to */
 }
 
 
-PASCAL NEAR scwrite(int row, char *outstr, int forg, int bacg, int revleft, int
+PASCAL NEAR scwrite(int row, char *outstr, int forg, int bacg, int revleft, int revright)
 /* write a line out */
 {
     char    *lnptr;         /* Pointer to the destination line */
@@ -447,13 +447,13 @@ PASCAL NEAR scwrite(int row, char *outstr, int forg, int bacg, int revleft, int
     /* you have graphics and set the graphics color to your background     */
     /* This is enabled in this driver though the $palette variable         */
 
-    if ((forg != 0) & (!revflag)) {
+    if ((forg != 0) && (!revflag)) {
         forg = ctrans[forg];
         _fmemset(attradd, forg, 1);
-    }else if ((forg != 0) & (revflag)) {
+    } else if ((forg != 0) && (revflag)) {
         forg = ctrans[forg] + TI_REVERSE;
         _fmemset(attradd, forg, 1);
-    }else{
+    } else {
         bacg = ctrans[bacg] + TI_REVERSE;
         _fmemset(attradd, bacg, 1);
     }

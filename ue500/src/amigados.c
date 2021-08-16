@@ -890,3 +890,4 @@ adoshello()
 {
 }
 #endif
+#endif  /* AMIGA */
