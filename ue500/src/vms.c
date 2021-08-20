@@ -60,7 +60,7 @@
 		DESCPTR( s)	String descriptor for buffer s, using sizeof()
 */
 #define NUM_DESCRIPTORS 10
-struct  dsc$descriptor_s *descrp(char *s, int l)
+(struct  dsc$descriptor_s *) descrp(char *s, int l)
 {
     static next_d = 0;
     static struct dsc$descriptor_s dsclist[ NUM_DESCRIPTORS];
@@ -76,7 +76,7 @@ struct  dsc$descriptor_s *descrp(char *s, int l)
 /*
  * Make pointer to descriptor from Asciz string.
  */
-struct dsc$descriptor_s *descptr(char *s)
+(struct dsc$descriptor_s *) descptr(char *s)
 {
     return( descrp( s, strlen( s)));
 }
@@ -951,7 +951,7 @@ char *PASCAL NEAR getnfile()
 
 	Mail/Notes entry point.  Should be declared UNIVERSAL in ME.OPT.
 */
-ME$EDIT(struct dsc$descriptor *infile, struct dsc$descriptor *outfile)
+ME$EDIT((struct dsc$descriptor *) infile, (struct dsc$descriptor *) outfile)
 {
     static int first_time = 1;
     char *instr, *outstr;

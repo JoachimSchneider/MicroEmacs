@@ -122,14 +122,16 @@ PASCAL NEAR ttopen()
 	/* check if the mouse drive exists first */
 	rg.x.ax = 0x3533;	/* look at the interrupt 33 address */
 
-#if	MSC | TURBO | IC | LATTICE | MWC
+# if	MSC | TURBO | IC | LATTICE | MWC
 	int86x(0x21, &rg, &rg, &segreg);
 	miaddr = (((long)segreg.es) << 16) + (long)rg.x.bx;
 	if (miaddr == 0 || *(char * far)miaddr == 0xcf) {
-#endif
 		mexist = FALSE;
 		return;
 	}
+# else
+#   error UNSUPPORTED COMPILER
+# endif
 
 	/* and then check for the mouse itself */
 	rg.x.ax = 0;		/* mouse status flag */
@@ -175,8 +177,8 @@ int lines;	/* # of vertical lines */
 {
 #if	MOUSE
 	if (mexist) {
-#endif
 	}
+#endif
 /* #endif*/
 }
 

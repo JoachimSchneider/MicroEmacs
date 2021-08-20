@@ -112,14 +112,15 @@ PASCAL NEAR ttopen()
 	ttcol = 999;
 
 #if	MOUSE
+# if ( ! (MSC || TURBO || IC || LATTICE || MWC) )
+		mexist = FALSE;
+# else
 	/* check if the mouse drive exists first */
 	rg.x.ax = 0x3599;	/* look at the interrupt 99 address */
 
-#if	MSC | TURBO | IC | LATTICE | MWC
 	int86x(0x21, &rg, &rg, &segreg);
 	miaddr = (((long)segreg.es) << 16) + (long)rg.x.bx;
 	if (miaddr == 0 || *(char * far)miaddr == 0xcf) {
-#endif
 		mexist = FALSE;
 		return;
 	}
@@ -143,9 +144,12 @@ PASCAL NEAR ttopen()
 	rg.x.bx = oldrow;		/* top row */
 	oldbut = 0;
 	int86(0x99, &rg, &rg);
+# endif
 #else	/* !MOUSE */
-	mexist = 0;
+	mexist = FALSE;
 #endif	/* !MOUSE */
+
+  return;
 }
 
 maxlines(lines)		/* set number of vertical rows for mouse */
