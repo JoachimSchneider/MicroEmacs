@@ -1,9 +1,8 @@
-/* LATIN.H: 	Latin language text strings for MicroEMACS 4.00
-		(C)Copyright 1995 by Daniel M. Lawrence
- 		translated 1991 by Anthony Appleyard	*/
+/* LATIN.H:     Latin language text strings for MicroEMACS 4.00 (C)Copyright
+ * 1995 by Daniel M. Lawrence translated 1991 by Anthony Appleyard  */
 
-#define	OQUOTE_CHAR	34
-#define	CQUOTE_CHAR	34
+#define OQUOTE_CHAR     34
+#define CQUOTE_CHAR     34
 
 #define TEXT1   "[incipio novum CLI]"
 #define TEXT2   "[non possum scribere filum percolationis]"
@@ -86,15 +85,18 @@
 #define TEXT79  "non inveni"
 #define TEXT80  "Nullum exemplar definitum est"
 #define TEXT81  "petere retro "
-#define TEXT82  UNUSED				/* "respicio %d cum saltu %d" */
-#define TEXT83  UNUSED				/* "ejus alius casus est %d" 'instance' vel ut A/a B/b etc? */
+#define TEXT82  UNUSED                          /* "respicio %d cum saltu %d" */
+#define TEXT83  UNUSED                          /* "ejus alius casus est %d"
+                                                 * 'instance' vel ut A/a B/b
+                                                 * etc? */
 #define TEXT84  "in loco hujus "
 #define TEXT85  "quaerens, in loco hujus "
 #define TEXT86  "ponere hoc "
 #define TEXT87  "in loco hujus: '"
 #define TEXT88  "' ponere hoc: '"
 #define TEXT89  "interrupistis!"
-#define TEXT90  "Y=ita,N=non,!=fac rest.,U=solve prec.,^G=exire,.=exire retro,?=adjuv.: "
+#define TEXT90  \
+    "Y=ita,N=non,!=fac rest.,U=solve prec.,^G=exire,.=exire retro,?=adjuv.: "
 #define TEXT91  "linum vacuum substitui, consisto igitur."
 #define TEXT92  "%D substitutiones"
 #define TEXT93  "%%ERROR dum delebam"
@@ -132,7 +134,8 @@
 #define TEXT125  "memoria est plena dum reponabam macronem"
 #define TEXT126  "%%error internalis dum oboedio circulum WHILE"
 #define TEXT127  "%%non est istum labellum"
-#define TEXT128  "(e)val exp,(c/x)=jussum,(t)=sequi exp,(^G)exire,<SP>=oboed,<META>=sistere debug"
+#define TEXT128  \
+    "(e)val exp,(c/x)=jussum,(t)=sequi exp,(^G)exire,<SP>=oboed,<META>=sistere debug"
 #define TEXT129  "filum oboediendum: "
 #define TEXT130  "iste macro non definitus est"
 #define TEXT131  "filum legendum"
@@ -222,16 +225,16 @@
 #define TEXT215  ": macro-ad-clavem "
 #define TEXT216 "non possum legere vel scribere directoria!!!"
 #define TEXT217 "[non possum adhuc istud facere sub AOS/VS]"
-#define	TEXT218	"Append file: "
+#define TEXT218 "Append file: "
 #define TEXT219 "%%Macro Failed"
-#define	TEXT220	"Linea %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x%x"
+#define TEXT220 "Linea %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x%x"
 #define TEXT221 "Too many groups"
 #define TEXT222 "Group not ended"
-#define	TEXT223 "%%Column origin out of range"
-#define	TEXT224 "%%Row origin out of range"
-#define	TEXT225 "[Switched to screen %s]"
-#define	TEXT226	"%%Can not kill an executing buffer"
-#define	TEXT227 "\n--- Press any key to Continue ---"
+#define TEXT223 "%%Column origin out of range"
+#define TEXT224 "%%Row origin out of range"
+#define TEXT225 "[Switched to screen %s]"
+#define TEXT226 "%%Can not kill an executing buffer"
+#define TEXT227 "\n--- Press any key to Continue ---"
 #define TEXT228 "[Kill ring cleared]"
 #define TEXT229 " in < "
 #define TEXT230 "> at line "
@@ -244,20 +247,20 @@
 #define TEXT245 "%%Division by Zero is illegal"
 #define TEXT246 "%%Need function key number"
 #define TEXT247 "%%Function key number out of range"
-#define	TEXT248 "Enter Label String: "
+#define TEXT248 "Enter Label String: "
 #define TEXT249 "Global variable to declare: "
-#define	TEXT250 "Local variable to declare: "
+#define TEXT250 "Local variable to declare: "
 
 /* some of these are just used in the microsoft windows version */
-#define	TEXT300 "[Incorrect menu]"
-#define	TEXT301 "[Too many nested popup menus]"
-#define	TEXT302 "[Lack of resources]"
-#define	TEXT303 "Menu: "
-#define	TEXT304 "Function: "
-#define	TEXT305 "Macro: "
-#define	TEXT306 "Menu: "
-#define	TEXT307 "Help file: "
-#define	TEXT308 "Help key: "
+#define TEXT300 "[Incorrect menu]"
+#define TEXT301 "[Too many nested popup menus]"
+#define TEXT302 "[Lack of resources]"
+#define TEXT303 "Menu: "
+#define TEXT304 "Function: "
+#define TEXT305 "Macro: "
+#define TEXT306 "Menu: "
+#define TEXT307 "Help file: "
+#define TEXT308 "Help key: "
 #define TEXT310 "Alt+"
 #define TEXT311 "Shift+"
 #define TEXT312 "BkSp"

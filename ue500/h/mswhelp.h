@@ -3,5 +3,6 @@
 #define HELPID_PROCEDURES   3
 
 #if WINXP
-#include <htmlhelp.h>
+# include <htmlhelp.h>
 #endif
+

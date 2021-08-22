@@ -1,16 +1,15 @@
-/*      EPROTO:         Global function prototypes and declarations
-                        MicroEMACS 4.00
-
-                        written by Daniel Lawrence
-                        based on code by Dave G. Conroy,
-                                Steve Wilhite and George Jones
-*/
+/*      EPROTO:         Global function prototypes and declarations MicroEMACS
+ * 4.00
+ *
+ *                       written by Daniel Lawrence based on code by Dave G.
+ * Conroy, Steve Wilhite and George Jones
+ */
 
 #if     PROTO
 
 /***    global function prototypes      ***/
 
-#if     WINDOW_MSWIN
+# if     WINDOW_MSWIN
 extern char * PASCAL fullpathname (char *PathName, int Nbuf);
 extern int PASCAL NEAR vtinitscr (SCREEN_T *sp, int nrow, int ncol);
 extern int PASCAL NEAR vtsizescr (SCREEN_T *sp, int nrow, int ncol);
@@ -34,22 +33,22 @@ extern int PASCAL NEAR unlist_screen(SCREEN_T *sp);
 extern int PASCAL mlhistory(VOID);
 extern int PASCAL updscrollbars (SCREEN_T *sp, char w_flag);
 extern VOID PASCAL NEAR vtscreen (SCREEN_T *sp);
-#endif
+# endif
 
-#if CALLED
+# if CALLED
 extern int emacs(int argc, char *argv[]);
-#endif
+# endif
 
-#if HANDLE_WINCH
+# if HANDLE_WINCH
 extern VOID winch_changed(int);
 extern VOID winch_new_size(VOID);
-#endif
+# endif
 
-#if DEBUG_SEARCH
+# if DEBUG_SEARCH
 int PASCAL NEAR mc_list(int f, int n);
 int PASCAL NEAR rmc_list(int f, int n);
 VOID PASCAL NEAR mctype_cat(char pline[], int mc_type);
-#endif
+# endif
 
 extern VOID undo_insert(OPTYPE op_type, long count, OBJECT op_erand);
 extern int undo_op(VOID);
@@ -83,7 +82,10 @@ extern char *gtname(char *filespec);
 extern char *PASCAL NEAR bytecopy(char *dst, CONST char *src, int maxlen);
 extern char *PASCAL NEAR cmdstr(int c, char *seq);
 extern char *PASCAL NEAR copystr(char *);
-extern char *PASCAL NEAR complete(char *prompt, char *defval, int type, int maxlen);
+extern char *PASCAL NEAR complete(char *prompt,
+                                  char *defval,
+                                  int  type,
+                                  int  maxlen);
 extern char *PASCAL NEAR envval(int i);
 extern CONST char *PASCAL NEAR fixnull(CONST char *s);
 extern CONST char *PASCAL NEAR flook(CONST char *fname, int hflag);
@@ -117,13 +119,13 @@ extern char *PASCAL NEAR regtostr(char *buf, REGION *region);
 extern int PASCAL NEAR lowerc(char ch);
 extern int PASCAL NEAR cycle_ring(int f, int n);
 extern int PASCAL NEAR upperc(char ch);
-#if     ZTC || TURBO || IC
-extern int (PASCAL NEAR *PASCAL NEAR fncmatch(char *fname))(int, int);
-extern int (PASCAL NEAR *PASCAL NEAR getname(char *prompt))(int, int);
-#else   /* Sun (and others?) screwed up the prototyping.*/
-extern int (PASCAL NEAR *PASCAL NEAR fncmatch(char *fname))(VOID);
-extern int (PASCAL NEAR *PASCAL NEAR getname(char *prompt))(VOID);
-#endif
+# if     ZTC || TURBO || IC
+extern int ( PASCAL NEAR *PASCAL NEAR fncmatch(char *fname) )(int, int);
+extern int ( PASCAL NEAR *PASCAL NEAR getname(char *prompt) )(int, int);
+# else  /* Sun (and others?) screwed up the prototyping.*/
+extern int ( PASCAL NEAR *PASCAL NEAR fncmatch(char *fname) )(VOID);
+extern int ( PASCAL NEAR *PASCAL NEAR getname(char *prompt) )(VOID);
+# endif
 extern int PASCAL NEAR asc_int(char *st);
 extern int dolhello(VOID);
 extern int dspram(VOID);
@@ -141,7 +143,8 @@ extern int PASCAL NEAR kill_abbrevs(int f, int n);
 extern int PASCAL NEAR ins_abbrevs(int f, int n);
 extern int PASCAL NEAR def_abbrevs(int f, int n);
 extern int PASCAL NEAR addline(BUFFER *bp, char *text);
-extern int PASCAL NEAR amatch(MC *mcptr, int direct, LINE **pcwline, int *pcwoff);
+extern int PASCAL NEAR amatch(MC *mcptr, int direct, LINE **pcwline,
+                              int *pcwoff);
 extern int PASCAL NEAR backhunt(int f, int n);
 extern int PASCAL NEAR backsearch(int f, int n);
 extern int PASCAL NEAR biteq(int bc, EBITMAP cclmap);
@@ -158,13 +161,17 @@ extern int PASCAL NEAR echostring(char *, int, int);
 extern int PASCAL NEAR eq(register unsigned char bc, register unsigned char pc);
 extern long PASCAL NEAR ernd(VOID);
 extern int PASCAL NEAR execkey(KEYTAB *key, int f, int n);
-extern int PASCAL NEAR fbound(DELTA *tbl, int jump, LINE **pcurline, int *pcuroff, int dir);
+extern int PASCAL NEAR fbound(DELTA *tbl,
+                              int   jump,
+                              LINE  **pcurline,
+                              int   *pcuroff,
+                              int   dir);
 extern int PASCAL NEAR fexist(char *fname);
 extern int PASCAL NEAR findcol(LINE *lp, int pos);
 extern int PASCAL NEAR fisearch(int f, int n);
-#if     FLABEL
+# if     FLABEL
 extern int PASCAL NEAR fnclabel(int f, int n);
-#endif
+# endif
 extern int PASCAL NEAR forwhunt(int f, int n);
 extern int PASCAL NEAR forwsearch(int f, int n);
 extern int PASCAL NEAR getcwnum(VOID);
@@ -176,9 +183,9 @@ extern int PASCAL NEAR getkey(VOID);
 extern int PASCAL NEAR getwpos(VOID);
 extern int PASCAL NEAR get_char(VOID);
 extern int PASCAL NEAR global_var(int f, int n);
-#if     DBCS
+# if     DBCS
 extern int PASCAL NEAR is2byte(char *sp, char *cp);
-#endif
+# endif
 extern int PASCAL NEAR is_letter(char ch);
 extern int PASCAL NEAR is_lower(char ch);
 extern int PASCAL NEAR is_num(char *st);
@@ -187,14 +194,20 @@ extern int PASCAL NEAR is_upper(char ch);
 extern int PASCAL NEAR kinsert(int back, char c);
 extern int PASCAL NEAR ldelnewline(VOID);
 extern int PASCAL NEAR linstr(CONST char *instr);
-extern int PASCAL NEAR liteq(LINE **curline, int *curpos, int direct, char *lstring);
+extern int PASCAL NEAR liteq(LINE **curline,
+                             int  *curpos,
+                             int  direct,
+                             char *lstring);
 extern int PASCAL NEAR litmake(char **ppatptr, MC *mcptr);
 extern int PASCAL NEAR lnewline(VOID);
 extern int PASCAL NEAR local_var(int f, int n);
 extern int PASCAL NEAR lookup_color(char *sp);
 extern int PASCAL NEAR lover(char *ostr);
 extern int PASCAL NEAR mceq(unsigned char bc, MC *mt);
-extern int PASCAL NEAR mcscanner(MC *mcpatrn, int direct, int beg_or_end, int repeats);
+extern int PASCAL NEAR mcscanner(MC  *mcpatrn,
+                                 int direct,
+                                 int beg_or_end,
+                                 int repeats);
 extern int PASCAL NEAR mcstr(VOID);
 extern int PASCAL NEAR mlprompt(char *, char *, int);
 extern int PASCAL NEAR movelocalpoint(int n, int *pcuroff, LINE **pcurline);
@@ -202,9 +215,9 @@ extern int PASCAL NEAR nextch(LINE **pcurline, int *pcuroff, int dir);
 extern int PASCAL NEAR pop(BUFFER *popbuffer);
 extern int PASCAL NEAR qreplace(int f, int n);
 extern int PASCAL NEAR readpattern(char *prompt, char apat[], int srch);
-#if     WINDOW_TEXT
+# if     WINDOW_TEXT
 extern VOID PASCAL NEAR refresh_screen(SCREEN_T *sp);
-#endif
+# endif
 extern int PASCAL NEAR reglines(VOID);
 extern int PASCAL NEAR rename_screen(int f, int n);
 extern int PASCAL NEAR replaces(int kind, int f, int n);
@@ -212,9 +225,9 @@ extern int PASCAL NEAR risearch(int f, int n);
 extern int PASCAL NEAR rmcstr(VOID);
 extern int PASCAL NEAR savematch(VOID);
 extern int PASCAL NEAR scanmore(int dir);
-#if MAGIC == 0
+# if MAGIC == 0
 extern int PASCAL NEAR scanner(int direct, int beg_or_end, int repeats);
-#endif
+# endif
 extern int PASCAL NEAR setlower(char *ch, char *val);
 extern int PASCAL NEAR setlower(char *ch, char *val);
 extern int PASCAL NEAR setupper(char *ch, char *val);
@@ -223,10 +236,10 @@ extern int PASCAL NEAR setvar(int f, int n);
 extern int PASCAL NEAR sindex(char *source, char *pattern);
 extern int PASCAL NEAR sreplace(int f, int n);
 extern int PASCAL NEAR stol(char *val);
-#if     DBCS
+# if     DBCS
 extern int PASCAL NEAR stopback(VOID);
 extern int PASCAL NEAR stopforw(VOID);
-#endif
+# endif
 extern int PASCAL NEAR svar(VDESC *var, char *value);
 extern int PASCAL NEAR tgetc(VOID);
 extern int PASCAL NEAR uneat(VOID);
@@ -253,7 +266,10 @@ extern int PASCAL NEAR backline(int f, int n);
 extern int PASCAL NEAR backpage(register int f, register int n);
 extern int PASCAL NEAR backword(int f, int n);
 extern int PASCAL NEAR bclear(BUFFER *bp);
-extern int PASCAL NEAR binary(CONST char *key, char *(PASCAL NEAR *tval)(), int tlength, int klength);
+extern int PASCAL NEAR binary(CONST char *key,
+                              char *(PASCAL NEAR *tval)(),
+                              int        tlength,
+                              int        klength);
 extern int PASCAL NEAR bindtokey(int f, int n);
 extern int PASCAL NEAR buildlist(int type, char *mstring);
 extern int PASCAL NEAR capword(int f, int n);
@@ -384,7 +400,10 @@ extern int PASCAL NEAR new_col_org(int f, int n);
 extern int PASCAL NEAR new_row_org(int f, int n);
 extern int PASCAL NEAR newsize(int f, int n);
 extern int PASCAL NEAR newwidth(int f, int n);
-extern int PASCAL NEAR nextarg(char *prompt, char *buffer, int size, int terminator);
+extern int PASCAL NEAR nextarg(char *prompt,
+                               char *buffer,
+                               int  size,
+                               int  terminator);
 extern int PASCAL NEAR nextbuffer(int f, int n);
 extern int PASCAL NEAR nextdown(int f, int n);
 extern int PASCAL NEAR nextup(int f, int n);
@@ -415,8 +434,12 @@ extern int PASCAL NEAR resizm2(int f, int n);
 extern int PASCAL NEAR resterr(VOID);
 extern int PASCAL NEAR restwnd(int f, int n);
 extern int PASCAL NEAR savewnd(int f, int n);
-extern int PASCAL NEAR scwrite(int row, char *outstr, int forg, int bacg,
-                                int revleft, int revright);
+extern int PASCAL NEAR scwrite(int  row,
+                               char *outstr,
+                               int  forg,
+                               int  bacg,
+                               int  revleft,
+                               int  revright);
 extern int PASCAL NEAR setccol(int pos);
 extern int PASCAL NEAR setekey(int f, int n);
 extern int PASCAL NEAR setfillcol(int f, int n);
@@ -469,15 +492,15 @@ extern int PASCAL NEAR zotbuf(BUFFER *bp);
 extern unsigned int PASCAL NEAR chcase(register unsigned int ch);
 extern unsigned int PASCAL NEAR getckey(int mflag);
 extern unsigned int PASCAL NEAR stock(CONST char *keyname);
-#if     VARARG && VARG
-#if     GCC
+# if     VARARG && VARG
+#  if     GCC
 extern VOID CDECL NEAR mlwrite(va_alist);
-#else
+#  else
 extern VOID CDECL NEAR mlwrite(va_dcl);
-#endif /* GCC */
-#else
+#  endif /* GCC */
+# else
 extern VOID CDECL NEAR mlwrite(char *fmt, ...);
-#endif
+# endif
 extern VOID PASCAL NEAR ab_init(VOID);
 extern VOID PASCAL NEAR ab_save(char c);
 extern VOID PASCAL NEAR ab_expand(VOID);
@@ -486,9 +509,9 @@ extern VOID PASCAL NEAR clist_command(char *name, int *cpos);
 extern VOID PASCAL NEAR clist_file(char *name, int *cpos);
 extern VOID PASCAL NEAR comp_buffer(char *name, int *cpos);
 extern VOID PASCAL NEAR comp_command(char *name, int *cpos);
-#if     !WINDOW_MSWIN
+# if     !WINDOW_MSWIN
 extern VOID PASCAL NEAR comp_file(char *name, int *cpos);
-#endif
+# endif
 extern VOID PASCAL NEAR ecrypt(char *bptr, unsigned len);
 extern VOID PASCAL NEAR errormesg(char *mesg, BUFFER *bp, LINE *lp);
 extern VOID PASCAL NEAR flong_asc(char buf[], int width, long num);
@@ -543,55 +566,55 @@ extern VOID qrep(int ch);
 extern EWINDOW *PASCAL NEAR mousewindow(int row);
 extern int PASCAL NEAR wpopup(BUFFER *popbuf);
 
-#if     CTAGS
+# if     CTAGS
 extern int PASCAL NEAR tagword(int f, int n);   /* vi-like tagging */
 extern int PASCAL NEAR retagword(int f, int n); /* Try again (if redefined) */
 extern int PASCAL NEAR backtagword(int f, int n); /* return from tagged word */
-#endif
+# endif
 
 /* some library redefinitions */
 
-#if WINXP == 0
+# if WINXP == 0
 char *strrev(char *);
-#endif
+# endif
 
-#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && IC) || GCC || VMS
-#include <stdlib.h>
-#include <string.h>
-#else
+# if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && IC) || GCC || VMS
+#  include <stdlib.h>
+#  include <string.h>
+# else
 char *getenv(char *);
 char *strcat(char *, char *);
 char *strcpy(char *, char *);
 int  strncmp(char *, char *, int);
 char *strchr(char *, int);
 int  strcmp(char *, char *);
-#if     XVT == 0 || XVTDRIVER == 0
+#  if     XVT == 0 || XVTDRIVER == 0
 int  strlen(char *);
-#if RAMSIZE == 0
+#   if RAMSIZE == 0
 char *malloc(int);
 VOID free(char *);
-#endif
+#   endif
 char *realloc(char *block, int siz);
-#endif
-#endif
+#  endif
+# endif
 
 #else
 
 /***    global function declarations    ***/
-#if CALLED
+# if CALLED
 extern int emacs();
-#endif
+# endif
 
-#if HANDLE_WINCH
+# if HANDLE_WINCH
 extern VOID winch_changed();
 extern VOID winch_new_size();
-#endif
+# endif
 
-#if DEBUG_SEARCH
+# if DEBUG_SEARCH
 int PASCAL NEAR mc_list();
 int PASCAL NEAR rmc_list();
 VOID PASCAL NEAR mctype_cat();
-#endif
+# endif
 
 
 extern VOID undo_insert();
@@ -659,8 +682,8 @@ extern char *undolock();
 extern char *PASCAL NEAR regtostr();
 extern int PASCAL NEAR lowerc();
 extern int PASCAL NEAR upperc();
-extern int (PASCAL NEAR *PASCAL NEAR fncmatch())();
-extern int (PASCAL NEAR *PASCAL NEAR getname())();
+extern int ( PASCAL NEAR *PASCAL NEAR fncmatch() )();
+extern int ( PASCAL NEAR *PASCAL NEAR getname() )();
 extern int PASCAL NEAR asc_int();
 extern int dolhello();
 extern int dspram();
@@ -702,9 +725,9 @@ extern int PASCAL NEAR fbound();
 extern int PASCAL NEAR fexist();
 extern int PASCAL NEAR findcol();
 extern int PASCAL NEAR fisearch();
-#if     FLABEL
+# if     FLABEL
 extern int PASCAL NEAR fnclabel();
-#endif
+# endif
 extern int PASCAL NEAR forwhunt();
 extern int PASCAL NEAR forwsearch();
 extern int PASCAL NEAR getcwnum();
@@ -716,9 +739,9 @@ extern int PASCAL NEAR getkey();
 extern int PASCAL NEAR getwpos();
 extern int PASCAL NEAR get_char();
 extern int PASCAL NEAR global_var();
-#if     DBCS
+# if     DBCS
 extern int PASCAL NEAR is2byte();
-#endif
+# endif
 extern int PASCAL NEAR is_letter();
 extern int PASCAL NEAR is_lower();
 extern int PASCAL NEAR is_num();
@@ -741,9 +764,9 @@ extern int PASCAL NEAR nextch();
 extern int PASCAL NEAR pop();
 extern int PASCAL NEAR qreplace();
 extern int PASCAL NEAR readpattern();
-#if     WINDOW_TEXT
+# if     WINDOW_TEXT
 extern VOID PASCAL NEAR refresh_screen();
-#endif
+# endif
 extern int PASCAL NEAR reglines();
 extern int PASCAL NEAR rename_screen();
 extern int PASCAL NEAR replaces();
@@ -760,10 +783,10 @@ extern int PASCAL NEAR setvar();
 extern int PASCAL NEAR sindex();
 extern int PASCAL NEAR sreplace();
 extern int PASCAL NEAR stol();
-#if     DBCS
+# if     DBCS
 extern int PASCAL NEAR stopback();
 extern int PASCAL NEAR stopforw();
-#endif
+# endif
 extern int PASCAL NEAR svar();
 extern int PASCAL NEAR tgetc();
 extern int PASCAL NEAR uneat();
@@ -1065,11 +1088,11 @@ extern VOID qrep();
 extern EWINDOW *PASCAL NEAR mousewindow();
 extern int PASCAL NEAR wpopup();
 
-#if     CTAGS
+# if     CTAGS
 extern int PASCAL NEAR tagword();       /* vi-like tagging */
 extern int PASCAL NEAR retagword();     /* Try again (if redefined) */
 extern int PASCAL NEAR backtagword();   /* return from tagged word */
-#endif
+# endif
 
 /* some library redefinitions */
 
@@ -1077,39 +1100,46 @@ char *getenv();
 char *strcat();
 char *strcpy();
 char *strrev();
-#if     XVT == 0 || XVTDRIVER == 0
+# if     XVT == 0 || XVTDRIVER == 0
 int  strlen();
-#if RAMSIZE == 0
+#  if RAMSIZE == 0
 char *malloc();
 VOID free();
-#endif
+#  endif
 char *realloc();
-#endif
+# endif
 #endif
 
 
-char *xstrcpy(char *s1, CONST char *s2);                    /* strcpy() possibly overlapping regions  */
-char *xstrncpy(char *s1, CONST char *s2, int n);            /* strncpy() possibly overlapping regions */
-int  xsnprintf(char *s, size_t n, CONST char *fmt, ...);    /* Like C99 snprintf() */
+char *xstrcpy(char *s1, CONST char *s2);                    /* strcpy() possibly
+                                                             * overlapping
+                                                             * regions  */
+char *xstrncpy(char *s1, CONST char *s2, int n);            /* strncpy()
+                                                             * possibly
+                                                             * overlapping
+                                                             * regions */
+int  xsnprintf(char *s, size_t n, CONST char *fmt, ...);    /* Like C99
+                                                             * snprintf() */
 char *xstrdup(CONST char *str);
 
-extern int          DebugMessage_lnno_;
+extern int DebugMessage_lnno_;
 extern CONST char   *DebugMessage_fname_;
 int  DebugMessage(CONST char *fmt, ...);
-#if ( defined(EMACS_TRC) )
+#if ( defined( EMACS_TRC) )
 # define  TRC(arg)  do {                        \
         DebugMessage_fname_ = __FILE__;         \
         DebugMessage_lnno_ = __LINE__;          \
         DebugMessage arg;                       \
-    } while ( 0 )
+} while ( 0 )
 #else
 # define  TRC(arg)  do {} while ( 0 )
 #endif
 
-#define STR(s)        ( (NULL == (s))? ((CONST char *)"@NIL@") : ((CONST char *)(s)) )
-#define MAX2(x, y)    ( ((x) < (y))?	(y) : (x) )
-#define MIN2(x, y)    ( ((x) < (y))?	(x) : (y) )
-#define NELEM(A)      ( sizeof((A))/sizeof((A)[0]) )
+#define STR(s)        ( ( NULL == \
+                          (s) )? ( (CONST char *)"@NIL@" ) : ( (CONST char *)(s) ) )
+#define MAX2(x, y)    ( ( (x) < (y) )?    (y) : (x) )
+#define MIN2(x, y)    ( ( (x) < (y) )?    (x) : (y) )
+#define NELEM(A)      ( sizeof ( (A) )/sizeof ( (A)[0] ) )
 
 
 /*

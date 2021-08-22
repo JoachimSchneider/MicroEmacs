@@ -14,6 +14,9 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 
 ## Change Log
+[2021-08-22.00]
+* Code was reformatted with uncrustify.
+
 [2021-08-05.00]
 * It works on Linux, FreeBSD, OpenBSD and Solaris (tested with SunOS 5.7).
 * Unified ifdefs for Unix Operating Systems.

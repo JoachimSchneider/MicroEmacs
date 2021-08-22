@@ -1,119 +1,71 @@
-/*	EPATH:	This file contains certain info needed to locate the
-		MicroEMACS files on a system dependant basis.
-
-									*/
-
-/*	possible names and paths of help files under different OSs	*/
+/*  EPATH:  This file contains certain info needed to locate the MicroEMACS
+ * files on a system dependant basis.
+ *
+ */
+/*  possible names and paths of help files under different OSs  */
 
 NOSHARE CONST char *pathname[] =
 
-#if	AMIGA
+#if     AMIGA
 {
-	".emacsrc",
-	"emacs.hlp",
-	"",
-	"c:",
-	":t/",
-	":s/"
+    ".emacsrc", "emacs.hlp", "", "c:", ":t/", ":s/"
 };
 
-#elif	TOS
+#elif   TOS
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"\\",
-	"\\bin\\",
-	"\\util\\",
-	""
-};
- 
-#elif	FINDER
-{
-	"emacs.rc",
-	"emacs.hlp",
-	"/bin",
-	"/sys/public",
-	""
+    "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\", ""
 };
 
-#elif	MSDOS || WINNT || WINXP
+#elif   FINDER
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"\\sys\\public\\",
-	"\\usr\\bin\\",
-	"\\bin\\",
-	"\\",
-	""
+    "emacs.rc", "emacs.hlp", "/bin", "/sys/public", ""
 };
 
-#elif	OS2
+#elif   MSDOS || WINNT || WINXP
 {
-        "emacs.rc",
-        "emacs.hlp",
-        "C:\\OS2\\SYSTEM\\",
-        "C:\\OS2\\DLL\\",
-        "C:\\OS2\\BIN\\",
-        "C:\\OS2\\",
-        "\\",
-        ""
+    "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\",
+    ""
 };
 
-#elif	IS_UNIX()
+#elif   OS2
 {
-	".emacsrc",
-	"emacs.hlp",
-	"/usr/local/",
-	"/usr/lib/",
-	""
+    "emacs.rc", "emacs.hlp", "C:\\OS2\\SYSTEM\\", "C:\\OS2\\DLL\\",
+    "C:\\OS2\\BIN\\", "C:\\OS2\\", "\\", ""
 };
 
-#elif	VMS
+#elif   IS_UNIX()
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"MICROEMACS$LIB:",
-	"SYS$LOGIN:",
-	""
+    ".emacsrc", "emacs.hlp", "/usr/local/", "/usr/lib/", ""
 };
 
-#elif	WMCS
+#elif   VMS
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"",
-	"sys$disk/syslib.users/"
+    "emacs.rc", "emacs.hlp", "MICROEMACS$LIB:", "SYS$LOGIN:", ""
 };
 
-#elif	AOSVS
+#elif   WMCS
+{
+    "emacs.rc", "emacs.hlp", "", "sys$disk/syslib.users/"
+};
+
+#elif   AOSVS
 /*
-    NOTE: you must use the Unix style pathnames here!
-*/
+ *   NOTE: you must use the Unix style pathnames here!
+ */
 {
-    "emacs.rc",
-    "emacs.hlp",
-    "",
-    "/macros/",
-    "/help/"
+    "emacs.rc", "emacs.hlp", "", "/macros/", "/help/"
 };
 
-#elif	MPE
+#elif   MPE
 {
-	"emacsrc",
-	"emacshlp",
-	".pub",
-	".pub.sys",
-	""
+    "emacsrc", "emacshlp", ".pub", ".pub.sys", ""
 };
 
 #else
 {
-	"",
-	"",
-	"",
-	"",
-	""
+    "", "", "", "", ""
 };
 #endif
 
-#define	NPNAMES	(sizeof(pathname)/sizeof(char *))
+#define NPNAMES ( sizeof (pathname)/sizeof (char *) )
+

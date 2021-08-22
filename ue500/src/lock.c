@@ -1,6 +1,6 @@
-/*	LOCK:	File locking command routines for MicroEMACS
-		written by Daniel Lawrence
-								*/
+/*  LOCK:   File locking command routines for MicroEMACS written by Daniel
+ * Lawrence
+ */
 
 #include <stdio.h>
 #include "estruct.h"
@@ -8,171 +8,177 @@
 #include "edef.h"
 #include "elang.h"
 
-#if	FILOCK
+#if     FILOCK
 
-#if ( IS_UNIX() || WMCS )
-# include <string.h>
-# include <sys/errno.h>
-#endif
+# if ( IS_UNIX() || WMCS )
+#  include <string.h>
+#  include <sys/errno.h>
+# endif
 
-#if	MSC
-#include <errno.h>
-#else
-extern int errno;		/* current error */
-#endif
+# if     MSC
+#  include <errno.h>
+# else
+extern int errno;               /* current error */
+# endif
 
-char *lname[NLOCKS];	/* names of all locked files */
-int numlocks;		/* # of current locks active */
+char *lname[NLOCKS];    /* names of all locked files */
+int numlocks;           /* # of current locks active */
 
-/* lockchk:	check a file for locking and add it to the list */
+/* lockchk: check a file for locking and add it to the list */
 
 lockchk(fname)
 
-CONST char  *fname;	/* file to check for a lock */
+CONST char  *fname;     /* file to check for a lock */
 
 {
-	register int i;		/* loop indexes */
-	register int status;	/* return status */
+    register int i;             /* loop indexes */
+    register int status;        /* return status */
 
-	/* check to see if that file is already locked here */
-	if (numlocks > 0)
-		for (i=0; i < numlocks; ++i)
-			if (strcmp(fname, lname[i]) == 0)
-				return(TRUE);
+    /* check to see if that file is already locked here */
+    if ( numlocks > 0 )
+        for ( i=0; i < numlocks; ++i )
+            if ( strcmp(fname, lname[i]) == 0 )
+                return (TRUE);
 
-	/* if we have a full locking table, bitch and leave */
-	if (numlocks == NLOCKS) {
-		mlwrite(TEXT173);
+
+
+    /* if we have a full locking table, bitch and leave */
+    if ( numlocks == NLOCKS ) {
+        mlwrite(TEXT173);
+
 /*                      "LOCK ERROR: Lock table full" */
-		return(ABORT);
-	}
+        return (ABORT);
+    }
 
-	/* next, try to lock it */
-	status = xlock(fname);
-	if (status == ABORT)	/* file is locked, no override */
-		return(ABORT);
-	if (status == FALSE)	/* locked, overriden, dont add to table */
-		return(TRUE);
+    /* next, try to lock it */
+    status = xlock(fname);
+    if ( status == ABORT )      /* file is locked, no override */
+        return (ABORT);
 
-	/* we have now locked it, add it to our table */
-	lname[++numlocks - 1] = (char *)room(strlen(fname) + 1);
-	if (lname[numlocks - 1] == NULL) {	/* room failure */
-		undolock(fname);		/* free the lock */
-		mlwrite(TEXT174);
+    if ( status == FALSE )      /* locked, overriden, dont add to table */
+        return (TRUE);
+
+    /* we have now locked it, add it to our table */
+    lname[++numlocks - 1] = (char *)room(strlen(fname) + 1);
+    if ( lname[numlocks - 1] == NULL ) {        /* room failure */
+        undolock(fname);                        /* free the lock */
+        mlwrite(TEXT174);
 /*                      "Cannot lock, out of memory" */
-		--numlocks;
-		return(ABORT);
-	}
+        --numlocks;
 
-	/* everthing is cool, add it to the table */
-	xstrcpy(lname[numlocks-1], fname);
-	return(TRUE);
+        return (ABORT);
+    }
+
+    /* everthing is cool, add it to the table */
+    xstrcpy(lname[numlocks-1], fname);
+
+    return (TRUE);
 }
 
-/*	lockrel:	release all the file locks so others may edit */
+/*  lockrel:    release all the file locks so others may edit */
 
 lockrel()
-
 {
-	register int i;		/* loop index */
-	register int status;	/* status of locks */
-	register int s;		/* status of one unlock */
+    register int i;             /* loop index */
+    register int status;        /* status of locks */
+    register int s;             /* status of one unlock */
 
-	status = TRUE;
-	while (numlocks-- > 0) {
-		if ((s = xunlock(lname[numlocks])) != TRUE)
-			status = s;
-		free(lname[numlocks]);
-	}
-	return(status);
+    status = TRUE;
+    while ( numlocks-- > 0 ) {
+        if ( ( s = xunlock(lname[numlocks]) ) != TRUE )
+            status = s;
+        free(lname[numlocks]);
+    }
+
+    return (status);
 }
 
-/* lock:	Check and lock a file from access by others
-		returns	TRUE = files was not locked and now is
-			FALSE = file was locked and overridden
-			ABORT = file was locked, abort command
-*/
+/* lock:    Check and lock a file from access by others returns TRUE = files was
+ * not locked and now is FALSE = file was locked and overridden ABORT = file was
+ * locked, abort command
+ */
 
 xlock(fname)
 
-CONST char  *fname;	/* file name to lock */
+CONST char  *fname;     /* file name to lock */
 
 {
-	register char *locker;	/* lock error message */
-	register int status;	/* return status */
-	char msg[NSTRING];	/* message string */
+    register char *locker;      /* lock error message */
+    register int status;        /* return status */
+    char msg[NSTRING];          /* message string */
 
-	/* attempt to lock the file */
-	locker = dolock(fname);
-	if (locker == NULL)	/* we win */
-		return(TRUE);
+    /* attempt to lock the file */
+    locker = dolock(fname);
+    if ( locker == NULL )       /* we win */
+        return (TRUE);
 
-	/* file failed...abort */
-	if (strncmp(locker, "LOCK", sizeof("LOCK") - 1) == 0) {
-		lckerror(locker);
+    /* file failed...abort */
+    if ( strncmp(locker, "LOCK", sizeof ("LOCK") - 1) == 0 ) {
+        lckerror(locker);
 
-		return(ABORT);
-	}
+        return (ABORT);
+    }
 
-	/* someone else has it....override? */
-	xstrcpy(msg, TEXT176);
+    /* someone else has it....override? */
+    xstrcpy(msg, TEXT176);
 /*                  "File in use by " */
-	strcat(msg, locker);
-	strcat(msg, TEXT177);
+    strcat(msg, locker);
+    strcat(msg, TEXT177);
 /*                  ", overide?" */
-	status = mlyesno(msg);		/* ask them */
-	if (status == TRUE)
-		return(FALSE);
-	else
-		return(ABORT);
+    status = mlyesno(msg);              /* ask them */
+    if ( status == TRUE )
+        return (FALSE);
+    else
+        return (ABORT);
 }
 
-/*	xunlock: Unlock a file
-		this only warns the user if it fails
-							*/
+/*  xunlock: Unlock a file this only warns the user if it fails
+ */
 
 xunlock(fname)
 
-char *fname;	/* file to unlock */
+char *fname;    /* file to unlock */
 
 {
-	register char *locker;	/* undolock return string */
+    register char *locker;      /* undolock return string */
 
-	/* unclock and return */
-	locker = undolock(fname);
-	if (locker == NULL)
-		return(TRUE);
+    /* unclock and return */
+    locker = undolock(fname);
+    if ( locker == NULL )
+        return (TRUE);
 
-	/* report the error and come back */
-	lckerror(locker);
-	return(FALSE);
+    /* report the error and come back */
+    lckerror(locker);
+
+    return (FALSE);
 }
 
-lckerror(errstr)	/* report a lock error */
+lckerror(errstr)        /* report a lock error */
 
-char *errstr;		/* lock error string to print out */
+char *errstr;           /* lock error string to print out */
 
 {
-	char obuf[NSTRING];	/* output buffer for error message */
-	char *sys_errstr = strerror(errno);
+    char obuf[NSTRING];         /* output buffer for error message */
+    char *sys_errstr = strerror(errno);
 
-	xstrcpy(obuf, errstr);
-	strcat(obuf, " - ");
-#if ( IS_UNIX() || WMCS )
-	if ( sys_errstr && *sys_errstr )
-		strcat(obuf, sys_errstr);
-	else
-		strcat(obuf, TEXT178);
+    xstrcpy(obuf, errstr);
+    strcat(obuf, " - ");
+# if ( IS_UNIX() || WMCS )
+    if ( sys_errstr && *sys_errstr )
+        strcat(obuf, sys_errstr);
+    else
+        strcat(obuf, TEXT178);
 /*                           "[can not get system error message]" */
-#else
-	strcat(obuf, "Error # ");
-	strcat(obuf, int_asc(errno));
-#endif
-	mlwrite(obuf);
-	update(TRUE);
+# else
+    strcat(obuf, "Error # ");
+    strcat( obuf, int_asc(errno) );
+# endif
+    mlwrite(obuf);
+    update(TRUE);
 }
 #else
-lckhello()	/* dummy function */
+lckhello()      /* dummy function */
 {
 }
 #endif
+

@@ -1,8 +1,6 @@
-/*      NTCONIO.C       Operating specific video & keyboard functions
- *                      for the Window NT operating system (console mode)
- *                      for MicroEMACS 4.00
- *                      (C)Copyright 1995 by Daniel M. Lawrence
- *                      Windows NT version by Walter Warniaha
+/*      NTCONIO.C       Operating specific video & keyboard functions for the
+ * Window NT operating system (console mode) for MicroEMACS 4.00 (C)Copyright
+ * 1995 by Daniel M. Lawrence Windows NT version by Walter Warniaha
  *
  * The routines in this file provide video and keyboard support using the
  * Windows NT console functions.
@@ -21,11 +19,11 @@
 #include        "elang.h"
 
 #if     NTCON
-#define NROW    80             /* Screen size.                 */
-#define NCOL    132             /* Edit if you want to.         */
-#define MARGIN  8               /* size of minimim margin and   */
-#define SCRSIZ  64              /* scroll size for extended lines */
-#define NPAUSE  5               /* # times thru update to pause */
+# define NROW    80            /* Screen size.                 */
+# define NCOL    132            /* Edit if you want to.         */
+# define MARGIN  8              /* size of minimim margin and   */
+# define SCRSIZ  64             /* scroll size for extended lines */
+# define NPAUSE  5              /* # times thru update to pause */
 
 /* Forward references.          */
 
@@ -43,19 +41,19 @@ PASCAL NEAR ntkclose();
 PASCAL NEAR ntkopen();
 PASCAL NEAR ntcres();
 PASCAL NEAR ntparm();
-#if     COLOR
+# if     COLOR
 PASCAL NEAR ntfcol();
 PASCAL NEAR ntbcol();
-#endif
+# endif
 PASCAL NEAR fnclabel();
 static WORD near ntAttribute(void);
 
 /* Screen buffer to write to. */
 static CHAR_INFO ciScreenBuffer[NROW * NCOL];
-static int      cfcolor = 0;    /* current foreground color     */
-static int      cbcolor = 15;   /* current background color     */
-static int      ctrans[] =      /* ansi to ibm color translation table  */
-        { 0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15 };
+static int cfcolor = 0;         /* current foreground color     */
+static int cbcolor = 15;        /* current background color     */
+static int ctrans[] =           /* ansi to ibm color translation table  */
+{ 0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15 };
 
 static WORD ntrow = 0;         /* current cursor row   */
 static WORD ntcol = 0;         /* current cursor col   */
@@ -79,752 +77,775 @@ static WORD wKeyEvent;
 /*
  * Standard terminal interface dispatch table.
  */
-TERM    term    = {
-        NROW-1,
-        NROW-1,
-        NCOL,
-        NCOL,
-        0, 0,
-        MARGIN,
-        SCRSIZ,
-        NPAUSE,
-        ntopen,
-        ntclose,
-        ntkopen,
-        ntkclose,
-        ntgetc,
-        ntputc,
-        ntflush,
-        ntmove,
-        nteeol,
-        nteeop,
-        nteeop,
-        ntbeep,
-        ntrev,
-        ntcres
-#if     COLOR
-        , ntfcol,
-        ntbcol
-#endif
+TERM term    =
+{
+    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, ntopen, ntclose,
+    ntkopen, ntkclose, ntgetc, ntputc, ntflush, ntmove, nteeol, nteeop, nteeop,
+    ntbeep, ntrev, ntcres
+# if     COLOR
+    , ntfcol, ntbcol
+# endif
 };
 
-/*	Mousing global variable	*/
-static int mexist;	/* is the mouse driver installed? */
-static int nbuttons;	/* number of buttons on the mouse */
-static int oldbut;	/* Previous state of mouse buttons */
-static int oldcol;	/* previous x position of mouse */
-static int oldrow;	/* previous y position of mouse */
+/*  Mousing global variable */
+static int mexist;      /* is the mouse driver installed? */
+static int nbuttons;    /* number of buttons on the mouse */
+static int oldbut;      /* Previous state of mouse buttons */
+static int oldcol;      /* previous x position of mouse */
+static int oldrow;      /* previous y position of mouse */
 
-/*	input buffers and pointers	*/
+/*  input buffers and pointers  */
 
-#define	IBUFSIZE	64	/* this must be a power of 2 */
+# define IBUFSIZE        64     /* this must be a power of 2 */
 
-unsigned char in_buf[IBUFSIZE];	/* input character buffer */
-int in_next = 0;		/* pos to retrieve next input character */
-int in_last = 0;		/* pos to place most recent input character */
+unsigned char in_buf[IBUFSIZE]; /* input character buffer */
+int in_next = 0;                /* pos to retrieve next input character */
+int in_last = 0;                /* pos to place most recent input character */
 
-void in_init()	/* initialize the input buffer */
-
+void in_init()  /* initialize the input buffer */
 {
-	in_next = in_last = 0;
+    in_next = in_last = 0;
 }
 
-int in_check()	/* is the input buffer non-empty? */
-
+int in_check()  /* is the input buffer non-empty? */
 {
-	if (in_next == in_last)
-		return(FALSE);
-	else
-		return(TRUE);
+    if ( in_next == in_last )
+        return (FALSE);
+    else
+        return (TRUE);
 }
 
 void in_put(event)
 
-int event;	/* event to enter into the input buffer */
+int event;      /* event to enter into the input buffer */
 
 {
-	in_buf[in_last++] = event;
-	in_last &= (IBUFSIZE - 1);
+    in_buf[in_last++] = event;
+    in_last &= (IBUFSIZE - 1);
 }
 
-int in_get()	/* get an event from the input buffer */
-
+int in_get()    /* get an event from the input buffer */
 {
-	register int event;	/* event to return */
+    register int event;         /* event to return */
 
-	event = in_buf[in_next++];
-	in_next &= (IBUFSIZE - 1);
-	return(event);
+    event = in_buf[in_next++];
+    in_next &= (IBUFSIZE - 1);
+
+    return (event);
 }
 
-#if COLOR
+# if COLOR
 /*----------------------------------------------------------------------*/
-/*	ntfcol()							*/
-/* Set the current foreground color.					*/
+/*  ntfcol()                            */
+/* Set the current foreground color.                    */
 /*----------------------------------------------------------------------*/
 
-PASCAL NEAR ntfcol(
-	int color)			/* color to set */
+PASCAL NEAR ntfcol(int color)                      /* color to set */
 {
-	cfcolor = ctrans[color];
+    cfcolor = ctrans[color];
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntbcol()							*/
-/* Set the current background color.					*/
+/*  ntbcol()                            */
+/* Set the current background color.                    */
 /*----------------------------------------------------------------------*/
 
-PASCAL NEAR ntbcol(
-	int color)		/* color to set */
+PASCAL NEAR ntbcol(int color)              /* color to set */
 {
-	cbcolor = ctrans[color];
+    cbcolor = ctrans[color];
 }
-#endif
+# endif
 
 static void near ntSetUpdateValues(void)
 {
-	if (ntrow < ntMin)
-		ntMin = ntrow;
-	if (ntrow > ntMax)
-		ntMax = ntrow;
-	if (ntMax == ntMin) {
-		if (ntcol < ntColMin)
-			ntColMin = ntcol;
-		if (ntcol > ntColMax)
-			ntColMax = ntcol;
-	}
+    if ( ntrow < ntMin )
+        ntMin = ntrow;
+    if ( ntrow > ntMax )
+        ntMax = ntrow;
+    if ( ntMax == ntMin ) {
+        if ( ntcol < ntColMin )
+            ntColMin = ntcol;
+        if ( ntcol > ntColMax )
+            ntColMax = ntcol;
+    }
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntmove()							*/
-/* Move the cursor. 						*/
+/*  ntmove()                            */
+/* Move the cursor.                         */
 /*----------------------------------------------------------------------*/
 
-PASCAL NEAR ntmove(
-	int row,
-	int col)
+PASCAL NEAR ntmove(int row, int col)
 {
-	COORD dwCursorPosition;
+    COORD dwCursorPosition;
 
-	ntcol = dwCursorPosition.X = col;
-	ntrow = dwCursorPosition.Y = row;
-	SetConsoleCursorPosition(hOutput, dwCursorPosition);
+    ntcol = dwCursorPosition.X = col;
+    ntrow = dwCursorPosition.Y = row;
+    SetConsoleCursorPosition(hOutput, dwCursorPosition);
 }
 
 
 /*----------------------------------------------------------------------*/
-/*	ntflush()							*/
-/* Update the physical video buffer from the logical video buffer.	*/
+/*  ntflush()                           */
+/* Update the physical video buffer from the logical video buffer.  */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntflush(void)
 {
-	SMALL_RECT srWriteRegion;
-	COORD coordUpdateBegin, coordBufferSize;
+    SMALL_RECT srWriteRegion;
+    COORD coordUpdateBegin, coordBufferSize;
 
-	if (ntMin <= ntMax) {
+    if ( ntMin <= ntMax ) {
 
-		if (ntMin == ntMax) {
+        if ( ntMin == ntMax ) {
 
-			/* Fri Feb 14 1992 WaltW - Same fuckin' line bud. */
-			srWriteRegion.Right = term.t_ncol - 1 /*ntColMax*/;
-			srWriteRegion.Left = 0; //ntColMin;
+            /* Fri Feb 14 1992 WaltW - Same fuckin' line bud. */
+            srWriteRegion.Right = term.t_ncol - 1 /*ntColMax*/;
+            srWriteRegion.Left = 0;             //ntColMin;
 
-			coordUpdateBegin.X = 0; //ntColMin;
-			coordUpdateBegin.Y = ntMin;
-		} else {
-			srWriteRegion.Right = term.t_ncol - 1;
-			srWriteRegion.Left = 0;
+            coordUpdateBegin.X = 0;             //ntColMin;
+            coordUpdateBegin.Y = ntMin;
+        } else {
+            srWriteRegion.Right = term.t_ncol - 1;
+            srWriteRegion.Left = 0;
 
-			coordUpdateBegin.X = 0;
-			coordUpdateBegin.Y = ntMin;
-		}
+            coordUpdateBegin.X = 0;
+            coordUpdateBegin.Y = ntMin;
+        }
 
-		srWriteRegion.Bottom = ntMax;
-		srWriteRegion.Top = ntMin;
+        srWriteRegion.Bottom = ntMax;
+        srWriteRegion.Top = ntMin;
 
-		coordBufferSize.X = term.t_ncol;
-		coordBufferSize.Y = term.t_nrow + 1;
+        coordBufferSize.X = term.t_ncol;
+        coordBufferSize.Y = term.t_nrow + 1;
 
-		WriteConsoleOutput(hOutput, (PCHAR_INFO)ciScreenBuffer,
-			coordBufferSize, coordUpdateBegin, &srWriteRegion);
-		ntColMax = ntMax = 0;
-		ntColMin = ntMin = (WORD) -1;
-	}
-	ntmove(ttrow, ttcol);
-	return(TRUE);
+        WriteConsoleOutput(hOutput,
+                           (PCHAR_INFO)ciScreenBuffer,
+                           coordBufferSize,
+                           coordUpdateBegin,
+                           &srWriteRegion);
+        ntColMax = ntMax = 0;
+        ntColMin = ntMin = (WORD) -1;
+    }
+    ntmove(ttrow, ttcol);
+
+    return (TRUE);
 }
 
 static void near MouseEvent(void)
-
 {
-	MOUSE_EVENT_RECORD *m_event;	/* mouse event to decode */
-	register int k;		/* current bit/button of mouse */
-	register int event;	/* encoded mouse event */
-	register int etype;	/* event type byte */
-	int mousecol;		/* current mouse column */
-	int mouserow;		/* current mouse row */
-	int sstate;		/* current shift key status */
-	int newbut;		/* new state of the mouse buttons */
+    MOUSE_EVENT_RECORD *m_event;        /* mouse event to decode */
+    register int k;             /* current bit/button of mouse */
+    register int event;         /* encoded mouse event */
+    register int etype;         /* event type byte */
+    int mousecol;               /* current mouse column */
+    int mouserow;               /* current mouse row */
+    int sstate;                 /* current shift key status */
+    int newbut;                 /* new state of the mouse buttons */
 
-	m_event = &(ir.Event.MouseEvent);
+    m_event = &(ir.Event.MouseEvent);
 
-	/* check to see if any mouse buttons are different */
-	newbut = m_event->dwButtonState;
-	mousecol = m_event->dwMousePosition.X;
-	mouserow = m_event->dwMousePosition.Y;
+    /* check to see if any mouse buttons are different */
+    newbut = m_event->dwButtonState;
+    mousecol = m_event->dwMousePosition.X;
+    mouserow = m_event->dwMousePosition.Y;
 
-	/* only notice changes */
-	if ((oldbut == newbut) && (mousecol == oldcol)
-	    && (mouserow == oldrow))
-		return(FALSE);
+    /* only notice changes */
+    if ( (oldbut == newbut) && (mousecol == oldcol)&& (mouserow == oldrow) )
+        return (FALSE);
 
-#if	0
-	printf("<%d,%d> B%d C%d F%d O%d N%d\n", m_event->dwMousePosition.Y,
-		m_event->dwMousePosition.Y, m_event->dwButtonState,
-		m_event->dwControlKeyState, m_event->dwEventFlags,
-		oldbut, newbut);
-#endif
+# if     0
+    printf("<%d,%d> B%d C%d F%d O%d N%d\n",
+           m_event->dwMousePosition.Y,
+           m_event->dwMousePosition.Y,
+           m_event->dwButtonState,
+           m_event->dwControlKeyState,
+           m_event->dwEventFlags,
+           oldbut,
+           newbut);
+# endif
 
-	/* get the shift key status as well */
-	etype = MOUS >> 8;
-	sstate = m_event->dwControlKeyState;
-	if (sstate & SHIFT_PRESSED)		/* shifted? */
-		etype |= (SHFT >> 8);
-	if ((sstate & RIGHT_CTRL_PRESSED) ||
-	    (sstate & LEFT_CTRL_PRESSED))	/* controled? */
-		etype |= (CTRL >> 8);
+    /* get the shift key status as well */
+    etype = MOUS >> 8;
+    sstate = m_event->dwControlKeyState;
+    if ( sstate & SHIFT_PRESSED )               /* shifted? */
+        etype |= (SHFT >> 8);
+    if ( (sstate & RIGHT_CTRL_PRESSED) ||(sstate & LEFT_CTRL_PRESSED) ) /*
+                                                                         * controled?
+                                                                         */
+        etype |= (CTRL >> 8);
 
-	/* no buttons changes */
-	if (oldbut == newbut) {
+    /* no buttons changes */
+    if ( oldbut == newbut ) {
 
-		/* generate a mouse movement */
-		if (((mouse_move == 1) && (mmove_flag == TRUE)) ||
-		    (mouse_move == 2)) {
-			in_put(0);
-			in_put(etype);
-			in_put(mousecol);
-			in_put(mouserow);
-			in_put('m');
-		}
-		oldcol = mousecol;
-		oldrow = mouserow;
-		return(TRUE);
-	}
+        /* generate a mouse movement */
+        if ( ( (mouse_move == 1) && (mmove_flag == TRUE) ) ||
+             (mouse_move == 2) ) {
+            in_put(0);
+            in_put(etype);
+            in_put(mousecol);
+            in_put(mouserow);
+            in_put('m');
+        }
+        oldcol = mousecol;
+        oldrow = mouserow;
 
-	for (k=1; k != (1 << nbuttons); k = k<<1) {
+        return (TRUE);
+    }
 
-		/* For each button on the mouse */
-		if ((oldbut&k) != (newbut&k)) {
-			/* This button changed, generate an event */
-			in_put(0);
-			in_put(etype);
-			in_put(mousecol);
-			in_put(mouserow);
+    for ( k=1; k != (1 << nbuttons); k = k<<1 ) {
 
-			event = ((newbut&k) ? 0 : 1);	/* up or down? */
-			if (k == 2)			/* center button? */
-				event += 4;
-			if (k == 4)			/* right button? */
-				event += 2;
-			event += 'a';
-			in_put(event);
-			oldbut = newbut;
-			oldcol = mousecol;
-			oldrow = mouserow;
-			return(TRUE);
-		}
-	}
-	return(FALSE);
+        /* For each button on the mouse */
+        if ( (oldbut&k) != (newbut&k) ) {
+            /* This button changed, generate an event */
+            in_put(0);
+            in_put(etype);
+            in_put(mousecol);
+            in_put(mouserow);
+
+            event = ( (newbut&k) ? 0 : 1 );             /* up or down? */
+            if ( k == 2 )                               /* center button? */
+                event += 4;
+            if ( k == 4 )                               /* right button? */
+                event += 2;
+            event += 'a';
+            in_put(event);
+            oldbut = newbut;
+            oldcol = mousecol;
+            oldrow = mouserow;
+
+            return (TRUE);
+        }
+    }
+
+    return (FALSE);
 }
 
 static void near WindowSizeEvent(void)
 {
-	term.t_nrow = ir.Event.WindowBufferSizeEvent.dwSize.Y - 1;
-	term.t_ncol = ir.Event.WindowBufferSizeEvent.dwSize.X;
-	ntflush();
-	SetConsoleTitle("WindowSizeEvent");
+    term.t_nrow = ir.Event.WindowBufferSizeEvent.dwSize.Y - 1;
+    term.t_ncol = ir.Event.WindowBufferSizeEvent.dwSize.X;
+    ntflush();
+    SetConsoleTitle("WindowSizeEvent");
 }
 
 /* handle the current keyboard event */
 
 static void near KeyboardEvent()
-
 {
-	int c;		/* ascii character to examine */
-	int vscan;	/* virtual scan code */
-	int prefix;	/* character prefix */
-	int state;	/* control key state from console device */
+    int c;              /* ascii character to examine */
+    int vscan;          /* virtual scan code */
+    int prefix;         /* character prefix */
+    int state;          /* control key state from console device */
 
-	/* ignore key up events */
-	if (ir.Event.KeyEvent.bKeyDown == FALSE)
-		return(FALSE);
+    /* ignore key up events */
+    if ( ir.Event.KeyEvent.bKeyDown == FALSE )
+        return (FALSE);
 
-	/* If this is an extended character, process it */
-	c = ir.Event.KeyEvent.uChar.AsciiChar;
-	state = ir.Event.KeyEvent.dwControlKeyState;
-	prefix = 0;
+    /* If this is an extended character, process it */
+    c = ir.Event.KeyEvent.uChar.AsciiChar;
+    state = ir.Event.KeyEvent.dwControlKeyState;
+    prefix = 0;
 
-	if (c == 0) {
+    if ( c == 0 ) {
 
-		/* grab the virtual scan code */
-		vscan = ir.Event.KeyEvent.wVirtualScanCode;
+        /* grab the virtual scan code */
+        vscan = ir.Event.KeyEvent.wVirtualScanCode;
 
-		/* function keys are special! */
-		if (vscan > 58 && vscan < 68) {
-			c = '1' + vscan - 59;
-			prefix = SPEC;
-			goto pastothers;
-		}
+        /* function keys are special! */
+        if ( vscan > 58 && vscan < 68 ) {
+            c = '1' + vscan - 59;
+            prefix = SPEC;
+            goto pastothers;
+        }
 
-		/* interpret code by keyscan */
-		switch (vscan) {
+        /* interpret code by keyscan */
+        switch ( vscan ) {
 
-			/* ignore these key down events */
-			case 29:	/* control */
-			case 42:	/* left shift */
-			case 54:	/* left shift */
-			case 56:	/* ALT key */
-				return;
+        /* ignore these key down events */
+        case 29:                        /* control */
+        case 42:                        /* left shift */
+        case 54:                        /* left shift */
+        case 56:                        /* ALT key */
+            return;
 
-			case 68:	/* F10 */
-				prefix = SPEC; c = '0'; break;
+        case 68:                        /* F10 */
+            prefix = SPEC;
+            c = '0';
+            break;
 
-			case 69:	/* PAUSE */
-				prefix = SPEC; c = ':'; break;
+        case 69:                        /* PAUSE */
+            prefix = SPEC;
+            c = ':';
+            break;
 
-			case 70:	/* SCROLL LOCK */
-				return;
+        case 70:                        /* SCROLL LOCK */
+            return;
 
-			case 71:	/* HOME */
-				prefix = SPEC; c = '<'; break;
+        case 71:                        /* HOME */
+            prefix = SPEC;
+            c = '<';
+            break;
 
-			case 72:	/* Cursor Up */
-				prefix = SPEC; c = 'P'; break;
+        case 72:                        /* Cursor Up */
+            prefix = SPEC;
+            c = 'P';
+            break;
 
-			case 73:	/* Page Up */
-				prefix = SPEC; c = 'Z'; break;
+        case 73:                        /* Page Up */
+            prefix = SPEC;
+            c = 'Z';
+            break;
 
-			case 75:	/* Cursor left */
-				prefix = SPEC; c = 'B'; break;
+        case 75:                        /* Cursor left */
+            prefix = SPEC;
+            c = 'B';
+            break;
 
-			case 76:	/* keypad 5 */
-				prefix = SPEC; c = 'L'; break;
+        case 76:                        /* keypad 5 */
+            prefix = SPEC;
+            c = 'L';
+            break;
 
-			case 77:	/* Cursor Right */
-				prefix = SPEC; c = 'F'; break;
+        case 77:                        /* Cursor Right */
+            prefix = SPEC;
+            c = 'F';
+            break;
 
-			case 79:	/* END */
-				prefix = SPEC; c = '>'; break;
+        case 79:                        /* END */
+            prefix = SPEC;
+            c = '>';
+            break;
 
-			case 80:	/* Cursor Down */
-				prefix = SPEC; c = 'N'; break;
+        case 80:                        /* Cursor Down */
+            prefix = SPEC;
+            c = 'N';
+            break;
 
-			case 81:	/* Page Down */
-				prefix = SPEC; c = 'V'; break;
+        case 81:                        /* Page Down */
+            prefix = SPEC;
+            c = 'V';
+            break;
 
-			case 82:	/* insert key */
-				prefix = SPEC; c = 'C'; break;
+        case 82:                        /* insert key */
+            prefix = SPEC;
+            c = 'C';
+            break;
 
-			case 83:	/* delete key */
-				prefix = SPEC; c = 'D'; break;
+        case 83:                        /* delete key */
+            prefix = SPEC;
+            c = 'D';
+            break;
 
-			case 87:	/* F11 */
-				prefix = SPEC; c = '-'; break;
+        case 87:                        /* F11 */
+            prefix = SPEC;
+            c = '-';
+            break;
 
-			case 88:	/* F12 */
-				prefix = SPEC; c = '='; break;
+        case 88:                        /* F12 */
+            prefix = SPEC;
+            c = '=';
+            break;
 
-			default:
-#if	0
-				/* tell us about a key we do net yet map! */
-				printf("<%d:%d/%d> ", ir.EventType,
-					ir.Event.KeyEvent.uChar.AsciiChar,
-					  ir.Event.KeyEvent.wVirtualScanCode);
-#endif
-				return;
-		}
+        default:
+# if     0
+            /* tell us about a key we do net yet map! */
+            printf("<%d:%d/%d> ",
+                   ir.EventType,
+                   ir.Event.KeyEvent.uChar.AsciiChar,
+                   ir.Event.KeyEvent.wVirtualScanCode);
+# endif
 
-pastothers:	/* shifted special key? */
-		if (state & SHIFT_PRESSED)
-			prefix |= SHFT;
-	}
+            return;
+        }
 
-	/* decode the various modifiers to the character */
-	if (state & (RIGHT_ALT_PRESSED | LEFT_ALT_PRESSED)) {
-		prefix |= ALTD;
-		if (islower(c))
-			c = c - 'a' + 'A';
-	}
-	if ((state & (RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED)) && c > 31)
-		prefix |= CTRL;
+pastothers:     /* shifted special key? */
+        if ( state & SHIFT_PRESSED )
+            prefix |= SHFT;
+    }
 
-	/* if there is a prefix, insert it in the input stream */
-	if (prefix != 0) {
-		in_put(0);
-		in_put(prefix >> 8);
-	}
+    /* decode the various modifiers to the character */
+    if ( state & (RIGHT_ALT_PRESSED | LEFT_ALT_PRESSED) ) {
+        prefix |= ALTD;
+        if ( islower(c) )
+            c = c - 'a' + 'A';
+    }
+    if ( ( state & (RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED) ) && c > 31 )
+        prefix |= CTRL;
 
-	/* place the ascii character in the input queue */
-	in_put(c);
-	return;
+    /* if there is a prefix, insert it in the input stream */
+    if ( prefix != 0 ) {
+        in_put(0);
+        in_put(prefix >> 8);
+    }
+
+    /* place the ascii character in the input queue */
+    in_put(c);
+
+    return;
 
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntgetc()							*/
-/* Get a character from the keyboard.					*/
+/*  ntgetc()                            */
+/* Get a character from the keyboard.                   */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntgetc()
 {
 
-	long dw;
+    long dw;
 
-ttc:	ntflush();
+ttc:    ntflush();
 
-	/* return any keystrokes waiting in the
-	   type ahead buffer */
-	if (in_check())
-		return(in_get());
+    /* return any keystrokes waiting in the type ahead buffer */
+    if ( in_check() )
+        return ( in_get() );
 
-	/* get the next keyboard/mouse/resize event */
-	ReadConsoleInput(hInput, &ir, 1, &dw);
+    /* get the next keyboard/mouse/resize event */
+    ReadConsoleInput(hInput, &ir, 1, &dw);
 
-	/* let the proper event handler field this event */
-	switch (ir.EventType) {
+    /* let the proper event handler field this event */
+    switch ( ir.EventType ) {
 
-		case KEY_EVENT:
-			KeyboardEvent();
-			goto ttc;
+    case KEY_EVENT:
+        KeyboardEvent();
+        goto ttc;
 
-		case MOUSE_EVENT:
-			MouseEvent();
-			goto ttc;
+    case MOUSE_EVENT:
+        MouseEvent();
+        goto ttc;
 
-		case WINDOW_BUFFER_SIZE_EVENT:
-			WindowSizeEvent();
-			goto ttc;
-	}
+    case WINDOW_BUFFER_SIZE_EVENT:
+        WindowSizeEvent();
+        goto ttc;
+    }
 
-	/* we should never arrive here, ignore this event */
-	goto ttc;
+    /* we should never arrive here, ignore this event */
+    goto ttc;
 }
 
-#if TYPEAH
+# if TYPEAH
 /*----------------------------------------------------------------------*/
-/*	typahead()							*/
-/* Returns true if a key has been pressed.				*/
+/*  typahead()                          */
+/* Returns true if a key has been pressed.              */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR typahead()
-
 {
-	DWORD dwCount;		/* number of pending keyboard events */
+    DWORD dwCount;              /* number of pending keyboard events */
 
-#if	1
-return(FALSE); /* temp KLUGE */
-#endif
-	/* anything waiting in the input queue? */
-	if (in_check())
-		return(TRUE);
+#  if     1
 
-	/* look ahead to see if there are any keyboard/mouse events ready */
-	if (PeekConsoleInput(hInput, &ir, 1, &dwCount) == FALSE)
-		return(FALSE);
+    return (FALSE); /* temp KLUGE */
 
-	/* let the proper event handler field this event */
-	switch (ir.EventType) {
+#  endif
+    /* anything waiting in the input queue? */
+    if ( in_check() )
+        return (TRUE);
 
-		case KEY_EVENT:
-printf("KEY event pending\n");
-			break;
+    /* look ahead to see if there are any keyboard/mouse events ready */
+    if ( PeekConsoleInput(hInput, &ir, 1, &dwCount) == FALSE )
+        return (FALSE);
 
-		case MOUSE_EVENT:
-printf("MOUSE event pending\n");
-			break;
+    /* let the proper event handler field this event */
+    switch ( ir.EventType ) {
 
-		case WINDOW_BUFFER_SIZE_EVENT:
-printf("RESIZE event pending\n");
-			break;
+    case KEY_EVENT:
+        printf("KEY event pending\n");
+        break;
 
-		case MENU_EVENT:
-printf("MENU event pending\n");
-			break;
+    case MOUSE_EVENT:
+        printf("MOUSE event pending\n");
+        break;
 
-		case FOCUS_EVENT:
-printf("FOCUS event pending\n");
-			break;
+    case WINDOW_BUFFER_SIZE_EVENT:
+        printf("RESIZE event pending\n");
+        break;
 
-printf("UNKNOWN event pending\n");
-	}
+    case MENU_EVENT:
+        printf("MENU event pending\n");
+        break;
 
-	return(dwCount ? TRUE : FALSE);
+    case FOCUS_EVENT:
+        printf("FOCUS event pending\n");
+        break;
+
+        printf("UNKNOWN event pending\n");
+    }
+
+    return (dwCount ? TRUE : FALSE);
 }
-#endif
+# endif
 
 static WORD near ntAttribute(void)
 {
-	return(revflag ? (cbcolor | (cfcolor << 4)) : ((cbcolor << 4) | cfcolor));
+    return ( revflag ? ( cbcolor |
+                         (cfcolor << 4) ) : ( (cbcolor << 4) | cfcolor ) );
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntputc()							*/
-/* Put a character at the current position in the current colors.	*/
-/* Note that this does not behave the same as putc() or VioWrtTTy().	*/
+/*  ntputc()                            */
+/* Put a character at the current position in the current colors.   */
+/* Note that this does not behave the same as putc() or VioWrtTTy().    */
 /* This routine does nothing with returns and linefeeds.  For backspace */
-/* it puts a space in the previous column and moves the cursor to the	*/
-/* previous column.  For all other characters, it will display the	*/
-/* graphic representation of the character and put the cursor in the	*/
+/* it puts a space in the previous column and moves the cursor to the   */
+/* previous column.  For all other characters, it will display the  */
+/* graphic representation of the character and put the cursor in the    */
 /* next column (even if that is off the screen.  In practice this isn't */
-/* a problem.								*/
+/* a problem.                               */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntputc(int c)
 {
-	WORD wScreenPos;
+    WORD wScreenPos;
 
-	/* This is TEMPORARY  no characters before the screen!!! */
-	if (ntcol < 0 || ntcol > 32000)
-			return;
+    /* This is TEMPORARY  no characters before the screen!!! */
+    if ( ntcol < 0 || ntcol > 32000 )
+        return;
 
-	if (c == '\n' || c == '\r') { 		/* returns and linefeeds */
-		ntrow++;
-		ntcol = 0;
-		return;
-	}
+    if ( c == '\n' || c == '\r' ) {             /* returns and linefeeds */
+        ntrow++;
+        ntcol = 0;
 
-	if (c == '\b') {			/* backspace */
-		--ntcol;
-		ntputc(' ');
-		--ntcol;
-		return;
-	}
+        return;
+    }
 
-	wScreenPos = (ntrow * term.t_ncol) + ntcol++;
-	ciScreenBuffer[wScreenPos].Char.AsciiChar = c;
-	ciScreenBuffer[wScreenPos].Attributes = ntAttribute();
-	ntSetUpdateValues();
+    if ( c == '\b' ) {                          /* backspace */
+        --ntcol;
+        ntputc(' ');
+        --ntcol;
+
+        return;
+    }
+
+    wScreenPos = (ntrow * term.t_ncol) + ntcol++;
+    ciScreenBuffer[wScreenPos].Char.AsciiChar = c;
+    ciScreenBuffer[wScreenPos].Attributes = ntAttribute();
+    ntSetUpdateValues();
 }
 
 
 /*----------------------------------------------------------------------*/
-/*	nteeol()							*/
-/* Erase to end of line.						*/
+/*  nteeol()                            */
+/* Erase to end of line.                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR nteeol()
 {
-	WORD wNum;
-	WORD wScreenPos;
-	WORD wAttribute;
+    WORD wNum;
+    WORD wScreenPos;
+    WORD wAttribute;
 
-	/* This is TEMPORARY  no characters before the screen!!! */
-	if (ntcol < 0 || ntcol > 32000)
-			return;
+    /* This is TEMPORARY  no characters before the screen!!! */
+    if ( ntcol < 0 || ntcol > 32000 )
+        return;
 
-	wNum = term.t_ncol - ntcol;
-	wScreenPos = ntrow * term.t_ncol + ntcol;
-	wAttribute = ntAttribute();
-	for (; wNum; wNum--) {
-		ciScreenBuffer[wScreenPos].Char.AsciiChar = ' ';
-		ciScreenBuffer[wScreenPos].Attributes = wAttribute;
-		wScreenPos++, ntcol++;
-	}
-	ntSetUpdateValues();
+    wNum = term.t_ncol - ntcol;
+    wScreenPos = ntrow * term.t_ncol + ntcol;
+    wAttribute = ntAttribute();
+    for (; wNum; wNum-- ) {
+        ciScreenBuffer[wScreenPos].Char.AsciiChar = ' ';
+        ciScreenBuffer[wScreenPos].Attributes = wAttribute;
+        wScreenPos++, ntcol++;
+    }
+    ntSetUpdateValues();
 }
 
 
 /*----------------------------------------------------------------------*/
-/*	nteeop()							*/
-/* Erase to end of page.						*/
+/*  nteeop()                            */
+/* Erase to end of page.                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR nteeop()
 {
-	WORD wNum;
-	WORD wScreenPos;
-	WORD wAttribute;
+    WORD wNum;
+    WORD wScreenPos;
+    WORD wAttribute;
 
-#if	COLOR
-	ntfcol(gfcolor);
-	ntbcol(gbcolor);
-#endif
+# if     COLOR
+    ntfcol(gfcolor);
+    ntbcol(gbcolor);
+# endif
 
-	wNum = (term.t_ncol - ntcol) + ((term.t_ncol * term.t_nrow) - ntrow);
-	wScreenPos = ntrow * term.t_ncol + ntcol;
-	wAttribute = ntAttribute();
-	for (; wNum; wNum--) {
-		ciScreenBuffer[wScreenPos].Char.AsciiChar = ' ';
-		ciScreenBuffer[wScreenPos].Attributes = wAttribute;
-		wScreenPos++, ntcol++;
-	}
-	ntSetUpdateValues();
+    wNum = (term.t_ncol - ntcol) + ( (term.t_ncol * term.t_nrow) - ntrow );
+    wScreenPos = ntrow * term.t_ncol + ntcol;
+    wAttribute = ntAttribute();
+    for (; wNum; wNum-- ) {
+        ciScreenBuffer[wScreenPos].Char.AsciiChar = ' ';
+        ciScreenBuffer[wScreenPos].Attributes = wAttribute;
+        wScreenPos++, ntcol++;
+    }
+    ntSetUpdateValues();
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntrev() 						*/
-/* Change reverse video state.						*/
+/*  ntrev()                         */
+/* Change reverse video state.                      */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntrev(state)
 
-int state;	/* TRUE = reverse, FALSE = normal */
+int state;      /* TRUE = reverse, FALSE = normal */
 
 {
-	revflag = state;
+    revflag = state;
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntcres()							*/
-/* Change the screen resolution.					*/
+/*  ntcres()                            */
+/* Change the screen resolution.                    */
 /*----------------------------------------------------------------------*/
 
-PASCAL NEAR ntcres(char *res)		/* name of desired video mode	*/
+PASCAL NEAR ntcres(char *res)           /* name of desired video mode   */
 {
-	return TRUE;
+    return TRUE;
 }
 
 
 /*----------------------------------------------------------------------*/
-/*	spal()								*/
-/* Change pallette settings.  (Does nothing.)				*/
+/*  spal()                              */
+/* Change pallette settings.  (Does nothing.)               */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR spal(char *dummy)
 {
-	return(TRUE);
+    return (TRUE);
 }
 
 
 /*----------------------------------------------------------------------*/
-/*	ntbeep()							*/
+/*  ntbeep()                            */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntbeep()
 {
-//	  _beep(1200, 80);
-	return(TRUE);
+//    _beep(1200, 80);
+    return (TRUE);
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntopen()							*/
+/*  ntopen()                            */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntopen()
 {
-	CONSOLE_SCREEN_BUFFER_INFO Console;
+    CONSOLE_SCREEN_BUFFER_INFO Console;
 
-	/* initialize the input queue */
-	in_init();
-	xstrcpy(os, "WINNT");
+    /* initialize the input queue */
+    in_init();
+    xstrcpy(os, "WINNT");
 
-	/* This will allocate a console if started from
-	 * the windows NT program manager. */
-	AllocConsole();
+    /* This will allocate a console if started from the windows NT program
+     * manager. */
+    AllocConsole();
 
-	/* Save the titlebar of the window so we can
-	 * restore it when we leave. */
-	GetConsoleTitle(chConsoleTitle, sizeof(chConsoleTitle));
+    /* Save the titlebar of the window so we can restore it when we leave. */
+    GetConsoleTitle( chConsoleTitle, sizeof (chConsoleTitle) );
 
-	/* Set Window Title to MicroEMACS */
-	SetConsoleTitle(PROGNAME);
+    /* Set Window Title to MicroEMACS */
+    SetConsoleTitle(PROGNAME);
 
-	/* Get our standard handles */
-	hInput = GetStdHandle(STD_INPUT_HANDLE);
-	hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
+    /* Get our standard handles */
+    hInput = GetStdHandle(STD_INPUT_HANDLE);
+    hOutput = GetStdHandle(STD_OUTPUT_HANDLE);
 
-	/* get a ptr to the output screen buffer */
-	GetConsoleScreenBufferInfo(hOutput, &Console);
-	SetConsoleMode(hInput, ENABLE_WINDOW_INPUT);
+    /* get a ptr to the output screen buffer */
+    GetConsoleScreenBufferInfo(hOutput, &Console);
+    SetConsoleMode(hInput, ENABLE_WINDOW_INPUT);
 
-	/* let MicroEMACS know our starting screen size */
-#if	0
-	term.t_nrow = Console.dwSize.Y - 1;
-	term.t_ncol = Console.dwSize.X;
-#else
-	term.t_nrow = 24;
-	term.t_ncol = 80;
-	term.t_mrow = 24;
-	term.t_mcol = 80;
-#endif
+    /* let MicroEMACS know our starting screen size */
+# if     0
+    term.t_nrow = Console.dwSize.Y - 1;
+    term.t_ncol = Console.dwSize.X;
+# else
+    term.t_nrow = 24;
+    term.t_ncol = 80;
+    term.t_mrow = 24;
+    term.t_mcol = 80;
+# endif
 
-	ntColMin = ntMin = (WORD)-1;
-	ntColMax = ntMax = 0;
+    ntColMin = ntMin = (WORD)-1;
+    ntColMax = ntMax = 0;
 
-	/* we always have a mouse under NT */
-	mexist = GetNumberOfConsoleMouseButtons(&nbuttons);
-	oldcol = -1;
-	oldrow = -1;
-	oldbut = 0;
+    /* we always have a mouse under NT */
+    mexist = GetNumberOfConsoleMouseButtons(&nbuttons);
+    oldcol = -1;
+    oldrow = -1;
+    oldbut = 0;
 
-	/* initialize some attributes about the output screen */
-	revexist = TRUE;
-	revflag = FALSE;
-	eolexist = TRUE;
-/*	gfcolor = 15;
-	gbcolor = 0;*/
-	cfcolor = 7;
-	cbcolor = 0;
+    /* initialize some attributes about the output screen */
+    revexist = TRUE;
+    revflag = FALSE;
+    eolexist = TRUE;
+/*  gfcolor = 15;
+ *       gbcolor = 0;*/
+    cfcolor = 7;
+    cbcolor = 0;
 
-	return(TRUE);
+    return (TRUE);
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntclose()							*/
-/* Restore the original video settings. 				*/
+/*  ntclose()                           */
+/* Restore the original video settings.                 */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntclose()
 {
-	/* reset the title on the window */
-	SetConsoleTitle(chConsoleTitle);
+    /* reset the title on the window */
+    SetConsoleTitle(chConsoleTitle);
 
-	FreeConsole();
-	return(TRUE);
+    FreeConsole();
+
+    return (TRUE);
 }
 
 /*----------------------------------------------------------------------*/
-/*	ntkopen()							*/
-/* Open the keyboard.							*/
+/*  ntkopen()                           */
+/* Open the keyboard.                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntkopen()
 {
-	/* save the original console mode to restore on exit */
-	GetConsoleMode(hInput, &OldConsoleMode);
+    /* save the original console mode to restore on exit */
+    GetConsoleMode(hInput, &OldConsoleMode);
 
-	/* and reset this to what MicroEMACS needs */
-	ConsoleMode = OldConsoleMode;
-	ConsoleMode &= ~(ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT |
-		ENABLE_ECHO_INPUT | ENABLE_WINDOW_INPUT);
-	ConsoleMode |= ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
-	SetConsoleMode(hInput, ConsoleMode);
+    /* and reset this to what MicroEMACS needs */
+    ConsoleMode = OldConsoleMode;
+    ConsoleMode &=
+        ~(ENABLE_PROCESSED_INPUT | ENABLE_LINE_INPUT |ENABLE_ECHO_INPUT |
+          ENABLE_WINDOW_INPUT);
+    ConsoleMode |= ENABLE_WINDOW_INPUT | ENABLE_MOUSE_INPUT;
+    SetConsoleMode(hInput, ConsoleMode);
 
-	return(TRUE);
+    return (TRUE);
 }
 
 
 /*----------------------------------------------------------------------*/
-/*	ntkclose()							*/
-/* Close the keyboard.							*/
+/*  ntkclose()                          */
+/* Close the keyboard.                          */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntkclose()
 {
-	/* restore the console mode from entry */
-	SetConsoleMode(hInput, OldConsoleMode);
-	return(TRUE);
+    /* restore the console mode from entry */
+    SetConsoleMode(hInput, OldConsoleMode);
+
+    return (TRUE);
 }
 
-#if FLABEL
-PASCAL NEAR fnclabel(f, n)	/* label a function key */
+# if FLABEL
+PASCAL NEAR fnclabel(f, n)      /* label a function key */
 
-int f,n;	/* default flag, numeric argument [unused] */
+int f, n;        /* default flag, numeric argument [unused] */
 
 {
-	/* on machines with no function keys...don't bother */
-	return(TRUE);
+    /* on machines with no function keys...don't bother */
+    return (TRUE);
 }
+# endif
 #endif
-#endif
+
