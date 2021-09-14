@@ -674,7 +674,7 @@ char *mode;     /* mode to open file (w = write a = append) */
     lp = lforw(curbp->b_linep);         /* start at the first line. */
     nline = 0L;                         /* track the Number of lines    */
     while ( lp != curbp->b_linep ) {
-        if ( ( status = ffputline( &lp->l_text[0], lused(lp) ) ) != FIOSUC )
+        if ( ( status = ffputline( lgetcp(lp, 0), get_lused(lp) ) ) != FIOSUC )
             break;
         ++nline;
         lp = lforw(lp);

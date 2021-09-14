@@ -418,7 +418,7 @@ int iflag;      /* list hidden buffer flag */
         nbytes = 0L;                            /* Count bytes in buf.  */
         lp = lforw(bp->b_linep);
         while ( lp != bp->b_linep ) {
-            nbytes += (long)lused(lp)+1L;
+            nbytes += (long)get_lused(lp)+1L;
             lp = lforw(lp);
         }
         flong_asc(b, 7, nbytes);                    /* 7 digit buffer size. */

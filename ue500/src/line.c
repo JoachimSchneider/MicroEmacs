@@ -23,8 +23,9 @@ static long last_size = -1L;    /* last # of bytes yanked */
 
 /*
  * This routine allocates a block of memory large enough to hold a LINE
- * containing "used" characters. Return a pointer to the new block, or NULL if
- * there isn't any memory left. Print a message in the message line if no space.
+ * containing "used" characters plus one trailing '\0'.
+ * Return a pointer to the new block, or NULL if there isn't any memory
+ * left. Print a message in the message line if no space.
  */
 
 LINE *PASCAL NEAR lalloc(used)
@@ -34,14 +35,15 @@ register int used;
 {
     register LINE   *lp;
 
-    if ( ( lp = (LINE *)room(sizeof (LINE)+used) ) == NULL ) {
+    if ( ( lp = (LINE *)room( sizeof (LINE) + used ) ) == NULL ) {
         mlabort(TEXT94);
 
 /*                      "%%Out of memory" */
         return (NULL);
     }
-    lp->l_size = used;
-    lp->l_used = used;
+    lp->l_size_ = used;
+    /* JES_UNSEC_CODE: Setting l_used to 0 here dos *not* work, but I don't know why. */
+    lp->l_used_ = used;
 #if     WINDOW_MSWIN
     {
         static int o = 0;
@@ -233,16 +235,16 @@ char c;
 #endif
 
 {
-    register char   *cp1;
-    register char   *cp2;
-    register LINE   *lp1;
-    register LINE   *lp2;
-    register LINE   *lp3;
-    register int doto;
-    register int i;
-    register EWINDOW *wp;
-    SCREEN_T *scrp;             /* screen to fix pointers in */
-    int cmark;                  /* current mark */
+    register char     *cp1;
+    register char     *cp2;
+    register LINE     *lp1;
+    register LINE     *lp2;
+    register LINE     *lp3;
+    register int      doto;
+    register int      i;
+    register EWINDOW  *wp;
+    SCREEN_T          *scrp;    /* screen to fix pointers in */
+    int               cmark;    /* current mark */
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -273,31 +275,31 @@ char c;
         if ( ( lp2=lalloc( BSIZE(n) ) ) == NULL )       /* Allocate new line    */
             return (FALSE);
 
-        lp2->l_used = n;
+        set_lused(lp2, n);
         lp3 = lp1->l_bp;                        /* Previous line    */
         lp3->l_fp = lp2;                        /* Link in      */
         lp2->l_fp = lp1;
         lp1->l_bp = lp2;
         lp2->l_bp = lp3;
-        for ( i=0; i<n; ++i )
-            lp2->l_text[i] = c;
+        for ( i = 0; i < n; ++i )
+            lputc(lp2, i, c);
         curwp->w_dotp = lp2;
         curwp->w_doto = n;
 
         return (TRUE);
     }
-    doto = curwp->w_doto;                       /* Save for later.  */
-    if ( lp1->l_used+n > lp1->l_size ) {        /* Hard: reallocate */
-        if ( ( lp2=lalloc( BSIZE(lp1->l_used+n) ) ) == NULL )
+    doto = curwp->w_doto;                         /* Save for later.  */
+    if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate */
+        if ( ( lp2=lalloc( BSIZE(get_lused(lp1) + n) ) ) == NULL )
             return (FALSE);
 
-        lp2->l_used = lp1->l_used+n;
-        cp1 = &lp1->l_text[0];
-        cp2 = &lp2->l_text[0];
-        while ( cp1 != &lp1->l_text[doto] )
+        set_lused(lp2, get_lused(lp1) + n);
+        cp1 = lgetcp(lp1, 0);
+        cp2 = lgetcp(lp2, 0);
+        while ( cp1 < lgetcp(lp1, doto) )
             *cp2++ = *cp1++;
         cp2 += n;
-        while ( cp1 != &lp1->l_text[lp1->l_used] )
+        while ( cp1 < lgetcp(lp1, get_lused(lp1)) )
             *cp2++ = *cp1++;
         lp1->l_bp->l_fp = lp2;
         lp2->l_fp = lp1->l_fp;
@@ -306,14 +308,14 @@ char c;
         free( (char *) lp1 );
     } else {                                    /* Easy: in place   */
         lp2 = lp1;                              /* Pretend new line */
-        lp2->l_used += n;
-        cp2 = &lp1->l_text[lp1->l_used];
+        set_lused(lp2, get_lused(lp2) + n);
+        cp2 = lgetcp(lp1, get_lused(lp1));
         cp1 = cp2-n;
-        while ( cp1 != &lp1->l_text[doto] )
+        while ( cp1 > lgetcp(lp1, doto) )
             *--cp2 = *--cp1;
     }
-    for ( i=0; i<n; ++i )                       /* Add the characters   */
-        lp2->l_text[doto+i] = c;
+    for ( i = 0; i < n; ++i )                   /* Add the characters   */
+        lputc(lp2, doto + i, c);
     /* in all screens.... */
     scrp = first_screen;
     while ( scrp ) {
@@ -358,7 +360,7 @@ char c;         /* character to overwrite on current position */
 #endif
 
 {
-    if ( curwp->w_doto < curwp->w_dotp->l_used &&
+    if ( curwp->w_doto < get_lused(curwp->w_dotp) &&
          ( (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || tabsize == 0) ||
            (curwp->w_doto) % tabsize == tabsize -1 ) )
         ldelete(1L, FALSE);
@@ -403,14 +405,14 @@ char    *ostr;
  */
 int PASCAL NEAR lnewline()
 {
-    register char   *cp1;
-    register char   *cp2;
-    register LINE   *lp1;
-    register LINE   *lp2;
-    register int doto;
-    register EWINDOW *wp;
-    SCREEN_T *scrp;             /* screen to fix pointers in */
-    int cmark;                  /* current mark */
+    register char     *cp1;
+    register char     *cp2;
+    register LINE     *lp1;
+    register LINE     *lp2;
+    register int      doto;
+    register EWINDOW  *wp;
+    SCREEN_T          *scrp;  /* screen to fix pointers in */
+    int cmark;                /* current mark */
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -425,14 +427,14 @@ int PASCAL NEAR lnewline()
     if ( ( lp2=lalloc(doto) ) == NULL )         /* New first half line  */
         return (FALSE);
 
-    cp1 = &lp1->l_text[0];                      /* Shuffle text around  */
-    cp2 = &lp2->l_text[0];
-    while ( cp1 != &lp1->l_text[doto] )
+    cp1 = lgetcp(lp1, 0);                      /* Shuffle text around  */
+    cp2 = lgetcp(lp2, 0);
+    while ( cp1 < lgetcp(lp1, doto) )
         *cp2++ = *cp1++;
-    cp2 = &lp1->l_text[0];
-    while ( cp1 != &lp1->l_text[lp1->l_used] )
+    cp2 = lgetcp(lp1, 0);
+    while ( cp1 < lgetcp(lp1, get_lused(lp1)) )
         *cp2++ = *cp1++;
-    lp1->l_used -= doto;
+    set_lused(lp1, get_lused(lp1) - doto);
     lp2->l_bp = lp1->l_bp;
     lp1->l_bp = lp2;
     lp2->l_bp->l_fp = lp2;
@@ -488,13 +490,13 @@ long n;         /* # of chars to delete */
 int kflag;      /* put killed text in kill buffer flag */
 
 {
-    register char   *cp1;
-    register char   *cp2;
-    register LINE   *dotp;
-    register int doto;
-    register int chunk;
-    register EWINDOW *wp;
-    int cmark;                  /* current mark */
+    register char     *cp1;
+    register char     *cp2;
+    register LINE     *dotp;
+    register int      doto;
+    register int      chunk;
+    register EWINDOW  *wp;
+    register int      cmark;  /* current mark */
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -506,22 +508,27 @@ int kflag;      /* put killed text in kill buffer flag */
 #if     DBCS
             /* never start forward on a 2 byte char */
             if ( curwp->w_doto > 0 &&
-                 is2byte(curwp->w_dotp->l_text,
-                         &curwp->w_dotp->l_text[curwp->w_doto - 1]) ) {
+                 is2byte(lgetcp(curwp->w_dotp,                 0),
+                         lgetcp(curwp->w_dotp, curwp->w_doto - 1)) ) {
                 curwp->w_doto--;
                 n++;
             }
 #endif
             /* record the current point */
             dotp = curwp->w_dotp;
+#ifdef JES_UNSEC_CODE
             doto = curwp->w_doto;
+#else
+            doto = MIN2(curwp->w_doto, get_lused(dotp));
+            TRC(("Original doto: %d, Fixed doto: %d", (int)curwp->w_doto, doto));
+#endif            
 
             /* can't delete past the end of the buffer */
             if ( dotp == curbp->b_linep )
                 return (FALSE);
 
             /* find out how many chars to delete on this line */
-            chunk = dotp->l_used-doto;                  /* Size of chunk.   */
+            chunk = get_lused(dotp) - doto;   /* Size of chunk.   */
             if ( chunk > n )
                 chunk = n;
 
@@ -542,11 +549,11 @@ int kflag;      /* put killed text in kill buffer flag */
             lchange(WFEDIT);
 
             /* find the limits of the kill */
-            cp1 = &dotp->l_text[doto];
+            cp1 = lgetcp(dotp, doto);
             cp2 = cp1 + chunk;
 #if     DBCS
             /* never leave half a character */
-            if ( is2byte(dotp->l_text, cp2 - 1) ) {
+            if ( is2byte(lgetcp(dotp, 0), cp2 - 1) ) {
                 ++chunk;
                 ++cp2;
                 ++n;
@@ -567,13 +574,14 @@ int kflag;      /* put killed text in kill buffer flag */
 
                     ++cp1;
                 }
-                cp1 = &dotp->l_text[doto];
+                cp1 = lgetcp(dotp, doto);
             }
 
             /* copy what is left of the line upward */
-            while ( cp2 != &dotp->l_text[dotp->l_used] )
+            while ( cp2 < lgetcp(dotp, get_lused(dotp)) )
                 *cp1++ = *cp2++;
-            dotp->l_used -= chunk;
+            /** JES_UNSEC_CODE: chunk .LT. 0 **/
+            set_lused(dotp, get_lused(dotp) - chunk);
 
             /* fix any other windows with the same text displayed */
             wp = wheadp;
@@ -608,8 +616,8 @@ int kflag;      /* put killed text in kill buffer flag */
 #if     DBCS
             /* never start backwards on the 1st of a 2 byte character */
             if ( curwp->w_doto > 1 &&
-                 is2byte(curwp->w_dotp->l_text,
-                         &curwp->w_dotp->l_text[curwp->w_doto-1]) ) {
+                 is2byte(lgetcp(curwp->w_dotp,                 0),
+                         lgetcp(curwp->w_dotp, curwp->w_doto - 1)) ) {
                 curwp->w_doto++;
                 n--;
             }
@@ -645,10 +653,10 @@ int kflag;      /* put killed text in kill buffer flag */
             lchange(WFEDIT);
 
             /* find the limits of the kill */
-            cp1 = &dotp->l_text[doto];
+            cp1 = lgetcp(dotp, doto);
             cp2 = cp1 - chunk;
 #if     DBCS
-            if ( is2byte(dotp->l_text, cp2 - 1) ) {
+            if ( is2byte(lgetcp(dotp, 0), cp2 - 1) ) {
                 ++chunk;
                 --cp2;
                 ++n;
@@ -669,13 +677,13 @@ int kflag;      /* put killed text in kill buffer flag */
                     if ( kinsert( REVERSE, *(--cp1) ) == FALSE )
                         return (FALSE);
                 }
-                cp1 = &dotp->l_text[doto];
+                cp1 = lgetcp(dotp, doto);
             }
 
             /* copy what is left of the line downward */
-            while ( cp1 != &dotp->l_text[dotp->l_used] )
+            while ( cp1 < lgetcp(dotp, get_lused(dotp)) )
                 *cp2++ = *cp1++;
-            dotp->l_used -= chunk;
+            set_lused(dotp, get_lused(dotp) - chunk);
             curwp->w_doto -= chunk;
 
             /* fix any other windows with the same text displayed */
@@ -730,7 +738,7 @@ char *rline;
     /* find the contents of the current line and its length */
     lp = curwp->w_dotp;
     sp = ltext(lp);
-    size = lused(lp);
+    size = get_lused(lp);
     if ( size >= NSTRING )
         size = NSTRING - 1;
 
@@ -797,15 +805,15 @@ int PASCAL NEAR ldelnewline()
     lp1 = curwp->w_dotp;
     lp2 = lp1->l_fp;
     if ( lp2 == curbp->b_linep ) {              /* At the buffer end.   */
-        if ( lp1->l_used == 0 )                 /* Blank line.      */
+        if ( get_lused(lp1) == 0 )              /* Blank line.          */
             lfree(lp1);
 
         return (TRUE);
     }
-    if ( lp2->l_used <= lp1->l_size-lp1->l_used ) {
-        cp1 = &lp1->l_text[lp1->l_used];
-        cp2 = &lp2->l_text[0];
-        while ( cp2 != &lp2->l_text[lp2->l_used] )
+    if ( get_lused(lp2) <= get_lsize(lp1) - get_lused(lp1) ) {
+        cp1 = lgetcp(lp1, get_lused(lp1));
+        cp2 = lgetcp(lp2, 0);
+        while ( cp2 < lgetcp(lp2, get_lused(lp2)) )
             *cp1++ = *cp2++;
 
         /* in all screens.... */
@@ -818,12 +826,12 @@ int PASCAL NEAR ldelnewline()
                     wp->w_linep = lp1;
                 if ( wp->w_dotp == lp2 ) {
                     wp->w_dotp  = lp1;
-                    wp->w_doto += lp1->l_used;
+                    wp->w_doto += get_lused(lp1);
                 }
                 for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                     if ( wp->w_markp[cmark] == lp2 ) {
                         wp->w_markp[cmark]  = lp1;
-                        wp->w_marko[cmark] += lp1->l_used;
+                        wp->w_marko[cmark] += get_lused(lp1);
                     }
                 }
                 wp = wp->w_wndp;
@@ -833,22 +841,22 @@ int PASCAL NEAR ldelnewline()
             scrp = scrp->s_next_screen;
         }
 
-        lp1->l_used += lp2->l_used;
+        set_lused(lp1, get_lused(lp1) + get_lused(lp2));
         lp1->l_fp = lp2->l_fp;
         lp2->l_fp->l_bp = lp1;
         free( (char *) lp2 );
 
         return (TRUE);
     }
-    if ( ( lp3=lalloc(lp1->l_used+lp2->l_used) ) == NULL )
+    if ( ( lp3=lalloc(get_lused(lp1)+get_lused(lp2)) ) == NULL )
         return (FALSE);
 
-    cp1 = &lp1->l_text[0];
-    cp2 = &lp3->l_text[0];
-    while ( cp1 != &lp1->l_text[lp1->l_used] )
+    cp1 = lgetcp(lp1, 0);
+    cp2 = lgetcp(lp3, 0);
+    while ( cp1 < lgetcp(lp1, get_lused(lp1)) )
         *cp2++ = *cp1++;
-    cp1 = &lp2->l_text[0];
-    while ( cp1 != &lp2->l_text[lp2->l_used] )
+    cp1 = lgetcp(lp2, 0);
+    while ( cp1 < lgetcp(lp2, get_lused(lp2)) )
         *cp2++ = *cp1++;
     lp1->l_bp->l_fp = lp3;
     lp3->l_fp = lp2->l_fp;
@@ -867,14 +875,14 @@ int PASCAL NEAR ldelnewline()
                 wp->w_dotp  = lp3;
             else if ( wp->w_dotp == lp2 ) {
                 wp->w_dotp  = lp3;
-                wp->w_doto += lp1->l_used;
+                wp->w_doto += get_lused(lp1);
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 if ( wp->w_markp[cmark] == lp1 )
                     wp->w_markp[cmark]  = lp3;
                 else if ( wp->w_markp[cmark] == lp2 ) {
                     wp->w_markp[cmark]  = lp3;
-                    wp->w_marko[cmark] += lp1->l_used;
+                    wp->w_marko[cmark] += get_lused(lp1);
                 }
             }
             wp = wp->w_wndp;

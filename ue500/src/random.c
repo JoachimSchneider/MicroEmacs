@@ -46,7 +46,7 @@ int f, n;                               /* prefix flag and argument */
         if ( lp == curwp->w_dotp ) {
             predlines = numlines;
             predchars = numchars + curwp->w_doto;
-            if ( (curwp->w_doto) == lused(lp) )
+            if ( (curwp->w_doto) == get_lused(lp) )
                 curchar = '\r';
             else
                 curchar = lgetc(lp, curwp->w_doto);
@@ -54,7 +54,7 @@ int f, n;                               /* prefix flag and argument */
 
         /* on to the next line */
         ++numlines;
-        numchars += lused(lp) + 1;
+        numchars += get_lused(lp) + 1;
         lp = lforw(lp);
     }
 
@@ -67,7 +67,7 @@ int f, n;                               /* prefix flag and argument */
     /* Get real column and end-of-line column. */
     col = getccol(FALSE);
     savepos = curwp->w_doto;
-    curwp->w_doto = lused(curwp->w_dotp);
+    curwp->w_doto = get_lused(curwp->w_dotp);
     ecol = getccol(FALSE);
     curwp->w_doto = savepos;
 
@@ -138,7 +138,11 @@ int bflg;
     register unsigned char c;
 
     col = 0;
+#ifdef JES_UNSEC_CODE
     for ( i = 0; i < curwp->w_doto; ++i ) {
+#else
+    for ( i = 0; i < MIN2(curwp->w_doto, get_lused(curwp->w_dotp)); ++i ) {
+#endif
         c = lgetc(curwp->w_dotp, i) & 0xFF;
         if ( c != ' ' && c != '\t' && bflg )
             break;
@@ -200,7 +204,7 @@ int pos;                                /* position to set cursor */
     register int llen;          /* length of line in bytes */
 
     col = 0;
-    llen = lused(curwp->w_dotp);
+    llen = get_lused(curwp->w_dotp);
 
     /* scan the line until we are at or past the target column */
     for ( i = 0; i < llen; ++i ) {
@@ -258,7 +262,7 @@ int f, n;                               /* prefix flag and argument */
     dotp = curwp->w_dotp;
 
     /* get the 2 chars to swap */
-    if ( curwp->w_doto == lused(dotp) && --curwp->w_doto < 0 ) {
+    if ( curwp->w_doto == get_lused(dotp) && --curwp->w_doto < 0 ) {
         curwp->w_doto = saved_doto;
 
         return (FALSE);
@@ -386,7 +390,7 @@ int f, n;                               /* default flag and numeric repeat count
         curwp->w_doto = 0;              /* start at the beginning */
 
         /* detab the entire current line */
-        while ( curwp->w_doto < lused(curwp->w_dotp) ) {
+        while ( curwp->w_doto < get_lused(curwp->w_dotp) ) {
             /* if we have a tab */
             if ( lgetc(curwp->w_dotp, curwp->w_doto) == '\t' ) {
                 ldelete(1L, FALSE);
@@ -435,7 +439,7 @@ int f, n;                               /* default flag and numeric repeat count
         ccol = curwp->w_doto = 0;               /* start at the beginning */
         fspace = -1;
 
-        while ( curwp->w_doto < lused(curwp->w_dotp) ) {
+        while ( curwp->w_doto < get_lused(curwp->w_dotp) ) {
             /* see if it is time to compress */
             if ( (fspace >= 0) && (nextab(fspace) <= ccol) )
                 if ( ccol - fspace < 2 )
@@ -506,7 +510,7 @@ int f, n;                               /* default flag and numeric repeat count
     while ( n ) {
         lp = curwp->w_dotp;             /* find current line text */
         offset = curwp->w_doto;         /* save original offset */
-        length = lused(lp);             /* find current length */
+        length = get_lused(lp);             /* find current length */
 
         /* trim the current line */
         while ( length > offset ) {
@@ -514,7 +518,7 @@ int f, n;                               /* default flag and numeric repeat count
                 break;
             length--;
         }
-        lp->l_used = length;
+        set_lused(lp, length);
 
         /* advance/or back to the next line */
         forwline(TRUE, inc);
@@ -625,16 +629,16 @@ int PASCAL NEAR cinsert()       /* insert a newline and indentation for C */
 
     /* if the new line is not blank... don't indent it! */
     lp = curwp->w_dotp;
-    if ( lused(lp) != 0 )
+    if ( get_lused(lp) != 0 )
         return (TRUE);
 
     /* hunt for the last non-blank line to get indentation from */
-    while ( lused(lp) == 0 && lp != curbp->b_linep )
+    while ( get_lused(lp) == 0 && lp != curbp->b_linep )
         lp = lback(lp);
 
     /* grab a pointer to text to copy indentation from */
     cptr = ltext(lp);
-    llen = lused(lp);
+    llen = get_lused(lp);
 
     /* save the indent of the last non blank line */
     i = 0;
@@ -703,7 +707,7 @@ int c;                                  /* brace to insert (always } for now) */
     backchar(FALSE, 1);
 
     while ( count > 0 ) {
-        if ( curwp->w_doto == lused(curwp->w_dotp) )
+        if ( curwp->w_doto == get_lused(curwp->w_dotp) )
             ch = '\r';
         else
             ch = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -799,11 +803,11 @@ int f, n;                               /* prefix flag and argument */
         return ( rdonly() );            /* we are in read only mode */
 
     lp1 = curwp->w_dotp;
-    while ( lused(lp1) == 0 && ( lp2 = lback(lp1) ) != curbp->b_linep )
+    while ( get_lused(lp1) == 0 && ( lp2 = lback(lp1) ) != curbp->b_linep )
         lp1 = lp2;
     lp2 = lp1;
     nld = 0;
-    while ( ( lp2 = lforw(lp2) ) != curbp->b_linep && lused(lp2) == 0 )
+    while ( ( lp2 = lforw(lp2) ) != curbp->b_linep && get_lused(lp2) == 0 )
         ++nld;
     if ( nld == 0 )
         return (TRUE);
@@ -839,7 +843,7 @@ int f, n;                               /* prefix flag and argument */
 
     while ( n-- ) {
         nicol = 0;
-        for ( i = 0; i < lused(curwp->w_dotp); ++i ) {
+        for ( i = 0; i < get_lused(curwp->w_dotp); ++i ) {
             c = lgetc(curwp->w_dotp, i);
             if ( c != ' ' && c != '\t' )
                 break;
@@ -965,19 +969,19 @@ int f, n;       /* prefix flag and argument */
     undo_insert(OP_CPOS, 0L, obj);
 
     if ( f == FALSE ) {
-        chunk = lused(curwp->w_dotp) - curwp->w_doto;
+        chunk = get_lused(curwp->w_dotp) - curwp->w_doto;
         if ( chunk == 0 )
             chunk = 1;
     } else if ( n == 0 ) {
         chunk = -curwp->w_doto;
     } else if ( n > 0 ) {
-        chunk = lused(curwp->w_dotp) - curwp->w_doto + 1;
+        chunk = get_lused(curwp->w_dotp) - curwp->w_doto + 1;
         nextp = lforw(curwp->w_dotp);
         while ( --n ) {
             if ( nextp == curbp->b_linep )
                 return (FALSE);
 
-            chunk += lused(nextp) + 1;
+            chunk += get_lused(nextp) + 1;
             nextp = lforw(nextp);
         }
     } else if ( n < 0 ) {
@@ -987,7 +991,7 @@ int f, n;       /* prefix flag and argument */
             if ( nextp == curbp->b_linep )
                 return (FALSE);
 
-            chunk -= lused(nextp) + 1;
+            chunk -= get_lused(nextp) + 1;
             nextp = lback(nextp);
         }
     }
@@ -1192,7 +1196,7 @@ int f, n;                               /* not used */
     oldoff = curwp->w_doto;
 
     /* get the current character */
-    if ( oldoff == lused(oldlp) )
+    if ( oldoff == get_lused(oldlp) )
         ch = '\r';
     else
         ch = lgetc(oldlp, oldoff);
@@ -1246,7 +1250,7 @@ int f, n;                               /* not used */
         else
             backchar(FALSE, 1);
 
-        if ( curwp->w_doto == lused(curwp->w_dotp) )
+        if ( curwp->w_doto == get_lused(curwp->w_dotp) )
             c = '\r';
         else
             c = lgetc(curwp->w_dotp, curwp->w_doto);
@@ -1342,7 +1346,7 @@ char ch;        /* fence type to match against */
     while ( count > 0 && curwp->w_dotp != toplp ) {
 
         backchar(FALSE, 1);
-        if ( curwp->w_doto == lused(curwp->w_dotp) )
+        if ( curwp->w_doto == get_lused(curwp->w_dotp) )
             c = '\r';
         else
             c = lgetc(curwp->w_dotp, curwp->w_doto);

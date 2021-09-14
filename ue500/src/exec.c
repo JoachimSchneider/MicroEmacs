@@ -530,7 +530,7 @@ BUFFER *bp;     /* buffer to execute */
 
         /* scan the current line */
         eline = ltext(lp);
-        i = lused(lp);
+        i = get_lused(lp);
 
         /* trim leading whitespace */
         while ( i > 0 && (*eline == ' ' || *eline == '\t') ) {
@@ -671,7 +671,7 @@ nxtscan:        /* on to the next line */
     while ( lp != hlp && eexitflag == FALSE ) {
 
         /* allocate eline and copy macro line to it */
-        linlen = lused(lp);
+        linlen = get_lused(lp);
         if ( ( einit = eline = room(linlen+1) ) == NULL ) {
             errormesg(TEXT123, bp, lp);
 /*                              "%%Out of Memory during macro execution" */
@@ -842,7 +842,7 @@ nxtscan:        /* on to the next line */
                     linlen = strlen(golabel);
                     glp = lforw(hlp);
                     while ( glp != hlp ) {
-                        if ( (lused(glp) >= linlen) &&
+                        if ( (get_lused(glp) >= linlen) &&
                              (lgetc(glp, 0) == '*') &&
                              (strncmp( ( (char *)ltext(glp) ) + 1, golabel,
                                        linlen ) == 0) ) {

@@ -238,7 +238,7 @@ int f, n;        /* prefix flag and argument */
     while ( lp != bp->b_linep ) {
 
         /* get a symbol name */
-        llength = lused(lp);
+        llength = get_lused(lp);
         if ( llength > MAXSYM )
             llength = MAXSYM;
         xstrncpy(cur_sym, ltext(lp), llength);
@@ -250,7 +250,7 @@ int f, n;        /* prefix flag and argument */
             break;
 
         /* and an expansion for that symbol */
-        llength = lused(lp);
+        llength = get_lused(lp);
         if ( llength > MAXSYM )
             llength = MAXSYM;
         xstrncpy(cur_exp, ltext(lp), llength);

@@ -796,7 +796,7 @@ int n;                                  /* prefix value */
 
         /* replace or overwrite mode, not at the end of a string */
         if ( curwp->w_bufp->b_mode & (MDREPL | MDOVER) &&
-             curwp->w_doto < lused(curwp->w_dotp) ) {
+             curwp->w_doto < get_lused(curwp->w_dotp) ) {
             do {
                 /* if we are in replace mode, or (next char is not a tab or we
                  * are at a tab stop) */
@@ -825,7 +825,7 @@ int n;                                  /* prefix value */
                         status = linsert(1, schar);
 #endif
                 }
-            } while (--n > 0 && curwp->w_doto < lused(curwp->w_dotp) &&
+            } while (--n > 0 && curwp->w_doto < get_lused(curwp->w_dotp) &&
                      status == TRUE);
         }
 

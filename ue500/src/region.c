@@ -30,7 +30,7 @@ int PASCAL NEAR reglines()
 
     /* scan the region... counting lines */
     while ( region.r_size > 0L ) {
-        region.r_size -= lused(linep) + 1;
+        region.r_size -= get_lused(linep) + 1;
         linep = lforw(linep);
         n++;
     }
@@ -101,7 +101,7 @@ int f, n;        /* prefix flag and argument */
     linep = region.r_linep;                     /* Current line.    */
     loffs = region.r_offset;                    /* Current offset.  */
     while ( region.r_size-- ) {
-        if ( loffs == lused(linep) ) {        /* End of line.         */
+        if ( loffs == get_lused(linep) ) {        /* End of line.         */
             if ( ( s=kinsert(FORWARD, '\r') ) != TRUE )
                 return (s);
 
@@ -159,7 +159,7 @@ int f, n;        /* prefix flag and argument */
     curwp->w_doto = region.r_offset;
     while ( region.r_size-- ) {
 
-        if ( curwp->w_doto == lused(curwp->w_dotp) ) {
+        if ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
 
             /* skip to the next line */
             curwp->w_dotp = lforw(curwp->w_dotp);
@@ -225,7 +225,7 @@ int f, n;        /* prefix flag and argument */
     curwp->w_doto = region.r_offset;
     while ( region.r_size-- ) {
 
-        if ( curwp->w_doto == lused(curwp->w_dotp) ) {
+        if ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
 
             /* skip to the next line */
             curwp->w_dotp = lforw(curwp->w_dotp);
@@ -284,7 +284,7 @@ int f, n;        /* prefix flag and argument */
     curwp->w_dotp = creg.r_linep;       /* only by full lines please! */
     curwp->w_doto = 0;
     creg.r_size += (long)creg.r_offset;
-    if ( creg.r_size <= (long)lused(curwp->w_dotp) ) {
+    if ( creg.r_size <= (long)get_lused(curwp->w_dotp) ) {
         mlwrite(TEXT72);
 
 /*          "%%Must narrow at least 1 full line" */
@@ -477,7 +477,7 @@ register REGION *rp;
     blp = curwp->w_dotp;
     bsize = (long)curwp->w_doto;
     flp = curwp->w_dotp;
-    fsize = (long)(lused(flp)-curwp->w_doto+1);
+    fsize = (long)(get_lused(flp)-curwp->w_doto+1);
     while ( flp!=curbp->b_linep || lback(blp)!=curbp->b_linep ) {
         if ( flp != curbp->b_linep ) {
             flp = lforw(flp);
@@ -488,11 +488,11 @@ register REGION *rp;
 
                 return (TRUE);
             }
-            fsize += lused(flp)+1;
+            fsize += get_lused(flp)+1;
         }
         if ( lback(blp) != curbp->b_linep ) {
             blp = lback(blp);
-            bsize += lused(blp)+1;
+            bsize += get_lused(blp)+1;
             if ( blp == curwp->w_markp[0] ) {
                 rp->r_linep = blp;
                 rp->r_offset = curwp->w_marko[0];
@@ -528,7 +528,7 @@ REGION *region;
     loffs = region->r_offset;                   /* Current offset.  */
     rsize = region->r_size;
     while ( rsize-- ) {
-        if ( loffs == lused(linep) ) {          /* End of line.     */
+        if ( loffs == get_lused(linep) ) {          /* End of line.     */
             *ptr = '\r';
             linep = lforw(linep);
             loffs = 0;
@@ -626,7 +626,7 @@ int f, n;        /* default flag and numeric repeat count */
         /* unshift current line using tabs */
         for ( i = 0; i < count; i++ ) {
             curwp->w_doto = 0;                  /* start at the beginning */
-            if ( (curwp->w_dotp->l_used > 0) &&
+            if ( (get_lused(curwp->w_dotp) > 0) &&
                  (lgetc(curwp->w_dotp, curwp->w_doto) == '\t') ) {
                 ldelete(1L, FALSE);
             }

@@ -10,7 +10,7 @@
  */
 
 #include        <stdio.h>
-#include        <assert.h>
+#include        <string.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
@@ -63,6 +63,8 @@ OBJECT op_erand;        /* the operand of the operation */
     up = (UNDO_OBJ *)malloc(undo_size);
     if ( up == (UNDO_OBJ *)NULL )
         return;
+
+    memset(up, 0, undo_size);
 
     /* update the buffer undo count */
     curwp->w_bufp->undo_count++;
@@ -412,7 +414,7 @@ int nbytes;     /* number of bytes to malloc() */
     UNDO_OBJ *up;       /* ptr to undo struct to free */
     UNDO_OBJ *lp;       /* last undo struct before up */
 
-    assert(0 <= nbytes);
+    ASRT(0 <= nbytes);
     if ( 0 >= nbytes ) return (VOID *)0;
 
     ptr = (char *)NULL;
@@ -420,8 +422,11 @@ int nbytes;     /* number of bytes to malloc() */
 
         /* attempt to allocate the memory */
         ptr = malloc(nbytes);
-        if ( ptr != (char *)NULL )
-            return (ptr);
+        if ( ptr != (char *)NULL )  {
+          memset(ptr, 0, nbytes);
+          
+          return (ptr);
+        }
 
         /* find the oldest visited buffer */
 nextbuf:        bp = getoldb();
@@ -469,7 +474,7 @@ void *orig_ptr;
     UNDO_OBJ *up;       /* ptr to undo struct to free */
     UNDO_OBJ *lp;       /* last undo struct before up */
 
-    assert(0 <= nbytes);
+    ASRT(0 <= nbytes);
     if ( 0 >= nbytes ) return (VOID *)0;
 
     /*
@@ -515,4 +520,10 @@ nxtbuf: bp = getoldb();
         bp->undo_count--;
     }
 }
+
+
+
+/*
+ * EOF
+ */
 

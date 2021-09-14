@@ -47,7 +47,7 @@ int f, n;        /* prefix flag and argument */
                 return (FALSE);
 
             curwp->w_dotp  = lp;
-            curwp->w_doto  = lused(lp);
+            curwp->w_doto  = get_lused(lp);
             curwp->w_flag |= WFMOVE;
         } else
             curwp->w_doto--;
@@ -71,7 +71,7 @@ int PASCAL NEAR gotoeol(f, n)
 int f, n;        /* argument flag and num */
 
 {
-    curwp->w_doto  = lused(curwp->w_dotp);
+    curwp->w_doto  = get_lused(curwp->w_dotp);
 
     return (TRUE);
 }
@@ -91,7 +91,7 @@ int f, n;        /* prefix flag and argument */
         return ( backchar(f, -n) );
 
     while ( n-- ) {
-        if ( curwp->w_doto == lused(curwp->w_dotp) ) {
+        if ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
             if ( curwp->w_dotp == curbp->b_linep )
                 return (FALSE);
 
@@ -302,7 +302,7 @@ int f, n;       /* default Flag & Numeric argument */
         while ( lback(curwp->w_dotp) != curbp->b_linep ) {
 
             /* at blank line */
-            if ( lused(curwp->w_dotp) == 0 )
+            if ( get_lused(curwp->w_dotp) == 0 )
                 break;
 
             /* current line start with member of $paralead? */
@@ -376,7 +376,7 @@ int f, n;       /* default Flag & Numeric argument */
         while ( curwp->w_dotp != curbp->b_linep ) {
 
             /* at blank line */
-            if ( lused(curwp->w_dotp) == 0 )
+            if ( get_lused(curwp->w_dotp) == 0 )
                 break;
 
             /* current line start with member of $paralead? */
@@ -410,7 +410,7 @@ int f, n;       /* default Flag & Numeric argument */
         while ( suc && !inword() ) {
             suc = backchar(FALSE, 1);
         }
-        curwp->w_doto = lused(curwp->w_dotp);           /* and to the EOL */
+        curwp->w_doto = get_lused(curwp->w_dotp); /* and to the EOL */
     }
     curwp->w_flag |= WFMOVE;            /* force screen update */
 
@@ -435,7 +435,7 @@ register LINE   *dlp;
 
     col = 0;
     dbo = 0;
-    while ( dbo != lused(dlp) ) {
+    while ( dbo != get_lused(dlp) ) {
         c = lgetc(dlp, dbo);
         newcol = col;
         if ( c == '\t' && tabsize > 0 )

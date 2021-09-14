@@ -350,7 +350,7 @@ int f, n;        /* prefix flag and argument */
         while ( n-- ) {
 
             /* if we are at EOL; skip to the beginning of the next */
-            while ( curwp->w_doto == lused(curwp->w_dotp) ) {
+            while ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
                 if ( forwchar(FALSE, 1) == FALSE )
                     return (FALSE);
 
@@ -376,7 +376,7 @@ int f, n;        /* prefix flag and argument */
         }
 
         /* skip whitespace and newlines */
-        while ( ( curwp->w_doto == lused(curwp->w_dotp) ) ||
+        while ( ( curwp->w_doto == get_lused(curwp->w_dotp) ) ||
                 ( ( c =
                         lgetc(curwp->w_dotp,
                               curwp->w_doto) ) == ' ' ) ||(c == '\t') ) {
@@ -457,7 +457,7 @@ bckdel: if ( forwchar(FALSE, size) == FALSE )
 int PASCAL NEAR inword()
 {
     /* the end of a line is never in a word */
-    if ( curwp->w_doto == lused(curwp->w_dotp) )
+    if ( curwp->w_doto == get_lused(curwp->w_dotp) )
         return (FALSE);
 
     /* grab the word to check */
@@ -530,7 +530,7 @@ int f, n;       /* Default flag and Numeric argument */
     /* ok, how big is this paragraph? */
     psize = 0;
     while ( lp != eop ) {
-        psize += lused(lp) + 1;
+        psize += get_lused(lp) + 1;
         lp = lforw(lp);
     }
 
@@ -552,7 +552,7 @@ int f, n;       /* Default flag and Numeric argument */
     lp = bop;
     pp = para;
     while ( lp != eop ) {
-        line_bytes = lused(lp);
+        line_bytes = get_lused(lp);
         if ( back == 0 ) {
             if ( lp == ptline )
                 back = line_bytes - ptoff + 1;
@@ -705,7 +705,7 @@ int f, n;       /* ignored numeric arguments */
     while ( size-- ) {
 
         /* get the current character */
-        if ( offset == lused(lp) ) {            /* end of line */
+        if ( offset == get_lused(lp) ) {  /* end of line */
             ch = '\r';
             lp = lforw(lp);
             offset = 0;

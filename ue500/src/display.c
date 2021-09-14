@@ -719,7 +719,7 @@ VOID PASCAL NEAR update_hilite()
     while ( forline < curwp->w_toprow + nlines ) {
         if ( (forline >= first_line) && (forline <= last_line) ) {
             vscreen[forline]->v_left = 0;
-            vscreen[forline]->v_right = findcol( forptr, lused(forptr) );
+            vscreen[forline]->v_right = findcol( forptr, get_lused(forptr) );
             if ( forline == first_line )
                 vscreen[forline]->v_left = first_pos;
             if ( forline == last_line )
@@ -789,7 +789,7 @@ EWINDOW *wp;     /* window to update current line in */
     vtmove(sline, -taboff);
 
     /* move each char of line to virtual screen until at end */
-    for ( i=0; i < lused(lp); ++i )
+    for ( i=0; i < get_lused(lp); ++i )
         vtputc( lgetc(lp, i) );
 #if     COLOR
     vscreen[sline]->v_rfcolor = wp->w_fcolor;
@@ -827,7 +827,7 @@ EWINDOW *wp;     /* window to update lines in */
         vtmove(sline, -taboff);
         if ( lp != wp->w_bufp->b_linep ) {
             /* if we are not at the end */
-            for ( i=0; i < lused(lp); ++i )
+            for ( i=0; i < get_lused(lp); ++i )
                 vtputc( lgetc(lp, i) );
             lp = lforw(lp);
         }
@@ -921,7 +921,7 @@ VOID PASCAL NEAR upddex()
                      (curcol < term.t_ncol - 1) ) {
                     taboff = wp->w_fcol;
                     vtmove(i, -taboff);
-                    for ( j = 0; j < lused(lp); ++j )
+                    for ( j = 0; j < get_lused(lp); ++j )
                         vtputc( lgetc(lp, j) );
                     vteeol();
                     taboff = 0;
@@ -1047,7 +1047,7 @@ BUFFER *popbuf;
 
         /* update the virtual screen image for this one line */
         vtmove(cline, 0);
-        llen = lused(lp);
+        llen = get_lused(lp);
         for ( index = 0; index < llen; index++ )
             vtputc( lgetc(lp, index) );
         vteeol();
@@ -1162,7 +1162,7 @@ VOID PASCAL NEAR updext()
     /* once we reach the left edge                                  */
     vtmove(currow, -taboff);     /* start scanning offscreen */
     lp = curwp->w_dotp;                 /* line to output */
-    for ( j=0; j<lused(lp); ++j )       /* until the end-of-line */
+    for ( j=0; j<get_lused(lp); ++j )       /* until the end-of-line */
         vtputc( lgetc(lp, j) );
 
     /* truncate the virtual line, restore tab offset */

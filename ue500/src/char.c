@@ -307,7 +307,7 @@ char *our_str;
 int PASCAL NEAR is2byte(sp, cp)
 
 char *sp;       /* ptr to beginning of string containing character to test */
-char *cp;       /* ptr to charactor to test */
+char *cp;       /* ptr to character to test */
 
 {
     register char *cc;          /* pointer to current character */
@@ -360,41 +360,6 @@ char *xstrncpy(char *s1, CONST char *s2, int n) /* strncpy() possibly
 
     return s1;
 }
-
-
-#define TRC_FILE_ENVVAR "EMACS_TRC_FILE"
-int DebugMessage_lnno_      = 0;
-CONST char  *DebugMessage_fname_    = (CONST char *)"";
-int DebugMessage(CONST char *fmt, ...)
-{
-    va_list ap;
-    int rc;
-    static FILE  *fp = NULL;
-
-    if ( NULL == fp ) {
-        char *fname  = getenv(TRC_FILE_ENVVAR);
-
-        if ( NULL != fname ) {
-            fp = fopen(fname, "a");
-        }
-
-        if ( NULL == fp ) {
-            fp = stderr;
-        }
-    }
-
-    fprintf(fp, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
-            DebugMessage_lnno_);
-    va_start(ap, fmt);
-    rc = vfprintf(fp, fmt, ap);
-    va_end(ap);
-    fprintf(fp, "%s", "\n");
-    fflush(fp);
-
-    return rc;
-}
-#undef  TRC_FILE_ENVVAR
-
 
 /* An unelegant but portable version of C99 vsnprintf():  */
 static int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap)
@@ -473,7 +438,46 @@ char *xstrdup(CONST char *str)
 }
 
 
+FILE  *GetTrcFP(void)
+{
+  static FILE *TrcFP  = NULL;
+
+  if ( NULL == TrcFP )  {
+    char *fname  = getenv(TRC_FILE_ENVVAR);
+
+    if ( NULL != fname ) {
+      if ( NULL != (TrcFP = fopen(fname, "a")) )  {
+        setbuf(TrcFP, NULL);
+      }
+    }
+    if ( NULL == TrcFP ) {
+      TrcFP = stderr;
+    }
+  }
+
+  return TrcFP;
+}
+
+int          DebugMessage_lnno_   = 0;
+CONST char  *DebugMessage_fname_  = (CONST char *)"";
+int DebugMessage(CONST char *fmt, ...)
+{
+    int     rc  = 0;
+    va_list ap;
+
+    fprintf(GetTrcFP(), "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
+            DebugMessage_lnno_);
+    va_start(ap, fmt);
+    rc = vfprintf(GetTrcFP(), fmt, ap);
+    va_end(ap);
+    fprintf(GetTrcFP(), "%s", "\n");
+    fflush(GetTrcFP());
+
+    return rc;
+}
+
+
+
 /*
  * EOF
  */
-

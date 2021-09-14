@@ -460,7 +460,7 @@ int *pcwoff;
             if ( curoff != 0 )
                 return FALSE;
         } else if ( mcptr->mc_type == EOL ) {
-            if ( curoff != lused(curline) )
+            if ( curoff != get_lused(curline) )
                 return FALSE;
         } else if ( mcptr->mc_type == BOWRD ) {
             if ( !isinword( lgetc(curline, curoff) ) )
@@ -652,7 +652,7 @@ int dir;
             if ( movelocalpoint(jump, &curoff, &curline) )
                 return (TRUE);                  /* hit end of buffer */
 
-            if ( curoff == lused(curline) )
+            if ( curoff == get_lused(curline) )
                 jump = tbl->delta[(int) '\r'];
             else
                 jump = tbl->delta[(int) lgetc(curline, curoff)];
@@ -670,7 +670,7 @@ int dir;
             if ( movelocalpoint(-jump, &curoff, &curline) )
                 return (TRUE);                  /* hit end of buffer */
 
-            if ( curoff == lused(curline) )
+            if ( curoff == get_lused(curline) )
                 jump = tbl->delta[(int) '\r'];
             else
                 jump = tbl->delta[(int) lgetc(curline, curoff)];
@@ -708,7 +708,7 @@ LINE **pcurline;
         if ( curline == curbp->b_linep )
             return TRUE;                        /* hit end of buffer */
 
-        while ( ( spare = curoff - lused(curline) ) > 0 ) {
+        while ( ( spare = curoff - get_lused(curline) ) > 0 ) {
             curline = lforw(curline);            /* skip to next line */
             curoff = spare - 1;
             if ( curline == curbp->b_linep )
@@ -717,7 +717,7 @@ LINE **pcurline;
     } else {
         while ( curoff < 0 ) {
             curline = lback(curline);                   /* skip back a line */
-            curoff += lused(curline) + 1;
+            curoff += get_lused(curline) + 1;
             if ( curline == curbp->b_linep )
                 return (TRUE);                  /* hit end of buffer */
         }
@@ -921,7 +921,7 @@ int dir;
     register int border;
 
     if ( dir == FORWARD ) {
-        border = ( curoff == lused(curline) ) &&
+        border = ( curoff == get_lused(curline) ) &&
                  (lforw(curline) == curbp->b_linep);
     } else {
         border = (curoff == 0) &&(lback(curline) == curbp->b_linep);
@@ -953,7 +953,7 @@ int dir;
     curoff = *pcuroff;
 
     if ( dir == FORWARD ) {
-        if ( curoff == lused(curline) ) {               /* if at EOL */
+        if ( curoff == get_lused(curline) ) {           /* if at EOL */
             curline = lforw(curline);                   /* skip to next line */
             curoff = 0;
             c = '\r';                                   /* and return a <NL> */
@@ -962,7 +962,7 @@ int dir;
     } else {                    /* Reverse.*/
         if ( curoff == 0 ) {
             curline = lback(curline);
-            curoff = lused(curline);
+            curoff = get_lused(curline);
             c = '\r';
         } else
             c = lgetc(curline, --curoff);

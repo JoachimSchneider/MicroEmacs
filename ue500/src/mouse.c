@@ -587,7 +587,7 @@ register int col;
     offset = 0;
     curcol = 0;
     col += wp->w_fcol;          /* adjust for extended lines */
-    while ( offset != lused(lp) ) {
+    while ( offset != get_lused(lp) ) {
         newcol = curcol;
         if ( ( c=lgetc(lp, offset) ) == '\t' && tabsize > 0 )
             newcol += -(newcol % tabsize) + (tabsize - 1);

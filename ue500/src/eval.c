@@ -511,7 +511,7 @@ CONST char  *vname;             /* name of environment variable to retrieve */
         return ( int_asc(cquote) );
 
     case EVCURCHAR:
-        return ( lused(curwp->w_dotp) ==
+        return ( get_lused(curwp->w_dotp) ==
                  curwp->w_doto ? int_asc('\r') :int_asc( lgetc(curwp->w_dotp,
                                                                curwp->w_doto) ) );
 
@@ -612,7 +612,7 @@ CONST char  *vname;             /* name of environment variable to retrieve */
         return (lterm);
 
     case EVLWIDTH:
-        return ( int_asc( lused(curwp->w_dotp) ) );
+        return ( int_asc( get_lused(curwp->w_dotp) ) );
 
     case EVMATCH:
         return ( fixnull(patmatch) );
@@ -1819,7 +1819,7 @@ char *token;            /* token to evaluate */
             return ("<END>");
 
         /* grab the line as an argument */
-        blen = lused(bp->b_dotp) - bp->b_doto;
+        blen = get_lused(bp->b_dotp) - bp->b_doto;
         if ( blen > NSTRING )
             blen = NSTRING;
         bytecopy(buf, ltext(bp->b_dotp) + bp->b_doto, blen);

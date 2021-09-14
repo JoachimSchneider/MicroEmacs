@@ -1,0 +1,23 @@
+# SOF
+
+
+[2021-09-13.00]
+Workarounds for cores produced by wrong settings of Dot-Ofsset (w_doto, b_doto)
+outside of the current line.
+
+
+Reproducing the error:
+
+(1) Fill Paragraph (Esc-q)
+
+(2) Undo (Ctrl+Shift+_)
+
+This confuses the doto settings: Microemacs always assumes 0 <= doto <= l_used.
+
+With -DJES_UNSEC_CODE the errors could be reproduced.
+
+Furthermore fill-paragraph does not work correctly e.g. when used in som TeX-documents.
+
+
+
+# EOF
