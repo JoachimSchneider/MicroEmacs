@@ -298,9 +298,9 @@ typedef struct  EWINDOW {
     struct  BUFFER  *w_bufp;            /* Buffer displayed in window   */
     struct  LINE    *w_linep;           /* Top line in the window       */
     struct  LINE    *w_dotp;            /* Line containing "."          */
-    short           w_doto;             /* Byte offset for "."          */
+    int             w_doto;             /* Byte offset for "."          */
     struct  LINE    *w_markp[NMARKS];   /* Line containing "mark"       */
-    short           w_marko[NMARKS];    /* Byte offset for "mark"       */
+    int             w_marko[NMARKS];    /* Byte offset for "mark"       */
     char            w_toprow;           /* Origin 0 top row of window   */
     char            w_ntrows;           /* # of rows of text in window  */
     char            w_force;            /* If NZ, forcing row.          */
@@ -361,7 +361,7 @@ typedef struct  VIDEO {
  */
 
 typedef struct SCREEN_T {
-    struct SCREEN_T *s_next_screen;       /* link to next screen in list */
+    struct SCREEN_T *s_next_screen;     /* link to next screen in list */
     EWINDOW *s_first_window;            /* head of linked list of windows */
     EWINDOW *s_cur_window;              /* current window in this screen */
     char *s_screen_name;                /* name of the current window */
@@ -391,10 +391,10 @@ typedef struct SCREEN_T {
 typedef struct  BUFFER {
     struct  BUFFER  *b_bufp;            /* Link to next BUFFER          */
     struct  LINE    *b_dotp;            /* Link to "." LINE structure   */
-    short           b_doto;             /* Offset of "." in above LINE  */
+    int              b_doto;            /* Offset of "." in above LINE  */
     struct  LINE    *b_markp[NMARKS];   /* The same as the above two,   */
-    short           b_marko[NMARKS];    /* but for the "mark"           */
-    int             b_fcol;             /* first col to display         */
+    int              b_marko[NMARKS];   /* but for the "mark"           */
+    int              b_fcol;            /* first col to display         */
     struct  LINE    *b_linep;           /* Link to the header LINE      */
     struct  LINE    *b_topline;         /* Link to narrowed top text    */
     struct  LINE    *b_botline;         /* Link to narrowed bottom text */
@@ -443,8 +443,8 @@ typedef struct  BUFFER {
  */
 typedef struct  {
     struct  LINE *r_linep;              /* Origin LINE address.         */
-    short r_offset;                     /* Origin LINE offset.          */
-    long r_size;                        /* Length in characters.        */
+    int     r_offset;                   /* Origin LINE offset.          */
+    long    r_size;                     /* Length in characters.        */
 }       REGION;
 
 /*
@@ -459,8 +459,8 @@ typedef struct  {
 typedef struct  LINE {
     struct  LINE *l_fp;                 /* Link to the next line        */
     struct  LINE *l_bp;                 /* Link to the previous line    */
-    short   l_size_;                    /* Allocated size               */
-    short   l_used_;                    /* Used size                    */
+    int     l_size_;                    /* Allocated size               */
+    int     l_used_;                    /* Used size                    */
     char    l_text_[1];                 /* A bunch of characters.       */
 }       LINE;
 
@@ -526,7 +526,7 @@ static char *lgetcp_(LINE *lp, int n, const char *fnam, int lno)
 #define lgetcp(lp, n)   ( lgetcp_((lp), (n), __FILE__, __LINE__) )
 
 #define lused_ORG(lp)       ( (lp)->l_used_ )
-static short get_lused_(LINE *lp, const char *fnam, int lno)
+static int get_lused_(LINE *lp, const char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
@@ -534,7 +534,7 @@ static short get_lused_(LINE *lp, const char *fnam, int lno)
     return ( (lp)->l_used_ );
 }
 #define get_lused(lp)   ( get_lused_((lp), __FILE__, __LINE__) )
-static short set_lused_(LINE *lp, short used, const char *fnam, int lno)
+static int set_lused_(LINE *lp, int used, const char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
@@ -545,7 +545,7 @@ static short set_lused_(LINE *lp, short used, const char *fnam, int lno)
 }
 #define set_lused(lp, used) ( set_lused_((lp), (used), __FILE__, __LINE__) )
 #define lsize_ORG(lp)       ( (lp)->l_size_ )
-static short get_lsize_(LINE *lp, const char *fnam, int lno)
+static int get_lsize_(LINE *lp, const char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
