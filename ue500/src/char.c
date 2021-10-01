@@ -440,18 +440,24 @@ char *xstrdup(CONST char *str)
 
 FILE  *GetTrcFP(void)
 {
-  static FILE *TrcFP  = NULL;
+  static int  FirstCall = !0;
+  static FILE *TrcFP    = NULL;
 
-  if ( NULL == TrcFP )  {
-    char *fname  = getenv(TRC_FILE_ENVVAR);
+  if ( FirstCall )  {
+    FirstCall = 0;
 
-    if ( NULL != fname ) {
-      if ( NULL != (TrcFP = fopen(fname, "a")) )  {
-        setbuf(TrcFP, NULL);
+    {
+      char *fname  = getenv(TRC_FILE_ENVVAR);
+
+      if ( NULL == fname ) {
+        TrcFP = NULL;
+      } else {
+        if ( NULL != (TrcFP = fopen(fname, "a")) )  {
+          setbuf(TrcFP, NULL);
+        } else {
+          TrcFP = stderr;
+        }
       }
-    }
-    if ( NULL == TrcFP ) {
-      TrcFP = stderr;
     }
   }
 
@@ -462,16 +468,21 @@ int          DebugMessage_lnno_   = 0;
 CONST char  *DebugMessage_fname_  = (CONST char *)"";
 int DebugMessage(CONST char *fmt, ...)
 {
-    int     rc  = 0;
+    int     rc    = 0;
     va_list ap;
+    FILE    *TFP  = GetTrcFP();
 
-    fprintf(GetTrcFP(), "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
-            DebugMessage_lnno_);
-    va_start(ap, fmt);
-    rc = vfprintf(GetTrcFP(), fmt, ap);
-    va_end(ap);
-    fprintf(GetTrcFP(), "%s", "\n");
-    fflush(GetTrcFP());
+    ZEROMEM(ap);
+
+    if ( TFP )  {
+      fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
+              DebugMessage_lnno_);
+      va_start(ap, fmt);
+      rc = vfprintf(TFP, fmt, ap);
+      va_end(ap);
+      fprintf(TFP, "%s", "\n");
+      fflush(TFP);
+    }
 
     return rc;
 }
