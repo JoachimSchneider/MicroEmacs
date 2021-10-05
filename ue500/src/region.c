@@ -37,7 +37,7 @@ int PASCAL NEAR reglines()
 
     /* place us at the beginning of the region */
     curwp->w_dotp = region.r_linep;
-    curwp->w_doto = region.r_offset;
+    set_w_doto(curwp, region.r_offset);
 
     return (n);
 }
@@ -73,7 +73,7 @@ int f, n;        /* prefix flag and argument */
 
     /* delete the region */
     curwp->w_dotp = region.r_linep;
-    curwp->w_doto = region.r_offset;
+    set_w_doto(curwp, region.r_offset);
 
     return ( ldelete(region.r_size, TRUE) );
 }
@@ -152,36 +152,36 @@ int f, n;        /* prefix flag and argument */
 
     /* save the current dot */
     save_dotp = curwp->w_dotp;
-    save_doto = curwp->w_doto;
+    save_doto = get_w_doto(curwp);
 
     /* scan the region.... */
     curwp->w_dotp = region.r_linep;
-    curwp->w_doto = region.r_offset;
+    set_w_doto(curwp, region.r_offset);
     while ( region.r_size-- ) {
 
-        if ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
+        if ( get_w_doto(curwp) == get_lused(curwp->w_dotp) ) {
 
             /* skip to the next line */
             curwp->w_dotp = lforw(curwp->w_dotp);
-            curwp->w_doto = 0;
+            set_w_doto(curwp, 0);
 
         } else {
 
             /* lowercase this character */
-            c = lgetc(curwp->w_dotp, curwp->w_doto);
+            c = lgetc(curwp->w_dotp, get_w_doto(curwp));
             if ( is_upper(c) ) {
                 obj.obj_char = c;
                 c = lowerc(c);
-                lputc(curwp->w_dotp, curwp->w_doto, c);
+                lputc(curwp->w_dotp, get_w_doto(curwp), c);
                 undo_insert(OP_REPC, 1L, obj);
             }
-            ++curwp->w_doto;
+            set_w_doto(curwp, get_w_doto(curwp) + 1);
         }
     }
 
     /* restore the dot position */
     curwp->w_dotp = save_dotp;
-    curwp->w_doto = save_doto;
+    set_w_doto(curwp, save_doto);
 
     return (TRUE);
 }
@@ -218,36 +218,36 @@ int f, n;        /* prefix flag and argument */
 
     /* save the current dot */
     save_dotp = curwp->w_dotp;
-    save_doto = curwp->w_doto;
+    save_doto = get_w_doto(curwp);
 
     /* scan the region.... */
     curwp->w_dotp = region.r_linep;
-    curwp->w_doto = region.r_offset;
+    set_w_doto(curwp, region.r_offset);
     while ( region.r_size-- ) {
 
-        if ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
+        if ( get_w_doto(curwp) == get_lused(curwp->w_dotp) ) {
 
             /* skip to the next line */
             curwp->w_dotp = lforw(curwp->w_dotp);
-            curwp->w_doto = 0;
+            set_w_doto(curwp, 0);
 
         } else {
 
             /* uppercase this character */
-            c = lgetc(curwp->w_dotp, curwp->w_doto);
+            c = lgetc(curwp->w_dotp, get_w_doto(curwp));
             if ( is_lower(c) ) {
                 obj.obj_char = c;
                 c = upperc(c);
-                lputc(curwp->w_dotp, curwp->w_doto, c);
+                lputc(curwp->w_dotp, get_w_doto(curwp), c);
                 undo_insert(OP_REPC, 1L, obj);
             }
-            ++curwp->w_doto;
+            set_w_doto(curwp, get_w_doto(curwp) + 1);
         }
     }
 
     /* restore the dot position */
     curwp->w_dotp = save_dotp;
-    curwp->w_doto = save_doto;
+    set_w_doto(curwp, save_doto);
 
     return (TRUE);
 }
@@ -282,7 +282,7 @@ int f, n;        /* prefix flag and argument */
         return (status);
 
     curwp->w_dotp = creg.r_linep;       /* only by full lines please! */
-    curwp->w_doto = 0;
+    set_w_doto(curwp, 0);
     creg.r_size += (long)creg.r_offset;
     if ( creg.r_size <= (long)get_lused(curwp->w_dotp) ) {
         mlwrite(TEXT72);
@@ -306,7 +306,7 @@ int f, n;        /* prefix flag and argument */
         creg.r_size -= (long)32000;
     }
     forwchar(TRUE, (int)creg.r_size);
-    curwp->w_doto = 0;                  /* only full lines! */
+    set_w_doto(curwp, 0);               /* only full lines! */
 
     /* archive the bottom fragment */
     if ( bp->b_linep != curwp->w_dotp ) {
@@ -326,7 +326,7 @@ int f, n;        /* prefix flag and argument */
             if ( wp->w_bufp == bp ) {
                 wp->w_linep = creg.r_linep;
                 wp->w_dotp = creg.r_linep;
-                wp->w_doto = 0;
+                set_w_doto(wp, 0);
                 for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                     wp->w_markp[cmark] = creg.r_linep;
                     wp->w_marko[cmark] = 0;
@@ -389,8 +389,7 @@ int f, n;        /* prefix flag and argument */
          * fragment */
         if ( curwp->w_dotp == bp->b_linep ) {
             curwp->w_dotp = bp->b_botline;
-            curwp->w_doto = 0;                          /* this should be
-                                                         * redundent */
+            set_w_doto(curwp, 0);       /* this should be redundent */
         }
 
         /* if any marks are at EOF, move them to the beginning of the bottom
@@ -464,26 +463,26 @@ register REGION *rp;
     }
     if ( curwp->w_dotp == curwp->w_markp[0] ) {
         rp->r_linep = curwp->w_dotp;
-        if ( curwp->w_doto < curwp->w_marko[0] ) {
-            rp->r_offset = curwp->w_doto;
-            rp->r_size = (long)(curwp->w_marko[0]-curwp->w_doto);
+        if ( get_w_doto(curwp) < curwp->w_marko[0] ) {
+            rp->r_offset = get_w_doto(curwp);
+            rp->r_size = (long)curwp->w_marko[0] - get_w_doto(curwp);
         } else {
             rp->r_offset = curwp->w_marko[0];
-            rp->r_size = (long)(curwp->w_doto-curwp->w_marko[0]);
+            rp->r_size = (long)get_w_doto(curwp) - curwp->w_marko[0];
         }
 
         return (TRUE);
     }
     blp = curwp->w_dotp;
-    bsize = (long)curwp->w_doto;
+    bsize = (long)get_w_doto(curwp);
     flp = curwp->w_dotp;
-    fsize = (long)(get_lused(flp)-curwp->w_doto+1);
+    fsize = (long)get_lused(flp) - get_w_doto(curwp) + 1;
     while ( flp!=curbp->b_linep || lback(blp)!=curbp->b_linep ) {
         if ( flp != curbp->b_linep ) {
             flp = lforw(flp);
             if ( flp == curwp->w_markp[0] ) {
                 rp->r_linep = curwp->w_dotp;
-                rp->r_offset = curwp->w_doto;
+                rp->r_offset = get_w_doto(curwp);
                 rp->r_size = fsize+curwp->w_marko[0];
 
                 return (TRUE);
@@ -583,11 +582,11 @@ int f, n;        /* default flag and numeric repeat count */
     /* loop thru indenting n lines */
     inc = ( (n > 0) ? 1 : -1 );
     while ( n ) {
-        curwp->w_doto = 0;              /* start at the beginning */
+        set_w_doto(curwp, 0);           /* start at the beginning */
 
         /* shift current line using tabs */
         if ( !( (curbp->b_mode & MDCMOD) &&
-                (lgetc(curwp->w_dotp, curwp->w_doto) == '#') ) ) {
+                (lgetc(curwp->w_dotp, get_w_doto(curwp)) == '#') ) ) {
             linsert(count, '\t');
         }
 
@@ -596,7 +595,7 @@ int f, n;        /* default flag and numeric repeat count */
         n -= inc;
     }
 
-    curwp->w_doto = 0;
+    set_w_doto(curwp, 0);
     thisflag &= ~CFCPCN;        /* flag that this resets the goal column */
     lchange(WFEDIT);            /* yes, we have made at least an edit */
 
@@ -625,9 +624,9 @@ int f, n;        /* default flag and numeric repeat count */
     while ( n ) {
         /* unshift current line using tabs */
         for ( i = 0; i < count; i++ ) {
-            curwp->w_doto = 0;                  /* start at the beginning */
+            set_w_doto(curwp, 0);       /* start at the beginning */
             if ( (get_lused(curwp->w_dotp) > 0) &&
-                 (lgetc(curwp->w_dotp, curwp->w_doto) == '\t') ) {
+                 (lgetc(curwp->w_dotp, get_w_doto(curwp)) == '\t') ) {
                 ldelete(1L, FALSE);
             }
         }

@@ -92,7 +92,7 @@ int n;                                          /* # of repetitions wanted */
      * and scan through the file.
      */
     origline = curwp->w_dotp;
-    origoff = curwp->w_doto;
+    origoff = get_w_doto(curwp);
     numsub = 0L;
     nummatch = 0;
     lastline = (LINE *) NULL;
@@ -174,7 +174,7 @@ qprompt:
                     goto pprompt;
                 }
                 curwp->w_dotp = lastline;
-                curwp->w_doto = lastoff;
+                set_w_doto(curwp, lastoff);
                 lastline = NULL;
                 lastoff = 0;
 
@@ -195,13 +195,13 @@ qprompt:
                 backchar(FALSE, oldmatchlen);
                 matchlen = oldmatchlen;
                 matchline = curwp->w_dotp;
-                matchoff = curwp->w_doto;
+                matchoff = get_w_doto(curwp);
                 continue;
 
             case '.':                   /* abort! and return */
                 /* restore old position */
                 curwp->w_dotp = origline;
-                curwp->w_doto = origoff;
+                set_w_doto(curwp, origoff);
                 curwp->w_flag |= WFMOVE;
 
             case BELL:                  /* abort! and stay */
@@ -257,7 +257,7 @@ qprompt:
             if ( c == 'l' || c == 'L' )
                 break;
             lastline = curwp->w_dotp;
-            lastoff = curwp->w_doto;
+            lastoff = get_w_doto(curwp);
             oldmatchlen = matchlen;             /* Save the length for un-do.*/
 
             if ( ( oldpatmatch = reroom(oldpatmatch, matchlen + 1) ) == NULL ) {

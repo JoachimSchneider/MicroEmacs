@@ -81,7 +81,7 @@ register LINE   *lp;
                 wp->w_linep = lforw(lp);
             if ( wp->w_dotp  == lp ) {
                 wp->w_dotp  = lforw(lp);
-                wp->w_doto  = 0;
+                set_w_doto(wp, 0);
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 if ( wp->w_markp[cmark] == lp ) {
@@ -101,7 +101,7 @@ register LINE   *lp;
         if ( bp->b_nwnd == 0 ) {
             if ( bp->b_dotp  == lp ) {
                 bp->b_dotp = lforw(lp);
-                bp->b_doto = 0;
+                set_b_doto(bp, 0);
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 if ( bp->b_markp[cmark] == lp ) {
@@ -266,7 +266,7 @@ char c;
 
     lp1 = curwp->w_dotp;                        /* Current line     */
     if ( lp1 == curbp->b_linep ) {              /* At the end: special  */
-        if ( curwp->w_doto != 0 ) {
+        if ( get_w_doto(curwp) != 0 ) {
             mlwrite(TEXT170);
 
 /*                              "bug: linsert" */
@@ -284,11 +284,11 @@ char c;
         for ( i = 0; i < n; ++i )
             lputc(lp2, i, c);
         curwp->w_dotp = lp2;
-        curwp->w_doto = n;
+        set_w_doto(curwp, n);
 
         return (TRUE);
     }
-    doto = curwp->w_doto;                         /* Save for later.  */
+    doto = get_w_doto(curwp);                         /* Save for later.  */
     if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate */
         if ( ( lp2=lalloc( BSIZE(get_lused(lp1) + n) ) ) == NULL )
             return (FALSE);
@@ -326,8 +326,8 @@ char c;
                 wp->w_linep = lp2;
             if ( wp->w_dotp == lp1 ) {
                 wp->w_dotp = lp2;
-                if ( wp==curwp || wp->w_doto>doto )
-                    wp->w_doto += n;
+                if ( wp==curwp || get_w_doto(wp) > doto )
+                    set_w_doto(wp, get_w_doto(wp) + n);
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 if ( wp->w_markp[cmark] == lp1 ) {
@@ -360,9 +360,9 @@ char c;         /* character to overwrite on current position */
 #endif
 
 {
-    if ( curwp->w_doto < get_lused(curwp->w_dotp) &&
-         ( (lgetc(curwp->w_dotp, curwp->w_doto) != '\t' || tabsize == 0) ||
-           (curwp->w_doto) % tabsize == tabsize -1 ) )
+    if ( get_w_doto(curwp) < get_lused(curwp->w_dotp) &&
+         ( (lgetc(curwp->w_dotp, get_w_doto(curwp)) != '\t' || tabsize == 0) ||
+           (get_w_doto(curwp)) % tabsize == tabsize -1 ) )
         ldelete(1L, FALSE);
 
     return ( linsert(1, c) );
@@ -423,7 +423,7 @@ int PASCAL NEAR lnewline()
 
     lchange(WFHARD);
     lp1  = curwp->w_dotp;                       /* Get the address and  */
-    doto = curwp->w_doto;                       /* offset of "."    */
+    doto = get_w_doto(curwp);                   /* offset of "."        */
     if ( ( lp2=lalloc(doto) ) == NULL )         /* New first half line  */
         return (FALSE);
 
@@ -449,10 +449,10 @@ int PASCAL NEAR lnewline()
             if ( wp->w_linep == lp1 )
                 wp->w_linep = lp2;
             if ( wp->w_dotp == lp1 ) {
-                if ( wp->w_doto < doto )
+                if ( get_w_doto(wp) < doto )
                     wp->w_dotp = lp2;
                 else
-                    wp->w_doto -= doto;
+                    set_w_doto(wp, get_w_doto(wp) - doto);
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 if ( wp->w_markp[cmark] == lp1 ) {
@@ -507,20 +507,22 @@ int kflag;      /* put killed text in kill buffer flag */
         while ( n > 0 ) {
 #if     DBCS
             /* never start forward on a 2 byte char */
-            if ( curwp->w_doto > 0 &&
+            if ( get_w_doto(curwp) > 0 &&
                  is2byte(lgetcp(curwp->w_dotp,                 0),
-                         lgetcp(curwp->w_dotp, curwp->w_doto - 1)) ) {
-                curwp->w_doto--;
+                         lgetcp(curwp->w_dotp, get_w_doto(curwp) - 1)) ) {
+                set_w_doto(curwp, get_w_doto(curwp) - 1);
                 n++;
             }
 #endif
             /* record the current point */
             dotp = curwp->w_dotp;
 #ifdef JES_UNSEC_CODE
-            doto = curwp->w_doto;
+            doto = get_w_doto(curwp);
 #else
-            doto = MIN2(curwp->w_doto, get_lused(dotp));
-            TRC(("Original doto: %d, Fixed doto: %d", (int)curwp->w_doto, doto));
+            doto = MIN2(get_w_doto(curwp), get_lused(dotp));
+            if ( get_w_doto(curwp) != doto )  {
+                TRC(("Original doto: %d, Fixed doto: %d", (int)get_w_doto(curwp), doto));
+            }
 #endif            
 
             /* can't delete past the end of the buffer */
@@ -588,10 +590,10 @@ int kflag;      /* put killed text in kill buffer flag */
             while ( wp != NULL ) {
 
                 /* reset the dot if needed */
-                if ( wp->w_dotp==dotp && wp->w_doto>=doto ) {
-                    wp->w_doto -= chunk;
-                    if ( wp->w_doto < doto )
-                        wp->w_doto = doto;
+                if ( wp->w_dotp==dotp && get_w_doto(wp) >= doto ) {
+                    set_w_doto(wp, get_w_doto(wp) - chunk);
+                    if ( get_w_doto(wp) < doto )
+                        set_w_doto(wp, doto);
                 }
 
                 /* reset any marks if needed */
@@ -615,16 +617,16 @@ int kflag;      /* put killed text in kill buffer flag */
         while ( n < 0 ) {
 #if     DBCS
             /* never start backwards on the 1st of a 2 byte character */
-            if ( curwp->w_doto > 1 &&
+            if ( get_w_doto(curwp) > 1 &&
                  is2byte(lgetcp(curwp->w_dotp,                 0),
-                         lgetcp(curwp->w_dotp, curwp->w_doto - 1)) ) {
-                curwp->w_doto++;
+                         lgetcp(curwp->w_dotp, get_w_doto(curwp) - 1)) ) {
+                set_w_doto(curwp, get_w_doto(curwp) + 1);
                 n--;
             }
 #endif
             /* record the current point */
             dotp = curwp->w_dotp;
-            doto = curwp->w_doto;
+            doto = get_w_doto(curwp);
 
             /* can't delete past the beginning of the buffer */
             if ( dotp == lforw(curbp->b_linep) && (doto == 0) )
@@ -665,10 +667,10 @@ int kflag;      /* put killed text in kill buffer flag */
 
             /* save deleted characters for an undo... */
             if ( undoflag == TRUE ) {
-                curwp->w_doto -= chunk;
+                set_w_doto(curwp, get_w_doto(curwp) - chunk);
                 obj.obj_sptr = cp2;
                 undo_insert(OP_DSTR, (long)chunk, obj);
-                curwp->w_doto += chunk;
+                set_w_doto(curwp, get_w_doto(curwp) + chunk);
             }
 
             /* save the text to the kill buffer */
@@ -684,17 +686,17 @@ int kflag;      /* put killed text in kill buffer flag */
             while ( cp1 < lgetcp(dotp, get_lused(dotp)) )
                 *cp2++ = *cp1++;
             set_lused(dotp, get_lused(dotp) - chunk);
-            curwp->w_doto -= chunk;
+            set_w_doto(curwp, get_w_doto(curwp) - chunk);
 
             /* fix any other windows with the same text displayed */
             wp = wheadp;
             while ( wp != NULL ) {
 
                 /* reset the dot if needed */
-                if ( wp->w_dotp==dotp && wp->w_doto>=doto ) {
-                    wp->w_doto -= chunk;
-                    if ( wp->w_doto < doto )
-                        wp->w_doto = doto;
+                if ( wp->w_dotp==dotp && get_w_doto(wp) >= doto ) {
+                    set_w_doto(wp, get_w_doto(wp) - chunk);
+                    if ( get_w_doto(wp) < doto )
+                        set_w_doto(wp, doto);
                 }
 
                 /* reset any marks if needed */
@@ -761,7 +763,7 @@ char *iline;    /* contents of new line */
     register int status;
 
     /* delete the current line */
-    curwp->w_doto = 0;          /* starting at the beginning of the line */
+    set_w_doto(curwp, 0);   /* starting at the beginning of the line */
     if ( ( status = killtext(TRUE, 1) ) != TRUE )
         return (status);
 
@@ -826,7 +828,7 @@ int PASCAL NEAR ldelnewline()
                     wp->w_linep = lp1;
                 if ( wp->w_dotp == lp2 ) {
                     wp->w_dotp  = lp1;
-                    wp->w_doto += get_lused(lp1);
+                    set_w_doto(wp, get_w_doto(wp) + get_lused(lp1));
                 }
                 for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                     if ( wp->w_markp[cmark] == lp2 ) {
@@ -875,7 +877,7 @@ int PASCAL NEAR ldelnewline()
                 wp->w_dotp  = lp3;
             else if ( wp->w_dotp == lp2 ) {
                 wp->w_dotp  = lp3;
-                wp->w_doto += get_lused(lp1);
+                set_w_doto(wp, get_w_doto(wp) + get_lused(lp1));
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 if ( wp->w_markp[cmark] == lp1 )
@@ -1124,7 +1126,7 @@ int f, n;        /* prefix flag and argument */
          * file.
          */
         curline = lback(curwp->w_dotp);
-        curoff = curwp->w_doto;
+        curoff = get_w_doto(curwp);
     }
 
     /* for each time.... */
@@ -1168,7 +1170,7 @@ int f, n;        /* prefix flag and argument */
      */
     if ( yankflag ) {
         curwp->w_dotp = lforw(curline);
-        curwp->w_doto = curoff;
+        set_w_doto(curwp, curoff);
     }
     thisflag |= CFYANK;
 

@@ -1,22 +1,36 @@
-/*      EPROTO:         Global function prototypes and declarations MicroEMACS
- * 4.00
+/*
+ * EPROTO: Global function prototypes and declarations MicroEMACS 4.00
  *
- *                       written by Daniel Lawrence based on code by Dave G.
- * Conroy, Steve Wilhite and George Jones
+ * written by Daniel Lawrence based on code by Dave G. Conroy,
+ * Steve Wilhite and George Jones
  */
 
 
-extern char *xstrcpy(char *s1, CONST char *s2);             /* strcpy() possibly
-                                                             * overlapping
-                                                             * regions  */
-extern char *xstrncpy(char *s1, CONST char *s2, int n);     /* strncpy()
-                                                             * possibly
-                                                             * overlapping
-                                                             * regions */
-extern int  xsnprintf(char *s, size_t n, CONST char *fmt, ...); /* Like C99
-                                                                 * snprintf() */
-extern char *xstrdup(CONST char *str);
+/**********************************************************************/
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <ctype.h>
+#include <stdarg.h>
+#include <string.h>
+#include <limits.h>
+#include <time.h>
+/**********************************************************************/
 
+
+/**********************************************************************/
+/* strcpy() possibly overlapping regions:   */
+extern char *xstrcpy(char *s1, CONST char *s2);
+
+/* strncpy() possibly overlapping regions:  */
+extern char *xstrncpy(char *s1, CONST char *s2, int n);
+
+/* Like C99 snprintf(): */
+extern int  xsnprintf(char *s, size_t n, CONST char *fmt, ...);
+
+extern char *xstrdup(CONST char *str);
+/**********************************************************************/
 
 /**********************************************************************/
 #define TRC_FILE_ENVVAR "EMACS_TRC_FILE"
@@ -42,16 +56,6 @@ extern int         DebugMessage(CONST char *fmt, ...);
 #endif
 /**********************************************************************/
 
-/**********************************************************************/
-#include <string.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <errno.h>
-#include <ctype.h>
-#include <stdarg.h>
-#include <string.h>
-#include <limits.h>
-#include <time.h>
 /**********************************************************************/
 #define STR(s)        ( ( NULL == (s) )?                                        \
                         ( (CONST char *)"@NIL@" ) : ( (CONST char *)(s) ) )
@@ -298,7 +302,7 @@ typedef struct  EWINDOW {
     struct  BUFFER  *w_bufp;            /* Buffer displayed in window   */
     struct  LINE    *w_linep;           /* Top line in the window       */
     struct  LINE    *w_dotp;            /* Line containing "."          */
-    int             w_doto;             /* Byte offset for "."          */
+    int             w_doto_;            /* Byte offset for "."          */
     struct  LINE    *w_markp[NMARKS];   /* Line containing "mark"       */
     int             w_marko[NMARKS];    /* Byte offset for "mark"       */
     char            w_toprow;           /* Origin 0 top row of window   */
@@ -311,6 +315,22 @@ typedef struct  EWINDOW {
 #endif
     int             w_fcol;             /* first column displayed       */
 }       EWINDOW;
+/**********************************************************************/
+static int get_w_doto_(EWINDOW *wp, const char *fnam, int lno)
+{
+    ASRTK(NULL != wp, fnam, lno);
+
+    return ( (wp)->w_doto_ );
+}
+#define get_w_doto(wp)        ( get_w_doto_((wp), __FILE__, __LINE__) )
+static int set_w_doto_(EWINDOW *wp, int doto, const char *fnam, int lno)
+{
+    ASRTK(NULL != wp, fnam, lno);
+
+    return ( (wp)->w_doto_ = doto );
+}
+#define set_w_doto(wp, doto)  ( set_w_doto_((wp), (doto), __FILE__, __LINE__) )
+/**********************************************************************/
 
 #define WFFORCE 0x01                    /* Window needs forced reframe  */
 #define WFMOVE  0x02                    /* Movement from line to line   */
@@ -391,7 +411,7 @@ typedef struct SCREEN_T {
 typedef struct  BUFFER {
     struct  BUFFER  *b_bufp;            /* Link to next BUFFER          */
     struct  LINE    *b_dotp;            /* Link to "." LINE structure   */
-    int              b_doto;            /* Offset of "." in above LINE  */
+    int              b_doto_;           /* Offset of "." in above LINE  */
     struct  LINE    *b_markp[NMARKS];   /* The same as the above two,   */
     int              b_marko[NMARKS];   /* but for the "mark"           */
     int              b_fcol;            /* first col to display         */
@@ -414,6 +434,22 @@ typedef struct  BUFFER {
     long            undo_count;         /* # of undo operations stacked */
     long            last_access;        /* time of last access          */
 }       BUFFER;
+/**********************************************************************/
+static int get_b_doto_(BUFFER *bp, const char *fnam, int lno)
+{
+    ASRTK(NULL != bp, fnam, lno);
+
+    return ( (bp)->b_doto_ );
+}
+#define get_b_doto(bp)        ( get_b_doto_((bp), __FILE__, __LINE__) )
+static int set_b_doto_(BUFFER *bp, int doto, const char *fnam, int lno)
+{
+    ASRTK(NULL != bp, fnam, lno);
+
+    return ( (bp)->b_doto_ = doto );
+}
+#define set_b_doto(bp, doto)  ( set_b_doto_((bp), (doto), __FILE__, __LINE__) )
+/**********************************************************************/
 
 #define BFINVS  0x01                    /* Internal invisable buffer    */
 #define BFCHG   0x02                    /* Changed since last write     */

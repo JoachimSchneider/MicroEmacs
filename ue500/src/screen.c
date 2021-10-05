@@ -107,7 +107,7 @@ int f, n;        /* prefix flag and argument */
         /* save the current dot position in the buffer info so the new screen
          * will start there! */
         curbp->b_dotp = curwp->w_dotp;
-        curbp->b_doto = curwp->w_doto;
+        set_b_doto(curbp, get_w_doto(curwp));
 
         /* screen does not exist, create it */
         sp = init_screen(scr_name, curbp);
@@ -131,7 +131,7 @@ SCREEN_T *sp;   /* screen to dump */
     while ( wp ) {
         if ( --wp->w_bufp->b_nwnd == 0 ) {
             wp->w_bufp->b_dotp  = wp->w_dotp;
-            wp->w_bufp->b_doto  = wp->w_doto;
+            set_b_doto(wp->w_bufp, get_w_doto(wp));
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 wp->w_bufp->b_markp[cmark] = wp->w_markp[cmark];
                 wp->w_bufp->b_marko[cmark] = wp->w_marko[cmark];
@@ -265,7 +265,7 @@ BUFFER *scr_buf;        /* buffer to place in first window of screen */
 
     /* position us at the buffers dot */
     wp->w_dotp  = scr_buf->b_dotp;
-    wp->w_doto  = scr_buf->b_doto;
+    set_w_doto(wp, get_b_doto(scr_buf));
 
     /* set all the marks to UNSET */
     for ( cmark = 0; cmark < NMARKS; cmark++ ) {

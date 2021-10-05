@@ -71,7 +71,7 @@ OBJECT op_erand;        /* the operand of the operation */
 
     /* record the buffer position and undo object type */
     up->line_num = getlinenum(curbp, curwp->w_dotp);
-    up->offset = curwp->w_doto;
+    up->offset = get_w_doto(curwp);
     up->type = op_type;
     up->count = count;
 
@@ -128,7 +128,7 @@ int undo_op()
 
     /* restore the buffer position */
     gotoline(TRUE, up->line_num);
-    curwp->w_doto = up->offset;
+    set_w_doto(curwp, up->offset);
     op_type = up->type;
 
     /* undo the actual operation */

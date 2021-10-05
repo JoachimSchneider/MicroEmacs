@@ -190,7 +190,7 @@ int f, n;       /* prefix flag and argument */
         lp = lforw(lp);
 
     curwp->w_dotp  = lp;
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
 
     return (TRUE);
 }
@@ -217,7 +217,7 @@ int f, n;        /* prefix flag and argument */
         first_screen->s_first_window = wheadp = wp->w_wndp;
         if ( --wp->w_bufp->b_nwnd == 0 ) {
             wp->w_bufp->b_dotp  = wp->w_dotp;
-            wp->w_bufp->b_doto  = wp->w_doto;
+            set_b_doto(wp->w_bufp, get_w_doto(wp));
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 wp->w_bufp->b_markp[cmark] = wp->w_markp[cmark];
                 wp->w_bufp->b_marko[cmark] = wp->w_marko[cmark];
@@ -231,7 +231,7 @@ int f, n;        /* prefix flag and argument */
         curwp->w_wndp = wp->w_wndp;
         if ( --wp->w_bufp->b_nwnd == 0 ) {
             wp->w_bufp->b_dotp  = wp->w_dotp;
-            wp->w_bufp->b_doto  = wp->w_doto;
+            set_b_doto(wp->w_bufp, get_w_doto(wp));
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 wp->w_bufp->b_markp[cmark] = wp->w_markp[cmark];
                 wp->w_bufp->b_marko[cmark] = wp->w_marko[cmark];
@@ -319,7 +319,7 @@ int f, n;       /* arguments are ignored for this command */
     /* get rid of the current window */
     if ( --curwp->w_bufp->b_nwnd == 0 ) {
         curwp->w_bufp->b_dotp  = curwp->w_dotp;
-        curwp->w_bufp->b_doto  = curwp->w_doto;
+        set_b_doto(curwp->w_bufp, get_w_doto(curwp));
         for ( cmark = 0; cmark < NMARKS; cmark++ ) {
             curwp->w_bufp->b_markp[cmark] = curwp->w_markp[cmark];
             curwp->w_bufp->b_marko[cmark] = curwp->w_marko[cmark];
@@ -379,7 +379,7 @@ int f, n;       /* default flag and numeric argument */
     ++curbp->b_nwnd;                            /* Displayed twice. */
     wp->w_bufp  = curbp;
     wp->w_dotp  = curwp->w_dotp;
-    wp->w_doto  = curwp->w_doto;
+    set_w_doto(wp, get_w_doto(curwp));
     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
         wp->w_markp[cmark] = curwp->w_markp[cmark];
         wp->w_marko[cmark] = curwp->w_marko[cmark];
@@ -608,7 +608,7 @@ BUFFER *popbuf;
         bp = wp->w_bufp;
         if ( --bp->b_nwnd == 0 ) {
             bp->b_dotp  = wp->w_dotp;
-            bp->b_doto  = wp->w_doto;
+            set_b_doto(bp, get_w_doto(wp));
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 bp->b_markp[cmark] = wp->w_markp[cmark];
                 bp->b_marko[cmark] = wp->w_marko[cmark];
@@ -624,7 +624,7 @@ setwin: wp = wheadp;
         if ( wp->w_bufp == popbuf ) {
             wp->w_linep = lforw(popbuf->b_linep);
             wp->w_dotp  = lforw(popbuf->b_linep);
-            wp->w_doto  = 0;
+            set_w_doto(wp, 0);
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 wp->w_markp[cmark] = NULL;
                 wp->w_marko[cmark] = 0;
@@ -767,7 +767,7 @@ int n;  /* numeric argument */
                 /* save the point/mark if needed */
                 if ( --wp->w_bufp->b_nwnd == 0 ) {
                     wp->w_bufp->b_dotp = wp->w_dotp;
-                    wp->w_bufp->b_doto = wp->w_doto;
+                    set_b_doto(wp->w_bufp, get_w_doto(wp));
                     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                         wp->w_bufp->b_markp[cmark] = wp->w_markp[cmark];
                         wp->w_bufp->b_marko[cmark] = wp->w_marko[cmark];

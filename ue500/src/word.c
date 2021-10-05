@@ -35,13 +35,13 @@ int n;          /* numeric argument */
     cnt = 0;
     while ( ( ( c =
                     lgetc(curwp->w_dotp,
-                          curwp->w_doto) ) != ' ' )&& (c != '\t') ) {
+                          get_w_doto(curwp)) ) != ' ' )&& (c != '\t') ) {
         cnt++;
         if ( !backchar(FALSE, 1) )
             return (FALSE);
 
         /* if we make it to the beginning, start a new line */
-        if ( curwp->w_doto == 0 ) {
+        if ( get_w_doto(curwp) == 0 ) {
             gotoeol(FALSE, 0);
 
             return ( lnewline() );
@@ -183,11 +183,11 @@ int f, n;        /* prefix flag and argument */
                 return (FALSE);
         }
         while ( inword() != FALSE ) {
-            c = lgetc(curwp->w_dotp, curwp->w_doto);
+            c = lgetc(curwp->w_dotp, get_w_doto(curwp));
             if ( is_lower(c) ) {
                 obj.obj_char = c;
                 c = upperc(c);
-                lputc(curwp->w_dotp, curwp->w_doto, c);
+                lputc(curwp->w_dotp, get_w_doto(curwp), c);
                 undo_insert(OP_REPC, 1L, obj);
                 lchange(WFHARD);
             }
@@ -223,11 +223,11 @@ int f, n;        /* prefix flag and argument */
                 return (FALSE);
         }
         while ( inword() != FALSE ) {
-            c = lgetc(curwp->w_dotp, curwp->w_doto);
+            c = lgetc(curwp->w_dotp, get_w_doto(curwp));
             if ( is_upper(c) ) {
                 obj.obj_char = c;
                 c = lowerc(c);
-                lputc(curwp->w_dotp, curwp->w_doto, c);
+                lputc(curwp->w_dotp, get_w_doto(curwp), c);
                 undo_insert(OP_REPC, 1L, obj);
                 lchange(WFHARD);
             }
@@ -264,11 +264,11 @@ int f, n;        /* prefix flag and argument */
                 return (FALSE);
         }
         if ( inword() != FALSE ) {
-            c = lgetc(curwp->w_dotp, curwp->w_doto);
+            c = lgetc(curwp->w_dotp, get_w_doto(curwp));
             if ( is_lower(c) ) {
                 obj.obj_char = c;
                 c = upperc(c);
-                lputc(curwp->w_dotp, curwp->w_doto, c);
+                lputc(curwp->w_dotp, get_w_doto(curwp), c);
                 undo_insert(OP_REPC, 1L, obj);
                 lchange(WFHARD);
             }
@@ -276,11 +276,11 @@ int f, n;        /* prefix flag and argument */
                 return (FALSE);
 
             while ( inword() != FALSE ) {
-                c = lgetc(curwp->w_dotp, curwp->w_doto);
+                c = lgetc(curwp->w_dotp, get_w_doto(curwp));
                 if ( is_upper(c) ) {
                     obj.obj_char = c;
                     c = lowerc(c);
-                    lputc(curwp->w_dotp, curwp->w_doto, c);
+                    lputc(curwp->w_dotp, get_w_doto(curwp), c);
                     undo_insert(OP_REPC, 1L, obj);
                     lchange(WFHARD);
                 }
@@ -324,7 +324,7 @@ int f, n;        /* prefix flag and argument */
 
     /* save the current cursor position */
     dotp = curwp->w_dotp;
-    doto = curwp->w_doto;
+    doto = get_w_doto(curwp);
 
     /* figure out how many characters to give the axe */
     size = 0;
@@ -350,7 +350,7 @@ int f, n;        /* prefix flag and argument */
         while ( n-- ) {
 
             /* if we are at EOL; skip to the beginning of the next */
-            while ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
+            while ( get_w_doto(curwp) == get_lused(curwp->w_dotp) ) {
                 if ( forwchar(FALSE, 1) == FALSE )
                     return (FALSE);
 
@@ -376,10 +376,10 @@ int f, n;        /* prefix flag and argument */
         }
 
         /* skip whitespace and newlines */
-        while ( ( curwp->w_doto == get_lused(curwp->w_dotp) ) ||
+        while ( ( get_w_doto(curwp) == get_lused(curwp->w_dotp) ) ||
                 ( ( c =
                         lgetc(curwp->w_dotp,
-                              curwp->w_doto) ) == ' ' ) ||(c == '\t') ) {
+                              get_w_doto(curwp)) ) == ' ' ) ||(c == '\t') ) {
             if ( forwchar(FALSE, 1) == FALSE )
                 break;
             ++size;
@@ -388,7 +388,7 @@ int f, n;        /* prefix flag and argument */
 
     /* restore the original position and delete the words */
     curwp->w_dotp = dotp;
-    curwp->w_doto = doto;
+    set_w_doto(curwp, doto);
 
     return ( ldelete(size, TRUE) );
 }
@@ -457,11 +457,11 @@ bckdel: if ( forwchar(FALSE, size) == FALSE )
 int PASCAL NEAR inword()
 {
     /* the end of a line is never in a word */
-    if ( curwp->w_doto == get_lused(curwp->w_dotp) )
+    if ( get_w_doto(curwp) == get_lused(curwp->w_dotp) )
         return (FALSE);
 
     /* grab the word to check */
-    return ( isinword( lgetc(curwp->w_dotp, curwp->w_doto) ) );
+    return ( isinword( lgetc(curwp->w_dotp, get_w_doto(curwp)) ) );
 }
 
 int PASCAL NEAR isinword(c)
@@ -517,7 +517,7 @@ int f, n;       /* Default flag and Numeric argument */
 
     /* save the original point */
     ptline = curwp->w_dotp;
-    ptoff = curwp->w_doto;
+    ptoff = get_w_doto(curwp);
 
     /* record the pointer to the line just past the EOP */
     gotoeop(FALSE, 1);
@@ -651,11 +651,11 @@ int n;  /* # of paras to delete */
 
         /* set the mark here */
         curwp->w_markp[0] = curwp->w_dotp;
-        curwp->w_marko[0] = curwp->w_doto;
+        curwp->w_marko[0] = get_w_doto(curwp);
 
         /* go to the beginning of the paragraph */
         gotobop(FALSE, 1);
-        curwp->w_doto = 0;              /* force us to the beginning of line */
+        set_w_doto(curwp, 0);   /* force us to the beginning of line */
 
         /* and delete it */
         if ( ( status = killregion(FALSE, 1) ) != TRUE )

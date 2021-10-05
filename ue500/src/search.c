@@ -281,7 +281,7 @@ int repeats;
     /* Setup local scan pointers to global ".".
      */
     curline = curwp->w_dotp;
-    curoff  = curwp->w_doto;
+    curoff  = get_w_doto(curwp);
 
     /* Scan each character until we hit the head link record.
      */
@@ -342,10 +342,10 @@ int repeats;
             curwp->w_flag |= WFMOVE;
             if ( beg_or_end == PTEND ) {                /* at end of string */
                 curwp->w_dotp = curline;
-                curwp->w_doto = curoff;
+                set_w_doto(curwp, curoff);
             } else {                    /* at beginning of string */
                 curwp->w_dotp = matchline;
-                curwp->w_doto = matchoff;
+                set_w_doto(curwp, matchoff);
             }
 
             /* If we're heading in reverse, set the "match"
@@ -550,7 +550,7 @@ int repeats;
     /* Set up local pointers to global ".".
      */
     curline = curwp->w_dotp;
-    curoff = curwp->w_doto;
+    curoff = get_w_doto(curwp);
 
     /* Scan each character until we hit the head link record. Get the character
      * resolving newlines, offset by the pattern length, i.e. the last character
@@ -583,10 +583,10 @@ int repeats;
             curwp->w_flag |= WFMOVE;
             if ( beg_or_end == PTEND ) {                /* at end of string */
                 curwp->w_dotp = curline;
-                curwp->w_doto = curoff;
+                set_w_doto(curwp, curoff);
             } else {                    /* at beginning of string */
                 curwp->w_dotp = matchline;
-                curwp->w_doto = matchoff;
+                set_w_doto(curwp, matchoff);
             }
 
             /* If we're heading in reverse, set the "match"

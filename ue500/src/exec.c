@@ -926,7 +926,7 @@ nxtscan:        /* on to the next line */
                 if ( wp->w_bufp == bp ) {
                     /* and point it */
                     wp->w_dotp = lp;
-                    wp->w_doto = 0;
+                    set_w_doto(wp, 0);
                     wp->w_flag |= WFHARD;
                 }
                 wp = wp->w_wndp;
@@ -934,7 +934,7 @@ nxtscan:        /* on to the next line */
 
             /* in any case set the buffer . */
             bp->b_dotp = lp;
-            bp->b_doto = 0;
+            set_b_doto(bp, 0);
 
             errormesg(TEXT219, bp, lp);
 /*                "%%Macro Failed" */

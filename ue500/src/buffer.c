@@ -79,7 +79,7 @@ BUFFER *bp;
     /* unuse the current buffer, saving window info to buffer struct */
     if ( --curbp->b_nwnd == 0 ) {               /* Last use.        */
         curbp->b_dotp  = curwp->w_dotp;
-        curbp->b_doto  = curwp->w_doto;
+        set_b_doto(curbp, get_w_doto(curwp));
         for ( cmark = 0; cmark < NMARKS; cmark++ ) {
             curbp->b_markp[cmark] = curwp->w_markp[cmark];
             curbp->b_marko[cmark] = curwp->w_marko[cmark];
@@ -96,7 +96,7 @@ BUFFER *bp;
         /* read it in and activate it */
         readin( curbp->b_fname, ( (curbp->b_mode&MDVIEW) == 0 ) );
         curbp->b_dotp = lforw(curbp->b_linep);
-        curbp->b_doto = 0;
+        set_b_doto(curbp, 0);
         curbp->b_active = TRUE;
     }
     curwp->w_bufp  = bp;
@@ -104,7 +104,7 @@ BUFFER *bp;
     curwp->w_flag |= WFMODE|WFFORCE|WFHARD;     /* Quite nasty.     */
     if ( bp->b_nwnd++ == 0 ) {                  /* First use.       */
         curwp->w_dotp  = bp->b_dotp;
-        curwp->w_doto  = bp->b_doto;
+        set_w_doto(curwp, get_b_doto(bp));
         for ( cmark = 0; cmark < NMARKS; cmark++ ) {
             curwp->w_markp[cmark] = bp->b_markp[cmark];
             curwp->w_marko[cmark] = bp->b_marko[cmark];
@@ -118,7 +118,7 @@ BUFFER *bp;
             while ( wp != NULL ) {
                 if ( wp!=curwp && wp->w_bufp==bp ) {
                     curwp->w_dotp  = wp->w_dotp;
-                    curwp->w_doto  = wp->w_doto;
+                    set_w_doto(curwp, get_w_doto(wp));
                     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                         curwp->w_markp[cmark] = wp->w_markp[cmark];
                         curwp->w_marko[cmark] = wp->w_marko[cmark];
@@ -566,7 +566,7 @@ int bflag;              /* bit settings for a new buffer */
         bp->last_access = access_time;
         bp->b_active = TRUE;
         bp->b_dotp  = lp;
-        bp->b_doto  = 0;
+        set_b_doto(bp, 0);
         for ( cmark = 0; cmark < NMARKS; cmark++ ) {
             bp->b_markp[cmark] = NULL;
             bp->b_marko[cmark] = 0;
@@ -615,7 +615,7 @@ register BUFFER *bp;
     while ( ( lp=lforw(bp->b_linep) ) != bp->b_linep )
         lfree(lp);
     bp->b_dotp  = bp->b_linep;                  /* Fix "."      */
-    bp->b_doto  = 0;
+    set_b_doto(bp, 0);
     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
         bp->b_markp[cmark] = NULL;          /* Invalidate "mark"    */
         bp->b_marko[cmark] = 0;

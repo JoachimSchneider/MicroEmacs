@@ -19,5 +19,17 @@ With -DJES_UNSEC_CODE the errors could be reproduced.
 Furthermore fill-paragraph does not work correctly e.g. when used in som TeX-documents.
 
 
+[2021-10-05.00]
+
+Next steps to repair the (w|b)_doto-Problem:
+
+(1) Introduce (get|set)_(b|w)_doto Makros and use the througout the code: Done.
+(2) Test uemacs with this modification.
+(3) Fix wrong (w|b)_doto-Settings in the (get|set)_(b|w)_doto Macros and trace wrong settings.
+(4) Check that TRC in line.c isn't triggered any more.
+(5) Remove Fix and TRC in line.c.
+(6) Try to go from TRC to ASRT to fix the error.
+(7) Enable the other platforms. 
+
 
 # EOF

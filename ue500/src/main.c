@@ -796,13 +796,13 @@ int n;                                  /* prefix value */
 
         /* replace or overwrite mode, not at the end of a string */
         if ( curwp->w_bufp->b_mode & (MDREPL | MDOVER) &&
-             curwp->w_doto < get_lused(curwp->w_dotp) ) {
+             get_w_doto(curwp) < get_lused(curwp->w_dotp) ) {
             do {
                 /* if we are in replace mode, or (next char is not a tab or we
                  * are at a tab stop) */
                 if ( curwp->w_bufp->b_mode & MDREPL ||
                      ( (lgetc(curwp->w_dotp,
-                              curwp->w_doto) != '\t' || tabsize == 0) ||
+                              get_w_doto(curwp)) != '\t' || tabsize == 0) ||
                        getccol(FALSE) % tabsize == (tabsize - 1) ) ) {
 
                     /* make sure the cursor gets back to the right place on an
@@ -825,7 +825,7 @@ int n;                                  /* prefix value */
                         status = linsert(1, schar);
 #endif
                 }
-            } while (--n > 0 && curwp->w_doto < get_lused(curwp->w_dotp) &&
+            } while (--n > 0 && get_w_doto(curwp) < get_lused(curwp->w_dotp) &&
                      status == TRUE);
         }
 

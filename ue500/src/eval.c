@@ -512,8 +512,8 @@ CONST char  *vname;             /* name of environment variable to retrieve */
 
     case EVCURCHAR:
         return ( get_lused(curwp->w_dotp) ==
-                 curwp->w_doto ? int_asc('\r') :int_asc( lgetc(curwp->w_dotp,
-                                                               curwp->w_doto) ) );
+                 get_w_doto(curwp) ? int_asc('\r') :int_asc( lgetc(curwp->w_dotp,
+                                                               get_w_doto(curwp)) ) );
 
     case EVCURCOL:
         return ( int_asc( getccol(FALSE) ) );
@@ -1811,7 +1811,7 @@ char *token;            /* token to evaluate */
          * vars */
         if ( bp->b_nwnd > 0 ) {
             curbp->b_dotp = curwp->w_dotp;
-            curbp->b_doto = curwp->w_doto;
+            set_b_doto(curbp, get_w_doto(curwp));
         }
 
         /* if we are at the end, return <END> */
@@ -1819,20 +1819,20 @@ char *token;            /* token to evaluate */
             return ("<END>");
 
         /* grab the line as an argument */
-        blen = get_lused(bp->b_dotp) - bp->b_doto;
+        blen = get_lused(bp->b_dotp) - get_b_doto(bp);
         if ( blen > NSTRING )
             blen = NSTRING;
-        bytecopy(buf, ltext(bp->b_dotp) + bp->b_doto, blen);
+        bytecopy(buf, ltext(bp->b_dotp) + get_b_doto(bp), blen);
         buf[blen] = 0;
 
         /* and step the buffer's line ptr ahead a line */
         bp->b_dotp = lforw(bp->b_dotp);
-        bp->b_doto = 0;
+        set_b_doto(bp, 0);
 
         /* if displayed buffer, reset window ptr vars*/
         if ( bp->b_nwnd > 0 ) {
             curwp->w_dotp = curbp->b_dotp;
-            curwp->w_doto = 0;
+            set_w_doto(curwp, 0);
             curwp->w_flag |= WFMOVE;
         }
 

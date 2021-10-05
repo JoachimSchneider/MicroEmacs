@@ -148,7 +148,7 @@ int dir;
     bytecopy(pat_save, (char *) pat, NPAT);     /* Save the old pattern string
                                                  */
     curline = curwp->w_dotp;            /* Save the current line pointer */
-    curoff = curwp->w_doto;     /* Save the current offset */
+    curoff = get_w_doto(curwp);         /* Save the current offset */
 # if MAGIC
     mcclear();
 # endif
@@ -236,7 +236,7 @@ start_over:                             /* This is a good place to start a
                  * (cmd_reexecute = 0) and let it take care of itself.
                  */
                 curwp->w_dotp = curline;
-                curwp->w_doto = curoff;
+                set_w_doto(curwp, curoff);
                 dir = init_direction;
                 bytecopy( (char *) pat, pat_save, NPAT );
                 setjtable();
@@ -290,10 +290,10 @@ start_over:                             /* This is a good place to start a
                                                          * or find next */
     }
 
-    curwp->w_dotp = curline;            /* Reset the line pointer       */
-    curwp->w_doto = curoff;     /*   and the offset to original value   */
-    curwp->w_flag |= WFMOVE;            /* Say we've moved          */
-    update(FALSE);              /* And force an update          */
+    curwp->w_dotp = curline;    /* Reset the line pointer               */
+    set_w_doto(curwp, curoff);  /*   and the offset to original value   */
+    curwp->w_flag |= WFMOVE;    /* Say we've moved                      */
+    update(FALSE);              /* And force an update                  */
     mmove_flag = TRUE;
 
     return (FALSE);
@@ -351,8 +351,8 @@ int dir;                                /* Search direction         */
 
     /* setup the local scan pointer to current "." */
 
-    curline = curwp->w_dotp;            /* Get the current line structure */
-    curoff = curwp->w_doto;     /* Get the offset within that line */
+    curline = curwp->w_dotp;        /* Get the current line structure  */
+    curoff = get_w_doto(curwp);     /* Get the offset within that line */
 
     if ( dir == FORWARD ) {                     /* If searching forward     */
         if ( sts = !boundry(curline, curoff, FORWARD) ) {
@@ -361,7 +361,7 @@ int dir;                                /* Search direction         */
              */
             if ( sts = eq(nextch(&curline, &curoff, FORWARD), chr) ) {
                 curwp->w_dotp = curline;
-                curwp->w_doto = curoff;
+                set_w_doto(curwp, curoff);
                 curwp->w_flag |= WFMOVE;
             }
         }

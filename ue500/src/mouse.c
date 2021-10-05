@@ -71,7 +71,7 @@ int f, n;        /* prefix flag and argument */
     /* if we aren't off the end of the text, move the point to the mouse */
     if ( ( lp=mouseline(wp, ypos) ) != NULL ) {
         curwp->w_dotp = lp;
-        curwp->w_doto = mouseoffset(wp, lp, xpos);
+        set_w_doto(curwp, mouseoffset(wp, lp, xpos));
     }
 
     return (TRUE);
@@ -186,7 +186,7 @@ int f, n;        /* prefix flag and argument */
         /* save the current dot position in the buffer info so the new screen
          * will start there! */
         curbp->b_dotp = curwp->w_dotp;
-        curbp->b_doto = curwp->w_doto;
+        set_b_doto(curbp, get_w_doto(curwp));
 
         /* screen does not exist, create it */
         sp = init_screen(scr_name, curbp);
@@ -215,7 +215,7 @@ int f, n;        /* prefix flag and argument */
     /* if we aren't off the end of the text, move the point to the mouse */
     if ( ( lp=mouseline(wp, ypos) ) != NULL ) {
         curwp->w_dotp = lp;
-        curwp->w_doto = mouseoffset(wp, lp, xpos);
+        set_w_doto(curwp, mouseoffset(wp, lp, xpos));
     }
 
     /* perform the region function */
@@ -224,7 +224,7 @@ int f, n;        /* prefix flag and argument */
             curwp->w_markp[hilite+1] = NULL;
             curwp->w_marko[hilite+1] = 0;
             curwp->w_markp[hilite] = curwp->w_dotp;
-            curwp->w_marko[hilite] = curwp->w_doto;
+            curwp->w_marko[hilite] = get_w_doto(curwp);
         }
 
         return ( setmark(FALSE, 0) );
@@ -341,7 +341,7 @@ int f, n;        /* prefix flag and argument */
     /* if we aren't off the end of the text, move the point to the mouse */
     if ( ( lp=mouseline(wp, ypos) ) != NULL && nclicks < 3 ) {
         curwp->w_dotp = lp;
-        curwp->w_doto = mouseoffset(wp, lp, xpos);
+        set_w_doto(curwp, mouseoffset(wp, lp, xpos));
     }
 
     /* if we changed windows, update the modelines, abort the new op */

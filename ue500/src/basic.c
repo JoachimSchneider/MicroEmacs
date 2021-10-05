@@ -20,7 +20,7 @@ int PASCAL NEAR gotobol(f, n)
 int f, n;        /* argument flag and num */
 
 {
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
 
     return (TRUE);
 }
@@ -42,15 +42,15 @@ int f, n;        /* prefix flag and argument */
         return ( forwchar(f, -n) );
 
     while ( n-- ) {
-        if ( curwp->w_doto == 0 ) {
+        if ( get_w_doto(curwp) == 0 ) {
             if ( ( lp=lback(curwp->w_dotp) ) == curbp->b_linep )
                 return (FALSE);
 
             curwp->w_dotp  = lp;
-            curwp->w_doto  = get_lused(lp);
+            set_w_doto(curwp, get_lused(lp));
             curwp->w_flag |= WFMOVE;
         } else
-            curwp->w_doto--;
+            set_w_doto(curwp, get_w_doto(curwp) - 1);
     }
 #if     DBCS
 
@@ -71,7 +71,7 @@ int PASCAL NEAR gotoeol(f, n)
 int f, n;        /* argument flag and num */
 
 {
-    curwp->w_doto  = get_lused(curwp->w_dotp);
+    set_w_doto(curwp, get_lused(curwp->w_dotp));
 
     return (TRUE);
 }
@@ -91,15 +91,15 @@ int f, n;        /* prefix flag and argument */
         return ( backchar(f, -n) );
 
     while ( n-- ) {
-        if ( curwp->w_doto == get_lused(curwp->w_dotp) ) {
+        if ( get_w_doto(curwp) == get_lused(curwp->w_dotp) ) {
             if ( curwp->w_dotp == curbp->b_linep )
                 return (FALSE);
 
             curwp->w_dotp  = lforw(curwp->w_dotp);
-            curwp->w_doto  = 0;
+            set_w_doto(curwp, 0);
             curwp->w_flag |= WFMOVE;
         } else
-            curwp->w_doto++;
+            set_w_doto(curwp, get_w_doto(curwp) + 1);
     }
 #if     DBCS
 
@@ -139,7 +139,7 @@ int f, n;        /* prefix flag and argument */
 
     /* first, we go to the start of the buffer */
     curwp->w_dotp  = lforw(curbp->b_linep);
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
 
     return ( forwline(f, n-1) );
 }
@@ -155,7 +155,7 @@ int f, n;        /* argument flag and num */
 
 {
     curwp->w_dotp  = lforw(curbp->b_linep);
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
     curwp->w_flag |= WFMOVE;
 
     return (TRUE);
@@ -172,7 +172,7 @@ int f, n;        /* argument flag and num */
 
 {
     curwp->w_dotp  = curbp->b_linep;
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
     curwp->w_flag |= WFMOVE;
 
     return (TRUE);
@@ -211,7 +211,7 @@ int f, n;        /* argument flag and num */
 
     /* reseting the current position */
     curwp->w_dotp  = dlp;
-    curwp->w_doto  = getgoal(dlp);
+    set_w_doto(curwp, getgoal(dlp));
     curwp->w_flag |= WFMOVE;
 #if     DBCS
 
@@ -259,7 +259,7 @@ int f, n;        /* argument flag and num */
 
     /* reseting the current position */
     curwp->w_dotp  = dlp;
-    curwp->w_doto  = getgoal(dlp);
+    set_w_doto(curwp, getgoal(dlp));
     curwp->w_flag |= WFMOVE;
 #if     DBCS
 
@@ -296,7 +296,7 @@ int f, n;       /* default Flag & Numeric argument */
         suc = backchar(FALSE, 1);
         while ( !inword() && suc )
             suc = backchar(FALSE, 1);
-        curwp->w_doto = 0;              /* and go to the B-O-Line */
+        set_w_doto(curwp, 0);   /* and go to the B-O-Line */
 
         /* scan back through the text */
         while ( lback(curwp->w_dotp) != curbp->b_linep ) {
@@ -366,7 +366,7 @@ int f, n;       /* default Flag & Numeric argument */
             suc = forwchar(FALSE, 1);
 
         /* and go to the B-O-Line */
-        curwp->w_doto = 0;
+        set_w_doto(curwp, 0);
 
         /* of next line if not at EOF */
         if ( suc )
@@ -410,7 +410,7 @@ int f, n;       /* default Flag & Numeric argument */
         while ( suc && !inword() ) {
             suc = backchar(FALSE, 1);
         }
-        curwp->w_doto = get_lused(curwp->w_dotp); /* and to the EOL */
+        set_w_doto(curwp, get_lused(curwp->w_dotp));  /* and to the EOL */
     }
     curwp->w_flag |= WFMOVE;            /* force screen update */
 
@@ -483,7 +483,7 @@ int f, n;        /* prefix flag and argument */
         lp = lforw(lp);
     curwp->w_linep = lp;
     curwp->w_dotp  = lp;
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
     curwp->w_flag |= WFHARD;
 
     return (TRUE);
@@ -520,7 +520,7 @@ register int n;
         lp = lback(lp);
     curwp->w_linep = lp;
     curwp->w_dotp  = lp;
-    curwp->w_doto  = 0;
+    set_w_doto(curwp, 0);
     curwp->w_flag |= WFHARD;
 
     return (TRUE);
@@ -541,7 +541,7 @@ int f, n;        /* argument flag and num */
     n %= NMARKS;
 
     curwp->w_markp[n] = curwp->w_dotp;
-    curwp->w_marko[n] = curwp->w_doto;
+    curwp->w_marko[n] = get_w_doto(curwp);
     mlwrite(TEXT9, n);
 
 /*              "[Mark %d set]" */
@@ -595,9 +595,9 @@ int f, n;        /* argument flag and num */
         return (FALSE);
     }
     odotp = curwp->w_dotp;
-    odoto = curwp->w_doto;
+    odoto = get_w_doto(curwp);
     curwp->w_dotp  = curwp->w_markp[n];
-    curwp->w_doto  = curwp->w_marko[n];
+    set_w_doto(curwp, curwp->w_marko[n]);
     curwp->w_markp[n] = odotp;
     curwp->w_marko[n] = odoto;
     curwp->w_flag |= WFMOVE;
@@ -627,7 +627,7 @@ int f, n;       /* default and numeric args */
         return (FALSE);
     }
     curwp->w_dotp  = curwp->w_markp[n];
-    curwp->w_doto  = curwp->w_marko[n];
+    set_w_doto(curwp, curwp->w_marko[n]);
     curwp->w_flag |= WFMOVE;
 
     return (TRUE);
@@ -639,9 +639,9 @@ int f, n;       /* default and numeric args */
 int PASCAL NEAR stopforw()
 {
     /* don't stop on the second byte of a 2 byte character */
-    if ( curwp->w_doto > 0 &&
+    if ( get_w_doto(curwp) > 0 &&
          is2byte(ltext(curwp->w_dotp),
-                 ltext(curwp->w_dotp) + curwp->w_doto - 1) )
+                 ltext(curwp->w_dotp) + get_w_doto(curwp) - 1) )
         return ( forwchar(TRUE, 1) );
 
     return (TRUE);
@@ -652,9 +652,9 @@ int PASCAL NEAR stopforw()
 int PASCAL NEAR stopback()
 {
     /* don't stop on the second byte of a 2 byte character */
-    if ( curwp->w_doto > 0 &&
+    if ( get_w_doto(curwp) > 0 &&
          is2byte(ltext(curwp->w_dotp),
-                 ltext(curwp->w_dotp) + curwp->w_doto - 1) )
+                 ltext(curwp->w_dotp) + get_w_doto(curwp) - 1) )
         return ( backchar(TRUE, 1) );
 
     return (TRUE);

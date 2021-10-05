@@ -361,7 +361,7 @@ out:    TTkopen();      /* open the keyboard again */
         if ( wp->w_bufp == curbp ) {
             wp->w_linep = lforw(curbp->b_linep);
             wp->w_dotp  = lforw(curbp->b_linep);
-            wp->w_doto  = 0;
+            set_w_doto(wp, 0);
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
                 wp->w_markp[cmark] = NULL;
                 wp->w_marko[cmark] = 0;
@@ -798,7 +798,7 @@ char fname[];
 #endif
     /* back up a line and save the mark here */
     curwp->w_dotp = lback(curwp->w_dotp);
-    curwp->w_doto = 0;
+    set_w_doto(curwp, 0);
     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
         if ( curwp->w_markp[cmark] == lforw(curwp->w_dotp) ) {
             curwp->w_markp[cmark] = curwp->w_dotp;
@@ -861,7 +861,7 @@ out:
 
     /* copy window parameters back to the buffer structure */
     curbp->b_dotp = curwp->w_dotp;
-    curbp->b_doto = curwp->w_doto;
+    set_b_doto(curbp, get_w_doto(curwp));
     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
         curbp->b_markp[cmark] = curwp->w_markp[cmark];
         curbp->b_marko[cmark] = curwp->w_marko[cmark];

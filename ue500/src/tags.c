@@ -179,16 +179,16 @@ int lmax;
     register int i;
     register int go_on = TRUE;
     register LINE *dotp = curwp->w_dotp;        /* Preserve '.' info    */
-    register int doto = curwp->w_doto;          /* Preserve '.' info    */
+    register int doto = get_w_doto(curwp);      /* Preserve '.' info    */
 
     for ( i = 0; go_on && i < lmax - 1 && inword(); i++ ) {
-        str[i] = lgetc(curwp->w_dotp, curwp->w_doto);
+        str[i] = lgetc(curwp->w_dotp, get_w_doto(curwp));
         go_on = forwchar(FALSE, 1);
     }
 
     str[i] = 0;                         /* Terminate word       */
     curwp->w_dotp = dotp;       /* Restore '.'          */
-    curwp->w_doto = doto;
+    set_w_doto(curwp, doto);
 
     return (TRUE);
 }
@@ -397,7 +397,7 @@ int f, n;
 
 {
     LINE    *pretagdotp = curwp->w_dotp;        /* Preserve '.' info    */
-    int pretagdoto = curwp->w_doto;
+    int pretagdoto = get_w_doto(curwp);
     int i;
 
     if ( restflag == TRUE )     /* Don't allow when in restricted mode  */
@@ -420,7 +420,7 @@ int f, n;
     fix_index();
 
     curwp->w_dotp = pretagdotp;         /* Restore '.'  */
-    curwp->w_doto = pretagdoto;
+    set_w_doto(curwp, pretagdoto);
 
     /* Ok, set file offset according to  curtp->t_wd (if any)   */
     if ( ( i = INDEX(*curtp->t_wd) ) == -1 || curtp->t_dotos[i] == -1L ) {
