@@ -24,12 +24,13 @@ Furthermore fill-paragraph does not work correctly e.g. when used in som TeX-doc
 Next steps to repair the (w|b)_doto-Problem:
 
 (1) Introduce (get|set)_(b|w)_doto Makros and use the througout the code: Done.
-(2) Test uemacs with this modification.
-(3) Fix wrong (w|b)_doto-Settings in the (get|set)_(b|w)_doto Macros and trace wrong settings.
-(4) Check that TRC in line.c isn't triggered any more.
-(5) Remove Fix and TRC in line.c.
-(6) Try to go from TRC to ASRT to fix the error.
-(7) Enable the other platforms. 
+(2) Test uemacs with this modification: Done.
+(3) Fix wrong (w|b)_doto-Settings in the (get|set)_(b|w)_doto Macros and trace wrong settings: Done.
+(4) Check that TRC in line.c isn't triggered any more: Done.
+(5) Remove Fix and TRC in line.c: Done.
 
+(6) FIX THIS ERROR: `TRC (../src/undo.c/131): set_w_doto(): Too large doto: 156. REWRITTEN TO: 155.'
+(7) Enable the other platforms. 
+(8) Introduce get/set-Logic and repair-code of the dot-code for the mark code as well.
 
 # EOF

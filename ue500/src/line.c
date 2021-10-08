@@ -42,7 +42,7 @@ register int used;
         return (NULL);
     }
     lp->l_size_ = used;
-    /* JES_UNSEC_CODE: Setting l_used to 0 here dos *not* work, but I don't know why. */
+    /* JES_TODO: Setting l_used to 0 here dos *not* work, but I don't know why. */
     lp->l_used_ = used;
 #if     WINDOW_MSWIN
     {
@@ -484,7 +484,9 @@ int PASCAL NEAR lnewline()
  *
  */
 
-int PASCAL NEAR ldelete(n, kflag)
+#undef  FUNC_
+#define FUNC_ ldelete
+int PASCAL NEAR FUNC_(n, kflag)
 
 long n;         /* # of chars to delete */
 int kflag;      /* put killed text in kill buffer flag */
@@ -516,14 +518,8 @@ int kflag;      /* put killed text in kill buffer flag */
 #endif
             /* record the current point */
             dotp = curwp->w_dotp;
-#ifdef JES_UNSEC_CODE
             doto = get_w_doto(curwp);
-#else
-            doto = MIN2(get_w_doto(curwp), get_lused(dotp));
-            if ( get_w_doto(curwp) != doto )  {
-                TRC(("Original doto: %d, Fixed doto: %d", (int)get_w_doto(curwp), doto));
-            }
-#endif            
+            ASRT(0 <= get_lused(dotp) - doto);
 
             /* can't delete past the end of the buffer */
             if ( dotp == curbp->b_linep )
@@ -582,7 +578,7 @@ int kflag;      /* put killed text in kill buffer flag */
             /* copy what is left of the line upward */
             while ( cp2 < lgetcp(dotp, get_lused(dotp)) )
                 *cp1++ = *cp2++;
-            /** JES_UNSEC_CODE: chunk .LT. 0 **/
+            /* See `ASRT(0 <= get_lused(dotp) - doto)' above. */
             set_lused(dotp, get_lused(dotp) - chunk);
 
             /* fix any other windows with the same text displayed */
@@ -591,9 +587,7 @@ int kflag;      /* put killed text in kill buffer flag */
 
                 /* reset the dot if needed */
                 if ( wp->w_dotp==dotp && get_w_doto(wp) >= doto ) {
-                    set_w_doto(wp, get_w_doto(wp) - chunk);
-                    if ( get_w_doto(wp) < doto )
-                        set_w_doto(wp, doto);
+                    set_w_doto(wp, MAX2(get_w_doto(wp) - chunk, doto));
                 }
 
                 /* reset any marks if needed */

@@ -18,6 +18,7 @@ HDIR = ../h
 #CFLAGS = -O -I. -I$(HDIR)
 #CFLAGS = -g -DEMACS_TRC -Wall -I. -I$(HDIR)
 #CFLAGS = -O2 -I. -I$(HDIR)
+#CFLAGS = -g -Wall -DJES_UNSEC_CODE -DEMACS_TRC -I. -I$(HDIR)
 CFLAGS = -g -Wall -DEMACS_TRC -I. -I$(HDIR)
 
 # list of header files

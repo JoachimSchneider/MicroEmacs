@@ -138,7 +138,7 @@ int bflg;
     register unsigned char c;
 
     col = 0;
-#ifdef JES_UNSEC_CODE
+#ifdef JES_UNSEC_CODE   /* JES_TODO: Use the defensive (secure) variant.  */
     for ( i = 0; i < get_w_doto(curwp); ++i ) {
 #else
     for ( i = 0; i < MIN2(get_w_doto(curwp), get_lused(curwp->w_dotp)); ++i ) {

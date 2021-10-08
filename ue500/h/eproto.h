@@ -118,6 +118,14 @@ extern int         DebugMessage(CONST char *fmt, ...);
 #define IS_ARRAY(a) ( (char *)(&(a)) == (char *)(&((a)[0])) )
 /**********************************************************************/
 
+
+/**********************************************************************/
+#define FNAM_   XCONCAT2(FUNC_, _)
+#define FSTR_   MKXSTRING(FUNC_)
+/**********************************************************************/
+
+
+
 /**********************************************************************/
 static char *uitostr_memacs(unsigned int i)
 {
@@ -179,9 +187,11 @@ static char *uitostr_memacs(unsigned int i)
  */
 #define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1];
 
-/* We will use fputs instead of fprintf, because fprintf
-   might use malloc(), but we want to use ASRT to exit
-   when malloc() fails  */
+/*
+ * We will use fputs instead of fprintf, because fprintf
+ * might use malloc(), but we want to use ASRT to exit
+ * when malloc() fails
+ */
 #define ASRT(e) do {                                                    \
         if ( !(e) )                                                     \
         {                                                               \
@@ -289,6 +299,112 @@ typedef struct UNDO_OBJ {
     OBJECT undo_obj;            /* object to be undone */
 } UNDO_OBJ;
 
+
+/*
+ * All text is kept in circularly linked lists of "LINE" structures. These begin
+ * at the header line (which is the blank line beyond the end of the buffer).
+ * This line is pointed to by the "BUFFER". Each line contains a the number of
+ * bytes in the line (the "used" size), the size of the text array, and the
+ * text. /o The end of line is not stored as a byte; it's implied. o/
+ * The routine lalloc() allocates one addtional character which is set to '\0'
+ * by the room() routine.
+ */
+
+typedef struct  LINE {
+    struct  LINE *l_fp;                 /* Link to the next line        */
+    struct  LINE *l_bp;                 /* Link to the previous line    */
+    int     l_size_;                    /* Allocated size               */
+    int     l_used_;                    /* Used size                    */
+    char    l_text_[1];                 /* A bunch of characters.       */
+}       LINE;
+
+#define lforw(lp)       ( (lp)->l_fp )
+#define lback(lp)       ( (lp)->l_bp )
+
+static char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+    ASRTK(0 <= n,                     fnam, lno);
+    ASRTK(n < lp->l_size_,            fnam, lno);
+
+    return ( lp->l_text_[n] = c );
+}
+#define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
+
+#undef  FUNC_
+#define FUNC_ lgetc
+#if ( IS_UNIX() )
+static unsigned char FNAM_(LINE *lp, int n, const char *fnam, int lno)
+#else
+    static char FNAM_(LINE *lp, int n, const char *fnam, int lno)
+#endif
+{
+    ASRTK(NULL != lp,                     fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
+    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
+
+    if ( n == lp->l_used_ ) {
+        TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
+              FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+
+        if ( n == lp->l_size_ ) {
+            return ( '\0' );
+        } else {
+            return ( lp->l_text_[n] );
+        }
+    }
+
+    return ( lp->l_text_[n] );
+}
+#define lgetc(lp, n)    ( lgetc_((lp), (n), __FILE__, __LINE__) )
+
+#undef  FUNC_
+#define FUNC_ lgetcp
+static char *FNAM_(LINE *lp, int n, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                     fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
+    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
+
+    if ( n == lp->l_used_ ) {
+        TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
+              FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+    }
+
+    return ( &(lp->l_text_[n]) );
+}
+#define lgetcp(lp, n)   ( lgetcp_((lp), (n), __FILE__, __LINE__) )
+
+static int get_lused_(LINE *lp, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+
+    return ( (lp)->l_used_ );
+}
+#define get_lused(lp)   ( get_lused_((lp), __FILE__, __LINE__) )
+static int set_lused_(LINE *lp, int used, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+    ASRTK(0 <= used,                  fnam, lno);
+    ASRTK(used <= lp->l_size_,        fnam, lno);
+
+    return ( (lp)->l_used_ = used );
+}
+#define set_lused(lp, used) ( set_lused_((lp), (used), __FILE__, __LINE__) )
+static int get_lsize_(LINE *lp, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+
+    return ( (lp)->l_size_ );
+}
+#define get_lsize(lp)   ( get_lsize_((lp), __FILE__, __LINE__) )
+#define ltext(lp)       ( lgetcp(lp, 0) )
+
+
 /*
  * There is a window structure allocated for every active display window. The
  * windows are kept in a big list, in top to bottom screen order, with the
@@ -297,6 +413,7 @@ typedef struct UNDO_OBJ {
  * redisplay. Although this is a bit of a compromise in terms of decoupling, the
  * full blown redisplay is just too expensive to run for every input character.
  */
+
 typedef struct  EWINDOW {
     struct  EWINDOW *w_wndp;            /* Next window                  */
     struct  BUFFER  *w_bufp;            /* Buffer displayed in window   */
@@ -316,16 +433,45 @@ typedef struct  EWINDOW {
     int             w_fcol;             /* first column displayed       */
 }       EWINDOW;
 /**********************************************************************/
-static int get_w_doto_(EWINDOW *wp, const char *fnam, int lno)
+#undef  FUNC_
+#define FUNC_ get_w_doto
+static int FNAM_(EWINDOW *wp, const char *fnam, int lno)
 {
-    ASRTK(NULL != wp, fnam, lno);
+    ASRTK(NULL != wp,                                 fnam, lno);
+    ASRTK(NULL != wp->w_dotp,                         fnam, lno);
+    ASRTK(0 <= wp->w_dotp->l_used_,                   fnam, lno);
+    ASRTK(wp->w_dotp->l_used_ <= wp->w_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= wp->w_doto_,                           fnam, lno);
 
-    return ( (wp)->w_doto_ );
+    if ( wp->w_dotp->l_used_ < wp->w_doto_ )  {
+        TRCK(("%s(): w_dotp->l_used_(%d) < wp->w_doto_(%d)",
+              FSTR_, wp->w_dotp->l_used_, wp->w_doto_), fnam, lno);
+    }
+
+    return ( wp->w_doto_ );
 }
 #define get_w_doto(wp)        ( get_w_doto_((wp), __FILE__, __LINE__) )
-static int set_w_doto_(EWINDOW *wp, int doto, const char *fnam, int lno)
+#undef  FUNC_
+#define FUNC_ set_w_doto
+static int FNAM_(EWINDOW *wp, int doto, const char *fnam, int lno)
 {
-    ASRTK(NULL != wp, fnam, lno);
+    ASRTK(NULL != wp,                                 fnam, lno);
+    ASRTK(NULL != wp->w_dotp,                         fnam, lno);
+    ASRTK(0 <= wp->w_dotp->l_used_,                   fnam, lno);
+    ASRTK(wp->w_dotp->l_used_ <= wp->w_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= wp->w_doto_,                           fnam, lno);
+
+    if ( 0 > doto ) {
+        TRCK(("%s(): Negativ doto: %d. REWRITTEN TO %d.",
+              FSTR_, doto, 0), fnam, lno);
+
+        doto  = 0;
+    }
+    if ( wp->w_dotp->l_used_ < doto ) {
+        TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
+              FSTR_, doto, wp->w_dotp->l_used_), fnam, lno);
+        doto  = wp->w_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
+    }
 
     return ( (wp)->w_doto_ = doto );
 }
@@ -339,7 +485,9 @@ static int set_w_doto_(EWINDOW *wp, int doto, const char *fnam, int lno)
 #define WFMODE  0x10                    /* Update mode line.            */
 #define WFCOLR  0x20                    /* Needs a color change         */
 
-/* This structure holds the information about each line appearing on the video
+
+/*
+ * This structure holds the information about each line appearing on the video
  * display. The redisplay module uses an array of virtual display lines. On
  * systems that do not have direct access to display memory, there is also an
  * array of physical display lines used to minimize video updating. In most
@@ -368,12 +516,13 @@ typedef struct  VIDEO {
 #define VFEXT   0x0004                  /* extended (beyond column 80)  */
 #define VFCOL   0x0008                  /* color change requested       */
 
+
 /*
- *      This structure holds the information about each separate "screen"
- * within the current editing session.  On a character based system, these
- * screens overlay each other, and can individually be brought to front. On a
+ * This structure holds the information about each separate "screen" within
+ * the current editing session.  On a character based system, these screens
+ * overlay each other, and can individually be brought to front. On a
  * windowing system like MicroSoft Windows 3.0, OS/2, the Macintosh, Intuition,
- * Sunview or X-windows, each screen is represented in an OS window.  The
+ * Sunview or X-windows, each screen is represented in an OS window. The
  * terminolgy is wrong in emacs.....
  *
  *      EMACS           The outside World screen          window window
@@ -396,6 +545,7 @@ typedef struct SCREEN_T {
 #endif
 } SCREEN_T;
 
+
 /*
  * Text is kept in buffers. A buffer header, described below, exists for every
  * buffer in the system. The buffers are kept in a big list, so that commands
@@ -408,6 +558,7 @@ typedef struct SCREEN_T {
  * buffer" time. Some buffers are really procedures and have a little extra
  * information stored with them.
  */
+
 typedef struct  BUFFER {
     struct  BUFFER  *b_bufp;            /* Link to next BUFFER          */
     struct  LINE    *b_dotp;            /* Link to "." LINE structure   */
@@ -435,16 +586,45 @@ typedef struct  BUFFER {
     long            last_access;        /* time of last access          */
 }       BUFFER;
 /**********************************************************************/
-static int get_b_doto_(BUFFER *bp, const char *fnam, int lno)
+#undef  FUNC_
+#define FUNC_ get_b_doto
+static int FNAM_(BUFFER *bp, const char *fnam, int lno)
 {
-    ASRTK(NULL != bp, fnam, lno);
+    ASRTK(NULL != bp,                                 fnam, lno);
+    ASRTK(NULL != bp->b_dotp,                         fnam, lno);
+    ASRTK(0 <= bp->b_dotp->l_used_,                   fnam, lno);
+    ASRTK(bp->b_dotp->l_used_ <= bp->b_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= bp->b_doto_,                           fnam, lno);
+
+    if ( bp->b_dotp->l_used_ < bp->b_doto_ )  {
+        TRCK(("%s(): b_dotp->l_used_(%d) < bp->b_doto_(%d)",
+              FSTR_, bp->b_dotp->l_used_, bp->b_doto_), fnam, lno);
+    }
 
     return ( (bp)->b_doto_ );
 }
 #define get_b_doto(bp)        ( get_b_doto_((bp), __FILE__, __LINE__) )
-static int set_b_doto_(BUFFER *bp, int doto, const char *fnam, int lno)
+#undef  FUNC_
+#define FUNC_ set_b_doto
+static int FNAM_(BUFFER *bp, int doto, const char *fnam, int lno)
 {
-    ASRTK(NULL != bp, fnam, lno);
+    ASRTK(NULL != bp,                                 fnam, lno);
+    ASRTK(NULL != bp->b_dotp,                         fnam, lno);
+    ASRTK(0 <= bp->b_dotp->l_used_,                   fnam, lno);
+    ASRTK(bp->b_dotp->l_used_ <= bp->b_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= bp->b_doto_,                           fnam, lno);
+
+    if ( 0 > doto ) {
+        TRCK(("%s(): Negativ doto: %d. REWRITTEN TO %d.",
+              FSTR_, doto, 0), fnam, lno);
+
+        doto  = 0;
+    }
+    if ( bp->b_dotp->l_used_ < doto ) {
+        TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
+              FSTR_, doto, bp->b_dotp->l_used_), fnam, lno);
+        doto  = bp->b_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
+    }
 
     return ( (bp)->b_doto_ = doto );
 }
@@ -473,6 +653,7 @@ static int set_b_doto_(BUFFER *bp, int doto, const char *fnam, int lno)
 #define MDREPL  0x0200                  /* replace mode                 */
 #define MDABBR  0x0400                  /* abbreviation expansion mode  */
 
+
 /*
  * The starting position of a region, and the size of the region in characters,
  * is kept in a region structure.  Used by the region commands.
@@ -482,115 +663,6 @@ typedef struct  {
     int     r_offset;                   /* Origin LINE offset.          */
     long    r_size;                     /* Length in characters.        */
 }       REGION;
-
-/*
- * All text is kept in circularly linked lists of "LINE" structures. These begin
- * at the header line (which is the blank line beyond the end of the buffer).
- * This line is pointed to by the "BUFFER". Each line contains a the number of
- * bytes in the line (the "used" size), the size of the text array, and the
- * text. /o The end of line is not stored as a byte; it's implied. o/
- * The routine lalloc() allocates one addtional character which si set to '\0'
- * by the room() routine.
- */
-typedef struct  LINE {
-    struct  LINE *l_fp;                 /* Link to the next line        */
-    struct  LINE *l_bp;                 /* Link to the previous line    */
-    int     l_size_;                    /* Allocated size               */
-    int     l_used_;                    /* Used size                    */
-    char    l_text_[1];                 /* A bunch of characters.       */
-}       LINE;
-
-#define lforw(lp)       ( (lp)->l_fp )
-#define lback(lp)       ( (lp)->l_bp )
-#if ( IS_UNIX() )
-# define lgetc_ORG_(lp, n)    ( (unsigned char)(lp)->l_text_[(n)] )
-#else
-# define lgetc_ORG_(lp, n)    ( (lp)->l_text_[(n)] )
-#endif
-
-#define lputc_ORG_(lp, n, c) ( (lp)->l_text_[(n)]=(c) )
-
-static char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-    ASRTK(0 <= n,                     fnam, lno);
-    ASRTK(n < lp->l_size_,            fnam, lno);
-
-    return ( lp->l_text_[n] = c );
-}
-#define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
-
-#if ( IS_UNIX() )
-static unsigned char lgetc_(LINE *lp, int n, const char *fnam, int lno)
-#else
-    static char lgetc_(LINE *lp, int n, const char *fnam, int lno)
-#endif
-{
-    ASRTK(NULL != lp,                     fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
-    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
-
-    if ( n == lp->l_used_ ) {
-        TRCK(("Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = %c", 
-              (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
-
-        if ( n == lp->l_size_ ) {
-            return ( '\0' );
-        } else {
-            return ( lp->l_text_[n] );
-        }
-    }
-
-    return ( lp->l_text_[n] );
-}
-#define lgetc(lp, n)    ( lgetc_((lp), (n), __FILE__, __LINE__) )
-
-static char *lgetcp_(LINE *lp, int n, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                     fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
-    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
-
-    if ( n == lp->l_used_ ) {
-        TRCK(("Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = %c", 
-              (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
-    }
-
-    return ( &(lp->l_text_[n]) );
-}
-#define lgetcp(lp, n)   ( lgetcp_((lp), (n), __FILE__, __LINE__) )
-
-#define lused_ORG(lp)       ( (lp)->l_used_ )
-static int get_lused_(LINE *lp, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-
-    return ( (lp)->l_used_ );
-}
-#define get_lused(lp)   ( get_lused_((lp), __FILE__, __LINE__) )
-static int set_lused_(LINE *lp, int used, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-    ASRTK(0 <= used,                  fnam, lno);
-    ASRTK(used <= lp->l_size_,        fnam, lno);
-
-    return ( (lp)->l_used_ = used );
-}
-#define set_lused(lp, used) ( set_lused_((lp), (used), __FILE__, __LINE__) )
-#define lsize_ORG(lp)       ( (lp)->l_size_ )
-static int get_lsize_(LINE *lp, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-
-    return ( (lp)->l_size_ );
-}
-#define get_lsize(lp)   ( get_lsize_((lp), __FILE__, __LINE__) )
-#define ltext_ORG(lp)       ( (lp)->l_text_ )
-#define ltext(lp)       ( lgetcp(lp, 0) )
 
 /*      This structure is used to hold a user variables name and its current
  * value. These are used for both the global and the local symbol tables.
@@ -605,7 +677,9 @@ typedef struct UVAR {
 #define VT_LOCAL        1       /* local to the current procedure */
 #define VT_GLOBAL       2       /* global to all procedures */
 
-/*      A UTABLE is a user variable table.... containing some header information
+
+/*
+ * A UTABLE is a user variable table.... containing some header information
  * and an array of user variable names and definitions. They are held together
  * in a linked list, the last member of the list being the global user variable
  * table.
@@ -620,6 +694,7 @@ typedef struct UTABLE {
                                  * variable table */
 } UTABLE;
 
+
 /*
  * The editor communicates with the display using a high level interface. A
  * "TERM" structure holds useful variables, and indirect pointers to routines
@@ -629,6 +704,7 @@ typedef struct UTABLE {
  * "termp->t_field" style in the future, to make it possible to run more than
  * one terminal type.
  */
+
 #if     PROTO
 typedef struct  {
     short t_mrow;                       /* max number of rows allowable */
@@ -718,8 +794,10 @@ typedef struct  {
 #endif
 
 
-/*      TEMPORARY macros for terminal I/O  (to be placed in a machine dependant
- * place later) */
+/*
+ * TEMPORARY macros for terminal I/O  (to be placed in a machine dependant
+ * place later)
+ */
 
 #define TTopen          (*term.t_open)
 #define TTclose         (*term.t_close)
@@ -740,7 +818,10 @@ typedef struct  {
 # define TTbacg          (*term.t_setback)
 #endif
 
-/*      Structure for the table of current key bindings         */
+
+/*
+ * Structure for the table of current key bindings
+ */
 
 ETYPE EPOINTER {
     int (PASCAL NEAR *fp)();            /* C routine to invoke */
@@ -760,8 +841,10 @@ typedef struct {
     int (PASCAL NEAR *n_func)();        /* function name is bound to */
 }       NBIND;
 
-/*      The editor holds deleted text chunks in the KILL buffer. The kill buffer
- * is logically a stream of ascii characters, however due to its unpredicatable
+
+/*
+ * The editor holds deleted text chunks in the KILL buffer. The kill buffer is
+ * logically a stream of ascii characters, however due to its unpredicatable
  * size, it gets implemented as a linked list of chunks. (The d_ prefix is for
  * "deleted" text, as k_ was taken up by the keycode structure)
  */
@@ -771,9 +854,12 @@ typedef struct KILL {
     char d_chunk[KBLOCK];       /* deleted text */
 } KILL;
 
-/*      When emacs's command interpetor needs to get a variable's name, rather
- * than it's value, it is passed back as a VDESC variable description structure.
- * The v_num field is a index into the appropriate variable table.
+
+/*
+ * When emacs's command interpetor needs to get a variable's name, rather
+ * than  it's value, it is passed back as a VDESC variable description
+ * structure. The v_num field is a index into the appropriate variable
+ * table.
  */
 
 typedef struct VDESC {
@@ -782,7 +868,9 @@ typedef struct VDESC {
     UTABLE *v_ut;       /* ptr to appropriate user table if user var */
 } VDESC;
 
-/*      The !WHILE directive in the execution language needs to stack references
+
+/*
+ * The !WHILE directive in the execution language needs to stack references
  * to pending whiles. These are stored linked to each currently open procedure
  * via a linked list of the following structure
  */
@@ -797,7 +885,9 @@ typedef struct WHBLOCK {
 #define BTWHILE         1
 #define BTBREAK         2
 
-/*      SWORDs are syntactical words to highlight in a different foreground
+
+/*
+ * SWORDs are syntactical words to highlight in a different foreground
  * color. WORDSETs are named lists of these WORDs.
  */
 
@@ -814,7 +904,9 @@ typedef struct WORDSET {
     int tmp;
 } WORDSET;
 
-/*      Abbreviations are short symbols that expand to longer strings when typed
+
+/*
+ * Abbreviations are short symbols that expand to longer strings when typed
  * into a buffer with no intervening whitespace or commands. This structure
  * grows dynamically as needed.
  */
@@ -825,23 +917,30 @@ typedef struct ABBREV {
     char ab_exp[1];                     /* string to expand to */
 } ABBREV;
 
+
 /* Search definitions... */
 
-/* HICHAR - 1 is the largest character we will deal with. BMAPSIZE represents
+
+/*
+ * HICHAR - 1 is the largest character we will deal with. BMAPSIZE represents
  * the number of bytes in the bitmap.
  */
+
 #define HICHAR          256
 #define BMAPSIZE        HICHAR >> 3
+
 
 /*
  * Jump table structures.
  */
+
 typedef struct {
     int jump;
     int patlen;
     int delta[HICHAR];
     char patrn[NPAT];
 } DELTA;
+
 
 #if     MAGIC
 /*
@@ -891,10 +990,13 @@ typedef struct {
 # define MAXGROUPS       10             /* 1 + maximum # of r. e. groups. */
 # define BIT(n)          ( 1 << (n) )   /* An integer with one bit set.*/
 
-/* Typedefs that define the bitmap type for searching (EBITMAP), the
+
+/*
+ * Typedefs that define the bitmap type for searching (EBITMAP), the
  * meta-character structure for MAGIC mode searching (MC), and the
  * meta-character structure for MAGIC mode replacment (RMC).
  */
+
 typedef char    *EBITMAP;
 
 typedef struct {
