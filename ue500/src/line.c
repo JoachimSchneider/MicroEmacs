@@ -519,7 +519,12 @@ int kflag;      /* put killed text in kill buffer flag */
             /* record the current point */
             dotp = curwp->w_dotp;
             doto = get_w_doto(curwp);
-            ASRT(0 <= get_lused(dotp) - doto);
+
+#ifdef JES_REPAIR_CODE
+            REPAIR(doto <= get_lused(dotp), doto = get_lused(dotp));
+#else
+            ASRT  (doto <= get_lused(dotp));
+#endif
 
             /* can't delete past the end of the buffer */
             if ( dotp == curbp->b_linep )
@@ -1278,4 +1283,3 @@ dispkill()
 
 }
 #endif
-

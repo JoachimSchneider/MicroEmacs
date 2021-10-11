@@ -4,10 +4,13 @@
  */
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
 #include "estruct.h"
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
+
 
 /*
  * Display the current position of the cursor, in origin 1 X-Y coordinates, the
@@ -126,6 +129,7 @@ LINE *sline;                    /* line to search for */
     return (numlines + 1L);
 }
 
+
 /*
  * Return current column.  Stop at first non-blank given TRUE argument.
  */
@@ -134,15 +138,18 @@ int PASCAL NEAR getccol(bflg)
 int bflg;
 
 {
-    register int i, col;
-    register unsigned char c;
+    int           i     = 0;
+    int           col   = 0;
+    unsigned char c     = '\0';
+    int           doto  = 0;
 
-    col = 0;
-#ifdef JES_UNSEC_CODE   /* JES_TODO: Use the defensive (secure) variant.  */
-    for ( i = 0; i < get_w_doto(curwp); ++i ) {
+    doto  = get_w_doto(curwp);
+#ifdef JES_REPAIR_CODE
+    REPAIR(doto <= get_lused(curwp->w_dotp), doto = get_lused(curwp->w_dotp));
 #else
-    for ( i = 0; i < MIN2(get_w_doto(curwp), get_lused(curwp->w_dotp)); ++i ) {
+    ASRT  (doto <= get_lused(curwp->w_dotp));
 #endif
+    for ( i = 0; i < doto; ++i )  {
         c = lgetc(curwp->w_dotp, i) & 0xFF;
         if ( c != ' ' && c != '\t' && bflg )
             break;
@@ -1478,3 +1485,334 @@ char *sp;                               /* name to look up */
     return (-1);
 }
 
+
+/*====================================================================*/
+
+
+char *xstrcpy(char *s1, CONST char *s2) /* strcpy() possibly overlapping regions
+                                         */
+{
+    int l2  = strlen(s2);
+    char *s  = (char *)calloc( l2 + 1, sizeof (char) );
+
+    strcpy(s, s2);
+    strcpy(s1, s);
+    free(s);
+
+    return s1;
+}
+
+char *xstrncpy(char *s1, CONST char *s2, int n) /* strncpy() possibly
+                                                 * overlapping regions */
+{
+    int l2  = 0;
+    char *s  = NULL;
+
+    while ( l2 < n || s2[l2] != '\0' ) {
+        l2++;
+    }
+    /* ==> l2 = MAX(n, strlen(s))  */
+    s  = (char *)calloc( l2 + 1, sizeof (char) );
+    strncpy(s, s2, n);
+    strncpy(s1, s, n);
+    free(s);
+
+    return s1;
+}
+
+/* An unelegant but portable version of C99 vsnprintf():  */
+static int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap)
+{
+    int nn = n;                 /* Want a signed value */
+    int rc = 0;
+    int nr = 0;                 /* Number of chars to read */
+    static FILE *fp = NULL;
+
+    if ( NULL == fp ) {           /* One-time initialization */
+        if ( NULL == ( fp = tmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
+            return (-1);
+        }
+        /*
+         * Buffering: No real IO for not too large junks
+         */
+        if ( 0 != setvbuf(fp, NULL, _IOFBF, 0) ) {
+            return (-2);
+        }
+    }
+
+    rewind(fp);
+    if ( 0 > ( rc = vfprintf(fp, fmt, ap) ) ) {
+        return (-3);
+    }
+
+    if ( 0 == nn ) {
+        /*
+         * EMPTY
+         */
+    } else if ( 1 == nn ) {
+        s[0] = '\0';
+    } else {
+        if ( 0 == rc ) {
+            s[0] = '\0';
+        } else {                /* Read back characters written: */
+            rewind(fp);
+            nr = MIN2(rc, nn - 1);
+            if ( 1 != fread(s, nr, 1, fp) ) {
+                return (-4);
+            }
+            s[nr] = '\0';
+        }
+    }
+
+    return rc;
+}
+
+int xsnprintf(char *s, size_t n, CONST char *fmt, ...)  /* Like C99 snprintf()
+                                                         */
+{
+    int rc = 0;
+    va_list ap;
+
+    va_start(ap, fmt);
+    rc = xvsnprintf(s, n, fmt, ap);
+    va_end(ap);
+
+    return rc;
+}
+
+char *xstrdup(CONST char *str)
+{
+    char    *res = NULL;
+    int len  = 0;
+
+
+    if ( NULL == str ) {
+        return NULL;
+    }
+    len = strlen(str);
+    res = (char *)calloc( len + 1, sizeof (char) );
+    strcpy(res, str);
+
+    return res;
+}
+
+
+FILE  *GetTrcFP(void)
+{
+  static int  FirstCall = !0;
+  static FILE *TrcFP    = NULL;
+
+  if ( FirstCall )  {
+    FirstCall = 0;
+
+    {
+      char *fname  = getenv(TRC_FILE_ENVVAR);
+
+      if ( NULL == fname ) {
+        TrcFP = NULL;
+      } else {
+        if ( NULL != (TrcFP = fopen(fname, "a")) )  {
+          setbuf(TrcFP, NULL);
+        } else {
+          TrcFP = stderr;
+        }
+      }
+    }
+  }
+
+  return TrcFP;
+}
+
+int          DebugMessage_lnno_   = 0;
+CONST char  *DebugMessage_fname_  = (CONST char *)"";
+int DebugMessage(CONST char *fmt, ...)
+{
+    int     rc    = 0;
+    va_list ap;
+    FILE    *TFP  = GetTrcFP();
+
+    ZEROMEM(ap);
+
+    if ( TFP )  {
+      fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
+              DebugMessage_lnno_);
+      va_start(ap, fmt);
+      rc = vfprintf(TFP, fmt, ap);
+      va_end(ap);
+      fprintf(TFP, "%s", "\n");
+      fflush(TFP);
+    }
+
+    return rc;
+}
+
+
+char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+    ASRTK(0 <= n,                     fnam, lno);
+    ASRTK(n < lp->l_size_,            fnam, lno);
+
+    return ( lp->l_text_[n] = c );
+}
+
+#undef  FUNC_
+#define FUNC_ lgetc_
+#if ( IS_UNIX() )
+unsigned char FUNC_(LINE *lp, int n, const char *fnam, int lno)
+#else
+         char FUNC_(LINE *lp, int n, const char *fnam, int lno)
+#endif
+{
+    ASRTK(NULL != lp,                     fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
+    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
+
+    if ( n == lp->l_used_ ) {
+        TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
+              FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+
+        if ( n == lp->l_size_ ) {
+            return ( '\0' );
+        } else {
+            return ( lp->l_text_[n] );
+        }
+    }
+
+    return ( lp->l_text_[n] );
+}
+
+#undef  FUNC_
+#define FUNC_ lgetcp_
+char *FUNC_(LINE *lp, int n, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                     fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
+    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
+
+    if ( n == lp->l_used_ ) {
+        TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
+              FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+    }
+
+    return ( &(lp->l_text_[n]) );
+}
+
+int get_lused_(LINE *lp, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+
+    return ( (lp)->l_used_ );
+}
+
+int set_lused_(LINE *lp, int used, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+    ASRTK(0 <= used,                  fnam, lno);
+    ASRTK(used <= lp->l_size_,        fnam, lno);
+
+    return ( (lp)->l_used_ = used );
+}
+
+int get_lsize_(LINE *lp, const char *fnam, int lno)
+{
+    ASRTK(NULL != lp,                 fnam, lno);
+    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+
+    return ( (lp)->l_size_ );
+}
+
+#undef  FUNC_
+#define FUNC_ get_w_doto_
+int FUNC_(EWINDOW *wp, const char *fnam, int lno)
+{
+    ASRTK(NULL != wp,                                 fnam, lno);
+    ASRTK(NULL != wp->w_dotp,                         fnam, lno);
+    ASRTK(0 <= wp->w_dotp->l_used_,                   fnam, lno);
+    ASRTK(wp->w_dotp->l_used_ <= wp->w_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= wp->w_doto_,                           fnam, lno);
+
+    if ( wp->w_dotp->l_used_ < wp->w_doto_ )  {
+        TRCK(("%s(): w_dotp->l_used_(%d) < wp->w_doto_(%d)",
+              FSTR_, wp->w_dotp->l_used_, wp->w_doto_), fnam, lno);
+    }
+
+    return ( wp->w_doto_ );
+}
+
+#undef  FUNC_
+#define FUNC_ set_w_doto_
+int FUNC_(EWINDOW *wp, int doto, const char *fnam, int lno)
+{
+    ASRTK(NULL != wp,                                 fnam, lno);
+    ASRTK(NULL != wp->w_dotp,                         fnam, lno);
+    ASRTK(0 <= wp->w_dotp->l_used_,                   fnam, lno);
+    ASRTK(wp->w_dotp->l_used_ <= wp->w_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= wp->w_doto_,                           fnam, lno);
+
+    if ( 0 > doto ) {
+        TRCK(("%s(): Negativ doto: %d. REWRITTEN TO %d.",
+              FSTR_, doto, 0), fnam, lno);
+
+        doto  = 0;
+    }
+    if ( wp->w_dotp->l_used_ < doto ) {
+        TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
+              FSTR_, doto, wp->w_dotp->l_used_), fnam, lno);
+        doto  = wp->w_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
+    }
+
+    return ( (wp)->w_doto_ = doto );
+}
+
+#undef  FUNC_
+#define FUNC_ get_b_doto_
+int FUNC_(BUFFER *bp, const char *fnam, int lno)
+{
+    ASRTK(NULL != bp,                                 fnam, lno);
+    ASRTK(NULL != bp->b_dotp,                         fnam, lno);
+    ASRTK(0 <= bp->b_dotp->l_used_,                   fnam, lno);
+    ASRTK(bp->b_dotp->l_used_ <= bp->b_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= bp->b_doto_,                           fnam, lno);
+
+    if ( bp->b_dotp->l_used_ < bp->b_doto_ )  {
+        TRCK(("%s(): b_dotp->l_used_(%d) < bp->b_doto_(%d)",
+              FSTR_, bp->b_dotp->l_used_, bp->b_doto_), fnam, lno);
+    }
+
+    return ( (bp)->b_doto_ );
+}
+
+#undef  FUNC_
+#define FUNC_ set_b_doto_
+int FUNC_(BUFFER *bp, int doto, const char *fnam, int lno)
+{
+    ASRTK(NULL != bp,                                 fnam, lno);
+    ASRTK(NULL != bp->b_dotp,                         fnam, lno);
+    ASRTK(0 <= bp->b_dotp->l_used_,                   fnam, lno);
+    ASRTK(bp->b_dotp->l_used_ <= bp->b_dotp->l_size_, fnam, lno);
+    ASRTK(0 <= bp->b_doto_,                           fnam, lno);
+
+    if ( 0 > doto ) {
+        TRCK(("%s(): Negativ doto: %d. REWRITTEN TO %d.",
+              FSTR_, doto, 0), fnam, lno);
+
+        doto  = 0;
+    }
+    if ( bp->b_dotp->l_used_ < doto ) {
+        TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
+              FSTR_, doto, bp->b_dotp->l_used_), fnam, lno);
+        doto  = bp->b_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
+    }
+
+    return ( (bp)->b_doto_ = doto );
+}
+
+
+
+/*
+ * EOF
+ */

@@ -120,7 +120,6 @@ extern int         DebugMessage(CONST char *fmt, ...);
 
 
 /**********************************************************************/
-#define FNAM_   XCONCAT2(FUNC_, _)
 #define FSTR_   MKXSTRING(FUNC_)
 /**********************************************************************/
 
@@ -171,7 +170,7 @@ static char *uitostr_memacs(unsigned int i)
     return buf + pos + 1;
 }
 /**********************************************************************/
-#define eputs(s)      fputs((s), GetTrcFP())
+#define eputs(s)      ( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
 #define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
 /**********************************************************************/
 
@@ -202,7 +201,7 @@ static char *uitostr_memacs(unsigned int i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            fflush(GetTrcFP());                                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -218,7 +217,7 @@ static char *uitostr_memacs(unsigned int i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            fflush(GetTrcFP());                                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -233,7 +232,7 @@ static char *uitostr_memacs(unsigned int i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            fflush(GetTrcFP());                                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -249,8 +248,88 @@ static char *uitostr_memacs(unsigned int i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            fflush(GetTrcFP())                                          \
-                abort();                                                \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            abort();                                                    \
+        }                                                               \
+    } while (0)
+
+/**********************************************************************/
+/*
+ * We will use fputs instead of fprintf, because fprintf
+ * might use malloc(), but we want to use REPAIR to exit
+ * when malloc() fails
+ */
+#define REPAIR(e, r) do {                                               \
+        if ( !(e) )                                                     \
+        {                                                               \
+            int errno_sv_ = errno;                                      \
+                                                                        \
+            eputs("File: "); eputs(__FILE__); eputs(", Line: ");        \
+            eputi(__LINE__); eputs("\n");                               \
+            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
+            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
+            eputs("--- REPAIRING ...\n");                               \
+            eputs("    `" #r "'"); eputs("\n");                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            do { r ; } while ( 0 );                                     \
+            eputs("--- ... DONE\n");                                    \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+        }                                                               \
+    } while (0)
+
+#define REPAIRM(e, m, r) do {                                           \
+        if ( !(e) )                                                     \
+        {                                                               \
+            int errno_sv_ = errno;                                      \
+                                                                        \
+            eputs("File: "); eputs(__FILE__); eputs(", Line: ");        \
+            eputi(__LINE__); eputs("\n");                               \
+            eputs("\t"); eputs((m)); eputs("\n");                       \
+            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
+            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
+            eputs("--- REPAIRING ...\n");                               \
+            eputs("    `" #r "'"); eputs("\n");                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            do { r ; } while ( 0 );                                     \
+            eputs("--- ... DONE\n");                                    \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+        }                                                               \
+    } while (0)
+
+#define REPAIRK(e, r, file, line) do {                                  \
+        if ( !(e) )                                                     \
+        {                                                               \
+            int errno_sv_ = errno;                                      \
+                                                                        \
+            eputs("File: "); eputs((file)); eputs(", Line: ");          \
+            eputi((line)); eputs("\n");                                 \
+            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
+            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
+            eputs("--- REPAIRING ...\n");                               \
+            eputs("    `" #r "'"); eputs("\n");                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            do { r ; } while ( 0 );                                     \
+            eputs("--- ... DONE\n");                                    \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+        }                                                               \
+    } while (0)
+
+#define REPAIRMK(e, m, r, file, line) do {                              \
+        if ( !(e) )                                                     \
+        {                                                               \
+            int errno_sv_ = errno;                                      \
+                                                                        \
+            eputs("File: "); eputs((file)); eputs(", Line: ");          \
+            eputi((line)); eputs("\n");                                 \
+            eputs("\t"); eputs((m)); eputs("\n");                       \
+            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
+            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
+            eputs("--- REPAIRING ...\n");                               \
+            eputs("    `" #r "'"); eputs("\n");                         \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            do { r ; } while ( 0 );                                     \
+            eputs("--- ... DONE\n");                                    \
+            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
         }                                                               \
     } while (0)
 /**********************************************************************/
@@ -321,88 +400,28 @@ typedef struct  LINE {
 #define lforw(lp)       ( (lp)->l_fp )
 #define lback(lp)       ( (lp)->l_bp )
 
-static char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-    ASRTK(0 <= n,                     fnam, lno);
-    ASRTK(n < lp->l_size_,            fnam, lno);
-
-    return ( lp->l_text_[n] = c );
-}
+extern char lputc_(LINE *lp, int n, char c, const char *fnam, int lno);
 #define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
 
-#undef  FUNC_
-#define FUNC_ lgetc
 #if ( IS_UNIX() )
-static unsigned char FNAM_(LINE *lp, int n, const char *fnam, int lno)
+extern unsigned char lgetc_(LINE *lp, int n, const char *fnam, int lno);
 #else
-    static char FNAM_(LINE *lp, int n, const char *fnam, int lno)
+extern          char lgetc_(LINE *lp, int n, const char *fnam, int lno);
 #endif
-{
-    ASRTK(NULL != lp,                     fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
-    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
-
-    if ( n == lp->l_used_ ) {
-        TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
-              FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
-
-        if ( n == lp->l_size_ ) {
-            return ( '\0' );
-        } else {
-            return ( lp->l_text_[n] );
-        }
-    }
-
-    return ( lp->l_text_[n] );
-}
 #define lgetc(lp, n)    ( lgetc_((lp), (n), __FILE__, __LINE__) )
 
-#undef  FUNC_
-#define FUNC_ lgetcp
-static char *FNAM_(LINE *lp, int n, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                     fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
-    ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
-
-    if ( n == lp->l_used_ ) {
-        TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
-              FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
-    }
-
-    return ( &(lp->l_text_[n]) );
-}
+extern char *lgetcp_(LINE *lp, int n, const char *fnam, int lno);
 #define lgetcp(lp, n)   ( lgetcp_((lp), (n), __FILE__, __LINE__) )
-
-static int get_lused_(LINE *lp, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-
-    return ( (lp)->l_used_ );
-}
-#define get_lused(lp)   ( get_lused_((lp), __FILE__, __LINE__) )
-static int set_lused_(LINE *lp, int used, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-    ASRTK(0 <= used,                  fnam, lno);
-    ASRTK(used <= lp->l_size_,        fnam, lno);
-
-    return ( (lp)->l_used_ = used );
-}
-#define set_lused(lp, used) ( set_lused_((lp), (used), __FILE__, __LINE__) )
-static int get_lsize_(LINE *lp, const char *fnam, int lno)
-{
-    ASRTK(NULL != lp,                 fnam, lno);
-    ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-
-    return ( (lp)->l_size_ );
-}
-#define get_lsize(lp)   ( get_lsize_((lp), __FILE__, __LINE__) )
 #define ltext(lp)       ( lgetcp(lp, 0) )
+
+extern int get_lused_(LINE *lp, const char *fnam, int lno);
+#define get_lused(lp)   ( get_lused_((lp), __FILE__, __LINE__) )
+
+extern int set_lused_(LINE *lp, int used, const char *fnam, int lno);
+#define set_lused(lp, used) ( set_lused_((lp), (used), __FILE__, __LINE__) )
+
+extern int get_lsize_(LINE *lp, const char *fnam, int lno);
+#define get_lsize(lp)   ( get_lsize_((lp), __FILE__, __LINE__) )
 
 
 /*
@@ -433,48 +452,9 @@ typedef struct  EWINDOW {
     int             w_fcol;             /* first column displayed       */
 }       EWINDOW;
 /**********************************************************************/
-#undef  FUNC_
-#define FUNC_ get_w_doto
-static int FNAM_(EWINDOW *wp, const char *fnam, int lno)
-{
-    ASRTK(NULL != wp,                                 fnam, lno);
-    ASRTK(NULL != wp->w_dotp,                         fnam, lno);
-    ASRTK(0 <= wp->w_dotp->l_used_,                   fnam, lno);
-    ASRTK(wp->w_dotp->l_used_ <= wp->w_dotp->l_size_, fnam, lno);
-    ASRTK(0 <= wp->w_doto_,                           fnam, lno);
-
-    if ( wp->w_dotp->l_used_ < wp->w_doto_ )  {
-        TRCK(("%s(): w_dotp->l_used_(%d) < wp->w_doto_(%d)",
-              FSTR_, wp->w_dotp->l_used_, wp->w_doto_), fnam, lno);
-    }
-
-    return ( wp->w_doto_ );
-}
+extern int get_w_doto_(EWINDOW *wp, const char *fnam, int lno);
 #define get_w_doto(wp)        ( get_w_doto_((wp), __FILE__, __LINE__) )
-#undef  FUNC_
-#define FUNC_ set_w_doto
-static int FNAM_(EWINDOW *wp, int doto, const char *fnam, int lno)
-{
-    ASRTK(NULL != wp,                                 fnam, lno);
-    ASRTK(NULL != wp->w_dotp,                         fnam, lno);
-    ASRTK(0 <= wp->w_dotp->l_used_,                   fnam, lno);
-    ASRTK(wp->w_dotp->l_used_ <= wp->w_dotp->l_size_, fnam, lno);
-    ASRTK(0 <= wp->w_doto_,                           fnam, lno);
-
-    if ( 0 > doto ) {
-        TRCK(("%s(): Negativ doto: %d. REWRITTEN TO %d.",
-              FSTR_, doto, 0), fnam, lno);
-
-        doto  = 0;
-    }
-    if ( wp->w_dotp->l_used_ < doto ) {
-        TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
-              FSTR_, doto, wp->w_dotp->l_used_), fnam, lno);
-        doto  = wp->w_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
-    }
-
-    return ( (wp)->w_doto_ = doto );
-}
+extern int set_w_doto_(EWINDOW *wp, int doto, const char *fnam, int lno);
 #define set_w_doto(wp, doto)  ( set_w_doto_((wp), (doto), __FILE__, __LINE__) )
 /**********************************************************************/
 
@@ -586,48 +566,9 @@ typedef struct  BUFFER {
     long            last_access;        /* time of last access          */
 }       BUFFER;
 /**********************************************************************/
-#undef  FUNC_
-#define FUNC_ get_b_doto
-static int FNAM_(BUFFER *bp, const char *fnam, int lno)
-{
-    ASRTK(NULL != bp,                                 fnam, lno);
-    ASRTK(NULL != bp->b_dotp,                         fnam, lno);
-    ASRTK(0 <= bp->b_dotp->l_used_,                   fnam, lno);
-    ASRTK(bp->b_dotp->l_used_ <= bp->b_dotp->l_size_, fnam, lno);
-    ASRTK(0 <= bp->b_doto_,                           fnam, lno);
-
-    if ( bp->b_dotp->l_used_ < bp->b_doto_ )  {
-        TRCK(("%s(): b_dotp->l_used_(%d) < bp->b_doto_(%d)",
-              FSTR_, bp->b_dotp->l_used_, bp->b_doto_), fnam, lno);
-    }
-
-    return ( (bp)->b_doto_ );
-}
+extern int get_b_doto_(BUFFER *bp, const char *fnam, int lno);
 #define get_b_doto(bp)        ( get_b_doto_((bp), __FILE__, __LINE__) )
-#undef  FUNC_
-#define FUNC_ set_b_doto
-static int FNAM_(BUFFER *bp, int doto, const char *fnam, int lno)
-{
-    ASRTK(NULL != bp,                                 fnam, lno);
-    ASRTK(NULL != bp->b_dotp,                         fnam, lno);
-    ASRTK(0 <= bp->b_dotp->l_used_,                   fnam, lno);
-    ASRTK(bp->b_dotp->l_used_ <= bp->b_dotp->l_size_, fnam, lno);
-    ASRTK(0 <= bp->b_doto_,                           fnam, lno);
-
-    if ( 0 > doto ) {
-        TRCK(("%s(): Negativ doto: %d. REWRITTEN TO %d.",
-              FSTR_, doto, 0), fnam, lno);
-
-        doto  = 0;
-    }
-    if ( bp->b_dotp->l_used_ < doto ) {
-        TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
-              FSTR_, doto, bp->b_dotp->l_used_), fnam, lno);
-        doto  = bp->b_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
-    }
-
-    return ( (bp)->b_doto_ = doto );
-}
+extern int set_b_doto_(BUFFER *bp, int doto, const char *fnam, int lno);
 #define set_b_doto(bp, doto)  ( set_b_doto_((bp), (doto), __FILE__, __LINE__) )
 /**********************************************************************/
 
