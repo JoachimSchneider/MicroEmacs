@@ -2,12 +2,14 @@
  *
  *       written 1993 by Daniel Lawrence            */
 
+
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
 #include        "evar.h"
+
 
 /* initialize the entries in one user variable table */
 
@@ -73,21 +75,16 @@ CONST char *PASCAL NEAR gtfun(fname)    /* evaluate a function */
 CONST char  *fname;     /* name of function to evaluate */
 
 {
-    char            *fnameL = xstrdup(fname);
-    register int fnum;                              /* index to function to eval
-                                                     */
-    register int arg;                               /* value of some arguments
-                                                     */
-    BUFFER          *bp;                                /* scratch buffer
-                                                         * pointer */
-    char arg1[NSTRING];                             /* value of first argument
-                                                     */
-    char arg2[NSTRING];                             /* value of second argument
-                                                     */
-    char arg3[NSTRING];                             /* value of third argument
-                                                     */
-    static char result[2 * NSTRING];            /* string result */
+    char         *fnameL  = NULL;
+    register int fnum     = 0;        /* index to function to eval  */
+    register int arg      = 0;        /* value of some arguments    */
+    BUFFER       *bp      = NULL;     /* scratch buffer pointer     */
+    char arg1[NSTRING];               /* value of first argument    */
+    char arg2[NSTRING];               /* value of second argument   */
+    char arg3[NSTRING];               /* value of third argument    */
+    static char result[2 * NSTRING];  /* string result              */
 
+    fnameL = xstrdup(fname);
     mklower(fnameL); /* and let it be upper or lower case */
 
     /* look the function up in the function table */
@@ -790,7 +787,7 @@ char *PASCAL NEAR getkill()
     register char *vp;          /* ptr into return value */
     KILL *kptr;                 /* ptr to the current KILL block */
     int counter;                /* index into data chunk */
-    static char value[NSTRING];         /* temp buffer for value */
+    static char value[NSTRING]; /* temp buffer for value */
 
     /* no kill buffer....just a null string */
     if ( kbufh[kill_index] == (KILL *)NULL ) {
@@ -1784,7 +1781,7 @@ char *token;            /* token to evaluate */
     register int status;        /* error return */
     register BUFFER *bp;        /* temp buffer pointer */
     register int blen;          /* length of buffer argument */
-    static char buf[NSTRING];    /* string buffer for some returns */
+    static char buf[NSTRING];   /* string buffer for some returns */
 
     switch ( gettyp(token) ) {
     case TKNUL:
@@ -1988,10 +1985,10 @@ char *lookup;   /* characters to translate */
 char *trans;    /* resulting translated characters */
 
 {
-    register char *sp;          /* pointer into source table */
-    register char *lp;          /* pointer into lookup table */
-    register char *rp;          /* pointer into result */
-    static char result[NSTRING];        /* temporary result */
+    register char *sp;            /* pointer into source table */
+    register char *lp;            /* pointer into lookup table */
+    register char *rp;            /* pointer into result */
+    static char result[NSTRING];  /* temporary result */
 
     /* scan source string */
     sp = source;
@@ -2170,7 +2167,7 @@ int f, n;        /* prefix flag and argument */
 {
     register BUFFER *varbuf;    /* buffer to put variable list into */
     register int uindex;        /* index into uvar table */
-    register int olen;                  /* current length of output string */
+    register int olen;          /* current length of output string */
     UTABLE *ut;                 /* user variable table pointer */
     PARG *cur_arg;              /* ptr to buffers argument list */
     char outseq[NSTRING];       /* output buffer for keystroke sequence */
@@ -2330,3 +2327,8 @@ int len;        /* wanted length of string */
     }
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

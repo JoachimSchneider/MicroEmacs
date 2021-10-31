@@ -26,10 +26,42 @@ extern char *xstrcpy(char *s1, CONST char *s2);
 /* strncpy() possibly overlapping regions:  */
 extern char *xstrncpy(char *s1, CONST char *s2, int n);
 
-/* Like C99 snprintf(): */
+/* Like the C99 vsnprintf():                                            */
+/* May be called with NULL == s .AND. 0 == n to get the size that would */
+/* be the result of an unrestricted write.                              */
+/* Returns the number of characters (not including the trailing '\0')   */
+/* that would have been written if n were large enough.                 */
+extern int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap);
+
+/* Like the C99 snprintf():                                             */
+/* May be called with NULL == s .AND. 0 == n to get the size that would */
+/* be the result of an unrestricted write.                              */
+/* Returns the number of characters (not including the trailing '\0')   */
+/* that would have been written if n were large enough.                 */
 extern int  xsnprintf(char *s, size_t n, CONST char *fmt, ...);
 
+/* Like GNU C vasprintf:                                        */
+/* Allocate (using malloc()) a string large enough to hold the  */
+/* resulting string.                                            */
+extern int xvasprintf(char **ret, const char *fmt, va_list ap);
+
+/* Like GNU C asprintf:                                         */
+/* Allocate (using malloc()) a string large enough to hold the  */
+/* resulting string.                                            */
+extern int xasprintf(char **ret, const char *fmt, ...);
+
 extern char *xstrdup(CONST char *str);
+
+/* Concatenate character c to string str and malloc the result. */
+/* Input string must either be NULL or malloced.                */
+extern char *astrcatc(const char *str, const char c);
+
+/* Concatenate string d to string str and malloc the result.    */
+/* Input string must either be NULL or malloced.                */
+extern char *astrcat(const char *str, const char *s);
+/**********************************************************************/
+
+/**********************************************************************/
 /**********************************************************************/
 
 /**********************************************************************/
@@ -118,6 +150,47 @@ extern int         DebugMessage(CONST char *fmt, ...);
 #define IS_ARRAY(a) ( (char *)(&(a)) == (char *)(&((a)[0])) )
 /**********************************************************************/
 
+/**********************************************************************/
+/****************************************************************/
+/* We must check if DESTINATION is an array, because it will be */
+/* defined inside the function calling VA_COPY while the source */
+/* could be given as a function argument which will be          */
+/* converted to a pointer to the first argument.                */
+/*                                                              */
+/* The non-array case must be handled via memcpy() and not via  */
+/* assignment, because otherwise the code won't compile for     */
+/* array implementations of va_list.                            */
+/*                                                              */
+/* Tested on many Platforms.                                    */
+/****************************************************************/
+#define MY_VA_COPY(d, s)      (               \
+    IS_ARRAY((d))?                            \
+      memcpy((d), (s), sizeof((d)))           \
+        :                                     \
+      memcpy(&(d), &(s), sizeof((d)))         \
+    )
+#define MY_VA_END
+
+#if ( 0 )
+# define VA_COPY            MY_VA_COPY
+# define VA_END             MY_VA_END
+#elif ( defined(va_copy) )
+# define VA_COPY            va_copy
+# define VA_END             va_end
+#elif ( defined(__va_copy) )
+# define VA_COPY            __va_copy
+# define VA_END             va_end
+#elif ( defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901 )
+# define VA_COPY            va_copy
+# define VA_END             va_end
+#elif ( 0 )
+# error CANNOT DEFINE VA_COPY
+#else
+# define VA_COPY            MY_VA_COPY
+# define VA_END             MY_VA_END
+#endif
+/**********************************************************************/
+
 
 /**********************************************************************/
 #define FSTR_   MKXSTRING(FUNC_)
@@ -186,6 +259,13 @@ static char *uitostr_memacs(unsigned int i)
  */
 #define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1];
 
+/**********************************************************************/
+/*
+ * All the ASRT* REPAIT* macros below evaluate their expression (`e')
+ * argument exactly *once*. So a use like
+ * `ASRT(NULL != (fp = fopen("FileName", "rw")));' is correct!
+ */
+/**********************************************************************/
 /*
  * We will use fputs instead of fprintf, because fprintf
  * might use malloc(), but we want to use ASRT to exit
@@ -332,6 +412,17 @@ static char *uitostr_memacs(unsigned int i)
             ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
         }                                                               \
     } while (0)
+/**********************************************************************/
+
+/**********************************************************************/
+#define FREE(p) do  {             \
+    char **pp_  = (char **)&(p);  \
+                                  \
+    if ( NULL != *pp_ ) {         \
+        free(*pp_);               \
+        *pp_  = NULL;             \
+    }                             \
+} while ( 0 )
 /**********************************************************************/
 
 
@@ -966,6 +1057,11 @@ typedef struct {
 
 /***    global function prototypes      ***/
 
+/* Filter function used by TransformRegion():
+ * Output string must be created by malloc(). */
+typedef char  *(*filter_func_T)(const char *rstart, const char *rtext,
+                                void *argp);
+
 # if     WINDOW_MSWIN
 extern char * PASCAL fullpathname (char *PathName, int Nbuf);
 extern int PASCAL NEAR vtinitscr (SCREEN_T *sp, int nrow, int ncol);
@@ -1419,6 +1515,8 @@ extern int PASCAL NEAR strinc(char *source, char *sub);
 extern int PASCAL NEAR swapmark(int f, int n);
 extern int PASCAL NEAR swbuffer(BUFFER *bp);
 extern int PASCAL NEAR tab(int f, int n);
+extern int TransformRegion(filter_func_T filter, void *argp);
+extern int PASCAL NEAR tr_region_test(int f, int n);
 extern int PASCAL NEAR trim(int f, int n);
 extern int PASCAL NEAR ttclose(VOID);
 extern int PASCAL NEAR ttflush(VOID);
@@ -1951,6 +2049,8 @@ extern int PASCAL NEAR strinc();
 extern int PASCAL NEAR swapmark();
 extern int PASCAL NEAR swbuffer();
 extern int PASCAL NEAR tab();
+extern int TransformRegion(f);
+extern int PASCAL NEAR tr_region_test();
 extern int PASCAL NEAR trim();
 extern int PASCAL NEAR ttclose();
 extern int PASCAL NEAR ttflush();

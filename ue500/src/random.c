@@ -318,13 +318,13 @@ int PASCAL NEAR quote(f, n)
 
 int f, n;                               /* prefix flag and argument */
 {
-    register int ec;            /* current extended key fetched */
-    register int c;             /* current ascii key fetched */
+    register int ec;            /* current extended key fetched     */
+    register int c;             /* current ascii key fetched        */
     register int status;        /* return value to hold from linstr */
-    char key_name[10];          /* name of a keystroke for quoting */
+    char key_name[10];          /* name of a keystroke for quoting  */
 
-    if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
-        return ( rdonly() );            /* we are in read only mode */
+    if ( curbp->b_mode & MDVIEW )   /* don't allow this command if  */
+        return ( rdonly() );        /* we are in read only mode     */
 
     ec = get_key();
 
@@ -1492,12 +1492,15 @@ char *sp;                               /* name to look up */
 char *xstrcpy(char *s1, CONST char *s2) /* strcpy() possibly overlapping regions
                                          */
 {
-    int l2  = strlen(s2);
-    char *s  = (char *)calloc( l2 + 1, sizeof (char) );
+    char  *s  = NULL;
 
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+
+    ASRT(NULL != (s = (char *)calloc(strlen(s2) + 1, sizeof (char))));
     strcpy(s, s2);
     strcpy(s1, s);
-    free(s);
+    FREE(s);
 
     return s1;
 }
@@ -1505,28 +1508,42 @@ char *xstrcpy(char *s1, CONST char *s2) /* strcpy() possibly overlapping regions
 char *xstrncpy(char *s1, CONST char *s2, int n) /* strncpy() possibly
                                                  * overlapping regions */
 {
-    int l2  = 0;
-    char *s  = NULL;
+    int   l2  = 0;
+    char *s   = NULL;
 
-    while ( l2 < n || s2[l2] != '\0' ) {
-        l2++;
+    ASRT(0 <= n);
+    if ( 0 == n ) {
+        return s1;
     }
-    /* ==> l2 = MAX(n, strlen(s))  */
-    s  = (char *)calloc( l2 + 1, sizeof (char) );
-    strncpy(s, s2, n);
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+
+    l2  = strlen(s2);
+    l2  = MAX2(l2, n);
+    ASRT(NULL !=(s  = (char *)calloc( l2 + 1, sizeof (char) )));
+    strncpy(s, s2, n);  /* This will always succedd and result in
+                         * a '\0'-terminated s. */
+
     strncpy(s1, s, n);
-    free(s);
+    FREE(s);
 
     return s1;
 }
 
-/* An unelegant but portable version of C99 vsnprintf():  */
-static int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap)
+/* An unelegant but portable version of C99 vsnprintf():                */
+/* May be called with NULL == s .AND. 0 == n to get the size that would */
+/* be the result of an unrestricted write.                              */
+/* Returns the number of characters (not including the trailing '\0')   */
+/* that would have been written if n were large enough.                 */
+int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap)
 {
-    int nn = n;                 /* Want a signed value */
-    int rc = 0;
-    int nr = 0;                 /* Number of chars to read */
+    int nn  = n;                /* Want a signed value */
+    int rc  = 0;
+    int nr  = 0;                /* Number of chars to read */
     static FILE *fp = NULL;
+
+    ASRT(0    <= nn);
+    ASRT(NULL != fmt);
 
     if ( NULL == fp ) {           /* One-time initialization */
         if ( NULL == ( fp = tmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
@@ -1550,8 +1567,12 @@ static int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap)
          * EMPTY
          */
     } else if ( 1 == nn ) {
+        ASRT(NULL != s);
+
         s[0] = '\0';
     } else {
+        ASRT(NULL != s);
+
         if ( 0 == rc ) {
             s[0] = '\0';
         } else {                /* Read back characters written: */
@@ -1564,14 +1585,25 @@ static int xvsnprintf(char *s, size_t n, CONST char *fmt, va_list ap)
         }
     }
 
+    if ( 0 < nn ) {
+        TRC(("xvsnprintf: %s", s));
+    }
+
     return rc;
 }
 
-int xsnprintf(char *s, size_t n, CONST char *fmt, ...)  /* Like C99 snprintf()
-                                                         */
+/* Like the C99 snprintf():                                             */
+/* May be called with NULL == s .AND. 0 == n to get the size that would */
+/* be the result of an unrestricted write.                              */
+/* Returns the number of characters (not including the trailing '\0')   */
+/* that would have been written if n were large enough.                 */
+int xsnprintf(char *s, size_t n, CONST char *fmt, ...)
 {
-    int rc = 0;
+    int     rc  = 0;
     va_list ap;
+
+    ZEROMEM(ap);
+    ASRT(NULL != fmt);
 
     va_start(ap, fmt);
     rc = xvsnprintf(s, n, fmt, ap);
@@ -1580,21 +1612,119 @@ int xsnprintf(char *s, size_t n, CONST char *fmt, ...)  /* Like C99 snprintf()
     return rc;
 }
 
+/* Like GNU C vasprintf:                                        */
+/* Allocate (using malloc()) a string large enough to hold the  */
+/* resulting string.                                            */
+int xvasprintf(char **ret, const char *fmt, va_list ap)
+{
+    int     rc  = 0;
+    int     len = 0;
+    char    *cp = NULL;
+    va_list aq;
+
+    ZEROMEM(aq);
+    VA_COPY(aq, ap);
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    if ( 0 > (len = xvsnprintf(NULL, 0, fmt, ap)) ) {
+        *ret  = NULL;
+
+        return len;
+    }
+    len += 1;
+    ASRT(NULL != (cp = calloc(len, sizeof(char))));
+
+    if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
+        FREE(cp);
+    }
+    VA_END(aq);
+    *ret  = cp;
+
+    return rc;
+}
+
+/* Like GNU C asprintf:                                         */
+/* Allocate (using malloc()) a string large enough to hold the  */
+/* resulting string.                                            */
+int xasprintf(char **ret, const char *fmt, ...)
+{
+    int     rc  = 0;
+    va_list ap;
+
+    ZEROMEM(ap);
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    va_start(ap, fmt);
+    rc = xvasprintf(ret, fmt, ap);
+    va_end(ap);
+
+    return rc;
+}
+
 char *xstrdup(CONST char *str)
 {
-    char    *res = NULL;
-    int len  = 0;
+    char  *res  = NULL;
+    int   len   = 0;
 
 
     if ( NULL == str ) {
         return NULL;
     }
     len = strlen(str);
-    res = (char *)calloc( len + 1, sizeof (char) );
+    ASRT(NULL != (res = (char *)calloc( len + 1, sizeof (char) )));
     strcpy(res, str);
 
     return res;
 }
+
+/* Concatenate character c to string str and malloc the result. */
+/* Input string must either be NULL or malloced.                */
+char *astrcatc(const char *str, const char c)
+{
+    char  *res  = NULL;
+    char  *nstr = NULL;
+    int   len   = 0;
+
+    if ( NULL == str ) {
+        len = 1 + 1;
+        ASRT(NULL != (nstr = (char *)calloc(len, sizeof(char))));
+    } else {
+        len = strlen(str) + 1 + 1;
+        ASRT(NULL != (nstr = (char *)realloc(str, len * sizeof(char))));
+    }
+    nstr[len - 2]  = c;
+    nstr[len - 1]  = '\0';
+
+    return nstr;
+}
+
+/* Concatenate string d to string str and malloc the result.    */
+/* Input string must either be NULL or malloced.                */
+char *astrcat(const char *str, const char *s)
+{
+    char  *res      = NULL;
+    char  *nstr     = NULL;
+    int   len       = 0;
+    const char  *xs = (NULL == s)? "" : s;
+    int   slen      = strlen(xs);
+
+    if ( NULL == str ) {
+        len = slen + 1;
+        ASRT(NULL != (nstr = (char *)calloc(len, sizeof(char))));
+        strcpy(nstr, xs);
+    } else {
+        len = strlen(str) + slen + 1;
+        ASRT(NULL != (nstr = (char *)realloc(str, len * sizeof(char))));
+        strcat(nstr, xs);
+    }
+
+    return nstr;
+}
+
+
+/*====================================================================*/
 
 
 FILE  *GetTrcFP(void)
@@ -1645,6 +1775,9 @@ int DebugMessage(CONST char *fmt, ...)
 
     return rc;
 }
+
+
+/*====================================================================*/
 
 
 char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
@@ -1812,7 +1945,121 @@ int FUNC_(BUFFER *bp, int doto, const char *fnam, int lno)
 }
 
 
+/*====================================================================*/
 
-/*
- * EOF
- */
+int TransformRegion(filter_func_T filter, void *argp)
+{
+    LINE    *linep  = NULL;
+    int     loffs   = 0;
+    long    rsize   = 0;
+    int     s       = 0;
+    char    *rtext  = xstrdup("");
+    char    *rstart = xstrdup("");
+    int     i       = 0;
+    REGION  region;
+
+    ZEROMEM(region);
+    ASRT(NULL != filter);
+
+    if ( ( s = getregion(&region) ) != TRUE ) {
+        return FALSE;
+    }
+
+    linep = region.r_linep;                     /* Current line.    */
+    loffs = region.r_offset;                    /* Current offset.  */
+    rsize = region.r_size;
+    for (  i = 0; i < loffs; i++ )  {
+        rstart  = astrcatc(rstart, lgetc(linep, i));
+    }
+    while ( rsize-- ) {
+        if ( loffs == get_lused(linep) ) {      /* End of line.         */
+            rtext = astrcatc(rtext, '\r');
+            linep = lforw(linep);
+            loffs = 0;
+        } else {                                /* Middle of line.  */
+            rtext = astrcatc(rtext, lgetc(linep, loffs));
+            ++loffs;
+        }
+    }
+
+    /* make sure the cursor gets back to the right place on an undo */
+    undo_insert(OP_CPOS, 0L, obj);
+
+    /* delete the region */
+    curwp->w_dotp = region.r_linep;
+    set_w_doto(curwp, region.r_offset);
+
+    if ( TRUE != ldelete(region.r_size, TRUE) ) {
+        FREE(rstart);
+        FREE(rtext);
+
+        return FALSE;
+    }
+
+
+    /*===============================================================*/
+    /* Do something with rtext here.                                 */
+    /*===============================================================*/
+    {
+        char  *outline  = (*filter)(rstart, rtext, argp);
+        FREE(rstart);
+        FREE(rtext);
+        linstr(outline);
+        FREE(outline);
+    }
+
+    return TRUE;
+}
+
+
+static char  *filter_test(const char *rstart, const char *rtext, void *argp)
+{
+    char  *res  = NULL;
+    int   rc    = 0;
+    char  *str  = NULL;
+    int   i     = 0;
+    char  c     = '\0';
+
+    ASRT(NULL != rstart);
+    ASRT(NULL != rtext);
+
+    str = xstrdup(rstart);
+    for ( i = 0; '\0' != (c = str[i]); i++ )  {
+        str[i]  = toupper(c);
+    }
+
+    rc  = xasprintf(&res, "<%s><%s>", str, rtext);
+    FREE(str);
+
+    return res;
+}
+
+int PASCAL NEAR tr_region_test(f, n)
+
+int f, n;                               /* ignored arguments */
+
+{
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformRegion(&filter_test, NULL);
+}
+
+
+/*====================================================================*/
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

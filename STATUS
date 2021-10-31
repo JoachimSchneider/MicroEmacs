@@ -33,6 +33,6 @@ Next steps to repair the (w|b)_doto-Problem:
 
 (8) FIX THIS ERROR: `TRC (../src/undo.c/131): set_w_doto(): Too large doto: 156. REWRITTEN TO: 155.'
     - This seems to be an error in the fillpara function in word.c
-
+(9) The "indent-region" function is also undoable: Must be repaired.
 
 # EOF
