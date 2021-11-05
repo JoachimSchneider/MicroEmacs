@@ -43,22 +43,24 @@ extern int  xsnprintf(char *s, size_t n, CONST char *fmt, ...);
 /* Like GNU C vasprintf:                                        */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-extern int xvasprintf(char **ret, const char *fmt, va_list ap);
+extern int xvasprintf(char **ret, CONST char *fmt, va_list ap);
 
 /* Like GNU C asprintf:                                         */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-extern int xasprintf(char **ret, const char *fmt, ...);
+extern int xasprintf(char **ret, CONST char *fmt, ...);
 
 extern char *xstrdup(CONST char *str);
 
+extern char *xstrtok_r(char *str, CONST char *sep, char **next);
+
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
-extern char *astrcatc(const char *str, const char c);
+extern char *astrcatc(CONST char *str, CONST char c);
 
 /* Concatenate string d to string str and malloc the result.    */
 /* Input string must either be NULL or malloced.                */
-extern char *astrcat(const char *str, const char *s);
+extern char *astrcat(CONST char *str, CONST char *s);
 /**********************************************************************/
 
 /**********************************************************************/
@@ -491,27 +493,27 @@ typedef struct  LINE {
 #define lforw(lp)       ( (lp)->l_fp )
 #define lback(lp)       ( (lp)->l_bp )
 
-extern char lputc_(LINE *lp, int n, char c, const char *fnam, int lno);
+extern char lputc_(LINE *lp, int n, char c, CONST char *fnam, int lno);
 #define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
 
 #if ( IS_UNIX() )
-extern unsigned char lgetc_(LINE *lp, int n, const char *fnam, int lno);
+extern unsigned char lgetc_(LINE *lp, int n, CONST char *fnam, int lno);
 #else
-extern          char lgetc_(LINE *lp, int n, const char *fnam, int lno);
+extern          char lgetc_(LINE *lp, int n, CONST char *fnam, int lno);
 #endif
 #define lgetc(lp, n)    ( lgetc_((lp), (n), __FILE__, __LINE__) )
 
-extern char *lgetcp_(LINE *lp, int n, const char *fnam, int lno);
+extern char *lgetcp_(LINE *lp, int n, CONST char *fnam, int lno);
 #define lgetcp(lp, n)   ( lgetcp_((lp), (n), __FILE__, __LINE__) )
 #define ltext(lp)       ( lgetcp(lp, 0) )
 
-extern int get_lused_(LINE *lp, const char *fnam, int lno);
+extern int get_lused_(LINE *lp, CONST char *fnam, int lno);
 #define get_lused(lp)   ( get_lused_((lp), __FILE__, __LINE__) )
 
-extern int set_lused_(LINE *lp, int used, const char *fnam, int lno);
+extern int set_lused_(LINE *lp, int used, CONST char *fnam, int lno);
 #define set_lused(lp, used) ( set_lused_((lp), (used), __FILE__, __LINE__) )
 
-extern int get_lsize_(LINE *lp, const char *fnam, int lno);
+extern int get_lsize_(LINE *lp, CONST char *fnam, int lno);
 #define get_lsize(lp)   ( get_lsize_((lp), __FILE__, __LINE__) )
 
 
@@ -543,9 +545,9 @@ typedef struct  EWINDOW {
     int             w_fcol;             /* first column displayed       */
 }       EWINDOW;
 /**********************************************************************/
-extern int get_w_doto_(EWINDOW *wp, const char *fnam, int lno);
+extern int get_w_doto_(EWINDOW *wp, CONST char *fnam, int lno);
 #define get_w_doto(wp)        ( get_w_doto_((wp), __FILE__, __LINE__) )
-extern int set_w_doto_(EWINDOW *wp, int doto, const char *fnam, int lno);
+extern int set_w_doto_(EWINDOW *wp, int doto, CONST char *fnam, int lno);
 #define set_w_doto(wp, doto)  ( set_w_doto_((wp), (doto), __FILE__, __LINE__) )
 /**********************************************************************/
 
@@ -657,9 +659,9 @@ typedef struct  BUFFER {
     long            last_access;        /* time of last access          */
 }       BUFFER;
 /**********************************************************************/
-extern int get_b_doto_(BUFFER *bp, const char *fnam, int lno);
+extern int get_b_doto_(BUFFER *bp, CONST char *fnam, int lno);
 #define get_b_doto(bp)        ( get_b_doto_((bp), __FILE__, __LINE__) )
-extern int set_b_doto_(BUFFER *bp, int doto, const char *fnam, int lno);
+extern int set_b_doto_(BUFFER *bp, int doto, CONST char *fnam, int lno);
 #define set_b_doto(bp, doto)  ( set_b_doto_((bp), (doto), __FILE__, __LINE__) )
 /**********************************************************************/
 
@@ -1059,7 +1061,7 @@ typedef struct {
 
 /* Filter function used by TransformRegion():
  * Output string must be created by malloc(). */
-typedef char  *(*filter_func_T)(const char *rstart, const char *rtext,
+typedef char  *(*filter_func_T)(CONST char *rstart, CONST char *rtext,
                                 void *argp);
 
 # if     WINDOW_MSWIN
@@ -1515,7 +1517,14 @@ extern int PASCAL NEAR strinc(char *source, char *sub);
 extern int PASCAL NEAR swapmark(int f, int n);
 extern int PASCAL NEAR swbuffer(BUFFER *bp);
 extern int PASCAL NEAR tab(int f, int n);
+extern int TransformBuffer(filter_func_T filter, void *argp);
+extern int TransformParagraph(filter_func_T filter, void *argp);
 extern int TransformRegion(filter_func_T filter, void *argp);
+extern int PASCAL NEAR tr_buffer_fill(int f, int n);
+extern int PASCAL NEAR tr_buffer_test(int f, int n);
+extern int PASCAL NEAR tr_paragraph_fill(int f, int n);
+extern int PASCAL NEAR tr_paragraph_test(int f, int n);
+extern int PASCAL NEAR tr_region_fill(int f, int n);
 extern int PASCAL NEAR tr_region_test(int f, int n);
 extern int PASCAL NEAR trim(int f, int n);
 extern int PASCAL NEAR ttclose(VOID);
@@ -2049,7 +2058,14 @@ extern int PASCAL NEAR strinc();
 extern int PASCAL NEAR swapmark();
 extern int PASCAL NEAR swbuffer();
 extern int PASCAL NEAR tab();
+extern int TransformBuffer();
+extern int TransformParagraph();
 extern int TransformRegion(f);
+extern int PASCAL NEAR tr_buffer_fill();
+extern int PASCAL NEAR tr_buffer_test();
+extern int PASCAL NEAR tr_paragraph_fill();
+extern int PASCAL NEAR tr_paragraph_test();
+extern int PASCAL NEAR tr_region_fill();
 extern int PASCAL NEAR tr_region_test();
 extern int PASCAL NEAR trim();
 extern int PASCAL NEAR ttclose();

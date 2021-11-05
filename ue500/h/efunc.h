@@ -230,6 +230,11 @@ NOSHARE NBIND names[] =
 #if     WINDOW_MSWIN
     { "tile-screens", tilescreens },
 #endif
+    { "tr-buffer-fill", tr_buffer_fill },
+    { "tr-buffer-test", tr_buffer_test },
+    { "tr-paragraph-fill", tr_paragraph_fill },
+    { "tr-paragraph-test", tr_paragraph_test },
+    { "tr-region-fill", tr_region_fill },
     { "tr-region-test", tr_region_test },
     { "transpose-characters", twiddle },
     { "trim-region", trim },

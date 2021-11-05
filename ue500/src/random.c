@@ -1487,6 +1487,9 @@ char *sp;                               /* name to look up */
 
 
 /*====================================================================*/
+/* The x<ident> functions have the same funcionaly like the <ident>   */
+/* functions found in newer C libraries.                              */
+/*====================================================================*/
 
 
 char *xstrcpy(char *s1, CONST char *s2) /* strcpy() possibly overlapping regions
@@ -1615,7 +1618,7 @@ int xsnprintf(char *s, size_t n, CONST char *fmt, ...)
 /* Like GNU C vasprintf:                                        */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-int xvasprintf(char **ret, const char *fmt, va_list ap)
+int xvasprintf(char **ret, CONST char *fmt, va_list ap)
 {
     int     rc  = 0;
     int     len = 0;
@@ -1647,7 +1650,7 @@ int xvasprintf(char **ret, const char *fmt, va_list ap)
 /* Like GNU C asprintf:                                         */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-int xasprintf(char **ret, const char *fmt, ...)
+int xasprintf(char **ret, CONST char *fmt, ...)
 {
     int     rc  = 0;
     va_list ap;
@@ -1679,9 +1682,47 @@ char *xstrdup(CONST char *str)
     return res;
 }
 
+char *xstrtok_r(char *str, CONST char *sep, char **next)
+{
+    char        *res  = NULL;
+    CONST char  *sp   = sep;
+
+    ASRT(NULL != next);
+
+    if ( NULL == str )  {
+        if ( NULL == (str = *next) )  {
+            return NULL;
+        }
+    }
+    *next = NULL;
+
+    res = str;
+
+    if ( NULL == sep )  {
+        return  res;
+    }
+
+    for ( ; *str; str++ ) {
+        for (sp = sep; *sp; sp++ ) {
+            if ( *str == *sp ) {
+                *next = str + 1;
+                *str = '\0';
+
+                return  res;
+            }
+        }
+    }
+
+    return  res;
+}
+
+
+/*====================================================================*/
+
+
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
-char *astrcatc(const char *str, const char c)
+char *astrcatc(CONST char *str, CONST char c)
 {
     char  *res  = NULL;
     char  *nstr = NULL;
@@ -1702,12 +1743,12 @@ char *astrcatc(const char *str, const char c)
 
 /* Concatenate string d to string str and malloc the result.    */
 /* Input string must either be NULL or malloced.                */
-char *astrcat(const char *str, const char *s)
+char *astrcat(CONST char *str, CONST char *s)
 {
     char  *res      = NULL;
     char  *nstr     = NULL;
     int   len       = 0;
-    const char  *xs = (NULL == s)? "" : s;
+    CONST char  *xs = (NULL == s)? "" : s;
     int   slen      = strlen(xs);
 
     if ( NULL == str ) {
@@ -1780,7 +1821,7 @@ int DebugMessage(CONST char *fmt, ...)
 /*====================================================================*/
 
 
-char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
+char lputc_(LINE *lp, int n, char c, CONST char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
@@ -1793,9 +1834,9 @@ char lputc_(LINE *lp, int n, char c, const char *fnam, int lno)
 #undef  FUNC_
 #define FUNC_ lgetc_
 #if ( IS_UNIX() )
-unsigned char FUNC_(LINE *lp, int n, const char *fnam, int lno)
+unsigned char FUNC_(LINE *lp, int n, CONST char *fnam, int lno)
 #else
-         char FUNC_(LINE *lp, int n, const char *fnam, int lno)
+         char FUNC_(LINE *lp, int n, CONST char *fnam, int lno)
 #endif
 {
     ASRTK(NULL != lp,                     fnam, lno);
@@ -1818,7 +1859,7 @@ unsigned char FUNC_(LINE *lp, int n, const char *fnam, int lno)
 
 #undef  FUNC_
 #define FUNC_ lgetcp_
-char *FUNC_(LINE *lp, int n, const char *fnam, int lno)
+char *FUNC_(LINE *lp, int n, CONST char *fnam, int lno)
 {
     ASRTK(NULL != lp,                     fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
@@ -1832,7 +1873,7 @@ char *FUNC_(LINE *lp, int n, const char *fnam, int lno)
     return ( &(lp->l_text_[n]) );
 }
 
-int get_lused_(LINE *lp, const char *fnam, int lno)
+int get_lused_(LINE *lp, CONST char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
@@ -1840,7 +1881,7 @@ int get_lused_(LINE *lp, const char *fnam, int lno)
     return ( (lp)->l_used_ );
 }
 
-int set_lused_(LINE *lp, int used, const char *fnam, int lno)
+int set_lused_(LINE *lp, int used, CONST char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
@@ -1850,7 +1891,7 @@ int set_lused_(LINE *lp, int used, const char *fnam, int lno)
     return ( (lp)->l_used_ = used );
 }
 
-int get_lsize_(LINE *lp, const char *fnam, int lno)
+int get_lsize_(LINE *lp, CONST char *fnam, int lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
@@ -1860,7 +1901,7 @@ int get_lsize_(LINE *lp, const char *fnam, int lno)
 
 #undef  FUNC_
 #define FUNC_ get_w_doto_
-int FUNC_(EWINDOW *wp, const char *fnam, int lno)
+int FUNC_(EWINDOW *wp, CONST char *fnam, int lno)
 {
     ASRTK(NULL != wp,                                 fnam, lno);
     ASRTK(NULL != wp->w_dotp,                         fnam, lno);
@@ -1878,7 +1919,7 @@ int FUNC_(EWINDOW *wp, const char *fnam, int lno)
 
 #undef  FUNC_
 #define FUNC_ set_w_doto_
-int FUNC_(EWINDOW *wp, int doto, const char *fnam, int lno)
+int FUNC_(EWINDOW *wp, int doto, CONST char *fnam, int lno)
 {
     ASRTK(NULL != wp,                                 fnam, lno);
     ASRTK(NULL != wp->w_dotp,                         fnam, lno);
@@ -1903,7 +1944,7 @@ int FUNC_(EWINDOW *wp, int doto, const char *fnam, int lno)
 
 #undef  FUNC_
 #define FUNC_ get_b_doto_
-int FUNC_(BUFFER *bp, const char *fnam, int lno)
+int FUNC_(BUFFER *bp, CONST char *fnam, int lno)
 {
     ASRTK(NULL != bp,                                 fnam, lno);
     ASRTK(NULL != bp->b_dotp,                         fnam, lno);
@@ -1921,7 +1962,7 @@ int FUNC_(BUFFER *bp, const char *fnam, int lno)
 
 #undef  FUNC_
 #define FUNC_ set_b_doto_
-int FUNC_(BUFFER *bp, int doto, const char *fnam, int lno)
+int FUNC_(BUFFER *bp, int doto, CONST char *fnam, int lno)
 {
     ASRTK(NULL != bp,                                 fnam, lno);
     ASRTK(NULL != bp->b_dotp,                         fnam, lno);
@@ -2011,8 +2052,45 @@ int TransformRegion(filter_func_T filter, void *argp)
     return TRUE;
 }
 
+int TransformParagraph(filter_func_T filter, void *argp)
+{
+    /* make sure the cursor gets back to the right place on an undo */
+    undo_insert(OP_CPOS, 0L, obj);
 
-static char  *filter_test(const char *rstart, const char *rtext, void *argp)
+    /* mark out the end and beginning of the para to transform  */
+    gotoeop(FALSE, 1);
+
+    /* set the mark here */
+    curwp->w_markp[0] = curwp->w_dotp;
+    curwp->w_marko[0] = get_w_doto(curwp);
+
+    /* go to the beginning of the paragraph */
+    gotobop(FALSE, 1);
+    set_w_doto(curwp, 0); /* force us to the beginning of line */
+
+    return TransformRegion(filter, argp);
+}
+
+int TransformBuffer(filter_func_T filter, void *argp)
+{
+    /* make sure the cursor gets back to the right place on an undo */
+    undo_insert(OP_CPOS, 0L, obj);
+
+    /* mark out the end and beginning of the para to transform  */
+    gotoeob(FALSE, 1);
+
+    /* set the mark here */
+    curwp->w_markp[0] = curwp->w_dotp;
+    curwp->w_marko[0] = get_w_doto(curwp);
+
+    /* go to the beginning of the paragraph */
+    gotobob(FALSE, 1);
+    set_w_doto(curwp, 0); /* force us to the beginning of line */
+
+    return TransformRegion(filter, argp);
+}
+
+static char  *filter_test_00(CONST char *rstart, CONST char *rtext, void *argp)
 {
     char  *res  = NULL;
     int   rc    = 0;
@@ -2034,6 +2112,300 @@ static char  *filter_test(const char *rstart, const char *rtext, void *argp)
     return res;
 }
 
+static char  *filter_test_01(CONST char *rstart, CONST char *rtext, void *argp)
+{
+    char  *res  = NULL;
+    int   rc    = 0;
+
+    ASRT(NULL != rstart);
+    ASRT(NULL != rtext);
+
+    rc  = xasprintf(&res, "%s", rtext);
+
+    return res;
+}
+
+static char  *filter_test(CONST char *rstart, CONST char *rtext, void *argp)
+{
+    return filter_test_01(rstart, rtext, argp);
+}
+
+static int  dsplen(CONST char *s)
+{
+    int       res = 0;
+    CONST int tw  = 8;
+
+    if ( NULL == s )  {
+        return 0;
+    }
+
+    for ( ; '\0' != *s; s++ ) {
+        switch ( *s ) {
+            case '\t':
+                res = (res / tw + 1) * tw;
+                break;
+            default:
+                res++;
+                break;
+        }
+    }
+
+    return  res;
+}
+
+/* Format the space separated words in input into a paragraph, where each
+ * line starts with start and its length should not exceed fcol (except
+ * if start + first word already exceed fcol).
+ * The result will be allocated with malloc().
+ *
+ * The routine skips leading and ignores trailing blanks. Words may be
+ * separated by one ore more blanks.
+ */
+static char *format_para(CONST char *start, CONST char *input, int fcol,
+                         int ommit  /* Skip start in first line */)
+{
+    char  *res  = xstrdup("");
+    int   slen  = 0;
+    char  *ip   = input;
+    char  *cp   = 0;
+    int   col   = 0;
+
+    ASRT(NULL != start);
+    ASRT(NULL != input);
+    slen  = dsplen(start);
+
+    while ( ' ' == *ip )  ip++;   /* Skip space */
+    if ( ! *ip )  return res;     /* Shortcut   */
+
+    if ( ! ommit )  {
+        res =  astrcat(res, start);
+    }
+    col = slen;
+
+    if ( NULL == (cp = strchr(ip, ' ')) ) {
+        return  astrcat(res, ip);
+    } else {
+        for (; ip < cp; ip++ )  {
+            res = astrcatc(res, *ip);
+            col++;
+        }
+        while ( ' ' == *ip )  ip++;   /* Skip space */
+        if ( ! *ip )  return res;     /* Shortcut   */
+    }
+
+    for ( ;; )  {
+        int ncol  = col;  /* Column of character before next space  */
+
+        if ( NULL != (cp  = strchr(ip, ' ')) )  {
+            ncol  += (cp - ip) + 1;
+        } else {
+            ncol  += strlen(ip) + 1;
+        }
+
+        if ( fcol <= ncol ) {
+            res = astrcatc(res, '\r');
+            res = astrcat(res, start);
+            col = slen;
+        } else {
+            res = astrcatc(res, ' ');
+            col++;
+        }
+
+        if ( NULL == cp ) {
+            return  astrcat(res, ip);
+        } else {
+            for (; ip < cp; ip++ )  {
+                res = astrcatc(res, *ip);
+                col++;
+            }
+            while ( ' ' == *ip )  ip++;   /* Skip space */
+            if ( ! *ip )  return res;     /* Shortcut   */
+        }
+    }
+
+    return  res;  /***NOT_REACHED***/
+}
+
+static char *filter_fill(CONST char *rstart, CONST char *rtext, void *argp)
+{
+    typedef enum  { IS_TEXT, IS_SPACE } state_T;
+
+    char    *res      = xstrdup("");  /* Reformatted region               */
+    state_T state     = IS_TEXT;
+    char    *start    = NULL;         /* Each line will start wirh it     */
+    char    *text     = NULL;         /* rtext without (lead|trail)ing \r */
+    int     nbef      = 0;            /* Lines before text                */
+    int     naft      = 0;            /* Lines aftertext                  */
+    int     tpos      = 0;
+    char    *pptext   = xstrdup("");  /* Preprocessed text                */
+    char    *lptr     = NULL;
+    int     sflag     = FALSE;
+    char    *context  = NULL;
+
+    ASRT(NULL != rstart);
+    ASRT(NULL != rtext);
+
+    {
+        char  *cp = rtext;
+        int   l   = 0;
+        int   nsp = 0;
+        int   ncr = 0;
+
+        while ( *cp && isspace(*cp) ) {
+            if ( '\r' == *cp )  {
+                nsp = 0;
+                ncr++;
+            } else {
+                nsp++;
+            }
+
+            cp++;
+        }
+        while ( 0 < nsp-- ) cp--;
+        nbef  = ncr;
+        text  = xstrdup(cp);
+
+        nsp = 0;
+        ncr = 0;
+        if ( 0 < (l = strlen(text)) ) {
+            cp  = &text[l - 1];
+
+            while ( 0 < l && isspace(*cp) ) {
+                if ( '\r' == *cp )  {
+                    nsp = 0;  /**NOT_USED**/
+                    ncr++;
+                } else {
+                    nsp++;  /**NOT_USED**/
+                }
+                *cp = '\0';
+
+                cp--;
+                l--;
+            }
+        }
+        naft  = ncr;
+    }
+
+    sflag = ( rstart && 0 < strlen(rstart) );
+
+    /* start: It contains the string wich will be prepended to every line:  */
+    if ( rstart && *rstart )  {
+        start = xstrdup(rstart);
+    } else {
+        int   i = 0;
+        char  c = '\0';
+
+        start = xstrdup("");
+        while ( (c = text[i]) && isspace(c) )  {
+            start = astrcatc(start, c);
+            i++;
+        }
+        tpos  +=  i;
+    }
+
+    {
+        int   ncr = 0;  /* Number of '\r' in a sequenze of white space  */
+        int   nsp = 0;  /* Number of white space in this sequence.      */
+        int   i   = 0;
+        char  c   = '\0';
+
+        /* pptext: <word>' '<word>' '<word>\r<word>' '<word>' '<word> */
+        for ( i = tpos; (c = text[i]); i++ ) {
+            switch ( state )  {
+                case IS_TEXT:
+                    if ( isspace(c) ) {
+                        if ( '\r' == c )  {
+                            ncr++;
+                        }
+                        nsp++;
+                        state = IS_SPACE;
+                    } else {
+                        pptext  = astrcatc(pptext, c);
+                    }
+                    break;
+                case IS_SPACE:
+                    if ( isspace(c) ) {
+                        if ( '\r' == c )  {
+                            ncr++;
+                        }
+                        nsp++;
+                    } else {
+                        if ( 2 <= ncr ) {
+                            pptext  = astrcatc(pptext, '\r');
+                        } else if ( 0 < nsp ) {
+                            pptext  = astrcatc(pptext, ' ');
+                        }
+                        ncr = 0;
+                        nsp = 0;
+                        pptext  = astrcatc(pptext, c);
+                        state = IS_TEXT;
+                    }
+                    break;
+                default:
+                    ASRT(!"IMPOSSIBLE");
+                    break;
+            }
+        }
+    }
+
+
+    while ( 0 < nbef-- )  {
+        res = astrcatc(res, '\r');
+    }
+
+    lptr  = xstrtok_r(pptext, "\r", &context);  /* .NE. NULL  */
+    for ( ;; )  {
+        char  *para = format_para(start, lptr, fillcol, sflag);
+
+        sflag = FALSE;
+        res = astrcat(res, para);
+        FREE(para);
+        res = astrcat(res, "\r\r");
+
+        if ( NULL == (lptr  = xstrtok_r(NULL, "\r", &context)) )  {
+            int l = strlen(res) - 1;
+
+            for ( ; 0 <= l && isspace(res[l]); l-- )  {
+                res[l]  = '\0';
+            }
+
+            break;
+        }
+    }
+
+    while ( 0 < naft-- )  {
+        res = astrcatc(res, '\r');
+    }
+
+
+    FREE(pptext);
+    FREE(text);
+    FREE(start);
+
+    return res;
+}
+
+int PASCAL NEAR tr_region_fill(f, n)
+
+int f, n;                               /* ignored arguments */
+
+{
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformRegion(&filter_fill, NULL);
+}
+
 int PASCAL NEAR tr_region_test(f, n)
 
 int f, n;                               /* ignored arguments */
@@ -2053,6 +2425,90 @@ int f, n;                               /* ignored arguments */
     /*===============================================================*/
 
     return TransformRegion(&filter_test, NULL);
+}
+
+int PASCAL NEAR tr_paragraph_test(f, n)
+
+int f, n;                               /* ignored arguments */
+
+{
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformParagraph(&filter_test, NULL);
+}
+
+int PASCAL NEAR tr_paragraph_fill(f, n)
+
+int f, n;                               /* ignored arguments */
+
+{
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformParagraph(&filter_fill, NULL);
+}
+
+int PASCAL NEAR tr_buffer_fill(f, n)
+
+int f, n;                               /* ignored arguments */
+
+{
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformBuffer(&filter_fill, NULL);
+}
+
+int PASCAL NEAR tr_buffer_test(f, n)
+
+int f, n;                               /* ignored arguments */
+
+{
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformBuffer(&filter_test, NULL);
 }
 
 
