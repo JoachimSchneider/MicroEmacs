@@ -29,7 +29,7 @@ modern Linux and FreeBSD systems:
 
 * Introduced the functions xstr(n)cpy (in char.c) which work correctly
   with overlapping buffers.
-  
+
   This fixed e.g. the error that there appeared a text "Functinn"
   instead of "Function" in the upper part of the screen when using the
   standard .emacsrc.
@@ -59,15 +59,50 @@ modern Linux and FreeBSD systems:
     eval.c:gtusr()      /* look up a user var's value                       */
     file.c:makename()   /* Create buffer name out of file name.             */
 ```
-    In all of these functions local modifyable copies are created using 
+    In all of these functions local modifyable copies are created using
     xstrdup().
 
+
+## New features
+
+* New user functions (efunc.h) fill-buffer and fill-region. With fill-region
+  if the region starts in the middle of a line the start of the line will be
+  used as a prefix for all lines:
+  ```
+       | --- Mark
+       v
+  ===> Text text text text text text text text text text text text ...
+  ```
+  will be filled to
+  ```
+  ===> Text text text text text text text text text text text text text
+  ===> text text text text text text text text text text text text text
+  ===> text text text text text text text text text text text text text
+  ===> text text text text text text text text text text text text text
+  ```
+
+  * fill-(paragraph|buffer|region) now accepts an numeric argument to be
+    used as parindent for the first line of a paragraph.
+
+  * fill-(paragraph|buffer|region) filled texts  start at th indent of
+    the first line (if not specified as above in the ``===>`` example:
+  ```
+       Text text text text text text text text text text text text ...
+    text text text text text text text text text text text ...
+  ```
+  will be filled to
+  ```
+       Text text text text text text text text text text text text text
+       text text text text text text text text text text text text text
+       text text text text text text text text text text text text text
+       text text text text text text text text text text text text text
+  ```
 
 
 ## For completeness I quote Peter Chapman's README.md here:
 ```
 ## Introduction
-I have found it hard to track down the source code for MicroEMACS, 
+I have found it hard to track down the source code for MicroEMACS,
 and with Daniel's passing I have noticed that links from his home page are breaking.
 
 This project seeks to collect the source code and binaries for MicroEMACS, and provide them all from one place

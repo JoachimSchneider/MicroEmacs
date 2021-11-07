@@ -30,11 +30,20 @@ Next steps to repair the (w|b)_doto-Problem:
 (5) Remove Fix and TRC in line.c: Done.
 (6) Enable the other platforms: Done
 (7) Introduce get/set-Logic and repair-code of the dot-code for the mark code as well: Might be unneccesary
-
 (8) FIX THIS ERROR: `TRC (../src/undo.c/131): set_w_doto(): Too large doto: 156. REWRITTEN TO: 155.'
     - This seems to be an error in the fillpara function in word.c
-    ---> Introduced the tr_para_fill() in random.c which seem to-be a unduable substitute.
+    - Introduced the trParFill() in random.c which is an unduable replacement.
+    Done
 
 (9) The "indent-region" function is also undoable: Must be repaired.
+(10) Introduce a goto(b|e)ofrp(): Goto(Beginning|End)ofRawParagraph and
+     a trRParFill(): Raw paragraphs are limited by '\r' only.
+
+[2021-11-07.00]
+
+The automatic reformatting has destroyed some of the very nice formatted
+comments in the original code: This hsa to be recreated!
+
+
 
 # EOF
