@@ -486,6 +486,10 @@ char c;
     return (FALSE);
 }
 
+
+#if(0)/***==========HISTORICAL_CODE_FOR_DOCUMENTATION_ONLY==========***/
+
+
 int PASCAL NEAR fillpara(f, n)  /* Fill the current paragraph according to the
                                  * current fill column */
 
@@ -635,6 +639,10 @@ char *para;     /* string buffer containing paragraph */
     }
 }
 
+
+#endif/***==========HISTORICAL_CODE_FOR_DOCUMENTATION_ONLY==========***/
+
+
 int PASCAL NEAR killpara(f, n)  /* delete n paragraphs starting with the current
                                  * one */
 
@@ -736,3 +744,8 @@ int f, n;       /* ignored numeric arguments */
     return (TRUE);
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

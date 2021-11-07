@@ -20,6 +20,11 @@
 
 
 /**********************************************************************/
+#undef  COMMENT
+/**********************************************************************/
+
+
+/**********************************************************************/
 /* strcpy() possibly overlapping regions:   */
 extern char *xstrcpy(char *s1, CONST char *s2);
 
@@ -1380,7 +1385,6 @@ extern int PASCAL NEAR filename(int f, int n);
 extern int PASCAL NEAR fileread(int f, int n);
 extern int PASCAL NEAR filesave(int f, int n);
 extern int PASCAL NEAR filewrite(int f, int n);
-extern int PASCAL NEAR fillpara(int f, int n);
 extern int PASCAL NEAR f_filter(int f, int n);
 extern VOID PASCAL NEAR findvar(char *var, VDESC *vd, int size, int scope);
 extern int PASCAL NEAR fmatch(char ch);
@@ -1520,12 +1524,12 @@ extern int PASCAL NEAR tab(int f, int n);
 extern int TransformBuffer(filter_func_T filter, void *argp);
 extern int TransformParagraph(filter_func_T filter, void *argp);
 extern int TransformRegion(filter_func_T filter, void *argp);
-extern int PASCAL NEAR tr_buffer_fill(int f, int n);
-extern int PASCAL NEAR tr_buffer_test(int f, int n);
-extern int PASCAL NEAR tr_paragraph_fill(int f, int n);
-extern int PASCAL NEAR tr_paragraph_test(int f, int n);
-extern int PASCAL NEAR tr_region_fill(int f, int n);
-extern int PASCAL NEAR tr_region_test(int f, int n);
+extern int PASCAL NEAR trBufFill(int f, int n);
+extern int PASCAL NEAR trBufTest_(int f, int n);
+extern int PASCAL NEAR trParFill(int f, int n);
+extern int PASCAL NEAR trParTest_(int f, int n);
+extern int PASCAL NEAR trRegFill(int f, int n);
+extern int PASCAL NEAR trRegTest_(int f, int n);
 extern int PASCAL NEAR trim(int f, int n);
 extern int PASCAL NEAR ttclose(VOID);
 extern int PASCAL NEAR ttflush(VOID);
@@ -1601,7 +1605,6 @@ extern VOID PASCAL NEAR next_kill(VOID);
 extern VOID PASCAL NEAR pad(char *s, int len);
 extern VOID PASCAL NEAR reeat(int c);
 extern VOID PASCAL NEAR reframe(EWINDOW *wp);
-extern VOID PASCAL NEAR reform(char *para);
 extern VOID PASCAL NEAR rmcclear(VOID);
 extern VOID PASCAL NEAR setbit(int bc, EBITMAP cclmap);
 extern VOID PASCAL NEAR setjtable(VOID);
@@ -1931,7 +1934,6 @@ extern int PASCAL NEAR filename();
 extern int PASCAL NEAR fileread();
 extern int PASCAL NEAR filesave();
 extern int PASCAL NEAR filewrite();
-extern int PASCAL NEAR fillpara();
 extern int PASCAL NEAR f_filter();
 extern VOID PASCAL NEAR findvar();
 extern int PASCAL NEAR fmatch();
@@ -2061,12 +2063,12 @@ extern int PASCAL NEAR tab();
 extern int TransformBuffer();
 extern int TransformParagraph();
 extern int TransformRegion(f);
-extern int PASCAL NEAR tr_buffer_fill();
-extern int PASCAL NEAR tr_buffer_test();
-extern int PASCAL NEAR tr_paragraph_fill();
-extern int PASCAL NEAR tr_paragraph_test();
-extern int PASCAL NEAR tr_region_fill();
-extern int PASCAL NEAR tr_region_test();
+extern int PASCAL NEAR trBufFill();
+extern int PASCAL NEAR trBufTest_();
+extern int PASCAL NEAR trParFill();
+extern int PASCAL NEAR trParTest_();
+extern int PASCAL NEAR trRegFill();
+extern int PASCAL NEAR trRegTest_();
 extern int PASCAL NEAR trim();
 extern int PASCAL NEAR ttclose();
 extern int PASCAL NEAR ttflush();
@@ -2132,7 +2134,6 @@ extern VOID PASCAL NEAR next_kill();
 extern VOID PASCAL NEAR pad();
 extern VOID PASCAL NEAR reeat();
 extern VOID PASCAL NEAR reframe();
-extern VOID PASCAL NEAR reform();
 extern VOID PASCAL NEAR rmcclear();
 extern VOID PASCAL NEAR setbit();
 extern VOID PASCAL NEAR setjtable();

@@ -2162,13 +2162,15 @@ static int  dsplen(CONST char *s)
  * separated by one ore more blanks.
  */
 static char *format_para(CONST char *start, CONST char *input, int fcol,
-                         int ommit  /* Skip start in first line */)
+                         int ommit  /* Skip start in first line */,
+                         int parindent)
 {
     char  *res  = xstrdup("");
     int   slen  = 0;
     char  *ip   = input;
     char  *cp   = 0;
     int   col   = 0;
+    int   i     = 0;
 
     ASRT(NULL != start);
     ASRT(NULL != input);
@@ -2183,8 +2185,16 @@ static char *format_para(CONST char *start, CONST char *input, int fcol,
     col = slen;
 
     if ( NULL == (cp = strchr(ip, ' ')) ) {
+        for ( i = 0; i < parindent; i++ ) {
+            res = astrcatc(res, ' ');
+        }
+
         return  astrcat(res, ip);
     } else {
+        for ( i = 0; i < parindent; i++ ) {
+            res = astrcatc(res, ' ');
+            col++;
+        }
         for (; ip < cp; ip++ )  {
             res = astrcatc(res, *ip);
             col++;
@@ -2227,6 +2237,14 @@ static char *format_para(CONST char *start, CONST char *input, int fcol,
 }
 
 static char *filter_fill(CONST char *rstart, CONST char *rtext, void *argp)
+/*
+ * Fill the region --- i.e.reformat it so that:
+ * (1) Multiple empty lines are converted into one empty line.
+ * (2) Text is wrapped at fillcol.
+ *
+ * If NULL != argp argp points to an integer whose value gives the first line
+ * indent of every paragraph.
+ */
 {
     typedef enum  { IS_TEXT, IS_SPACE } state_T;
 
@@ -2241,6 +2259,7 @@ static char *filter_fill(CONST char *rstart, CONST char *rtext, void *argp)
     char    *lptr     = NULL;
     int     sflag     = FALSE;
     char    *context  = NULL;
+    int     parindent = (NULL == argp)? 0 : *(int *)argp;
 
     ASRT(NULL != rstart);
     ASRT(NULL != rtext);
@@ -2355,7 +2374,7 @@ static char *filter_fill(CONST char *rstart, CONST char *rtext, void *argp)
 
     lptr  = xstrtok_r(pptext, "\r", &context);  /* .NE. NULL  */
     for ( ;; )  {
-        char  *para = format_para(start, lptr, fillcol, sflag);
+        char  *para = format_para(start, lptr, fillcol, sflag, parindent);
 
         sflag = FALSE;
         res = astrcat(res, para);
@@ -2385,11 +2404,16 @@ static char *filter_fill(CONST char *rstart, CONST char *rtext, void *argp)
     return res;
 }
 
-int PASCAL NEAR tr_region_fill(f, n)
+int PASCAL NEAR trRegFill(f, n)
 
-int f, n;                               /* ignored arguments */
+int f, n;     /* argument flag and num */
+              /* If f == TRUE: n: Indent of first line of a paragraph */
 
 {
+    if ( f == FALSE ) {
+        n = 0;
+    }
+
     /*===============================================================*/
     /* Don't do this command in read-only mode */
     if ( curbp->b_mode&MDVIEW ) {
@@ -2403,10 +2427,10 @@ int f, n;                               /* ignored arguments */
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformRegion(&filter_fill, NULL);
+    return TransformRegion(&filter_fill, &n);
 }
 
-int PASCAL NEAR tr_region_test(f, n)
+int PASCAL NEAR trRegTest_(f, n)
 
 int f, n;                               /* ignored arguments */
 
@@ -2427,7 +2451,7 @@ int f, n;                               /* ignored arguments */
     return TransformRegion(&filter_test, NULL);
 }
 
-int PASCAL NEAR tr_paragraph_test(f, n)
+int PASCAL NEAR trParTest_(f, n)
 
 int f, n;                               /* ignored arguments */
 
@@ -2448,11 +2472,16 @@ int f, n;                               /* ignored arguments */
     return TransformParagraph(&filter_test, NULL);
 }
 
-int PASCAL NEAR tr_paragraph_fill(f, n)
+int PASCAL NEAR trParFill(f, n)
 
-int f, n;                               /* ignored arguments */
+int f, n;     /* argument flag and num */
+              /* If f == TRUE: n: Indent of first line of a paragraph */
 
 {
+    if ( f == FALSE ) {
+        n = 0;
+    }
+
     /*===============================================================*/
     /* Don't do this command in read-only mode */
     if ( curbp->b_mode&MDVIEW ) {
@@ -2466,14 +2495,19 @@ int f, n;                               /* ignored arguments */
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformParagraph(&filter_fill, NULL);
+    return TransformParagraph(&filter_fill, &n);
 }
 
-int PASCAL NEAR tr_buffer_fill(f, n)
+int PASCAL NEAR trBufFill(f, n)
 
-int f, n;                               /* ignored arguments */
+int f, n;     /* argument flag and num */
+              /* If f == TRUE: n: Indent of first line of a paragraph */
 
 {
+    if ( f == FALSE ) {
+        n = 0;
+    }
+
     /*===============================================================*/
     /* Don't do this command in read-only mode */
     if ( curbp->b_mode&MDVIEW ) {
@@ -2487,10 +2521,10 @@ int f, n;                               /* ignored arguments */
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformBuffer(&filter_fill, NULL);
+    return TransformBuffer(&filter_fill, &n);
 }
 
-int PASCAL NEAR tr_buffer_test(f, n)
+int PASCAL NEAR trBufTest_(f, n)
 
 int f, n;                               /* ignored arguments */
 

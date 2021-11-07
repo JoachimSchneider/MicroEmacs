@@ -16,6 +16,11 @@
 
 NOSHARE NBIND names[] =
 {
+    { "_goto-bop", gotobop },
+    { "_goto-eop", gotoeop },
+    { "_tr-buffer-test", trBufTest_ },
+    { "_tr-paragraph-test", trParTest_ },
+    { "_tr-region-test", trRegTest_ },
     { "abort-command", ctrlg },
     { "add-abbrev", add_abbrev },
     { "add-global-mode", setgmode },
@@ -99,7 +104,9 @@ NOSHARE NBIND names[] =
     { "execute-procedure", execproc },
     { "execute-program", execprg },
     { "exit-emacs", quit },
-    { "fill-paragraph", fillpara },
+    { "fill-buffer", trBufFill },
+    { "fill-paragraph", trParFill },
+    { "fill-region", trRegFill },
     { "filter-buffer", f_filter },
     { "find-file", filefind },
     { "find-screen", find_screen },
@@ -230,12 +237,6 @@ NOSHARE NBIND names[] =
 #if     WINDOW_MSWIN
     { "tile-screens", tilescreens },
 #endif
-    { "tr-buffer-fill", tr_buffer_fill },
-    { "tr-buffer-test", tr_buffer_test },
-    { "tr-paragraph-fill", tr_paragraph_fill },
-    { "tr-paragraph-test", tr_paragraph_test },
-    { "tr-region-fill", tr_region_fill },
-    { "tr-region-test", tr_region_test },
     { "transpose-characters", twiddle },
     { "trim-region", trim },
     { "unbind-key", unbindkey },
