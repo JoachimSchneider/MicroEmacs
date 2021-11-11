@@ -82,7 +82,8 @@ modern Linux and FreeBSD systems:
   ```
 
   * fill-(paragraph|buffer|region) now accepts an numeric argument to be
-    used as parindent for the first line of a paragraph.
+    used as parindent for the first line of a paragraph. The default is
+    set  set by the new environment variable $parindent (default: 0).
 
   * fill-(paragraph|buffer|region) filled texts  start at th indent of
     the first line (if not specified as above in the ``===>`` example:

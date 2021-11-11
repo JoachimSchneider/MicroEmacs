@@ -36,8 +36,17 @@ Next steps to repair the (w|b)_doto-Problem:
     Done
 
 (9) The "indent-region" function is also undoable: Must be repaired.
+
 (10) Introduce a goto(b|e)ofrp(): Goto(Beginning|End)ofRawParagraph and
-     a trRParFill(): Raw paragraphs are limited by '\r' only.
+     a trRParFill(): Raw paragraphs are limited by '\r' only. DONE: Not
+     necessary, simply set the environment variable $wchars to a string
+     containing all charcters thet will be recogbnized as parts of
+     words, e.g.:
+
+    set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
+
+(11) Make filter-buffer redoable and introduce filter-region.
+
 
 [2021-11-07.00]
 

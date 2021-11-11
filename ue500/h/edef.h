@@ -30,6 +30,7 @@ NOSHARE int DNEAR mouse_move = 1;       /* user allow tracking mouse moves? */
 NOSHARE int DNEAR mmove_flag = TRUE;    /* code currently allowing mmoves? */
 NOSHARE int DNEAR newscreenflag = FALSE;/* Create new screen on reads? */
 NOSHARE int DNEAR overlap = 2;          /* overlap when paging screens */
+NOSHARE int DNEAR parindent = 0;        /* parindent to be used with fill */
 CONST char *modename[] =                /* name of modes        */
 {
     "WRAP", "CMODE", "SPELL", "EXACT", "VIEW", "OVER", "MAGIC", "CRYPT",
@@ -278,6 +279,7 @@ NOSHARE extern int DNEAR mouse_move;    /* user allow tracking mouse moves? */
 NOSHARE extern int DNEAR mmove_flag;    /* code currently allowing mmoves? */
 NOSHARE extern int DNEAR newscreenflag; /* Create new screen on reads? */
 NOSHARE extern int DNEAR overlap;       /* overlap when paging screens */
+NOSHARE extern int DNEAR parindent;     /* parindent to be used with fill */
 CONST extern char *modename[DUMMYSZ];   /* text names of modes      */
 CONST extern char modecode[DUMMYSZ];    /* letters to represent modes   */
 NOSHARE extern int DNEAR numfunc;       /* number of bindable functions */

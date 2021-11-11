@@ -644,6 +644,9 @@ CONST char  *vname;             /* name of environment variable to retrieve */
     case EVOVERLAP:
         return ( int_asc(overlap) );
 
+    case EVPARINDENT:
+        return ( int_asc(parindent) );
+
     case EVPAGELEN:
         return ( int_asc(term.t_nrow + 1) );
 
@@ -1440,6 +1443,10 @@ char *value;    /* value to set to */
 
         case EVOVERLAP:
             overlap = asc_int(value);
+            break;
+
+        case EVPARINDENT:
+            parindent = asc_int(value);
             break;
 
         case EVPAGELEN:
