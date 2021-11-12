@@ -562,6 +562,9 @@ char *value;
 }
 
 
+#if(0)/***==========HISTORICAL_CODE_FOR_DOCUMENTATION_ONLY==========***/
+
+
 int PASCAL NEAR indent_region(f, n) /* indent a region n tab-stops */
 
 int f, n;        /* default flag and numeric repeat count */
@@ -642,3 +645,11 @@ int f, n;        /* default flag and numeric repeat count */
     return (TRUE);
 }
 
+
+#endif/***==========HISTORICAL_CODE_FOR_DOCUMENTATION_ONLY==========***/
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

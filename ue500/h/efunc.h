@@ -127,7 +127,7 @@ NOSHARE NBIND names[] =
 #if     ISRCH
     { "incremental-search", fisearch },
 #endif
-    { "indent-region", indent_region },
+    { "indent-region", trRegIndent },
     { "insert-abbrevs", ins_abbrevs },
 #if     WINDOW_MSWIN
     { "insert-clip", insertclip },
@@ -243,7 +243,7 @@ NOSHARE NBIND names[] =
 #if     WINDOW_MSWIN
     { "unbind-menu", unbindmenu },
 #endif
-    { "undent-region", undent_region },
+    { "undent-region", trRegUndent },
     { "undo", undo },
     { "universal-argument", unarg },
     { "unmark-buffer", unmark },

@@ -1988,6 +1988,14 @@ int FUNC_(BUFFER *bp, int doto, CONST char *fnam, int lno)
 
 /*====================================================================*/
 
+
+/*====================================================================*/
+/* The generic transformation functions which implement the           */
+/* transformations of regions, paragraphs and buffers in a generic    */
+/* and *undoable* way:                                                */
+/*====================================================================*/
+
+
 int TransformRegion(filter_func_T filter, void *argp)
 {
     LINE    *linep  = NULL;
@@ -2090,6 +2098,11 @@ int TransformBuffer(filter_func_T filter, void *argp)
     return TransformRegion(filter, argp);
 }
 
+
+/*====================================================================*/
+/* The (static) filter functions which do the actual work:            */
+/*====================================================================*/
+
 static char  *filter_test_00(CONST char *rstart, CONST char *rtext, void *argp)
 {
     char  *res  = NULL;
@@ -2132,8 +2145,7 @@ static char  *filter_test(CONST char *rstart, CONST char *rtext, void *argp)
 
 static int  dsplen(CONST char *s)
 {
-    int       res = 0;
-    CONST int tw  = 8;
+    int res = 0;
 
     if ( NULL == s )  {
         return 0;
@@ -2142,7 +2154,9 @@ static int  dsplen(CONST char *s)
     for ( ; '\0' != *s; s++ ) {
         switch ( *s ) {
             case '\t':
-                res = (res / tw + 1) * tw;
+                if ( 0 < tabsize )  {
+                    res = (res / tabsize + 1) * tabsize;
+                }
                 break;
             default:
                 res++;
@@ -2404,6 +2418,143 @@ static char *filter_fill(CONST char *rstart, CONST char *rtext, void *argp)
     return res;
 }
 
+static char *filter_indent(CONST char *rstart, CONST char *rtext, void *argp)
+/*
+ * Indent the region:
+ *
+ * IF '\r' is NOT followd by <white space> OPT '\r' THEN
+ *   IF 0 < stabsize THEN
+ *     Replace '\r' ---> '\r' + stabsize x ' '
+ *   ELSE
+ *     Replace '\r' ---> '\r' + '\t'
+ *   ENDIF
+ * ENDIF
+ *
+ * argp (IF NOT NULL) points to an integer containing the number on indents.
+ */
+#define filter_indent_do_indent_(cp)  do  {                         \
+    char  *sp_  = (cp);                                             \
+    char  *np_   = sp_ + 1;                                         \
+                                                                    \
+    while ( isspace(*np_) )  np_++;                                 \
+    if ( *np_ && '\r' != *np_ ) {                                   \
+        if ( !((curbp->b_mode & MDCMOD) && ('#' == *(sp_ + 1))) ) { \
+            int j_ = 0;                                             \
+                                                                    \
+            for ( j_ = 0; j_ < count; j_++ )  {                     \
+                if ( 0 < stabsize ) {                               \
+                    int i_ = 0;                                     \
+                                                                    \
+                    for ( i_ = 0; i_ < stabsize; i_++ ) {           \
+                        res = astrcatc(res, ' ');                   \
+                    }                                               \
+                } else {                                            \
+                    res = astrcatc(res, '\t');                      \
+                }                                                   \
+            }                                                       \
+        }                                                           \
+    }                                                               \
+} while ( 0 )
+{
+    char  *res  = xstrdup("");  /* Reformatted region */
+    char  *cp   = rtext;
+    int   count = 1;
+
+    ASRT(NULL != rtext);
+
+    if ( NULL != argp ) {
+        count = *(int *)argp;
+
+        if ( 0 >= count ) {
+            return astrcat(res, cp);
+        }
+    }
+
+    if ( ! (rstart && *rstart) )  {
+        filter_indent_do_indent_(cp);
+    }
+    for ( ; *cp; cp++ ) {
+        res = astrcatc(res, *cp);
+
+        if ( '\r' == *cp )  {
+            filter_indent_do_indent_(cp);
+        }
+    }
+
+    return res;
+}
+#undef  filter_indent_do_indent_
+
+
+static char *filter_undent(CONST char *rstart, CONST char *rtext, void *argp)
+/*
+ * undent the region:
+ *
+ * IF 0 < stabsize THEN
+ *   Replace '\r' + stabsize x ' '  ---> '\r'
+ * ELSE
+ *   Replace '\r' + '\t'            ---> '\r'
+ * ENDIF
+ *
+ * argp (IF NOT NULL) points to an integer containing the number on undents.
+ */
+#define filter_undent_do_undent_(pcp)  do  {                    \
+    char  **sp_ = (pcp);                                        \
+    char  *cp_  = *sp_;                                         \
+    int   j_    = 0;                                            \
+                                                                \
+    for ( j_ = 0; j_ < count; j_++ )  {                         \
+        if ( 0 < stabsize ) {                                   \
+            int i_ = 0;                                         \
+                                                                \
+            for ( i_ = 0; i_ < stabsize; i_++ ) {               \
+                if ( ' ' == *cp_ )  {                           \
+                    cp_++;                                      \
+                }                                               \
+            }                                                   \
+        } else {                                                \
+            if ( '\t' == *cp_ )  {                              \
+                cp_++;                                          \
+            }                                                   \
+        }                                                       \
+    }                                                           \
+    *sp_  = cp_;                                                \
+} while ( 0 )
+{
+    char  *res  = xstrdup("");  /* Reformatted region */
+    char  *cp   = rtext;
+    int   count = 1;
+
+    ASRT(NULL != rtext);
+
+    if ( NULL != argp ) {
+        count = *(int *)argp;
+
+        if ( 0 >= count ) {
+            return astrcat(res, cp);
+        }
+    }
+
+    if ( ! (rstart && *rstart) )  {
+        filter_undent_do_undent_(&cp);
+    }
+    while ( *cp ) {
+        res = astrcatc(res, *cp);
+
+        if ( '\r' == *cp++ )  {
+            filter_undent_do_undent_(&cp);
+        }
+    }
+
+    return res;
+}
+#undef  filter_undent_do_undent_
+
+
+/*====================================================================*/
+/* The actual transormation routines:                                 */
+/*====================================================================*/
+
 int PASCAL NEAR trRegFill(f, n)
 
 int f, n;     /* argument flag and num */
@@ -2428,6 +2579,56 @@ int f, n;     /* argument flag and num */
     /*===============================================================*/
 
     return TransformRegion(&filter_fill, &n);
+}
+
+int PASCAL NEAR trRegIndent(f, n)
+
+int f, n;     /* argument flag and numeric repeat count */
+
+{
+    if ( f == FALSE ) {
+        n = 1;
+    }
+
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformRegion(&filter_indent, &n);
+}
+
+int PASCAL NEAR trRegUndent(f, n)
+
+int f, n;     /* argument flag and numeric repeat count */
+
+{
+    if ( f == FALSE ) {
+        n = 1;
+    }
+
+    /*===============================================================*/
+    /* Don't do this command in read-only mode */
+    if ( curbp->b_mode&MDVIEW ) {
+        return ( rdonly() );
+    }
+
+    /* flag this command as a kill */
+    if ( (lastflag & CFKILL) == 0 ) {
+        next_kill();
+    }
+    thisflag |= CFKILL;
+    /*===============================================================*/
+
+    return TransformRegion(&filter_undent, &n);
 }
 
 int PASCAL NEAR trRegTest_(f, n)

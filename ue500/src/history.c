@@ -2580,6 +2580,10 @@
  *           by an undo.
  *        o With a numeric argument one can specify a first line parindent.
  *      - Similar functions tr(Reg|Buf)Fill with user functions fill-(region|buffer).
+ *	12 Nov 2021 Joachim Schneider
+ *      - indent_region/undent_region work now with '\t' or spaces depending on
+ *        $softtab (i.e. stabsize) setting.
+ *      - indent_region and undent_region are undoable now.
  */
 
 
