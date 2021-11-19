@@ -337,12 +337,7 @@ int ch;                                 /* Character to add     */
 /*
  * qrep - replace a key sequence with a single character in the input buffer.
  */
-# if PROTO
-VOID qrep(int ch)
-# else
-VOID qrep(ch)
-int ch;
-# endif
+VOID qrep P1_(int ch)
 {
     inbuft = inbuf;
     qin(ch);

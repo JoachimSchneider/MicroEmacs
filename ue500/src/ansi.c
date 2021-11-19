@@ -15,19 +15,11 @@
 
 #if     ANSI
 
-# if     PROTO
-int PASCAL NEAR fnclabel(int f, int n);
-int PASCAL NEAR readparam(int *v);
-void PASCAL NEAR dobbnmouse(void);
-void PASCAL NEAR docsi(int oh);
-void PASCAL NEAR ttputs(char *string);
-# else
-int PASCAL NEAR fnclabel();
-int PASCAL NEAR readparam();
-void PASCAL NEAR dobbnmouse();
-void PASCAL NEAR docsi();
-void PASCAL NEAR ttputs();
-# endif
+extern int PASCAL NEAR fnclabel DCL((int f, int n));
+extern int PASCAL NEAR readparam DCL((int *v));
+extern VOID PASCAL NEAR dobbnmouse DCL((void));
+extern VOID PASCAL NEAR docsi DCL((int oh));
+extern VOID PASCAL NEAR ttputs DCL((char *string));
 
 # if VMS
 #  include ttdef
@@ -217,14 +209,7 @@ PASCAL NEAR ansicres()  /* change screen resolution */
     return (TRUE);
 }
 
-# if     PROTO
-PASCAL NEAR spal(char *dummy)           /* change pallette settings */
-# else
-PASCAL NEAR spal(dummy)         /* change pallette settings */
-
-char *dummy;
-# endif
-
+PASCAL NEAR spal P1_(char *dummy)   /* change pallette settings */
 {
     /* none for now */
 }

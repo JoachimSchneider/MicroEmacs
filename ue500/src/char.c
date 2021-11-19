@@ -18,10 +18,7 @@
  * itself).
  */
 
-int PASCAL NEAR is_letter(ch)
-
-register char ch;
-
+int PASCAL NEAR is_letter P1_(char ch)
 {
     return ( is_upper(ch) || is_lower(ch) );
 }
@@ -30,10 +27,7 @@ register char ch;
  * lower to uppercase translation table.
  */
 
-int PASCAL NEAR is_lower(ch)
-
-register char ch;
-
+int PASCAL NEAR is_lower P1_(char ch)
 {
     return (lowcase[ch & 255] != 0);
 }
@@ -42,10 +36,7 @@ register char ch;
  * upper to lowercase translation table.
  */
 
-int PASCAL NEAR is_upper(ch)
-
-register char ch;
-
+int PASCAL NEAR is_upper P1_(char ch)
 {
     return (upcase[ch & 255] != 0);
 }
@@ -95,15 +86,8 @@ unsigned char *cp;      /* ptr to character to lowercase */
         *cp = upcase[*cp & 255];
 }
 
-#if     PROTO
-int PASCAL NEAR upperc(char ch) /* return the upper case equivalant of a
-                                 * character */
-#else
-int PASCAL NEAR upperc(ch)      /* return the upper case equivalant of a
-                                 * character */
-
-unsigned char ch;       /* character to get uppercase euivalant of */
-#endif
+int PASCAL NEAR upperc P1_(char ch) /* return the upper case equivalant of
+                                     * character ch */
 {
     if ( is_lower(ch) )
         return (lowcase[ch & 255]);
@@ -111,15 +95,8 @@ unsigned char ch;       /* character to get uppercase euivalant of */
         return (ch);
 }
 
-#if     PROTO
-int PASCAL NEAR lowerc(char ch) /* return the lower case equivalant of a
-                                 * character */
-#else
-int PASCAL NEAR lowerc(ch)      /* return the lower case equivalant of a
-                                 * character */
-
-unsigned char ch;       /* character to get lowercase equivalant of */
-#endif
+int PASCAL NEAR lowerc P1_(char ch) /* return the lower case equivalant of
+                                     * character ch */
 {
     if ( is_upper(ch) )
         return (upcase[ch & 255]);

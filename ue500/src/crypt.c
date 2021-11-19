@@ -10,11 +10,7 @@
 
 #if     CRYPT
 
-# if     PROTO
-static int PASCAL NEAR mod95(int);
-# else
-static int PASCAL NEAR mod95();
-# endif
+static int PASCAL NEAR mod95 DCL((int));
 
 int PASCAL NEAR setekey(f, n)   /* reset encryption key of current buffer */
 

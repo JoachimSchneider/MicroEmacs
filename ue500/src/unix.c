@@ -615,12 +615,7 @@ unsigned char grabnowait()
 /*
  * qin - queue in a character to the input buffer.
  */
-# if PROTO
-VOID qin(int ch)
-# else
-VOID qin(ch)
-int ch;
-# endif
+VOID qin P1_(int ch)
 {
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
@@ -637,12 +632,7 @@ int ch;
 /*
  * qrep - replace a key sequence with a single character in the input buffer.
  */
-# if PROTO
-VOID qrep(int ch)
-# else
-VOID qrep(ch)
-int ch;
-# endif
+VOID qrep P1_(int ch)
 {
     inbuft = inbuf;
     qin(ch);
@@ -2003,6 +1993,8 @@ void winch_changed(int signo)
 
 void winch_new_size()
 {
+    extern VOID winch_vtresize(int rows, int cols);
+
     EWINDOW *wp;
     struct winsize win;
 

@@ -575,13 +575,7 @@ int f, n;       /* default flag and numeric argument */
 /*  pop up the indicated buffer
  */
 
-#if     PROTO
-int PASCAL NEAR wpopup(BUFFER *popbuf)
-#else
-int PASCAL NEAR wpopup(popbuf)
-
-BUFFER *popbuf;
-#endif
+int PASCAL NEAR wpopup P1_(BUFFER *popbuf)
 {
     register EWINDOW *wp;
     register BUFFER *bp;

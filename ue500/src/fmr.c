@@ -66,22 +66,13 @@ KEYDEF newtab[NUMFKEYS] =
 union REGS rg;          /* cpu register for use of DOS calls */
 struct SREGS sg;        /* cpu segment registers         */
 
-# if     PROTO
-int PASCAL NEAR fnclabel(int f, int n);
-int PASCAL NEAR readparam(int *v);
-void PASCAL NEAR dobbnmouse(void);
-void PASCAL NEAR docsi(int oh);
-void PASCAL NEAR ttputs(char *string);
-void PASCAL NEAR charwrite(int row, char *outstr, int forg, int left,
-                           int right);
-# else
-int PASCAL NEAR fnclabel();
-int PASCAL NEAR readparam();
-void PASCAL NEAR dobbnmouse();
-void PASCAL NEAR docsi();
-void PASCAL NEAR ttputs();
-void PASCAL NEAR charwrite();
-# endif
+extern int PASCAL NEAR fnclabel DCL((int f, int n));
+extern int PASCAL NEAR readparam DCL((int *v));
+extern VOID PASCAL NEAR dobbnmouse DCL((void));
+extern VOID PASCAL NEAR docsi DCL((int oh));
+extern VOID PASCAL NEAR ttputs DCL((char *string));
+extern VOID PASCAL NEAR charwrite DCL((int row, char *outstr, int forg,
+                                       int left, int right));
 
 # define NROW    24                     /* Screen size.                 */
 # define NCOL    80                     /* Edit if you want to.         */

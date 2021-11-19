@@ -8,10 +8,8 @@
 #include        "edef.h"
 #include        "elang.h"
 
-VOID PASCAL NEAR ab_save(c)
-
-char c;         /* character to add to current word buffer */
-
+VOID PASCAL NEAR ab_save P1_(char c)
+/* c: character to add to current word buffer */
 {
     char *s;            /* ptr to cycle chars */
 
@@ -222,7 +220,7 @@ int f, n;        /* prefix flag and argument */
 {
     register BUFFER *bp;        /* ptr to buffer to dump */
     register LINE *lp;          /* ptr to current line in our buffer */
-    register llength;           /* length of the current line being examined */
+    register int llength;       /* length of the current line being examined */
     char cur_sym[MAXSYM+1];     /* current symbol being defined */
     char cur_exp[NSTRING];      /* current expansion */
 
@@ -262,6 +260,8 @@ int f, n;        /* prefix flag and argument */
         /* on to the next pair */
         lp = lforw(lp);
     }
+
+    return TRUE;
 }
 
 VOID PASCAL NEAR ab_init()

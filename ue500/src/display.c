@@ -25,19 +25,14 @@ static VIDEO   **pscreen;                      /* Physical screen. */
 
 /*  some local function declarations    */
 
-#if     PROTO
-# if     MEMMAP
-extern VOID PASCAL NEAR update_line(int row, struct VIDEO *vp1);
-# else
-extern VOID PASCAL NEAR update_line(int          row,
-                                    struct VIDEO *vp1,
-                                    struct VIDEO *vp2);
-# endif
-extern VOID PASCAL NEAR update_hilite(void);
+#if     MEMMAP
+extern VOID PASCAL NEAR update_line DCL((int row, struct VIDEO *vp1));
 #else
-extern VOID PASCAL NEAR update_line();
-extern VOID PASCAL NEAR update_hilite();
+extern VOID PASCAL NEAR update_line DCL((int          row,
+                                         struct VIDEO *vp1,
+                                         struct VIDEO *vp2));
 #endif
+extern VOID PASCAL NEAR update_hilite DCL((void));
 
 /*
  * Initialize the data structures used by the display code. The edge vectors
@@ -257,7 +252,7 @@ int PASCAL NEAR vtsizescr(SCREEN_T *sp, int nrow, int ncol)
  * system prompt will be written in the line). Shut down the channel to the
  * terminal.
  */
-int PASCAL NEAR vttidy()
+VOID PASCAL NEAR vttidy()
 {
     mlerase();
     movecursor(term.t_nrow, 0);
@@ -271,7 +266,7 @@ int PASCAL NEAR vttidy()
  * There is no checking for nonsense values; this might be a good idea during
  * the early stages.
  */
-int PASCAL NEAR vtmove(row, col)
+VOID PASCAL NEAR vtmove(row, col)
 
 int row, col;
 
@@ -287,7 +282,7 @@ int row, col;
  * checked.
  */
 
-int PASCAL NEAR vtputc(c)
+VOID PASCAL NEAR vtputc(c)
 
 int c;
 
@@ -344,7 +339,7 @@ int c;
  * Erase from the end of the software cursor to the end of the line on which the
  * software cursor is located.
  */
-int PASCAL NEAR vteeol()
+VOID PASCAL NEAR vteeol()
 {
     register VIDEO      *vp;
 
@@ -488,12 +483,12 @@ int force;      /* force update past type ahead? */
     upddex();
 
     /* if screen is garbage, re-plot it */
-    if ( sgarbf != FALSE )
+    if ( sgarbf != FALSE )  {
         if ( gflags & GFSDRAW )
             sgarbf = FALSE;
         else
             updgar();
-
+    }
 
     /* update the virtual screen to the physical screen */
     updupd(force);
@@ -1019,13 +1014,7 @@ VOID PASCAL NEAR update_size()
  * command.
  */
 
-#if     PROTO
-int PASCAL NEAR pop(BUFFER *popbuf)
-#else
-int PASCAL NEAR pop(popbuf)
-
-BUFFER *popbuf;
-#endif
+int PASCAL NEAR pop P1_(BUFFER *popbuf)
 {
     register int index;         /* index into the current output line */
     register int llen;          /* length of the current output line */
@@ -1879,17 +1868,9 @@ va_dcl          /* variable argument list arg1 = format string arg2+ = arguments
     va_end(ap);
 }
 # else
-#  if PROTO
-VOID CDECL NEAR mlwrite(char *fmt, ...)
-/* char * fmt;*/
-#  else
-VOID CDECL NEAR mlwrite()
-char *fmt;
-#  endif
-
+VOID CDECL NEAR mlwrite V2_(char *fmt, ...)
 /* variable argument list arg1 = format string arg2+ = arguments in that string
  */
-
 {
     register int c;             /* current char in format string */
     va_list ap;                 /* ptr to current data field */
@@ -2187,7 +2168,7 @@ int s;  /* scaled integer to output */
 }
 
 #if HANDLE_WINCH
-winch_vtresize(rows, cols)
+VOID winch_vtresize(rows, cols)
 int rows, cols;
 {
     int i;

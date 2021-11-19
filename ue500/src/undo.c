@@ -18,15 +18,10 @@
 
 /* insert an editing operation at the top of the current buffer's undo stack. */
 
-#if     PROTO
-VOID undo_insert(OPTYPE op_type, long count, OBJECT op_erand)
-#else
-VOID undo_insert(op_type, count, op_erand)
-
-OPTYPE op_type;         /* type of operation being recorded */
-long count;             /* operand count */
-OBJECT op_erand;        /* the operand of the operation */
-#endif
+VOID undo_insert P3_(OPTYPE op_type,  /* type of operation being recorded */
+                     long count,      /* operand count                    */
+                     OBJECT op_erand  /* the operand of the operation     */
+                  )
 {
     int undo_size;      /* size of the undo object */
     UNDO_OBJ *up;       /* ptr to a newly allocated undo object */
@@ -105,11 +100,7 @@ OBJECT op_erand;        /* the operand of the operation */
 /* reverse the editing operation at the top of the current buffer's undo stack.
  */
 
-#if     PROTO
-int undo_op(void)
-#else
-int undo_op()
-#endif
+int undo_op P0_(void)
 {
     OPTYPE op_type;             /* type of operation being recorded */
     UNDO_OBJ *up;               /* ptr to the undo object */
@@ -381,11 +372,7 @@ int PASCAL NEAR undolist()
 
 /* clear ALL the undo stacks */
 
-#if     PROTO
-VOID undo_dump(void)
-#else
-VOID undo_dump()
-#endif
+VOID undo_dump P0_(void)
 {
     BUFFER *bp;
 
@@ -401,13 +388,7 @@ VOID undo_dump()
  * information and retry
  */
 
-#if     PROTO
-VOID *room(int nbytes)
-#else
-VOID *room(nbytes)
-
-int nbytes;     /* number of bytes to malloc() */
-#endif
+char *room P1_(int nbytes /* number of bytes to malloc() */)
 {
     void *ptr;          /* temporary pointer */
     BUFFER *bp;         /* buffer to dealloc memory from */
@@ -460,14 +441,7 @@ nextbuf:        bp = getoldb();
  * information and retry
  */
 
-#if     PROTO
-VOID *reroom(void *orig_ptr, int nbytes)
-#else
-VOID *reroom(orig_ptr, nbytes)
-
-int nbytes;     /* number of bytes to malloc() */
-void *orig_ptr;
-#endif
+char *reroom P2_(void *orig_ptr, int nbytes /* number of bytes to malloc() */)
 {
     void *ptr;          /* temporary pointer */
     BUFFER *bp;         /* buffer to dealloc memory from */

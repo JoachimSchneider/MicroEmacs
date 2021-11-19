@@ -1085,14 +1085,9 @@ int f, n;       /* agruments to C function */
 
 /* set a KEYTAB to the given name of the given type */
 
-#if     PROTO
-int set_key(KEYTAB *key, char *name)
-#else
-set_key(key, name)
-
-KEYTAB *key;            /* ptr to key to set */
-char *name;             /* name of function or buffer */
-#endif
+int set_key P2_(KEYTAB *key,  /* ptr to key to set          */
+                char *name    /* name of function or buffer */
+              )
 {
     int (PASCAL NEAR *ktemp)();         /* temp function pointer to assign */
     register BUFFER *kmacro;            /* ptr to buffer of macro to bind to key

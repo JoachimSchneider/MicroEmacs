@@ -464,10 +464,7 @@ int PASCAL NEAR inword()
     return ( isinword( lgetc(curwp->w_dotp, get_w_doto(curwp)) ) );
 }
 
-int PASCAL NEAR isinword(c)
-
-char c;
-
+int PASCAL NEAR isinword P1_(char c)
 {
     /* if we are using the table.... */
     if ( wlflag )

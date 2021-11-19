@@ -180,12 +180,7 @@ int f, n;       /* default flag and numeric argument */
  * linstr -- Insert a string at the current point
  */
 
-#if PROTO
-int PASCAL NEAR linstr(CONST char *instr)
-#else
-int PASCAL NEAR linstr(instr)
-CONST char *instr;
-#endif
+int PASCAL NEAR linstr P1_(CONST char *instr)
 {
     register int status;
     register int saved_undo;            /* saved undo flag */
@@ -225,15 +220,7 @@ CONST char *instr;
  * errors.
  */
 
-#if     PROTO
-int PASCAL NEAR linsert(int n, char c)
-#else
-int PASCAL NEAR linsert(n, c)
-
-int n;
-char c;
-#endif
-
+int PASCAL NEAR linsert P2_(int n, char c)
 {
     register char     *cp1;
     register char     *cp2;
@@ -351,14 +338,7 @@ char c;
  *
  */
 
-#if     PROTO
-int PASCAL NEAR lowrite(char c)
-#else
-int PASCAL NEAR lowrite(c)
-
-char c;         /* character to overwrite on current position */
-#endif
-
+int PASCAL NEAR lowrite P1_(char c /* character to overwrite on current position */)
 {
     if ( get_w_doto(curwp) < get_lused(curwp->w_dotp) &&
          ( (lgetc(curwp->w_dotp, get_w_doto(curwp)) != '\t' || tabsize == 0) ||
@@ -723,13 +703,7 @@ int kflag;      /* put killed text in kill buffer flag */
 /* getctext:    grab and return a string with the text of the current line
  */
 
-#if PROTO
-char *PASCAL NEAR getctext(char *rline)
-#else
-char *PASCAL NEAR getctext(rline)
-char *rline;
-#endif
-
+char *PASCAL NEAR getctext P1_(char *rline)
 {
     register LINE *lp;          /* line to copy */
     register int size;          /* length of line to return */
@@ -904,14 +878,9 @@ int PASCAL NEAR ldelnewline()
  * non-displayed buffers as well!
  */
 
-#if     PROTO
-int PASCAL NEAR addline(BUFFER *bp, char *text)
-#else
-int PASCAL NEAR addline(bp, text)
-
-BUFFER *bp;     /* buffer to add text to */
-char *text;     /* line to add */
-#endif
+int PASCAL NEAR addline P2_(BUFFER *bp, /* buffer to add text to  */
+                            char *text  /* line to add            */
+                          )
 {
     register LINE   *lp;
     register int i;
@@ -997,15 +966,9 @@ VOID PASCAL NEAR next_kill()
  * Return TRUE if all is well, and FALSE on errors.
  */
 
-#if     PROTO
-int PASCAL NEAR kinsert(int direct, char c)
-#else
-int PASCAL NEAR kinsert(direct, c)
-
-int direct;     /* direction (FORWARD/REVERSE) to insert characters */
-char c;         /* character to insert in the kill buffer */
-#endif
-
+int PASCAL NEAR kinsert P2_(int direct, /* direction (FORWARD/REVERSE) to insert characters */
+                            char c      /* character to insert in the kill buffer           */
+                          )
 {
     KILL *nchunk;       /* ptr to newly roomed chunk */
 
