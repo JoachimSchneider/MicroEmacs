@@ -1,23 +1,24 @@
-/*  This file is for functions having to do with key bindings, descriptions,
+/*
+ * This file is for functions having to do with key bindings, descriptions,
  * help commands and startup file.
  *
  *       written 11-feb-86 by Daniel Lawrence
  */
 
-#include        <stdio.h>
-#include    <stdlib.h>
-#include        "estruct.h"
-#include        "eproto.h"
-#include        "edef.h"
-#include        "elang.h"
-#include        "epath.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include "estruct.h"
+#include "eproto.h"
+#include "edef.h"
+#include "elang.h"
+#include "epath.h"
 
-int PASCAL NEAR help(f, n)      /* give me some help!!!!!
-                                 *  bring up a fake buffer and read the help
-                                 * file into it with view mode          */
 
-int f, n;        /* prefix flag and argument */
-
+/* give me some help!!!!!
+ *  bring up a fake buffer and read the help
+ * file into it with view mode
+ */
+int PASCAL NEAR help P2_(int f, int n /* prefix flag and argument */)
 {
     register BUFFER *bp;        /* buffer pointer to help */
     CONST char      *fname;     /* file name of help file */
@@ -903,16 +904,9 @@ KEYTAB *key;    /* key binding to return a name of */
 }
 
 /* fncmatch:    match fname to a function in the names table and return any
- * match or NULL if none */
-
-#if     MSC
-int ( PASCAL NEAR *PASCAL NEAR fncmatch(char *fname) )(void)
-#else
-int ( PASCAL NEAR *PASCAL NEAR fncmatch(fname) )()
-
-char *fname;    /* name to attempt to match */
-#endif
-
+ * match or NULL if none
+ */
+ue_fnc_T fncmatch P1_(char *fname)
 {
     int nval;
 
@@ -1127,3 +1121,8 @@ int set_key P2_(KEYTAB *key,  /* ptr to key to set          */
     return (FALSE);
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

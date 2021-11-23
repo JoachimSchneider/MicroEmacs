@@ -466,21 +466,23 @@ int PASCAL NEAR inword()
 
 int PASCAL NEAR isinword P1_(char c)
 {
+#define c_  C2I(c)
     /* if we are using the table.... */
     if ( wlflag )
-        return (wordlist[c]);
+        return (wordlist[c_]);
 
     /* else use the default hard coded check */
-    if ( is_letter(c) )
+    if ( is_letter(c_) )
         return (TRUE);
 
-    if ( c>='0' && c<='9' )
+    if ( '0' <= c_ && c_ <= '9' )
         return (TRUE);
 
-    if ( c == '_' )
+    if ( c_ == '_' )
         return (TRUE);
 
     return (FALSE);
+#undef c_
 }
 
 

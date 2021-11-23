@@ -1,21 +1,26 @@
 /*
- * The routines in this file provides support for  vi-like tagging of defined
- * identifiers.  We presuppose the "tags" file in the current directory
- * (constructed by 'ctags' or 'etags'), with each entry on the following format:
+ * The routines in this file provides support for  vi-like tagging
+ * of defined identifiers.  We presuppose the "tags" file in the
+ * current directory (constructed by 'ctags' or 'etags'), with each
+ * entry on the following format:
  *
- *   identifier<tab>file<tab>vi-search-pattern
+ *	 identifier<tab>file<tab>vi-search-pattern
  *
  * Code will be generated if both  MAGIC and CTAGS  is wanted.
- *                          880826mhs 890622mhs Changed code so as to take
- * advantage of the new FAST search routine i.e. we do not use the MAGIC search.
- * Also implemented indexing of the "tags" file to reduce the time used when
- * tagging is performed more than once.  Moreover, we now support tagging of
- * file(s) other than those in the current directory.  We automatically locates
- * the correct "tags" and records its vital info (only the first time it's
- * referenced!!).
- * 890627mhs Added possibility to be prompted for word to tag.  You will be
- * prompted if you execute the tag-word function whenever dot is not within a
- * word.
+ *							880826mhs
+ *
+ * 890622mhs
+ * Changed code so as to take advantage of the new FAST search routine
+ * i.e. we do not use the MAGIC search.
+ * Also implemented indexing of the "tags" file to reduce the time used
+ * when tagging is performed more than once.  Moreover, we now support
+ * tagging of file(s) other than those in the current directory.  We
+ * automatically locates the correct "tags" and records its vital info
+ * (only the first time it's referenced!!).
+ *
+ * 890627mhs
+ * Added possibility to be prompted for word to tag.  You will be prompted
+ * if you execute the tag-word function whenever dot is not within a word.
  */
 
 #include <stdio.h>
@@ -27,11 +32,6 @@
 # include "elang.h"
 
 static char SVER[] = "@(#) %M% %I% %H%";
-
-# ifdef  min
-#  undef min
-# endif
-# define min(x, y)       ( (x) <= (y) ? (x) : (y) )
 
 # define INDEX(c)        ( is_lower(c) ? c-'a'+ \
                            27 : ( is_letter(c) ? c-'A'+ \
@@ -64,8 +64,7 @@ static TAG *curtp = NULL;       /* Currently in-use 'tags'. */
  * are succesfull.
  */
 
-newtags(path)
-char path[NFILEN];
+static int newtags P1_(char path[NFILEN])
 {
     register TAG    *tnewp;
     register int i = NINDEXES;
@@ -101,13 +100,14 @@ char path[NFILEN];
  * Look-up 'tags' file; first in our list and if it isn't there try it the hard
  * way.  If we find the file we return TRUE.
  */
-
-lookup()
+static int lookup P0_(void)
 {
-    TAG             *tmp = curtp;       /* Remember current 'tags'  */
-    char cpath[NFILEN];                 /* Path of current file     */
-    register char   *cp;        /* Auxiliary pointer        */
-    register int nope = TRUE;           /* True if 'tags' is unknown    */
+    TAG           *tmp  = curtp;  /* Remember current 'tags'  */
+    char          cpath[NFILEN];  /* Path of current file     */
+    register char *cp   = NULL;   /* Auxiliary pointer        */
+    register int  nope  = TRUE;   /* True if 'tags' is unknown    */
+
+    ZEROMEM(cpath);
 
     cp = curbp->b_fname + strlen(curbp->b_fname) - 1;
 # if     MSDOS
@@ -171,15 +171,12 @@ VOID fix_index()
  * Put the rest of the characters of the current word at '.' in str (but maximum
  * lmax characters).  '.' is preserved.
  */
-
-restword(str, lmax)
-char *str;
-int lmax;
+static int restword P2_(char *str, int lmax)
 {
-    register int i;
-    register int go_on = TRUE;
-    register LINE *dotp = curwp->w_dotp;        /* Preserve '.' info    */
-    register int doto = get_w_doto(curwp);      /* Preserve '.' info    */
+    register int  i     = 0;
+    register int  go_on = TRUE;
+    register LINE *dotp = curwp->w_dotp;      /* Preserve '.' info  */
+    register int  doto  = get_w_doto(curwp);  /* Preserve '.' info  */
 
     for ( i = 0; go_on && i < lmax - 1 && inword(); i++ ) {
         str[i] = lgetc(curwp->w_dotp, get_w_doto(curwp));
@@ -199,11 +196,7 @@ int lmax;
  * which normally don't consider '_' part of a word.  You might want to change
  * inword() in order to obtain satisfactory results from this code (I did).
  */
-
-backupword(f, n)
-
-int f, n;
-
+static int backupword(int f, int n)
 {
     while ( inword() )
         if ( backchar(FALSE, 1) == FALSE )
@@ -223,9 +216,7 @@ int f, n;
  * of the new FAST search routine, we have to remove the pattern anchoring (^
  * and $) and search direction characters (? or /)
  */
-
-alterpattern(pattern)
-register char pattern[];
+static int alterpattern P1_(register char pattern[])
 {
     register int i = 0;         /* EMACS pattern index  */
     register int j = 1;         /* VI pattern -skip /or?*/
@@ -242,7 +233,7 @@ register char pattern[];
             pattern[i++] = pattern[++j];
 
 
-    pattern[min(i, NPAT/2)] = '\0';     /* Terminate pattern string */
+    pattern[MIN2(i, NPAT/2)] = '\0';  /* Terminate pattern string */
 
     return (TRUE);
 }
@@ -290,9 +281,7 @@ char *filename;
  * prevent loosing the return information.
  */
 
-tagger(errmsg, retag)
-char *errmsg;
-int retag;
+int tagger P2_(char *errmsg, int retag)
 {
     char tagf[NFILEN];          /* File of tagged word  */
     char pretagpat[NPAT];               /* Search pattern prior */
@@ -489,3 +478,8 @@ tagshello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -6,7 +6,9 @@
 #include "estruct.h"
 #include "eproto.h"
 #include "elang.h"
-
+#if  ( IS_UNIX() )
+# include <unistd.h>
+#endif
 
 #if ( FILOCK && WMCS )
 /* file locking for WMCS */
@@ -18,8 +20,7 @@
 char msg[] = TEXT35;
 /*           "another user" */
 
-char *dolock(fname)
-CONST char *fname;
+char *dolock P1_(CONST char *fname)
 {
     int lun, status;
     status = _open(fname, OPREADACC|OPWRITEACC|OPWRITELOCK, -1, &lun);
@@ -28,8 +29,7 @@ CONST char *fname;
     return (msg);
 }
 
-char *undolock(fname)
-CONST char *fname;
+char *undolock P1_(CONST char *fname)
 {
     int i, j, k, lun, status;
     char xname[95], c;
@@ -104,13 +104,12 @@ extern int errno;
  * locking the file if other error, returns "LOCK ERROR: explanation"
  *
  *********************/
-
-char *parse_name(filespec)  /* get name component of filespec */
-char *filespec;
+ 
+/* get name component of filespec:  */
+static CONST char *parse_name P1_(CONST char *filespec)
 {
-    char *rname;
+    CONST char  *rname  = &filespec[strlen(filespec) - 1];
 
-    rname = &filespec[strlen(filespec) - 1];
     while ( rname >= filespec ) {
         if ( *rname == DIRSEPCHAR || *rname == DRIVESEPCHAR ) {
             ++rname;
@@ -127,11 +126,10 @@ char *filespec;
         return (filespec);
 }
 
-char *parse_path(filespec)
-char *filespec;
+static char *parse_path P1_(CONST char *filespec)
 {
     static char rbuff[NFILEN];
-    char *rname;
+    char        *rname  = NULL;
 
     /* make a copy we can mung */
     xstrcpy(rbuff, filespec);
@@ -171,11 +169,10 @@ char *filespec;
     return (rbuff);
 }
 
-char *parse_drive(filespec)
-char *filespec;
+static CONST char *parse_drive P1_(CONST char *filespec)
 {
     static char rbuff[NFILEN];
-    char *rname;
+    char        *rname  = NULL;
 
     /* search for a drive specifier */
     xstrcpy(rbuff, filespec);
@@ -193,9 +190,8 @@ char *filespec;
     return ("");
 }
 
-VOID term_trim(buf)   /* trim line terminators and whitespace from end of string
-                       */
-char *buf;
+/* trim line terminators and whitespace from end of string  */
+static VOID term_trim P1_(char *buf)
 {
     char *c;  /* ptr to current character to examine */
 
@@ -209,8 +205,7 @@ char *buf;
     return;
 }
 
-char *dolock(filespec)
-CONST char *filespec;   /* full file spec of file to lock */
+char *dolock P1_(CONST char *filespec /* full file spec of file to lock */)
 {
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
@@ -421,8 +416,7 @@ CONST char *filespec;   /* full file spec of file to lock */
  *
  *********************/
 
-char *undolock(filespec)
-CONST char *filespec;     /* filespec to unlock */
+char *undolock P1_(CONST char *filespec /* filespec to unlock */)
 {
     char filename[NFILEN];          /* name of file to lock */
     char pathname[NFILEN];          /* path leading to file to lock */
@@ -476,7 +470,7 @@ CONST char *filespec;     /* filespec to unlock */
 
 
 #else
-dolhello()
+VOID dohello P0_(void)
 {
 }
 #endif

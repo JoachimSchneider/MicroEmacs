@@ -1,35 +1,44 @@
-/*  Input:  Various input routines for MicroEMACS written by Daniel Lawrence
- * (C)Copyright 1995 by Daniel M. Lawrence
+/* Input:  Various input routines for MicroEMACS
+ *         written by Daniel Lawrence
+ *         (C)Copyright 1995 by Daniel M. Lawrence
  *
- *       Notes:
+ * Notes:
  *
- *       MicroEMACS's kernel processes two distinct forms of characters.  One of
- * these is a standard unsigned character which is used in the edited text.  The
- * other form, called an EMACS Extended Character is a 2 byte value which
- * contains both an ascii value, and flags for certain prefixes/events.
+ * MicroEMACS's kernel processes two distinct forms of
+ * characters.  One of these is a standard unsigned character
+ * which is used in the edited text.  The other form, called
+ * an EMACS Extended Character is a 2 byte value which contains
+ * both an ascii value, and flags for certain prefixes/events.
  *
- *       Bit    Usage
- *       ---    -----
- *       0 -> 7 Standard 8 bit ascii character 8    Control key flag 9  META
- * prefix flag 10   ^X prefix flag 11   Function key flag 12    Mouse prefix 13 Shifted
- * flag (not needed on alpha shifted characters) 14 Alterate prefix (ALT key on
- * PCs)
+ * Bit     Usage
+ * ---     -----
+ * 0 -> 7  Standard 8 bit ascii character
+ * 8       Control key flag
+ * 9       META prefix flag
+ * 10      ^X prefix flag
+ * 11      Function key flag
+ * 12      Mouse prefix
+ * 13      Shifted flag (not needed on alpha shifted characters)
+ * 14      Alterate prefix (ALT key on PCs)
  *
- *       The machine dependent driver is responsible for returning a byte stream
- * from the various input devices with various prefixes/events embedded as
- * escape codes.  Zero is used as the value indicating an escape sequence is
- * next.  The format of an escape sequence is as follows:
+ * The machine dependent driver is responsible for returning
+ * a byte stream from the various input devices with various
+ * prefixes/events embedded as escape codes.  Zero is used as the
+ * value indicating an escape sequence is next.  The format of
+ * an escape sequence is as follows:
  *
- *       0      Escape indicator
- *       <prefix byte>  upper byte of extended character
- *       {<col><row>}   col, row position if the prefix byte indicated a mouse
- * event or a menu selection in which case these form a 16 bit menu ID
- *       <event code>   value of event
+ * 0               Escape indicator
+ * <prefix byte>   upper byte of extended character
+ * {<col><row>}    col, row position if the prefix byte
+ *                 indicated a mouse event or a menu selection
+ *                 in which case these form a 16 bit menu ID
+ * <event code>    value of event
  *
- *       A ^<space> sequence (0/1/32) is generated when an actual null is being
- * input from the control-space key under many unix systems.  These values are
- * then interpreted by get_key() to construct the proper extended character
- * sequences to pass to the MicroEMACS kernel.
+ * A ^<space> sequence (0/1/32) is generated when an actual
+ * null is being input from the control-space key under many
+ * unix systems.  These values are then interpreted by get_key()
+ * to construct the proper extended character sequences to pass
+ * to the MicroEMACS kernel.
  */
 
 #include        <stdio.h>
@@ -48,15 +57,13 @@ extern struct passwd *getpwnam();
  * ABORT. The ABORT status is returned if the user bumps out of the question
  * with a ^G. Used any time a confirmation is required.
  */
-
 #if     !WINDOW_MSWIN   /* for MS Windows, mlyesno is defined in mswsys.c */
-int PASCAL NEAR mlyesno(prompt)
-
-char *prompt;
-
+int PASCAL NEAR mlyesno P1_(char *prompt)
 {
-    int c;                      /* input character */
-    char buf[NPAT];             /* prompt to user */
+    int   c = 0;      /* input character */
+    char  buf[NPAT];  /* prompt to user */
+
+    ZEROMEM(buf);
 
     for (;; ) {
         /* build and prompt the user */
@@ -66,17 +73,14 @@ char *prompt;
         mlwrite(buf);
 
         /* get the response */
-        c = getcmd();           /* getcmd() lets us check for anything that
-                                 * might */
-                                /* generate a 'y' or 'Y' in case use screws up
-                                 */
-
-        if ( c == ectoc(abortc) )               /* Bail out! */
+        c = getcmd();   /* getcmd() lets us check for anything that might */
+                        /* generate a 'y' or 'Y' in case use screws up    */
+        if ( c == ectoc(abortc) )   /* Bail out! */
             return (ABORT);
 
         if ( (c == 'n') || (c == 'N')||
              ( c & (SPEC|ALTD|CTRL|META|CTLX|MOUS) ) )
-            return (FALSE);             /* ONLY 'y' or 'Y' allowed!!! */
+            return (FALSE);         /* ONLY 'y' or 'Y' allowed!!! */
 
 # if     FRENCH
         if ( c=='o' || c=='O' )
@@ -99,24 +103,15 @@ char *prompt;
  * full speed. The reply is always terminated by a carriage return. Handle
  * erase, kill, and abort keys.
  */
-
-int PASCAL NEAR mlreply(prompt, buf, nbuf)
-
-char *prompt;
-char *buf;
-int nbuf;
-
+int PASCAL NEAR mlreply P3_(char *prompt, char *buf, int nbuf)
 {
     return ( nextarg( prompt, buf, nbuf, ctoec( (int) '\r' ) ) );
 }
 
-/*  ectoc:  expanded character to character collapse the CTRL and SPEC flags
- * back into an ascii code   */
-
-int PASCAL NEAR ectoc(c)
-
-int c;
-
+/* ectoc:  expanded character to character collapse the CTRL and SPEC flags
+ * back into an ascii code
+ */
+int PASCAL NEAR ectoc P1_(int c)
 {
     if ( c == (CTRL | ' ') )
         c = 0;
@@ -128,13 +123,10 @@ int c;
     return (c);
 }
 
-/*  ctoec:  character to extended character pull out the CTRL and SPEC prefixes
- * (if possible)    */
-
-int PASCAL NEAR ctoec(c)
-
-int c;
-
+/* ctoec:  character to extended character pull out the CTRL and SPEC prefixes
+ * (if possible)
+ */
+int PASCAL NEAR ctoec P1_(int c)
 {
     if ( c == 0 )
         c = CTRL | ' ';
@@ -148,43 +140,35 @@ int c;
  * pressing a <SPACE> will attempt to complete an unfinished command name if it
  * is unique.
  */
-
-#if     MSC
-int ( PASCAL NEAR *PASCAL NEAR getname(char *prompt) )(void)
-#else
-int ( PASCAL NEAR *PASCAL NEAR getname(prompt) )()
-
-char *prompt;   /* string to prompt with */
-#endif
-
+ue_fnc_T getname P1_(char *prompt)
 {
-    char *sp;           /* ptr to the returned string */
+    /* ptr to the returned string:  */
+    char  *sp = complete(prompt, NULL, CMP_COMMAND, NSTRING);
 
-    sp = complete(prompt, NULL, CMP_COMMAND, NSTRING);
-    if ( sp == NULL )
+    if ( sp == NULL ) {
         return (NULL);
+    }
 
     return ( fncmatch(sp) );
 }
 
-/*  getcbuf:    get a completion from the user for a buffer name.
+/* getcbuf: Get a completion from the user for a buffer name.
  *
- *                       I was goaded into this by lots of other people's
- * completion code.
+ *          I was goaded into this by lots of other people's
+ *          completion code.
  */
-
-BUFFER *PASCAL NEAR getcbuf(prompt, defval, createflag)
-
-char *prompt;           /* prompt to user on command line */
-char *defval;           /* default value to display to user */
-int createflag;         /* should this create a new buffer? */
-
+BUFFER *PASCAL NEAR getcbuf P3_(
+                        char *prompt,   /* prompt to user on command line   */
+                        char *defval,   /* default value to display to user */
+                        int createflag  /* should this create a new buffer? */
+                      )
 {
-    char *sp;           /* ptr to the returned string */
+    /* ptr to the returned string:  */
+    char  *sp = complete(prompt, defval, CMP_BUFFER, NBUFN);
 
-    sp = complete(prompt, defval, CMP_BUFFER, NBUFN);
-    if ( sp == NULL )
+    if ( sp == NULL ) {
         return (NULL);
+    }
 
     return ( bfind(sp, createflag, 0) );
 }
@@ -995,23 +979,20 @@ int PASCAL NEAR getcmd()
     return (c);
 }
 
-/*  A more generalized prompt/reply function allowing the caller to specify the
+/* A more generalized prompt/reply function allowing the caller to specify the
  * proper terminator. If the terminator is not a return('\r'), return will echo
  * as "<NL>"
  */
-int PASCAL NEAR getstring(buf, nbuf, eolchar)
-
-unsigned char *buf;
-int nbuf;
-int eolchar;
-
+int PASCAL NEAR getstring P3_(unsigned char *buf, int nbuf, int eolchar)
 {
-    register int cpos;          /* current character position in string */
-    register int c;             /* current input character */
-    register int ec;            /* extended current input character */
-    register int quotef;        /* are we quoting the next char? */
-    char *kp;                   /* pointer into key_name */
-    char key_name[10];          /* name of a quoted key */
+    register int  cpos    = 0;    /* current character position in string */
+    register int  c       = 0;    /* current input character */
+    register int  ec      = 0;    /* extended current input character */
+    register int  quotef  = 0;    /* are we quoting the next char? */
+    char          *kp     = NULL; /* pointer into key_name */
+    char key_name[10];            /* name of a quoted key */
+
+    ZEROMEM(key_name);
 
     cpos = 0;
     quotef = FALSE;
@@ -1287,3 +1268,8 @@ unsigned char c;        /* character to be echoed */
     return (++col);                     /* return the new column number */
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

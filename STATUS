@@ -60,8 +60,11 @@ Next steps to repair the (w|b)_doto-Problem:
 [2021-11-07.00]
 
 The automatic reformatting has destroyed some of the very nice formatted
-comments in the original code: This hsa to be recreated!
+comments in the original code: This has to be recreated!
 
+These files have been reviewed:
 
+  src/input.c
+  src/eval.c
 
 # EOF

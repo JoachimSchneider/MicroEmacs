@@ -1,19 +1,19 @@
-/*  FILE.C:   for MicroEMACS
+/* FILE.C:   for MicroEMACS
  *
- *       The routines in this file handle the reading, writing and lookup of
- * disk files.  All of details about the reading and writing of the disk are in
- * "fileio.c".
- *
+ * The routines in this file handle the reading, writing and lookup of
+ * disk files. All of details about the reading and writing of the disk
+ * are in "fileio.c".
  */
 
-#include        <stdio.h>
-#include        "estruct.h"
-#include        "eproto.h"
-#include        "edef.h"
-#include        "elang.h"
+#include <stdio.h>
+#include "estruct.h"
+#include "eproto.h"
+#include "edef.h"
+#include "elang.h"
 #if ( IS_UNIX() )
-# include       <sys/types.h>
-# include       <sys/stat.h>
+# include <sys/types.h>
+# include <sys/stat.h>
+# include <unistd.h>
 #endif
 
 /*
@@ -21,10 +21,8 @@
  * the name of the file, and call the standard
  * "read a file into the current buffer" code. Bound to "C-X C-R".
  */
-int PASCAL NEAR fileread(f, n)
-
-int f, n;       /* defualt and numeric arguments (unused) */
-
+int PASCAL NEAR fileread P2_(int f, int n)
+  /* default and numeric arguments (unused) */
 {
     char *fname;        /* file name to read */
 
@@ -927,3 +925,8 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

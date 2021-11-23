@@ -246,7 +246,10 @@ extern int         DebugMessage DCL((CONST char *fmt, ...));
 
 
 /**********************************************************************/
-static char *uitostr_memacs P1_(unsigned int i)
+#ifndef maindef
+extern char *uitostr_memacs DCL((unsigned int i));
+#else
+char *uitostr_memacs P1_(unsigned int i)
 {
     unsigned int  base  = 10;
 
@@ -289,6 +292,7 @@ static char *uitostr_memacs P1_(unsigned int i)
 
     return buf + pos + 1;
 }
+#endif
 /**********************************************************************/
 #define eputs(s)      ( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
 #define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
@@ -470,6 +474,113 @@ static char *uitostr_memacs P1_(unsigned int i)
         *pp_  = NULL;             \
     }                             \
 } while ( 0 )
+/**********************************************************************/
+
+/**********************************************************************/
+#define C2I(c)  ( (int)(unsigned char)(c) )
+/* REMARK: Using integer promotion another (cryptic) way to achive    */
+/*         this would be: C2I(c) := ( (c) & 255 ).                    */
+/**********************************************************************/
+
+
+/**********************************************************************/
+CASRT(0 <= 'a');
+CASRT(0 <= 'b');
+CASRT(0 <= 'c');
+CASRT(0 <= 'd');
+CASRT(0 <= 'e');
+CASRT(0 <= 'f');
+CASRT(0 <= 'g');
+CASRT(0 <= 'h');
+CASRT(0 <= 'i');
+CASRT(0 <= 'j');
+CASRT(0 <= 'k');
+CASRT(0 <= 'l');
+CASRT(0 <= 'm');
+CASRT(0 <= 'n');
+CASRT(0 <= 'o');
+CASRT(0 <= 'p');
+CASRT(0 <= 'q');
+CASRT(0 <= 'r');
+CASRT(0 <= 's');
+CASRT(0 <= 't');
+CASRT(0 <= 'u');
+CASRT(0 <= 'v');
+CASRT(0 <= 'w');
+CASRT(0 <= 'x');
+CASRT(0 <= 'y');
+CASRT(0 <= 'z');
+
+CASRT(0 <= 'A');
+CASRT(0 <= 'B');
+CASRT(0 <= 'C');
+CASRT(0 <= 'D');
+CASRT(0 <= 'E');
+CASRT(0 <= 'F');
+CASRT(0 <= 'G');
+CASRT(0 <= 'H');
+CASRT(0 <= 'I');
+CASRT(0 <= 'J');
+CASRT(0 <= 'K');
+CASRT(0 <= 'L');
+CASRT(0 <= 'M');
+CASRT(0 <= 'N');
+CASRT(0 <= 'O');
+CASRT(0 <= 'P');
+CASRT(0 <= 'Q');
+CASRT(0 <= 'R');
+CASRT(0 <= 'S');
+CASRT(0 <= 'T');
+CASRT(0 <= 'U');
+CASRT(0 <= 'V');
+CASRT(0 <= 'W');
+CASRT(0 <= 'X');
+CASRT(0 <= 'Y');
+CASRT(0 <= 'Z');
+
+CASRT(0 <= '0');
+CASRT(0 <= '1');
+CASRT(0 <= '2');
+CASRT(0 <= '3');
+CASRT(0 <= '4');
+CASRT(0 <= '5');
+CASRT(0 <= '6');
+CASRT(0 <= '7');
+CASRT(0 <= '8');
+CASRT(0 <= '9');
+
+CASRT(0 <= '!');
+CASRT(0 <= '@');
+CASRT(0 <= '#');
+CASRT(0 <= '$');
+CASRT(0 <= '%');
+CASRT(0 <= '^');
+CASRT(0 <= '&');
+CASRT(0 <= '*');
+CASRT(0 <= '(');
+CASRT(0 <= ')');
+CASRT(0 <= '_');
+CASRT(0 <= '-');
+CASRT(0 <= '+');
+CASRT(0 <= '=');
+CASRT(0 <= '[');
+CASRT(0 <= ']');
+CASRT(0 <= '{');
+CASRT(0 <= '}');
+CASRT(0 <= '\\');
+CASRT(0 <= '|');
+CASRT(0 <= ';');
+CASRT(0 <= ':');
+CASRT(0 <= '\'');
+CASRT(0 <= '"');
+CASRT(0 <= ',');
+CASRT(0 <= '.');
+CASRT(0 <= '<');
+CASRT(0 <= '>');
+CASRT(0 <= '/');
+CASRT(0 <= '?');
+CASRT(0 <= '`');
+CASRT(0 <= '~');
 /**********************************************************************/
 
 
@@ -857,8 +968,8 @@ typedef struct  {
  */
 
 ETYPE EPOINTER {
-    int (PASCAL NEAR *fp)();            /* C routine to invoke */
-    BUFFER *buf;                        /* buffer to execute */
+    int (PASCAL NEAR *fp) DCL((int, int));  /* C routine to invoke */
+    BUFFER *buf;                            /* buffer to execute */
 };
 
 typedef struct  {
@@ -870,8 +981,8 @@ typedef struct  {
 /*      structure for the name binding table            */
 
 typedef struct {
-    char *n_name;                       /* name of function key */
-    int (PASCAL NEAR *n_func)();        /* function name is bound to */
+    char *n_name;                               /* name of function key */
+    int (PASCAL NEAR *n_func) DCL((int, int));  /* function name is bound to */
 }       NBIND;
 
 
@@ -1057,6 +1168,9 @@ typedef struct {
 
 /***    global function prototypes      ***/
 
+/* MicroEmacs named function type:  */
+typedef int PASCAL NEAR (*ue_fnc_T) DCL((int, int));
+
 /* Filter function used by TransformRegion():
  * Output string must be created by malloc(). */
 typedef char  *(*filter_func_T) DCL((CONST char *rstart, CONST char *rtext,
@@ -1172,15 +1286,10 @@ extern char *PASCAL NEAR regtostr DCL((char *buf, REGION *region));
 extern int PASCAL NEAR lowerc DCL((char ch));
 extern int PASCAL NEAR cycle_ring DCL((int f, int n));
 extern int PASCAL NEAR upperc DCL((char ch));
-#if     ZTC || TURBO || IC
-extern int ( PASCAL NEAR *PASCAL NEAR fncmatch(char *fname) ) DCL((int, int));
-extern int ( PASCAL NEAR *PASCAL NEAR getname(char *prompt) ) DCL((int, int));
-#else  /* Sun (and others?) screwed up the prototyping.*/
-extern int ( PASCAL NEAR *PASCAL NEAR fncmatch(char *fname) ) DCL((void));
-extern int ( PASCAL NEAR *PASCAL NEAR getname(char *prompt) ) DCL((void));
-#endif
+extern ue_fnc_T fncmatch DCL((char *fname));
+extern ue_fnc_T getname  DCL((char *prompt));
 extern int PASCAL NEAR asc_int DCL((char *st));
-extern int dolhello DCL((void));
+extern VOID dohello DCL((void));
 extern int dspram DCL((void));
 extern int lckerror DCL((char *errstr));
 extern int lckhello DCL((void));
@@ -1532,7 +1641,7 @@ extern int PASCAL NEAR ttopen DCL((void));
 extern int PASCAL NEAR ttputc DCL((int c));
 extern int PASCAL NEAR twiddle DCL((int f, int n));
 extern int PASCAL NEAR typahead DCL((void));
-extern int PASCAL NEAR unarg DCL((void));
+extern int PASCAL NEAR unarg DCL((int f, int n));
 extern int PASCAL NEAR unbindchar DCL((int c));
 extern int PASCAL NEAR unbindkey DCL((int f, int n));
 extern int PASCAL NEAR unmark DCL((int f, int n));
@@ -1635,26 +1744,26 @@ extern int PASCAL NEAR backtagword DCL((int f, int n)); /* return from tagged wo
 /* some library redefinitions */
 
 #if WINXP == 0
-char *strrev DCL((char *));
+extern char *strrev DCL((char *));
 #endif
 
 #if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && IC) || GCC || VMS
 # include <stdlib.h>
 # include <string.h>
 #else
-char *getenv DCL((char *));
-char *strcat DCL((char *, char *));
-char *strcpy DCL((char *, char *));
-int  strncmp DCL((char *, char *, int));
-char *strchr DCL((char *, int));
-int  strcmp DCL((char *, char *));
+extern char *getenv DCL((char *));
+extern char *strcat DCL((char *, char *));
+extern char *strcpy DCL((char *, char *));
+extern int  strncmp DCL((char *, char *, int));
+extern char *strchr DCL((char *, int));
+extern int  strcmp DCL((char *, char *));
 # if     XVT == 0 || XVTDRIVER == 0
-int  strlen DCL((char *));
+extern int  strlen DCL((char *));
 #  if RAMSIZE == 0
-char *malloc DCL((int));
-VOID free DCL((char *));
+extern char *malloc DCL((int));
+extern VOID free DCL((char *));
 #  endif
-char *realloc DCL((char *block, int siz));
+extern char *realloc DCL((char *block, int siz));
 # endif
 #endif
 

@@ -1,7 +1,7 @@
-/*  UNDO.C:     Undo commands and functionality for MicroEMACS (C)Copyright 1995
+/* UNDO.C:     Undo commands and functionality for MicroEMACS (C)Copyright 1995
  * by Daniel Lawrence
  *
- *  The functions in this file record and allow the playback of basic editing
+ * The functions in this file record and allow the playback of basic editing
  * changes. For each buffer, a stack of these changes is maintained. The
  * beginning of each command which can change the buffer is flaged with a
  * command entry. The undo command then can back out of these changes one
@@ -384,16 +384,15 @@ VOID undo_dump P0_(void)
     }
 }
 
-/*  ROOM:   Allocate memory using malloc() on failure, discard oldest undo
+/* ROOM:   Allocate memory using malloc() on failure, discard oldest undo
  * information and retry
  */
-
 char *room P1_(int nbytes /* number of bytes to malloc() */)
 {
-    void *ptr;          /* temporary pointer */
-    BUFFER *bp;         /* buffer to dealloc memory from */
-    UNDO_OBJ *up;       /* ptr to undo struct to free */
-    UNDO_OBJ *lp;       /* last undo struct before up */
+    void      *ptr  = NULL;   /* temporary pointer */
+    BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
+    UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free */
+    UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
 
     ASRT(0 <= nbytes);
     if ( 0 >= nbytes ) return (VOID *)0;
@@ -405,7 +404,7 @@ char *room P1_(int nbytes /* number of bytes to malloc() */)
         ptr = malloc(nbytes);
         if ( ptr != (char *)NULL )  {
           memset(ptr, 0, nbytes);
-          
+
           return (ptr);
         }
 
@@ -435,12 +434,13 @@ nextbuf:        bp = getoldb();
         lp->next = (UNDO_OBJ *)NULL;
         bp->undo_count--;
     }
+
+    return NULL;  /**AVOID_WARNING**/
 }
 
-/*  RE-ROOM: Allocate memory using realloc() on failure, discard oldest undo
+/* RE-ROOM: Allocate memory using realloc() on failure, discard oldest undo
  * information and retry
  */
-
 char *reroom P2_(void *orig_ptr, int nbytes /* number of bytes to malloc() */)
 {
     void *ptr;          /* temporary pointer */
@@ -493,11 +493,12 @@ nxtbuf: bp = getoldb();
         lp->next = (UNDO_OBJ *)NULL;
         bp->undo_count--;
     }
+
+    return NULL;  /**AVOID_WARNING**/
 }
 
 
 
-/*
- * EOF
- */
-
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -634,25 +634,24 @@ setwin: wp = wheadp;
     return (TRUE);
 }
 
-int PASCAL NEAR nextup(f, n)    /* scroll the next window up (back) a page */
-
-int f, n;       /* prefix flag and argument */
-
+/* scroll the next window up (back) a page */
+int PASCAL NEAR nextup P2_(int f, int n)  /* prefix flag and argument */
 {
     nextwind(FALSE, 1);
     backpage(f, n);
     prevwind(FALSE, 1);
+
+    return TRUE;
 }
 
-int PASCAL NEAR nextdown(f, n)  /* scroll the next window down (forward) a page
-                                 */
-
-int f, n;       /* prefix flag and argument */
-
+/* scroll the next window down (forward) a page */
+int PASCAL NEAR nextdown P2_(int f, int n)  /* prefix flag and argument */
 {
     nextwind(FALSE, 1);
     forwpage(f, n);
     prevwind(FALSE, 1);
+
+    return TRUE;
 }
 
 int PASCAL NEAR savewnd(f, n)   /* save ptr to current window */

@@ -29,7 +29,7 @@ int PASCAL NEAR is_letter P1_(char ch)
 
 int PASCAL NEAR is_lower P1_(char ch)
 {
-    return (lowcase[ch & 255] != 0);
+    return (lowcase[C2I(ch)] != 0);
 }
 
 /*      is_upper() Is the character a upper case letter?  This looks in the
@@ -38,7 +38,7 @@ int PASCAL NEAR is_lower P1_(char ch)
 
 int PASCAL NEAR is_upper P1_(char ch)
 {
-    return (upcase[ch & 255] != 0);
+    return (upcase[C2I(ch)] != 0);
 }
 
 /*      chcase()
@@ -52,11 +52,11 @@ register unsigned int ch;
 {
     /* translate lowercase */
     if ( is_lower(ch) )
-        return (lowcase[ch & 255]);
+        return (lowcase[C2I(ch)]);
 
     /* translate uppercase */
     if ( is_upper(ch) )
-        return (upcase[ch & 255]);
+        return (upcase[C2I(ch)]);
 
     /* let the rest pass */
     return (ch);
@@ -71,7 +71,7 @@ unsigned char *cp;      /* ptr to character to uppercase */
 {
     /* translate uppercase */
     if ( is_lower(*cp) )
-        *cp = lowcase[*cp & 255];
+        *cp = lowcase[C2I(*cp)];
 }
 
 /* change *cp to an lower case character */
@@ -83,14 +83,14 @@ unsigned char *cp;      /* ptr to character to lowercase */
 {
     /* translate lowercase */
     if ( is_upper(*cp) )
-        *cp = upcase[*cp & 255];
+        *cp = upcase[C2I(*cp)];
 }
 
 int PASCAL NEAR upperc P1_(char ch) /* return the upper case equivalant of
                                      * character ch */
 {
     if ( is_lower(ch) )
-        return (lowcase[ch & 255]);
+        return (lowcase[C2I(ch)]);
     else
         return (ch);
 }
@@ -99,7 +99,7 @@ int PASCAL NEAR lowerc P1_(char ch) /* return the lower case equivalant of
                                      * character ch */
 {
     if ( is_upper(ch) )
-        return (upcase[ch & 255]);
+        return (upcase[C2I(ch)]);
     else
         return (ch);
 }
@@ -240,7 +240,7 @@ char *ch;       /* ptr to character to set */
 char *val;      /* value to set it to */
 
 {
-    return (lowcase[*ch & 255] = *val & 255);
+    return (lowcase[C2I(*ch)] = C2I(*val));
 }
 
 /*      Set a character in the uppercase map */
@@ -251,7 +251,7 @@ char *ch;       /* ptr to character to set */
 char *val;      /* value to set it to */
 
 {
-    return (upcase[*ch & 255] = *val & 255);
+    return (upcase[C2I(*ch)] = C2I(*val));
 }
 
 #if (ZTC | TURBO | MSC) == 0
@@ -308,6 +308,6 @@ char *cp;       /* ptr to character to test */
 
 
 
-/*
- * EOF
- */
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

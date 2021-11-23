@@ -1,6 +1,6 @@
 /*
- * The functions in this file implement commands that search in the forward and
- * backward directions.
+ * The functions in this file implement commands that search in the
+ * forward and backward directions.
  *
  * (History comments formerly here have been moved to history.c)
  */
@@ -669,7 +669,7 @@ int PASCAL NEAR movelocalpoint P3_(int n, int *pcuroff, LINE **pcurline)
 /*
  * make_delta -- Create the delta tables.
  */
-VOID make_delta P2_(char *pstring, DELTA *tbl)
+static VOID make_delta P2_(CONST char *pstring, DELTA *tbl)
 {
     int j, jump_by, ch;
 
@@ -710,7 +710,7 @@ VOID make_delta P2_(char *pstring, DELTA *tbl)
  * initialization and for substitution purposes.  The default for any character
  * to jump is the pattern length.
  */
-VOID PASCAL NEAR setjtable()
+VOID PASCAL NEAR setjtable P0_(void)
 {
     make_delta(pat, &deltapat);
     make_delta(strrev( xstrcpy( (char *)tap, (char *)pat ) ), &tapatled);
@@ -718,11 +718,9 @@ VOID PASCAL NEAR setjtable()
 
 /*
  * eq -- Compare two characters.  The "bc" comes from the buffer, "pc"
- *  from the pattern.  If we are not in EXACT mode, fold out the case.
+ * from the pattern.  If we are not in EXACT mode, fold out the case.
  */
-int PASCAL NEAR eq(bc, pc)
-register unsigned char bc;
-register unsigned char pc;
+int PASCAL NEAR eq P2_(register unsigned char bc, register unsigned char pc)
 {
     if ( (curwp->w_bufp->b_mode & MDEXACT) == 0 ) {
         if ( is_lower(bc) )
@@ -1663,3 +1661,8 @@ VOID PASCAL NEAR mctype_cat P2_(char pline[], int mc_type)
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

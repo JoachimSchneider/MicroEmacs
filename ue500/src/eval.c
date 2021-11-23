@@ -1,14 +1,15 @@
-/*  EVAL.C: Expresion evaluation functions for MicroEMACS
+/*  EVAL.C: Expresion evaluation functions for
+ *               MicroEMACS
  *
- *       written 1993 by Daniel Lawrence            */
+ *       written 1993 by Daniel Lawrence
+ */
 
-
-#include        <stdio.h>
-#include        "estruct.h"
-#include        "eproto.h"
-#include        "edef.h"
-#include        "elang.h"
-#include        "evar.h"
+#include <stdio.h>
+#include "estruct.h"
+#include "eproto.h"
+#include "edef.h"
+#include "elang.h"
+#include "evar.h"
 
 
 /* initialize the entries in one user variable table */
@@ -353,6 +354,8 @@ CONST char  *fname;     /* name of function to evaluate */
     }
 
     meexit(-11);        /* never should get here */
+
+    return NULL;  /**AVOID_WARNING**/
 }
 
 CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */
@@ -768,6 +771,8 @@ CONST char  *vname;             /* name of environment variable to retrieve */
         return ( int_asc(ypos) );
     }
     meexit(-12);        /* again, we should never get here */
+
+    return NULL;  /**AVOID_WARNING**/
 }
 
 CONST char *PASCAL NEAR fixnull(s)      /* Don't return NULL pointers! */
@@ -1064,17 +1069,16 @@ int n;          /* numeric arg (ignored here) */
 
 /* find a variables type and name */
 
-VOID PASCAL NEAR findvar(var, vd, size, scope)
-
-char *var;      /* name of var to get */
-VDESC *vd;      /* structure to hold type and ptr */
-int size;       /* size of var array */
-int scope;      /* intended scope of any created user variables */
-
+VOID PASCAL NEAR findvar P4_(
+        char  *var,   /* name of var to get */
+        VDESC *vd,    /* structure to hold type and ptr */
+        int   size,   /* size of var array */
+        int   scope   /* intended scope of any created user variables */
+    )
 {
-    register int vnum;          /* subscript in varable arrays */
-    register int vtype;         /* type to return */
-    register UTABLE *vut;       /* user var table to search */
+    register int    vnum  = 0;      /* subscript in varable arrays */
+    register int    vtype = 0;      /* type to return */
+    register UTABLE *vut  = NULL;   /* user var table to search */
 
 fvar:   vtype = -1;
     vut = uv_head;
@@ -1613,9 +1617,9 @@ char *value;    /* value to set to */
     return (status);
 }
 
-/*  asc_int:    ascii string to integer......This is too inconsistant to use the
- * system's */
-
+/* asc_int: ascii string to integer......This is too inconsistant to use the
+ *          system's
+ */
 int PASCAL NEAR asc_int(st)
 
 char *st;
@@ -1651,9 +1655,9 @@ char *st;
     return (result * sign);
 }
 
-/*  int_asc:    integer to ascii string.......... This is too inconsistant to
- * use the system's */
-
+/* int_asc: integer to ascii string.......... This is too inconsistant to
+ *          use the system's
+ */
 char *PASCAL NEAR int_asc(i)
 
 int i;  /* integer to translate to a string */
@@ -1780,24 +1784,24 @@ char *token;    /* token to analyze */
     }
 }
 
-CONST char *PASCAL NEAR getval(token) /* find the value of a token */
-
-char *token;            /* token to evaluate */
-
+/* getval:  Find the value of a token */
+CONST char *PASCAL NEAR getval P1_(char *token  /* token to evaluate */)
 {
-    register int status;        /* error return */
-    register BUFFER *bp;        /* temp buffer pointer */
-    register int blen;          /* length of buffer argument */
-    static char buf[NSTRING];   /* string buffer for some returns */
+    register int    status  = 0;      /* error return */
+    register BUFFER *bp     = NULL;   /* temp buffer pointer */
+    register int    blen    = 0;      /* length of buffer argument */
+    static char buf[NSTRING];         /* string buffer for some returns */
 
-    switch ( gettyp(token) ) {
+    ZEROMEM(buf);
+
+    switch ( gettyp(token) )  {
     case TKNUL:
         return ("");
 
     case TKARG:                 /* interactive argument */
         xstrcpy( token, fixnull( getval(&token[1]) ) );
         mlwrite("%s", token);
-        status = getstring( buf, NSTRING, ctoec(RETCHAR) );
+        status = getstring( (unsigned char *)buf, NSTRING, ctoec(RETCHAR) );
         if ( status == ABORT )
             return (NULL);
 
@@ -1867,6 +1871,8 @@ char *token;            /* token to evaluate */
     case TKCMD:
         return (token);
     }
+
+    return NULL;/**AVOID_WARNING**/
 }
 
 int PASCAL NEAR stol(val)       /* convert a string to a numeric logical */
@@ -1935,8 +1941,8 @@ int x;
 long PASCAL NEAR ernd() /* returns a random integer */
 /* This function implements the "minimal standard" RNG from the paper "RNGs:
  * Good Ones are Hard to Find" by Park and Miller, CACM, Volume 31, Number 10,
- * October 1988. */
-
+ * October 1988.
+ */
 {
     long int a=16807L, m=2147483647L, q=127773L, r=2836L;
     long lo, hi, test;
@@ -2163,10 +2169,9 @@ int n;          /* numeric arg (can overide prompted value) */
     return (TRUE);
 }
 
-/*  describe-variables  Bring up a fake buffer and list the contents of all the
- * environment variables
+/* describe-variables:  Bring up a fake buffer and list the contents of all the
+ *                      environment variables
  */
-
 int PASCAL NEAR desvars(f, n)
 
 int f, n;        /* prefix flag and argument */
@@ -2273,10 +2278,9 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*  describe-functions  Bring up a fake buffer and list the names of all the
- * functions
+/* describe-functions:  Bring up a fake buffer and list the names of all the
+ *                      functions
  */
-
 int PASCAL NEAR desfunc(f, n)
 
 int f, n;        /* prefix flag and argument */

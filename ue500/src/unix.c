@@ -63,10 +63,10 @@
 
 /** Include files **/
 #include <stdio.h>              /* Standard I/O definitions */
-#include <stdlib.h>             /* malloc(), ...        */
-#include <time.h>               /* time(), ...          */
-#include <errno.h>              /* errno, ...           */
-#include <sys/stat.h>           /* stat(), ...          */
+#include <stdlib.h>             /* malloc(), ...            */
+#include <time.h>               /* time(), ...              */
+#include <errno.h>              /* errno, ...               */
+#include <sys/stat.h>           /* stat(), ...              */
 #include "estruct.h"            /* Emacs definitions        */
 
 
@@ -137,6 +137,21 @@ int scnothing()
 #  include <dirent.h>                   /* Directory entry definitions  */
 #  define DIRENTRY       dirent
 # endif /* XENIX || VAT */
+
+
+/*==============================================================*/
+/* Found in `curses.h':                                         */
+/*==============================================================*/
+# if(!0)
+extern int tgetflag DCL((char *id));
+extern int tgetnum  DCL((char *id));
+extern int tputs    DCL((const char *str, int affcnt, int (*putc)(int)));
+extern int tgetent  DCL((char *bp, const char *name));
+# else
+#  include <curses.h>
+# endif
+/*==============================================================*/
+
 
 /** Restore predefined definitions **/
 # undef CTRL                            /* Restore CTRL         */
@@ -311,9 +326,12 @@ static char rbuf[NFILEN];               /* Return file buffer       */
 static char *nameptr;                   /* Ptr past end of path in rbuf */
 
 /** Terminal definition block **/
-int scopen(), scclose(), ttgetc(), ttputc(), ttflush();
-int scmove(), sceeol(), sceeop(), scbeep(), screv();
-int sckopen(), sckclose();
+int scopen(), ttgetc(), ttputc(), ttflush();
+int scmove(), sceeol(), sceeop(), screv();
+static int scbeep   DCL((void));
+static int sckclose DCL((void));
+static int scclose  DCL((void));
+static int sckopen  DCL((void));
 # if COLOR
 int scfcol(), scbcol();
 # endif /* COLOR */
@@ -808,7 +826,7 @@ int scopen()
     /* Get keybindings */
     kp = keybind;
     while ( kp < &keybind[sizeof (keybind)/sizeof (*keybind)] ) {
-        addkey(TGETSTR(kp->name, &cp), kp->value);
+        addkey((unsigned char *)TGETSTR(kp->name, &cp), kp->value);
         kp++;
     }
 
@@ -855,11 +873,11 @@ int scopen()
 # endif /* USE_CURSES */
 
     /* Success */
-    return (0);
+    return ( 0 );
 }
 
 /** Close screen package **/
-int scclose()
+int scclose P0_(void)
 {
     /* Turn off keypad mode */
     putpad(capbind[CAP_KE].store);
@@ -874,27 +892,31 @@ int scclose()
     ttclose();
 
     /* Success */
-    return (0);
+    return ( 0 );
 }
 
 /* open keyboard -hm */
-int sckopen()
+int sckopen P0_(void)
 {
     putpad(capbind[CAP_KS].store);
     ttflush();
 # if     FLABEL
     dis_ufk();
 # endif
+
+    return ( 0 );
 }
 
 /* close keyboard -hm */
-int sckclose()
+int sckclose P0_(void)
 {
     putpad(capbind[CAP_KE].store);
     ttflush();
 # if     FLABEL
     dis_sfk();
 # endif
+
+    return ( 0 );
 }
 
 /** Move cursor **/
@@ -982,7 +1004,7 @@ int state;                              /* New state            */
 }
 
 /** Beep **/
-scbeep()
+int scbeep P0_(void)
 {
 # if !NOISY
     /* Send out visible bell, if it exists */
@@ -1003,7 +1025,9 @@ scbeep()
 }
 
 # if COLOR
+#  if USG || AUX
 static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
+#  endif /* USG || AUX */
 
 /** Set foreground color **/
 int scfcol(color)
@@ -1075,11 +1099,11 @@ int color;                      /* Color to set         */
 # endif /* COLOR */
 
 /** Set palette **/
-int spal(cmd)
-char * cmd;                             /* Palette command      */
+int spal P1_(char * cmd /* Palette command */)
 {
-    int code, dokeymap;
-    char * cp;
+    int   code      = 0;
+    int   dokeymap  = 0;
+    char  *cp       = NULL;
 
     /* Check for keymapping command */
     if ( strncmp(cmd, "KEYMAP ", 7) == 0 )
@@ -1113,7 +1137,7 @@ char * cmd;                             /* Palette command      */
         code = stock(cmd);
 
         /* Add to tree */
-        addkey(cp, code);
+        addkey((unsigned char *)cp, code);
     }
 # if COLOR
     else {
@@ -1434,8 +1458,8 @@ static int IsIn(const char c, const char *set, int len)
 
 # define IsLetter(c)     ( IsUpper( (c) ) || IsLower( (c) ) )
 
-
-static char ToUpper(const char c)
+#if(0)/**NOT_USED**/
+static char ToUpper P1_(const char c)
 {
     int i   = 0;
 
@@ -1448,7 +1472,7 @@ static char ToUpper(const char c)
     return c;
 }
 
-static char ToLower(const char c)
+static char ToLower P1_(const char c)
 {
     int i   = 0;
 
@@ -1460,6 +1484,7 @@ static char ToLower(const char c)
 
     return c;
 }
+#endif/**NOT_USED**/
 
 /*=============================================================================*/
 
@@ -1827,11 +1852,12 @@ char *fspec;                            /* Filename specification   */
 }
 
 /** Get next filename from pattern **/
-char *getnfile()
+char *getnfile P0_(void)
 {
-    int index;
-    struct DIRENTRY * dp;
-    struct stat fstat;
+    struct DIRENTRY *dp = NULL;
+    struct stat     fstat;
+
+    ZEROMEM(fstat);
 
     /* ...and call for the next file */
     do {
@@ -1995,8 +2021,9 @@ void winch_new_size()
 {
     extern VOID winch_vtresize(int rows, int cols);
 
-    EWINDOW *wp;
     struct winsize win;
+
+    ZEROMEM(win);
 
     winch_flag=0;
     ioctl(fileno(stdin), TIOCGWINSZ, &win);
@@ -2009,3 +2036,8 @@ void winch_new_size()
 
 #endif /* IS_UNIX() */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
