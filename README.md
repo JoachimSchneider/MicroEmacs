@@ -100,7 +100,18 @@ modern Linux and FreeBSD systems:
   ```
 
 
-## For completeness I quote Peter Chapman's README.md here:
+## TODO
+- Remove *All* warnings
+- UTF-8 support
+- Compile on Windows:
+  + CygWin
+  + MSC
+- Try to compile on *really old* compilers:
+  + Provide a `stdarg.h' *and* `varargs.h` version for all functions
+    whit variable argumebnt lists.
+
+
+# For completeness I quote Peter Chapman's README.md here:
 ```
 ## Introduction
 I have found it hard to track down the source code for MicroEMACS,

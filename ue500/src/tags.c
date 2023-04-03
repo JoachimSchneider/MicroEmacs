@@ -64,7 +64,7 @@ static TAG *curtp = NULL;       /* Currently in-use 'tags'. */
  * are succesfull.
  */
 
-static int newtags P1_(char path[NFILEN])
+static int newtags P1_(char *, path)
 {
     register TAG    *tnewp;
     register int i = NINDEXES;
@@ -171,7 +171,7 @@ VOID fix_index()
  * Put the rest of the characters of the current word at '.' in str (but maximum
  * lmax characters).  '.' is preserved.
  */
-static int restword P2_(char *str, int lmax)
+static int restword P2_(char *, str, int, lmax)
 {
     register int  i     = 0;
     register int  go_on = TRUE;
@@ -216,7 +216,7 @@ static int backupword(int f, int n)
  * of the new FAST search routine, we have to remove the pattern anchoring (^
  * and $) and search direction characters (? or /)
  */
-static int alterpattern P1_(register char pattern[])
+static int alterpattern P1_(register char *, pattern)
 {
     register int i = 0;         /* EMACS pattern index  */
     register int j = 1;         /* VI pattern -skip /or?*/
@@ -281,7 +281,7 @@ char *filename;
  * prevent loosing the return information.
  */
 
-int tagger P2_(char *errmsg, int retag)
+int tagger P2_(char *, errmsg, int, retag)
 {
     char tagf[NFILEN];          /* File of tagged word  */
     char pretagpat[NPAT];               /* Search pattern prior */

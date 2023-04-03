@@ -11,85 +11,80 @@
  *
  *  John M. Gamble 5-Oct-86
  *  - Made iterative search use search.c's scanner() routine. This allowed the
- * elimination of bakscan().
+ *    elimination of bakscan().
  *  - Put isearch constants into estruct.h
  *  - Eliminated the passing of 'status' to scanmore() and checknext(), since
- * there were no circumstances where it ever equalled FALSE. Dan Corkill
- * 6-Oct-87
- *      - Changed character loop to terminate with extended characters (thus
- * arrow keys, and most commands behave intuitively).
- *      - Changed META to be reread rather than simply aborting.
- *      - Conditionalized VMS alternates for ^S and ^Q to only apply to VMS
- * ports.  (Allowing ^X as a synonym for ^S defeats some of the benefits of the
- * first change above.)
+ *    there were no circumstances where it ever equalled FALSE.
  *
- *  (Further comments are in history.c)
+ * Dan Corkill 6-Oct-87
+ *  - Changed character loop to terminate with extended characters (thus
+ *    arrow keys, and most commands behave intuitively).
+ *  - Changed META to be reread rather than simply aborting.
+ *  - Conditionalized VMS alternates for ^S and ^Q to only apply to VMS
+ *    ports. (Allowing ^X as a synonym for ^S defeats some of the
+ *    benefits of the * first change above.)
+ *
+ * (Further comments are in history.c)
  */
-
 #include <stdio.h>
 #include "estruct.h"
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
 
+
 #if     ISRCH
 
-# define CMDBUFLEN       256    /* Length of our command buffer */
+# define CMDBUFLEN  (256) /* Length of our command buffer */
 
-/* A couple of "own" variables for re-eat */
+/* A couple of "own" variables for re-eat                   */
 /* Hey, BLISS user, these were "GLOBAL", I made them "OWN". */
-static int      (PASCAL NEAR *saved_get_char)();        /* Get character routine
-                                                         */
-static int eaten_char = -1;             /* Re-eaten char */
+static int (PASCAL NEAR *saved_get_char)(); /* Get character routine  */
+static int eaten_char     = -1;             /* Re-eaten char          */
 
-/* A couple more "own" variables for the command string */
+/* A couple more "own" variables for the command string             */
+static int cmd_buff[CMDBUFLEN]; /* Save the command args here       */
+static int cmd_offset;          /* Current offset into command buff */
+static int cmd_reexecute  = -1; /* > 0 if re-executing command      */
 
-static int cmd_buff[CMDBUFLEN]; /* Save the command args here */
-static int cmd_offset;  /* Current offset into command buff */
-static int cmd_reexecute = -1;  /* > 0 if re-executing command */
 
-/*
- * Subroutine to do incremental reverse search.  It actually uses the same code
- * as the normal incremental search, as both can go both ways.
+/* Subroutine to do incremental reverse search. It actually uses the
+ * same code * as the normal incremental search, as both can go both
+ * ways.
  */
-
-int PASCAL NEAR risearch(f, n)
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR risearch P2_(int, f, int, n/*prefix flag and argument*/)
 {
-    register int status;
+    register int  status  = 0;
 
-    /* Make sure the search doesn't match where we already are by backing up a
+    /*
+     * Make sure the search doesn't match where we already are by backing up a
      * character.
      */
     backchar(TRUE, 1);
 
-    if ( status = isearch(REVERSE) )
-        mlerase();                      /* If happy, just erase the cmd line  */
+    if ( (status = isearch(REVERSE)) )
+        mlerase();        /* If happy, just erase the cmd line  */
     else
-        mlwrite(TEXT164);
+        mlwrite(TEXT164); /* "[search failed]"                  */
 
-/*               "[search failed]" */
     return (status);
 }
 
-/* Again, but for the forward direction */
-
-int PASCAL NEAR fisearch(f, n)
-int f, n;
+/* Again, but for the forward direction
+ */
+int PASCAL NEAR fisearch P2_(int, f, int, n)
 {
-    register int status;
+    register int  status  = 0;
 
-    if ( status = isearch(FORWARD) )
-        mlerase();                      /* If happy, just erase the cmd line  */
+    if ( (status = isearch(FORWARD)) )
+        mlerase();        /* If happy, just erase the cmd line  */
     else
-        mlwrite(TEXT164);
+        mlwrite(TEXT164); /* "[search failed]"                  */
 
-/*               "[search failed]" */
     return (status);
 }
 
-/*
- * Subroutine to do an incremental search.  In general, this works similarly to
+/* Subroutine to do an incremental search.  In general, this works similarly to
  * the older micro-emacs search function, except that the search happens as each
  * character is typed, with the screen and cursor updated with each new search
  * character.
@@ -113,24 +108,22 @@ int f, n;
  * will stall until the pattern string is edited back into something that exists
  * (or until the search is aborted).
  */
-
-int PASCAL NEAR isearch(dir)
-
-int dir;
-
+int PASCAL NEAR isearch P1_(int, dir)
 {
-    int status;                 /* Search status */
-    int col;                    /* prompt column */
-    register int cpos;          /* character number in search string  */
-    register int c;             /* current input character */
-    register int expc;          /* function expanded input char       */
-    char pat_save[NPAT];                /* Saved copy of the old pattern str  */
-    LINE            *curline;           /* Current line on entry          */
-    int curoff;                 /* Current offset on entry        */
-    int init_direction;                 /* The initial search direction       */
-    KEYTAB          *ktp;       /* The command bound to the key       */
-    register int (PASCAL NEAR *kfunc)();        /* ptr to the requested function
+    int           status          = 0;    /* Search status                      */
+    int           col             = 0;    /* prompt column                      */
+    register int  cpos            = 0;    /* character number in search string  */
+    register int  c               = 0;    /* current input character            */
+    register int  expc            = 0;    /* function expanded input char       */
+    char          pat_save[NPAT];         /* Saved copy of the old pattern str  */
+    LINE          *curline        = NULL; /* Current line on entry              */
+    int           curoff          = 0;    /* Current offset on entry            */
+    int           init_direction  = 0;    /* The initial search direction       */
+    KEYTAB        *ktp            = NULL; /* The command bound to the key       */
+    register int (PASCAL NEAR *kfunc)() = NULL; /* ptr to the requested function
                                                  * to bind to */
+
+    ZEROMEM(pat_save);
 
     /* Set up the starting conditions */
 
@@ -145,28 +138,26 @@ int dir;
      * if isearch.  Unmake the meta-character array, so that it will get re-made
      * automatically with the (maybe) new search string on a MAGIC mode search.
      */
-    bytecopy(pat_save, (char *) pat, NPAT);     /* Save the old pattern string
-                                                 */
-    curline = curwp->w_dotp;            /* Save the current line pointer */
-    curoff = get_w_doto(curwp);         /* Save the current offset */
+    bytecopy(pat_save, (char *) pat, NPAT); /* Save the old pattern string    */
+    curline = curwp->w_dotp;                /* Save the current line pointer  */
+    curoff = get_w_doto(curwp);             /* Save the current offset        */
 # if MAGIC
     mcclear();
 # endif
 
 
-start_over:                             /* This is a good place to start a
-                                         * re-execution: */
+start_over: /* This is a good place to start a re-execution:  */
 
     /*
      * Ask the user for the text of a pattern, and remember the column.
      */
-    col = (clexec) ? 0 : mlprompt(TEXT165, (char *) pat, isterm);
-/*              "ISearch: " */
+    col = (clexec) ?
+      0 : mlprompt(TEXT165/*"ISearch: "*/, (char *) pat, isterm);
 
-    cpos = 0;                           /* Start afresh           */
-    status = TRUE;              /* Assume everything's cool   */
+    cpos = 0;       /* Start afresh             */
+    status = TRUE;  /* Assume everything's cool */
 
-    for (;; ) {                         /* ISearch per character loop */
+    for (;; ) {     /* ISearch per character loop */
 
         /*
          * Check for special characters first. That is, a control or ^X or FN or
@@ -186,7 +177,7 @@ start_over:                             /* This is a good place to start a
 
         if ( expc == quotec )                           /* Quote character?
                                                          *    */
-            c = ectoc( expc = get_char() );             /* Get the next char        
+            c = ectoc( expc = get_char() );             /* Get the next char
                                                          *  */
         else if ( (expc > 255 || expc == 0) &&(c != '\t' && c != '\r') ) {
 
@@ -266,53 +257,49 @@ start_over:                             /* This is a good place to start a
          * restore the old search string and its jump tables.
          */
         if ( cpos >= NPAT ) {
-            mlwrite(TEXT166);
-/*              "? Search string too long" */
+            mlwrite(TEXT166/*"? Search string too long"*/);
             bytecopy( (char *) pat, pat_save, NPAT );
             setjtable();
             mmove_flag = TRUE;
 
-            return (FALSE);             /* Return an error, but stay. */
+            return (FALSE); /* Return an error, but stay. */
         }
 
-        pat[cpos] = 0;          /* null terminate the buffer  */
+        pat[cpos] = 0;                  /* null terminate the buffer  */
 # if     COLOR
         /* set up the proper colors for the command line */
         TTforg(gfcolor);
         TTbacg(gbcolor);
 # endif
-        movecursor(term.t_nrow, col);           /* Position the cursor  */
+        movecursor(term.t_nrow, col);   /* Position the cursor        */
         col += echochar(c);             /* Echo the character         */
-        if ( !status )          /* If we lost last time       */
-            TTbeep();                   /* Feep again       */
+        if ( !status )                  /* If we lost last time       */
+            TTbeep();                   /* Feep again                 */
         else                            /* Otherwise, we must have won*/
-            status = checknext(c, dir);                 /* See if still matches
-                                                         * or find next */
+            status = checknext(c, dir); /* See if still matches
+                                         * or find next               */
     }
 
-    curwp->w_dotp = curline;    /* Reset the line pointer               */
-    set_w_doto(curwp, curoff);  /*   and the offset to original value   */
-    curwp->w_flag |= WFMOVE;    /* Say we've moved                      */
-    update(FALSE);              /* And force an update                  */
+    curwp->w_dotp = curline;    /* Reset the line pointer             */
+    set_w_doto(curwp, curoff);  /*   and the offset to original value */
+    curwp->w_flag |= WFMOVE;    /* Say we've moved                    */
+    update(FALSE);              /* And force an update                */
     mmove_flag = TRUE;
 
     return (FALSE);
 }
 
-/*
- * This hack will search for the next occurrence of <pat> in the buffer, either
+/* This hack will search for the next occurrence of <pat> in the buffer, either
  * forward or backward.  If we can't find any more matches, "point"
  * is left where it was before.  If we do find a match, "point" will be at the
  * end of the matched string for forward searches and at the beginning of the
  * matched string for reverse searches.
  */
-
-int PASCAL NEAR scanmore(dir)
-int dir;                                /* direction to search      */
+int PASCAL NEAR scanmore P1_(int, dir/*direction to search*/)
 {
-    register int status;        /* search status        */
+    register int  status  = 0;  /* search status  */
 
-    setjtable();                /* Set up fast search arrays    */
+    setjtable();                /* Set up fast search arrays  */
 
 # if MAGIC
     if ( dir == FORWARD )
@@ -324,13 +311,12 @@ int dir;                                /* direction to search      */
 # endif
 
     if ( !status )
-        TTbeep();                       /* Feep if search fails       */
+        TTbeep(); /* Feep if search fails */
 
     return (status);
 }
 
-/*
- * Trivial routine to insure that the next character in the search string is
+/* Trivial routine to insure that the next character in the search string is
  * still true to whatever we're pointing to in the buffer. This routine will not
  * attempt to move the "point" if the match fails, although it will implicitly
  * move the "point" if we're forward searching, and find a match, since that's
@@ -339,42 +325,38 @@ int dir;                                /* direction to search      */
  *
  * If the compare fails, we return FALSE and call scanmore or something.
  */
-
-int PASCAL NEAR checknext(chr, dir)
-int chr;                                /* Next char to look for    */
-int dir;                                /* Search direction         */
+int PASCAL NEAR checknext P2_(int, chr, int, dir)
+/* chr: Next char to look for */
+/* dir: Search direction      */
 {
-    LINE *curline;              /* current line during scan */
-    int curoff;                         /* position within current line */
-    register char *patrn;       /* The entire search string (incl chr) */
-    register int sts;           /* how well things go       */
+    LINE          *curline  = NULL; /* current line during scan             */
+    int           curoff    = 0;    /* position within current line         */
+    register char *patrn    = NULL; /* The entire search string (incl chr)  */
+    register int  sts       = 0;    /* how well things go                   */
 
-    /* setup the local scan pointer to current "." */
+    /* setup the local scan pointer to current "."  */
 
     curline = curwp->w_dotp;        /* Get the current line structure  */
     curoff = get_w_doto(curwp);     /* Get the offset within that line */
 
-    if ( dir == FORWARD ) {                     /* If searching forward     */
-        if ( sts = !boundry(curline, curoff, FORWARD) ) {
+    if ( dir == FORWARD ) {         /* If searching forward */
+        if ( (sts = !boundry(curline, curoff, FORWARD)) ) {
             /* If it's what we're looking for, set the point and say that we've
              * moved.
              */
-            if ( sts = eq(nextch(&curline, &curoff, FORWARD), chr) ) {
+            if ( (sts = eq(nextch(&curline, &curoff, FORWARD), chr)) ) {
                 curwp->w_dotp = curline;
                 set_w_doto(curwp, curoff);
                 curwp->w_flag |= WFMOVE;
             }
         }
-    } else {                            /* Else, reverse search check. */
+    } else {                        /* Else, reverse search check.  */
         patrn = (char *) pat;
-        while ( *patrn ) {                      /* Loop for all characters in
-                                                 * patrn   */
-            if ( ( sts =
-                       !boundry(curline, curoff, FORWARD) ) == FALSE ||
-                 ( sts =
-                       eq(nextch(&curline, &curoff, FORWARD),
-                          *patrn) ) == FALSE )
+        while ( *patrn ) {          /* Loop for all characters in patrn */
+            if ( !( sts = !boundry(curline, curoff, FORWARD) )              ||
+                 !( sts = eq(nextch(&curline, &curoff, FORWARD), *patrn) )  )
                 break;                  /* Nope, just punt it then */
+
             patrn++;
         }
     }
@@ -383,43 +365,40 @@ int dir;                                /* Search direction         */
      * If the 'next' character didn't fit in the pattern, let's go search for it
      * somewhere else.
      */
-    if ( sts == FALSE )
+    if ( !sts )
         sts = scanmore(dir);
 
     return (sts);               /* And return the status */
 }
 
-/*
- * Routine to get the next character or extended character from the input
+/* Routine to get the next character or extended character from the input
  * stream.  If we're reading from the real terminal, force a screen update
  * before we get the char.  Otherwise, we must be re-executing the command
  * string, so just return the next character.
  */
-
-int PASCAL NEAR get_char()
+int PASCAL NEAR get_char P0_(void)
 {
-    int c;
-    KEYTAB  *key;
+    int     c     = 0;
+    KEYTAB  *key  = NULL;
 
     /* See if we're re-executing: */
-
-    if ( cmd_reexecute >= 0 )   /* Is there an offset?      */
+    if ( cmd_reexecute >= 0 ) /* Is there an offset?  */
         if ( (c = cmd_buff[cmd_reexecute++]) != 0 )
             return (c);
 
-    /* Yes, return any character    */
+    /* Yes, return any character  */
 
-    /* We're not re-executing (or aren't any more).  Try for a real char
+    /*
+     * We're not re-executing (or aren't any more).  Try for a real char
      */
-    cmd_reexecute = -1;         /* Say we're in real mode again */
-    update(FALSE);              /* Pretty up the screen     */
+    cmd_reexecute = -1;                   /* Say we're in real mode again   */
+    update(FALSE);                        /* Pretty up the screen           */
     if ( posflag )
-        upmode();                       /* and the modeline, if need be.*/
-    if ( cmd_offset >= CMDBUFLEN - 1 ) {        /* If we're getting too big ... */
-        mlwrite(TEXT167);               /* Complain loudly and bitterly */
-
-/*               "? command too long" */
-        return (isterm);                /* And force a quit     */
+        upmode();                         /* and the modeline, if need be.  */
+    if ( cmd_offset >= CMDBUFLEN - 1 ) {  /* If we're getting too big ...   */
+        mlwrite(TEXT167);                 /* Complain loudly and bitterly   */
+                                          /*  "? command too long"          */
+        return (isterm);                  /* And force a quit               */
     }
 
     /*
@@ -433,53 +412,55 @@ int PASCAL NEAR get_char()
         if ( key->k_ptr.fp == cex || key->k_ptr.fp == f_meta ) {
             c = get_key();
 # if     SMOS
-            c = upperc(c&255) | (c & ~255);             /* Force to upper */
+            c = upperc(c&255) | (c & ~255); /* Force to upper */
 # else
-            c = upperc(c) | (c & ~255);                 /* Force to upper */
+            c = upperc(c) | (c & ~255);     /* Force to upper */
 # endif
             c |= (key->k_ptr.fp == cex) ? CTLX : META;
         }
     }
 
-    cmd_buff[cmd_offset++] = c;         /* Save the char for next time  */
-    cmd_buff[cmd_offset] = '\0';        /* And terminate the buffer */
+    cmd_buff[cmd_offset++] = c;           /* Save the char for next time  */
+    cmd_buff[cmd_offset] = '\0';          /* And terminate the buffer     */
 
-    return (c);                         /* Return the character     */
+    return (c);                           /* Return the character         */
 }
 
-/*
- * Hacky routine to re-eat a character.  This will save the character to be
+/* Hacky routine to re-eat a character.  This will save the character to be
  * re-eaten by redirecting the input call to a routine here.  Hack, etc.
  *
  * Come here on the next term.t_getchar call:
  */
-
-int PASCAL NEAR uneat()
+int PASCAL NEAR uneat P0_(void)
 {
-    int c;
+    int c = 0;
 
-    term.t_getchar = saved_get_char;            /* restore the routine address  */
-    c = eaten_char;             /* Get the re-eaten char    */
-    eaten_char = -1;            /* Clear the old char       */
+    term.t_getchar = saved_get_char;  /* restore the routine address    */
+    c = eaten_char;                   /* Get the re-eaten char          */
+    eaten_char = -1;                  /* Clear the old char             */
 
-    return (c);                         /* and return the last char */
+    return (c);                       /* and return the last char       */
 }
 
-VOID PASCAL NEAR reeat(c)
-int c;
+VOID PASCAL NEAR reeat P1_(int, c)
 {
-    if ( eaten_char != -1 )     /* If we've already been here   */
-        return;                         /* Don't do it again        */
+    if ( eaten_char != -1 )           /* If we've already been here     */
+        return;                       /* Don't do it again              */
 
-    eaten_char = c;             /* Else, save the char for later*/
-    saved_get_char = term.t_getchar;            /* Save the char get routine    */
-    term.t_getchar = uneat;     /* Replace it with ours     */
+    eaten_char = c;                   /* Else, save the char for later  */
+    saved_get_char = term.t_getchar;  /* Save the char get routine      */
+    term.t_getchar = uneat;           /* Replace it with ours           */
 }
 
 #else
-int PASCAL NEAR isearch(dir)
-int dir;
+int PASCAL NEAR isearch P1_(int, dir)
 {
+  return 0;
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

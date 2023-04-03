@@ -575,7 +575,7 @@ int f, n;       /* default flag and numeric argument */
 /*  pop up the indicated buffer
  */
 
-int PASCAL NEAR wpopup P1_(BUFFER *popbuf)
+int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
 {
     register EWINDOW *wp;
     register BUFFER *bp;
@@ -635,7 +635,7 @@ setwin: wp = wheadp;
 }
 
 /* scroll the next window up (back) a page */
-int PASCAL NEAR nextup P2_(int f, int n)  /* prefix flag and argument */
+int PASCAL NEAR nextup P2_(int, f, int, n)  /* prefix flag and argument */
 {
     nextwind(FALSE, 1);
     backpage(f, n);
@@ -645,7 +645,7 @@ int PASCAL NEAR nextup P2_(int f, int n)  /* prefix flag and argument */
 }
 
 /* scroll the next window down (forward) a page */
-int PASCAL NEAR nextdown P2_(int f, int n)  /* prefix flag and argument */
+int PASCAL NEAR nextdown P2_(int, f, int, n)  /* prefix flag and argument */
 {
     nextwind(FALSE, 1);
     forwpage(f, n);

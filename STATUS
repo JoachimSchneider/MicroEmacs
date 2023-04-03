@@ -54,7 +54,13 @@ Next steps to repair the (w|b)_doto-Problem:
 
 ===>
 
-(11) Make filter-buffer redoable and introduce filter-region.
+(11) _goto-eop goes to the end of the next paragrapg, when point is at
+    the last letter of a paragraph:
+
+    lastword.   or   lastword
+           ^                ^
+
+(12) Make filter-buffer redoable and introduce filter-region.
 
 
 [2021-11-07.00]
@@ -64,7 +70,22 @@ comments in the original code: This has to be recreated!
 
 These files have been reviewed:
 
-  src/input.c
-  src/eval.c
+File Name     Formated Comments   Func. Proto.    Init.   Warnings  EOF
+============================================================================
+src/exec.c      X                   X               X       X         X
+src/input.c     X                   X               X       X         X
+src/eval.c      X                                           X         X
+src/isearch.c   X                   X               X       X         X
+src/keyboard.c  X                   X               X       X         X
+h/estruct.h     X                                                     X
+h/eproto.h      X                                                     X
+
+
+[2023-03-02.00]
+- void * durch VOIDP ersetzen
+- weitermacehn in line.c
+- Warnungen wegmachen.
+- weitermachen in exec.c
+
 
 # EOF

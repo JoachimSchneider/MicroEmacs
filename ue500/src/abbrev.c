@@ -8,7 +8,7 @@
 #include        "edef.h"
 #include        "elang.h"
 
-VOID PASCAL NEAR ab_save P1_(char c)
+VOID PASCAL NEAR ab_save P1_(char, c)
 /* c: character to add to current word buffer */
 {
     char *s;            /* ptr to cycle chars */

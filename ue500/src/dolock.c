@@ -20,7 +20,7 @@
 char msg[] = TEXT35;
 /*           "another user" */
 
-char *dolock P1_(CONST char *fname)
+char *dolock P1_(CONST char *, fname)
 {
     int lun, status;
     status = _open(fname, OPREADACC|OPWRITEACC|OPWRITELOCK, -1, &lun);
@@ -29,7 +29,7 @@ char *dolock P1_(CONST char *fname)
     return (msg);
 }
 
-char *undolock P1_(CONST char *fname)
+char *undolock P1_(CONST char *, fname)
 {
     int i, j, k, lun, status;
     char xname[95], c;
@@ -106,7 +106,7 @@ extern int errno;
  *********************/
  
 /* get name component of filespec:  */
-static CONST char *parse_name P1_(CONST char *filespec)
+static CONST char *parse_name P1_(CONST char *, filespec)
 {
     CONST char  *rname  = &filespec[strlen(filespec) - 1];
 
@@ -126,7 +126,7 @@ static CONST char *parse_name P1_(CONST char *filespec)
         return (filespec);
 }
 
-static char *parse_path P1_(CONST char *filespec)
+static char *parse_path P1_(CONST char *, filespec)
 {
     static char rbuff[NFILEN];
     char        *rname  = NULL;
@@ -169,7 +169,7 @@ static char *parse_path P1_(CONST char *filespec)
     return (rbuff);
 }
 
-static CONST char *parse_drive P1_(CONST char *filespec)
+static CONST char *parse_drive P1_(CONST char *, filespec)
 {
     static char rbuff[NFILEN];
     char        *rname  = NULL;
@@ -191,7 +191,7 @@ static CONST char *parse_drive P1_(CONST char *filespec)
 }
 
 /* trim line terminators and whitespace from end of string  */
-static VOID term_trim P1_(char *buf)
+static VOID term_trim P1_(char *, buf)
 {
     char *c;  /* ptr to current character to examine */
 
@@ -205,7 +205,7 @@ static VOID term_trim P1_(char *buf)
     return;
 }
 
-char *dolock P1_(CONST char *filespec /* full file spec of file to lock */)
+char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 {
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
@@ -416,7 +416,7 @@ char *dolock P1_(CONST char *filespec /* full file spec of file to lock */)
  *
  *********************/
 
-char *undolock P1_(CONST char *filespec /* filespec to unlock */)
+char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
 {
     char filename[NFILEN];          /* name of file to lock */
     char pathname[NFILEN];          /* path leading to file to lock */

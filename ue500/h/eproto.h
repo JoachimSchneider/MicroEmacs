@@ -1,9 +1,19 @@
-/*
- * EPROTO: Global function prototypes and declarations MicroEMACS 4.00
+/*======================================================================
+ * EPROTO:  Global function prototypes and declarations MicroEMACS 4.00
  *
- * written by Daniel Lawrence based on code by Dave G. Conroy,
- * Steve Wilhite and George Jones
- */
+ *          written by Daniel Lawrence based on code by Dave G. Conroy,
+ *          Steve Wilhite and George Jones
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef EPROTO_H_
+#define EPROTO_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
 
 
 /**********************************************************************/
@@ -18,48 +28,54 @@
 #include <time.h>
 /**********************************************************************/
 
+/**********************************************************************/
+#include "estruct.h"
+/**********************************************************************/
+
 
 /**********************************************************************/
 #if     PROTO
-# define P0_(x0)                                    (void)
-# define P1_(x1)                                    (x1)
-# define P2_(x1, x2)                                (x1, x2)
-# define P3_(x1, x2, x3)                            (x1, x2, x3)
-# define P4_(x1, x2, x3, x4)                        (x1, x2, x3, x4)
-# define P5_(x1, x2, x3, x4, x5)                    (x1, x2, x3, x4, x5)
-# define P6_(x1, x2, x3, x4, x5, x6)                (x1, x2, x3, x4, x5, x6)
-# define P7_(x1, x2, x3, x4, x5, x6, x7)            (x1, x2, x3, x4, x5, x6, x7)
-# define P8_(x1, x2, x3, x4, x5, x6, x7, x8)        (x1, x2, x3, x4, x5, x6, x7, x8)
-# define P9_(x1, x2, x3, x4, x5, x6, x7, x8, x9)    (x1, x2, x3, x4, x5, x6, x7, x8, x9)
-# define V2_  P2_
-# define V3_  P3_
-# define V4_  P4_
-# define V5_  P5_
-# define V6_  P6_
-# define V7_  P7_
-# define V8_  P8_
-# define V9_  P9_
-# define DCL(args)                                args
+# define P0_(x0)                        (void)
+# define P1_(t1, x1)                                                                  \
+  (t1 x1)
+# define P2_(t1, x1, t2, x2)                                                          \
+  (t1 x1, t2 x2)
+# define P3_(t1, x1, t2, x2, t3, x3)                                                  \
+  (t1 x1, t2 x2, t3 x3)
+# define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4)
+# define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5)
+# define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6)
+# define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7)
+# define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8)
+# define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
+  (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
+# define DCL(args)                      args
 #else
-# define P0_(x0)                                  ()
-# define P1_(x1)                                  () x1;
-# define P2_(x1, x2)                              () x1; x2;
-# define P3_(x1, x2, x3)                          () x1; x2; x3;
-# define P4_(x1, x2, x3, x4)                      () x1; x2; x3; x4;
-# define P5_(x1, x2, x3, x4, x5)                  () x1; x2; x3; x4; x5;
-# define P6_(x1, x2, x3, x4, x5, x6)              () x1; x2; x3; x4; x5; x6;
-# define P7_(x1, x2, x3, x4, x5, x6, x7)          () x1; x2; x3; x4; x5; x6; x7;
-# define P8_(x1, x2, x3, x4, x5, x6, x7, x8)      () x1; x2; x3; x4; x5; x6; x7; x8;
-# define P9_(x1, x2, x3, x4, x5, x6, x7, x8, x9)  () x1; x2; x3; x4; x5; x6; x7; x8; x9;
-# define V2_(x1, x2)                              () x1;
-# define V3_(x1, x2, x3)                          () x1; x2;
-# define V4_(x1, x2, x3, x4)                      () x1; x2; x3;
-# define V5_(x1, x2, x3, x4, x5)                  () x1; x2; x3; x4;
-# define V6_(x1, x2, x3, x4, x5, x6)              () x1; x2; x3; x4; x5;
-# define V7_(x1, x2, x3, x4, x5, x6, x7)          () x1; x2; x3; x4; x5; x6;
-# define V8_(x1, x2, x3, x4, x5, x6, x7, x8)      () x1; x2; x3; x4; x5; x6; x7;
-# define V9_(x1, x2, x3, x4, x5, x6, x7, x8, x9)  () x1; x2; x3; x4; x5; x6; x7; x8;
-# define DCL(args)                                ()
+# define P0_(x0)                        ()
+# define P1_(t1, x1)                                                                  \
+  (x1)                                  t1 x1;
+# define P2_(t1, x1, t2, x2)                                                          \
+  (x1, x2)                              t1 x1; t2 x2;
+# define P3_(t1, x1, t2, x2, t3, x3)                                                  \
+  (x1, x2, x3)                          t1 x1; t2 x2; t3 x3;
+# define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
+  (x1, x2, x3, x4)                      t1 x1; t2 x2; t3 x3; t4 x4;
+# define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
+  (x1, x2, x3, x4, x5)                  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5;
+# define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
+  (x1, x2, x3, x4, x5, x6)              t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6;
+# define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
+  (x1, x2, x3, x4, x5, x6, x7)          t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7;
+# define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
+  (x1, x2, x3, x4, x5, x6, x7, x8)      t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8;
+# define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
+  (x1, x2, x3, x4, x5, x6, x7, x8, x9)  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8; t9 x9;
+# define DCL(args)                      ()
 #endif
 /**********************************************************************/
 
@@ -83,7 +99,7 @@ extern int xvsnprintf DCL((char *s, size_t n, CONST char *fmt, va_list ap));
 /* be the result of an unrestricted write.                              */
 /* Returns the number of characters (not including the trailing '\0')   */
 /* that would have been written if n were large enough.                 */
-extern int  xsnprintf DCL((char *s, size_t n, CONST char *fmt, ...));
+extern int  xsnprintf(char *s, size_t n, CONST char *fmt, ...);
 
 /* Like GNU C vasprintf:                                        */
 /* Allocate (using malloc()) a string large enough to hold the  */
@@ -93,7 +109,7 @@ extern int xvasprintf DCL((char **ret, CONST char *fmt, va_list ap));
 /* Like GNU C asprintf:                                         */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-extern int xasprintf DCL((char **ret, CONST char *fmt, ...));
+extern int xasprintf(char **ret, CONST char *fmt, ...);
 
 extern char *xstrdup DCL((CONST char *str));
 
@@ -117,7 +133,7 @@ extern FILE *GetTrcFP DCL((void));
 
 extern int         DebugMessage_lnno_;
 extern CONST char *DebugMessage_fname_;
-extern int         DebugMessage DCL((CONST char *fmt, ...));
+extern int         DebugMessage(CONST char *fmt, ...);
 #if ( defined( EMACS_TRC) )
 # define  TRC(arg)  do {                        \
         DebugMessage_fname_ = __FILE__;         \
@@ -249,7 +265,7 @@ extern int         DebugMessage DCL((CONST char *fmt, ...));
 #ifndef maindef
 extern char *uitostr_memacs DCL((unsigned int i));
 #else
-char *uitostr_memacs P1_(unsigned int i)
+char *uitostr_memacs P1_(unsigned int, i)
 {
     unsigned int  base  = 10;
 
@@ -1174,7 +1190,7 @@ typedef int PASCAL NEAR (*ue_fnc_T) DCL((int, int));
 /* Filter function used by TransformRegion():
  * Output string must be created by malloc(). */
 typedef char  *(*filter_func_T) DCL((CONST char *rstart, CONST char *rtext,
-                                void *argp));
+                                VOIDP argp));
 
 #if     WINDOW_MSWIN
 extern char * PASCAL fullpathname  DCL((char *PathName, int Nbuf));
@@ -1225,7 +1241,7 @@ extern int PASCAL NEAR undo DCL((int f, int n));
 extern int PASCAL NEAR undo_delete DCL((int f, int n));
 extern int PASCAL NEAR undo_list DCL((int f, int n));
 extern char *room DCL((int));
-extern char *reroom DCL((void *, int));
+extern char *reroom DCL((VOIDP, int));
 
 extern int PASCAL NEAR ab_insert DCL((char *sym, char *expansion));
 extern char *PASCAL NEAR ab_lookup DCL((char *sym));
@@ -1622,9 +1638,9 @@ extern int PASCAL NEAR strinc DCL((char *source, char *sub));
 extern int PASCAL NEAR swapmark DCL((int f, int n));
 extern int PASCAL NEAR swbuffer DCL((BUFFER *bp));
 extern int PASCAL NEAR tab DCL((int f, int n));
-extern int TransformBuffer DCL((filter_func_T filter, void *argp));
-extern int TransformParagraph DCL((filter_func_T filter, void *argp));
-extern int TransformRegion DCL((filter_func_T filter, void *argp));
+extern int TransformBuffer DCL((filter_func_T filter, VOIDP argp));
+extern int TransformParagraph DCL((filter_func_T filter, VOIDP argp));
+extern int TransformRegion DCL((filter_func_T filter, VOIDP argp));
 extern int PASCAL NEAR trBufFill DCL((int f, int n));
 extern int PASCAL NEAR trBufTest_ DCL((int f, int n));
 extern int PASCAL NEAR trParFill DCL((int f, int n));
@@ -1669,7 +1685,7 @@ extern VOID CDECL NEAR mlwrite DCL((va_alist));
 extern VOID CDECL NEAR mlwrite DCL((va_dcl));
 # endif /* GCC */
 #else
-extern VOID CDECL NEAR mlwrite DCL((char *fmt, ...));
+extern VOID CDECL NEAR mlwrite(char *fmt, ...);
 #endif
 extern VOID PASCAL NEAR ab_init DCL((void));
 extern VOID PASCAL NEAR ab_save DCL((char c));
@@ -1770,6 +1786,10 @@ extern char *realloc DCL((char *block, int siz));
 /**********************************************************************/
 
 
+
+/*====================================================================*/
+#endif/**#ifndef EPROTO_H_**/
+/*====================================================================*/
 
 /**********************************************************************/
 /* EOF                                                                */

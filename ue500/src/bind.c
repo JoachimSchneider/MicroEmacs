@@ -18,7 +18,7 @@
  *  bring up a fake buffer and read the help
  * file into it with view mode
  */
-int PASCAL NEAR help P2_(int f, int n /* prefix flag and argument */)
+int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 {
     register BUFFER *bp;        /* buffer pointer to help */
     CONST char      *fname;     /* file name of help file */
@@ -906,7 +906,7 @@ KEYTAB *key;    /* key binding to return a name of */
 /* fncmatch:    match fname to a function in the names table and return any
  * match or NULL if none
  */
-ue_fnc_T fncmatch P1_(char *fname)
+ue_fnc_T fncmatch P1_(char *, fname)
 {
     int nval;
 
@@ -1079,8 +1079,8 @@ int f, n;       /* agruments to C function */
 
 /* set a KEYTAB to the given name of the given type */
 
-int set_key P2_(KEYTAB *key,  /* ptr to key to set          */
-                char *name    /* name of function or buffer */
+int set_key P2_(KEYTAB *, key,  /* ptr to key to set          */
+                char *, name    /* name of function or buffer */
               )
 {
     int (PASCAL NEAR *ktemp)();         /* temp function pointer to assign */

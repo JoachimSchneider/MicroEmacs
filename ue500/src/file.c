@@ -21,7 +21,7 @@
  * the name of the file, and call the standard
  * "read a file into the current buffer" code. Bound to "C-X C-R".
  */
-int PASCAL NEAR fileread P2_(int f, int n)
+int PASCAL NEAR fileread P2_(int, f, int, n)
   /* default and numeric arguments (unused) */
 {
     char *fname;        /* file name to read */

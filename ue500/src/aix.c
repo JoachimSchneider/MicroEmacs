@@ -693,7 +693,7 @@ unsigned char grabnowait()
 /*
  * qin - queue in a character to the input buffer.
  */
-VOID qin P1_(int ch)
+VOID qin P1_(int, ch)
 {
     /* Check for overflow */
     if ( inbuft == &inbuf[sizeof (inbuf)] ) {
@@ -710,7 +710,7 @@ VOID qin P1_(int ch)
 /*
  * qrep - replace a key sequence with a single character in the input buffer.
  */
-VOID qrep P1_(int ch)
+VOID qrep P1_(int, ch)
 {
     inbuft = inbuf;
     qin(ch);

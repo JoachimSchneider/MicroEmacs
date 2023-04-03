@@ -18,9 +18,9 @@
 
 /* insert an editing operation at the top of the current buffer's undo stack. */
 
-VOID undo_insert P3_(OPTYPE op_type,  /* type of operation being recorded */
-                     long count,      /* operand count                    */
-                     OBJECT op_erand  /* the operand of the operation     */
+VOID undo_insert P3_(OPTYPE,  op_type,  /* type of operation being recorded */
+                     long,    count,    /* operand count                    */
+                     OBJECT,  op_erand  /* the operand of the operation     */
                   )
 {
     int undo_size;      /* size of the undo object */
@@ -387,7 +387,7 @@ VOID undo_dump P0_(void)
 /* ROOM:   Allocate memory using malloc() on failure, discard oldest undo
  * information and retry
  */
-char *room P1_(int nbytes /* number of bytes to malloc() */)
+char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 {
     void      *ptr  = NULL;   /* temporary pointer */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
@@ -441,7 +441,7 @@ nextbuf:        bp = getoldb();
 /* RE-ROOM: Allocate memory using realloc() on failure, discard oldest undo
  * information and retry
  */
-char *reroom P2_(void *orig_ptr, int nbytes /* number of bytes to malloc() */)
+char *reroom P2_(void *, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
 {
     void *ptr;          /* temporary pointer */
     BUFFER *bp;         /* buffer to dealloc memory from */

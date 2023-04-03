@@ -209,7 +209,7 @@ PASCAL NEAR ansicres()  /* change screen resolution */
     return (TRUE);
 }
 
-PASCAL NEAR spal P1_(char *dummy)   /* change pallette settings */
+PASCAL NEAR spal P1_(char *, dummy) /* change pallette settings */
 {
     /* none for now */
 }

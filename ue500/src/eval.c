@@ -1070,10 +1070,10 @@ int n;          /* numeric arg (ignored here) */
 /* find a variables type and name */
 
 VOID PASCAL NEAR findvar P4_(
-        char  *var,   /* name of var to get */
-        VDESC *vd,    /* structure to hold type and ptr */
-        int   size,   /* size of var array */
-        int   scope   /* intended scope of any created user variables */
+        char  *,  var,  /* name of var to get */
+        VDESC *,  vd,   /* structure to hold type and ptr */
+        int,      size, /* size of var array */
+        int,      scope /* intended scope of any created user variables */
     )
 {
     register int    vnum  = 0;      /* subscript in varable arrays */
@@ -1785,7 +1785,7 @@ char *token;    /* token to analyze */
 }
 
 /* getval:  Find the value of a token */
-CONST char *PASCAL NEAR getval P1_(char *token  /* token to evaluate */)
+CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
 {
     register int    status  = 0;      /* error return */
     register BUFFER *bp     = NULL;   /* temp buffer pointer */

@@ -1,15 +1,18 @@
-/*
- * The functions in this file are a general set of line management utilities.
- * They are the only routines that touch the text. They also touch the buffer
- * and window structures, to make sure that the necessary updating gets done.
- * There are routines in this file that handle the kill buffer too. It isn't
- * here for any good reason.
+/*======================================================================
  *
- * Note that this code only updates the dot and mark values in the window list.
- * Since all the code acts on the current window, the buffer that we are editing
- * must be being displayed, which means that "b_nwnd" is non zero, which means
- * that the dot and mark values in the buffer headers are nonsense.
- */
+ * The functions in this file are a general set of line management
+ * utilities. They are the only routines that touch the text. They also
+ * touch the buffer and window structures, to make sure that the
+ * necessary updating gets done. There are routines in this file that
+ * handle the kill buffer too. It isn't here for any good reason.
+
+ * Note that this code only updates the dot and mark values in the
+ * window list. Since all the code acts on the current window, the
+ * buffer that we are editing must be being displayed, which means that
+ * "b_nwnd" is non zero, which means that the dot and mark values in
+ * the buffer headers are nonsense.
+ *
+ *====================================================================*/
 
 #include        <stdio.h>
 #include        "estruct.h"
@@ -21,19 +24,14 @@
 
 static long last_size = -1L;    /* last # of bytes yanked */
 
-/*
- * This routine allocates a block of memory large enough to hold a LINE
+/* This routine allocates a block of memory large enough to hold a LINE
  * containing "used" characters plus one trailing '\0'.
  * Return a pointer to the new block, or NULL if there isn't any memory
  * left. Print a message in the message line if no space.
  */
-
-LINE *PASCAL NEAR lalloc(used)
-
-register int used;
-
+LINE *PASCAL NEAR lalloc P1_(register int, used)
 {
-    register LINE   *lp;
+    register LINE *lp = NULL;
 
     if ( ( lp = (LINE *)room( sizeof (LINE) + used ) ) == NULL ) {
         mlabort(TEXT94);
@@ -58,19 +56,17 @@ register int used;
     return (lp);
 }
 
-/*
- * Delete line "lp". Fix all of the links that might point at it (they are moved
+/* Delete line "lp". Fix all of the links that might point at it (they are moved
  * to offset 0 of the next line. Unlink the line from whatever buffer it might
  * be in. Release the memory. The buffers are updated too; the magic conditions
  * described in the above comments don't hold here.
  */
-int PASCAL NEAR lfree(lp)
-register LINE   *lp;
+int PASCAL NEAR lfree P1_(register LINE *, lp)
 {
-    register BUFFER *bp;
-    SCREEN_T *scrp;             /* screen to fix pointers in */
-    register EWINDOW *wp;
-    register int cmark;                 /* current mark */
+    register BUFFER   *bp     = NULL;
+    SCREEN_T          *scrp   = NULL; /* screen to fix pointers in  */
+    register EWINDOW  *wp     = NULL;
+    register int      cmark   = 0;    /* current mark               */
 
     /* in all screens.... */
     scrp = first_screen;
@@ -125,20 +121,20 @@ register LINE   *lp;
         }
     }
 #endif
+
+    return 0;
 }
 
-/*
- * This routine gets called when a character is changed in place in the current
+/* This routine gets called when a character is changed in place in the current
  * buffer. It updates all of the required flags in the buffer and window system.
  * The flag used is passed as an argument; if the buffer is being displayed in
  * more than 1 window we change EDIT t HARD. Set MODE if the mode line needs to
  * be updated (the "*" has to be set).
  */
-int PASCAL NEAR lchange(flag)
-register int flag;
+int PASCAL NEAR lchange P1_(register int, flag)
 {
-    register EWINDOW *wp;
-    SCREEN_T *scrp;             /* screen to fix pointers in */
+    register EWINDOW  *wp   = NULL;
+    SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
 
     if ( curbp->b_nwnd != 1 )                   /* Ensure hard.     */
         flag = WFHARD;
@@ -161,14 +157,16 @@ register int flag;
         /* next screen! */
         scrp = scrp->s_next_screen;
     }
+
+    return 0;
 }
 
-int PASCAL NEAR insspace(f, n)  /* insert spaces forward into text */
-
-int f, n;       /* default flag and numeric argument */
-
+/* insert spaces forward into text
+ */
+int PASCAL NEAR insspace P2_(int, f, int, n)
+/* f, n:  default flag and numeric argument */
 {
-    register int status;
+    register int  status  = 0;
 
     if ( ( status = linsert(n, ' ') ) == TRUE )
         status = backchar(f, n);
@@ -176,14 +174,12 @@ int f, n;       /* default flag and numeric argument */
     return status;
 }
 
-/*
- * linstr -- Insert a string at the current point
+/* linstr -- Insert a string at the current point
  */
-
-int PASCAL NEAR linstr P1_(CONST char *instr)
+int PASCAL NEAR linstr P1_(CONST char *, instr)
 {
-    register int status;
-    register int saved_undo;            /* saved undo flag */
+    register int status     = 0;
+    register int saved_undo = 0;  /* saved undo flag  */
 
     status = TRUE;
     if ( instr != NULL && *instr != '\0' ) {
@@ -210,8 +206,7 @@ int PASCAL NEAR linstr P1_(CONST char *instr)
     return (status);
 }
 
-/*
- * Insert "n" copies of the character "c" at the current location of dot. In the
+/* Insert "n" copies of the character "c" at the current location of dot. In the
  * easy case all that happens is the text is stored in the line. In the hard
  * case, the line has to be reallocated. When the window list is updated, take
  * special care; I screwed it up once. You always update dot in the current
@@ -219,19 +214,18 @@ int PASCAL NEAR linstr P1_(CONST char *instr)
  * the place where you did the insert. Return TRUE if all is well, and FALSE on
  * errors.
  */
-
-int PASCAL NEAR linsert P2_(int n, char c)
+int PASCAL NEAR linsert P2_(int, n, char, c)
 {
-    register char     *cp1;
-    register char     *cp2;
-    register LINE     *lp1;
-    register LINE     *lp2;
-    register LINE     *lp3;
-    register int      doto;
-    register int      i;
-    register EWINDOW  *wp;
-    SCREEN_T          *scrp;    /* screen to fix pointers in */
-    int               cmark;    /* current mark */
+    register char     *cp1  = NULL;
+    register char     *cp2  = NULL;
+    register LINE     *lp1  = NULL;
+    register LINE     *lp2  = NULL;
+    register LINE     *lp3  = NULL;
+    register int      doto  = 0;
+    register int      i     = 0;
+    register EWINDOW  *wp   = NULL;
+    SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
+    int               cmark = 0;    /* current mark               */
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -333,12 +327,10 @@ int PASCAL NEAR linsert P2_(int n, char c)
     return (TRUE);
 }
 
-/*
- * Overwrite a character into the current line at the current position
- *
+/* Overwrite a character into the current line at the current position
  */
-
-int PASCAL NEAR lowrite P1_(char c /* character to overwrite on current position */)
+int PASCAL NEAR lowrite P1_(char, c)
+/* c: character to overwrite on current position  */
 {
     if ( get_w_doto(curwp) < get_lused(curwp->w_dotp) &&
          ( (lgetc(curwp->w_dotp, get_w_doto(curwp)) != '\t' || tabsize == 0) ||
@@ -348,14 +340,9 @@ int PASCAL NEAR lowrite P1_(char c /* character to overwrite on current position
     return ( linsert(1, c) );
 }
 
-/*
- * lover -- Overwrite a string at the current point
+/* lover -- Overwrite a string at the current point
  */
-
-int PASCAL NEAR lover(ostr)
-
-char    *ostr;
-
+int PASCAL NEAR lover P1_(char *, ostr)
 {
     register int status = TRUE;
 
@@ -375,15 +362,15 @@ char    *ostr;
     return (status);
 }
 
-/*
- * Insert a newline into the buffer at the current location of dot in the
+/*HEREHEREHEREHERE*/
+/* Insert a newline into the buffer at the current location of dot in the
  * current window. The funny ass-backwards way it does things is not a botch;
  * it just makes the last line in the file not a special case. Return TRUE if
  * everything works out and FALSE on error (memory allocation failure). The
  * update of dot and mark is a bit easier then in the above case, because the
  * split forces more updating.
  */
-int PASCAL NEAR lnewline()
+int PASCAL NEAR lnewline P0_(void)
 {
     register char     *cp1;
     register char     *cp2;
@@ -452,25 +439,20 @@ int PASCAL NEAR lnewline()
     return (TRUE);
 }
 
-/*
+/* LDELETE:
  *
- *  LDELETE:
- *
- *       This function deletes "n" bytes, starting at dot. Positive n deletes
- * forward, negative n deletes backwords. It understands how to deal with end of
- * lines, and with two byte characters. It returns TRUE if all of the characters
- * were deleted, and FALSE if they were not (because dot ran into the buffer
- * end). The "kflag" is TRUE if the text should be put in the kill buffer.
- *
+ * This function deletes "n" bytes, starting at dot. Positive n deletes
+ * forward, negative n deletes backwords. It understands how to deal
+ * with end of lines, and with two byte characters. It returns TRUE if
+ * all of the characters were deleted, and FALSE if they were not
+ * (because dot ran into the buffer end). The "kflag" is TRUE if the
+ * text should be put in the kill buffer.
  */
-
 #undef  FUNC_
 #define FUNC_ ldelete
-int PASCAL NEAR FUNC_(n, kflag)
-
-long n;         /* # of chars to delete */
-int kflag;      /* put killed text in kill buffer flag */
-
+int PASCAL NEAR FUNC_ P2_(long, n, int, kflag)
+/* n:     # of chars to delete                */
+/* kflag: put killed text in kill buffer flag */
 {
     register char     *cp1;
     register char     *cp2;
@@ -700,10 +682,11 @@ int kflag;      /* put killed text in kill buffer flag */
     return (TRUE);
 }
 
-/* getctext:    grab and return a string with the text of the current line
+/* GETCTEXT:
+ *
+ * grab and return a string with the text of the current line
  */
-
-char *PASCAL NEAR getctext P1_(char *rline)
+char *PASCAL NEAR getctext P1_(char *, rline)
 {
     register LINE *lp;          /* line to copy */
     register int size;          /* length of line to return */
@@ -726,12 +709,10 @@ char *PASCAL NEAR getctext P1_(char *rline)
     return (rline);
 }
 
-/* putctext:    replace the current line with the passed in text    */
-
-int PASCAL NEAR putctext(iline)
-
-char *iline;    /* contents of new line */
-
+/* PUTCTEXT:
+ * replace the current line with the passed in text
+ */
+int PASCAL NEAR putctext P1_(char *, iline/* contents of new line */)
 {
     register int status;
 
@@ -750,8 +731,7 @@ char *iline;    /* contents of new line */
     return (status);
 }
 
-/*
- * Delete a newline. Join the current line with the next line. If the next line
+/* Delete a newline. Join the current line with the next line. If the next line
  * is the magic header line always return TRUE; merging the last line with the
  * header line can be thought of as always being a successful operation, even if
  * nothing is done, and this makes the kill buffer work "right". Easy cases can
@@ -759,7 +739,7 @@ char *iline;    /* contents of new line */
  * about in memory. Return FALSE on error and TRUE if all looks ok. Called by
  * "ldelete" only.
  */
-int PASCAL NEAR ldelnewline()
+int PASCAL NEAR ldelnewline P0_(void)
 {
     register char   *cp1;
     register char   *cp2;
@@ -873,13 +853,12 @@ int PASCAL NEAR ldelnewline()
     return (TRUE);
 }
 
-/*  Add a new line to the end of the indicated buffer.
- *       return FALSE if we run out of memory note that this works on
- * non-displayed buffers as well!
+/* Add a new line to the end of the indicated buffer.
+ * - Return FALSE if we run out of memory.
+ * - Note that this works on non-displayed buffers as well!
  */
-
-int PASCAL NEAR addline P2_(BUFFER *bp, /* buffer to add text to  */
-                            char *text  /* line to add            */
+int PASCAL NEAR addline P2_(BUFFER *, bp,   /* buffer to add text to  */
+                            char *,   text  /* line to add            */
                           )
 {
     register LINE   *lp;
@@ -909,13 +888,11 @@ int PASCAL NEAR addline P2_(BUFFER *bp, /* buffer to add text to  */
     return (TRUE);
 }
 
-/*
- * Delete all of the text saved in the kill buffer. Called by commands when a
+/* Delete all of the text saved in the kill buffer. Called by commands when a
  * new kill context is being created. The kill buffer array is released, just in
  * case the buffer has grown to immense size. No errors.
  */
-
-VOID PASCAL NEAR kdelete()
+VOID PASCAL NEAR kdelete P0_(void)
 {
     KILL *kp;           /* ptr to scan kill buffer chunk list */
 
@@ -949,8 +926,7 @@ VOID PASCAL NEAR kdelete()
 /*  next_kill:  advance to the next position in the kill ring, pushing the
  * current kill buffer and clearing what will be the new kill buffer
  */
-
-VOID PASCAL NEAR next_kill()
+VOID PASCAL NEAR next_kill P0_(void)
 {
     /* advance to the next kill ring entry */
     kill_index++;
@@ -961,13 +937,11 @@ VOID PASCAL NEAR next_kill()
     kdelete();
 }
 
-/*
- * Insert a character to the kill buffer, allocating new chunks as needed.
+/* Insert a character to the kill buffer, allocating new chunks as needed.
  * Return TRUE if all is well, and FALSE on errors.
  */
-
-int PASCAL NEAR kinsert P2_(int direct, /* direction (FORWARD/REVERSE) to insert characters */
-                            char c      /* character to insert in the kill buffer           */
+int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to insert characters */
+                            char, c       /* character to insert in the kill buffer           */
                           )
 {
     KILL *nchunk;       /* ptr to newly roomed chunk */
@@ -1047,18 +1021,14 @@ int PASCAL NEAR kinsert P2_(int direct, /* direction (FORWARD/REVERSE) to insert
     return (TRUE);
 }
 
-/*
- * Yank text back from the kill buffer. This is really easy. All of the work is
+/* Yank text back from the kill buffer. This is really easy. All of the work is
  * done by the standard insert routines. All you do is run the loop, and check
  * for errors. Bound to "C-Y".
  */
+#define Char_insert(a)  ( (a) == '\r' ? lnewline() : linsert(1, (a)) )
 
-#define Char_insert(a)  ( a == '\r' ? lnewline() : linsert(1, a) )
-
-int PASCAL NEAR yank(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR yank P2_(int, f, int, n)
+/* f, n:  prefix flag and argument  */
 {
     register int counter;       /* counter into kill buffer data */
     register char *sp;          /* pointer into string to insert */
@@ -1139,10 +1109,8 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-int PASCAL NEAR cycle_ring(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR cycle_ring P2_(int, f, int, n)
+/* f, n:  prefix flag and argument  */
 {
     register int orig_index;            /* original kill_index */
 
@@ -1163,10 +1131,8 @@ int f, n;        /* prefix flag and argument */
     return TRUE;
 }
 
-int PASCAL NEAR yank_pop(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR yank_pop P2_(int, f, int, n)
+/* f, n:  prefix flag and argument  */
 {
     /* defaulted non first call will cycle by 1 */
     if ( (lastflag & CFYANK) && (f == FALSE) ) {
@@ -1185,10 +1151,8 @@ int f, n;        /* prefix flag and argument */
     return ( yank(FALSE, 1) );
 }
 
-int PASCAL NEAR clear_ring(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR clear_ring P2_(int, f, int, n)
+/* f, n:  prefix flag and argument  */
 {
     register int index;
 
@@ -1201,7 +1165,7 @@ int f, n;        /* prefix flag and argument */
 }
 
 #if     0
-dispkill()
+dispkill P0_(void)
 {
     KILL *kptr;
     int index;
@@ -1246,3 +1210,9 @@ dispkill()
 
 }
 #endif
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

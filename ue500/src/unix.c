@@ -633,7 +633,7 @@ unsigned char grabnowait()
 /*
  * qin - queue in a character to the input buffer.
  */
-VOID qin P1_(int ch)
+VOID qin P1_(int, ch)
 {
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
@@ -650,7 +650,7 @@ VOID qin P1_(int ch)
 /*
  * qrep - replace a key sequence with a single character in the input buffer.
  */
-VOID qrep P1_(int ch)
+VOID qrep P1_(int, ch)
 {
     inbuft = inbuf;
     qin(ch);
@@ -1099,7 +1099,7 @@ int color;                      /* Color to set         */
 # endif /* COLOR */
 
 /** Set palette **/
-int spal P1_(char * cmd /* Palette command */)
+int spal P1_(char *, cmd  /* Palette command */)
 {
     int   code      = 0;
     int   dokeymap  = 0;
@@ -1459,7 +1459,7 @@ static int IsIn(const char c, const char *set, int len)
 # define IsLetter(c)     ( IsUpper( (c) ) || IsLower( (c) ) )
 
 #if(0)/**NOT_USED**/
-static char ToUpper P1_(const char c)
+static char ToUpper P1_(const char, c)
 {
     int i   = 0;
 
@@ -1472,7 +1472,7 @@ static char ToUpper P1_(const char c)
     return c;
 }
 
-static char ToLower P1_(const char c)
+static char ToLower P1_(const char, c)
 {
     int i   = 0;
 

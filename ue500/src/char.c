@@ -18,7 +18,7 @@
  * itself).
  */
 
-int PASCAL NEAR is_letter P1_(char ch)
+int PASCAL NEAR is_letter P1_(char, ch)
 {
     return ( is_upper(ch) || is_lower(ch) );
 }
@@ -27,7 +27,7 @@ int PASCAL NEAR is_letter P1_(char ch)
  * lower to uppercase translation table.
  */
 
-int PASCAL NEAR is_lower P1_(char ch)
+int PASCAL NEAR is_lower P1_(char, ch)
 {
     return (lowcase[C2I(ch)] != 0);
 }
@@ -36,7 +36,7 @@ int PASCAL NEAR is_lower P1_(char ch)
  * upper to lowercase translation table.
  */
 
-int PASCAL NEAR is_upper P1_(char ch)
+int PASCAL NEAR is_upper P1_(char, ch)
 {
     return (upcase[C2I(ch)] != 0);
 }
@@ -86,8 +86,8 @@ unsigned char *cp;      /* ptr to character to lowercase */
         *cp = upcase[C2I(*cp)];
 }
 
-int PASCAL NEAR upperc P1_(char ch) /* return the upper case equivalant of
-                                     * character ch */
+int PASCAL NEAR upperc P1_(char, ch)  /* return the upper case equivalant of
+                                       * character ch */
 {
     if ( is_lower(ch) )
         return (lowcase[C2I(ch)]);
@@ -95,8 +95,8 @@ int PASCAL NEAR upperc P1_(char ch) /* return the upper case equivalant of
         return (ch);
 }
 
-int PASCAL NEAR lowerc P1_(char ch) /* return the lower case equivalant of
-                                     * character ch */
+int PASCAL NEAR lowerc P1_(char, ch)  /* return the lower case equivalant of
+                                       * character ch */
 {
     if ( is_upper(ch) )
         return (upcase[C2I(ch)]);

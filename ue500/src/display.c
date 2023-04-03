@@ -1014,7 +1014,7 @@ VOID PASCAL NEAR update_size()
  * command.
  */
 
-int PASCAL NEAR pop P1_(BUFFER *popbuf)
+int PASCAL NEAR pop P1_(BUFFER *, popbuf)
 {
     register int index;         /* index into the current output line */
     register int llen;          /* length of the current output line */
@@ -1868,7 +1868,7 @@ va_dcl          /* variable argument list arg1 = format string arg2+ = arguments
     va_end(ap);
 }
 # else
-VOID CDECL NEAR mlwrite V2_(char *fmt, ...)
+VOID CDECL NEAR mlwrite (char *fmt, ...)
 /* variable argument list arg1 = format string arg2+ = arguments in that string
  */
 {

@@ -1117,7 +1117,7 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-int PASCAL NEAR unarg P2_(int f, int n) /* dummy function for binding to universal-argument */
+int PASCAL NEAR unarg P2_(int, f, int, n) /* dummy function for binding to universal-argument */
 {
     return (TRUE);
 }
