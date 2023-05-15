@@ -807,7 +807,7 @@ DELTA *tbl;
  */
 VOID PASCAL NEAR setjtable()
 {
-	make_delta(pat, &deltapat);
+	make_delta((char *)pat, &deltapat);
 	make_delta(strrev(xstrcpy((char *)tap, (char *)pat)), &tapatled);
 }
 
@@ -815,9 +815,13 @@ VOID PASCAL NEAR setjtable()
  * eq -- Compare two characters.  The "bc" comes from the buffer, "pc"
  *	from the pattern.  If we are not in EXACT mode, fold out the case.
  */
+#if PROTO
+int PASCAL NEAR eq(register unsigned char bc, register unsigned char pc)
+#else
 int PASCAL NEAR eq(bc, pc)
 register unsigned char bc;
 register unsigned char pc;
+#endif
 {
 	if ((curwp->w_bufp->b_mode & MDEXACT) == 0) {
 		if (is_lower(bc))

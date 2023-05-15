@@ -20,10 +20,13 @@
         translated to itself).
 */
 
+#if PROTO
+int PASCAL NEAR is_letter(char ch)
+#else
 int PASCAL NEAR is_letter(ch)
 
 register char ch;
-
+#endif
 {
         return(is_upper(ch) || is_lower(ch));
 }
@@ -33,10 +36,13 @@ register char ch;
         in the lower to uppercase translation table.
 */
 
+#if PROTO
+int PASCAL NEAR is_lower(char ch)
+#else
 int PASCAL NEAR is_lower(ch)
 
 register char ch;
-
+#endif
 {
         return(lowcase[ch & 255] != 0);
 }
@@ -46,10 +52,13 @@ register char ch;
         in the upper to lowercase translation table.
 */
 
+#if PROTO
+int PASCAL NEAR is_upper(char ch)
+#else
 int PASCAL NEAR is_upper(ch)
 
 register char ch;
-
+#endif
 {
         return(upcase[ch & 255] != 0);
 }

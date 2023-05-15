@@ -435,10 +435,13 @@ int PASCAL NEAR inword()
 	return(isinword(lgetc(curwp->w_dotp, curwp->w_doto)));
 }
 
+#if PROTO
+int PASCAL NEAR isinword(char c)
+#else
 int PASCAL NEAR isinword(c)
 
 char c;
-
+#endif
 {
 	/* if we are using the table.... */
 	if (wlflag)

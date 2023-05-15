@@ -15,7 +15,7 @@
 # include <sys/errno.h>
 #endif
 
-#if	MSC
+#if	MSC || VMS
 #include <errno.h>
 #else
 extern int errno;		/* current error */

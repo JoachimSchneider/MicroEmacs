@@ -82,6 +82,10 @@ smg_noop()
 {
 }
 
+smg_noop1(int param)
+{
+}
+
 #if	SMG
 
 #include "eproto.h"
@@ -92,7 +96,10 @@ smg_noop()
 #include descrip
 #include ttdef
 #include tt2def
+#include smg$routines
+#include smgtrmptr
 
+#ifdef NEED_SMGTRMPTR
 /*
 	SMG constants from $$smgtrmptrdef
 */
@@ -382,6 +389,7 @@ smg_noop()
 #define	SMG$K_KEY_THIRD_UP		697
 #define	SMG$K_KEY_FOURTH_UP		698
 #define	SMG$K_MAX_STRING2_CODE		880
+#endif
 
 /*
 	Parts of VMS.C that we'll want to access here
@@ -409,7 +417,12 @@ extern NOSHARE TTCHAR orgchar;			/* Original characteristics */
 #define FAILURE( s) (!(s&1))
 #define SUCCESS( s) (s&1)
 
-
+/*
+	Compaq C 6.4 on VMS/VAX wants system API routines in lowercase
+*/
+#ifdef __VAX
+#pragma message disable DUPEXTERN
+#endif
 
 /** Values to manage the screen **/
 static int termtype;			/* Handle to pass to SMG	*/
@@ -442,6 +455,7 @@ extern int PASCAL NEAR smgrev();
 extern int PASCAL NEAR smgcres();
 extern int PASCAL NEAR smgparm();
 extern int PASCAL NEAR smggetc();
+extern int PASCAL NEAR smgputs();
 extern int PASCAL NEAR smgclose();
 
 /** Terminal dispatch table **/
@@ -470,8 +484,8 @@ NOSHARE TERM term = {
 	smgcres				/* Change screen resolution	*/
 #if COLOR
 	,
-	smg_noop,			/* Set forground color		*/
-	smg_noop			/* Set background color		*/
+	smg_noop1,			/* Set forground color		*/
+	smg_noop1			/* Set background color		*/
 #endif /* COLOR */
 };
 
@@ -670,7 +684,7 @@ int smggetnum(int code)
  ***/
 int smgaddkey(int code, int fn)
 {
-	return (addkey(smggetstr(code), fn));
+	return (addkey((unsigned char *)smggetstr(code), fn));
 }
 
 /***
@@ -876,10 +890,10 @@ char * string;				/* String to write		*/
  *
  *  ch  - (Extended) character to add
  ***/
-qin(int ch)
+VOID qin(int ch)
 {
 	/* Check for overflow */
-	if (inbuft == &inbuf[sizeof(inbuf)]) {
+	if (inbuft - inbuf >= sizeof(inbuf)) {
 		
 		/* Annoy user */
 		smgbeep();
@@ -888,6 +902,20 @@ qin(int ch)
 	
 	/* Add character */
 	*inbuft++ = ch;
+}
+
+/*
+ * qrep - replace a key sequence with a single character in the input buffer.
+ */
+#if PROTO
+VOID qrep(int ch)
+#else
+VOID qrep( ch)
+int ch;
+#endif
+{
+	inbuft = inbuf;
+	qin(ch);
 }
 
 /***
@@ -931,9 +959,10 @@ int smggetc()
  *
  *  Nothing returned
  ***/
-spal()
+int PASCAL NEAR spal(char *pstr)
 {
 	/* Nothing */
+	return 1;
 }
 
 #if FLABEL

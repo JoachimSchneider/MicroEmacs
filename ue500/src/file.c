@@ -176,7 +176,7 @@ int         lockfl;     /* check the file for locks? */
 	char prompt[NSTRING];	/* string for collisions prompt */
 
 #if	MSDOS | WINNT | WINXP | AOSVS | VMS | TOS
-	mklower(fname); 	       /* msdos isn't case sensitive */
+	mklower((char *)fname); 	       /* msdos isn't case sensitive */
 #endif
 	for (bp=bheadp; bp!=NULL; bp=bp->b_bufp) {
 		if ((bp->b_flag&BFINVS)==0 && strcmp(bp->b_fname, fname)==0) {

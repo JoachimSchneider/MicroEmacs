@@ -617,7 +617,7 @@ setwin: wp = wheadp;
 	return(TRUE);
 }
 
-int PASCAL NEAR nextup(f, n)	/* scroll the next window up (back) a page */
+VOID PASCAL NEAR nextup(f, n)	/* scroll the next window up (back) a page */
 
 int f, n;	/* prefix flag and argument */
 
@@ -627,7 +627,7 @@ int f, n;	/* prefix flag and argument */
 	prevwind(FALSE, 1);
 }
 
-int PASCAL NEAR nextdown(f, n)	/* scroll the next window down (forward) a page */
+VOID PASCAL NEAR nextdown(f, n)	/* scroll the next window down (forward) a page */
 
 int f, n;	/* prefix flag and argument */
 

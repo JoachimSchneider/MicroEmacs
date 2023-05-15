@@ -9,9 +9,13 @@
 #include	"edef.h"
 #include	"elang.h"
 
+#if PROTO
+VOID PASCAL NEAR ab_save(char c)
+#else
 VOID PASCAL NEAR ab_save(c)
 
 char c;		/* character to add to current word buffer */
+#endif
 
 {
 	char *s;	/* ptr to cycle chars */

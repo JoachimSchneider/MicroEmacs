@@ -303,7 +303,7 @@ int n;
   ec = stock(codeseq);
 
   ostring(codeseq);
-  return (addkey(esc_seq, ec)); /* Add to tree */
+  return (addkey((unsigned char *)esc_seq, ec)); /* Add to tree */
 }
 
 /*

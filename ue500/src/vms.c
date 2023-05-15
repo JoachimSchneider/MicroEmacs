@@ -29,16 +29,34 @@
 #include msgdef
 #include rms
 #include ctype
+#include time
+#include starlet
+#include lib$routines
+#include str$routines
+
+static next_read(int flag);
+
+/*
+	Compaq C 6.4 on VMS/VAX wants system API routines in lowercase
+*/
+#ifdef __VAX
+#pragma message disable DUPEXTERN
+#endif
+
 /*
 	These are the LIB$SPAWN mode flags.  There's no .h for
 	them in VAX C V2.4.
 */
+#ifdef NEED_CLIDEF
 #define CLI$M_NOCONTROL 32
 #define CLI$M_NOCLISYM 2
 #define CLI$M_NOLOGNAM 4
 #define CLI$M_NOKEYPAD 8
 #define CLI$M_NOTIFY 16
 #define CLI$M_NOWAIT 1
+#else
+#include clidef
+#endif
 /*
 	test macro is used to signal errors from system services
 */
@@ -529,7 +547,7 @@ PASCAL NEAR ttflush()
 	Note that we also wake from hibernation if a character arrives, so
 	this never causes an undue delay if the user it actually typing.
 */
-int PASCAL NEAR grabnowait()
+int PASCAL NEAR grabnowait(VOID)
 {
     if (tylen == 0)
     {	/* Nothing immediately available, hibernate for a short time */
@@ -540,7 +558,7 @@ int PASCAL NEAR grabnowait()
     return ((tylen == 0)? -1: ttgetc());
 }
 
-int PASCAL NEAR grabwait()
+int PASCAL NEAR grabwait(VOID)
 {
     return (ttgetc());
 }
@@ -666,7 +684,7 @@ int PASCAL NEAR execprg(int f, int n)
         return(TRUE);
 }
 
-int PASCAL NEAR pipecmd()
+int PASCAL NEAR pipecmd(int f, int n)
 {
     register int    s;	    /* return status from CLI */
     register EWINDOW *wp;    /* pointer to new window */
@@ -729,13 +747,13 @@ int PASCAL NEAR pipecmd()
     }
 
     /* and get rid of the temporary file */
-    delete(filnam);
+    unlink(filnam);
     return(TRUE);
 }
 
 int PASCAL NEAR f_filter(int f, int n)
 {
-        register int    s;	/* return status from CLI */
+        /*register*/ int    s;	/* return status from CLI */
 	register BUFFER *bp;	/* pointer to buffer to zot */
         char line[NLINE];	/* command line send to shell */
 	char tmpnam[NFILEN];	/* place to store real file name */
@@ -785,8 +803,8 @@ int PASCAL NEAR f_filter(int f, int n)
 		mlwrite(TEXT3);
 /*                      "[Execution failed]" */
 		xstrcpy(bp->b_fname, tmpnam);
-		delete(filnam1);
-		delete(filnam2);
+		unlink(filnam1);
+		unlink(filnam2);
 		return(s);
 	}
 
@@ -795,8 +813,8 @@ int PASCAL NEAR f_filter(int f, int n)
 	bp->b_flag |= BFCHG;		/* flag it as changed */
 
 	/* and get rid of the temporary file */
-	delete(filnam1);
-	delete(filnam2);
+	unlink(filnam1);
+	unlink(filnam2);
 	return(TRUE);
 }
 
@@ -808,10 +826,10 @@ int PASCAL NEAR f_filter(int f, int n)
 char *PASCAL NEAR timeset()
 {
     register char *sp;		/* temp string pointer */
-    char buf[16];		/* time data buffer */
+    time_t buf;			/* time data buffer */
 
-    time(buf);
-    sp = ctime(buf);
+    time(&buf);
+    sp = ctime(&buf);
     sp[strlen(sp)-1] = 0;
     return(sp);
 }
@@ -901,9 +919,9 @@ char *PASCAL NEAR getffile(char *fspec)
 	 */
 	for (cp=rbuf; *cp!=' ' && cp!=rbuf+NFILEN-1; cp++) ;
 	*cp = 0;
-	for (cp--; *cp!=';' && cp!=rbuf-1; cp--) ;
+	for (cp--; *cp!=';' && cp>=rbuf; cp--) ;
 	*cp = 0;
-	for (cp--; *cp!=']' && cp!=rbuf-1; cp--) ;
+	for (cp--; *cp!=']' && cp>=rbuf; cp--) ;
 	strcat(path,++cp);
 	mklower(path);
 	return(path);
@@ -927,17 +945,17 @@ char *PASCAL NEAR getnfile()
 	 * isolate the filename and extension,
 	 * and append filename/extension on to the original path
 	 */
-	for (cp=path+strlen(path)-1; *cp!=']' && cp!=path-1; cp--)
+	for (cp=path+strlen(path)-1; *cp!=']' && cp>=path; cp--)
 		;
 
 	*++cp = 0;
 	for (cp=rbuf; *cp!=' ' && cp!=rbuf+NFILEN-1; cp++)
 		;
 	*cp = 0;
-	for (cp--; *cp!=';' && cp!=rbuf-1; cp--)
+	for (cp--; *cp!=';' && cp>=rbuf; cp--)
 		;
 	*cp = 0;
-	for (cp--; *cp!=']' && cp!=rbuf-1; cp--)
+	for (cp--; *cp!=']' && cp>=rbuf; cp--)
 		;
 	strcat(path,++cp);
 	mklower(path);
@@ -976,7 +994,7 @@ ME$EDIT(struct dsc$descriptor *infile, struct dsc$descriptor *outfile)
     outstr = xstrncpy( calloc( 1, 1+outfile->dsc$w_length),
 	outfile->dsc$a_pointer, outfile->dsc$w_length);
 
-    if (infile->dsc$w_length <= 0)
+    if (infile->dsc$w_length == 0)
 	instr = outstr;
     else instr = xstrncpy( calloc( 1, 1+infile->dsc$w_length),
 	infile->dsc$a_pointer, infile->dsc$w_length);
@@ -1005,7 +1023,7 @@ PASCAL NEAR bktoshell(int f, int n)
 	Pause this process and wait for it to be woken up
 */
     unsigned pid;
-    unsigned char *env, *dir;
+    char *env, *dir;
     int argc;
     char *argv[ 16];
 
@@ -1094,7 +1112,7 @@ static struct RAB rab;		/* a record access block */
 /*
  * Open a file for reading.
  */
-PASCAL NEAR ffropen(char *fn)
+PASCAL NEAR ffropen(CONST char *fn)
 {
         unsigned long status;
 
@@ -1102,7 +1120,7 @@ PASCAL NEAR ffropen(char *fn)
 	fab=cc$rms_fab;
 	rab=cc$rms_rab;
 
-	fab.fab$l_fna = fn;
+	fab.fab$l_fna = (char *)fn;
 	fab.fab$b_fns = strlen(fn);
 	fab.fab$b_fac = FAB$M_GET;
 	fab.fab$b_shr = FAB$M_SHRGET;

@@ -14,6 +14,11 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 
 ## Change Log
+[2023-05-15]
+* It works on OpenVMS VAX 7.3 (Compaq C V6.4-005), OpenVMS Alpha V7.3-2
+(HP C V7.1-015), OpenVMS I64 V8.4-2L1 (VSI C V7.4-001) and OpenVMS
+x86_64 E9.2-1 (VSI C X7.4-726 (GEM 50X23)).
+
 [2021-08-05.00]
 * It works on Linux, FreeBSD, OpenBSD and Solaris (tested with SunOS 5.7).
 * Unified ifdefs for Unix Operating Systems.

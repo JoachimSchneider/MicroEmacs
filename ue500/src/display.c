@@ -250,7 +250,7 @@ int PASCAL NEAR vtsizescr(SCREEN_T *sp, int nrow, int ncol)
  * system prompt will be written in the line). Shut down the channel to the
  * terminal.
  */
-int PASCAL NEAR vttidy()
+VOID PASCAL NEAR vttidy()
 {
     mlerase();
     movecursor(term.t_nrow, 0);
@@ -264,7 +264,7 @@ int PASCAL NEAR vttidy()
  * screen. There is no checking for nonsense values; this might be a good
  * idea during the early stages.
  */
-int PASCAL NEAR vtmove(row, col)
+VOID PASCAL NEAR vtmove(row, col)
 
 int row, col;
 
@@ -280,7 +280,7 @@ int row, col;
    terminal buffers. Only column overflow is checked.
 */
 
-int PASCAL NEAR vtputc(c)
+VOID PASCAL NEAR vtputc(c)
 
 int c;
 
@@ -338,7 +338,7 @@ int c;
  * Erase from the end of the software cursor to the end of the line on which
  * the software cursor is located.
  */
-int PASCAL NEAR vteeol()
+VOID PASCAL NEAR vteeol()
 {
     register VIDEO	*vp;
 

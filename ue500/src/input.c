@@ -991,7 +991,7 @@ int PASCAL NEAR getcmd()
 							*/
 int PASCAL NEAR getstring(buf, nbuf, eolchar)
 
-unsigned char *buf;
+/*unsigned*/ char *buf;
 int nbuf;
 int eolchar;
 
@@ -1139,7 +1139,7 @@ int eolchar;
 	}
 }
 
-int PASCAL NEAR outstring(s) /* output a string of input characters */
+VOID PASCAL NEAR outstring(s) /* output a string of input characters */
 
 char *s;	/* string to output */
 
@@ -1149,7 +1149,7 @@ char *s;	/* string to output */
 			mlout(*s++);
 }
 
-int PASCAL NEAR ostring(s)	/* output a string of output characters */
+VOID PASCAL NEAR ostring(s)	/* output a string of output characters */
 
 char *s;	/* string to output */
 
@@ -1229,10 +1229,13 @@ int uptocol;	/* last column to be echoed in */
 /*
  * Routine to echo i-search and message-prompting characters.
  */
+#if PROTO
+int PASCAL NEAR echochar(unsigned char c)
+#else
 int PASCAL NEAR echochar(c)
 
 unsigned char c;	/* character to be echoed */
-
+#endif
 {
 	int col = 0;			/* column to be echoed in */
 
