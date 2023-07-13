@@ -14,6 +14,13 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 
 ## Change Log
+
+[2023-07-13.00]
+* Cleared all warnings.
+* Fixed error in eval.c:gtfun() returning address of a stack variable.
+* Introduced macro ISSPACE to avoid (maybee unsigned) character indexes
+  for arrays (some isspace-macro-implementations use lookup arrays).
+
 [2021-08-22.00]
 * Code was reformatted with uncrustify.
 
@@ -46,13 +53,16 @@ modern Linux and FreeBSD systems:
     (e.g.. set ``$palette "CLRMAP  7 ~e[37m" ; white``): Use ``[ ][ ]*``
     instead of ``' '`` as field separator.
 
+* The `Undo' feature was broken by some "optimized" fill-functions
+  which did'nt record the undo information: Fixed.
+
 * Color support by using .emacsrc statements. (XTerm as well as  Linux
   and FreeBSD text console). Find the correct Escape-Sequences with ``tput
     setf [1-7]`` or  ``tput setb [1-7]``.
 
 * Const-Correctness:
 
-    Funktions modified to get const-correctnes:
+    Functions modified to get const-correctnes:
 ```
     bind.c:stock()      /* Convert (function-)keyname intp internal Code.   */
     eval.c():gtfun()    /* Call internal function via name.                 */
@@ -101,11 +111,14 @@ modern Linux and FreeBSD systems:
 
 
 ## TODO
-- Remove *All* warnings
-- UTF-8 support
+- Review all original comments so they aren't destryed by automatic reformatting.
+- Check Compilation on OpenVMS
+- Check Compile on PCDOS whith Borland C++
 - Compile on Windows:
+  + Borland C++
   + CygWin
   + MSC
+- UTF-8 support
 - Try to compile on *really old* compilers:
   + Provide a `stdarg.h' *and* `varargs.h` version for all functions
     whit variable argumebnt lists.

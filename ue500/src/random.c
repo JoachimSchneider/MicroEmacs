@@ -22,19 +22,19 @@
 
 int PASCAL NEAR showcpos(f, n)
 
-int f, n;                               /* prefix flag and argument */
+int f, n;                             /* prefix flag and argument */
 
 {
-    register LINE *lp;                  /* current line */
-    register long numchars;             /* # of chars in file */
-    register long numlines;             /* # of lines in file */
-    register long predchars;            /* # chars preceding point */
-    register long predlines;            /* # lines preceding point */
-    register int curchar;               /* character under cursor */
-    int ratio;
-    int col;
-    int savepos;                /* temp save for current offset */
-    int ecol;                           /* column pos/end of current line */
+    register LINE *lp       = NULL;   /* current line */
+    register long numchars  = 0;      /* # of chars in file */
+    register long numlines  = 0;      /* # of lines in file */
+    register long predchars = 0;      /* # chars preceding point */
+    register long predlines = 0;      /* # lines preceding point */
+    register int  curchar   = 0;      /* character under cursor */
+    int           ratio     = 0;
+    int           col       = 0;
+    int           savepos   = 0;      /* temp save for current offset */
+    int           ecol      = 0;      /* column pos/end of current line */
 
     /* starting at the beginning of the buffer */
     lp = lforw(curbp->b_linep);
@@ -453,15 +453,16 @@ int f, n;                               /* default flag and numeric repeat count
 
         while ( get_w_doto(curwp) < get_lused(curwp->w_dotp) ) {
             /* see if it is time to compress */
-            if ( (fspace >= 0) && (nextab(fspace) <= ccol) )
-                if ( ccol - fspace < 2 )
+            if ( (fspace >= 0) && (nextab(fspace) <= ccol) )  {
+                if ( ccol - fspace < 2 )  {
                     fspace = -1;
-                else {
+                } else {
                     backchar(TRUE, ccol - fspace);
                     ldelete( (long) (ccol - fspace), FALSE );
                     linsert(1, '\t');
                     fspace = -1;
                 }
+            }
 
             /* get the current character */
             cchar = lgetc(curwp->w_dotp, get_w_doto(curwp));
@@ -857,13 +858,16 @@ int f, n;                               /* prefix flag and argument */
         nicol = 0;
         for ( i = 0; i < get_lused(curwp->w_dotp); ++i ) {
             c = lgetc(curwp->w_dotp, i);
-            if ( c != ' ' && c != '\t' )
+            if ( c != ' ' && c != '\t' )  {
                 break;
-            if ( c == '\t' )
-                if ( tabsize > 0 )
+            }
+            if ( c == '\t' )  {
+                if ( tabsize > 0 )  {
                     nicol += -(nicol % tabsize) + (tabsize - 1);
-                else
+                } else {
                     break;
+                }
+            }
 
             ++nicol;
         }
@@ -965,8 +969,8 @@ int PASCAL NEAR killtext(f, n)
 int f, n;       /* prefix flag and argument */
 
 {
-    register LINE *nextp;
-    long chunk;
+    register LINE *nextp  = NULL;
+    long          chunk   = 0;
 
     /* Don't do this command in read-only mode */
     if ( curbp->b_mode & MDVIEW )
@@ -1717,7 +1721,6 @@ char *xstrtok_r P3_(char *, str, CONST char *, sep, char **, next)
 /* Input string must either be NULL or malloced.                */
 char *astrcatc P2_(CONST char *, str, CONST char, c)
 {
-    char  *res  = NULL;
     char  *nstr = NULL;
     int   len   = 0;
 
@@ -1726,7 +1729,7 @@ char *astrcatc P2_(CONST char *, str, CONST char, c)
         ASRT(NULL != (nstr = (char *)calloc(len, sizeof(char))));
     } else {
         len = strlen(str) + 1 + 1;
-        ASRT(NULL != (nstr = (char *)realloc(str, len * sizeof(char))));
+        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * sizeof(char))));
     }
     nstr[len - 2]  = c;
     nstr[len - 1]  = '\0';
@@ -1738,7 +1741,6 @@ char *astrcatc P2_(CONST char *, str, CONST char, c)
 /* Input string must either be NULL or malloced.                */
 char *astrcat P2_(CONST char *, str, CONST char *, s)
 {
-    char  *res      = NULL;
     char  *nstr     = NULL;
     int   len       = 0;
     CONST char  *xs = (NULL == s)? "" : s;
@@ -1750,7 +1752,7 @@ char *astrcat P2_(CONST char *, str, CONST char *, s)
         strcpy(nstr, xs);
     } else {
         len = strlen(str) + slen + 1;
-        ASRT(NULL != (nstr = (char *)realloc(str, len * sizeof(char))));
+        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * sizeof(char))));
         strcat(nstr, xs);
     }
 
@@ -1989,7 +1991,7 @@ int FUNC_ P4_(BUFFER *, bp, int, doto, CONST char *, fnam, int, lno)
 /*====================================================================*/
 
 
-int TransformRegion P2_(filter_func_T, filter, void *, argp)
+int TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
 {
     LINE    *linep  = NULL;
     int     loffs   = 0;
@@ -2053,7 +2055,7 @@ int TransformRegion P2_(filter_func_T, filter, void *, argp)
     return TRUE;
 }
 
-int TransformParagraph P2_(filter_func_T, filter, void *, argp)
+int TransformParagraph P2_(filter_func_T, filter, VOIDP, argp)
 {
     /* make sure the cursor gets back to the right place on an undo */
     undo_insert(OP_CPOS, 0L, obj);
@@ -2072,7 +2074,7 @@ int TransformParagraph P2_(filter_func_T, filter, void *, argp)
     return TransformRegion(filter, argp);
 }
 
-int TransformBuffer P2_(filter_func_T, filter, void *, argp)
+int TransformBuffer P2_(filter_func_T, filter, VOIDP, argp)
 {
     /* make sure the cursor gets back to the right place on an undo */
     undo_insert(OP_CPOS, 0L, obj);
@@ -2096,10 +2098,10 @@ int TransformBuffer P2_(filter_func_T, filter, void *, argp)
 /* The (static) filter functions which do the actual work:            */
 /*====================================================================*/
 
-static char  *filter_test_00 P3_(CONST char *, rstart, CONST char *, rtext, void *, argp)
+#if ( 0 )
+static char  *filter_test_00 P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
 {
     char  *res  = NULL;
-    int   rc    = 0;
     char  *str  = NULL;
     int   i     = 0;
     char  c     = '\0';
@@ -2112,26 +2114,26 @@ static char  *filter_test_00 P3_(CONST char *, rstart, CONST char *, rtext, void
         str[i]  = toupper(c);
     }
 
-    rc  = xasprintf(&res, "<%s><%s>", str, rtext);
+    xasprintf(&res, "<%s><%s>", str, rtext);
     FREE(str);
 
     return res;
 }
+#endif
 
-static char  *filter_test_01 P3_(CONST char *, rstart, CONST char *, rtext, void *, argp)
+static char  *filter_test_01 P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
 {
     char  *res  = NULL;
-    int   rc    = 0;
 
     ASRT(NULL != rstart);
     ASRT(NULL != rtext);
 
-    rc  = xasprintf(&res, "%s", rtext);
+    xasprintf(&res, "%s", rtext);
 
     return res;
 }
 
-static char  *filter_test P3_(CONST char *, rstart, CONST char *, rtext, void *, argp)
+static char  *filter_test P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
 {
     return filter_test_01(rstart, rtext, argp);
 }
@@ -2174,12 +2176,12 @@ static char *format_para P5_(CONST char *,  start,
                              int,           ommit       /* Skip start in first line */,
                              int,           parindent)
 {
-    char  *res  = xstrdup("");
-    int   slen  = 0;
-    char  *ip   = input;
-    char  *cp   = 0;
-    int   col   = 0;
-    int   i     = 0;
+    char        *res  = xstrdup("");
+    int         slen  = 0;
+    CONST char  *ip   = input;
+    char        *cp   = 0;
+    int         col   = 0;
+    int         i     = 0;
 
     ASRT(NULL != start);
     ASRT(NULL != input);
@@ -2245,7 +2247,7 @@ static char *format_para P5_(CONST char *,  start,
     return  res;  /***NOT_REACHED***/
 }
 
-static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, argp)
+static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
 /*
  * Fill the region --- i.e.reformat it so that:
  * (1) Multiple empty lines are converted into one empty line.
@@ -2274,36 +2276,36 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, 
     ASRT(NULL != rtext);
 
     {
-        char  *cp = rtext;
-        int   l   = 0;
-        int   nsp = 0;
-        int   ncr = 0;
+        CONST char  *ccp  = rtext;
+        int         l     = 0;
+        int         nsp   = 0;
+        int         ncr   = 0;
 
-        while ( *cp && isspace(*cp) ) {
-            if ( '\r' == *cp )  {
+        while ( *ccp && ISSPACE(*ccp) ) {
+            if ( '\r' == *ccp )  {
                 nsp = 0;
                 ncr++;
             } else {
                 nsp++;
             }
 
-            cp++;
+            ccp++;
         }
-        while ( 0 < nsp-- ) cp--;
+        while ( 0 < nsp-- ) ccp--;
         nbef  = ncr;
-        text  = xstrdup(cp);
+        text  = xstrdup(ccp);
 
         nsp = 0;
         ncr = 0;
         if ( 0 < (l = strlen(text)) ) {
-            cp  = &text[l - 1];
+            char  *cp = &text[l - 1];
 
-            while ( 0 < l && isspace(*cp) ) {
+            while ( 0 < l && ISSPACE(*cp) ) {
                 if ( '\r' == *cp )  {
                     nsp = 0;  /**NOT_USED**/
                     ncr++;
                 } else {
-                    nsp++;  /**NOT_USED**/
+                    nsp++;    /**NOT_USED**/
                 }
                 *cp = '\0';
 
@@ -2324,7 +2326,7 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, 
         char  c = '\0';
 
         start = xstrdup("");
-        while ( (c = text[i]) && isspace(c) )  {
+        while ( (c = text[i]) && ISSPACE(c) )  {
             start = astrcatc(start, c);
             i++;
         }
@@ -2341,7 +2343,7 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, 
         for ( i = tpos; (c = text[i]); i++ ) {
             switch ( state )  {
                 case IS_TEXT:
-                    if ( isspace(c) ) {
+                    if ( ISSPACE(c) ) {
                         if ( '\r' == c )  {
                             ncr++;
                         }
@@ -2352,7 +2354,7 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, 
                     }
                     break;
                 case IS_SPACE:
-                    if ( isspace(c) ) {
+                    if ( ISSPACE(c) ) {
                         if ( '\r' == c )  {
                             ncr++;
                         }
@@ -2393,7 +2395,7 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, 
         if ( NULL == (lptr  = xstrtok_r(NULL, "\r", &context)) )  {
             int l = strlen(res) - 1;
 
-            for ( ; 0 <= l && isspace(res[l]); l-- )  {
+            for ( ; 0 <= l && ISSPACE(res[l]); l-- )  {
                 res[l]  = '\0';
             }
 
@@ -2413,7 +2415,7 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, void *, 
     return res;
 }
 
-static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, void *, argp)
+static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
 /*
  * Indent the region:
  *
@@ -2428,10 +2430,10 @@ static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, void *
  * argp (IF NOT NULL) points to an integer containing the number on indents.
  */
 #define filter_indent_do_indent_(cp)  do  {                         \
-    char  *sp_  = (cp);                                             \
-    char  *np_   = sp_ + 1;                                         \
+    CONST char  *sp_  = (cp);                                       \
+    CONST char  *np_  = sp_ + 1;                                    \
                                                                     \
-    while ( isspace(*np_) )  np_++;                                 \
+    while ( ISSPACE(*np_) )  np_++;                                 \
     if ( *np_ && '\r' != *np_ ) {                                   \
         if ( !((curbp->b_mode & MDCMOD) && ('#' == *(sp_ + 1))) ) { \
             int j_ = 0;                                             \
@@ -2451,9 +2453,9 @@ static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, void *
     }                                                               \
 } while ( 0 )
 {
-    char  *res  = xstrdup("");  /* Reformatted region */
-    char  *cp   = rtext;
-    int   count = 1;
+    char        *res  = xstrdup("");  /* Reformatted region */
+    CONST char  *cp   = rtext;
+    int         count = 1;
 
     ASRT(NULL != rtext);
 
@@ -2481,7 +2483,7 @@ static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, void *
 #undef  filter_indent_do_indent_
 
 
-static char *filter_undent P3_(CONST char *, rstart, CONST char *, rtext, void *, argp)
+static char *filter_undent P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
 /*
  * undent the region:
  *
@@ -2494,8 +2496,8 @@ static char *filter_undent P3_(CONST char *, rstart, CONST char *, rtext, void *
  * argp (IF NOT NULL) points to an integer containing the number on undents.
  */
 #define filter_undent_do_undent_(pcp)  do  {                    \
-    char  **sp_ = (pcp);                                        \
-    char  *cp_  = *sp_;                                         \
+    CONST char  **sp_ = (pcp);                                  \
+    CONST char  *cp_  = *sp_;                                   \
     int   j_    = 0;                                            \
                                                                 \
     for ( j_ = 0; j_ < count; j_++ )  {                         \
@@ -2516,9 +2518,9 @@ static char *filter_undent P3_(CONST char *, rstart, CONST char *, rtext, void *
     *sp_  = cp_;                                                \
 } while ( 0 )
 {
-    char  *res  = xstrdup("");  /* Reformatted region */
-    char  *cp   = rtext;
-    int   count = 1;
+    char        *res  = xstrdup("");  /* Reformatted region */
+    CONST char  *cp   = rtext;
+    int         count = 1;
 
     ASRT(NULL != rtext);
 

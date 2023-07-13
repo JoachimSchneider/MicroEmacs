@@ -28,7 +28,7 @@ static HWND hPrgWnd;    /* window handle of the external program task */
 /* HandleTimer: checks the existence of the external program window */
 /* ===========                                                      */
 
-static void PASCAL  HandleTimer (HWND hDlg)
+static VOID PASCAL  HandleTimer (HWND hDlg)
 /* This function uses a 200ms timeout to check the existence of the window
  * indicated by hPrgWnd. When that window handle becomes invalid, it is assumed
  * that the external program has exited and the WAITFORPRG dialog box is

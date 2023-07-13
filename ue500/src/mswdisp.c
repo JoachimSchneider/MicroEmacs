@@ -76,7 +76,7 @@ static int CaretCol, CaretRow;      /* caret position */
 /* BuildCellMetrics:   fills a CellMetrics structure from a font description */
 /* ================                                                          */
 
-void FAR PASCAL BuildCellMetrics (CellMetrics *cm, HFONT hFont)
+VOID FAR PASCAL BuildCellMetrics (CellMetrics *cm, HFONT hFont)
 {
     HDC hDC;
     TEXTMETRIC Metrics;
@@ -106,7 +106,7 @@ void FAR PASCAL BuildCellMetrics (CellMetrics *cm, HFONT hFont)
 /* InvalidateCells: marks character cells for repaint */
 /* ===============                                    */
 
-void FAR PASCAL InvalidateCells (HWND hWnd,
+VOID FAR PASCAL InvalidateCells (HWND hWnd,
                                  int  leftcol,
                                  int  toprow,
                                  int  rightcol,
@@ -145,7 +145,7 @@ void FAR PASCAL InvalidateCells (HWND hWnd,
 /* MinimumClientSize:  computes the minimum client area size */
 /* =================                                         */
 
-void FAR PASCAL MinimumClientSize (HWND hWnd,
+VOID FAR PASCAL MinimumClientSize (HWND hWnd,
                                    int  NCols,
                                    int  NRows,
                                    int  *Width,
@@ -217,7 +217,7 @@ int FAR PASCAL DisplayableColumns (HWND hWnd, int Width, CellMetrics *cm)
 /* UpdateEmacsCaretPos: position the caret according to CaretCol/CaretRow */
 /* ===================                                                    */
 
-static void PASCAL UpdateEmacsCaretPos (void)
+static VOID PASCAL UpdateEmacsCaretPos (void)
 {
     POINT pt;
 
@@ -235,7 +235,7 @@ static void PASCAL UpdateEmacsCaretPos (void)
 /* EmacsCaret:  Creates or destroys the caret */
 /* ==========                                 */
 
-void FAR PASCAL EmacsCaret (BOOL Show)
+VOID FAR PASCAL EmacsCaret (BOOL Show)
 /* the Show parameter is TRUE if the caret should be created and FALSE if it
  * should be destroyed */
 {
@@ -274,7 +274,7 @@ void FAR PASCAL EmacsCaret (BOOL Show)
 /* MoveEmacsCaret:  updates the caret position */
 /* ==============                              */
 
-void FAR PASCAL MoveEmacsCaret (HWND hWnd, int col, int row)
+VOID FAR PASCAL MoveEmacsCaret (HWND hWnd, int col, int row)
 {
     CaretCol = col;
     CaretRow = row;
@@ -290,7 +290,7 @@ void FAR PASCAL MoveEmacsCaret (HWND hWnd, int col, int row)
 /* ShowEmacsCaret:  shows or hides the caret used by emacs */
 /* ==============                                          */
 
-void FAR PASCAL ShowEmacsCaret (BOOL Show)
+VOID FAR PASCAL ShowEmacsCaret (BOOL Show)
 /* this function is used to make the caret visible only when waiting for user
  * input */
 {
@@ -320,7 +320,7 @@ BOOL FAR PASCAL InMessageLine (void)
 /* ============
  *                                                                 */
 
-void FAR PASCAL CellToClient (HWND hWnd, POINT Cell, LPPOINT Client)
+VOID FAR PASCAL CellToClient (HWND hWnd, POINT Cell, LPPOINT Client)
 /* The resulting Client coordinates indicate the upper left pixel one
  * HalfLeadingY above the character cell */
 {
@@ -340,7 +340,7 @@ void FAR PASCAL CellToClient (HWND hWnd, POINT Cell, LPPOINT Client)
 /* ============
  *                                                                 */
 
-void FAR PASCAL ClientToCell (HWND hWnd, POINT Client, LPPOINT Cell)
+VOID FAR PASCAL ClientToCell (HWND hWnd, POINT Client, LPPOINT Cell)
 /* The area associated with a Cell is the character cell itself, plus the
  * HalfLeadingY-high areas above and under the cell */
 {
@@ -370,7 +370,7 @@ void FAR PASCAL ClientToCell (HWND hWnd, POINT Client, LPPOINT Cell)
 /* GetMinMaxInfo:  processes the WM_GETMINMAXINFO message for a screen */
 /* =============                                                       */
 
-void FAR PASCAL GetMinMaxInfo (HWND hWnd, LPPOINT rgpt)
+VOID FAR PASCAL GetMinMaxInfo (HWND hWnd, LPPOINT rgpt)
 {
     if ( InternalRequest ) return;      /* none of our business */
 
@@ -442,7 +442,7 @@ BOOL FAR PASCAL ScrReSize (HWND hWnd, WPARAM wParam, WORD cx, WORD cy)
 /* ScrPaint:   processes WM_PAINT messages for emacs screens */
 /* ========                                                  */
 
-void FAR PASCAL ScrPaint (HWND hWnd)
+VOID FAR PASCAL ScrPaint (HWND hWnd)
 {
     SCREEN_T  *sp;
     PAINTSTRUCT ps;
@@ -570,7 +570,7 @@ EndScrPaint: EndPaint (hWnd, &ps);
 /* MLPaint: processes WM_PAINT messages for the Message Line */
 /* =======                                                   */
 
-void FAR PASCAL MLPaint (void)
+VOID FAR PASCAL MLPaint (void)
 {
     PAINTSTRUCT ps;
     HANDLE hPrev, hPen;

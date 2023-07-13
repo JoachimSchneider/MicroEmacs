@@ -1,21 +1,28 @@
-#	Unix makefile for
-#		MicroEMACS 3.12
-#		(C)Copyright 1993 by Daniel Lawrence
-#		all rights reserved
+#               Unix makefile for
+#               MicroEMACS 3.12
+#               (C)Copyright 1993 by Daniel Lawrence
+#               all rights reserved
 
 # modify the following lines with the proper relative directories
 
-# object file directory
-OBJD = obj
-# source file directory
-SRCD = ../../src
-# header file directory
-HDIR = ../../h
+OBJD = obj			# object file directory
+SRCD = ../../src		# source file directory
+HDIR = ../../h			# header file directory
+
+
+# C compiler
+#CC =
+
 
 # options and arguments to the C compiler
+#
+# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
+# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
+#
+#CFLAGS = -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR) -g
+#CFLAGS = -I. -I$(HDIR)
+CFLAGS = -I. -I$(HDIR) -g
 
-#CFLAGS= -I. -I$(HDIR)
-CFLAGS= -I. -I$(HDIR) -g
 
 # list of header files
 
@@ -82,14 +89,14 @@ $(OBJD)/main.o: $(SRCD)/main.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c
+$(OBJD)/screen.o: $(SRCD)/screen.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/screen.o $(SRCD)/screen.c
 $(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
 $(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/region.o $(SRCD)/region.c
-$(OBJD)/screen.o: $(SRCD)/screen.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/screen.o $(SRCD)/screen.c
 $(OBJD)/search.o: $(SRCD)/search.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/search.o $(SRCD)/search.c
 $(OBJD)/replace.o: $(SRCD)/replace.c $(HFILES)
@@ -102,3 +109,12 @@ $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/word.o $(SRCD)/word.c
+
+
+clean:
+	rm -f $(OBJD)/*.o
+	rm -f bin/emacs
+
+
+
+# EOF

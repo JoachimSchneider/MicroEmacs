@@ -59,8 +59,8 @@ int EXPORT FAR PASCAL FileDlgProc (HWND   hDlg,
                                    UINT   wMsg,
                                    WPARAM wParam,
                                    LPARAM lParam);
-static void    CompletePath (char *s, char *FileName);
-static void    UpdateAll (HWND hDlg, char *s);
+static VOID    CompletePath (char *s, char *FileName);
+static VOID    UpdateAll (HWND hDlg, char *s);
 
 /* ChangeWorkingDir:    sets the working dir to match the supplied path */
 /* ================                                                     */
@@ -442,7 +442,7 @@ NoMoreTypeAhead: return FALSE;
 /* CompletePath:  prepend Path to the FileName, result in s */
 /* ============                                             */
 
-static void    CompletePath (char *s, char *FileName)
+static VOID    CompletePath (char *s, char *FileName)
 /* s must be at least NFILEN characters long, while the length of Path +
  *  the length of FileName must be < NFILEN */
 {
@@ -454,7 +454,7 @@ static void    CompletePath (char *s, char *FileName)
 /* UpdateAll:   updates all the controls from the path in s */
 /* =========                                                */
 
-static void    UpdateAll (HWND hDlg, char *s)
+static VOID    UpdateAll (HWND hDlg, char *s)
 /* this function also keeps the static variables Path and StarName up to date */
 {
     if ( DlgDirList (hDlg, s, ID_DIRECTORIES, ID_PATH, ATTR_DIR) ) {

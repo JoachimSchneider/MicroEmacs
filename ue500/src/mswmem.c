@@ -54,8 +54,8 @@ static unsigned char mtrx = 0;
 static struct mtr_tag {
     WORD m_func;            /* ASCII signature of function */
     union   {
-        WORD m_wseg;        /* segment selector */
-        void    *m_block;   /* block address */
+        WORD      m_wseg;   /* segment selector */
+        VOIDP     m_block;  /* block address */
         SEGHEADER *m_segh;  /* segment header */
     }
     m_ptr;
@@ -77,11 +77,11 @@ mtr[256];
 /* SubAlloc:    performs suballocation from a global segment */
 /* ========                                                  */
 
-void *SubAlloc(WORD wSeg, unsigned size)
+VOIDP SubAlloc(WORD wSeg, unsigned size)
 /* wSeg is the global segment's selector */
 {
-    HANDLE hBlock;      /* better be a stack variable */
-    void    *Block;     /* better be a stack variable */
+    HANDLE  hBlock;     /* better be a stack variable */
+    VOIDP   Block;      /* better be a stack variable */
 #  if MEMTRACE
     WORD RealSize = 0;   /* better be a stack variable */
 #  endif
@@ -89,7 +89,7 @@ void *SubAlloc(WORD wSeg, unsigned size)
     hBlock = LocalAlloc (LMEM_FIXED | LMEM_NOCOMPACT, size);
     /* no point attempting compaction: everything is FIXED in this heap! */
     if ( hBlock ) {
-        Block = (void*)(LPSTR)LocalLock (hBlock);
+        Block = (VOIDP)(LPSTR)LocalLock (hBlock);
 #  if MEMTRACE
         RealSize = LocalSize (hBlock);
 #  endif
@@ -108,12 +108,12 @@ void *SubAlloc(WORD wSeg, unsigned size)
 /* malloc:  allocates a chunk of memory */
 /* ======                               */
 
-void * CDECL malloc(size_t size)
+VOIDP CDECL malloc(size_t size)
 {
-    SEGHEADER *Seg;         /* segment header pointer */
-    WORD wSeg;              /* segment's selector, must be a stack variable */
-    BOOL NewSeg = FALSE;    /* TRUE: a new segment has been allocated */
-    void    *Block;         /* obtained block's address */
+    SEGHEADER *Seg;           /* segment header pointer */
+    WORD      wSeg;           /* segment's selector, must be a stack variable */
+    BOOL      NewSeg = FALSE; /* TRUE: a new segment has been allocated */
+    VOIDP     Block;          /* obtained block's address */
 
 #  if MEMTRACE
     mtr[mtrx].m_func = MTR_MALLOC;
@@ -209,7 +209,7 @@ void * CDECL malloc(size_t size)
 /* free:    frees an allocated block */
 /* =====                              */
 
-void CDECL free (void *block)
+VOID CDECL free (VOIDP block)
 {
     HANDLE hSeg;
     WORD wSeg;
@@ -291,14 +291,14 @@ void CDECL free (void *block)
 /* realloc: reallocates a chunk of memory (shrink or expand) */
 /* ========                                                   */
 
-void * CDECL realloc(void * oldblock, size_t size);
+VOIDP CDECL realloc(VOIDP oldblock, size_t size);
 {
-    HANDLE hBlock, hOldBlock;
-    void    *Block;
-    WORD wSeg;
-    int OldSize;
+    HANDLE  hBlock, hOldBlock;
+    VOIDP   Block;
+    WORD    wSeg;
+    int     OldSize;
 #  if MEMTRACE
-    WORD RealSize = 0;
+    WORD    RealSize = 0;
 #  endif
 
     if ( oldblock == NULL ) return malloc (size);
@@ -352,7 +352,7 @@ void * CDECL realloc(void * oldblock, size_t size);
 /* InitializeFarStorage:    start the suballocation mechanism */
 /* ====================                                       */
 
-void FAR PASCAL InitializeFarStorage (void)
+VOID FAR PASCAL InitializeFarStorage (void)
 {
 # if SUBALLOC
     FarStorage = TRUE;
@@ -362,7 +362,7 @@ void FAR PASCAL InitializeFarStorage (void)
 /* JettisonFarStorage: Release all the global segments (quitting time) */
 /* ==================                                                  */
 
-void FAR PASCAL JettisonFarStorage (void)
+VOID FAR PASCAL JettisonFarStorage (void)
 {
 # if SUBALLOC
     SEGHEADER   *sp;

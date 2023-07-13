@@ -1,8 +1,8 @@
 /*
- * This file is for functions having to do with key bindings, descriptions,
- * help commands and startup file.
+ * This file is for functions having to do with key bindings,
+ * descriptions, help commands and startup file.
  *
- *       written 11-feb-86 by Daniel Lawrence
+ * written 11-feb-86 by Daniel Lawrence
  */
 
 #include <stdio.h>
@@ -20,8 +20,8 @@
  */
 int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 {
-    register BUFFER *bp;        /* buffer pointer to help */
-    CONST char      *fname;     /* file name of help file */
+    register BUFFER *bp     = NULL;   /* buffer pointer to help */
+    CONST char      *fname  = NULL;     /* file name of help file */
 
     /* first check if we are already here */
     bp = bfind("emacs.hlp", FALSE, BFINVS);
@@ -626,19 +626,20 @@ char *sfname;   /* name of startup file (null if default) */
     return ( dofile(fname) );
 }
 
-/*  Look up the existance of a file along the normal or PATH environment
+/* Look up the existance of a file along the normal or PATH environment
  * variable.
  *
- *       LOOKUP ORDER:
+ * LOOKUP ORDER:
  *
- *               if contains path:
+ *         if contains path:
  *
- *                       absolute
+ *                 absolute
  *
- *               else
+ *         else
  *
- *                       HOME environment directory all directories along PATH
- * environment directories in table from EPATH.H
+ *                 HOME environment directory
+ *                 all directories along PATH environment
+ *                 directories in table from EPATH.H
  */
 
 CONST char *PASCAL NEAR flook(fname, hflag)
@@ -924,19 +925,23 @@ int index;      /* index of name to fetch out of the name table */
     return (names[index].n_name);
 }
 
-/*  stock()     String key name TO Command Key
+/* stock()         String key name TO Command Key
  *
- *       A key binding consists of one or more prefix functions followed by a
- * keystroke.  Allowable prefixes must be in the following order:
+ * A key binding consists of one or more prefix functions followed by
+ * a keystroke.  Allowable prefixes must be in the following order:
  *
- *       ^X preceeding control-X A- similtaneous ALT key (on PCs mainly) S- shifted
- * function key MS  mouse generated keystroke M-    Preceding META key FN   function
- * key
- *       ^  control key
+ * ^X      preceeding control-X
+ * A-      similtaneous ALT key (on PCs mainly)
+ * S-      shifted function key
+ * MS      mouse generated keystroke
+ * M-      Preceding META key
+ * FN      function key
+ * ^       control key
  *
- *       Meta and ^X prefix of lower case letters are converted to upper case.
- *  Real control characters are automatically converted to the ^A form.
- */
+ * Meta and ^X prefix of lower case letters are converted to upper
+ * case.  Real control characters are automatically converted to
+ * the ^A form.
+*/
 
 unsigned int PASCAL NEAR stock(keyname)
 

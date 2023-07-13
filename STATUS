@@ -72,20 +72,42 @@ These files have been reviewed:
 
 File Name     Formated Comments   Func. Proto.    Init.   Warnings  EOF
 ============================================================================
+src/bind.c      X                                           X         X
 src/exec.c      X                   X               X       X         X
 src/input.c     X                   X               X       X         X
+src/display.c   X                                           X
 src/eval.c      X                                           X         X
+src/file.c      X                                           X         X
 src/isearch.c   X                   X               X       X         X
+src/line.c      X                   X               X       X         X
 src/keyboard.c  X                   X               X       X         X
+src/lock.c      X                   X               X       X         X
+src/main.c      X                   X                       X         X
+src/mouse.c                                                 X
+src/screen.c                                                X
+src/search.c    X                                           X
+src/unix.c                                                  X
+src/random.c    X                                           X         X
+src/replace.c   X                                           X
+src/main.c                                                  X
 h/estruct.h     X                                                     X
 h/eproto.h      X                                                     X
+h/mswin.h       X                                                     X
 
 
-[2023-03-02.00]
-- void * durch VOIDP ersetzen
-- weitermacehn in line.c
-- Warnungen wegmachen.
-- weitermachen in exec.c
+[2023-07-13.00]
+- Substitute `void *' with VOIDP  (\/)
+- edef.h nachschauen: Das wird in search.c verwendet: Ist da signed/unsigned wichtig?   (\/)
+- Fix compiler warnings.          (\/)
+- Compiles without warnings on linux (gcc), FreeBSD (clan, gcc), OpenBSD (clang),
+  Solaris SPARC (gcc)             (\/)
+- static returned buffer in eval.c:gtfun()  (\/)
+- Macro ISSPACE                   (\/)
+- replace *all* estruct.h files   (\/)
+- continue in:
+  + Comments
+  + Compile for PCDOS with Borland C++
+
 
 
 # EOF

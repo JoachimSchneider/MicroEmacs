@@ -214,7 +214,7 @@ int PASCAL execmenu (int f, int n)
 /* GenerateMenuSeq: send a menu sequence into the input stream */
 /* ===============                                             */
 
-void FAR PASCAL GenerateMenuSeq (UINT ID)
+VOID FAR PASCAL GenerateMenuSeq (UINT ID)
 {
     if ( !in_room (5) ) return;
 
@@ -288,7 +288,7 @@ int EXPORT FAR PASCAL  AboutDlgProc (HWND   hDlg,
 /* SetCheck:    puts a check mark in a check box */
 /* ========                                      */
 
-void PASCAL    SetCheck (HWND hDlg, int BoxID)
+VOID PASCAL    SetCheck (HWND hDlg, int BoxID)
 {
     SendMessage (GetDlgItem (hDlg, BoxID), BM_SETCHECK, 1, 0L);
 } /* SetCheck */
@@ -429,7 +429,7 @@ UINT PASCAL    GetMenuEntryID (HMENU hMenu, int Position)
 /* If there is no match, the returned value point to the BINDNUL entry
  */
 
-KEYTAB * FAR PASCAL FindKeyBinding (void *Func)
+KEYTAB * FAR PASCAL FindKeyBinding (VOIDP Func)
 {
     register KEYTAB *KTp;
 
@@ -587,7 +587,7 @@ all_done: Text[i] = '\0';
 /* UpdateMenuItemText:  sets the key binding info in a menu item */
 /* ==================                                            */
 
-void PASCAL    UpdateMenuItemText (HMENU hMenu, int Position, MENUTAB *MTp)
+VOID PASCAL    UpdateMenuItemText (HMENU hMenu, int Position, MENUTAB *MTp)
 {
     KEYTAB  *KTp;
     char NewText[MAXMENUTITLE];
@@ -600,7 +600,7 @@ void PASCAL    UpdateMenuItemText (HMENU hMenu, int Position, MENUTAB *MTp)
     /* find the first tab char or the string's end */
 
     KTp = FindKeyBinding (
-        MTp->m_word & MB_BUF ? (void*)MTp->m_ptr.buf :(void*)MTp->m_ptr.fp);
+        MTp->m_word & MB_BUF ? (VOIDP)MTp->m_ptr.buf :(VOIDP)MTp->m_ptr.fp);
     if ( KTp->k_type != BINDNUL ) {
         NewText[i] = '\t';
         if ( !GetKeyText (KTp->k_code, &NewText[i+1], MAXMENUTITLE + 1 - i) )
@@ -622,7 +622,7 @@ no_binding:
 /* here, we may gray menu entries that are invalid. We also try to display a key
  * binding after each menu item */
 
-void FAR PASCAL InitMenuPopup (HMENU hMenu, LPARAM lParam)
+VOID FAR PASCAL InitMenuPopup (HMENU hMenu, LPARAM lParam)
 {
     int Position;
     int ItemCount;
@@ -803,7 +803,7 @@ void FAR PASCAL InitMenuPopup (HMENU hMenu, LPARAM lParam)
 /* SimulateExtendedKey:    feed an extended key into the input stream */
 /* ===================                                                */
 
-static void PASCAL  SimulateExtendedKey (int ec)
+static VOID PASCAL  SimulateExtendedKey (int ec)
 {
     char prefix;
 

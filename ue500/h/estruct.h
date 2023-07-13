@@ -206,40 +206,46 @@
 
 /*=================================================================== */
 
+
 /*===== handle constant and voids properly ===========================*/
+/* The `VOID' definitions (to `void' or `') only affect the function  */
+/* return types *not* the argument types: These are handled by the    */
+/* P#_-macros in eproto.h.                                            */
+/*====================================================================*/
 
 #if     VMS
 # define CONST   readonly
 # define VOID    void
-  typedef void * VOIDP;
+  typedef void * voidp_;
 # define NOSHARE noshare
 #else
 # if     AOSVS
 #  define CONST $shared $align(1)   /* fake a  const */
 #  define VOID
-   typedef char * VOIDP;
+   typedef char * voidp_;
 #  define NOSHARE $low32k $align(1) /* attempt to optimize read/write vars. */
 # else
 
 #  if     __STDC__ || MSC || TURBO || GCC || (AMIGA && LATTICE)
 #   define CONST   const
 #   define VOID    void
-    typedef void * VOIDP;
+    typedef void * voidp_;
 #   define NOSHARE
 #  else
 #   define CONST
 #   if     IC
 #    define VOID    void
-     typedef void * VOIDP;
+     typedef void * voidp_;
 #   else
 #    define VOID
-     typedef char * VOIDP;
+     typedef char * voidp_;
 #   endif
 #   define NOSHARE
 #  endif
 
 # endif
 #endif
+#define VOIDP voidp_
 
 
 /*===== System dep. library redefinitions, structures and includes ===*/

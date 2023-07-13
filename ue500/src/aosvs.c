@@ -191,7 +191,7 @@ extern FILE *ffp;               /* file stream pointer used in fileio.c */
 extern int vttidy();            /* MicroEMACS routine to tidy up the screen */
 
 extern int              aosvs$expand_pathname();
-extern void             aosvs$unix_to_aosvs_path();
+extern VOID             aosvs$unix_to_aosvs_path();
 
 FILE *STDIN, *STDOUT;           /* Needed since the array of files went away.*/
                                 /* Of course, if _iob changes, we'll have to */
@@ -1507,7 +1507,7 @@ P_GNFN aosvs$bsd_gnfn_pkt;
 /*
  *   aosvs$bsd_closedir
  */
-void closedir(dir_stream)  /* $name("aosvs$bsd_closedir") */
+VOID closedir(dir_stream)  /* $name("aosvs$bsd_closedir") */
 
 DIR *dir_stream;
 
@@ -1623,7 +1623,7 @@ DIR *dir_stream;
  *   aosvs$bsd_seekdir
  */
 
-void seekdir(dir_stream, pos)  /* name$("aosvs$bsd_seekdir") */
+VOID seekdir(dir_stream, pos)  /* name$("aosvs$bsd_seekdir") */
 
 DIR *dir_stream;
 long pos;
@@ -1680,7 +1680,7 @@ DIR *dir_stream;
  *  dcr  03/02/89  01.03  added code to skip out if first char is legal Aos/Vs
  * char. This makes us "just like" _toaos_fid().
  */
-void aosvs$unix_to_aosvs_path(u_path, a_path)
+VOID aosvs$unix_to_aosvs_path(u_path, a_path)
 
 char *u_path, *a_path;
 {
@@ -1846,8 +1846,8 @@ char *c_path, *x_path;
 extern DIR              *opendir();
 extern struct direct    *readdir();
 extern long             telldir();
-extern void             seekdir();
-extern void             closedir();
+extern VOID             seekdir();
+extern VOID             closedir();
 
 # define rewinddir(dirp)       seekdir(dirp, 0L)
 

@@ -225,11 +225,11 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
  */
 int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, repeats)
 {
-    LINE    *curline;           /* current line during scan */
-    int curoff;                 /* position within current line */
-    DELTA   *tbl;               /* structure with jump info */
-    int patlenadd;
-    int jump;
+    LINE  *curline  = NULL;   /* current line during scan */
+    int   curoff    = 0;      /* position within current line */
+    DELTA *tbl      = NULL;   /* structure with jump info */
+    int   patlenadd = 0;
+    int   jump      = 0;
 
     /* If we are going in reverse, then the 'end' is actually the beginning of
      * the pattern.  Toggle it.
@@ -712,7 +712,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
  */
 VOID PASCAL NEAR setjtable P0_(void)
 {
-    make_delta(pat, &deltapat);
+    make_delta((CONST char *)pat, &deltapat);
     make_delta(strrev( xstrcpy( (char *)tap, (char *)pat ) ), &tapatled);
 }
 

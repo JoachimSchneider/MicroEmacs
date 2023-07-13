@@ -11,8 +11,8 @@
 #include "edef.h"
 #include "elang.h"
 
-static int replen;              /* length of replacement string */
-static char     *oldpatmatch = NULL;    /* allocated memory for un-do.*/
+static int  replen        = 0;      /* length of replacement string */
+static char *oldpatmatch  = NULL;   /* allocated memory for un-do.*/
 
 /*
  * sreplace -- Search and replace.
@@ -39,22 +39,21 @@ int n;                                  /* # of repetitions wanted */
  * might be enabled (according to kind).
  */
 int PASCAL NEAR replaces(kind, f, n)
-int kind;                               /* Query enabled flag */
-int f;                                          /* default flag */
-int n;                                          /* # of repetitions wanted */
+  int kind;   /* Query enabled flag */
+  int f;      /* default flag */
+  int n;      /* # of repetitions wanted */
 {
-    register int status;        /* success flag on pattern inputs */
-    register int nummatch;      /* number of found matches */
-    long numsub;                        /* number of substitutions */
-    int nlflag;                         /* last char of search string a <NL>? */
-    int nlrepl;                         /* was a replace done on the last line?
-                                         */
-    char c;                             /* input char for query */
-    LINE *origline;             /* original "." position */
-    int origoff;                /* and offset (for . query option) */
-    LINE *lastline;             /* position of last replace and */
-    int lastoff;                /* offset (for 'u' query option) */
-    int oldmatchlen;            /* Closure may alter the match length.*/
+    register int  status      = 0;    /* success flag on pattern inputs */
+    register int  nummatch    = 0;    /* number of found matches */
+    long          numsub      = 0;    /* number of substitutions */
+    int           nlflag      = 0;    /* last char of search string a <NL>? */
+    int           nlrepl      = 0;    /* was a replace done on the last line? */
+    char          c           = '\0'; /* input char for query */
+    LINE          *origline   = NULL; /* original "." position */
+    int           origoff     = 0;    /* and offset (for . query option) */
+    LINE          *lastline   = NULL; /* position of last replace and */
+    int           lastoff     = 0;    /* offset (for 'u' query option) */
+    int           oldmatchlen = 0;    /* Closure may alter the match length.*/
 
     /*
      * Don't allow this command if we are in read only mode.

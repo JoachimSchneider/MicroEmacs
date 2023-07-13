@@ -76,14 +76,21 @@ CONST char *PASCAL NEAR gtfun(fname)    /* evaluate a function */
 CONST char  *fname;     /* name of function to evaluate */
 
 {
-    char         *fnameL  = NULL;
-    register int fnum     = 0;        /* index to function to eval  */
-    register int arg      = 0;        /* value of some arguments    */
-    BUFFER       *bp      = NULL;     /* scratch buffer pointer     */
-    char arg1[NSTRING];               /* value of first argument    */
-    char arg2[NSTRING];               /* value of second argument   */
-    char arg3[NSTRING];               /* value of third argument    */
-    static char result[2 * NSTRING];  /* string result              */
+    char          *fnameL = NULL;
+    register int  fnum    = 0;          /* index to function to eval  */
+    register int  arg     = 0;          /* value of some arguments    */
+    BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
+    /* ==== These might be part of the (static allocated) result ==== */
+    static char   arg1[NSTRING];        /* value of first argument    */
+    static char   arg2[NSTRING];        /* value of second argument   */
+    static char   arg3[NSTRING];        /* value of third argument    */
+    static char   result[2 * NSTRING];  /* string result              */
+    /* ============================================================== */
+
+    ZEROMEM(arg1);
+    ZEROMEM(arg2);
+    ZEROMEM(arg3);
+    ZEROMEM(result);
 
     fnameL = xstrdup(fname);
     mklower(fnameL); /* and let it be upper or lower case */

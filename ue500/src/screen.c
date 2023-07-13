@@ -117,7 +117,7 @@ int f, n;        /* prefix flag and argument */
     return ( select_screen(sp, TRUE) );
 }
 
-int PASCAL NEAR free_screen(sp) /* free all resouces associated with a screen */
+VOID PASCAL NEAR free_screen(sp) /* free all resouces associated with a screen */
 
 SCREEN_T *sp;   /* screen to dump */
 
@@ -153,7 +153,7 @@ SCREEN_T *sp;   /* screen to dump */
     free( (char *) sp );
 }
 
-int PASCAL NEAR unlist_screen(sp)
+VOID PASCAL NEAR unlist_screen(sp)
 
 SCREEN_T *sp;         /* screen to remove from the list */
 {
@@ -230,7 +230,7 @@ BUFFER *scr_buf;        /* buffer to place in first window of screen */
     sp->s_screen_name = copystr(scr_name);
 #if     WINDOW_MSWIN
     if ( term.t_newscr (sp) != TRUE ) {         /* failed */
-        free ( (void *)sp );
+        free ( (VOIDP)sp );
 
         return ( (SCREEN_T *)NULL );
     }

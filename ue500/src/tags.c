@@ -31,8 +31,6 @@
 # include "edef.h"
 # include "elang.h"
 
-static char SVER[] = "@(#) %M% %I% %H%";
-
 # define INDEX(c)        ( is_lower(c) ? c-'a'+ \
                            27 : ( is_letter(c) ? c-'A'+ \
                                   1: ( (c == '_') ? 0 : -1 ) ) )

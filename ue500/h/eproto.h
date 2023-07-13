@@ -1212,7 +1212,7 @@ extern int PASCAL execmenu  DCL((int f, int n));
 extern int PASCAL longop  DCL((int f));
 extern int PASCAL filenamedlg  DCL((char *prompt, char *buf, int nbuf, int fullpath));
 extern int PASCAL NEAR vtfreescr  DCL((SCREEN_T *sp));
-extern int PASCAL NEAR unlist_screen DCL((SCREEN_T *sp));
+extern VOID PASCAL NEAR unlist_screen DCL((SCREEN_T *sp));
 extern int PASCAL mlhistory DCL((void));
 extern int PASCAL updscrollbars  DCL((SCREEN_T *sp, char w_flag));
 extern VOID PASCAL NEAR vtscreen  DCL((SCREEN_T *sp));
@@ -1257,7 +1257,7 @@ extern SCREEN_T *PASCAL NEAR index_screen DCL((int scr_num));
 extern int PASCAL NEAR screen_index DCL((SCREEN_T *sp));
 extern int PASCAL NEAR insert_screen DCL((SCREEN_T *sp));
 extern int PASCAL NEAR select_screen DCL((SCREEN_T *sp, int announce));
-extern int PASCAL NEAR free_screen DCL((SCREEN_T *sp));
+extern VOID PASCAL NEAR free_screen DCL((SCREEN_T *sp));
 extern char *Eallocate DCL((unsigned nbytes));
 extern char *dolock DCL((CONST char *fname));
 extern char *getpath DCL((char *filespec));
@@ -1307,8 +1307,8 @@ extern ue_fnc_T getname  DCL((char *prompt));
 extern int PASCAL NEAR asc_int DCL((char *st));
 extern VOID dohello DCL((void));
 extern int dspram DCL((void));
-extern int lckerror DCL((char *errstr));
-extern int lckhello DCL((void));
+extern VOID lckerror DCL((char *errstr));
+extern VOID lckhello DCL((void));
 extern int xlock DCL((CONST char *fname));
 extern int lockchk DCL((CONST char *fname));
 extern int lockrel DCL((void));
@@ -1421,7 +1421,7 @@ extern int PASCAL NEAR stopforw DCL((void));
 extern int PASCAL NEAR svar DCL((VDESC *var, char *value));
 extern int PASCAL NEAR tgetc DCL((void));
 extern int PASCAL NEAR uneat DCL((void));
-extern int PASCAL NEAR unlist_screen DCL((SCREEN_T *sp));
+extern VOID PASCAL NEAR unlist_screen DCL((SCREEN_T *sp));
 extern int PASCAL NEAR upscreen DCL((int f, int n));
 extern int PASCAL NEAR vtinit DCL((void));
 extern int PASCAL NEAR yank DCL((int f, int n));
@@ -1554,7 +1554,7 @@ extern int PASCAL NEAR macrotokey DCL((int f, int n));
 extern int PASCAL NEAR makelist DCL((int iflag));
 extern int PASCAL NEAR movelocalpoint DCL(());
 extern int PASCAL NEAR undolist DCL(());
-extern int PASCAL NEAR mouse_screen DCL((void));
+extern VOID PASCAL NEAR mouse_screen DCL((void));
 extern int PASCAL NEAR screenlist DCL((int iflag));
 extern int PASCAL NEAR meexit DCL((int status));
 extern int PASCAL NEAR f_meta DCL((int f, int n));
@@ -1783,6 +1783,25 @@ extern char *realloc DCL((char *block, int siz));
 # endif
 #endif
 
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* Some helper macros:                                                */
+/**********************************************************************/
+#define ISALNUM(x)  isalnum((unsigned char)(x))
+#define ISALPHA(x)  isalpha((unsigned char)(x))
+#define ISCNTRL(x)  iscntrl((unsigned char)(x))
+#define ISDIGIT(x)  isdigit((unsigned char)(x))
+#define ISGRAPH(x)  isgraph((unsigned char)(x))
+#define ISLOWER(x)  islower((unsigned char)(x))
+#define ISPRINT(x)  isprint((unsigned char)(x))
+#define ISPUNCT(x)  ispunct((unsigned char)(x))
+#define ISSPACE(x)  isspace((unsigned char)(x))
+#define ISUPPER(x)  isupper((unsigned char)(x))
+#define ISXDIGIT(x) isxdigit((unsigned char)(x))
+#define ISASCII(x)  isascii((unsigned char)(x))
+#define ISBLANK(x)  isblank((unsigned char)(x))
 /**********************************************************************/
 
 

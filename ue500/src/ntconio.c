@@ -102,7 +102,7 @@ unsigned char in_buf[IBUFSIZE]; /* input character buffer */
 int in_next = 0;                /* pos to retrieve next input character */
 int in_last = 0;                /* pos to place most recent input character */
 
-void in_init()  /* initialize the input buffer */
+VOID in_init()  /* initialize the input buffer */
 {
     in_next = in_last = 0;
 }
@@ -115,7 +115,7 @@ int in_check()  /* is the input buffer non-empty? */
         return (TRUE);
 }
 
-void in_put(event)
+VOID in_put(event)
 
 int event;      /* event to enter into the input buffer */
 
@@ -156,7 +156,7 @@ PASCAL NEAR ntbcol(int color)              /* color to set */
 }
 # endif
 
-static void near ntSetUpdateValues(void)
+static VOID near ntSetUpdateValues(void)
 {
     if ( ntrow < ntMin )
         ntMin = ntrow;
@@ -232,7 +232,7 @@ PASCAL NEAR ntflush(void)
     return (TRUE);
 }
 
-static void near MouseEvent(void)
+static VOID near MouseEvent(void)
 {
     MOUSE_EVENT_RECORD *m_event;        /* mouse event to decode */
     register int k;             /* current bit/button of mouse */
@@ -321,7 +321,7 @@ static void near MouseEvent(void)
     return (FALSE);
 }
 
-static void near WindowSizeEvent(void)
+static VOID near WindowSizeEvent(void)
 {
     term.t_nrow = ir.Event.WindowBufferSizeEvent.dwSize.Y - 1;
     term.t_ncol = ir.Event.WindowBufferSizeEvent.dwSize.X;
@@ -331,7 +331,7 @@ static void near WindowSizeEvent(void)
 
 /* handle the current keyboard event */
 
-static void near KeyboardEvent()
+static VOID near KeyboardEvent()
 {
     int c;              /* ascii character to examine */
     int vscan;          /* virtual scan code */
@@ -467,7 +467,7 @@ pastothers:     /* shifted special key? */
     /* decode the various modifiers to the character */
     if ( state & (RIGHT_ALT_PRESSED | LEFT_ALT_PRESSED) ) {
         prefix |= ALTD;
-        if ( islower(c) )
+        if ( ISLOWER(c) )
             c = c - 'a' + 'A';
     }
     if ( ( state & (RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED) ) && c > 31 )

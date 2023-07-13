@@ -35,7 +35,7 @@ HFONT FAR PASCAL SelectFont (HDC hDC, HFONT hFont)
 /* GetFontMetrics:  retrieves the TEXTMETRIC and face name of a given font */
 /* ==============                                                          */
 
-static void PASCAL GetFontMetrics (HFONT      hFont,
+static VOID PASCAL GetFontMetrics (HFONT      hFont,
                                    TEXTMETRIC *Metrics,
                                    char       *FaceName)
 /* If either Metrics of FaceName is NULL, the corresponding value is not
@@ -56,7 +56,7 @@ static void PASCAL GetFontMetrics (HFONT      hFont,
 /* UpdateMaxRowCol: update the maximas displayed on the dialog box */
 /* ===============                                                 */
 
-static void PASCAL UpdateMaxRowCol (HWND hDlg, HFONT hFont)
+static VOID PASCAL UpdateMaxRowCol (HWND hDlg, HFONT hFont)
 {
     CellMetrics cm;
     char text[17];
@@ -71,7 +71,7 @@ static void PASCAL UpdateMaxRowCol (HWND hDlg, HFONT hFont)
 /* UpdateSample:    Update the sample text displayed on the dialog box */
 /* ============                                                        */
 
-static void PASCAL UpdateSample (HWND       hDlg,
+static VOID PASCAL UpdateSample (HWND       hDlg,
                                  HFONT      hFont,
                                  TEXTMETRIC *m,
                                  char       *FaceName)
@@ -110,7 +110,7 @@ static void PASCAL UpdateSample (HWND       hDlg,
 /* NewFont: creates a font matching the user's selections */
 /* =======                                                */
 
-static void PASCAL    NewFont (HWND hDlg, BOOL TrustSizeEdit)
+static VOID PASCAL    NewFont (HWND hDlg, BOOL TrustSizeEdit)
 /* setting TrustSizeEdit to FALSE indicates that the contents of the ID_FONTSIZE
  * edit box should not be used (this is used when this function is called for a
  * size list-selection change, at which time the edit box has not been updated
@@ -168,7 +168,7 @@ static void PASCAL    NewFont (HWND hDlg, BOOL TrustSizeEdit)
 /* AddSize: Add a font size into the font size list (used by EnumSizesProc) */
 /* =======                                                                  */
 
-static void PASCAL AddSize (HWND hDlg, short int Height, short int Width)
+static VOID PASCAL AddSize (HWND hDlg, short int Height, short int Width)
 {
     char ItemText[17];
     int i;
@@ -232,7 +232,7 @@ int EXPORT FAR PASCAL EnumSizesProc (LPLOGFONT    lf,
 /* BuildSizeList:   initializes the FontSize list box */
 /* =============                                      */
 
-static void PASCAL BuildSizeList (HWND hDlg, TEXTMETRIC *Metrics)
+static VOID PASCAL BuildSizeList (HWND hDlg, TEXTMETRIC *Metrics)
 /* This function initializes the FontSize list box with the sizes available for
  * the face name currently selected in the Font list box. The sizes are written
  * in the format: CXxCY. Also, the sizes are stored in the 32 bit values
@@ -304,7 +304,7 @@ static void PASCAL BuildSizeList (HWND hDlg, TEXTMETRIC *Metrics)
 /* AddFace: Adds a face to the FONT list box if it begets a proper font */
 /* =======                                                              */
 
-static void PASCAL AddFace (HWND hDlg, char *CandidateFace)
+static VOID PASCAL AddFace (HWND hDlg, char *CandidateFace)
 {
     BYTE CharSet;
     int From, At;       /* indexes for list box searches */
@@ -380,7 +380,7 @@ int EXPORT FAR PASCAL EnumFacesProc (LPLOGFONT    lf,
 /* BuildFaceList:   initialize the FONT list box */
 /* =============                                 */
 
-static void PASCAL BuildFaceList (HWND hDlg, char *FaceName)
+static VOID PASCAL BuildFaceList (HWND hDlg, char *FaceName)
 /* This function initializes the Font list box with fixed fonts matching the
  * current charset selection and then selects an item */
 {
@@ -578,7 +578,7 @@ CancelFont: EndDialog (hDlg, FALSE);
 
 /* ChangeFont:  effects the font change on the screen & message line */
 /* ==========                                                         */
-static void PASCAL ChangeFont (void)
+static VOID PASCAL ChangeFont (void)
 {
     SCREEN_T  *sp, *fsp;
     RECT Rect;
@@ -634,7 +634,7 @@ BOOL FAR PASCAL PickEmacsFont (void)
 /* FontInit:    initialize a font description from WIN.INI */
 /* ========                                                */
 
-void FAR PASCAL FontInit (void)
+VOID FAR PASCAL FontInit (void)
 {
     LOGFONT lf;
     char text[20];
@@ -642,7 +642,7 @@ void FAR PASCAL FontInit (void)
     if ( GetPrivateProfileString (ProgName, "CharSet", "", text, 20,
                                   IniFile) ) {
 
-        if ( isdigit(text[0]) ) { /* pure numeric value */
+        if ( ISDIGIT(text[0]) ) { /* pure numeric value */
             lf.lfCharSet = atoi (text);
         } else { /* menmonic value */
             if ( strncmp (text, "OEM", 3) == 0 ) {

@@ -252,7 +252,7 @@ char ch;                                /* Character to display     */
 }
 
 /** Put out sequence, with padding **/
-void putpad(pad, seq)
+VOID putpad(pad, seq)
 int pad;                                /* Number of padding characters */
 char * seq;                             /* Character sequence       */
 {
@@ -318,7 +318,7 @@ unsigned char grabnowait()
 }
 
 /** Queue input character **/
-void qin(ch)
+VOID qin(ch)
 int ch;                                 /* Character to add     */
 {
     /* Check for overflow */

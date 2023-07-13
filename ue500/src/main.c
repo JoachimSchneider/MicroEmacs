@@ -1,11 +1,12 @@
 /*
- *  MicroEMACS 5.00 written by Daniel M. Lawrence based on code by Dave G.
- * Conroy.
+ *	MicroEMACS 5.00
+ *		written by Daniel M. Lawrence
+ *		based on code by Dave G. Conroy.
  *
- *  (C)Copyright 1988-2009 by Daniel M. Lawrence MicroEMACS 5.00 can be copied
- * and distributed freely for any non-commercial purposes. MicroEMACS 5.00 can
- * only be incorporated into commercial software with the permission of the
- * current author.
+ *	(C)Copyright 1988-2009 by Daniel M. Lawrence
+ *	MicroEMACS 5.00 can be copied and distributed freely for any
+ *	non-commercial purposes. MicroEMACS 5.00 can only be incorporated
+ *	into commercial software with the permission of the current author.
  *
  * This file contains the main driving routine, and some keyboard processing
  * code, for the MicroEMACS screen editor.
@@ -67,36 +68,36 @@ extern unsigned int _stklen = 10000;
 # include <signal.h>
 #endif
 
-/*
- *       This is the primary entry point that is used by command line
- * invocation, and by applications that link with microemacs in such a way that
- * each invocation of Emacs is a fresh environment.
- *
- *       There is another entry point in VMS.C that is used when microemacs is
- * "linked" (In quotes, because it is a run-time link rather than a link-time
- * link.) with applications that wish Emacs to preserve it's context across
- * invocations.  (For example, EMACS.RC is only executed once per invocation of
- * the application, instead of once per invocation of Emacs.)
- *
- *       Note that re-entering an Emacs that is saved in a kept subprocess would
- * require a similar entrypoint.
- */
 
+/* EMACS, CALLED_MAIN, MAIN:
+ *
+ * This is the primary entry point that is used by command line
+ * invocation, and by applications that link with microemacs in such a
+ * way that each invocation of Emacs is a fresh environment.
+ *
+ * There is another entry point in VMS.C that is used when microemacs
+ * is "linked" (In quotes, because it is a run-time link rather than a
+ * link-time link.) with applications that wish Emacs to preserve it's
+ * context across invocations. (For example, EMACS.RC is only executed
+ * once per invocation of the application, instead of once per
+ * invocation of Emacs.)
+ *
+ * Note that re-entering an Emacs that is saved in a kept subprocess
+ * would require a similar entrypoint.
+ */
 #if     CALLED
-int emacs(argc, argv)
+int emacs P2_(int, argc, char **, argv)
 #else
 # if     XVT
-called_main(argc, argv)
+int called_main P2_(int, argc, char **, argv)
 # else
-main(argc, argv)
+int main P2_(int, argc, char **, argv)
 # endif
 #endif
-
-int argc;                       /* # of arguments */
-char *argv[];                   /* argument strings */
-
+/* argc:    # of arguments    */
+/* argv[]:  argument strings  */
 {
-    register int status;
+    register int  status  = 0;
 
 #if HANDLE_WINCH
     signal(SIGWINCH, winch_changed);
@@ -132,7 +133,10 @@ char *argv[];                   /* argument strings */
     expandargs(&argc, &argv);           /* expand VMS wildcards.*/
 #endif
     dcline(argc, argv, TRUE);
-edit:   status = editloop();
+
+edit:
+    status = editloop();
+
 abortrun:
     /* execute the macro the user had bound to $exithook */
     eexitflag = FALSE;
@@ -145,26 +149,27 @@ abortrun:
 
     /* close things down */
     vttidy();
-#if     CLEAN
+#if CLEAN
     clean();
 #endif
-#if     CALLED
 
+#if CALLED
     return (status);
-
 #else
     exit(status);
 #endif
 }
 
-#if     CLEAN
-/*
- *       On some primitive operation systems, and when emacs is used as a
- * subprogram to a larger project, emacs needs to de-alloc its own used memory,
- * otherwise we just exit.
- */
 
-int PASCAL NEAR clean()
+#if     CLEAN
+
+/* CLEAN:
+ *
+ * On some primitive operation systems, and when emacs is used as a
+ * subprogram to a larger project, emacs needs to de-alloc its own used
+ * memory, otherwise we just exit.
+ */
+int PASCAL NEAR clean P0_(void)
 {
     register BUFFER *bp;        /* buffer list pointer */
     register SCREEN_T *scrp;            /* ptr to screen to dump */
@@ -211,14 +216,11 @@ int PASCAL NEAR clean()
 }
 #endif
 
-/*  Process a command line.   May be called any time.   */
-
-VOID PASCAL NEAR dcline(argc, argv, firstflag)
-
-int argc;
-char *argv[];
-int firstflag;                  /* is this the first time in? */
-
+/* DCLINE:
+ *
+ * Process a command line. May be called any time.
+ */
+VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this the first time in? */)
 {
     register BUFFER *bp;        /* temp buffer pointer */
     register int firstfile;             /* first file flag */
@@ -241,8 +243,6 @@ int firstflag;                  /* is this the first time in? */
     int cryptflag;              /* encrypting on the way in? */
     char ekey[NPAT];            /* startup encryption key */
 #endif
-    NOSHARE CONST extern char *pathname[];      /* startup file path/name array
-                                                 */
 
     viewflag = FALSE;           /* view mode defaults off in command line */
     gotoflag = FALSE;           /* set to off to begin with */
@@ -443,8 +443,10 @@ int firstflag;                  /* is this the first time in? */
 }
 
 #if     WINDOW_MSWIN
+
 # define GETBASEKEY getbasekey
-static int PASCAL NEAR getbasekey()
+
+static int PASCAL NEAR getbasekey P0_(void)
 {
     register int c;
 
@@ -457,17 +459,20 @@ static int PASCAL NEAR getbasekey()
 
     return c;
 }
+
 #else
+
 # define GETBASEKEY get_key
-#endif
 
-/*
- *       This is called to let the user edit something. Note that if you arrange
- * to be able to call this from a macro, you will have invented the
- * "recursive-edit" function.
+#endif  /* WINDOW_MSWIN */
+
+/* EDITLOOP:
+ *
+ * This is called to let the user edit something. Note that if you
+ * arrange to be able to call this from a macro, you will have invented
+ * the "recursive-edit" function.
  */
-
-int PASCAL NEAR editloop()
+int PASCAL NEAR editloop P0_(void)
 {
     register int c;             /* command character */
     register int f;             /* default flag */
@@ -600,8 +605,7 @@ loop:
         n = 4;                          /* with argument of 4 */
         mflag = 0;                      /* that can be discarded. */
         mlwrite("Arg: 4");
-        while ( ( c = GETBASEKEY() ) >= '0' && c <= '9' ||c == reptc ||
-                c == '-' ) {
+        while ( ((c = GETBASEKEY()) >= '0' && c <= '9') || c == reptc || c == '-' ) {
             if ( c == reptc )
                 if ( (n > 0) == ( (n * 4) > 0 ) )
                     n = n * 4;
@@ -648,16 +652,14 @@ loop:
     goto loop;
 }
 
-/*
- * Initialize all of the buffers, windows and screens. The buffer name is passed
- * down as an argument, because the main routine may have been told to read in a
- * file by default, and we want the buffer name to be right.
+/* EDINIT:
+ *
+ * Initialize all of the buffers, windows and screens. The buffer name
+ * is passed down as an argument, because the main routine may have
+ * been told to read in a file by default, and we want the buffer name
+ * to be right.
  */
-
-VOID PASCAL NEAR edinit(bname)
-
-char bname[];                   /* name of buffer to initialize */
-
+VOID PASCAL NEAR edinit P1_(char *, bname /* name of buffer to initialize */)
 {
     register BUFFER *bp;
     register int index;
@@ -712,24 +714,21 @@ char bname[];                   /* name of buffer to initialize */
     curwp = wheadp = first_screen->s_cur_window = first_screen->s_first_window;
 }
 
-/*
- * This is the general command execution routine. It handles the fake binding of
- * all the keys to "self-insert". It also clears out the "thisflag" word, and
- * arranges to move it to the "lastflag", so that the next command can look at
- * it. Return the status of command.
+/* EXECUTE:
+ *
+ * This is the general command execution routine. It handles the fake
+ * binding of all the keys to "self-insert". It also clears out the
+ * "thisflag" word, and arranges to move it to the "lastflag", so that
+ * the next command can look at it. Return the status of command.
  */
-
-int PASCAL NEAR execute(c, f, n)
-
-int c;                                  /* key to execute */
-int f;                                  /* prefix argument flag */
-int n;                                  /* prefix value */
-
+int PASCAL NEAR execute P3_(int, c /* key to execute */,
+                            int, f /* prefix argument flag */,
+                            int, n /* prefix value */)
 {
-    register int status;
-    KEYTAB *key;                /* key entry to execute */
-#if     DBCS
-    int schar;                  /* second key in 2 byte sequence */
+    register int  status  = 0;
+    KEYTAB        *key    = NULL;   /* key entry to execute */
+#if DBCS
+    int           schar   = 0;      /* second key in 2 byte sequence */
 #endif
 
 #if     WINDOW_MSWIN
@@ -884,15 +883,14 @@ int n;                                  /* prefix value */
     return (FALSE);
 }
 
-/*
- *       Fancy quit command, as implemented by Norm. If the any buffer has
- * changed do a write on that buffer and exit emacs, otherwise simply exit.
+/* QUICKEXIT:
+ *
+ * Fancy quit command, as implemented by Norm. If the any buffer has
+ * changed do a write on that buffer and exit emacs, otherwise simply
+ * exit.
  */
-
-int PASCAL NEAR quickexit(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR quickexit P2_(int, f /* prefix flag */,
+                              int, n /* prefix argument */)
 {
     register BUFFER *bp;        /* scanning pointer to buffers */
     register BUFFER *oldcb;     /* original current buffer */
@@ -925,14 +923,14 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Quit command. If an argument, always quit. Otherwise confirm if a buffer has
- * been changed and not written out. Normally bound to "C-X C-C".
+/* QUIT:
+ *
+ * Quit command. If an argument, always quit. Otherwise confirm if a
+ * buffer has been changed and not written out. Normally bound to "C-X
+ * C-C".
  */
-
-int PASCAL NEAR quit(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR quit P2_(int, f /* prefix flag */,
+                         int, n /* prefix argument */)
 {
     register int status;        /* return status */
 
@@ -959,8 +957,7 @@ int f, n;                               /* prefix flag and argument */
     return (status);
 }
 
-int PASCAL NEAR meexit(status)
-int status;                             /* return status of emacs */
+int PASCAL NEAR meexit P1_(int, status /* return status of emacs */)
 {
     eexitflag = TRUE;           /* flag a program exit */
     gflags |= GFEXIT;
@@ -970,15 +967,13 @@ int status;                             /* return status of emacs */
     return (TRUE);
 }
 
-/*
- * Begin a keyboard macro. Error if not at the top level in keyboard processing.
- * Set up variables and return.
+/* CTLXLP:
+ *
+ * Begin a keyboard macro. Error if not at the top level in keyboard
+ * processing. Set up variables and return.
  */
-
-int PASCAL NEAR ctlxlp(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR ctlxlp P2_(int, f /* prefix flag */,
+                           int, n /* prefix argument */)
 {
     if ( kbdmode != STOP ) {
         mlwrite(TEXT105);
@@ -995,15 +990,13 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * End keyboard macro. Check for the same limit conditions as the above routine.
- * Set up the variables and return to the caller.
+/* CTLXRP:
+ *
+ * End keyboard macro. Check for the same limit conditions as the above
+ * routine. Set up the variables and return to the caller.
  */
-
-int PASCAL NEAR ctlxrp(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR ctlxrp P2_(int, f /* prefix flag */,
+                           int, n /* prefix argument */)
 {
     if ( kbdmode == STOP ) {
         mlwrite(TEXT107);
@@ -1020,15 +1013,14 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Execute a macro. The command argument is the number of times to loop. Quit as
- * soon as a command gets an error. Return TRUE if all ok, else FALSE.
+/* CTLXE:
+ *
+ * Execute a macro. The command argument is the number of times to
+ * loop. Quit as soon as a command gets an error. Return TRUE if all
+ * ok, else FALSE.
  */
-
-int PASCAL NEAR ctlxe(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR ctlxe P2_(int, f /* prefix flag */,
+                          int, n /* prefix argument */)
 {
     if ( kbdmode != STOP ) {
         mlwrite(TEXT105);
@@ -1046,15 +1038,14 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Abort. Beep the beeper. Kill off any keyboard macro, etc., that is in
- * progress. Sometimes called as a routine, to do general aborting of stuff.
+/* CTRLG:
+ *
+ * Abort. Beep the beeper. Kill off any keyboard macro, etc., that is
+ * in progress. Sometimes called as a routine, to do general aborting
+ * of stuff.
  */
-
-int PASCAL NEAR ctrlg(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR ctrlg P2_(int, f /* prefix flag */,
+                          int, n /* prefix argument */)
 {
     TTbeep();
     kbdmode = STOP;
@@ -1064,10 +1055,12 @@ int f, n;                               /* prefix flag and argument */
     return (ABORT);
 }
 
-/* tell the user that this command is illegal while we are in VIEW (read-only)
- * mode             */
-
-int PASCAL NEAR rdonly()
+/* RDONLY:
+ *
+ * tell the user that this command is illegal while we are in VIEW
+ * (read-only) mode
+ */
+int PASCAL NEAR rdonly P0_(void)
 {
     TTbeep();
     mlwrite(TEXT109);
@@ -1076,7 +1069,7 @@ int PASCAL NEAR rdonly()
     return (FALSE);
 }
 
-int PASCAL NEAR resterr()
+int PASCAL NEAR resterr P0_(void)
 {
     TTbeep();
     mlwrite(TEXT110);
@@ -1085,18 +1078,22 @@ int PASCAL NEAR resterr()
     return (FALSE);
 }
 
-int PASCAL NEAR nullproc(f, n)  /* user function that does NOTHING */
-
-int n, f;       /* yes, these are default and never used.. but MUST be here */
-
+/* NULLPROC:
+ *
+ * user function that does NOTHING
+ */
+int PASCAL NEAR nullproc P2_(int, f, int, n)
+/* f, n: yes, these are default and never used.. but MUST be here */
 {
     return (TRUE);
 }
 
-int PASCAL NEAR f_meta(f, n)    /* set META prefixing pending */
-
-int f, n;                               /* prefix flag and argument */
-
+/* F_META:
+ *
+ * Set META prefixing pending
+ */
+int PASCAL NEAR f_meta P2_(int, f, int, n)
+/* f, n: prefix flag and argument */
 {
     prefix |= META;
     prenum = n;
@@ -1105,10 +1102,12 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-int PASCAL NEAR cex(f, n)       /* set ^X prefixing pending */
-
-int f, n;                               /* prefix flag and argument */
-
+/* CEX:
+ *
+ * set ^X prefixing pending
+ */
+int PASCAL NEAR cex P2_(int, f, int, n)
+/* f, n:  prefix flag and argument */
 {
     prefix |= CTLX;
     prenum = n;
@@ -1117,20 +1116,22 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-int PASCAL NEAR unarg P2_(int, f, int, n) /* dummy function for binding to universal-argument */
+/* UNARG:
+ *
+ * Dummy function for binding to universal-argument
+ */
+int PASCAL NEAR unarg P2_(int, f, int, n)
 {
     return (TRUE);
 }
 
-/*  bytecopy:   copy a string...with length restrictions ALWAYS null terminate
+/* BYTECOPY:
+ *
+ * Copy a string...with length restrictions ALWAYS null terminate
  */
-
-char *PASCAL NEAR bytecopy(dst, src, maxlen)
-
-char        *dst;               /* destination of copied string */
-CONST char  *src;               /* source */
-int maxlen;             /* maximum length */
-
+char *PASCAL NEAR bytecopy P3_(char *,        dst,    /* destination of copied string */
+                               CONST char *,  src,    /* source */
+                               int,           maxlen  /* maximum length */)
 {
     char *dptr;                         /* ptr into dst */
 
@@ -1142,14 +1143,11 @@ int maxlen;             /* maximum length */
     return (dst);
 }
 
-/*  copystr:    make another copy of the argument
+/* COPYSTR:
  *
+ * Make another copy of the argument.
  */
-
-char *PASCAL NEAR copystr(sp)
-
-char *sp;                               /* string to copy */
-
+char *PASCAL NEAR copystr P1_(char *, sp /* string to copy */)
 {
     char *dp;                           /* copy of string */
 
@@ -1166,12 +1164,14 @@ char *sp;                               /* string to copy */
 /*****      Compiler specific Library functions ****/
 
 #if     RAMSIZE
-/*  These routines will allow me to track memory usage by placing a layer on top
- * of the standard system malloc() and free() calls.
- *       with this code defined, the environment variable, $RAM, will report on
- * the number of bytes allocated via malloc.
+/*
+ * These routines will allow me to track memory usage by placing a
+ * layer on top of the standard system malloc() and free() calls.
  *
- *       with RAMSHOW defined, the number is also posted on the end of the
+ * with this code defined, the environment variable, $RAM, will report
+ * on the number of bytes allocated via malloc.
+ *
+ * with RAMSHOW defined, the number is also posted on the end of the
  * bottom mode line and is updated whenever it is changed.
  */
 
@@ -1183,10 +1183,11 @@ char *sp;                               /* string to copy */
 #  define free    VAXC$FREE_OPT
 # endif
 
-char *Eallocate(nbytes) /* allocate nbytes and track */
-
-unsigned nbytes;        /* # of bytes to allocate */
-
+/* EALLOCATE:
+ *
+ * Allocate nbytes and track
+ */
+char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
 {
     char *mp;           /* ptr returned from malloc */
     char *malloc();
@@ -1215,10 +1216,11 @@ unsigned nbytes;        /* # of bytes to allocate */
     return (mp);
 }
 
-Erelease(mp)    /* release malloced memory and track */
-
-char *mp;       /* chunk of RAM to release */
-
+/* ERELEASE:
+ *
+ * Release malloced memory and track
+ */
+Erelease P1_(char *, mp /* chunk of RAM to release */)
 {
     unsigned *lp;       /* ptr to the long containing the block size */
 # if     RAMTRCK
@@ -1245,7 +1247,8 @@ char *mp;       /* chunk of RAM to release */
 }
 
 # if     RAMSHOW
-dspram()        /* display the amount of RAM currently malloced */
+
+VOID dspram P0_(void) /* display the amount of RAM currently malloced */
 {
     char mbuf[20];
     char *sp;
@@ -1269,6 +1272,11 @@ dspram()        /* display the amount of RAM currently malloced */
     fclose(track);
 #  endif
 }
-# endif
-#endif
+# endif /* RAMSHOW  */
+#endif  /* RAMSIZE  */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

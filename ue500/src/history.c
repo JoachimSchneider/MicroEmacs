@@ -2587,8 +2587,12 @@
  */
 
 
-history()
 
+/* this is here to keep compilers from complaining... it's not needed */
+#include "eproto.h"
+
+
+VOID history P0_(void)
 {
 	/* this is here to keep compilers from complaining... it's not needed */
 }

@@ -618,18 +618,20 @@ EWINDOW *wp;
 
 VOID PASCAL NEAR update_hilite()
 {
-    int first_line;             /* first screen line to highlight */
-    short first_pos;            /* position in that line */
-    int last_line;              /* last screen line to highlight */
-    short last_pos;             /* position in that line */
-    LINE *forptr, *bckptr;      /* line pointers searching in current buffer */
-    int forline, bckline;       /* screen lines of for/bck ptrs */
-    int nlines;                 /* number of text lines in current window */
-    LINE *first_mark;           /* first mark to highlighted text */
-    LINE *last_mark;            /* last mark to highlighted text */
-    LINE *b_linep;              /* header line of current buffer */
-    int temp_line;              /* temp line # for swap */
-    short temp_pos;             /*  more of the same */
+    int   first_line  = 0;      /* first screen line to highlight */
+    short first_pos   = 0;      /* position in that line */
+    int   last_line   = 0;      /* last screen line to highlight */
+    short last_pos    = 0;      /* position in that line */
+    LINE  *forptr     = NULL;   /* line pointers searching in current buffer */
+    LINE  *bckptr     = NULL;   /* ......................................... */
+    int   forline     = 0;      /* screen lines of for/bck ptrs */
+    int   bckline     = 0;      /* ............................ */
+    int   nlines      = 0;      /* number of text lines in current window */
+    LINE  *first_mark = NULL;   /* first mark to highlighted text */
+    LINE  *last_mark  = NULL;   /* last mark to highlighted text */
+    LINE  *b_linep    = NULL;   /* header line of current buffer */
+    int   temp_line   = 0;      /* temp line # for swap */
+    short temp_pos    = 0;      /*  more of the same */
 
     /* $hilight must be set to the first of 2 consecutive marks used to define
      * the region to highlight */
@@ -1425,16 +1427,16 @@ EWINDOW *wp;    /* window to update modeline for */
 
     n = wp->w_toprow+wp->w_ntrows;              /* Location. */
 
-/*
- *       Note that we assume that setting REVERSE will cause the terminal driver
- * to draw with the inverted relationship of fcolor and bcolor, so that when we
- * say to set the foreground color to "white"
- *       and background color to "black", the fact that "reverse" is enabled
- * means that the terminal driver actually draws "black" on a background of
- * "white".  Makes sense, no?  This way, devices for which the color controls
- * are optional will still get the "reverse"
- *       signals.
- */
+    /*
+     * Note that we assume that setting REVERSE will cause the terminal
+     * driver to draw with the inverted relationship of fcolor and
+     * bcolor, so that when we say to set the foreground color to
+     * "white" and background color to "black", the fact that "reverse"
+     * is enabled means that the terminal driver actually draws "black"
+     * on a background of "white". Makes sense, no? This way, devices
+     * for which the color controls are optional will still get the
+     * "reverse" signals.
+     */
 
     vscreen[n]->v_flag |= VFCHG | VFCOL;        /* Redraw next time. */
     vscreen[n]->v_left = 0;

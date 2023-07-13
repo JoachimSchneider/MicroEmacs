@@ -441,7 +441,7 @@ char *PASCAL NEAR getnfile()
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* and call for the next file */
-    if ( DosFindNext(hDir, (void *)&pBuf, sizeof (pBuf), &num_found) != 0 )
+    if ( DosFindNext(hDir, (VOIDP)&pBuf, sizeof (pBuf), &num_found) != 0 )
         return (NULL);
 
     /* return the first file name! */

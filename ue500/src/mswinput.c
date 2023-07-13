@@ -28,7 +28,7 @@ static int vk_at = -1;                  /* VK code for '@' key */
 /* in_init: initialize the input stream buffer */
 /* =======                                     */
 
-void    in_init (void)
+VOID    in_init (void)
 {
     /*-initialize input stream buffer */
     in_next = in_last = 0;
@@ -69,7 +69,7 @@ BOOL    in_check (void)
 /* in_put:  enter an event into the input buffer */
 /* ======                                        */
 
-void    in_put (int event)
+VOID    in_put (int event)
 {
     in_buf[in_last++] = event;
     in_last &= (IBUFSIZE - 1);
@@ -236,7 +236,7 @@ KeyDown:
 /* PutMouseMessage: feeds a mouse message into the in_put queue */
 /* ===============                                              */
 
-void PASCAL    PutMouseMessage (UINT wMsg, WPARAM wParam, POINT Position)
+VOID PASCAL    PutMouseMessage (UINT wMsg, WPARAM wParam, POINT Position)
 {
     char c;
     int prefix;
@@ -296,7 +296,7 @@ void PASCAL    PutMouseMessage (UINT wMsg, WPARAM wParam, POINT Position)
 /* MouseMessage:    handles client area mouse messages */
 /* ============                                        */
 
-void FAR PASCAL MouseMessage (HWND hWnd, UINT wMsg, WPARAM wParam,
+VOID FAR PASCAL MouseMessage (HWND hWnd, UINT wMsg, WPARAM wParam,
                               LPARAM lParam)
 {
     POINT Position;
@@ -356,7 +356,7 @@ void FAR PASCAL MouseMessage (HWND hWnd, UINT wMsg, WPARAM wParam,
 /* DropMessage:    handles WM_DROPFILES messages */
 /* ===========                                   */
 
-void FAR PASCAL DropMessage (HWND hWnd, HDROP hDrop)
+VOID FAR PASCAL DropMessage (HWND hWnd, HDROP hDrop)
 /* Generates a MS! keystroke. $xpos/$ypos contain the position where the files
  * were dropped, or -1 (actually, 255) if the drop occurred outside a screen
  * client area. The invisible buffer "Dropped files" is filled with the list of

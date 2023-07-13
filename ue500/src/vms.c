@@ -221,7 +221,7 @@ static next_read(int flag)
 * FUNCTION - RemoveEscapes - remove ANSI escapes from string (for broadcast
 * messages that contain 'formatting')
 ***********************************************************/
-static void RemoveEscapes(char *str)
+static VOID RemoveEscapes(char *str)
 {
     char *in=str, *out=str;
 
@@ -1286,7 +1286,7 @@ int *nbytes;    /* save our caller hassle, calc the line length */
 * FUNCTION - addspec - utility function for expandargs
 ***********************************************************/
 # define ADDSPEC_INCREMENT 10
-static void PASCAL NEAR addspec(struct dsc$descriptor dsc,
+static VOID PASCAL NEAR addspec(struct dsc$descriptor dsc,
                                 int                   *pargc,
                                 char                  ***pargv,
                                 int                   *pargcapacity)
@@ -1311,7 +1311,7 @@ static void PASCAL NEAR addspec(struct dsc$descriptor dsc,
 * FUNCTION - expandargs - massage argc and argv to expand wildcards by calling
 * VMS.
 ***********************************************************/
-void PASCAL NEAR expandargs(int *pargc, char ***pargv)
+VOID PASCAL NEAR expandargs(int *pargc, char ***pargv)
 {
     int argc = *pargc;
     char **argv = *pargv;

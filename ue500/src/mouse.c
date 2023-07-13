@@ -609,7 +609,7 @@ register int col;
     return (offset);
 }
 
-int PASCAL NEAR mouse_screen()
+VOID PASCAL NEAR mouse_screen()
 {
     register SCREEN_T *screen_ptr;      /* screen to test mouse in */
 

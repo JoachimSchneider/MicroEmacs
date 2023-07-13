@@ -337,7 +337,7 @@ int scfcol(), scbcol();
 # endif /* COLOR */
 
 # if ( FLABEL )
-static void dis_sfk(), dis_ufk();
+static VOID dis_sfk(), dis_ufk();
 # endif
 
 TERM term =
@@ -720,7 +720,7 @@ int typahead()
 # endif /* TYPEAH */
 
 /** Put out sequence, with padding **/
-void putpad(seq)
+VOID putpad(seq)
 char * seq;                             /* Character sequence       */
 {
     /* Check for null */
@@ -1041,8 +1041,8 @@ int color;              /* Color to set         */
     TRC( ("scfcol(): %s", "color != cfcolor") );
 
     /* Send out color sequence */
-    TRC( ( "scfcol(): capbind[CAP_C0].store == %d",
-           (int)(capbind[CAP_C0].store) ) );
+    TRC( ( "scfcol(): capbind[CAP_C0].store == 0x%lX",
+           (unsigned long int)(capbind[CAP_C0].store) ) );
     if ( capbind[CAP_C0].store ) {
         TRC( ( "scfcol(): capbind[CAP_C0 + (color & 7)].store = %s",
                STR(capbind[CAP_C0 + (color & 7)].store) ) );
@@ -1075,8 +1075,8 @@ int color;                      /* Color to set         */
     TRC( ("scbcol(): %s", "color != cbcolor") );
 
     /* Send out color sequence */
-    TRC( ( "scbcol(): capbind[CAP_C0].store == %d",
-           (int)(capbind[CAP_C0].store) ) );
+    TRC( ( "scbcol(): capbind[CAP_C0].store == 0x%lX",
+           (unsigned long int)(capbind[CAP_C0].store) ) );
     if ( capbind[CAP_C0].store ) {
         TRC( ( "scbcol(): capbind[CAP_D0 + (color & 7)].store = %s",
                STR(capbind[CAP_D0 + (color & 7)].store) ) );
@@ -1164,6 +1164,8 @@ int spal P1_(char *, cmd  /* Palette command */)
 
 /** Perform a stop signal **/
 int bktoshell(f, n)
+  int f;
+  int n;
 {
     /* Reset the terminal and go to the last line */
     vttidy();
@@ -1812,7 +1814,7 @@ int n;                                  /* Argument count       */
 char *getffile(fspec)
 char *fspec;                            /* Filename specification   */
 {
-    int index, point, extflag;
+    int index, point;
 
     /* First parse the file path off the file spec */
     xstrcpy(path, fspec);
@@ -1824,10 +1826,8 @@ char *fspec;                            /* Filename specification   */
 
     /* Check for an extension */
     point = strlen(fspec) - 1;
-    extflag = FALSE;
     while ( point >= 0 ) {
         if ( fspec[point] == '.' ) {
-            extflag = TRUE;
             break;
         }
         point--;
@@ -1951,7 +1951,7 @@ int n;          /* function key number 1...8 on hp-terminals */
 }
 
 /* display user function key labels */
-static void dis_ufk()
+static VOID dis_ufk()
 {
     int label_num;
     char buf[6];
@@ -1968,7 +1968,7 @@ static void dis_ufk()
 }
 
 /* display system function key labels */
-static void dis_sfk()
+static VOID dis_sfk()
 {
     char buf[6];
 
@@ -2011,13 +2011,13 @@ char *name;     /* name of directory to delete */
 /*
  * Window size changes handled via signals.
  */
-void winch_changed(int signo)
+VOID winch_changed(int signo)
 {
     signal(SIGWINCH, winch_changed);
     winch_flag = 1;
 }
 
-void winch_new_size()
+VOID winch_new_size()
 {
     extern VOID winch_vtresize(int rows, int cols);
 

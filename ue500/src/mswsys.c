@@ -61,9 +61,9 @@ static HCURSOR hRealHourglass;
 #endif
 
 /* prototypes */
-static void PASCAL MessageLoop (BOOL WaitMode);
+static VOID PASCAL MessageLoop (BOOL WaitMode);
 static BOOL PASCAL UpdateCursor (HWND hWnd, WPARAM wParam, LPARAM lParam);
-static void PASCAL SetHourglass (BOOL hg);
+static VOID PASCAL SetHourglass (BOOL hg);
 
 /* timeset: return a system-dependant time string */
 /* =======                                        */
@@ -245,7 +245,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
 
     /*-Register the frame window class */
     wc.style        = 0;
-    wc.lpfnWndProc  = (void*)&FrameWndProc;
+    wc.lpfnWndProc  = (VOIDP)&FrameWndProc;
     wc.cbClsExtra   = 0;
     wc.cbWndExtra   = FRMWNDEXTRA;
     wc.hInstance    = hEmacsInstance;
@@ -261,7 +261,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
     strcat (text, "_screen");
     ScreenClassName = copystr(text);
     wc.style        = 0;
-    wc.lpfnWndProc  = (void*)&ScrWndProc;
+    wc.lpfnWndProc  = (VOIDP)&ScrWndProc;
     wc.cbClsExtra   = 0;
     wc.cbWndExtra   = SCRWNDEXTRA;
     wc.hInstance    = hEmacsInstance;
@@ -337,7 +337,7 @@ ParsingDone: return TRUE;
 /* SetFrameCaption: sets the frame window's text according to the app Id */
 /* ===============                                                       */
 
-static void PASCAL  SetFrameCaption (void)
+static VOID PASCAL  SetFrameCaption (void)
 {
     char text[sizeof (PROGNAME) + sizeof (VERSION)+20];
     char    *t;
@@ -457,7 +457,7 @@ DefaultProc: return CallWindowProc (MDIClientProc, hWnd, wMsg, wParam, lParam);
 /* FrameInit:   Frame window's WM_CREATE */
 /* =========                             */
 
-void FAR PASCAL FrameInit (CREATESTRUCT *cs)
+VOID FAR PASCAL FrameInit (CREATESTRUCT *cs)
 {
     RECT Rect;
     CLIENTCREATESTRUCT ccs;
@@ -1011,7 +1011,7 @@ int PASCAL  WinMain (HINSTANCE hInstance,
 /* ModifyCursor:    forces a WM_SETCURSOR */
 /* ============                           */
 
-static void PASCAL  ModifyCursor (void)
+static VOID PASCAL  ModifyCursor (void)
 {
     POINT pt;
 
@@ -1022,7 +1022,7 @@ static void PASCAL  ModifyCursor (void)
 /* MessageLoop: Main message loop */
 /* ===========                    */
 
-static void PASCAL MessageLoop (BOOL WaitMode)
+static VOID PASCAL MessageLoop (BOOL WaitMode)
 /* If WaitMode is TRUE this function uses GetMessage the first time and
  * PeekMessage after that, until the input queue is empty and there is something
  * in the in_put pipe. Thus, WM_PAINTs are processed and the input queue is
@@ -1188,7 +1188,7 @@ static BOOL PASCAL UpdateCursor (HWND hWnd, WPARAM wParam, LPARAM lParam)
 /* SetHourglass:    sets or removes the hourglass cursor */
 /* ============                                          */
 
-static void PASCAL SetHourglass (BOOL hg)
+static VOID PASCAL SetHourglass (BOOL hg)
 /* hg = TRUE sets the hourglass, hg = FALSE removes it */
 {
     POINT Point;

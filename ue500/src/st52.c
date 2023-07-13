@@ -238,7 +238,7 @@ int in_get()    /* get an event from the input buffer */
     return (event);
 }
 
-void init_aline()
+VOID init_aline()
 {
     int *ld_contrl;
     int *ld_intin;

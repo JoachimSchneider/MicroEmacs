@@ -46,9 +46,9 @@ int PASCAL NEAR insfile(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int s;
-    char *fname;        /* file name */
-    LINE *curline;
+    register int  s         = 0;
+    char          *fname    = NULL; /* file name */
+    LINE          *curline  = NULL;
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -244,12 +244,12 @@ int lockfl;             /* check the file for locks? */
 }
 
 /*
- *       Read file "fname" into the current buffer, blowing away any text found
- * there.  Called by both the read and find commands.  Return the final status
- * of the read.  Also called by the mainline, to read in a file specified on the
- * command line as an argument.
- *       The command in $readhook is called after the buffer is set up and
- * before it is read.
+ * Read file "fname" into the current buffer, blowing away any text
+ * found there. Called by both the read and find commands. Return the
+ * final status of the read. Also called by the mainline, to read in a
+ * file specified on the command line as an argument. The command in
+ * $readhook is called after the buffer is set up and before it is
+ * read.
  */
 
 int PASCAL NEAR readin(fname, lockfl)

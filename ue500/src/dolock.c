@@ -321,9 +321,9 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 
         /* and output the info needed */
 # if  ( IS_UNIX() )
-        fprintf( fp, "%u\n", getpid() );
+        fprintf( fp, "%lu\n", (long int)getpid() );
 # else
-        fprintf(fp, "%u\n", 0u); /* process ID */
+        fprintf(fp, "%lu\n", 0ul); /* process ID */
 # endif
 
         /* user name */

@@ -376,7 +376,7 @@ KEYDEF *ftable;         /* table to set definitions from */
 
 /* charwrite:   write some chars directly out to the video */
 
-void PASCAL NEAR charwrite(row, outstr, forg, left, right)
+VOID PASCAL NEAR charwrite(row, outstr, forg, left, right)
 
 int row;        /* row of screen to place outstr on */
 char *outstr;   /* string to write out (must be term.t_ncol long) */

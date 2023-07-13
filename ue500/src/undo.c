@@ -389,13 +389,13 @@ VOID undo_dump P0_(void)
  */
 char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 {
-    void      *ptr  = NULL;   /* temporary pointer */
+    VOIDP     ptr   = NULL;   /* temporary pointer */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
     UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free */
     UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
 
     ASRT(0 <= nbytes);
-    if ( 0 >= nbytes ) return (VOID *)0;
+    if ( 0 >= nbytes ) return (VOIDP)0;
 
     ptr = (char *)NULL;
     while ( ptr == (char *)NULL ) {
@@ -441,15 +441,15 @@ nextbuf:        bp = getoldb();
 /* RE-ROOM: Allocate memory using realloc() on failure, discard oldest undo
  * information and retry
  */
-char *reroom P2_(void *, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
+char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
 {
-    void *ptr;          /* temporary pointer */
+    VOIDP ptr;          /* temporary pointer */
     BUFFER *bp;         /* buffer to dealloc memory from */
     UNDO_OBJ *up;       /* ptr to undo struct to free */
     UNDO_OBJ *lp;       /* last undo struct before up */
 
     ASRT(0 <= nbytes);
-    if ( 0 >= nbytes ) return (VOID *)0;
+    if ( 0 >= nbytes ) return (VOIDP)0;
 
     /*
      * Avoid the whole problem of non-ANSI realloc() functions that don't handle

@@ -1,7 +1,7 @@
-/* This file is for functions dealing with execution of commands, command
- * lines, buffers, files and startup files
+/*      This file is for functions dealing with execution of
+ *      commands, command lines, buffers, files and startup files
  *
- * written 1993 by Daniel Lawrence
+ *      written 1993 by Daniel Lawrence
  */
 
 #include <stdio.h>
@@ -10,14 +10,18 @@
 #include "edef.h"
 #include "elang.h"
 
-/* namedcmd:  execute a named command even if it is not bound
+/* NAMEDCMD:
+ *
+ * Execute a named command even if it is not bound.
  */
 int PASCAL NEAR namedcmd P2_(int, f, int, n)
 /* command arguments [passed through to command executed] */
 {
-    int (PASCAL NEAR *kfunc)();         /* ptr to the function to execute */
+    int (PASCAL NEAR *kfunc)()  = NULL; /* ptr to the function to execute */
     char buffer[NSTRING];               /* buffer to store function name */
-    int status;
+    int status                  = 0;
+
+    ZEROMEM(buffer);
 
     /* if we are non-interactive.... force the command interactivly */
     if ( clexec == TRUE ) {
@@ -33,8 +37,8 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
         /* and look it up */
         if ( ( kfunc = fncmatch(buffer) ) == NULL ) {
             mlwrite(TEXT16);
+            /* "[No such Function]" */
 
-/*                          "[No such Function]" */
             return (FALSE);
         }
 
@@ -51,8 +55,8 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
     kfunc = getname(": ");
     if ( kfunc == NULL ) {
         mlwrite(TEXT16);
+        /* "[No such function]" */
 
-/*                      "[No such function]" */
         return (FALSE);
     }
 
@@ -60,13 +64,17 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
     return ( (*kfunc)(f, n) );
 }
 
-/* execcmd: Execute a command line command to be typed in by the user
+/* EXECCMD:
+ *
+ * Execute a command line command to be typed in by the user.
  */
 int PASCAL NEAR execcmd P2_(int, f, int, n)
 /* default Flag and Numeric argument  */
 {
-    register int status;                /* status return */
+    register int status   = 0;          /* status return */
     char cmdstr[NSTRING];               /* string holding command to execute */
+
+    ZEROMEM(cmdstr);
 
     /* get the line wanted */
     if ( ( status = mlreply(": ", cmdstr, NSTRING) ) != TRUE )
@@ -77,26 +85,30 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
     return ( docmd(cmdstr) );
 }
 
-/*  docmd:  take a passed string as a command line and translate it to be
- *          executed as a command. This function will be used by
- *          execute-command-line and by all source and startup files.
- *          Lastflag/thisflag is also updated.
+/* DOCMD:
  *
- *  format of the command line is:
+ * take a passed string as a command line and translate it to be
+ * executed as a command. This function will be used by
+ * execute-command-line and by all source and startup files.
+ * Lastflag/thisflag is also updated.
  *
- *          {# arg} <command-name> {<argument string(s)>}
+ * format of the command line is:
+ *  {# arg} <command-name> {<argument string(s)>}
  */
 int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
 {
-    register int f;             /* default argument flag */
-    register int n;             /* numeric repeat value */
-    int (PASCAL NEAR *fnc)();    /* function to execute */
-    BUFFER *bp;                 /* buffer to execute */
-    int status;                 /* return status of function */
-    int oldcle;                 /* old contents of clexec flag */
-    char *oldestr;              /* original exec string */
-    char tkn[NSTRING];          /* next token off of command line */
-    char bufn[NBUFN+2];         /* name of buffer to execute */
+    register int  f           = 0;      /* default argument flag */
+    register int  n           = 0;      /* numeric repeat value */
+    int (PASCAL NEAR *fnc)()  = NULL;   /* function to execute */
+    BUFFER        *bp         = NULL;   /* buffer to execute */
+    int           status      = 0;      /* return status of function */
+    int           oldcle      = 0;      /* old contents of clexec flag */
+    char          *oldestr    = NULL;   /* original exec string */
+    char          tkn[NSTRING];         /* next token off of command line */
+    char          bufn[NBUFN+2];        /* name of buffer to execute */
+
+    ZEROMEM(tkn);
+    ZEROMEM(bufn);
 
     /* if we are scanning and not executing..go back here */
     if ( execlevel )
@@ -142,7 +154,7 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
         /* find the pointer to that buffer */
         if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) {
             mlwrite(TEXT16);
-/*                        "[No such Function]" */
+            /* "[No such Function]" */
             execstr = oldestr;
 
             return (FALSE);
@@ -173,7 +185,9 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
     return (status);
 }
 
-/* token: chop a token off a string return a pointer past the token
+/* TOKEN:
+ *
+ * Chop a token off a string return a pointer past the token.
  */
 char *PASCAL NEAR token P3_(
         char *, src,  /* source string */
@@ -260,7 +274,9 @@ char *PASCAL NEAR token P3_(
     return (src);
 }
 
-/* macarg:  get a macro line argument
+/* MACARG:
+ *
+ * Get a macro line argument.
  */
 int PASCAL NEAR macarg P1_(char *, tok /* buffer to place argument */)
 {
@@ -275,7 +291,9 @@ int PASCAL NEAR macarg P1_(char *, tok /* buffer to place argument */)
     return (status);
 }
 
-/* nextarg: get the next argument
+/* NEXTARG:
+ *
+ * Get the next argument.
  */
 int PASCAL NEAR nextarg P4_(
         char *, prompt,     /* prompt to use if we must be interactive */
@@ -309,8 +327,10 @@ int PASCAL NEAR nextarg P4_(
     return (TRUE);
 }
 
-/* storeproc: Set up a procedure buffer and flag to store all executed command
- *            lines there
+/* STOREPROC:
+ *
+ * Set up a procedure buffer and flag to store all executed command
+ * lines there.
  */
 int PASCAL NEAR storeproc P2_(
         int, f, /* default flag */
@@ -338,8 +358,8 @@ int PASCAL NEAR storeproc P2_(
     /* set up the new macro buffer */
     if ( ( bp = bfind(bname, TRUE, BFINVS) ) == NULL ) {
         mlwrite(TEXT113);
+        /* "Can not create macro" */
 
-/*                      "Can not create macro" */
         return (FALSE);
     }
 
@@ -357,8 +377,8 @@ int PASCAL NEAR storeproc P2_(
         cur_arg = (PARG *)room( sizeof (PARG) );
         if ( cur_arg == (PARG *)NULL ) {
             mlwrite(TEXT113);
+            /* "Can not create macro" */
 
-/*                          "Can not create macro" */
             return (FALSE);
         }
 
@@ -385,7 +405,9 @@ int PASCAL NEAR storeproc P2_(
     return (TRUE);
 }
 
-/* execproc:  Execute a procedure
+/* EXECPROC:
+ *
+ * Execute a procedure.
  */
 int PASCAL NEAR execproc P2_(int, f, int, n)
 /* default flag and numeric arg */
@@ -408,8 +430,8 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
     /* find the pointer to that buffer */
     if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) {
         mlwrite(TEXT116);
+        /* "No such procedure"  */
 
-/*                      "No such procedure" */
         return (FALSE);
     }
 
@@ -423,7 +445,9 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
     return (TRUE);
 }
 
-/* execbuf: Execute the contents of a buffer of commands
+/* EXECBUF:
+ *
+ * Execute the contents of a buffer of commands.
  */
 int PASCAL NEAR execbuf P2_(int, f, int, n)
 /* default flag and numeric arg */
@@ -444,24 +468,26 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*  dobuf:  execute the contents of the buffer pointed to by the passed BP
+/* DOBUF:
  *
- *          Directives start with a "!" and include:
+ * Execute the contents of the buffer pointed to by the passed BP
  *
- *          !endm           End a macro
- *          !if (cond)      conditional execution
- *          !else
- *          !endif
- *          !return <rval>  Return (terminating current macro/
- *                                  set $rval to and return <rval>)
- *          !goto <label>   Jump to a label in the current macro
- *          !force          Force macro to continue...even if command fails
- *          !while (cond)   Execute a loop if the condition is true
- *          !endwhile
+ * Directives start with a "!" and include:
  *
- *          Line Labels begin with a "*" as the first nonblank char, like:
+ *  !endm           End a macro
+ *  !if (cond)      conditional execution
+ *  !else
+ *  !endif
+ *  !return <rval>  Return (terminating current macro/
+ *                  set $rval to and return <rval>)
+ *  !goto <label>   Jump to a label in the current macro
+ *  !force          Force macro to continue...even if command fails
+ *  !while (cond)   Execute a loop if the condition is true
+ *  !endwhile
  *
- *          *LBL01
+ * Line Labels begin with a "*" as the first nonblank char, like:
+ *
+ *  *LBL01
  */
 int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
 {
@@ -877,8 +903,7 @@ nxtscan:        /* on to the next line */
 
                     if ( whtemp == NULL ) {
                         errormesg(TEXT126, bp, lp);
-/*                                                      "%%Internal While loop
- * error" */
+                        /* "%%Internal While loop error"  */
                         goto eabort;
                     }
 
@@ -973,8 +998,10 @@ freeut: uv_head = ut->next;
     return (FALSE);
 }
 
-/* errormesg: display a macro execution error along with the buffer and line
- *            currently being executed
+/* ERRORMESG:
+ *
+ * Display a macro execution error along with the buffer and line
+ * currently being executed.
  */
 VOID PASCAL NEAR errormesg P3_(
         char *,   mesg, /* error message to display */
@@ -1000,10 +1027,11 @@ VOID PASCAL NEAR errormesg P3_(
     mlforce(buf);
 }
 
-/* Interactive debugger
+/* INTERACTIVE DEBUGGER
  *
- * if $debug == TRUE, The interactive debugger is invoked commands
- * are listed out with the ? key
+ * If $debug == TRUE, the interactive debugger is invoked.
+ *
+ * Commands are listed out with the ? key.
  */
 int PASCAL NEAR debug P3_(
         BUFFER *, bp,       /* buffer to execute */
@@ -1136,7 +1164,9 @@ dinput: outline[term.t_ncol - 1] = 0;
     return (TRUE);
 }
 
-/* freewhile: free a list of while block pointers
+/* FREEWHILE:
+ *
+ * Free a list of while block pointers.
  */
 VOID PASCAL NEAR freewhile P1_(WHBLOCK *, wp /* head of structure to free */)
 {
@@ -1146,7 +1176,10 @@ VOID PASCAL NEAR freewhile P1_(WHBLOCK *, wp /* head of structure to free */)
     }
 }
 
-/* execfile:  execute a series of commands in a file */
+/* EXECFILE:
+ *
+ * Execute a series of commands in a file.
+ */
 int PASCAL NEAR execfile P2_(
         int, f,
         int, n
@@ -1186,8 +1219,8 @@ int PASCAL NEAR execfile P2_(
         /* complain if we are interactive */
         if ( clexec == FALSE )
             mlwrite(TEXT214, fname);
+            /* "%%No such file as %s" */
 
-/*                  "%%No such file as %s" */
         return (FALSE);
     }
 
@@ -1200,8 +1233,10 @@ exec1:  /* otherwise, execute it */
     return (TRUE);
 }
 
-/* dofile:  yank a file into a buffer and execute it if there are no errors,
- *          delete the buffer on exit
+/* DOFILE:
+ *
+ * Yank a file into a buffer and execute it if there are no errors,
+ * delete the buffer on exit.
  */
 int PASCAL NEAR dofile P1_(CONST char *, fname  /* file name to execute */)
 {

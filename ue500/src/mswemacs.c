@@ -188,7 +188,7 @@ bail_out:       GlobalUnlock (hClipData);
 /* ClipboardCleanup:    to be called if the user aborts during a longop */
 /* ================                                                     */
 
-void FAR PASCAL ClipboardCleanup (void)
+VOID FAR PASCAL ClipboardCleanup (void)
 {
     if ( hClipData ) {
         GlobalUnlock (hClipData);
@@ -334,7 +334,7 @@ PASCAL  cascadescreens (int f, int n)
 
 /* ScrollMessage:   handle WM_HSCROLL and WM_VSCROLL */
 /* =============                                     */
-void FAR PASCAL ScrollMessage (HWND hWnd, UINT wMsg, WORD ScrlCode, int Pos)
+VOID FAR PASCAL ScrollMessage (HWND hWnd, UINT wMsg, WORD ScrlCode, int Pos)
 {
     int Delta;
 
@@ -422,7 +422,7 @@ void FAR PASCAL ScrollMessage (HWND hWnd, UINT wMsg, WORD ScrlCode, int Pos)
 
 /* ScrollBars:      shows/hides, enables/disables scroll bars for all screens */
 /* ==========                                                                 */
-void FAR PASCAL ScrollBars (void)
+VOID FAR PASCAL ScrollBars (void)
 {
     static int VScroll = TRUE;
     static int HScroll = TRUE;

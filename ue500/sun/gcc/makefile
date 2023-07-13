@@ -1,7 +1,7 @@
-#	Unix makefile for
-#		MicroEMACS 3.12
-#		(C)Copyright 1993 by Daniel Lawrence
-#		all rights reserved
+#               Unix makefile for
+#               MicroEMACS 3.12
+#               (C)Copyright 1993 by Daniel Lawrence
+#               all rights reserved
 
 # modify the following lines with the proper relative directories
 
@@ -9,10 +9,20 @@ OBJD = obj			# object file directory
 SRCD = ../../src		# source file directory
 HDIR = ../../h			# header file directory
 
-# options and arguments to the C compiler
 
-CC = gcc
-CFLAGS=	-O -I. -I$(HDIR) -g
+# C compiler
+CC =gcc
+
+
+# options and arguments to the C compiler
+#
+# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
+# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
+#
+#CFLAGS = -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR) -g
+#CFLAGS = -I. -I$(HDIR) -g
+CFLAGS = -I. -I$(HDIR) -O2
+
 
 # list of header files
 
@@ -27,7 +37,7 @@ F4 = $(OBJD)/fileio.o $(OBJD)/unix.o $(OBJD)/input.o
 F5 = $(OBJD)/isearch.o $(OBJD)/line.o $(OBJD)/lock.o
 F6 = $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
 F7 = $(OBJD)/random.o $(OBJD)/region.o $(OBJD)/search.o $(OBJD)/replace.o
-F8 = $(OBJD)/tags.o $(OBJ)/undo.o $(OBJD)/window.o $(OBJD)/word.o
+F8 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/window.o $(OBJD)/word.o
 
 # product list
 
@@ -98,3 +108,13 @@ $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/word.o $(SRCD)/word.c
+
+
+clean:
+	rm -f $(OBJD)/*.o
+	rm -f bin/emacs
+
+
+
+# EOF
+

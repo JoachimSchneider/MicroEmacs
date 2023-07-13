@@ -1,5 +1,5 @@
-/*  LOCK:   File locking command routines for MicroEMACS written by Daniel
- * Lawrence
+/*  LOCK:   File locking command routines for MicroEMACS written by
+ *          Daniel Lawrence
  */
 
 #include <stdio.h>
@@ -18,29 +18,26 @@
 # if     MSC
 #  include <errno.h>
 # else
-extern int errno;               /* current error */
+extern int errno;       /* current error  */
 # endif
 
-char *lname[NLOCKS];    /* names of all locked files */
-int numlocks;           /* # of current locks active */
+static char *lname[NLOCKS]; /* names of all locked files  */
+static int  numlocks;       /* # of current locks active  */
 
-/* lockchk: check a file for locking and add it to the list */
-
-lockchk(fname)
-
-CONST char  *fname;     /* file to check for a lock */
-
+/* LOCKCHK:
+ *
+ * Check a file for locking and add it to the list
+ */
+int lockchk P1_(CONST char *, fname /* file to check for a lock */)
 {
-    register int i;             /* loop indexes */
-    register int status;        /* return status */
+    register int  i       = 0;    /* loop indexes   */
+    register int  status  = 0;    /* return status  */
 
     /* check to see if that file is already locked here */
     if ( numlocks > 0 )
         for ( i=0; i < numlocks; ++i )
             if ( strcmp(fname, lname[i]) == 0 )
                 return (TRUE);
-
-
 
     /* if we have a full locking table, bitch and leave */
     if ( numlocks == NLOCKS ) {
@@ -75,13 +72,14 @@ CONST char  *fname;     /* file to check for a lock */
     return (TRUE);
 }
 
-/*  lockrel:    release all the file locks so others may edit */
-
-lockrel()
+/* LOCKREL:
+ *
+ * Release all the file locks so others may edit
+ */
+int lockrel P0_(void)
 {
-    register int i;             /* loop index */
-    register int status;        /* status of locks */
-    register int s;             /* status of one unlock */
+    register int  status  = 0;    /* status of locks      */
+    register int  s       = 0;    /* status of one unlock */
 
     status = TRUE;
     while ( numlocks-- > 0 ) {
@@ -93,19 +91,20 @@ lockrel()
     return (status);
 }
 
-/* lock:    Check and lock a file from access by others returns TRUE = files was
+/* XLOCK:
+ *
+ * Check and lock a file from access by others returns TRUE = files was
  * not locked and now is FALSE = file was locked and overridden ABORT = file was
  * locked, abort command
  */
 
-xlock(fname)
-
-CONST char  *fname;     /* file name to lock */
-
+int xlock P1_(CONST char *, fname /* file name to lock */)
 {
-    register char *locker;      /* lock error message */
-    register int status;        /* return status */
-    char msg[NSTRING];          /* message string */
+    register char *locker = NULL; /* lock error message */
+    register int  status  = 0;    /* return status      */
+    char msg[NSTRING];            /* message string     */
+
+    ZEROMEM(msg);
 
     /* attempt to lock the file */
     locker = dolock(fname);
@@ -132,15 +131,13 @@ CONST char  *fname;     /* file name to lock */
         return (ABORT);
 }
 
-/*  xunlock: Unlock a file this only warns the user if it fails
+/* XUNLOCK:
+ *
+ * Unlock a file this only warns the user if it fails
  */
-
-xunlock(fname)
-
-char *fname;    /* file to unlock */
-
+int xunlock P1_(char *, fname /* file to unlock */)
 {
-    register char *locker;      /* undolock return string */
+    register char *locker = NULL;   /* undolock return string */
 
     /* unclock and return */
     locker = undolock(fname);
@@ -153,12 +150,13 @@ char *fname;    /* file to unlock */
     return (FALSE);
 }
 
-lckerror(errstr)        /* report a lock error */
-
-char *errstr;           /* lock error string to print out */
-
+/* LCKERROR:
+ *
+ * Report a lock error
+ */
+VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 {
-    char obuf[NSTRING];         /* output buffer for error message */
+    char obuf[NSTRING];   /* output buffer for error message */
     char *sys_errstr = strerror(errno);
 
     xstrcpy(obuf, errstr);
@@ -176,9 +174,17 @@ char *errstr;           /* lock error string to print out */
     mlwrite(obuf);
     update(TRUE);
 }
+
 #else
-lckhello()      /* dummy function */
+
+VOID lckhello P0_(void)   /* dummy function */
 {
 }
-#endif
 
+#endif  /* FILOCK */
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

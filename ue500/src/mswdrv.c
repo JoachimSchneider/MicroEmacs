@@ -108,7 +108,7 @@ static int BackColor;       /* background colors */
 /* PushMLHist:  store the last message line contents in the history */
 /* ==========                                                       */
 
-static void PASCAL  PushMLHist (void)
+static VOID PASCAL  PushMLHist (void)
 {
     char    *ml;
     int i, e;
@@ -201,7 +201,7 @@ PASCAL mlhistory (void)
     FreeProcInstance (ProcInstance);
 } /* mlhistory */
 
-static void PASCAL ChangeUpdateRow (int newrow)
+static VOID PASCAL ChangeUpdateRow (int newrow)
 /* Set UpdateRow to newrow, invalidating the changed cells in the previous
  * update row */
 {

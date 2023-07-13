@@ -328,7 +328,7 @@ int scfcol(), scbcol();
 # endif /* COLOR */
 
 # if     TERMCAP && FLABEL
-static void dis_sfk(), dis_ufk();
+static VOID dis_sfk(), dis_ufk();
 # endif
 
 TERM term =
@@ -775,7 +775,7 @@ int typahead()
 
 # if TERMCAP || TERMIOS
 /** Put out sequence, with padding **/
-void putpad(seq)
+VOID putpad(seq)
 char * seq;                             /* Character sequence       */
 {
     /* Check for null */
@@ -1683,7 +1683,7 @@ int n;          /* function key number 1...8 on hp-terminals */
 }
 
 /* display user function key labels */
-static void dis_ufk()
+static VOID dis_ufk()
 {
     int label_num;
     char buf[6];
@@ -1700,7 +1700,7 @@ static void dis_ufk()
 }
 
 /* display system function key labels */
-static void dis_sfk()
+static VOID dis_sfk()
 {
     char buf[6];
 
@@ -1743,13 +1743,13 @@ char *name;     /* name of directory to delete */
 /*
  * Window size changes handled via signals.
  */
-void winch_changed()
+VOID winch_changed()
 {
     signal(SIGWINCH, winch_changed);
     winch_flag = 1;
 }
 
-void winch_new_size()
+VOID winch_new_size()
 {
     EWINDOW *wp;
     struct winsize win;

@@ -324,7 +324,7 @@ PASCAL NEAR ansikclose()        /* close the keyboard (a noop here) */
  *
  *  Nothing returned
  ***/
-void PASCAL NEAR ttputs(string)
+VOID PASCAL NEAR ttputs(string)
 char * string;                          /* String to write      */
 {
     if ( string )
@@ -363,7 +363,7 @@ int *v; /* Place to put parameter value */
  *
  * The 'x' in the arrays keypad[] and dec_fnkey[] are merely placeholders.
  */
-void PASCAL NEAR docsi(oh)
+VOID PASCAL NEAR docsi(oh)
 int oh;
 {
     static char crsr[4] = { 'P', 'N', 'F', 'B' };
@@ -443,7 +443,7 @@ int oh;
     }
 }
 
-void PASCAL NEAR dobbnmouse()
+VOID PASCAL NEAR dobbnmouse()
 {
     int params[ 5];
     int i, ch;

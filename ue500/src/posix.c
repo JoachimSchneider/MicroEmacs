@@ -194,7 +194,7 @@ char ch;                                /* Character to display     */
 }
 
 /** Add character sequence to keycode entry **/
-void addkey(seq, fn)
+VOID addkey(seq, fn)
 unsigned char * seq;                    /* Character sequence       */
 int fn;                                 /* Resulting keycode        */
 {
@@ -319,7 +319,7 @@ unsigned char grabnowait()
 }
 
 /** Queue input character **/
-void qin(ch)
+VOID qin(ch)
 int ch;                                 /* Character to add     */
 {
     /* Check for overflow */
@@ -336,7 +336,7 @@ int ch;                                 /* Character to add     */
 }
 
 /** Cook input characters **/
-void cook()
+VOID cook()
 {
     unsigned char ch;
     struct keyent * cur;
