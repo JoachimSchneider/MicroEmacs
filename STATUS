@@ -108,6 +108,9 @@ h/mswin.h       X                                                     X
   + file.c:getfile(): Do a strdup of `fname'
   + smg.c:            Reformat.
   + vms.c:            Reformat.
+  + The functions grabnowait(), grabwait() added to eproto.h have
+    different return types (int / unsigned char) for different
+    platforms: This is an *error* which needs to be fixed.
 - continue in:
   + Comments
   + Compile for PCDOS with Borland C++

@@ -1364,8 +1364,11 @@ extern int PASCAL NEAR getkey DCL((void));
 extern int PASCAL NEAR getwpos DCL((void));
 extern int PASCAL NEAR get_char DCL((void));
 extern int PASCAL NEAR global_var DCL((int f, int n));
+#if VMS
+/***TODO***/
 extern int PASCAL NEAR grabnowait DCL((void));
 extern int PASCAL NEAR grabwait DCL((void));
+#endif
 #if     DBCS
 extern int PASCAL NEAR is2byte DCL((char *sp, char *cp));
 #endif
