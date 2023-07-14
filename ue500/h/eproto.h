@@ -1339,6 +1339,9 @@ extern int PASCAL NEAR echostring DCL((char *, int, int));
 extern int PASCAL NEAR eq DCL((register unsigned char bc, register unsigned char pc));
 extern long PASCAL NEAR ernd DCL((void));
 extern int PASCAL NEAR execkey DCL((KEYTAB *key, int f, int n));
+#if VMS
+extern void PASCAL NEAR expandargs DCL((int *pargc, char ***pargv));
+#endif
 extern int PASCAL NEAR fbound DCL((DELTA *tbl,
                               int   jump,
                               LINE  **pcurline,
@@ -1361,6 +1364,11 @@ extern int PASCAL NEAR getkey DCL((void));
 extern int PASCAL NEAR getwpos DCL((void));
 extern int PASCAL NEAR get_char DCL((void));
 extern int PASCAL NEAR global_var DCL((int f, int n));
+#if VMS
+/***TODO***/
+extern int PASCAL NEAR grabnowait DCL((void));
+extern int PASCAL NEAR grabwait DCL((void));
+#endif
 #if     DBCS
 extern int PASCAL NEAR is2byte DCL((char *sp, char *cp));
 #endif
