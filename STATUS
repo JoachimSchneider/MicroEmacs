@@ -104,6 +104,8 @@ h/mswin.h       X                                                     X
 - static returned buffer in eval.c:gtfun()  (\/)
 - Macro ISSPACE                   (\/)
 - replace *all* estruct.h files   (\/)
+- Include Martin Vorlaender's VMS changes:
+  + file.c:getfile(): Do a strdup of `fname'
 - continue in:
   + Comments
   + Compile for PCDOS with Borland C++
