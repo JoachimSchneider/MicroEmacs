@@ -106,6 +106,8 @@ h/mswin.h       X                                                     X
 - replace *all* estruct.h files   (\/)
 - Include Martin Vorlaender's VMS changes:
   + file.c:getfile(): Do a strdup of `fname'
+  + smg.c:            Reformat.
+  + vms.c:            Reformat.
 - continue in:
   + Comments
   + Compile for PCDOS with Borland C++

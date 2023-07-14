@@ -18,6 +18,14 @@
 /* make global definitions not external */
 #define maindef
 
+#if VMS
+/* Suppress 'the referenced type of the pointer value "nextdown"/"nextup" is
+ * "function (int,int) returning void",
+ * which is not compatible with "function () returning int".'
+ */
+# pragma message disable PTRMISMATCH
+#endif
+
 #include "estruct.h"    /* global structures and defines */
 #include "eproto.h"     /* variable prototype definitions */
 #include "efunc.h"      /* function declarations and name table */
