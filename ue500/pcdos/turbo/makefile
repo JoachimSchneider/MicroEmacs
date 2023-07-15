@@ -5,14 +5,14 @@
 
 # modify the following lines with the proper relative directories
 
-OBJD = obj			# object file directory
-SRCD = ..\..\src		# source file directory
-HDIR = ..\..\h			# header file directory
-INCD = c:\tc\include	# system include directory
+OBJD = obj			      # object file directory
+SRCD = ..\..\src	   	# source file directory
+HDIR = ..\..\h			  # header file directory
+INCD = e:\bc\include	# system include directory
 
 # options and arguments to the C compiler
 
-CC = tcc
+CC = bcc
 
 #These options or with debugging on!
 CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -v -w-par -y -Z
@@ -42,10 +42,10 @@ F8 = $(OBJD)\undo.obj $(OBJD)\window.obj $(OBJD)\word.obj  $(OBJD)\execpr.obj
 all:	bin\emacs.exe bin\cmdfix.exe
 
 bin\emacs.exe: $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
-	link @emacs.lnk
+	tlink @emacs.lnk
 
 bin\cmdfix.exe: $(OBJD)\cmdfix.obj
-	link @cmdfix.lnk
+	tlink @cmdfix.lnk
 
 # compilation rules
 
@@ -114,4 +114,4 @@ $(OBJD)\undo.obj: $(SRCD)\undo.c $(HFILES)
 $(OBJD)\word.obj: $(SRCD)\word.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\execpr.obj: $(SRCD)\execpr.asm
-	masm $(SRCD)\execpr.asm, $(OBJD)\execpr.obj, , ,
+	tasm $(SRCD)\execpr.asm,$(OBJD)\execpr.obj
