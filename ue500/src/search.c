@@ -349,15 +349,16 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
  */
 int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pcwoff)
 {
-    LINE    *curline;           /* current line during scan */
-    int curoff;                 /* position within current line */
-    int pre_matchlen;           /* matchlen before a recursive amatch() call.*/
-    int cl_matchlen;            /* number of chars matched in a local closure.*/
-    int cl_min;                 /* minimum number of chars matched in closure.*/
-    int cl_type;                /* Which closure type?.*/
+    LINE    *curline;   /* current line during scan */
+    int curoff;         /* position within current line */
+    int pre_matchlen;   /* matchlen before a recursive amatch() call.*/
+    int cl_matchlen;    /* number of chars matched in a local closure.*/
+    int cl_min;         /* minimum number of chars matched in closure.*/
+    int cl_type;        /* Which closure type?.*/
 
-    /* Set up local scan pointers to ".", and set up our local character
-     * counting variable, which can correct matchlen on a failed partial match.
+    /* Set up local scan pointers to ".", and set up our local
+     * character counting variable, which can correct matchlen
+     * on a failed partial match.
      */
     curline = *pcwline;
     curoff = *pcwoff;
@@ -369,7 +370,7 @@ int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pc
     while ( mcptr->mc_type != MCNIL ) {
         /* Is the current meta-character modified by a closure?
          */
-        if ( ( cl_type = (mcptr->mc_type & ALLCLOS) ) ) {
+        if ( 0 != (cl_type = (mcptr->mc_type & ALLCLOS)) )  {
 
             /* Minimum number of characters that may match is 0 or 1.
              */
@@ -939,7 +940,7 @@ int PASCAL NEAR mcstr()
     mcptr = &mcpat[0];
     patptr = (char *)&pat[0];
 
-    while ( (pchr = *patptr) && status ) {
+    while ( 0 != (pchr = *patptr) && status )   {
         switch ( pchr ) {
         case MC_CCL:
             status = cclmake(&patptr, mcptr);
@@ -1305,12 +1306,12 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
 }
 
 /*
- * litmake -- create the literal string from the collection of characters. If
- * there is only one character in the collection, then no memory needs to be
- * allocated.
+ * litmake -- create the literal string from the collection of
+ * characters. If there is only one character in the collection,
+ * then no memory needs to be allocated.
  *
- *  Please Note:  If new meta-characters are added (see estruct.h) then you will
- * also need to update this function!
+ *  Please Note:  If new meta-characters are added (see estruct.h)
+ * then you will also need to update this function!
  */
 int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
 {
@@ -1320,23 +1321,25 @@ int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
     register char   *patptr;
 
     /*
-     * The reason this function was called was because a literal character was
-     * encountered, so collect it immediately.
+     * The reason this function was called was because a literal
+     * character was encountered, so collect it immediately.
      */
     collect[0] = *(patptr = *ppatptr);
     collect_len = 1;
 
     /*
-     * Now loop through the pattern, collecting characters until we run into a
-     * meta-character.
+     * Now loop through the pattern, collecting characters until
+     * we run into a meta-character.
      */
-    while ( (pchr = *++patptr) ) {
+    while ( 0 != (pchr = *++patptr) )   {
         /*
-         * If the current character is a closure character, then the previous
-         * character cannot be part of the collected string (it will be modified
-         * by closure). Back up one, if it is not solo.
+         * If the current character is a closure character, then the
+         * previous character cannot be part of the collected string
+         * (it will be modified by closure). Back up one, if it is not
+         * solo.
          */
-        if ( pchr == MC_CLOSURE || pchr == MC_CLOSURE_1 ||pchr == MC_ZEROONE ) {
+        if ( pchr == MC_CLOSURE || pchr == MC_CLOSURE_1
+             || pchr == MC_ZEROONE )    {
             if ( collect_len > 1 ) {
                 collect_len--;
                 patptr--;
@@ -1352,15 +1355,15 @@ int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
             break;
 
         /*
-         * See if an escaped character is part of a meta-character or not.  If
-         * not, then advance the pointer to collect the next character, if there
-         * is a next character.
+         * See if an escaped character is part of a meta-character
+         * or not. If not, then advance the pointer to collect the
+         * next character, if there is a next character.
          */
         if ( pchr == MC_ESC ) {
             pchr = *(patptr + 1);
 
-            if ( pchr == MC_GRPBEG || pchr == MC_GRPEND ||pchr == MC_BOWRD ||
-                 pchr == MC_EOWRD )
+            if ( pchr == MC_GRPBEG || pchr == MC_GRPEND
+                 || pchr == MC_BOWRD || pchr == MC_EOWRD )
                 break;
 
             if ( pchr != '\0' )
@@ -1372,8 +1375,8 @@ int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
     }
 
     /*
-     * Finished collecting characters, so either make a string out of them, or a
-     * simple character.
+     * Finished collecting characters, so either make a string out of
+     * them, or a simple character.
      */
     if ( collect_len == 1 ) {
         mcptr->u.lchar = collect[0];
@@ -1420,10 +1423,11 @@ VOID PASCAL NEAR setbit P2_(int, bc, EBITMAP, cclmap)
 int PASCAL NEAR mc_list P2_(int, f, int, n)
 {
     MC      *mcptr;
-    BUFFER *patbuf;             /* buffer containing pattern list */
+    BUFFER *patbuf;             /* buffer containing pattern list   */
     char pline[NPAT*2];         /* text buffer to hold current line */
-    char cstr[2];               /* to turn single characters into strings.*/
-    int status;                 /* return status from subcommands */
+    char cstr[2];               /* to turn single characters into
+                                 * strings.i                        */
+    int status;                 /* return status from subcommands   */
     int j;
 
     /* prepare and clear the buffer holding the meta-character list */

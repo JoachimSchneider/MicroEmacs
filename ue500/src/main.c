@@ -165,6 +165,7 @@ abortrun:
     return (status);
 #else
     exit(status);
+    return (status);    /* Keep compiler happy. */
 #endif
 }
 

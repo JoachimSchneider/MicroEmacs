@@ -6,7 +6,7 @@ export LANG LC_ALL
 
 mydir=`dirname "$0"`
 mydir=`cd "$mydir"; pwd`
-cfg="${mydir}/uncrustify_new.cfg"
+cfg="${mydir}/uncrstfy.cfg"
 error_exit=43
 
 diag()

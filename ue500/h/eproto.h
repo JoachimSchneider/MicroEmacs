@@ -19,11 +19,11 @@
 /**********************************************************************/
 #include <string.h>
 #include <stdio.h>
-#include <stdlib.h>
+/***#include <stdlib.h>***/
 #include <errno.h>
 #include <ctype.h>
 #include <stdarg.h>
-#include <string.h>
+/***#include <string.h>***/
 #include <limits.h>
 #include <time.h>
 /**********************************************************************/
@@ -31,6 +31,28 @@
 /**********************************************************************/
 #include "estruct.h"
 /**********************************************************************/
+/*....................................................................*/
+#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
+    || GCC || VMS || IS_UNIX()
+# include <stdlib.h>
+# include <string.h>
+#else
+extern char *getenv DCL((char *));
+extern char *strcat DCL((char *, char *));
+extern char *strcpy DCL((char *, char *));
+extern int  strncmp DCL((char *, char *, int));
+extern char *strchr DCL((char *, int));
+extern int  strcmp DCL((char *, char *));
+# if     XVT == 0 || XVTDRIVER == 0
+extern int  strlen DCL((char *));
+#  if RAMSIZE == 0
+extern char *malloc DCL((int));
+extern VOID free DCL((char *));
+#  endif
+extern char *realloc DCL((char *block, int siz));
+# endif
+#endif
+/*....................................................................*/
 
 
 /**********************************************************************/
@@ -226,13 +248,22 @@ extern int         DebugMessage(CONST char *fmt, ...);
 /*                                                              */
 /* Tested on many Platforms.                                    */
 /****************************************************************/
-#define MY_VA_COPY(d, s)      (               \
+#if ( MSDOS && TURBO )
+/* Something like `typedef void * <spec> va_list' */
+# define MY_VA_COPY(d, s)     (               \
+      memcpy(&(d), &(s), sizeof((d)))         \
+    )
+# define MY_VA_END(x)         VOIDCAST(0)
+#endif
+#ifndef MY_VA_COPY
+# define MY_VA_COPY(d, s)     (               \
     IS_ARRAY((d))?                            \
       memcpy((d), (s), sizeof((d)))           \
         :                                     \
       memcpy(&(d), &(s), sizeof((d)))         \
     )
-#define MY_VA_END
+# define MY_VA_END(x)         VOIDCAST(0)
+#endif
 
 #if ( 0 )
 # define VA_COPY            MY_VA_COPY
@@ -310,7 +341,7 @@ char *uitostr_memacs P1_(unsigned int, i)
 }
 #endif
 /**********************************************************************/
-#define eputs(s)      ( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
+#define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
 #define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
 /**********************************************************************/
 
@@ -348,7 +379,7 @@ char *uitostr_memacs P1_(unsigned int, i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -364,7 +395,7 @@ char *uitostr_memacs P1_(unsigned int, i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -379,7 +410,7 @@ char *uitostr_memacs P1_(unsigned int, i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -395,7 +426,7 @@ char *uitostr_memacs P1_(unsigned int, i)
             eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- abort ...\n");                                   \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             abort();                                                    \
         }                                                               \
     } while (0)
@@ -1522,7 +1553,7 @@ extern int PASCAL NEAR forwword DCL((int f, int n));
 extern int PASCAL NEAR getccol DCL((int bflg));
 extern int PASCAL NEAR getcmd DCL((void));
 extern int PASCAL NEAR getfence DCL((int f, int n));
-extern int PASCAL NEAR getfile DCL((CONST char fname[], int lockfl));
+extern int PASCAL NEAR getfile DCL((CONST char *fname, int lockfl));
 extern int PASCAL NEAR get_key DCL((void));
 extern int PASCAL NEAR getregion DCL((REGION *rp));
 extern int PASCAL NEAR gotobob DCL((int f, int n));
@@ -1607,7 +1638,7 @@ extern int PASCAL NEAR quickexit DCL((int f, int n));
 extern int PASCAL NEAR quit DCL((int f, int n));
 extern int PASCAL NEAR quote DCL((int f, int n));
 extern int PASCAL NEAR rdonly DCL((void));
-extern int PASCAL NEAR readin DCL((const char fname[], int lockfl));
+extern int PASCAL NEAR readin DCL((const char *fname, int lockfl));
 extern int PASCAL NEAR refresh DCL((int f, int n));
 extern int PASCAL NEAR remmark DCL((int f, int n));
 extern int PASCAL NEAR reposition DCL((int f, int n));
@@ -1769,26 +1800,6 @@ extern int PASCAL NEAR backtagword DCL((int f, int n)); /* return from tagged wo
 
 #if WINXP == 0
 extern char *strrev DCL((char *));
-#endif
-
-#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && IC) || GCC || VMS
-# include <stdlib.h>
-# include <string.h>
-#else
-extern char *getenv DCL((char *));
-extern char *strcat DCL((char *, char *));
-extern char *strcpy DCL((char *, char *));
-extern int  strncmp DCL((char *, char *, int));
-extern char *strchr DCL((char *, int));
-extern int  strcmp DCL((char *, char *));
-# if     XVT == 0 || XVTDRIVER == 0
-extern int  strlen DCL((char *));
-#  if RAMSIZE == 0
-extern char *malloc DCL((int));
-extern VOID free DCL((char *));
-#  endif
-extern char *realloc DCL((char *block, int siz));
-# endif
 #endif
 
 /**********************************************************************/

@@ -62,7 +62,7 @@ int PASCAL NEAR risearch P2_(int, f, int, n/*prefix flag and argument*/)
      */
     backchar(TRUE, 1);
 
-    if ( (status = isearch(REVERSE)) )
+    if ( 0 != (status = isearch(REVERSE)) )
         mlerase();        /* If happy, just erase the cmd line  */
     else
         mlwrite(TEXT164); /* "[search failed]"                  */
@@ -76,7 +76,7 @@ int PASCAL NEAR fisearch P2_(int, f, int, n)
 {
     register int  status  = 0;
 
-    if ( (status = isearch(FORWARD)) )
+    if ( 0 != (status = isearch(FORWARD)) )
         mlerase();        /* If happy, just erase the cmd line  */
     else
         mlwrite(TEXT164); /* "[search failed]"                  */
@@ -340,11 +340,12 @@ int PASCAL NEAR checknext P2_(int, chr, int, dir)
     curoff = get_w_doto(curwp);     /* Get the offset within that line */
 
     if ( dir == FORWARD ) {         /* If searching forward */
-        if ( (sts = !boundry(curline, curoff, FORWARD)) ) {
-            /* If it's what we're looking for, set the point and say that we've
-             * moved.
+        if ( 0 != (sts = !boundry(curline, curoff, FORWARD)) )  {
+            /* If it's what we're looking for, set the point and say
+             * that we've moved.
              */
-            if ( (sts = eq(nextch(&curline, &curoff, FORWARD), chr)) ) {
+            if ( 0 != (sts = eq(nextch(&curline, &curoff, FORWARD),
+                                chr)) )                         {
                 curwp->w_dotp = curline;
                 set_w_doto(curwp, curoff);
                 curwp->w_flag |= WFMOVE;

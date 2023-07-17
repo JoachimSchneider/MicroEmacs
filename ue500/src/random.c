@@ -1434,7 +1434,7 @@ int f, n;                               /* ignored arguments */
         n = -n;
 
     /* insert it */
-    while ( n-- && ( status = linstr(tstring) ) )
+    while ( n-- && ( 0 != (status = linstr(tstring)) ) )
         ;
 
     return (status);
@@ -1461,7 +1461,7 @@ int f, n;                               /* ignored arguments */
         n = -n;
 
     /* insert it */
-    while ( n-- && ( status = lover(tstring) ) )
+    while ( n-- && ( 0 != (status = lover(tstring)) ) )
         ;
 
     return (status);
@@ -1996,7 +1996,6 @@ int TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     LINE    *linep  = NULL;
     int     loffs   = 0;
     long    rsize   = 0;
-    int     s       = 0;
     char    *rtext  = xstrdup("");
     char    *rstart = xstrdup("");
     int     i       = 0;
@@ -2005,7 +2004,7 @@ int TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     ZEROMEM(region);
     ASRT(NULL != filter);
 
-    if ( ( s = getregion(&region) ) != TRUE ) {
+    if ( getregion(&region) != TRUE ) {
         return FALSE;
     }
 
@@ -2218,7 +2217,7 @@ static char *format_para P5_(CONST char *,  start,
         int ncol  = col;  /* Column of character before next space  */
 
         if ( NULL != (cp  = strchr(ip, ' ')) )  {
-            ncol  += (cp - ip) + 1;
+            ncol  += ((CONST char *)cp - ip) + 1;
         } else {
             ncol  += strlen(ip) + 1;
         }
@@ -2244,29 +2243,31 @@ static char *format_para P5_(CONST char *,  start,
         }
     }
 
-    return  res;  /***NOT_REACHED***/
+    /***return  res;***/  /***NOT_REACHED***/
 }
 
-static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
+static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext,
+                             VOIDP, argp)
 /*
  * Fill the region --- i.e.reformat it so that:
  * (1) Multiple empty lines are converted into one empty line.
  * (2) Text is wrapped at fillcol.
  *
- * If NULL != argp argp points to an integer whose value gives the first line
- * indent of every paragraph.
+ * If NULL != argp argp points to an integer whose value gives
+ * the first line indent of every paragraph.
  */
 {
     typedef enum  { IS_TEXT, IS_SPACE } state_T;
 
-    char    *res      = xstrdup("");  /* Reformatted region               */
+    char    *res      = xstrdup("");  /* Reformatted region           */
     state_T state     = IS_TEXT;
-    char    *start    = NULL;         /* Each line will start wirh it     */
-    char    *text     = NULL;         /* rtext without (lead|trail)ing \r */
-    int     nbef      = 0;            /* Lines before text                */
-    int     naft      = 0;            /* Lines aftertext                  */
+    char    *start    = NULL;         /* Each line will start with it */
+    char    *text     = NULL;         /* rtext without                */
+                                      /*  (lead|trail)ing \r          */
+    int     nbef      = 0;            /* Lines before text            */
+    int     naft      = 0;            /* Lines aftertext              */
     int     tpos      = 0;
-    char    *pptext   = xstrdup("");  /* Preprocessed text                */
+    char    *pptext   = xstrdup("");  /* Preprocessed text            */
     char    *lptr     = NULL;
     int     sflag     = FALSE;
     char    *context  = NULL;
@@ -2318,7 +2319,9 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, a
 
     sflag = ( rstart && 0 < strlen(rstart) );
 
-    /* start: It contains the string wich will be prepended to every line:  */
+    /* start: It contains the string wich will be prepended to every
+     *        line:
+     */
     if ( rstart && *rstart )  {
         start = xstrdup(rstart);
     } else {
@@ -2326,7 +2329,7 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, a
         char  c = '\0';
 
         start = xstrdup("");
-        while ( (c = text[i]) && ISSPACE(c) )  {
+        while ( '\0' != (c = text[i]) && ISSPACE(c) )   {
             start = astrcatc(start, c);
             i++;
         }
@@ -2334,13 +2337,13 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, a
     }
 
     {
-        int   ncr = 0;  /* Number of '\r' in a sequenze of white space  */
-        int   nsp = 0;  /* Number of white space in this sequence.      */
+        int   ncr = 0;  /* Number of '\r' in a seq. of white space    */
+        int   nsp = 0;  /* Number of white space in this sequence.    */
         int   i   = 0;
         char  c   = '\0';
 
         /* pptext: <word>' '<word>' '<word>\r<word>' '<word>' '<word> */
-        for ( i = tpos; (c = text[i]); i++ ) {
+        for ( i = tpos; '\0' != (c = text[i]); i++ )    {
             switch ( state )  {
                 case IS_TEXT:
                     if ( ISSPACE(c) ) {
@@ -2385,7 +2388,8 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, a
 
     lptr  = xstrtok_r(pptext, "\r", &context);  /* .NE. NULL  */
     for ( ;; )  {
-        char  *para = format_para(start, lptr, fillcol, sflag, parindent);
+        char  *para = format_para(start, lptr, fillcol, sflag,
+                                  parindent);
 
         sflag = FALSE;
         res = astrcat(res, para);

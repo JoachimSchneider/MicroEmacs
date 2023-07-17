@@ -159,7 +159,7 @@ int PASCAL NEAR resetkey()      /* reset the encryption key if needed */
 
 int PASCAL NEAR getfile(fname, lockfl)
 
-CONST char fname[];     /* file name to find */
+CONST char *fname;      /* file name to find */
 int lockfl;             /* check the file for locks? */
 
 {
@@ -255,7 +255,7 @@ int lockfl;             /* check the file for locks? */
 
 int PASCAL NEAR readin(fname, lockfl)
 
-CONST char fname[];             /* name of file to read */
+CONST char *fname;              /* name of file to read */
 int lockfl;                     /* check for file locks? */
 
 {
@@ -441,7 +441,7 @@ CONST char  *fname;
 #endif
     /* cp1 is pointing to the first real filename char in fnameA */
     /* Reset cp1 to the aquivalent position in fname: */
-    cp1 = fname + strlen(fname) - (fnameA + strlen(fnameA) - cp1);
+    cp1 = fname + strlen(fname) - ((CONST char *)fnameA + strlen(fnameA) - cp1);
     pathp = cp1;
 
     cp2 = &bname[0];

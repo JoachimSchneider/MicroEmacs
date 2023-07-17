@@ -1652,7 +1652,7 @@ char *st;
         ++st;
 
     /* scan digits, build value */
-    while ( (c = *st++) )
+    while ( '\0' != (c = *st++) )
         if ( c >= '0' && c <= '9' )
             result = result * 10 + c - '0';
         else

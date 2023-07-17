@@ -15,6 +15,9 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 ## Change Log
 
+[2023-07-17.00]
+* It works on MSDOS whith Borland C (pcdos/turbo).
+
 [2023-07-13.00]
 * Cleared all warnings.
 * Fixed error in eval.c:gtfun() returning address of a stack variable.

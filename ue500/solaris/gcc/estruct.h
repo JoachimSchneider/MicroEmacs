@@ -79,13 +79,13 @@
 #define XENIX   0                     /* IBM-PC SCO XENIX             */
 
 
-#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD || FREEBSD || \
-                          HPUX8 || HPUX9 || LINUX || OPENBSD || SMOS || \
-                          SOLARIS || SUN || USG || \
-                          XENIX )
-#define IS_POSIX_UNIX() ( IS_UNIX() && \
-                          !( USG || AIX || AUX || SMOS || HPUX8 || HPUX9 || \
-                             SUN || XENIX) )
+#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD       \
+                          || FREEBSD || HPUX8 || HPUX9 || LINUX     \
+                          || OPENBSD || SMOS || SOLARIS || SUN      \
+                          || USG || XENIX )
+#define IS_POSIX_UNIX() ( IS_UNIX()                                 \
+                          && !( USG || AIX || AUX || SMOS || HPUX8  \
+                                || HPUX9 || SUN || XENIX ) )
 
 
 /*      Compiler definitions                                          */
@@ -214,36 +214,36 @@
 /*====================================================================*/
 
 #if     VMS
-# define CONST   readonly
-# define VOID    void
-  typedef void * voidp_;
-# define NOSHARE noshare
+# define CONST      readonly
+# define VOID       void
+# define VOIDCAST   (void)
+  typedef void *    voidp_;
+# define NOSHARE    noshare
+#elif   AOSVS
+# define CONST      $shared $align(1)   /* fake a  const */
+# define VOID
+# define VOIDCAST
+  typedef char *    voidp_;
+  /* attempt to optimize read/write vars. */
+# define NOSHARE    $low32k $align(1)
+#elif  __STDC__ || IS_UNIX() || MSC || TURBO || GCC   \
+  || (AMIGA && LATTICE)
+# define CONST      const
+# define VOID       void
+# define VOIDCAST   (void)
+  typedef void *    voidp_;
+# define NOSHARE
 #else
-# if     AOSVS
-#  define CONST $shared $align(1)   /* fake a  const */
-#  define VOID
-   typedef char * voidp_;
-#  define NOSHARE $low32k $align(1) /* attempt to optimize read/write vars. */
+# define CONST
+# if     IC
+#   define VOID     void
+    typedef void *  voidp_;
 # else
-
-#  if     __STDC__ || MSC || TURBO || GCC || (AMIGA && LATTICE)
-#   define CONST   const
-#   define VOID    void
-    typedef void * voidp_;
-#   define NOSHARE
-#  else
-#   define CONST
-#   if     IC
-#    define VOID    void
-     typedef void * voidp_;
-#   else
-#    define VOID
-     typedef char * voidp_;
-#   endif
-#   define NOSHARE
-#  endif
-
+#   define VOID
+#   define VOIDCAST
+    typedef char *  voidp_;
 # endif
+# define NOSHARE
 #endif
 #define VOIDP voidp_
 
