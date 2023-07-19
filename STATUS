@@ -113,7 +113,11 @@ h/mswin.h       X                                                     X
     platforms: This is an *error* which needs to be fixed.
 - continue in:
   + Comments
-  + Compile for PCDOS with Borland C++
+  + PCDOS with Borland C++: issue with help-system:
+    - Call help
+    - Use arrow key
+    - You are catched in a macro-loop
+    - Does not occur on MicroEmacs 4.0
 
 
 

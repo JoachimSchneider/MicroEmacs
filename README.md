@@ -16,7 +16,9 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 ## Change Log
 
 [2023-07-17.00]
-* It works on MSDOS whith Borland C (pcdos/turbo).
+* It compiles on MSDOS with Borland C (pcdos/turbo)
+* ... but there is an issue (arrow-navigation in help ends in an
+  infinite macro-loop).
 
 [2023-07-13.00]
 * Cleared all warnings.
@@ -121,7 +123,7 @@ modern Linux and FreeBSD systems:
 ## TODO
 - Review all original comments so they aren't destryed by automatic reformatting.
 - Check Compilation on OpenVMS
-- Check Compile on PCDOS whith Borland C++
+- Fix help-arrow issue for PCDOS with Borland C++
 - Compile on Windows:
   + Borland C++
   + CygWin
