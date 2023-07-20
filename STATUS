@@ -118,7 +118,25 @@ h/mswin.h       X                                                     X
     - Use arrow key
     - You are catched in a macro-loop
     - Does not occur on MicroEmacs 4.0
+    - We test these versions:
 
+      (a) ue400dev.zip (2005)
+      (b) emacs5.zip (2009): Daniel_Michael_Lawrence/http:@@www.aquest.com/downloads
+      (c) https:@@github.com@pmachapman@memacs.tar.xz --- pmachapman.zip (2018)
+      (d) master.zip: Archive created out of the current (2023-07-19) master branch.
+
+      Version (c) Seems to be younger than Version (b).
+
+      ( i)  (a): The Error does not occur.
+      (ii)  (c): Compiled with a modified (a) estruct.h: The error does
+                not occur.
+      (iii) (d): Compiled with a modified (a) estruct.h: The error does
+                not occur.
+
+    - The error can be reproduced on UNIX(FreeBSD): it occurs in branch
+      "fixes" but not in branch "master")
+
+      Next step: ?Bisecvtion in "fixes".
 
 
 # EOF
