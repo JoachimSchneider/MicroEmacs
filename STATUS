@@ -138,5 +138,48 @@ h/mswin.h       X                                                     X
 
       Next step: ?Bisecvtion in "fixes".
 
+    - emacs.fixes_2023-04-03_GOOD
+      emacs.fixes_2023-07-13_BAD
+
+      commit a15abcc4adcb9958f047a7fc023ce6e920ffdaeb
+      Author: Dr. Joachim Schneider <jesmx@hal.rhein-neckar.de>
+      Date:   Thu Jul 13 19:39:27 2023 +0200
+
+        Removed all warnings.
+
+      commit 869090a8fd95b287b433d0077b7c088c54635ed1
+      Author: Dr. Joachim Schneider <jesmx@hal.rhein-neckar.de>
+      Date:   Mon Apr 3 11:37:56 2023 +0200
+
+        Ich bin gerade am reparieren, will den derzeitigen Stand aber sichern.
+
+    - Regression found:
+
+      $ git diff ../src/eval.c
+      diff --git a/ue500/src/eval.c b/ue500/src/eval.c
+      index 0854636..00d23f5 100644
+      --- a/ue500/src/eval.c
+      +++ b/ue500/src/eval.c
+      @@ -81,9 +81,9 @@ CONST char  *fname;     /* name of function to evaluate */
+           register int  arg     = 0;          /* value of some arguments    */
+           BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
+           /* ==== These might be part of the (static allocated) result ==== */
+      -    static char   arg1[NSTRING];        /* value of first argument    */
+      -    static char   arg2[NSTRING];        /* value of second argument   */
+      -    static char   arg3[NSTRING];        /* value of third argument    */
+      +    char          arg1[NSTRING];        /* value of first argument    */
+      +    char          arg2[NSTRING];        /* value of second argument   */
+      +    char          arg3[NSTRING];        /* value of third argument    */
+           static char   result[2 * NSTRING];  /* string result              */
+           /* ============================================================== */
+
+[2023-07-20.00]
+New TODO's
+* Check eval.c:gtfun(): why arg{1,2,3} must not be static.
+* Why has the size grown so much:
+  548512 emacs.fixes_2023-04-03_GOOD
+  840016 emacs.fixes_2023-07-13_BAD
+
+
 
 # EOF

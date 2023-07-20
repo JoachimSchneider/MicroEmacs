@@ -15,6 +15,12 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 ## Change Log
 
+[2023-07-20.01]
+* It works on MSDOS with Borland C (pcdos/turbo)
+
+[2023-07-20.00]
+* Regression in eval.c:gtfun() resolved.
+
 [2023-07-17.00]
 * It compiles on MSDOS with Borland C (pcdos/turbo)
 * ... but there is an issue (arrow-navigation in help ends in an

@@ -81,9 +81,10 @@ CONST char  *fname;     /* name of function to evaluate */
     register int  arg     = 0;          /* value of some arguments    */
     BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
     /* ==== These might be part of the (static allocated) result ==== */
-    static char   arg1[NSTRING];        /* value of first argument    */
-    static char   arg2[NSTRING];        /* value of second argument   */
-    static char   arg3[NSTRING];        /* value of third argument    */
+    /***TODO***: Shouldn't these variables be static?                 */
+    char          arg1[NSTRING];        /* value of first argument    */
+    char          arg2[NSTRING];        /* value of second argument   */
+    char          arg3[NSTRING];        /* value of third argument    */
     static char   result[2 * NSTRING];  /* string result              */
     /* ============================================================== */
 
