@@ -179,8 +179,11 @@ extern int PASCAL NEAR getkey(VOID);
 extern int PASCAL NEAR getwpos(VOID);
 extern int PASCAL NEAR get_char(VOID);
 extern int PASCAL NEAR global_var(int f, int n);
+#if VMS
+/***TODO***/
 extern int PASCAL NEAR grabnowait(VOID);
 extern int PASCAL NEAR grabwait(VOID);
+#endif
 #if     DBCS
 extern int PASCAL NEAR is2byte(char *sp, char *cp);
 #endif
