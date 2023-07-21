@@ -339,7 +339,8 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
             fprintf( fp, "%s\n", getenv("HOST") );
         else {
 # if  ( IS_UNIX() )
-            gethostname(buf, NFILEN);
+            ZEROMEM(buf);
+            gethostname(buf, sizeof(buf) - 1);
             fprintf(fp, "%s\n", buf);
 # else
             fprintf(fp, "<unknown>\n");
@@ -378,7 +379,8 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 
 # if  ( IS_UNIX() )
         /* is it the current host? */
-        gethostname(host, NFILEN);
+        ZEROMEM(host);
+        gethostname(host, sizeof(host) - 1);
         if ( strcmp(buf, host) == 0 ) {
 
             /* see if the process is dead already */

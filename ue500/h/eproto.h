@@ -369,65 +369,66 @@ char *uitostr_memacs P1_(unsigned int, i)
  * might use malloc(), but we want to use ASRT to exit
  * when malloc() fails
  */
+#ifndef maindef
+extern VOID ASRT_Catch DCL((CONST char *file, int line, CONST char *cond));
+#else
+VOID ASRT_Catch P3_(CONST char *, file, int, line, CONST char *, cond)
+{
+    int errno_sv_ = errno;
+
+    eputs("File: "); eputs(file); eputs(", Line: ");
+    eputi(line); eputs("\n");
+    eputs("\tAssertion `"); eputs(cond); eputs("' failed!\n");
+    eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");
+    eputs("--- abort ...\n");
+    VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );
+    abort();
+}
+#endif
+
+#ifndef maindef
+extern VOID ASRTM_Catch DCL((CONST char *file, int line, CONST char *cond, CONST char *msg));
+#else
+VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST char *, msg)
+{
+    int errno_sv_ = errno;
+
+    eputs("File: "); eputs(file); eputs(", Line: ");
+    eputi(line); eputs("\n");
+    eputs("\t"); eputs(msg); eputs("\n");
+    eputs("\tAssertion `"); eputs(cond); eputs("' failed!\n");
+    eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");
+    eputs("--- abort ...\n");
+    VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );
+    abort();
+}
+#endif
+
 #define ASRT(e) do {                                                    \
         if ( !(e) )                                                     \
         {                                                               \
-            int errno_sv_ = errno;                                      \
-                                                                        \
-            eputs("File: "); eputs(__FILE__); eputs(", Line: ");        \
-            eputi(__LINE__); eputs("\n");                               \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- abort ...\n");                                   \
-            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
-            abort();                                                    \
+            ASRT_Catch (__FILE__, __LINE__, #e);                        \
         }                                                               \
     } while (0)
 
 #define ASRTM(e, m) do {                                                \
         if ( !(e) )                                                     \
         {                                                               \
-            int errno_sv_ = errno;                                      \
-                                                                        \
-            eputs("File: "); eputs(__FILE__); eputs(", Line: ");        \
-            eputi(__LINE__); eputs("\n");                               \
-            eputs("\t"); eputs((m)); eputs("\n");                       \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- abort ...\n");                                   \
-            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
-            abort();                                                    \
+            ASRTM_Catch (__FILE__, __LINE__, #e, m);                    \
         }                                                               \
     } while (0)
 
 #define ASRTK(e, file, line) do {                                       \
         if ( !(e) )                                                     \
         {                                                               \
-            int errno_sv_ = errno;                                      \
-                                                                        \
-            eputs("File: "); eputs((file)); eputs(", Line: ");          \
-            eputi((line)); eputs("\n");                                 \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- abort ...\n");                                   \
-            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
-            abort();                                                    \
+            ASRT_Catch (file, line, #e);                                \
         }                                                               \
     } while (0)
 
 #define ASRTMK(e, m, file, line) do {                                   \
         if ( !(e) )                                                     \
         {                                                               \
-            int errno_sv_ = errno;                                      \
-                                                                        \
-            eputs("File: "); eputs((file)); eputs(", Line: ");          \
-            eputi((line)); eputs("\n");                                 \
-            eputs("\t"); eputs((m)); eputs("\n");                       \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- abort ...\n");                                   \
-            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
-            abort();                                                    \
+            ASRTM_Catch (file, line, #e, m);                            \
         }                                                               \
     } while (0)
 
