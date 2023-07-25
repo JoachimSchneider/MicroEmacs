@@ -54,6 +54,27 @@ extern char *realloc DCL((char *block, int siz));
 #endif
 /*....................................................................*/
 
+/*....................................................................*/
+/* Set defaults for settings which *could* be defined in estructc.h:  */
+/*....................................................................*/
+#ifndef UEMACS_TRC
+# ifdef NDEBUG
+#   define UEMACS_TRC          (0)
+# else
+#   define UEMACS_TRC         (!0)
+# endif
+#endif
+#ifndef TRC_FILE_ENVVAR
+# define TRC_FILE_ENVVAR  "UEMACS_TRC_FILE"
+#endif
+#ifndef REPAIR_CODE_LINE
+# define REPAIR_CODE_LINE     (!0)
+#endif
+#ifndef DFT_STATIC_STACKSIZE
+# define DFT_STATIC_STACKSIZE (16)
+#endif
+/*....................................................................*/
+
 
 /**********************************************************************/
 #if     PROTO
@@ -144,19 +165,64 @@ extern char *astrcatc DCL((CONST char *str, CONST char c));
 /* Concatenate string d to string str and malloc the result.    */
 /* Input string must either be NULL or malloced.                */
 extern char *astrcat DCL((CONST char *str, CONST char *s));
+
+/*--------------------------------------------------------------------*/
+/* A Stack ADT to be used for returning pointers to static variables  */
+/* (e.g. char arrays) from functions: It allows (limited) indirect    */
+/* recursion of such functions.                                       */
+/*--------------------------------------------------------------------*/
+/* Return a new stack with stacksize elements each of size len:       */
+extern VOIDP  NewStack(int stacksize, int len);   /* Won't fail       */
+extern char   *NextStackElem(CONST VOIDP stack);  /* Overflow: NULL   */
+extern char   *DecStackPtr(CONST VOIDP stack);    /* Return previous
+                                                   * stack element or
+                                                   * NULL on error.   */
+extern VOID   DelStack(CONST VOIDP stack);        /* Not needed.      */
+#if ( 0 )
+/* Example usage: */
+char *HelloFunc(int n)
+{
+    char          *RVAL = NULL;
+#define RETURN(e) do { RVAL = (e); goto RETURN_L; } while ( 0 )
+
+    CONST char    MSG[] = "Hello World";
+    static VOIDP  s     = NULL;
+    char          *msg  = NULL;
+    CONST int     len   = 3 * ((sizeof(MSG) - 1) + 4) + 1;
+
+    BEGIN_DO_ONCE {
+        s = NewStack(3, len);
+    } END_DO_ONCE;
+    ASRT(NULL != (msg = NextStackElem(s)));
+    if ( 1 >= n) {
+        xsnprintf(msg, len, "%s_%d", MSG, 1);
+    } else                {
+        xsnprintf(msg, len, "%s, %s_%d", HelloFunc(n - 1), MSG, n);
+    }
+
+    RETURN(msg);
+
+RETURN_L:
+#undef RETURN
+    ASRT(NULL != DecStackPtr(s));
+
+    return RVAL;
+}
+#endif
+/*--------------------------------------------------------------------*/
+
 /**********************************************************************/
 
 /**********************************************************************/
 /**********************************************************************/
 
 /**********************************************************************/
-#define TRC_FILE_ENVVAR "EMACS_TRC_FILE"
 extern FILE *GetTrcFP DCL((void));
 
 extern int         DebugMessage_lnno_;
 extern CONST char *DebugMessage_fname_;
 extern int         DebugMessage(CONST char *fmt, ...);
-#if ( defined( EMACS_TRC) )
+#if UEMACS_TRC
 # define  TRC(arg)  do {                        \
         DebugMessage_fname_ = __FILE__;         \
         DebugMessage_lnno_ = __LINE__;          \
@@ -522,6 +588,27 @@ VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST ch
         *pp_  = NULL;             \
     }                             \
 } while ( 0 )
+/**********************************************************************/
+
+/**********************************************************************/
+/* Do something only *once*:  */
+#define BEGIN_DO_ONCE do {        \
+    static int  FirstCall_  = !0; \
+                                  \
+    if ( FirstCall_ ) {           \
+        FirstCall_  = 0;          \
+        {
+/**END_OF_DEFINITION**/
+#define   END_DO_ONCE }           \
+    }                             \
+} while ( 0 )
+/* Example (Yes, additional braces are not necessary):  */
+#if ( 0 )
+BEGIN_DO_ONCE {
+  action0;
+  action1;
+} END_DO_ONCE;
+#endif
 /**********************************************************************/
 
 /**********************************************************************/
@@ -1447,8 +1534,6 @@ extern int PASCAL NEAR scanmore DCL((int dir));
 extern int PASCAL NEAR scanner DCL((int direct, int beg_or_end, int repeats));
 #endif
 extern int PASCAL NEAR setlower DCL((char *ch, char *val));
-extern int PASCAL NEAR setlower DCL((char *ch, char *val));
-extern int PASCAL NEAR setupper DCL((char *ch, char *val));
 extern int PASCAL NEAR setupper DCL((char *ch, char *val));
 extern int PASCAL NEAR setvar DCL((int f, int n));
 extern int PASCAL NEAR sindex DCL((char *source, char *pattern));

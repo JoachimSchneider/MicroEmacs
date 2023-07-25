@@ -144,7 +144,7 @@ int bflg;
     int           doto  = 0;
 
     doto  = get_w_doto(curwp);
-#ifdef JES_REPAIR_CODE
+#if REPAIR_CODE_LINE
     REPAIR(doto <= get_lused(curwp->w_dotp), doto = get_lused(curwp->w_dotp));
 #else
     ASRT  (doto <= get_lused(curwp->w_dotp));
@@ -1763,7 +1763,74 @@ char *astrcat P2_(CONST char *, str, CONST char *, s)
 /*====================================================================*/
 
 
+/*--------------------------------------------------------------------*/
+/* A Stack ADT to be used for returning pointers to static variables  */
+/* (e.g. char arrays) from functions: It allows (limited) indirect    */
+/* recursion of such functions.                                       */
+/*--------------------------------------------------------------------*/
 
+typedef struct  STACK_S_  {
+    int   stacksize;
+    int   len;
+    int   sp;
+    char  *arr;
+} STACK_T_;
+
+VOIDP  NewStack(int stacksize, int len)
+{
+    STACK_T_  *stack = NULL;
+
+    ASRT(0 < stacksize);
+    ASRT(0 < len);
+    ASRT(NULL != (stack = calloc(1, sizeof(*stack))));
+    stack->stacksize = stacksize;
+    stack->len       = len;
+    stack->sp        = (-1);
+    ASRT(NULL != (stack->arr = calloc(stacksize, len)));
+
+    return (VOIDP)stack;
+}
+
+char  *NextStackElem(CONST VOIDP stack)
+{
+    ASRT(NULL != stack);
+
+    STACK_T_  *stk  = (STACK_T_ *)stack;
+
+    if ( (-1) > stk->sp ) {
+        return NULL;
+    }
+    stk->sp++;
+    if ( stk->stacksize <= stk->sp ) {
+        return NULL;
+    }
+
+    return &stk->arr[stk->sp * stk->len];
+}
+
+char  *DecStackPtr(CONST VOIDP stack)
+{
+    ASRT(NULL != stack);
+
+    STACK_T_  *stk  = (STACK_T_ *)stack;
+
+    stk->sp--;
+    if ( (-1) > stk->sp ) {
+        return NULL;
+    }
+
+    return &stk->arr[(stk->sp + 1) * stk->len];
+}
+
+VOID  DelStack(CONST VOIDP stack)
+{
+    ASRT(NULL != stack);
+
+    STACK_T_  *stk  = (STACK_T_ *)stack;
+
+    FREE(stk->arr);
+    FREE(stk);
+}
 
 
 /*====================================================================*/

@@ -16,11 +16,7 @@ HDIR = ../h
 
 
 # options and arguments to the C compiler
-#
-# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
-# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
-#
-#CFLAGS = -g -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
+#CFLAGS = -g -Wall     -I. -I$(HDIR)
 CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
 
 

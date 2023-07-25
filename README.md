@@ -15,6 +15,10 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 ## Change Log
 
+[2023-07-25.00]
+* Added stack ADT for static returned strings (eval.c:gtfun()) to
+  allow (indirect) recursive function calls.
+
 [2023-07-20.01]
 * It works on MSDOS with Borland C (pcdos/turbo)
 

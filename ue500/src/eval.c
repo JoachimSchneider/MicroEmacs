@@ -71,27 +71,41 @@ UTABLE *ut;     /* table to clear */
     free(ut);
 }
 
-CONST char *PASCAL NEAR gtfun(fname)    /* evaluate a function */
-
-CONST char  *fname;     /* name of function to evaluate */
-
+/* GTFUN:
+ *
+ * evaluate a function
+ */
+CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
 {
+    CONST char    *RVAL   = NULL;
+#define RETURN(e) do { RVAL = (e); goto RETURN_L; } while ( 0 )
+
     char          *fnameL = NULL;
     register int  fnum    = 0;          /* index to function to eval  */
     register int  arg     = 0;          /* value of some arguments    */
     BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
+    /* ============================================================== */
+    static VOIDP  arg1S   = NULL;
+    static VOIDP  arg2S   = NULL;
+    static VOIDP  arg3S   = NULL;
+    static VOIDP  resultS = NULL;
     /* ==== These might be part of the (static allocated) result ==== */
-    /***TODO***: Shouldn't these variables be static?                 */
-    char          arg1[NSTRING];        /* value of first argument    */
-    char          arg2[NSTRING];        /* value of second argument   */
-    char          arg3[NSTRING];        /* value of third argument    */
-    static char   result[2 * NSTRING];  /* string result              */
+    char          *arg1   = NULL;       /* value of first argument    */
+    char          *arg2   = NULL;       /* value of second argument   */
+    char          *arg3   = NULL;       /* value of third argument    */
+    char          *result = NULL;       /* string result              */
     /* ============================================================== */
 
-    ZEROMEM(arg1);
-    ZEROMEM(arg2);
-    ZEROMEM(arg3);
-    ZEROMEM(result);
+    BEGIN_DO_ONCE {
+        arg1S   = NewStack(DFT_STATIC_STACKSIZE, NSTRING);
+        arg2S   = NewStack(DFT_STATIC_STACKSIZE, NSTRING);
+        arg3S   = NewStack(DFT_STATIC_STACKSIZE, NSTRING);
+        resultS = NewStack(DFT_STATIC_STACKSIZE, 2 * NSTRING);
+    } END_DO_ONCE;
+    ASRT(NULL != (arg1    = NextStackElem(arg1S)));
+    ASRT(NULL != (arg2    = NextStackElem(arg2S)));
+    ASRT(NULL != (arg3    = NextStackElem(arg3S)));
+    ASRT(NULL != (result  = NextStackElem(resultS)));
 
     fnameL = xstrdup(fname);
     mklower(fnameL); /* and let it be upper or lower case */
@@ -105,24 +119,24 @@ CONST char  *fname;     /* name of function to evaluate */
 /*          "%%No such function as '%s'" */
         free(fnameL);
 
-        return (errorm);
+        RETURN ( errorm );
     }
     free(fnameL);
 
     /* if needed, retrieve the first argument */
     if ( funcs[fnum].f_type >= MONAMIC ) {
         if ( macarg(arg1) != TRUE )
-            return (errorm);
+            RETURN ( errorm );
 
         /* if needed, retrieve the second argument */
         if ( funcs[fnum].f_type >= DYNAMIC ) {
             if ( macarg(arg2) != TRUE )
-                return (errorm);
+                RETURN ( errorm );
 
             /* if needed, retrieve the third argument */
             if ( funcs[fnum].f_type >= TRINAMIC )
                 if ( macarg(arg3) != TRUE )
-                    return (errorm);
+                    RETURN ( errorm );
 
         }
     }
@@ -131,34 +145,34 @@ CONST char  *fname;     /* name of function to evaluate */
     /* and now evaluate it! */
     switch ( fnum ) {
     case UFABBREV:
-        return ( fixnull( ab_lookup(arg1) ) );
+        RETURN ( fixnull( ab_lookup(arg1) ) );
 
     case UFABS:
-        return ( int_asc( absv( asc_int(arg1) ) ) );
+        RETURN ( int_asc( absv( asc_int(arg1) ) ) );
 
     case UFADD:
-        return ( int_asc( asc_int(arg1) + asc_int(arg2) ) );
+        RETURN ( int_asc( asc_int(arg1) + asc_int(arg2) ) );
 
     case UFAND:
-        return ( ltos( stol(arg1) && stol(arg2) ) );
+        RETURN ( ltos( stol(arg1) && stol(arg2) ) );
 
     case UFASCII:
-        return ( int_asc( (int)arg1[0] ) );
+        RETURN ( int_asc( (int)arg1[0] ) );
 
     case UFBAND:
-        return ( int_asc( asc_int(arg1) & asc_int(arg2) ) );
+        RETURN ( int_asc( asc_int(arg1) & asc_int(arg2) ) );
 
     case UFBIND:
-        return ( transbind(arg1) );
+        RETURN ( transbind(arg1) );
 
     case UFBNOT:
-        return ( int_asc( ~asc_int(arg1) ) );
+        RETURN ( int_asc( ~asc_int(arg1) ) );
 
     case UFBOR:
-        return ( int_asc( asc_int(arg1) | asc_int(arg2) ) );
+        RETURN ( int_asc( asc_int(arg1) | asc_int(arg2) ) );
 
     case UFBXOR:
-        return ( int_asc( asc_int(arg1) ^ asc_int(arg2) ) );
+        RETURN ( int_asc( asc_int(arg1) ^ asc_int(arg2) ) );
 
     case UFCALL:                /* construct buffer name to execute */
         result[0] = '[';
@@ -168,202 +182,209 @@ CONST char  *fname;     /* name of function to evaluate */
         /* find it, return ERROR if it does not exist */
         bp = bfind(result, FALSE, 0);
         if ( bp == NULL )
-            return (errorm);
+            RETURN ( errorm );
 
         /* execute it and return whats in the $rval */
         dobuf(bp);
 
-        return ( fixnull(rval) );
+        RETURN ( fixnull(rval) );
 
     case UFCAT:
         xstrcpy(result, arg1);
         strncat(result, arg2, NSTRING);
         result[NSTRING - 1] = 0;
 
-        return (result);
+        RETURN ( result );
 
     case UFCHR:
         result[0] = asc_int(arg1);
         result[1] = 0;
 
-        return (result);
+        RETURN ( result );
 
     case UFDIV:
         if ( ( arg = asc_int(arg2) ) != 0 )
-            return ( int_asc(asc_int(arg1) / arg) );
+            RETURN ( int_asc(asc_int(arg1) / arg) );
         else {
             mlwrite(TEXT245);
 
 /*                      "%%Division by Zero is illegal" */
-            return (errorm);
+            RETURN ( errorm );
         }
 
     case UFENV:
 #if     ENVFUNC
 
-        return ( fixnull( getenv(arg1) ) );
+        RETURN ( fixnull( getenv(arg1) ) );
 
 #else
 
-        return ("");
+        RETURN ( "" );
 
 #endif
     case UFEQUAL:
-        return ( ltos( asc_int(arg1) == asc_int(arg2) ) );
+        RETURN ( ltos( asc_int(arg1) == asc_int(arg2) ) );
 
     case UFEXIST:
-        return ( ltos( fexist(arg1) ) );
+        RETURN ( ltos( fexist(arg1) ) );
 
     case UFFIND:
-        return ( fixnull( flook(arg1, TRUE) ) );
+        RETURN ( fixnull( flook(arg1, TRUE) ) );
 
     case UFGREATER:
-        return ( ltos( asc_int(arg1) > asc_int(arg2) ) );
+        RETURN ( ltos( asc_int(arg1) > asc_int(arg2) ) );
 
     case UFGROUP:
         arg = asc_int(arg1);
 #if     MAGIC
         if ( arg < 0 || arg >= MAXGROUPS )
-            return ( bytecopy(result, errorm, NSTRING * 2) );
+            RETURN ( bytecopy(result, errorm, NSTRING * 2) );
 
-        return ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2) );
+        RETURN ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2) );
 
 #else
         if ( arg == 0 )
             bytecopy(result, patmatch, NSTRING * 2);
         else
-            return ( bytecopy(result, errorm, NSTRING * 2) );
+            RETURN ( bytecopy(result, errorm, NSTRING * 2) );
 
-        return (result);
+        RETURN ( result );
 
 #endif
     case UFGTCMD:
-        return ( cmdstr(getcmd(), result) );
+        RETURN ( cmdstr(getcmd(), result) );
 
     case UFGTKEY:
         result[0] = tgetc();
         result[1] = 0;
 
-        return (result);
+        RETURN ( result );
 
     case UFIND:
-        return ( xstrcpy( result, fixnull( getval(arg1) ) ) );
+        RETURN ( xstrcpy( result, fixnull( getval(arg1) ) ) );
 
     case UFISNUM:
-        return ( ltos( is_num(arg1) ) );
+        RETURN ( ltos( is_num(arg1) ) );
 
     case UFLEFT:
-        return ( bytecopy( result, arg1, asc_int(arg2) ) );
+        RETURN ( bytecopy( result, arg1, asc_int(arg2) ) );
 
     case UFLENGTH:
-        return ( int_asc( strlen(arg1) ) );
+        RETURN ( int_asc( strlen(arg1) ) );
 
     case UFLESS:
-        return ( ltos( asc_int(arg1) < asc_int(arg2) ) );
+        RETURN ( ltos( asc_int(arg1) < asc_int(arg2) ) );
 
     case UFLOWER:
-        return ( mklower(arg1) );
+        RETURN ( mklower(arg1) );
 
     case UFMID:
         arg = asc_int(arg2);
         if ( arg > strlen(arg1) )
-            return ( xstrcpy(result, "") );
+            RETURN ( xstrcpy(result, "") );
 
-        return ( bytecopy( result, &arg1[arg-1], asc_int(arg3) ) );
+        RETURN ( bytecopy( result, &arg1[arg-1], asc_int(arg3) ) );
 
     case UFMKCOL:
         if ( ( arg = asc_int(arg1) ) < 0 || arg >= NMARKS ||
              curwp->w_markp[arg] == NULL ) {
             mlwrite(TEXT11, arg);
 
-            return ( int_asc(-1) );
+            RETURN ( int_asc(-1) );
         }
 
-        return ( int_asc( findcol(curwp->w_markp[arg], curwp->w_marko[arg]) ) );
+        RETURN ( int_asc( findcol(curwp->w_markp[arg], curwp->w_marko[arg]) ) );
 
     case UFMKLINE:
         if ( ( arg = asc_int(arg1) ) < 0 || arg >= NMARKS ||
              curwp->w_markp[arg] == NULL ) {
             mlwrite(TEXT11, arg);
 
-            return ( int_asc(0) );
+            RETURN ( int_asc(0) );
         }
 
-        return ( long_asc( getlinenum(curbp, curwp->w_markp[arg]) ) );
+        RETURN ( long_asc( getlinenum(curbp, curwp->w_markp[arg]) ) );
 
     case UFMOD:
         if ( ( arg = asc_int(arg2) ) != 0 )
-            return ( int_asc(asc_int(arg1) % arg) );
+            RETURN ( int_asc(asc_int(arg1) % arg) );
         else {
             mlwrite(TEXT245);
 
 /*                      "%%Division by Zero is illegal" */
-            return (errorm);
+            RETURN ( errorm );
         }
 
     case UFNEG:
-        return ( int_asc( -asc_int(arg1) ) );
+        RETURN ( int_asc( -asc_int(arg1) ) );
 
     case UFNOT:
-        return ( ltos(stol(arg1) == FALSE) );
+        RETURN ( ltos(stol(arg1) == FALSE) );
 
     case UFOR:
-        return ( ltos( stol(arg1) || stol(arg2) ) );
+        RETURN ( ltos( stol(arg1) || stol(arg2) ) );
 
     case UFREVERSE:
-        return ( strrev( bytecopy(result, arg1, NSTRING * 2) ) );
+        RETURN ( strrev( bytecopy(result, arg1, NSTRING * 2) ) );
 
     case UFRIGHT:
         arg = asc_int(arg2);
         if ( arg > strlen(arg1) )
             arg = strlen(arg1);
 
-        return ( xstrcpy(result, &arg1[strlen(arg1) - arg]) );
+        RETURN ( xstrcpy(result, &arg1[strlen(arg1) - arg]) );
 
     case UFRND:
-        return ( int_asc( (int)( ernd() % (long)absv( asc_int(arg1) ) ) +
+        RETURN ( int_asc( (int)( ernd() % (long)absv( asc_int(arg1) ) ) +
                           1L ) );
 
     case UFSEQUAL:
-        return ( ltos(strcmp(arg1, arg2) == 0) );
+        RETURN ( ltos(strcmp(arg1, arg2) == 0) );
 
     case UFSGREAT:
-        return ( ltos(strcmp(arg1, arg2) > 0) );
+        RETURN ( ltos(strcmp(arg1, arg2) > 0) );
 
     case UFSINDEX:
-        return ( int_asc( sindex(arg1, arg2) ) );
+        RETURN ( int_asc( sindex(arg1, arg2) ) );
 
     case UFSLESS:
-        return ( ltos(strcmp(arg1, arg2) < 0) );
+        RETURN ( ltos(strcmp(arg1, arg2) < 0) );
 
     case UFSLOWER:
-        return (setlower(arg1, arg2), "");
+        RETURN ( (setlower(arg1, arg2), "") );
 
     case UFSUB:
-        return ( int_asc( asc_int(arg1) - asc_int(arg2) ) );
+        RETURN ( int_asc( asc_int(arg1) - asc_int(arg2) ) );
 
     case UFSUPPER:
-        return (setupper(arg1, arg2), "");
+        RETURN ( (setupper(arg1, arg2), "") );
 
     case UFTIMES:
-        return ( int_asc( asc_int(arg1) * asc_int(arg2) ) );
+        RETURN ( int_asc( asc_int(arg1) * asc_int(arg2) ) );
 
     case UFTRIM:
-        return ( trimstr(arg1) );
+        RETURN ( trimstr(arg1) );
 
     case UFTRUTH:
-        return ( ltos(asc_int(arg1) == 42) );
+        RETURN ( ltos(asc_int(arg1) == 42) );
 
     case UFUPPER:
-        return ( mkupper(arg1) );
+        RETURN ( mkupper(arg1) );
 
     case UFXLATE:
-        return ( xlat(arg1, arg2, arg3) );
+        RETURN ( xlat(arg1, arg2, arg3) );
     }
 
     meexit(-11);        /* never should get here */
 
-    return NULL;  /**AVOID_WARNING**/
+RETURN_L:
+#undef RETURN
+    ASRT(NULL != DecStackPtr(arg1S));
+    ASRT(NULL != DecStackPtr(arg2S));
+    ASRT(NULL != DecStackPtr(arg3S));
+    ASRT(NULL != DecStackPtr(resultS));
+
+    return RVAL;
 }
 
 CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */

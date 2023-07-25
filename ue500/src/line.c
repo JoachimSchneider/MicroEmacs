@@ -495,7 +495,7 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
             dotp = curwp->w_dotp;
             doto = get_w_doto(curwp);
 
-#ifdef JES_REPAIR_CODE
+#if REPAIR_CODE_LINE
             REPAIR(doto <= get_lused(dotp), doto = get_lused(dotp));
 #else
             ASRT  (doto <= get_lused(dotp));
