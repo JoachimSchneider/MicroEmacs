@@ -228,7 +228,7 @@
 /* P#_-macros in eproto.h.                                            */
 /*====================================================================*/
 
-#if     VMS
+#if     VMS && defined(VAXC)
 # define CONST      readonly
 # define VOID       void
 # define VOIDCAST   (void)

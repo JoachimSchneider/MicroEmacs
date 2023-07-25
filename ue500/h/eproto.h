@@ -421,7 +421,7 @@ char *uitostr_memacs P1_(unsigned int, i)
  * structures against given needs.  Example: CASRT( sizeof(int) ==
  * sizeof(long) );
  */
-#define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1];
+#define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
 
 /**********************************************************************/
 /*
@@ -1487,6 +1487,9 @@ extern int PASCAL NEAR global_var DCL((int f, int n));
 /***TODO***/
 extern int PASCAL NEAR grabnowait DCL((void));
 extern int PASCAL NEAR grabwait DCL((void));
+#else
+extern unsigned char   grabwait DCL((void));
+extern unsigned char   grabnowait DCL((void));
 #endif
 #if     DBCS
 extern int PASCAL NEAR is2byte DCL((char *sp, char *cp));

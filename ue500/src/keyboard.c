@@ -449,11 +449,6 @@ int extcode P1_(unsigned, c)
 
 #if ( IS_UNIX() || (VMS && SMG) || MPE )
 
-/* These are defined in unix.c: */
-extern unsigned char grabwait DCL((void));
-extern unsigned char grabnowait DCL((void));
-
-
 # define NKEYSEQ  (300) /* Number of keymap entries */
 
 typedef struct keyent {                 /* Key mapping entry            */
