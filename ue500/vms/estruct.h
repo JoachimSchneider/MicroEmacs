@@ -212,7 +212,7 @@
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
 #define UEMACS_TRC            (!0)
-#define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
+#define TRC_FILE_ENVVAR       "UEMACS_TRC_FILE"
 
 /* Size of stacks for static return strings:                          */
 /*====================================================================*/

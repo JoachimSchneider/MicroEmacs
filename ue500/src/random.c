@@ -1782,6 +1782,7 @@ VOIDP  NewStack(int stacksize, int len)
 
     ASRT(0 < stacksize);
     ASRT(0 < len);
+
     ASRT(NULL != (stack = calloc(1, sizeof(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
@@ -1793,9 +1794,9 @@ VOIDP  NewStack(int stacksize, int len)
 
 char  *NextStackElem(CONST VOIDP stack)
 {
-    ASRT(NULL != stack);
-
     STACK_T_  *stk  = (STACK_T_ *)stack;
+
+    ASRT(NULL != stk);
 
     if ( (-1) > stk->sp ) {
         return NULL;
@@ -1810,9 +1811,9 @@ char  *NextStackElem(CONST VOIDP stack)
 
 char  *DecStackPtr(CONST VOIDP stack)
 {
-    ASRT(NULL != stack);
-
     STACK_T_  *stk  = (STACK_T_ *)stack;
+
+    ASRT(NULL != stk);
 
     stk->sp--;
     if ( (-1) > stk->sp ) {
@@ -1824,9 +1825,9 @@ char  *DecStackPtr(CONST VOIDP stack)
 
 VOID  DelStack(CONST VOIDP stack)
 {
-    ASRT(NULL != stack);
-
     STACK_T_  *stk  = (STACK_T_ *)stack;
+
+    ASRT(NULL != stk);
 
     FREE(stk->arr);
     FREE(stk);

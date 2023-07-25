@@ -515,10 +515,10 @@ VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST ch
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- REPAIRING ...\n");                               \
             eputs("    `" #r "'"); eputs("\n");                         \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             eputs("--- ... DONE\n");                                    \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
 
@@ -534,10 +534,10 @@ VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST ch
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- REPAIRING ...\n");                               \
             eputs("    `" #r "'"); eputs("\n");                         \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             eputs("--- ... DONE\n");                                    \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
 
@@ -552,10 +552,10 @@ VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST ch
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- REPAIRING ...\n");                               \
             eputs("    `" #r "'"); eputs("\n");                         \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             eputs("--- ... DONE\n");                                    \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
 
@@ -571,10 +571,10 @@ VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST ch
             eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
             eputs("--- REPAIRING ...\n");                               \
             eputs("    `" #r "'"); eputs("\n");                         \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             eputs("--- ... DONE\n");                                    \
-            ( GetTrcFP()? fflush(GetTrcFP()) : 0 );                     \
+            VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
 /**********************************************************************/
