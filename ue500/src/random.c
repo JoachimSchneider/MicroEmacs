@@ -1792,12 +1792,13 @@ VOIDP  NewStack(int stacksize, int len)
     return (VOIDP)stack;
 }
 
-char  *NextStackElem(CONST VOIDP stack)
+char  *NextStackElem_(CONST VOIDP stack, CONST char *file, int line)
 {
     STACK_T_  *stk  = (STACK_T_ *)stack;
 
     ASRT(NULL != stk);
 
+    TRCK(("NextStackElem: sp = %d", stk->sp), file, line);
     if ( (-1) > stk->sp ) {
         return NULL;
     }
@@ -1809,12 +1810,13 @@ char  *NextStackElem(CONST VOIDP stack)
     return &stk->arr[stk->sp * stk->len];
 }
 
-char  *DecStackPtr(CONST VOIDP stack)
+char  *DecStackPtr_(CONST VOIDP stack, CONST char *file, int line)
 {
     STACK_T_  *stk  = (STACK_T_ *)stack;
 
     ASRT(NULL != stk);
 
+    TRCK(("DecStackPtr: sp = %d", stk->sp), file, line);
     stk->sp--;
     if ( (-1) > stk->sp ) {
         return NULL;

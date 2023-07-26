@@ -173,10 +173,13 @@ extern char *astrcat DCL((CONST char *str, CONST char *s));
 /*--------------------------------------------------------------------*/
 /* Return a new stack with stacksize elements each of size len:       */
 extern VOIDP  NewStack(int stacksize, int len);   /* Won't fail       */
-extern char   *NextStackElem(CONST VOIDP stack);  /* Overflow: NULL   */
-extern char   *DecStackPtr(CONST VOIDP stack);    /* Return previous
-                                                   * stack element or
-                                                   * NULL on error.   */
+extern char   *NextStackElem_(CONST VOIDP stack, CONST char *file,
+                              int line);          /* Overflow: NULL   */
+#define NextStackElem(x)  NextStackElem_((x), __FILE__, __LINE__)
+extern char   *DecStackPtr_(CONST VOIDP stack, CONST char *file,
+                            int line);  /* Return previous stack
+                                         * element or NULL on error.  */
+#define DecStackPtr(x)    DecStackPtr_((x), __FILE__, __LINE__)
 extern VOID   DelStack(CONST VOIDP stack);        /* Not needed.      */
 #if ( 0 )
 /* Example usage: */

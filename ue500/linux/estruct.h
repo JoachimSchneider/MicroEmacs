@@ -216,7 +216,7 @@
 
 /* Size of stacks for static return strings:                          */
 /*====================================================================*/
-#define DFT_STATIC_STACKSIZE  (4)
+#define DFT_STATIC_STACKSIZE  (8)
 
 
 /*=================================================================== */

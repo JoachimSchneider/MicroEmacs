@@ -84,28 +84,24 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     register int  fnum    = 0;          /* index to function to eval  */
     register int  arg     = 0;          /* value of some arguments    */
     BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
-    /* ============================================================== */
-    static VOIDP  arg1S   = NULL;
-    static VOIDP  arg2S   = NULL;
-    static VOIDP  arg3S   = NULL;
-    static VOIDP  resultS = NULL;
-    /* ==== These might be part of the (static allocated) result ==== */
-    char          *arg1   = NULL;       /* value of first argument    */
-    char          *arg2   = NULL;       /* value of second argument   */
-    char          *arg3   = NULL;       /* value of third argument    */
-    char          *result = NULL;       /* string result              */
-    /* ============================================================== */
+    int           rc      = 0;
+    char          arg1[NSTRING];
+    char          arg2[NSTRING];
+    char          arg3[NSTRING];
+    char          result[2 * NSTRING];
+
+    static VOIDP  RValS   = NULL;
+    char          *rval   = NULL;
+
+    ZEROMEM(arg1);
+    ZEROMEM(arg2);
+    ZEROMEM(arg3);
+    ZEROMEM(result);
 
     BEGIN_DO_ONCE {
-        arg1S   = NewStack(DFT_STATIC_STACKSIZE, NSTRING);
-        arg2S   = NewStack(DFT_STATIC_STACKSIZE, NSTRING);
-        arg3S   = NewStack(DFT_STATIC_STACKSIZE, NSTRING);
-        resultS = NewStack(DFT_STATIC_STACKSIZE, 2 * NSTRING);
+        RValS = NewStack(DFT_STATIC_STACKSIZE, 2 * NSTRING);
     } END_DO_ONCE;
-    ASRT(NULL != (arg1    = NextStackElem(arg1S)));
-    ASRT(NULL != (arg2    = NextStackElem(arg2S)));
-    ASRT(NULL != (arg3    = NextStackElem(arg3S)));
-    ASRT(NULL != (result  = NextStackElem(resultS)));
+    ASRT(NULL != (rval = NextStackElem(RValS)));
 
     fnameL = xstrdup(fname);
     mklower(fnameL); /* and let it be upper or lower case */
@@ -379,12 +375,14 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
 RETURN_L:
 #undef RETURN
-    ASRT(NULL != DecStackPtr(arg1S));
-    ASRT(NULL != DecStackPtr(arg2S));
-    ASRT(NULL != DecStackPtr(arg3S));
-    ASRT(NULL != DecStackPtr(resultS));
+    if ( 2 * NSTRING <= (rc = xsnprintf(rval, 2 * NSTRING, "%s", RVAL)) ) {
+        TRC(("gtfun(): rval truncated: 2 * NSTRING = %d <= rc = %d",
+             2 * NSTRING, rc));
+    }
 
-    return RVAL;
+    ASRT(NULL != DecStackPtr(RValS));
+
+    return rval;
 }
 
 CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */

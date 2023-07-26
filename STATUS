@@ -175,12 +175,16 @@ h/mswin.h       X                                                     X
 
 [2023-07-20.00]
 New TODO's
-* Check eval.c:gtfun(): why arg{1,2,3} must not be static.
+* Check eval.c:gtfun(): why arg{1,2,3} must not be static.  (\/)
 * Why has the size grown so much:
   548512 emacs.fixes_2023-04-03_GOOD
   840016 emacs.fixes_2023-07-13_BAD
   ===> The main difference seem to be that we initialize much more
        function local variables.
+
+[2023-07-26.00]
+* pcdos/turbo: Still does not work:
+  - After using help system emacs hangs.
 
 
 
