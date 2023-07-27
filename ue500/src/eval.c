@@ -77,8 +77,8 @@ UTABLE *ut;     /* table to clear */
  */
 CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
 {
-    CONST char    *RVAL   = NULL;
-#define RETURN(e) do { RVAL = (e); goto RETURN_L; } while ( 0 )
+    CONST char    *RETURN_VALUE_  = NULL;
+#define RETURN(e) do { RETURN_VALUE_ = (e); goto RETURN_L; } while ( 0 )
 
     char          *fnameL = NULL;
     register int  fnum    = 0;          /* index to function to eval  */
@@ -90,18 +90,26 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     char          arg3[NSTRING];
     char          result[2 * NSTRING];
 
+#if UEMACS_FEATURE_USE_STATIC_STACK
     static VOIDP  RValS   = NULL;
-    char          *rval   = NULL;
+    char          *RVAL_  = NULL;
+#else
+    static char   RVAL_[2 * NSTRING];
+#endif
 
     ZEROMEM(arg1);
     ZEROMEM(arg2);
     ZEROMEM(arg3);
     ZEROMEM(result);
 
+#if UEMACS_FEATURE_USE_STATIC_STACK
     BEGIN_DO_ONCE {
         RValS = NewStack(DFT_STATIC_STACKSIZE, 2 * NSTRING);
     } END_DO_ONCE;
-    ASRT(NULL != (rval = NextStackElem(RValS)));
+    ASRT(NULL != (RVAL_ = NextStackElem(RValS)));
+#else
+    ZEROMEM(RVAL_);
+#endif
 
     fnameL = xstrdup(fname);
     mklower(fnameL); /* and let it be upper or lower case */
@@ -375,14 +383,17 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
 RETURN_L:
 #undef RETURN
-    if ( 2 * NSTRING <= (rc = xsnprintf(rval, 2 * NSTRING, "%s", RVAL)) ) {
-        TRC(("gtfun(): rval truncated: 2 * NSTRING = %d <= rc = %d",
+    if ( 2 * NSTRING <= (rc = xsnprintf(RVAL_, 2 * NSTRING, "%s",
+                                        RETURN_VALUE_)) ) {
+        TRC(("gtfun(): RVAL_ truncated: 2 * NSTRING = %d <= rc = %d",
              2 * NSTRING, rc));
     }
 
+#if UEMACS_FEATURE_USE_STATIC_STACK
     ASRT(NULL != DecStackPtr(RValS));
+#endif
 
-    return rval;
+    return RVAL_;
 }
 
 CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */

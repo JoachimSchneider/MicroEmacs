@@ -54,6 +54,12 @@ extern char *realloc DCL((char *block, int siz));
 #endif
 /*....................................................................*/
 
+/* Switch On/Off some features:                                       */
+/*....................................................................*/
+#define UEMACS_FEATURE_USE_STATIC_STACK (0)
+/*....................................................................*/
+
+
 /*....................................................................*/
 /* Set defaults for settings which *could* be defined in estructc.h:  */
 /*....................................................................*/
@@ -166,6 +172,7 @@ extern char *astrcatc DCL((CONST char *str, CONST char c));
 /* Input string must either be NULL or malloced.                */
 extern char *astrcat DCL((CONST char *str, CONST char *s));
 
+#if UEMACS_FEATURE_USE_STATIC_STACK
 /*--------------------------------------------------------------------*/
 /* A Stack ADT to be used for returning pointers to static variables  */
 /* (e.g. char arrays) from functions: It allows (limited) indirect    */
@@ -175,13 +182,13 @@ extern char *astrcat DCL((CONST char *str, CONST char *s));
 extern VOIDP  NewStack(int stacksize, int len);   /* Won't fail       */
 extern char   *NextStackElem_(CONST VOIDP stack, CONST char *file,
                               int line);          /* Overflow: NULL   */
-#define NextStackElem(x)  NextStackElem_((x), __FILE__, __LINE__)
+# define NextStackElem(x)  NextStackElem_((x), __FILE__, __LINE__)
 extern char   *DecStackPtr_(CONST VOIDP stack, CONST char *file,
                             int line);  /* Return previous stack
                                          * element or NULL on error.  */
-#define DecStackPtr(x)    DecStackPtr_((x), __FILE__, __LINE__)
+# define DecStackPtr(x)    DecStackPtr_((x), __FILE__, __LINE__)
 extern VOID   DelStack(CONST VOIDP stack);        /* Not needed.      */
-#if ( 0 )
+# if ( 0 )
 /* Example usage: */
 char *HelloFunc(int n)
 {
@@ -211,8 +218,9 @@ RETURN_L:
 
     return RVAL;
 }
-#endif
+# endif
 /*--------------------------------------------------------------------*/
+#endif
 
 /**********************************************************************/
 
