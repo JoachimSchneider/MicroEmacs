@@ -343,6 +343,10 @@ extern int         DebugMessage(CONST char *fmt, ...);
 #elif ( defined(__va_copy) )
 # define VA_COPY            __va_copy
 # define VA_END             va_end
+/* VMS on non X86_64 has __STDC_VERSION__ >= 199901 but no va_copy: */
+#elif VMS && (__DECC_VER < 70500000)
+# define VA_COPY            MY_VA_COPY
+# define VA_END             MY_VA_END
 #elif ( defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901 )
 # define VA_COPY            va_copy
 # define VA_END             va_end
@@ -1486,14 +1490,8 @@ extern int PASCAL NEAR getkey DCL((void));
 extern int PASCAL NEAR getwpos DCL((void));
 extern int PASCAL NEAR get_char DCL((void));
 extern int PASCAL NEAR global_var DCL((int f, int n));
-#if VMS
-/***TODO***/
-extern int PASCAL NEAR grabnowait DCL((void));
-extern int PASCAL NEAR grabwait DCL((void));
-#else
-extern unsigned char   grabwait DCL((void));
-extern unsigned char   grabnowait DCL((void));
-#endif
+extern unsigned char PASCAL NEAR grabnowait DCL((void));
+extern unsigned char PASCAL NEAR grabwait DCL((void));
 #if     DBCS
 extern int PASCAL NEAR is2byte DCL((char *sp, char *cp));
 #endif

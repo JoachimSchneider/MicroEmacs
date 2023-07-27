@@ -547,7 +547,7 @@ PASCAL NEAR ttflush()
 	Note that we also wake from hibernation if a character arrives, so
 	this never causes an undue delay if the user it actually typing.
 */
-int PASCAL NEAR grabnowait(VOID)
+unsigned char PASCAL NEAR grabnowait(VOID)
 {
     if (tylen == 0)
     {	/* Nothing immediately available, hibernate for a short time */
@@ -558,7 +558,7 @@ int PASCAL NEAR grabnowait(VOID)
     return ((tylen == 0)? -1: ttgetc());
 }
 
-int PASCAL NEAR grabwait(VOID)
+unsigned char PASCAL NEAR grabwait(VOID)
 {
     return (ttgetc());
 }
