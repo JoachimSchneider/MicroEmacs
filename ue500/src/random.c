@@ -1490,6 +1490,7 @@ char *sp;                               /* name to look up */
 
 
 /* strcpy() possibly overlapping regions: */
+#if ( 0 )
 char *xstrcpy P2_(char *, s1, CONST char *, s2)
 {
     char  *s  = NULL;
@@ -1504,8 +1505,42 @@ char *xstrcpy P2_(char *, s1, CONST char *, s2)
 
     return s1;
 }
+#else
+char *xstrcpy P2_(char *, s1, CONST char *, s2)
+{
+    if ( NULL != s1 && NULL != s2 ) {
+        if        ( s1 <  s2 )  {
+            int i = 0;
+
+            for ( i = 0; '\0' != s2[i]; i++ ) {
+                s1[i] = s2[i];
+            }
+            s1[i] = '\0';
+        } else if ( s1 == s2 )  {
+            /**EMPTY**/
+        } else if ( s1 >  s2 )  {
+            int i = 0;
+
+            for ( i = strlen(s2); i >= 0; i-- ) {
+                s1[i] = s2[i];
+            }
+        } else                  { /* Possible on e.g. OS/400 */
+            strcpy(s1, s2);
+        }
+    } else if ( NULL == s1 )  {
+        if ( '\0' != *s2 )  {
+            abort();
+        }
+    } else if ( NULL == s2 )  {
+        *s1 = '\0';
+    }
+
+    return s1;
+}
+#endif
 
 /* strncpy() possibly overlapping regions:  */
+#if ( 0 )
 char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 {
     int   l2  = 0;
@@ -1528,6 +1563,93 @@ char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
     FREE(s);
 
     return s1;
+}
+#else
+char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
+{
+    if ( NULL != s1 && NULL != s2 ) {
+        int l2  = 0;
+
+        l2  = strlen(s2) + 1;
+        if        ( s1 <  s2 )  {
+            int ncpy  = MIN2(l2, n);
+            int i     = 0;
+
+            for ( i = 0; i < ncpy; i++ )  {
+                s1[i] = s2[i];
+            }
+            for ( ; i < n; i++ )  {
+                s1[i] = '\0';
+            }
+        } else if ( s1 == s2 )  {
+            /**EMPTY**/
+        } else if ( s1 >  s2 )  {
+            int i = 0;
+
+            for ( i = n - 1; i >= l2; i-- ) {
+                s1[i] = '\0';
+            }
+            for ( ; i >= 0; i-- ) {
+                s1[i] = s2[i];
+            }
+        } else                  { /* Possible on e.g. OS/400 */
+            strncpy(s1, s2, n);
+        }
+    } else if ( NULL == s1 )  {
+        if ( '\0' != *s2 )  {
+            abort();
+        }
+    } else if ( NULL == s2 )  {
+        *s1 = '\0';
+    }
+
+    return s1;
+}
+#endif
+
+/* Like FreeBSD's strlcpy(): Equivalent semantics:
+ *  n = strlcpy(dst, src, len);
+ *  n = snprintf(dst, len, "%s", src);
+ */
+int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
+{
+    int l2  = 0;
+
+    if ( NULL != s1 && NULL != s2 ) {
+        int ncpy  = 0;
+
+        l2    = strlen(s2);
+        ncpy  = MIN2(l2, n);
+
+        if        ( s1 <  s2 )  {
+            int i     = 0;
+
+            for ( i = 0; i < ncpy; i++ )  {
+                s1[i] = s2[i];
+            }
+            s1[i] = '\0';
+        } else if ( s1 == s2 )  {
+            /**EMPTY**/
+        } else if ( s1 >  s2 )  {
+            int i = 0;
+
+            s1[ncpy]  = '\0';
+
+            for ( i = ncpy - 1; i >= 0; i-- ) {
+                s1[i] = s2[i];
+            }
+        } else                  { /* Possible on e.g. OS/400 */
+            abort();
+        }
+    } else if ( NULL == s1 )  {
+        if ( '\0' != *s2 )  {
+            abort();
+        }
+    } else if ( NULL == s2 )  {
+        *s1 = '\0';
+    }
+
+    return l2;
 }
 
 /* An unelegant but portable version of C99 vsnprintf():                */

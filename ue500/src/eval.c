@@ -383,8 +383,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
 RETURN_L:
 #undef RETURN
-    if ( 2 * NSTRING <= (rc = xsnprintf(RVAL_, 2 * NSTRING, "%s",
-                                        RETURN_VALUE_)) ) {
+    if ( 2 * NSTRING <= (rc = xstrlcpy(RVAL_, RETURN_VALUE_, 2 * NSTRING)) )  {
         TRC(("gtfun(): RVAL_ truncated: 2 * NSTRING = %d <= rc = %d",
              2 * NSTRING, rc));
     }

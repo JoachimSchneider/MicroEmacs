@@ -136,6 +136,12 @@ extern char *xstrcpy DCL((char *s1, CONST char *s2));
 /* strncpy() possibly overlapping regions:  */
 extern char *xstrncpy DCL((char *s1, CONST char *s2, int n));
 
+/* Like FreeBSD's strlcpy(): Equivalent semantics:
+ *  n = strlcpy(dst, src, len);
+ *  n = snprintf(dst, len, "%s", src);
+ */
+extern int xstrlcpy DCL((char * s1, CONST char * s2, int n));
+
 /* Like the C99 vsnprintf():                                            */
 /* May be called with NULL == s .AND. 0 == n to get the size that would */
 /* be the result of an unrestricted write.                              */

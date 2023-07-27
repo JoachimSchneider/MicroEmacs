@@ -186,6 +186,13 @@ New TODO's
 * pcdos/turbo: Still does not work:
   - After using help system emacs hangs.
 
+[2023-07-27.00]
+* Test New String Functions: ../Temp/NewStringFunctions/random.c  ) (\/)
+  ===> Switched to the new simplified versions now.
+* Test DOS-Version after rval hide has been resolved                (\/)
+  ===> Problem is still there.
+* Check all static returns in eval.c
+
 
 
 # EOF
