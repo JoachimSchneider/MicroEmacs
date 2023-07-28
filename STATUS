@@ -193,6 +193,19 @@ New TODO's
   ===> Problem is still there.
 * Check all static returns in eval.c
 
+[2023-07-28.00]
+Status of pcdos/turbo error, which is reproduced on DOS by
+o set HOME=<Path To CMD folder>
+o Start emacs
+o Start Help System
+o Navigate around
+o Leave Help System: Now emacs hangs.
+
+- It exists on DOSEMU and on DOSBOX.
+- It does *not* occur with UE312DEV.
+- It occurs on UE400DEV and later.
+- Does it depend on the macros in CMD folder?
+
 
 
 # EOF

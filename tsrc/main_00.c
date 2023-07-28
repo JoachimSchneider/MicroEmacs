@@ -26,14 +26,14 @@ int DebugMessage(const char *fmt, ...)
            fp = stderr;
        }
    }
-   
+
    fprintf(fp, "%s (%s/%03d): ", "TRC", DebugMessage_fname_, DebugMessage_lnno_);
    va_start(ap, fmt);
    rc = vfprintf(fp, fmt, ap);
    va_end(ap);
    fprintf(fp, "%s", "\n");
    fflush(fp);
-   
+
    return rc;
 }
 #undef  TRC_FILE_ENVVAR
@@ -57,3 +57,7 @@ int main(int argc, char *argv[])
 
    return 0;
 }
+
+
+/* EOF */
+

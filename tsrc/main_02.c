@@ -350,7 +350,7 @@ int main(int argc, char *argv[])
     char *s3  = &A1[18];  /* 'u'  */
 
     xstrncpy(s2, s1, 3);
-    
+
     fprintf(stdout, "%s\n", A1);
 
     memcpy(A1, A0, sizeof(A1));
@@ -358,7 +358,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "%s\n", A1);
 
     xstrncpy(s1, s2, 4);
-    
+
     fprintf(stdout, "%s\n", A1);
 
     memcpy(A1, A0, sizeof(A1));
@@ -366,7 +366,7 @@ int main(int argc, char *argv[])
     fprintf(stdout, "%s\n", A1);
 
     xstrlcpy(s2, s1, 4);
-    
+
     fprintf(stdout, "%s\n", s2);
 
     memcpy(A1, A0, sizeof(A1));
@@ -374,8 +374,12 @@ int main(int argc, char *argv[])
     fprintf(stdout, "%s\n", A1);
 
     xstrlcpy(s1, s2, 4);
-    
+
     fprintf(stdout, "%s\n", s1);
-    
+
     return 0;
 }
+
+
+/* EOF */
+

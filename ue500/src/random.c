@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
+#include <assert.h>
 #include "estruct.h"
 #include "eproto.h"
 #include "edef.h"
@@ -1488,6 +1489,13 @@ char *sp;                               /* name to look up */
 /* functions found in newer C libraries.                              */
 /*====================================================================*/
 
+/* We want to use a working `assert' inside of some of these
+ * functions therefor we use the following construct:
+ */
+#ifdef NDEBUG
+# define  NDEBUF_WAS_DEFINED_
+# undef   NDEBUG
+#endif
 
 /* strcpy() possibly overlapping regions: */
 #if ( 0 )
@@ -1529,6 +1537,10 @@ char *xstrcpy P2_(char *, s1, CONST char *, s2)
         }
     } else if ( NULL == s1 )  {
         if ( '\0' != *s2 )  {
+            /* No `ASRT()' here: So we may use this function
+             * inside of `ASRT()'
+             */
+            assert(0);
             abort();
         }
     } else if ( NULL == s2 )  {
@@ -1597,6 +1609,10 @@ char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
         }
     } else if ( NULL == s1 )  {
         if ( '\0' != *s2 )  {
+            /* No `ASRT()' here: So we may use this function
+             * inside of `ASRT()'
+             */
+            assert(0);
             abort();
         }
     } else if ( NULL == s2 )  {
@@ -1639,10 +1655,18 @@ int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
                 s1[i] = s2[i];
             }
         } else                  { /* Possible on e.g. OS/400 */
+            /* No `ASRT()' here: So we may use this function
+             * inside of `ASRT()'
+             */
+            assert(0);
             abort();
         }
     } else if ( NULL == s1 )  {
         if ( '\0' != *s2 )  {
+            /* No `ASRT()' here: So we may use this function
+             * inside of `ASRT()'
+             */
+            assert(0);
             abort();
         }
     } else if ( NULL == s2 )  {
@@ -1881,6 +1905,13 @@ char *astrcat P2_(CONST char *, str, CONST char *, s)
     return nstr;
 }
 
+/* We want to use a working `assert' inside of some of these
+ * functions therefor we use the following construct:
+ */
+#ifdef NDEBUF_WAS_DEFINED_
+# define  NDEBUF
+# undef   NDEBUF_WAS_DEFINED_
+#endif
 
 /*====================================================================*/
 
