@@ -1476,7 +1476,7 @@ EWINDOW *wp;    /* window to update modeline for */
     }
 
     n  = 4;
-    xstrcpy(tline, " ");                        /* Buffer name. */
+    XSTRCPY(tline, " ");                        /* Buffer name. */
 #if     !WINDOW_MSWIN
     strcat(tline, PROGNAME);
     strcat(tline, " ");
@@ -1603,7 +1603,7 @@ char *ts;
 {
     char buf[80];
 
-    xstrcpy( buf, timeset() );
+    XSTRCPY( buf, timeset() );
     if ( strcmp(buf, errorm) == 0 ) {
         *ts = 0;
 
@@ -1611,7 +1611,7 @@ char *ts;
     }
 
     buf[16] = 0;
-    xstrcpy(ts, &buf[11]);
+    XSTRCPY(ts, &buf[11]);
 
     return;
 }

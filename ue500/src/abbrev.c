@@ -94,7 +94,7 @@ int f, n;       /* numeric flag and argument */
 
     /* get the value for that expansion */
     if ( f == TRUE )
-        xstrcpy( value, int_asc(n) );
+        XSTRCPY( value, int_asc(n) );
     else {
         status = mlreply(TEXT53, &value[0], NSTRING);
 /*               "Value: " */
@@ -165,7 +165,7 @@ int f, n;       /* numeric flag and argument */
     while ( cur_node != (ABBREV *)NULL ) {
 
         /* add in the abbreviation symbol name */
-        xstrcpy(outseq, cur_node->ab_sym);
+        XSTRCPY(outseq, cur_node->ab_sym);
         pad(outseq, 20);
 
         /* add it's expansion */
@@ -301,8 +301,8 @@ char *expansion;        /* string to expand to */
         return (FALSE);
 
     /* copy data to that node */
-    xstrcpy(new_node->ab_sym, sym);
-    xstrcpy(new_node->ab_exp, expansion);
+    XSTRCPY(new_node->ab_sym, sym);
+    XSTRCPY(new_node->ab_exp, expansion);
 
     /* do we have an empty list */
     if ( ab_head == NULL ) {

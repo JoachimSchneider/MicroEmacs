@@ -343,7 +343,7 @@ PASCAL NEAR tibeep()
 
 PASCAL NEAR tiopen()
 {
-    xstrcpy(sres, "NORMAL");
+    XSTRCPY(sres, "NORMAL");
     revexist = TRUE;
     revflag = FALSE;
     scinit();

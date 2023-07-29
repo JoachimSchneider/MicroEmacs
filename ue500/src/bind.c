@@ -207,7 +207,7 @@ int f, n;       /* command arguments [IGNORED] */
         return (status);
 
     /* build the responce string for later */
-    xstrcpy(outseq, TEXT215);
+    XSTRCPY(outseq, TEXT215);
 /*         ": macro-to-key " */
     strcat(outseq, &bufn[1]);
 
@@ -431,7 +431,7 @@ char *mstring;  /* match string if a partial list */
     while ( nptr->n_func != NULL ) {
 
         /* add in the command name */
-        xstrcpy(outseq, nptr->n_name);
+        XSTRCPY(outseq, nptr->n_name);
         cpos = strlen(outseq);
 
         /* if we are executing an apropos command..... */
@@ -481,7 +481,7 @@ fail:   /* and on to the next name */
             goto bfail;
 
         /* add in the command name */
-        xstrcpy(outseq, bp->b_bname);
+        XSTRCPY(outseq, bp->b_bname);
         cpos = strlen(outseq);
 
         /* if we are executing an apropos command..... */
@@ -610,7 +610,7 @@ char *sfname;   /* name of startup file (null if default) */
     if ( *sfname != 0 ) {
 
         /* default the extention */
-        xstrcpy(name, sfname);
+        XSTRCPY(name, sfname);
         if ( sindex(name, ".") == 0 )
             strcat(name, ".cmd");
 
@@ -679,7 +679,7 @@ int hflag;              /* Look in the HOME environment variable first? */
 # endif
         if ( home != NULL ) {
             /* build home dir file spec */
-            xstrcpy(fspec, home);
+            XSTRCPY(fspec, home);
 # if WMCS
             strcat(fspec, fname);
 # else
@@ -751,7 +751,7 @@ int hflag;              /* Look in the HOME environment variable first? */
 
     /* look it up via the old table method */
     for ( i=2; i < NPNAMES; i++ ) {
-        xstrcpy(fspec, pathname[i]);
+        XSTRCPY(fspec, pathname[i]);
         strcat(fspec, fname);
 
         /* and try it out */
@@ -1109,7 +1109,7 @@ int set_key P2_(KEYTAB *, key,  /* ptr to key to set          */
     }
 
     /* is it a procedure/macro? */
-    xstrcpy(bufn, "[");
+    XSTRCPY(bufn, "[");
     strcat(bufn, name);
     strcat(bufn, "]");
     if ( ( kmacro=bfind(bufn, FALSE, 0) ) != NULL ) {

@@ -142,6 +142,15 @@ extern char *xstrncpy DCL((char *s1, CONST char *s2, int n));
  */
 extern int xstrlcpy DCL((char * s1, CONST char * s2, int n));
 
+/* SFSTRCPY:
+ *  if size .GE. 0 copy src to dst usling xstrlcpy(dst, src, sizeof(dst))
+ *  else           copy src to dst usling xstrcpy(dst, src) and log
+ *                 a warning message.
+ */
+extern char *sfstrcpy_ DCL((char *dst, int dst_size, const char *src,
+                            const char *file, int line));
+#define XSTRCPY(dst, src) sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+
 /* Like the C99 vsnprintf():                                            */
 /* May be called with NULL == s .AND. 0 == n to get the size that would */
 /* be the result of an unrestricted write.                              */

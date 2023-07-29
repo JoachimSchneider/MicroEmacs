@@ -206,6 +206,56 @@ o Leave Help System: Now emacs hangs.
 - It occurs on UE400DEV and later.
 - Does it depend on the macros in CMD folder?
 
++ It does *not* occur on UE400DEV when using the *original* estruct.h:
+  In the previous experiments we used a modified PMACHAPMAN estruct.h
+
++ They differ in
+
+  BAD:
+    NLINE   = 512
+    NSTRING = 512
+    NPAT    = 512
+
+  GOOD:
+    NLINE   = 256
+    NSTRING = 128
+    NPAT    = 128
+
++ With these settings the *latest* UE500DEV (i.e. UE230728) works!
+
++ This strongly suggests, that there is a memory overwrite caused by
+  use of *unsafe* library functions like (x)strcpy and sprintf.
+
+
+[2023-07-28.00]
+
+Number of strcpy:   457
+Number of sprintf:  25
+
+Plan:
+
+- We repair the sprintf's manually by substitutingb them with xsnprintf's whereever possible.
+
+- We introduce an XSTRCPY - Macro which is substituded for xstrcpy:
+
+  /* SFSTRCPY:
+   *  if size .GE. 0 copy src to dst usling xstrlcpy(dst, src, sizeof(dst))
+   *  else           copy src to dst usling xstrcpy(dst, src) and log
+   *                 a warning message.
+   */
+  extern char *sfstrcpy_(char *dst, int dst_size, const char *src, const char *file, int line);
+
+#define XSPRINTF(dst, src)  sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+
+- Some occurances of xstrcpy can't be replaced by XSTRCPY because dst
+  is not an Lvalue: We use xstrcpy there:
+  ===> These must be reviewed.
+
+- Handle bytecopy
+
+- Handle strcat
+
+
 
 
 # EOF

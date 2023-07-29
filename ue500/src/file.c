@@ -201,7 +201,7 @@ int lockfl;             /* check the file for locks? */
         /* if interactive, let em change it if they dislike our names */
         if ( clexec == FALSE ) {
 
-            xstrcpy(prompt, TEXT136);
+            XSTRCPY(prompt, TEXT136);
 /*                     "Buffer name: " */
             xstrcpy(&prompt[strlen(prompt) - 2], "[");
             strcat(prompt, bname);
@@ -281,7 +281,7 @@ int lockfl;                     /* check for file locks? */
         return (s);
 
     bp->b_flag &= ~(BFINVS|BFCHG);
-    xstrcpy(bp->b_fname, fname);
+    XSTRCPY(bp->b_fname, fname);
 
     /* let a user macro get hold of things...if he wants */
     execkey(&readhook, FALSE, 1);
@@ -334,7 +334,7 @@ int lockfl;                     /* check for file locks? */
     }
 #endif
 
-    xstrcpy(mesg, "[");
+    XSTRCPY(mesg, "[");
     if ( s==FIOERR ) {
         strcat(mesg, TEXT141);
 /*                           "I/O ERROR, " */
@@ -500,7 +500,7 @@ int f, n;       /* emacs arguments */
         return (FALSE);
 
     if ( ( s=writeout(fname, "w") ) == TRUE ) {
-        xstrcpy(curbp->b_fname, fname);
+        XSTRCPY(curbp->b_fname, fname);
         curbp->b_flag &= ~BFCHG;
         /* Update mode lines.   */
         upmode();
@@ -639,7 +639,7 @@ char *mode;     /* mode to open file (w = write a = append) */
     if ( sflag ) {
         /* duplicate original file name, and find where to trunc it */
         sp = tname + (makename(tname, fn) - fn) + 1;
-        xstrcpy(tname, fn);
+        XSTRCPY(tname, fn);
 
         /* create a unique name, using random numbers */
         do {
@@ -685,7 +685,7 @@ char *mode;     /* mode to open file (w = write a = append) */
     status |= ffclose();
     if ( status == FIOSUC ) {
         /* report on success (or lack therof) */
-        xstrcpy(buf, TEXT149);
+        XSTRCPY(buf, TEXT149);
 /*                          "[Wrote " */
         strcat( buf, long_asc(nline) );
         strcat(buf, TEXT143);
@@ -747,9 +747,9 @@ int f, n;        /* prefix flag and argument */
         return (s);
 
     if ( s == FALSE )
-        xstrcpy(curbp->b_fname, "");
+        XSTRCPY(curbp->b_fname, "");
     else
-        xstrcpy(curbp->b_fname, fname);
+        XSTRCPY(curbp->b_fname, fname);
     /* Update mode lines.   */
     upmode();
     curbp->b_mode &= ~MDVIEW;          /* no longer read only mode */
@@ -832,7 +832,7 @@ char fname[];
             curwp->w_markp[cmark] = lforw(curwp->w_markp[cmark]);
 
 
-    xstrcpy(mesg, "[");
+    XSTRCPY(mesg, "[");
     if ( s==FIOERR ) {
         strcat(mesg, TEXT141);
 /*                           "I/O ERROR, " */
@@ -911,7 +911,7 @@ int f, n;        /* prefix flag and argument */
     while ( sp ) {
 
         /* add a name to the buffer */
-        xstrcpy(outseq, sp);
+        XSTRCPY(outseq, sp);
         if ( addline(dirbuf, outseq) != TRUE )
             return (FALSE);
 

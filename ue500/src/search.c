@@ -674,7 +674,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
 {
     int j, jump_by, ch;
 
-    xstrcpy(tbl->patrn, pstring);
+    XSTRCPY(tbl->patrn, pstring);
 
     jump_by = strlen(pstring);
 
@@ -759,7 +759,7 @@ int PASCAL NEAR readpattern P3_(char *, prompt, char *, apat, int, srch)
      */
     if ( ( status = nextarg(NULL, tpat, NPAT, sterm) ) == TRUE ) {
         lastflag &= ~CFSRCH;
-        xstrcpy(apat, tpat);
+        XSTRCPY(apat, tpat);
 
         if ( srch )
             setjtable();
@@ -1444,7 +1444,7 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
         return (status);
 
     /* add in the header text */
-    xstrcpy(pline, "         Pattern = \"");
+    XSTRCPY(pline, "         Pattern = \"");
     strcat(pline, pat);
     strcat(pline, "\"  (");
     strcat( pline, int_asc(deltapat.jump) );
@@ -1466,13 +1466,13 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
         while ( mcptr->mc_type != MCNIL ) {
 
             if ( (mcptr->mc_type) & CLOSURE )
-                xstrcpy(pline, "Zero to many    ");
+                XSTRCPY(pline, "Zero to many    ");
             else if ( (mcptr->mc_type) & CLOSURE_1 )
-                xstrcpy(pline, "One to many     ");
+                XSTRCPY(pline, "One to many     ");
             else if ( (mcptr->mc_type) & ZEROONE )
-                xstrcpy(pline, "Optional        ");
+                XSTRCPY(pline, "Optional        ");
             else
-                xstrcpy(pline, "                ");
+                XSTRCPY(pline, "                ");
 
             /* next, the meta-character type */
             mctype_cat(pline, (mcptr->mc_type) & MASKCLO);
@@ -1520,7 +1520,7 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
             mcptr++;
         }
         /* add in the header text */
-        xstrcpy(pline, " Reverse Pattern = \"");
+        XSTRCPY(pline, " Reverse Pattern = \"");
         strcat(pline, tap);
         strcat(pline, "\"  (");
         strcat( pline, int_asc(tapatled.jump) );
@@ -1556,7 +1556,7 @@ int PASCAL NEAR rmc_list P2_(int, f, int, n)
         return (status);
 
     /* add in the header text */
-    xstrcpy(pline, "Replacement Pattern = \"");
+    XSTRCPY(pline, "Replacement Pattern = \"");
     strcat(pline, rpat);
     strcat(pline, "\"");
 

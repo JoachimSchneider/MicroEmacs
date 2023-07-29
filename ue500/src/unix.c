@@ -379,7 +379,7 @@ int hpterm;                             /* global flag braindead HP-terminal */
 /** Open terminal device **/
 int ttopen()
 {
-    xstrcpy(os, "UNIX");
+    XSTRCPY(os, "UNIX");
 # if ( USE_TERMIO_IOCTL )
 
 #  if SMOS
@@ -1150,7 +1150,7 @@ int spal P1_(char *, cmd  /* Palette command */)
         /* Move color code to capability structure */
         capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
         if ( capbind[CAP_C0 + code].store ) {
-            xstrcpy(capbind[CAP_C0 + code].store, cp);
+            XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
                    STR(capbind[CAP_C0 + code].store) ) );
         }
@@ -1618,32 +1618,32 @@ int n;                                  /* Argument count       */
     }
 
     if ( NULL != ( cp = gettmpfname("fltinp") ) ) {
-        xstrcpy(InFile, cp);
+        XSTRCPY(InFile, cp);
     } else {
         return FALSE;
     }
     if ( NULL != ( cp = gettmpfname("command") ) ) {
-        xstrcpy(OutFile, cp);
+        XSTRCPY(OutFile, cp);
     } else {
         return FALSE;
     }
 
     /* Setup the proper file names */
     bp = curbp;
-    xstrcpy(tmpnam, bp->b_fname);       /* Save the original name */
-    xstrcpy(bp->b_fname, InFile);       /* Set it to our new one */
+    XSTRCPY(tmpnam, bp->b_fname);       /* Save the original name */
+    XSTRCPY(bp->b_fname, InFile);       /* Set it to our new one */
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
         mlwrite("[Cannot write filter file]");
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
         unlink(InFile);
         sleep(MLWAIT);
 
         return FALSE;
     }
     /* Reset file name */
-    xstrcpy(bp->b_fname, tmpnam);
+    XSTRCPY(bp->b_fname, tmpnam);
 
 # if   ( 0 )    /* Activate multiple "command" buffers  */
     makename(bname, OutFile);           /* New buffer name. */
@@ -1741,12 +1741,12 @@ int n;                                  /* Argument count       */
     char OutFile[NFILEN];
 
     if ( NULL != ( cp = gettmpfname("fltinp") ) ) {
-        xstrcpy(InFile, cp);
+        XSTRCPY(InFile, cp);
     } else {
         return FALSE;
     }
     if ( NULL != ( cp = gettmpfname("fltout") ) ) {
-        xstrcpy(OutFile, cp);
+        XSTRCPY(OutFile, cp);
     } else {
         return FALSE;
     }
@@ -1769,13 +1769,13 @@ int n;                                  /* Argument count       */
 
     /* Setup the proper file names */
     bp = curbp;
-    xstrcpy(tmpnam, bp->b_fname);       /* Save the original name */
-    xstrcpy(bp->b_fname, InFile);       /* Set it to our new one */
+    XSTRCPY(tmpnam, bp->b_fname);       /* Save the original name */
+    XSTRCPY(bp->b_fname, InFile);       /* Set it to our new one */
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
         mlwrite("[Cannot write filter file]");
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
         unlink(InFile);
         sleep(MLWAIT);
 
@@ -1795,7 +1795,7 @@ int n;                                  /* Argument count       */
 
 
     /* Reset file name */
-    xstrcpy(bp->b_fname, tmpnam);
+    XSTRCPY(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
     unlink(InFile);
@@ -1817,7 +1817,7 @@ char *fspec;                            /* Filename specification   */
     int index, point;
 
     /* First parse the file path off the file spec */
-    xstrcpy(path, fspec);
+    XSTRCPY(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 && (path[index] != '/') )
         --index;
@@ -1844,7 +1844,7 @@ char *fspec;                            /* Filename specification   */
     if ( !dirptr )
         return (NULL);
 
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     nameptr = &rbuf[strlen(rbuf)];
 
     /* ...and call for the first file */
@@ -1866,7 +1866,7 @@ char *getnfile P0_(void)
             return (NULL);
 
         /* Check to make sure we skip all weird entries except directories */
-        xstrcpy(nameptr, dp->d_name);
+        XSTRCPY(nameptr, dp->d_name);
 
     } while (stat(rbuf,
                   &fstat) ||
@@ -1987,7 +1987,7 @@ int mode;       /* umask for creation (which we blissfully ignore...) */
 {
     char buf[80];
 
-    xstrcpy(buf, "mkdir ");
+    XSTRCPY(buf, "mkdir ");
     strcat(buf, name);
     strcat(buf, " > /dev/null 2>&1");
 
@@ -1999,7 +1999,7 @@ char *name;     /* name of directory to delete */
 {
     char buf[80];
 
-    xstrcpy(buf, "rmdir ");
+    XSTRCPY(buf, "rmdir ");
     strcat(buf, name);
     strcat(buf, " > /dev/null 2>&1");
 

@@ -312,7 +312,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
             case 'k':                   /* -k<key> for code key */
             case 'K':
                 cryptflag = TRUE;
-                xstrcpy(ekey, &argv[carg][2]);
+                XSTRCPY(ekey, &argv[carg][2]);
                 break;
 
 #endif
@@ -379,7 +379,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
 
             /* set this to inactive */
             bp = bfind(bname, TRUE, 0);
-            xstrcpy(bp->b_fname, argv[carg]);
+            XSTRCPY(bp->b_fname, argv[carg]);
 #if     WINDOW_MSWIN
             fullpathname (bp->b_fname, NFILEN);
 #endif
@@ -1165,7 +1165,7 @@ char *PASCAL NEAR copystr P1_(char *, sp /* string to copy */)
     if ( dp == NULL )
         return (NULL);
 
-    xstrcpy(dp, sp);
+    XSTRCPY(dp, sp);
 
     return (dp);
 }

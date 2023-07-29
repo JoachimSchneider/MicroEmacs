@@ -180,7 +180,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFCALL:                /* construct buffer name to execute */
         result[0] = '[';
-        xstrcpy(&result[1], arg1);
+        xstrlcpy(&result[1], arg1, sizeof(result) - 1);
         strcat(result, "]");
 
         /* find it, return ERROR if it does not exist */
@@ -194,7 +194,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( fixnull(rval) );
 
     case UFCAT:
-        xstrcpy(result, arg1);
+        XSTRCPY(result, arg1);
         strncat(result, arg2, NSTRING);
         result[NSTRING - 1] = 0;
 
@@ -265,7 +265,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( result );
 
     case UFIND:
-        RETURN ( xstrcpy( result, fixnull( getval(arg1) ) ) );
+        RETURN ( XSTRCPY( result, fixnull( getval(arg1) ) ) );
 
     case UFISNUM:
         RETURN ( ltos( is_num(arg1) ) );
@@ -285,7 +285,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     case UFMID:
         arg = asc_int(arg2);
         if ( arg > strlen(arg1) )
-            RETURN ( xstrcpy(result, "") );
+            RETURN ( XSTRCPY(result, "") );
 
         RETURN ( bytecopy( result, &arg1[arg-1], asc_int(arg3) ) );
 
@@ -336,7 +336,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         if ( arg > strlen(arg1) )
             arg = strlen(arg1);
 
-        RETURN ( xstrcpy(result, &arg1[strlen(arg1) - arg]) );
+        RETURN ( XSTRCPY(result, &arg1[strlen(arg1) - arg]) );
 
     case UFRND:
         RETURN ( int_asc( (int)( ernd() % (long)absv( asc_int(arg1) ) ) +
@@ -944,7 +944,7 @@ int n;          /* numeric arg (can overide prompted value) */
 
     /* get the value for that variable */
     if ( f == TRUE )
-        xstrcpy( value, int_asc(n) );
+        XSTRCPY( value, int_asc(n) );
     else {
         status = mlreply(TEXT53, &value[0], NSTRING);
 /*               "Value: " */
@@ -1169,7 +1169,7 @@ fvar:   vtype = -1;
         if ( strcmp(&var[1], "ind") == 0 ) {
             /* grab token, and eval it */
             execstr = token(execstr, var, size);
-            xstrcpy( var, fixnull( getval(var) ) );
+            XSTRCPY( var, fixnull( getval(var) ) );
             goto fvar;
         }
     }
@@ -1256,12 +1256,12 @@ char *value;    /* value to set to */
             break;
 
         case EVCBUFNAME:
-            xstrcpy(curbp->b_bname, value);
+            XSTRCPY(curbp->b_bname, value);
             curwp->w_flag |= WFMODE;
             break;
 
         case EVCFNAME:
-            xstrcpy(curbp->b_fname, value);
+            XSTRCPY(curbp->b_fname, value);
 #if     WINDOW_MSWIN
             fullpathname(curbp->b_fname, NFILEN);
 #endif
@@ -1707,7 +1707,7 @@ int i;  /* integer to translate to a string */
 
     /* this is a special case */
     if ( i == -32768 ) {
-        xstrcpy(result, "-32768");
+        XSTRCPY(result, "-32768");
 
         return (result);
     }
@@ -1836,7 +1836,7 @@ CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
         return ("");
 
     case TKARG:                 /* interactive argument */
-        xstrcpy( token, fixnull( getval(&token[1]) ) );
+        XSTRCPY( token, fixnull( getval(&token[1]) ) );
         mlwrite("%s", token);
         status = getstring( (unsigned char *)buf, NSTRING, ctoec(RETCHAR) );
         if ( status == ABORT )
@@ -1847,7 +1847,7 @@ CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
     case TKBUF:                 /* buffer contents fetch */
 
         /* grab the right buffer */
-        xstrcpy( token, fixnull( getval(&token[1]) ) );
+        XSTRCPY( token, fixnull( getval(&token[1]) ) );
         bp = bfind(token, FALSE, 0);
         if ( bp == NULL )
             return (NULL);
@@ -2239,7 +2239,7 @@ int f, n;        /* prefix flag and argument */
     for ( uindex = 0; uindex < NEVARS; uindex++ ) {
 
         /* add in the environment variable name */
-        xstrcpy(outseq, "$");
+        XSTRCPY(outseq, "$");
         strcat(outseq, envars[uindex]);
         pad(outseq, 14);
 
@@ -2262,7 +2262,7 @@ int f, n;        /* prefix flag and argument */
             return (FALSE);
 
         /* make a header for this list */
-        xstrcpy(outseq, "----- ");
+        XSTRCPY(outseq, "----- ");
         if ( ut->bufp == (BUFFER *)NULL )
             strcat(outseq, "Global User Variables");
         else {
@@ -2292,7 +2292,7 @@ int f, n;        /* prefix flag and argument */
                 break;
 
             /* add in the user variable name */
-            xstrcpy(outseq, "%");
+            XSTRCPY(outseq, "%");
             strcat(outseq, ut->uv[uindex].u_name);
             pad(outseq, 14);
 
@@ -2345,7 +2345,7 @@ int f, n;        /* prefix flag and argument */
     for ( uindex = 0; uindex < NFUNCS; uindex++ ) {
 
         /* add in the environment variable name */
-        xstrcpy(outseq, "&");
+        XSTRCPY(outseq, "&");
         strcat(outseq, funcs[uindex].f_name);
 
         /* and add it as a line into the buffer */

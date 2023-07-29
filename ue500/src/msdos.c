@@ -107,7 +107,7 @@ int PASCAL NEAR ttopen()
     /* on all screens we are not sure of the initial position of the cursor                 */
     ttrow = 999;
     ttcol = 999;
-    xstrcpy(os, "MSDOS");
+    XSTRCPY(os, "MSDOS");
 
 # if     MOUSE
     /* check if the mouse drive exists first */
@@ -586,7 +586,7 @@ int f, n;
     if ( ( tmp = getenv("TMP") ) == NULL )
         filnam[0] = 0;
     else {
-        xstrcpy(filnam, tmp);
+        XSTRCPY(filnam, tmp);
         if ( filnam[strlen(filnam) - 1] != '\\' )
             strcat(filnam, "\\");
     }
@@ -684,14 +684,14 @@ int f, n;
 
     /* setup the proper file names */
     bp = curbp;
-    xstrcpy(tmpnam, bp->b_fname);       /* save the original name */
-    xstrcpy(bp->b_fname, bname1);       /* set it to our new one */
+    XSTRCPY(tmpnam, bp->b_fname);       /* save the original name */
+    XSTRCPY(bp->b_fname, bname1);       /* set it to our new one */
 
     /* write it out, checking for errors */
     if ( writeout(filnam1, "w") != TRUE ) {
         mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
 
         return (FALSE);
     }
@@ -711,7 +711,7 @@ int f, n;
     if ( s != TRUE || (readin(filnam2, FALSE) == FALSE) ) {
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
         unlink(filnam1);
         unlink(filnam2);
 
@@ -719,7 +719,7 @@ int f, n;
     }
 
     /* reset file name */
-    xstrcpy(bp->b_fname, tmpnam);       /* restore name */
+    XSTRCPY(bp->b_fname, tmpnam);       /* restore name */
     bp->b_flag |= BFCHG;                /* flag it as changed */
 
     /* and get rid of the temporary file */
@@ -773,7 +773,7 @@ char *cmd;      /*  Incoming command line to execute  */
     /**  shell in interactive mode.   **/
 
     if ( *cmd ) {
-        xstrcpy(comline, shell);
+        XSTRCPY(comline, shell);
         strcat(comline, " ");
         comline[strlen(comline) + 1] = 0;
         comline[strlen(comline)] = swchar;
@@ -825,17 +825,17 @@ char *cmd;      /*  Incoming command line to execute  */
     while ( *cmd && ( (*cmd == ' ') || (*cmd == '\t') ) )
         ++cmd;
     *tail = (char)( strlen(cmd) );   /* record the byte length */
-    xstrcpy(&tail[1], cmd);
+    XSTRCPY(&tail[1], cmd);
     strcat(&tail[1], "\r");
 
     /* look up the program on the path trying various extentions */
     if ( ( sp = flook(prog, TRUE) ) == NULL )
         if ( ( sp = flook(strcat(prog, ".exe"), TRUE) ) == NULL ) {
-            xstrcpy(&prog[strlen(prog)-4], ".com");
+            XSTRCPY(&prog[strlen(prog)-4], ".com");
             if ( ( sp = flook(prog, TRUE) ) == NULL )
                 return (FALSE);
         }
-    xstrcpy(prog, sp);
+    XSTRCPY(prog, sp);
 
 # if     MWC == 0
     /* get a pointer to this PSPs environment segment number */
@@ -899,7 +899,7 @@ char *cmd;      /*  Incoming command line to execute  */
         rv = -_doserrno;                /* failed child call */
 #  endif /* IC */
 # endif
-    xstrcpy( rval, int_asc(rv) );
+    XSTRCPY( rval, int_asc(rv) );
 
     return ( (rval < 0) ? FALSE : TRUE );
 }
@@ -950,7 +950,7 @@ char *fspec;    /* pattern to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    xstrcpy(path, fspec);
+    XSTRCPY(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -969,7 +969,7 @@ char *fspec;    /* pattern to match */
     }
 
     /* construct the composite wild card spec */
-    xstrcpy(fname, path);
+    XSTRCPY(fname, path);
     strcat(fname, &fspec[index+1]);
     strcat(fname, "*");
     if ( extflag == FALSE )
@@ -980,7 +980,7 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     strcat(rbuf, fileblock.ff_name);
     mklower(rbuf);
     if ( fileblock.ff_attrib == 16 )
@@ -1001,7 +1001,7 @@ char *PASCAL NEAR getnfile()
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     strcat(rbuf, fileblock.ff_name);
     mklower(rbuf);
     if ( fileblock.ff_attrib == 16 )
@@ -1029,7 +1029,7 @@ char *fspec;    /* pattern to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    xstrcpy(path, fspec);
+    XSTRCPY(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -1048,7 +1048,7 @@ char *fspec;    /* pattern to match */
     }
 
     /* construct the composite wild card spec */
-    xstrcpy(fname, path);
+    XSTRCPY(fname, path);
     strcat(fname, &fspec[index+1]);
     strcat(fname, "*");
     if ( extflag == FALSE )
@@ -1059,7 +1059,7 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     strcat(rbuf, fileblock.name);
     mklower(rbuf);
     if ( fileblock.attrib == 16 )
@@ -1080,7 +1080,7 @@ char *PASCAL NEAR getnfile()
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     strcat(rbuf, fileblock.name);
     mklower(rbuf);
     if ( fileblock.attrib == 16 )

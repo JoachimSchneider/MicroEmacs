@@ -266,7 +266,7 @@ qprompt:
 
                 return (ABORT);
             }
-            xstrcpy(oldpatmatch, patmatch);
+            XSTRCPY(oldpatmatch, patmatch);
         } else if ( matchlen == 0 ) {
             mlwrite(TEXT91);
 /*              "Empty string replaced, stopping." */

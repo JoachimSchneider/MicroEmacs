@@ -61,7 +61,7 @@ char *mode;     /* mode to open file for */
     if ( *lterm ) {
 
         /* open in binary mode */
-        xstrcpy(xmode, mode);
+        XSTRCPY(xmode, mode);
         strcat(xmode, "b");
         ffp = fopen(fn, xmode);
     } else {

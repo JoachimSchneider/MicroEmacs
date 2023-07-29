@@ -237,7 +237,7 @@ register int n;
 
 PASCAL NEAR fmropen()
 {
-    xstrcpy(sres, "NORMAL");
+    XSTRCPY(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
 

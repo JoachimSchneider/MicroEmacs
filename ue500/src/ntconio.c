@@ -735,7 +735,7 @@ PASCAL NEAR ntopen()
 
     /* initialize the input queue */
     in_init();
-    xstrcpy(os, "WINNT");
+    XSTRCPY(os, "WINNT");
 
     /* This will allocate a console if started from the windows NT program
      * manager. */

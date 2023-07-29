@@ -242,9 +242,9 @@ char *sfilnam;    /* save file name or NULL */
     zero( (char *) &fstat_pkt, sizeof (fstat_pkt) );
     zero(acl_buf, $MXACL);
 
-    xstrcpy(bfnam, bfilnam);
+    XSTRCPY(bfnam, bfilnam);
     if ( sfilnam ) {
-        xstrcpy(sfnam, sfilnam);
+        XSTRCPY(sfnam, sfilnam);
         resolve_full_pathname(sfnam, sfnam);
         tptr = sfnam;
     } else {
@@ -362,7 +362,7 @@ char *del_fnam;        /* name of file to delete */
 {
     char dtmp[NFILEN];
 
-    xstrcpy(dtmp, del_fnam);
+    XSTRCPY(dtmp, del_fnam);
     resolve_full_pathname(dtmp, dtmp);
     ac0.cptr = dtmp;
     ac1.lng = 0L;
@@ -389,8 +389,8 @@ char *to_nam;       /* rename to name */
      * string and working our way backward until we find a pathname seperator
      * which under AOS/VS is a colon (:).
      */
-    xstrcpy(ftmp, from_nam);
-    xstrcpy(ttmp, to_nam);
+    XSTRCPY(ftmp, from_nam);
+    XSTRCPY(ttmp, to_nam);
     resolve_full_pathname(ftmp, ftmp);
     resolve_full_pathname(ttmp, ttmp);
 
@@ -704,7 +704,7 @@ int execprg(f, n)
     if ( ( s=mlreply("!", line, NLINE) ) != TRUE )
         return (s);
 
-    xstrcpy(tline, line);
+    XSTRCPY(tline, line);
     do_system();
     do_system_end();
 
@@ -1166,7 +1166,7 @@ VOID ttopen()
     signal(SIGSYS, &traceback);
     signal(SIGTERM, &traceback);
 
-    xstrcpy(os, "AOS");         /* tell us what OS we run */
+    XSTRCPY(os, "AOS");         /* tell us what OS we run */
     ac0.in = fchannel(stdout);    /* make sure it is opened */
     ac0.in = fchannel(stdin);     /* make sure it is opened */
     ac1.ulng = ( BIT0 | (sizeof (crt_info)/2) ); /* get characteristics flag */
@@ -1197,7 +1197,7 @@ VOID ttopen()
 
     switch ( termcode ) {
     case 0:     /* Generic ANSI compliant */
-        xstrcpy(sres, "ANSI");
+        XSTRCPY(sres, "ANSI");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1210,7 +1210,7 @@ VOID ttopen()
 
     case 1:     /* DEC VT100 */
     case 2:     /* DEC VT100K */
-        xstrcpy(sres, "VT100");
+        XSTRCPY(sres, "VT100");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1223,7 +1223,7 @@ VOID ttopen()
 
     case 4:     /* DEC VT102 */
     case 5:     /* DEC VT102K */
-        xstrcpy(sres, "VT102");
+        XSTRCPY(sres, "VT102");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1237,7 +1237,7 @@ VOID ttopen()
 
     case 7:     /* DEC VT220 */
     case 8:     /* DEC VT220K */
-        xstrcpy(sres, "VT220");
+        XSTRCPY(sres, "VT220");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1249,13 +1249,13 @@ VOID ttopen()
         break;
 
     case 6:     /* D.G. Dasher D4xx */
-        xstrcpy(sres, "DGD400");
+        XSTRCPY(sres, "DGD400");
         crt_func = (INS_CHAR | INS_LINE | DEL_CHAR | DEL_LINE);
         break;
 
     case 3:     /* D.G. Dasher D2xx */
         default;
-        xstrcpy(sres, "DGD200");
+        XSTRCPY(sres, "DGD200");
     }
 # else
     if ( (crt_info.char_cdt != char_d2xx)    /* is not CRT3 or D2xx ?  and */
@@ -1266,7 +1266,7 @@ VOID ttopen()
         term.t_move = &ansimove;
         term.t_rev  = &ansirev;
         term.t_dim  = &ansidim;
-        xstrcpy(sres, "ANSI");
+        XSTRCPY(sres, "ANSI");
     }
 # endif /* XXCRT */
 
@@ -1302,7 +1302,7 @@ VOID ttopen()
     /* assume terminal has following */
     eolexist = TRUE;
     revexist = TRUE;
-    xstrcpy(sres, "NORMAL");
+    XSTRCPY(sres, "NORMAL");
 
     /*
      *   here we lower the priority of this task so that the console reader task
@@ -1713,7 +1713,7 @@ char *u_path, *a_path;
      * C Functions" manual, DG part number 093-000585-00.
      */
     if ( (*up == '^') || (*up == '@') || (*up == '=') || (*up == ':') ) {
-        xstrcpy(a_path, u_path);
+        XSTRCPY(a_path, u_path);
 
         return;
     }
@@ -1834,7 +1834,7 @@ char *c_path, *x_path;
     aosvs$ac1.cptr = x_path;
     if ( sys($GRNAME, &aosvs$ac0, &aosvs$ac1, &aosvs$ac2) )
         if ( (aosvs$ac0.in == ERFDE) || (aosvs$ac0.in == ERFDE) )
-            xstrcpy(x_path, t_path);
+            XSTRCPY(x_path, t_path);
         else
             return (1);
 
@@ -1888,7 +1888,7 @@ char *fspec;    /* pattern to match */
     gnfndirect = NULL;
 
     /* first parse the file path off the file spec */
-    xstrcpy(gnfnpath, fspec);
+    XSTRCPY(gnfnpath, fspec);
     index = strlen(gnfnpath) - 1;
     while ( index >= 0 &&
             (gnfnpath[index] != '/' &&gnfnpath[index] != '\\' &&
@@ -1901,7 +1901,7 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* build the wildcard or template to use in the lookup */
-    xstrcpy(gnfntmp, &fspec[index+1]);
+    XSTRCPY(gnfntmp, &fspec[index+1]);
     strcat(gnfntmp, "+");
     gnfndir->dd_buf = gnfntmp;
 
@@ -1924,7 +1924,7 @@ char *PASCAL NEAR getnfile()
     }
 
     /* return the next file name! */
-    xstrcpy(gnfnrbuf, gnfnpath);
+    XSTRCPY(gnfnrbuf, gnfnpath);
     strcat(gnfnrbuf, gnfndirect->d_name);
     mklower(gnfnrbuf);
     free(gnfndirect);
@@ -1940,7 +1940,7 @@ char *fn, *mode;
 {
     char tmppath[NFILEN];               /* temp. to hold expanded pathname */
 
-    xstrcpy(tmppath, fn);                        /* load passed pathname */
+    XSTRCPY(tmppath, fn);                        /* load passed pathname */
     resolve_full_pathname(tmppath, tmppath);    /* expand it... */
 
     return ( fopen(tmppath, mode) );           /* try to open expanded pathname

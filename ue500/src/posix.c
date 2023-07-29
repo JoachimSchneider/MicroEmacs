@@ -654,13 +654,13 @@ int n;                                  /* Argument count       */
 
     /* Setup the proper file names */
     bp = curbp;
-    xstrcpy(tmpnam, bp->b_fname);       /* Save the original name */
-    xstrcpy(bp->b_fname, bname1);       /* Set it to our new one */
+    XSTRCPY(tmpnam, bp->b_fname);       /* Save the original name */
+    XSTRCPY(bp->b_fname, bname1);       /* Set it to our new one */
 
     /* Write it out, checking for errors */
     if ( !writeout(filnam1, "w") ) {
         mlwrite("[Cannot write filter file]");
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
 
         return (0);
     }
@@ -681,7 +681,7 @@ int n;                                  /* Argument count       */
 
 
     /* Reset file name */
-    xstrcpy(bp->b_fname, tmpnam);
+    XSTRCPY(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
     unlink(filnam1);
@@ -701,7 +701,7 @@ char *fspec;                            /* Filename specification   */
     int index, point, extflag;
 
     /* First parse the file path off the file spec */
-    xstrcpy(path, fspec);
+    XSTRCPY(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -731,7 +731,7 @@ char *fspec;                            /* Filename specification   */
     if ( !dirptr )
         return (NULL);
 
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     nameptr = &rbuf[strlen(rbuf)];
 
     /* ...and call for the first file */
@@ -752,7 +752,7 @@ char *getnfile()
             return (NULL);
 
         /* Check to make sure we skip all weird entries except directories */
-        xstrcpy(nameptr, dp->d_name);
+        XSTRCPY(nameptr, dp->d_name);
 
     } while ( stat(rbuf,
                    &fstat) ||

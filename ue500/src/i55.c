@@ -185,7 +185,7 @@ register int n;
 
 PASCAL NEAR i55open()
 {
-    xstrcpy(sres, "NORMAL");
+    XSTRCPY(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
 

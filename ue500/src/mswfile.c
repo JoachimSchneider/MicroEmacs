@@ -128,7 +128,7 @@ char * PASCAL   fullpathname (char *PathName, int Nbuf)
     char FullName[_MAX_PATH];
 
     if ( _fullpath(FullName, PathName, Nbuf) != NULL ) {
-        xstrcpy (PathName, FullName);
+        XSTRCPY (PathName, FullName);
     }
 
     return PathName;
@@ -205,9 +205,9 @@ static BOOL PASCAL FileDlgOK (HWND hDlg)
 
             return FALSE;
 
-ExtractedOK: xstrcpy (Par->Name, ++n);
+ExtractedOK: XSTRCPY (Par->Name, ++n);
             if ( n - &s[0] < NFILEN - 1 - strlen(StarName) ) {
-                xstrcpy (n, StarName);
+                XSTRCPY (n, StarName);
                 /* now, we use DlgDirList to generate the full directory path */
                 if ( DlgDirList (hDlg, s, NULL, ID_PATH, ATTR_FIL) ) {
                     getcwd (Path, NFILEN);
@@ -305,7 +305,7 @@ int EXPORT FAR PASCAL  FileDlgProc (HWND   hDlg,
     {       /* let's build the caption */
         char DlgTitle[sizeof (PROGNAME) + 3 + 30];
 
-        xstrcpy (DlgTitle, ProgName);
+        XSTRCPY (DlgTitle, ProgName);
         strcat (DlgTitle, " - ");
         strcat (DlgTitle, Par->Prompt);     /* hopefully, the prompt is under 30
                                              * char! */
@@ -446,7 +446,7 @@ static VOID    CompletePath (char *s, char *FileName)
 /* s must be at least NFILEN characters long, while the length of Path +
  *  the length of FileName must be < NFILEN */
 {
-    xstrcpy (s, Path);
+    XSTRCPY (s, Path);
     if ( (*s != 0) && (s[strlen (s) - 1] != '\\') ) strcat (s, "\\");
     strcat (s, FileName);
 } /* CompletePath */
@@ -459,7 +459,7 @@ static VOID    UpdateAll (HWND hDlg, char *s)
 {
     if ( DlgDirList (hDlg, s, ID_DIRECTORIES, ID_PATH, ATTR_DIR) ) {
         getcwd (Path, NFILEN);
-        xstrcpy (StarName, s);
+        XSTRCPY (StarName, s);
         DlgDirList (hDlg, s, ID_FILES, NULL, ATTR_FIL);
         SetDlgItemText (hDlg, ID_FILENAME, StarName);
 #if WINDOW_MSWIN32
@@ -490,7 +490,7 @@ char *fspec;    /* pattern to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    xstrcpy(path, fspec);
+    XSTRCPY(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -509,7 +509,7 @@ char *fspec;    /* pattern to match */
     }
 
     /* construct the composite wild card spec */
-    xstrcpy(fname, path);
+    XSTRCPY(fname, path);
     strcat(fname, &fspec[index+1]);
     strcat(fname, "*");
     if ( extflag == FALSE )
@@ -520,7 +520,7 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     strcat(rbuf, fileblock.ff_name);
     mklower(rbuf);
     if ( fileblock.ff_attrib == 16 )
@@ -541,7 +541,7 @@ char *PASCAL getnfile()
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
     strcat(rbuf, fileblock.ff_name);
     mklower(rbuf);
     if ( fileblock.ff_attrib == 16 )
@@ -569,7 +569,7 @@ char *fspec;    /* pattern to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    xstrcpy(path, fspec);
+    XSTRCPY(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -588,7 +588,7 @@ char *fspec;    /* pattern to match */
     }
 
     /* construct the composite wild card spec */
-    xstrcpy(fname, path);
+    XSTRCPY(fname, path);
     strcat(fname, &fspec[index+1]);
     strcat(fname, "*");
     if ( extflag == FALSE )
@@ -604,7 +604,7 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
 #  if WINDOW_MSWIN32
     strcat(rbuf, fileblock.cFileName);
     mklower(rbuf);
@@ -640,7 +640,7 @@ char *PASCAL getnfile()
 #  endif
 
     /* return the first file name! */
-    xstrcpy(rbuf, path);
+    XSTRCPY(rbuf, path);
 #  if WINDOW_MSWIN32
     strcat(rbuf, fileblock.cFileName);
     mklower(rbuf);

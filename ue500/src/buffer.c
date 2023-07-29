@@ -294,7 +294,7 @@ ask:    if ( mlreply(TEXT29, bufn, NBUFN) != TRUE )
         bp = bp->b_bufp;                /* onward */
     }
 
-    xstrcpy(curbp->b_bname, bufn);      /* copy buffer name to structure */
+    XSTRCPY(curbp->b_bname, bufn);      /* copy buffer name to structure */
     upmode();                           /* make all mode lines replot */
     mlerase();
 
@@ -343,7 +343,7 @@ int iflag;      /* list hidden buffer flag */
     if ( ( s=bclear(blistp) ) != TRUE )         /* Blow old text away   */
         return (s);
 
-    xstrcpy(blistp->b_fname, "");
+    XSTRCPY(blistp->b_fname, "");
     if ( addline(blistp, TEXT30) == FALSE
 /*          "ACTN   Modes        Size Buffer       File" */
          ||  addline(blistp,
@@ -577,8 +577,8 @@ int bflag;              /* bit settings for a new buffer */
         bp->b_nwnd  = 0;
         bp->b_exec  = 0;
         bp->b_linep = lp;
-        xstrcpy(bp->b_fname, "");
-        xstrcpy(bp->b_bname, bname);
+        XSTRCPY(bp->b_fname, "");
+        XSTRCPY(bp->b_bname, bname);
 #if     CRYPT
         bp->b_key[0] = 0;
 #endif

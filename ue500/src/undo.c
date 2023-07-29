@@ -271,7 +271,7 @@ int PASCAL NEAR undolist()
     if ( ( status = bclear(ulistp) ) != TRUE )  /* Blow old text away   */
         return (status);
 
-    xstrcpy(ulistp->b_fname, "");
+    XSTRCPY(ulistp->b_fname, "");
 
     /* add in the header text */
     if ( addline(ulistp, "           Line/Pos  REP   Type  Data") == FALSE||
@@ -301,7 +301,7 @@ int PASCAL NEAR undolist()
         *cp1++ = '/';
 
         /* and the offset into the line */
-        xstrcpy( b, int_asc(up->offset) );
+        XSTRCPY( b, int_asc(up->offset) );
         while ( strlen(b) < 6 )
             strcat(b, " ");
         cp2 = &b[0];
@@ -310,7 +310,7 @@ int PASCAL NEAR undolist()
         *cp1++ = ' ';
 
         /* and the count */
-        xstrcpy( b, int_asc(up->count) );
+        XSTRCPY( b, int_asc(up->count) );
         while ( strlen(b) < 3 )
             strcat(b, " ");
         cp2 = &b[0];

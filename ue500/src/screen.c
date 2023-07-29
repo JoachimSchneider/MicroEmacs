@@ -445,7 +445,7 @@ int iflag;      /* list hidden screen flag */
         return (status);
 
     /* there is no file connected with this buffer */
-    xstrcpy(slistp->b_fname,
+    XSTRCPY(slistp->b_fname,
             "");
 
     /* construct the header of this list */
@@ -463,7 +463,7 @@ int iflag;      /* list hidden screen flag */
     while ( sp ) {
 
         /* construct the screen name */
-        xstrcpy(line, sp->s_screen_name);
+        XSTRCPY(line, sp->s_screen_name);
         strcat(line, "                ");
         line[15] = 0;
 
@@ -472,14 +472,14 @@ int iflag;      /* list hidden screen flag */
         while ( wp ) {
 
             /* grab this window's buffer name */
-            xstrcpy(bname, wp->w_bufp->b_bname);
+            XSTRCPY(bname, wp->w_bufp->b_bname);
 
             /* handle full lines */
             if ( strlen(line) + strlen(bname) + 1 > 78 ) {
                 if ( addline(slistp, line) == FALSE )
                     return (FALSE);
 
-                xstrcpy(line, "               ");
+                XSTRCPY(line, "               ");
             }
 
             /* append this buffer name */

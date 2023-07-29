@@ -132,7 +132,7 @@ static char *parse_path P1_(CONST char *, filespec)
     char        *rname  = NULL;
 
     /* make a copy we can mung */
-    xstrcpy(rbuff, filespec);
+    XSTRCPY(rbuff, filespec);
 
     /* starting from the end */
     rname = &rbuff[strlen(rbuff)-1];
@@ -175,7 +175,7 @@ static CONST char *parse_drive P1_(CONST char *, filespec)
     char        *rname  = NULL;
 
     /* search for a drive specifier */
-    xstrcpy(rbuff, filespec);
+    XSTRCPY(rbuff, filespec);
     rname = rbuff;
     while ( *rname ) {
         if ( *rname == DRIVESEPCHAR ) {
@@ -220,15 +220,15 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
     static char result[NSTRING]; /* error return string */
 
     /* separate filespec into components */
-    xstrcpy( filename, parse_name(filespec) );
-    xstrcpy( pathname, parse_path(filespec) );
-    xstrcpy( drivename, parse_drive(filespec) );
+    XSTRCPY( filename, parse_name(filespec) );
+    XSTRCPY( pathname, parse_path(filespec) );
+    XSTRCPY( drivename, parse_drive(filespec) );
     if ( pathname[0] == 0 )
-        xstrcpy(pathname, ".");
+        XSTRCPY(pathname, ".");
 
     /* merge the drive into the pathname */
     strcat(drivename, pathname);
-    xstrcpy(pathname, drivename);
+    XSTRCPY(pathname, drivename);
 
 # if  LOCKDEBUG
     printf("Locking [%s] [%s]\n", pathname, filename);
@@ -242,13 +242,13 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         printf("stat() = %u   errno = %u\n", stat(pathname, &sb), errno);
         tgetc();
 #  endif
-        xstrcpy(result, LOCKMSG);
+        XSTRCPY(result, LOCKMSG);
         strcat(result, "Path not found");
 
         return (result);
     }
     if ( (sb.st_mode & S_IFDIR) == 0 ) {
-        xstrcpy(result, LOCKMSG);
+        XSTRCPY(result, LOCKMSG);
         strcat(result, "Illegal Path");
 
         return (result);
@@ -256,7 +256,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 # endif
 
     /* create the lock directory if it does not exist */
-    xstrcpy(lockpath, pathname);
+    XSTRCPY(lockpath, pathname);
     strcat(lockpath, DIRSEPSTR);
     strcat(lockpath, LOCKDIR);
 # if  LOCKDEBUG
@@ -276,7 +276,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 # else
         if ( mkdir(lockpath) != 0 ) {
 # endif
-            xstrcpy(result, LOCKMSG);
+            XSTRCPY(result, LOCKMSG);
             switch ( errno ) {
 
             case EACCES:
@@ -296,7 +296,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
     }
 
     /* check for the existance of this lockfile */
-    xstrcpy(lockfile, lockpath);
+    XSTRCPY(lockfile, lockpath);
     strcat(lockfile, DIRSEPSTR);
     strcat(lockfile, filename);
 # if  LOCKDEBUG
@@ -309,7 +309,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         /* create the lock file */
         fp = fopen(lockfile, "w");
         if ( fp == (FILE *)NULL ) {
-            xstrcpy(result, LOCKMSG);
+            XSTRCPY(result, LOCKMSG);
             strcat(result, "Can not open lock file");
 # if  LOCKDEBUG
             printf("Could not open lockfile [%s](%s)\n", lockfile, result);
@@ -357,7 +357,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         /* get the existing lock info */
         fp = fopen(lockfile, "r");
         if ( fp == (FILE *)NULL ) {
-            xstrcpy(result, LOCKMSG);
+            XSTRCPY(result, LOCKMSG);
             strcat(result, "Can not read lock file");
 
             return (result);
@@ -428,15 +428,15 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
     static char result[NSTRING];    /* error return string */
 
     /* separate filespec into components */
-    xstrcpy( filename, parse_name(filespec) );
-    xstrcpy( pathname, parse_path(filespec) );
-    xstrcpy( drivename, parse_drive(filespec) );
+    XSTRCPY( filename, parse_name(filespec) );
+    XSTRCPY( pathname, parse_path(filespec) );
+    XSTRCPY( drivename, parse_drive(filespec) );
     if ( pathname[0] == 0 )
-        xstrcpy(pathname, ".");
+        XSTRCPY(pathname, ".");
 
     /* merge the drive into the pathname */
     strcat(drivename, pathname);
-    xstrcpy(pathname, drivename);
+    XSTRCPY(pathname, drivename);
 
 # if  LOCKDEBUG
     printf("\nUnLocking [%s] [%s]\n", pathname, filename);
@@ -444,7 +444,7 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
 # endif
 
     /* create the lock directory if it does not exist */
-    xstrcpy(lockpath, pathname);
+    XSTRCPY(lockpath, pathname);
     strcat(lockpath, DIRSEPSTR);
     strcat(lockpath, LOCKDIR);
 # if  LOCKDEBUG
@@ -452,7 +452,7 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
     tgetc();
 # endif
     /* check for the existance of this lockfile */
-    xstrcpy(lockfile, lockpath);
+    XSTRCPY(lockfile, lockpath);
     strcat(lockfile, DIRSEPSTR);
     strcat(lockfile, filename);
 # if  LOCKDEBUG

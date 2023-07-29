@@ -72,7 +72,7 @@ static int newtags P1_(char *, path)
 
         return (FALSE);
     }
-    xstrcpy(tnewp->t_path, path);
+    XSTRCPY(tnewp->t_path, path);
     strcat(path, "tags");
     if ( ( tnewp->t_fp = fopen(path, "r") ) == NULL ) {
         free( (char *) tnewp );
@@ -82,8 +82,8 @@ static int newtags P1_(char *, path)
 
     tnewp->t_tagp = theadp;
     curtp = theadp = tnewp;
-    xstrcpy(tnewp->t_fname, curbp->b_fname);
-    xstrcpy(tnewp->t_wd, "");
+    XSTRCPY(tnewp->t_fname, curbp->b_fname);
+    XSTRCPY(tnewp->t_wd, "");
 
     /* Initialize index...  */
     tnewp->t_indexed = FALSE;
@@ -119,7 +119,7 @@ static int lookup P0_(void)
     if ( cp >= curbp->b_fname )
         xstrncpy( cpath, curbp->b_fname, (int) (cp - curbp->b_fname) );
     else
-        xstrcpy(cpath, ".");
+        XSTRCPY(cpath, ".");
     /* Append a DIRSEPCHAR character to the path... */
     if ( strlen(cpath) < NFILEN - 1 )
         cpath[strlen(cpath)] = DIRSEPCHAR;
@@ -266,9 +266,9 @@ char *filename;
     if ( *tp == DIRSEPCHAR )
         return;
 
-    xstrcpy(temp, curtp->t_path);
+    XSTRCPY(temp, curtp->t_path);
     strcat(temp, filename);
-    xstrcpy(filename, temp);
+    XSTRCPY(filename, temp);
 }
 
 /*
@@ -308,7 +308,7 @@ int tagger P2_(char *, errmsg, int, retag)
         return (FALSE);
     }
 
-    xstrcpy(pretagpat, (char *) pat);           /* Preserve old search pattern  */
+    XSTRCPY(pretagpat, (char *) pat);           /* Preserve old search pattern  */
 
     /* Scan line for file and pattern   */
     sscanf(line, "%s %s %[^\n]", curtp->t_wd, tagf, pat);
@@ -417,7 +417,7 @@ int f, n;
     }
     fseek(curtp->t_fp, curtp->t_dotos[i], 0);
 
-    xstrcpy(curtp->t_fname, curbp->b_fname);            /* Save name of current
+    XSTRCPY(curtp->t_fname, curbp->b_fname);            /* Save name of current
                                                          * file */
 
     return ( tagvalid = tagger("[No tag entry for '%s' found]", FALSE) );

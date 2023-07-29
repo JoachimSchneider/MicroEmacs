@@ -388,7 +388,7 @@ PASCAL NEAR ttopen()
     int status;
     char *waitstr;
 
-    xstrcpy(os, "VMS");
+    XSTRCPY(os, "VMS");
     tyin = 0;
     tyout = 0;
     tylen = 0;
@@ -775,14 +775,14 @@ int PASCAL NEAR f_filter(int f, int n)
 
 	/* setup the proper file names */
 	bp = curbp;
-	xstrcpy(tmpnam, bp->b_fname);	/* save the original name */
-	xstrcpy(bp->b_fname, bname1);	/* set it to our new one */
+	XSTRCPY(tmpnam, bp->b_fname);	/* save the original name */
+	XSTRCPY(bp->b_fname, bname1);	/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1, "w") != TRUE) {
 		mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-		xstrcpy(bp->b_fname, tmpnam);
+		XSTRCPY(bp->b_fname, tmpnam);
 		return(FALSE);
 	}
 
@@ -802,14 +802,14 @@ int PASCAL NEAR f_filter(int f, int n)
 	if (!s || (readin(filnam2,FALSE) == FALSE)) {
 		mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-		xstrcpy(bp->b_fname, tmpnam);
+		XSTRCPY(bp->b_fname, tmpnam);
 		unlink(filnam1);
 		unlink(filnam2);
 		return(s);
 	}
 
 	/* reset file name */
-	xstrcpy(bp->b_fname, tmpnam);	/* restore name */
+	XSTRCPY(bp->b_fname, tmpnam);	/* restore name */
 	bp->b_flag |= BFCHG;		/* flag it as changed */
 
 	/* and get rid of the temporary file */
@@ -857,7 +857,7 @@ char *PASCAL NEAR getffile(char *fspec)
 	register char *cp, c;
 
 	/* first parse the file path off the file spec */
-	xstrcpy(path, fspec);
+	XSTRCPY(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != ']' && path[index] != ':'))
 		--index;
@@ -889,7 +889,7 @@ char *PASCAL NEAR getffile(char *fspec)
 	}
 
 	/* construct the composite wild card spec */
-	xstrcpy(fname, path);
+	XSTRCPY(fname, path);
 	strcat(fname, &fspec[index+1]);
 	strcat(fname, "*");
 	if (!extflag)
@@ -1002,10 +1002,10 @@ ME$EDIT(struct dsc$descriptor *infile, struct dsc$descriptor *outfile)
     makename( bname, outstr);
     unqname(bname);
     bp = bfind(bname, TRUE, 0);
-    xstrcpy(bp->b_fname, instr);
+    XSTRCPY(bp->b_fname, instr);
     bp->b_active = FALSE;
     swbuffer( bp);
-    xstrcpy(bp->b_fname, outstr);
+    XSTRCPY(bp->b_fname, outstr);
     bp->b_flag |= BFCHG;            /* flag it as changed */
     free( instr);
     free( outstr);

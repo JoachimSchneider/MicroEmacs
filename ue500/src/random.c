@@ -1062,10 +1062,10 @@ int global;                             /* true = global flag,  false = current
 
     /* build the proper prompt string */
     if ( global )
-        xstrcpy(prompt, TEXT62);
+        XSTRCPY(prompt, TEXT62);
 /*                "Global mode to " */
     else
-        xstrcpy(prompt, TEXT63);
+        XSTRCPY(prompt, TEXT63);
 /*                "Mode to " */
 
     if ( kind == TRUE )
@@ -1674,6 +1674,23 @@ int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
     }
 
     return l2;
+}
+
+/* SFSTRCPY:
+ *  if size .GE. 0 copy src to dst usling xstrlcpy(dst, src, sizeof(dst))
+ *  else           copy src to dst usling xstrcpy(dst, src) and log
+ *                 a warning message.
+ */
+char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src, const char *, file, int, line)
+{
+    if ( 0 <= dst_size )  {
+        xstrlcpy(dst, src, dst_size);
+    } else                {
+        xstrcpy(dst, src);
+        TRCK(("%s", "Warning unsafe string copy"), file, line);
+    }
+
+    return dst;
 }
 
 /* An unelegant but portable version of C99 vsnprintf():                */

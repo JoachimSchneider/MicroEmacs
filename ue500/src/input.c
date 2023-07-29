@@ -66,7 +66,7 @@ int PASCAL NEAR mlyesno P1_(char *, prompt)
 
     for (;; ) {
         /* build and prompt the user */
-        xstrcpy(buf, prompt);
+        XSTRCPY(buf, prompt);
         strcat(buf, TEXT162);
 /*                          " [y/n]? " */
         mlwrite(buf);
@@ -330,7 +330,7 @@ char *PASCAL NEAR complete P4_(
 
             /* save the user name! */
             buf[cpos] = 0;
-            xstrcpy(user_name, &buf[1]);
+            XSTRCPY(user_name, &buf[1]);
 
             /* erase the chars on-screen */
             while ( cpos > 0 ) {
@@ -402,7 +402,7 @@ char *PASCAL NEAR complete P4_(
             /* expand an environment variable reference */
             /* save the variable name! */
             buf[cpos] = 0;
-            xstrcpy(user_name, &buf[1]);
+            XSTRCPY(user_name, &buf[1]);
 # if     MSDOS | OS2 | VMS
             mkupper(user_name);
 # endif
@@ -748,7 +748,7 @@ VOID PASCAL NEAR comp_file P2_(
 
             /* if this is the first match, simply record it */
             if ( matches == 1 ) {
-                xstrcpy(longestmatch, fname);
+                XSTRCPY(longestmatch, fname);
                 longestlen = strlen(longestmatch);
             } else {
 

@@ -268,7 +268,7 @@ register int n;
 
 PASCAL NEAR necopen()
 {
-    xstrcpy(sres, "NORMAL");
+    XSTRCPY(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
     ttputc(ESC);

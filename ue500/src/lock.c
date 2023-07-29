@@ -67,7 +67,7 @@ int lockchk P1_(CONST char *, fname /* file to check for a lock */)
     }
 
     /* everthing is cool, add it to the table */
-    xstrcpy(lname[numlocks-1], fname);
+    XSTRCPY(lname[numlocks-1], fname);
 
     return (TRUE);
 }
@@ -119,7 +119,7 @@ int xlock P1_(CONST char *, fname /* file name to lock */)
     }
 
     /* someone else has it....override? */
-    xstrcpy(msg, TEXT176);
+    XSTRCPY(msg, TEXT176);
 /*                  "File in use by " */
     strcat(msg, locker);
     strcat(msg, TEXT177);
@@ -159,7 +159,7 @@ VOID lckerror P1_(char *, errstr /* lock error string to print out */)
     char obuf[NSTRING];   /* output buffer for error message */
     char *sys_errstr = strerror(errno);
 
-    xstrcpy(obuf, errstr);
+    XSTRCPY(obuf, errstr);
     strcat(obuf, " - ");
 # if ( IS_UNIX() || WMCS )
     if ( sys_errstr && *sys_errstr )

@@ -238,7 +238,7 @@ int EXPORT FAR PASCAL  AboutDlgProc (HWND   hDlg,
     switch ( wMsg ) {
 
     case WM_INITDIALOG:
-        xstrcpy (s, PROGNAME);
+        XSTRCPY (s, PROGNAME);
         strcat (s, " ");
         strcat (s, VERSION);
         SetDlgItemText (hDlg, ID_PROGVER, s);
@@ -319,10 +319,10 @@ int EXPORT FAR PASCAL  ModeDlgProc (HWND   hDlg,
 
     case WM_INITDIALOG:
         if ( LOWORD(lParam) ) {
-            xstrcpy (s, TEXT331);    /* "Global modes" */
+            XSTRCPY (s, TEXT331);    /* "Global modes" */
             modep = &gmode;
         } else {
-            xstrcpy (s, TEXT332);    /* "Modes for buffer: " */
+            XSTRCPY (s, TEXT332);    /* "Modes for buffer: " */
             strcat (s, curbp->b_bname);
             modep = &(curbp->b_mode);
         }
@@ -484,7 +484,7 @@ int PASCAL GetKeyText (int Key, char *Text, int TextLength)
     }
 
 #define APPENDTEXT(s)   { if ( TextLength - i < sizeof (s) ) return 0; \
-                          xstrcpy (&Text[i], s); i += sizeof (s) - 1; }
+                          XSTRCPY (&Text[i], s); i += sizeof (s) - 1; }
 
     c = (char)Key;
 
@@ -595,7 +595,7 @@ VOID PASCAL    UpdateMenuItemText (HMENU hMenu, int Position, MENUTAB *MTp)
     register int i;
 
     GetMenuString (hMenu, Position, OldText, MAXMENUTITLE, MF_BYPOSITION);
-    xstrcpy (NewText, OldText);
+    XSTRCPY (NewText, OldText);
     for ( i = 0; (NewText[i] != '\0') && (NewText[i] != '\t'); ++i );
     /* find the first tab char or the string's end */
 
@@ -867,22 +867,22 @@ BOOL FAR PASCAL MenuCommand (WPARAM wParam, LPARAM lParam)
 
 #if WINXP
     case IDM_WHELPINDEX:
-        xstrcpy(HelpTopic, MainHelpFile);
+        XSTRCPY(HelpTopic, MainHelpFile);
         strcat(HelpTopic, "::/html/help7jnc.htm");
         goto InvokeHelp;
 
     case IDM_WHELPKEYBOARD:
-        xstrcpy(HelpTopic, MainHelpFile);
+        XSTRCPY(HelpTopic, MainHelpFile);
         strcat(HelpTopic, "::/html/help2uec.htm");
         goto InvokeHelp;
 
     case IDM_WHELPCOMMANDS:
-        xstrcpy(HelpTopic, MainHelpFile);
+        XSTRCPY(HelpTopic, MainHelpFile);
         strcat(HelpTopic, "::/html/macr9ylv.htm");
         goto InvokeHelp;
 
     case IDM_WHELPPROCEDURES:
-        xstrcpy(HelpTopic, MainHelpFile);
+        XSTRCPY(HelpTopic, MainHelpFile);
         strcat(HelpTopic, "::/html/help8f1v.htm");
 InvokeHelp: HtmlHelp(hFrameWnd, HelpTopic, HH_HELP_FINDER, NULL);
 

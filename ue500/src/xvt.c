@@ -473,7 +473,7 @@ static long taskHandler(WINDOW win, EVENT *ep)
                  xvt_char_height * 2,
                  xvt_char_width * 82,
                  xvt_char_height * 27);
-        xstrcpy(aname, PROGNAME);
+        XSTRCPY(aname, PROGNAME);
         strcat(aname, " ");
         strcat(aname, VERSION);
 
@@ -515,7 +515,7 @@ char **argv;
     config.menu_bar_ID = MAIN_MENUBAR;
     config.about_box_ID = 0;
     config.base_appl_name = "uemacs";
-    xstrcpy(aname, PROGNAME);
+    XSTRCPY(aname, PROGNAME);
     strcat(aname, " ");
     strcat(aname, VERSION);
     config.appl_name = aname;
@@ -685,7 +685,7 @@ PASCAL NEAR xvtopen()
     xvt_next = xvt_obuf;
 
     /* let emacs know the screen is open */
-    xstrcpy(sres, "XVT");
+    XSTRCPY(sres, "XVT");
     revexist = TRUE;
     ttopen();
 }

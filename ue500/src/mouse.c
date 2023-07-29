@@ -176,10 +176,10 @@ int f, n;        /* prefix flag and argument */
     if ( xpos == 0 && ypos == 0 ) {
 
         /* get the name of the screen to create */
-        xstrcpy(scr_name, "SCREEN_T");
+        XSTRCPY(scr_name, "SCREEN_T");
         strcat( scr_name, int_asc(temp_count++) );
         while ( lookup_screen(scr_name) != (SCREEN_T *)NULL ) {
-            xstrcpy(scr_name, "SCREEN_T");
+            XSTRCPY(scr_name, "SCREEN_T");
             strcat( scr_name, int_asc(temp_count++) );
         }
 

@@ -312,14 +312,14 @@ f_filter(f, n)
 
     /* setup the proper file names */
     bp = curbp;
-    xstrcpy(tmpnam, bp->b_fname);       /* save the original name */
-    xstrcpy(bp->b_fname, bname1);       /* set it to our new one */
+    XSTRCPY(tmpnam, bp->b_fname);       /* save the original name */
+    XSTRCPY(bp->b_fname, bname1);       /* set it to our new one */
 
     /* write it out, checking for errors */
     if ( writeout(filnam1, "w") != TRUE ) {
         mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
 
         return (FALSE);
     }
@@ -336,7 +336,7 @@ f_filter(f, n)
     if ( s != TRUE || (readin(filnam2, FALSE) == FALSE) ) {
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-        xstrcpy(bp->b_fname, tmpnam);
+        XSTRCPY(bp->b_fname, tmpnam);
         unlink(filnam1);
         unlink(filnam2);
 
@@ -344,7 +344,7 @@ f_filter(f, n)
     }
 
     /* reset file name */
-    xstrcpy(bp->b_fname, tmpnam);       /* restore name */
+    XSTRCPY(bp->b_fname, tmpnam);       /* restore name */
     bp->b_flag |= BFCHG;                /* flag it as changed */
     upmode();
 
@@ -397,7 +397,7 @@ char *fspec;    /* file to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    xstrcpy(xpath, fspec);
+    XSTRCPY(xpath, fspec);
     index = strlen(xpath) - 1;
     while ( index >= 0 &&
             (xpath[index] != '/' &&xpath[index] != '\\' &&
@@ -417,7 +417,7 @@ char *fspec;    /* file to match */
     }
 
     /* construct the composite wild card spec */
-    xstrcpy(fname, xpath);
+    XSTRCPY(fname, xpath);
     strcat(fname, &fspec[index+1]);
     strcat(fname, "*");
     if ( extflag == FALSE )
@@ -429,7 +429,7 @@ char *fspec;    /* file to match */
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, xpath);
+    XSTRCPY(rbuf, xpath);
     strcat(rbuf, info.d_fname);
     mklower(rbuf);
     if ( info.d_fattr & 0x10 )
@@ -446,7 +446,7 @@ char *PASCAL NEAR getnfile()
         return (NULL);
 
     /* return the first file name! */
-    xstrcpy(rbuf, xpath);
+    XSTRCPY(rbuf, xpath);
     strcat(rbuf, info.d_fname);
     mklower(rbuf);
     if ( info.d_fattr & 0x10 )
@@ -473,7 +473,7 @@ char *cmd;      /* command to execute */
 
     /* create program name length/string */
     tail[0] = strlen(cmd);
-    xstrcpy(&tail[1], cmd);
+    XSTRCPY(&tail[1], cmd);
 
     /* go do it! */
     return ( gemdos( (int)EXEC, (int)0, (char *)pname, (char *)tail,

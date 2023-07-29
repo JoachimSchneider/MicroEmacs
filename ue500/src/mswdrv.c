@@ -144,7 +144,7 @@ int EXPORT FAR PASCAL  MLHistDlgProc (
     {
         char s[50];
 
-        xstrcpy (s, PROGNAME);
+        XSTRCPY (s, PROGNAME);
         strcat (s, TEXT330);
         SetWindowText (hDlg, s);
     }
@@ -228,8 +228,8 @@ static int PASCAL mswopen ()
 
         revexist = TRUE;
         eolexist = TRUE;
-        xstrcpy (sres, "MSWIN");                /* $SRES emacs variable */
-        xstrcpy(os, "MSWIN");           /* $OS emacs variable */
+        XSTRCPY (sres, "MSWIN");                /* $SRES emacs variable */
+        XSTRCPY(os, "MSWIN");           /* $OS emacs variable */
         MLBuf = (char*)room(MLSIZE);
         for ( x = 0; x < MLSIZE; ) MLBuf[x++] = ' ';
         FirstTime = FALSE;

@@ -38,7 +38,7 @@ int n;          /* numeric argument */
     ecrypt( key, (unsigned int) strlen(key) );
 
     /* and save it off */
-    xstrcpy(curbp->b_key, key);
+    XSTRCPY(curbp->b_key, key);
     mlwrite(" ");               /* clear it off the bottom line */
 
     return (TRUE);

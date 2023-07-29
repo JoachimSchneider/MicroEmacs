@@ -141,7 +141,7 @@ VOID PASCAL NEAR mlabort (char *s)
     char text[NSTRING];     /* hopefully sufficient! */
 
     while ( *s == '%' ) s++; /* remove those strange % signs in some messages */
-    xstrcpy (text, s);
+    XSTRCPY (text, s);
     strcat (text, "\tAbort ");
     strcat (text, ProgName);
     strcat (text, " ?");
@@ -239,7 +239,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
         caret_shape = 2;
 
     /*-Register the broadcast message */
-    xstrcpy (text, ProgName);
+    XSTRCPY (text, ProgName);
     strcat (text, ":Broadcast_1.1");
     EmacsBroadcastMsg = RegisterWindowMessage(text);
 
@@ -257,7 +257,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
     RegisterClass (&wc);
 
     /*-Register the MDI child (screen) window class */
-    xstrcpy (text, ProgName);
+    XSTRCPY (text, ProgName);
     strcat (text, "_screen");
     ScreenClassName = copystr(text);
     wc.style        = 0;
@@ -305,7 +305,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
 #if GRINDERS == 0
     hHourglass = LoadCursor (NULL, IDC_WAIT);
 #else
-    xstrcpy (text, "Grinder1");
+    XSTRCPY (text, "Grinder1");
     for ( i = 0; i < GRINDERS; i++ ) {
         text[7] = (char)i + '1';    /* this assumes GRINDERS < 10 */
         GrinderCursor[i] = LoadCursor (hEmacsInstance, text);
@@ -343,7 +343,7 @@ static VOID PASCAL  SetFrameCaption (void)
     char    *t;
     int Id;
 
-    xstrcpy (text, PROGNAME " " VERSION);
+    XSTRCPY (text, PROGNAME " " VERSION);
     Id = GetWindowWord (hFrameWnd, GWW_FRMID);
     if ( Id ) {
         for ( t = text; *t != '\0'; t++ );  /* look for the end of text */

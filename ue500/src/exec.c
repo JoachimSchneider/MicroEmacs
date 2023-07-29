@@ -30,7 +30,7 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
         execstr = token(execstr, buffer, NPAT);
 
         /* evaluate it */
-        xstrcpy( buffer, fixnull( getval(buffer) ) );
+        XSTRCPY( buffer, fixnull( getval(buffer) ) );
         if ( strcmp(buffer, errorm) == 0 )
             return (FALSE);
 
@@ -132,7 +132,7 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
     /* process leadin argument */
     if ( gettyp(tkn) != TKCMD ) {
         f = TRUE;
-        xstrcpy( tkn, fixnull( getval(tkn) ) );
+        XSTRCPY( tkn, fixnull( getval(tkn) ) );
         n = asc_int(tkn);
 
         /* and now get the command to execute */
@@ -147,7 +147,7 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
     if ( ( fnc = fncmatch(tkn) ) == NULL ) {
 
         /* construct the buffer name */
-        xstrcpy(bufn, "[");
+        XSTRCPY(bufn, "[");
         strcat(bufn, tkn);
         strcat(bufn, "]");
 
@@ -322,7 +322,7 @@ int PASCAL NEAR nextarg P4_(
     if ( ( sp = getval(buffer) ) == NULL )
         return (FALSE);
 
-    xstrcpy(buffer, sp);
+    XSTRCPY(buffer, sp);
 
     return (TRUE);
 }
@@ -383,7 +383,7 @@ int PASCAL NEAR storeproc P2_(
         }
 
         /* and add it to the linked list of arguments for this buffer */
-        xstrcpy(cur_arg->name, bname);
+        XSTRCPY(cur_arg->name, bname);
         cur_arg->next = (PARG *)NULL;
         if ( last_arg == (PARG *)NULL )
             bp->b_args = cur_arg;
@@ -707,7 +707,7 @@ nxtscan:        /* on to the next line */
 #if     LOGFLG
         /* append the current command to the log file */
         fp = fopen("emacs.log", "a");
-        xstrcpy(outline, eline);
+        XSTRCPY(outline, eline);
         fprintf(fp, "%s", outline);
         fclose(fp);
 #endif
@@ -1016,7 +1016,7 @@ VOID PASCAL NEAR errormesg P3_(
     exec_error = TRUE;
 
     /* build error message line */
-    xstrcpy(buf, "\n");
+    XSTRCPY(buf, "\n");
     strcat(buf, mesg);
     strcat(buf, TEXT229);
 /*      " in < " */
@@ -1122,7 +1122,7 @@ dinput: outline[term.t_ncol - 1] = 0;
             goto dbuild;
 
         case 'e':         /* evaluate expresion */
-            xstrcpy(temp, "set %track ");
+            XSTRCPY(temp, "set %track ");
             oldinp = disinp;
             disinp = TRUE;
             mlwrite("Exp:");
@@ -1131,7 +1131,7 @@ dinput: outline[term.t_ncol - 1] = 0;
             oldstatus = cmdstatus;
             docmd(temp);
             cmdstatus = oldstatus;
-            xstrcpy(temp, " = [");
+            XSTRCPY(temp, " = [");
             strcat( temp, gtusr("track") );
             strcat(temp, "]");
             mlforce(temp);
@@ -1144,7 +1144,7 @@ dinput: outline[term.t_ncol - 1] = 0;
             mlwrite("Exp: ");
             getstring( (unsigned char *)temp, NSTRING, ctoec(RETCHAR) );
             disinp = oldinp;
-            xstrcpy(track, "set %track ");
+            XSTRCPY(track, "set %track ");
             strcat(track, temp);
             goto dbuild;
 
