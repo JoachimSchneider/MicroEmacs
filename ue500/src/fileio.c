@@ -62,7 +62,7 @@ char *mode;     /* mode to open file for */
 
         /* open in binary mode */
         XSTRCPY(xmode, mode);
-        strcat(xmode, "b");
+        XSTRCAT(xmode, "b");
         ffp = fopen(fn, xmode);
     } else {
 

@@ -141,10 +141,10 @@ VOID PASCAL NEAR mlabort (char *s)
     char text[NSTRING];     /* hopefully sufficient! */
 
     while ( *s == '%' ) s++; /* remove those strange % signs in some messages */
-    XSTRCPY (text, s);
-    strcat (text, "\tAbort ");
-    strcat (text, ProgName);
-    strcat (text, " ?");
+    xstrcpy (text, s);
+    xstrcat (text, "\tAbort ");
+    xstrcat (text, ProgName);
+    xstrcat (text, " ?");
     if ( MessageBox (hFrameWnd, text, NULL,
                      MB_YESNO | MB_DEFBUTTON2 |MB_ICONHAND | MB_APPLMODAL) ==
          IDYES ) {
@@ -195,15 +195,15 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
         if ( i > 0 ) text[i+1] = '\0';
         else text[0] = '\0';
 #if WINXP
-        strcat (text, "mewin.chm");
+        xstrcat (text, "mewin.chm");
 #else
-        strcat(text, "mewin.hlp");
+        xstrcat(text, "mewin.hlp");
 #endif
         MainHelpFile = copystr (text);
     }
     if ( i > 0 ) {
         text[i] = '\0';
-        strcat (HomeDir, text);
+        xstrcat (HomeDir, text);
         putenv (HomeDir);   /* set HOME environment var to point to MicroEMACS
                              * executable directory */
     }
@@ -239,8 +239,8 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
         caret_shape = 2;
 
     /*-Register the broadcast message */
-    XSTRCPY (text, ProgName);
-    strcat (text, ":Broadcast_1.1");
+    xstrcpy (text, ProgName);
+    xstrcat (text, ":Broadcast_1.1");
     EmacsBroadcastMsg = RegisterWindowMessage(text);
 
     /*-Register the frame window class */
@@ -257,8 +257,8 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
     RegisterClass (&wc);
 
     /*-Register the MDI child (screen) window class */
-    XSTRCPY (text, ProgName);
-    strcat (text, "_screen");
+    xstrcpy (text, ProgName);
+    xstrcat (text, "_screen");
     ScreenClassName = copystr(text);
     wc.style        = 0;
     wc.lpfnWndProc  = (VOIDP)&ScrWndProc;
@@ -305,7 +305,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
 #if GRINDERS == 0
     hHourglass = LoadCursor (NULL, IDC_WAIT);
 #else
-    XSTRCPY (text, "Grinder1");
+    xstrcpy (text, "Grinder1");
     for ( i = 0; i < GRINDERS; i++ ) {
         text[7] = (char)i + '1';    /* this assumes GRINDERS < 10 */
         GrinderCursor[i] = LoadCursor (hEmacsInstance, text);
@@ -343,7 +343,7 @@ static VOID PASCAL  SetFrameCaption (void)
     char    *t;
     int Id;
 
-    XSTRCPY (text, PROGNAME " " VERSION);
+    xstrcpy (text, PROGNAME " " VERSION);
     Id = GetWindowWord (hFrameWnd, GWW_FRMID);
     if ( Id ) {
         for ( t = text; *t != '\0'; t++ );  /* look for the end of text */

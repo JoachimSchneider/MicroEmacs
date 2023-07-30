@@ -212,7 +212,7 @@ ttopen()
 
     Enable_Abort = 0;           /* for the Manx compiler */
 # endif
-    XSTRCPY(os, "AMIGADOS");
+    xstrcpy(os, "AMIGADOS");
 
     /* open the intuition library */
     IntuitionBase = (struct IntuitionBase *)OpenLibrary("intuition.library",
@@ -712,8 +712,8 @@ pipecmd(f, n)
     }
 
     newcli = Open("CON:0/0/640/200/MicroEMACS Subprocess", NEW);
-    strcat(line, " >");
-    strcat(line, filnam);
+    xstrcat(line, " >");
+    xstrcat(line, filnam);
     Execute(line, 0L, newcli);
     s = TRUE;
     Close(newcli);
@@ -772,20 +772,20 @@ f_filter(f, n)
 
     /* setup the proper file names */
     bp = curbp;
-    XSTRCPY(tmpnam, bp->b_fname);       /* save the original name */
-    XSTRCPY(bp->b_fname, bname1);       /* set it to our new one */
+    xstrcpy(tmpnam, bp->b_fname);       /* save the original name */
+    xstrcpy(bp->b_fname, bname1);       /* set it to our new one */
 
     /* write it out, checking for errors */
     if ( writeout(filnam1, "w") != TRUE ) {
         mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
 
         return (FALSE);
     }
 
     newcli = Open("CON:0/0/640/200/MicroEMACS Subprocess", NEW);
-    strcat(line, " <ram:fltinp >ram:fltout");
+    xstrcat(line, " <ram:fltinp >ram:fltout");
     Execute(line, 0L, newcli);
     s = TRUE;
     Close(newcli);
@@ -795,7 +795,7 @@ f_filter(f, n)
     if ( s != TRUE || (readin(filnam2, FALSE) == FALSE) ) {
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
         unlink(filnam1);
         unlink(filnam2);
 
@@ -803,7 +803,7 @@ f_filter(f, n)
     }
 
     /* reset file name */
-    XSTRCPY(bp->b_fname, tmpnam);       /* restore name */
+    xstrcpy(bp->b_fname, tmpnam);       /* restore name */
     bp->b_flag |= BFCHG;                /* flag it as changed */
 
     /* and get rid of the temporary file */
@@ -838,7 +838,7 @@ char *fspec;    /* pattern to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    XSTRCPY(path, fspec);
+    xstrcpy(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -846,12 +846,12 @@ char *fspec;    /* pattern to match */
     path[index+1] = 0;
 
     /* construct the composite wild card spec */
-    XSTRCPY(fname, path);
-    strcat(fname, &fspec[index+1]);
-    strcat(fname, "*.*");
+    xstrcpy(fname, path);
+    xstrcat(fname, &fspec[index+1]);
+    xstrcat(fname, "*.*");
 
     /* save the path/wildcard off */
-    XSTRCPY(path, fname);
+    xstrcpy(path, fname);
 
     /* and call for the first file */
     return ( getnfile() );
@@ -867,7 +867,7 @@ char *PASCAL NEAR getnfile()
         return (NULL);
 
     /* return the next file name! */
-    XSTRCPY(rbuf, sp);
+    xstrcpy(rbuf, sp);
 
     return (rbuf);
 }

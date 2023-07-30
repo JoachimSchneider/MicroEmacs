@@ -250,8 +250,8 @@ pipecmd(f, n)
             return (FALSE);
     }
 
-    strcat(line, " >>");
-    strcat(line, filnam);
+    xstrcat(line, " >>");
+    xstrcat(line, filnam);
     movecursor(term.t_nrow - 1, 0);
     TTkclose();
     system(line);
@@ -312,19 +312,19 @@ f_filter(f, n)
 
     /* setup the proper file names */
     bp = curbp;
-    XSTRCPY(tmpnam, bp->b_fname);       /* save the original name */
-    XSTRCPY(bp->b_fname, bname1);       /* set it to our new one */
+    xstrcpy(tmpnam, bp->b_fname);       /* save the original name */
+    xstrcpy(bp->b_fname, bname1);       /* set it to our new one */
 
     /* write it out, checking for errors */
     if ( writeout(filnam1, "w") != TRUE ) {
         mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
 
         return (FALSE);
     }
 
-    strcat(line, " <fltinp >fltout");
+    xstrcat(line, " <fltinp >fltout");
     movecursor(term.t_nrow, 0);
     TTkclose();
     system(line);
@@ -336,7 +336,7 @@ f_filter(f, n)
     if ( s != TRUE || (readin(filnam2, FALSE) == FALSE) ) {
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
         unlink(filnam1);
         unlink(filnam2);
 
@@ -344,7 +344,7 @@ f_filter(f, n)
     }
 
     /* reset file name */
-    XSTRCPY(bp->b_fname, tmpnam);       /* restore name */
+    xstrcpy(bp->b_fname, tmpnam);       /* restore name */
     bp->b_flag |= BFCHG;                /* flag it as changed */
     upmode();
 
@@ -397,7 +397,7 @@ char *fspec;    /* file to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    XSTRCPY(xpath, fspec);
+    xstrcpy(xpath, fspec);
     index = strlen(xpath) - 1;
     while ( index >= 0 &&
             (xpath[index] != '/' &&xpath[index] != '\\' &&
@@ -417,11 +417,11 @@ char *fspec;    /* file to match */
     }
 
     /* construct the composite wild card spec */
-    XSTRCPY(fname, xpath);
-    strcat(fname, &fspec[index+1]);
-    strcat(fname, "*");
+    xstrcpy(fname, xpath);
+    xstrcat(fname, &fspec[index+1]);
+    xstrcat(fname, "*");
     if ( extflag == FALSE )
-        strcat(fname, ".*");
+        xstrcat(fname, ".*");
 
     /* and call for the first file */
     Fsetdta(&info);             /* Initialize buffer for our search */
@@ -429,11 +429,11 @@ char *fspec;    /* file to match */
         return (NULL);
 
     /* return the first file name! */
-    XSTRCPY(rbuf, xpath);
-    strcat(rbuf, info.d_fname);
+    xstrcpy(rbuf, xpath);
+    xstrcat(rbuf, info.d_fname);
     mklower(rbuf);
     if ( info.d_fattr & 0x10 )
-        strcat(rbuf, DIRSEPSTR);
+        xstrcat(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
@@ -446,11 +446,11 @@ char *PASCAL NEAR getnfile()
         return (NULL);
 
     /* return the first file name! */
-    XSTRCPY(rbuf, xpath);
-    strcat(rbuf, info.d_fname);
+    xstrcpy(rbuf, xpath);
+    xstrcat(rbuf, info.d_fname);
     mklower(rbuf);
     if ( info.d_fattr & 0x10 )
-        strcat(rbuf, DIRSEPSTR);
+        xstrcat(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
@@ -473,7 +473,7 @@ char *cmd;      /* command to execute */
 
     /* create program name length/string */
     tail[0] = strlen(cmd);
-    XSTRCPY(&tail[1], cmd);
+    xstrcpy(&tail[1], cmd);
 
     /* go do it! */
     return ( gemdos( (int)EXEC, (int)0, (char *)pname, (char *)tail,

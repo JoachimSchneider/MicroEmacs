@@ -136,8 +136,12 @@ extern char *xstrcpy DCL((char *s1, CONST char *s2));
 /* strncpy() possibly overlapping regions:  */
 extern char *xstrncpy DCL((char *s1, CONST char *s2, int n));
 
+/* strcat of possibly overlapping regions   */
+extern char *xstrcat DCL((char *s1, CONST char *s2));
+
 /* Like FreeBSD's strlcpy(): Equivalent semantics:
  *  n = strlcpy(dst, src, len);
+ *  ---
  *  n = snprintf(dst, len, "%s", src);
  */
 extern int xstrlcpy DCL((char * s1, CONST char * s2, int n));
@@ -150,6 +154,25 @@ extern int xstrlcpy DCL((char * s1, CONST char * s2, int n));
 extern char *sfstrcpy_ DCL((char *dst, int dst_size, const char *src,
                             const char *file, int line));
 #define XSTRCPY(dst, src) sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+
+/* SFSTRCAT:
+ *  if size .GE. 0 append src to dst usling xstrlcat(dst, src, sizeof(dst))
+ *  else           append src to dst usling xstrcat(dst, src) and log a
+ *                 warning message.
+ */
+extern char *sfstrcat_ P5_(char *, dst, int, dst_size,
+                           const char *, src,
+                           const char *, file, int, line);
+#define XSTRCAT(dst, src) sfstrcat_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+
+/* Like FreeBSD's strlcat(): Equivalent semantics:
+ *  n = strlcat(dst, src, len);
+ *  ---
+ *  dup = strdup(dst);
+ *  n = snprintf(dst, len, "%s%s", dup, src);
+ *  free(dup);
+ */
+extern int xstrlcat P3_(char *, s1, CONST char *, s2, int, n);
 
 /* Like the C99 vsnprintf():                                            */
 /* May be called with NULL == s .AND. 0 == n to get the size that would */
@@ -525,6 +548,22 @@ VOID ASRTM_Catch P4_(CONST char *, file, int, line, CONST char *, cond, CONST ch
         if ( !(e) )                                                     \
         {                                                               \
             ASRTM_Catch (file, line, #e, m);                            \
+        }                                                               \
+    } while (0)
+
+#define ASRT_TRC(e, a) do {                                             \
+        if ( !(e) )                                                     \
+        {                                                               \
+            TRCK(a, __FILE__, __LINE__);                                \
+            ASRT_Catch (__FILE__, __LINE__, #e);                        \
+        }                                                               \
+    } while (0)
+
+#define ASRTK_TRC(e, a, file, line) do {                                \
+        if ( !(e) )                                                     \
+        {                                                               \
+            TRCK(a, file, line);                                        \
+            ASRT_Catch (file, line, #e);                                \
         }                                                               \
     } while (0)
 

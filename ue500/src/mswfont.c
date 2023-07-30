@@ -81,17 +81,17 @@ static VOID PASCAL UpdateSample (HWND       hDlg,
     int i;
     char c;
 
-    XSTRCPY (SampleText, FaceName);
+    xstrcpy (SampleText, FaceName);
     i = strlen (SampleText);
-    XSTRCPY (&SampleText[i], " (Height=");
+    xstrcpy (&SampleText[i], " (Height=");
     i += strlen (&SampleText[i]);
     itoa (m->tmHeight, &SampleText[i], 10);
     i += strlen (&SampleText[i]);
-    XSTRCPY (&SampleText[i], ", Width=");
+    xstrcpy (&SampleText[i], ", Width=");
     i += strlen (&SampleText[i]);
     itoa (m->tmAveCharWidth, &SampleText[i], 10);
     i += strlen (&SampleText[i]);
-    XSTRCPY (&SampleText[i], ") sample:");
+    xstrcpy (&SampleText[i], ") sample:");
     i += strlen (&SampleText[i]);
     for ( c = 'A'; c <= 'Z'; c++ ) {
         SampleText[i++] = ' ';
@@ -421,8 +421,8 @@ int EXPORT FAR PASCAL  FontDlgProc (HWND   hDlg,
         {   /*-setup the dialog box's caption */
             char s[40];
 
-            XSTRCPY (s, ProgName);
-            strcat (s, " - Font selection");
+            xstrcpy (s, ProgName);
+            xstrcat (s, " - Font selection");
             SetWindowText (hDlg, s);
         }
         /*-set the Bold button */

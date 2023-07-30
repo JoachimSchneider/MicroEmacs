@@ -271,7 +271,7 @@ PASCAL NEAR ansiopen()
         ttputs(s);
     }
 # endif
-    XSTRCPY(sres, "NORMAL");
+    xstrcpy(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
 

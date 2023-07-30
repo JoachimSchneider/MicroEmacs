@@ -1165,7 +1165,7 @@ char *PASCAL NEAR copystr P1_(char *, sp /* string to copy */)
     if ( dp == NULL )
         return (NULL);
 
-    XSTRCPY(dp, sp);
+    xstrcpy(dp, sp);  /**UNSAFE_OK**/
 
     return (dp);
 }

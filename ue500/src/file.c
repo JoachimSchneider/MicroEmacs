@@ -204,8 +204,8 @@ int lockfl;             /* check the file for locks? */
             XSTRCPY(prompt, TEXT136);
 /*                     "Buffer name: " */
             xstrcpy(&prompt[strlen(prompt) - 2], "[");
-            strcat(prompt, bname);
-            strcat(prompt, "]: ");
+            XSTRCAT(prompt, bname);
+            XSTRCAT(prompt, "]: ");
             s = mlreply(prompt, bname, NBUFN);
 
             if ( s == ABORT )                   /* ^G to just quit  */
@@ -336,23 +336,23 @@ int lockfl;                     /* check for file locks? */
 
     XSTRCPY(mesg, "[");
     if ( s==FIOERR ) {
-        strcat(mesg, TEXT141);
+        XSTRCAT(mesg, TEXT141);
 /*                           "I/O ERROR, " */
         curbp->b_flag |= BFTRUNC;
     }
     if ( s == FIOMEM ) {
-        strcat(mesg, TEXT142);
+        XSTRCAT(mesg, TEXT142);
 /*                           "OUT OF MEMORY, " */
         curbp->b_flag |= BFTRUNC;
     }
-    strcat(mesg, TEXT140);
+    XSTRCAT(mesg, TEXT140);
 /*                   "Read " */
-    strcat( mesg, long_asc(nline) );
-    strcat(mesg, TEXT143);
+    XSTRCAT( mesg, long_asc(nline) );
+    XSTRCAT(mesg, TEXT143);
 /*                   " line" */
     if ( nline > 1L )
-        strcat(mesg, "s");
-    strcat(mesg, "]");
+        XSTRCAT(mesg, "s");
+    XSTRCAT(mesg, "]");
     mlwrite(mesg);
 
 out:    TTkopen();      /* open the keyboard again */
@@ -644,7 +644,7 @@ char *mode;     /* mode to open file (w = write a = append) */
         /* create a unique name, using random numbers */
         do {
             *sp = 0;
-            strcat( tname, int_asc(ernd() & 0xffff) );
+            XSTRCAT( tname, int_asc(ernd() & 0xffff) );
         } while ( fexist(tname) );
 
         /* open the temporary file */
@@ -687,11 +687,11 @@ char *mode;     /* mode to open file (w = write a = append) */
         /* report on success (or lack therof) */
         XSTRCPY(buf, TEXT149);
 /*                          "[Wrote " */
-        strcat( buf, long_asc(nline) );
-        strcat(buf, TEXT143);
+        XSTRCAT( buf, long_asc(nline) );
+        XSTRCAT(buf, TEXT143);
 /*                          " line" */
         if ( nline > 1L )
-            strcat(buf, "s");
+            XSTRCAT(buf, "s");
 
         if ( sflag ) {
 #if ( IS_UNIX() )
@@ -708,13 +708,13 @@ char *mode;     /* mode to open file (w = write a = append) */
                 ;
 #endif
             } else {
-                strcat(buf, TEXT150);
+                XSTRCAT(buf, TEXT150);
 /*                                          ", saved as " */
-                strcat(buf, tname);
+                XSTRCAT(buf, tname);
                 status = FIODEL;                            /* failed */
             }
         }
-        strcat(buf, "]");
+        XSTRCAT(buf, "]");
         mlwrite(buf);
     }
 
@@ -834,23 +834,23 @@ char fname[];
 
     XSTRCPY(mesg, "[");
     if ( s==FIOERR ) {
-        strcat(mesg, TEXT141);
+        XSTRCAT(mesg, TEXT141);
 /*                           "I/O ERROR, " */
         curbp->b_flag |= BFTRUNC;
     }
     if ( s == FIOMEM ) {
-        strcat(mesg, TEXT142);
+        XSTRCAT(mesg, TEXT142);
 /*                           "OUT OF MEMORY, " */
         curbp->b_flag |= BFTRUNC;
     }
-    strcat(mesg, TEXT154);
+    XSTRCAT(mesg, TEXT154);
 /*                   "Inserted " */
-    strcat( mesg, long_asc(nline) );
-    strcat(mesg, TEXT143);
+    XSTRCAT( mesg, long_asc(nline) );
+    XSTRCAT(mesg, TEXT143);
 /*                   " line" */
     if ( nline > 1L )
-        strcat(mesg, "s");
-    strcat(mesg, "]");
+        XSTRCAT(mesg, "s");
+    XSTRCAT(mesg, "]");
     mlwrite(mesg);
 
 out:

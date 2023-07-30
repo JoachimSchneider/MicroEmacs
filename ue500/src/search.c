@@ -759,7 +759,7 @@ int PASCAL NEAR readpattern P3_(char *, prompt, char *, apat, int, srch)
      */
     if ( ( status = nextarg(NULL, tpat, NPAT, sterm) ) == TRUE ) {
         lastflag &= ~CFSRCH;
-        XSTRCPY(apat, tpat);
+        xstrcpy(apat, tpat);
 
         if ( srch )
             setjtable();
@@ -1445,12 +1445,12 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
 
     /* add in the header text */
     XSTRCPY(pline, "         Pattern = \"");
-    strcat(pline, pat);
-    strcat(pline, "\"  (");
-    strcat( pline, int_asc(deltapat.jump) );
-    strcat(pline, ", ");
-    strcat( pline, int_asc(deltapat.patlen) );
-    strcat(pline, ")");
+    XSTRCAT(pline, pat);
+    XSTRCAT(pline, "\"  (");
+    XSTRCAT( pline, int_asc(deltapat.jump) );
+    XSTRCAT(pline, ", ");
+    XSTRCAT( pline, int_asc(deltapat.patlen) );
+    XSTRCAT(pline, ")");
 
     /* scan through the regular expression pattern */
     cstr[0] = cstr[1] = '\0';
@@ -1480,36 +1480,36 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
             /* and some additional information */
             switch ( (mcptr->mc_type) & MASKCLO ) {
             case JMPTABLE:
-                strcat(pline, "\"");
-                strcat(pline, mcptr->u.jmptable->patrn);
-                strcat(pline, "\"  (");
-                strcat( pline, int_asc(mcptr->u.jmptable->jump) );
-                strcat(pline, ", ");
-                strcat( pline, int_asc(mcptr->u.jmptable->patlen) );
-                strcat(pline, ")");
+                XSTRCAT(pline, "\"");
+                XSTRCAT(pline, mcptr->u.jmptable->patrn);
+                XSTRCAT(pline, "\"  (");
+                XSTRCAT( pline, int_asc(mcptr->u.jmptable->jump) );
+                XSTRCAT(pline, ", ");
+                XSTRCAT( pline, int_asc(mcptr->u.jmptable->patlen) );
+                XSTRCAT(pline, ")");
                 break;
 
             case LITSTRING:
-                strcat(pline, "\"");
-                strcat(pline, mcptr->u.lstring);
-                strcat(pline, "\"");
+                XSTRCAT(pline, "\"");
+                XSTRCAT(pline, mcptr->u.lstring);
+                XSTRCAT(pline, "\"");
                 break;
 
             case LITCHAR:
                 cstr[0] =  mcptr->u.lchar;
-                strcat(pline, "\"");
-                strcat(pline, cstr);
-                strcat(pline, "\"");
+                XSTRCAT(pline, "\"");
+                XSTRCAT(pline, cstr);
+                XSTRCAT(pline, "\"");
                 break;
 
             case GRPBEG:
                 cstr[0] = mcptr->u.group_no + '0';
-                strcat(pline, cstr);
+                XSTRCAT(pline, cstr);
                 break;
 
             case GRPEND:
                 cstr[0] = mcptr->u.group_no + '0';
-                strcat(pline, cstr);
+                XSTRCAT(pline, cstr);
                 break;
             }
 
@@ -1521,12 +1521,12 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
         }
         /* add in the header text */
         XSTRCPY(pline, " Reverse Pattern = \"");
-        strcat(pline, tap);
-        strcat(pline, "\"  (");
-        strcat( pline, int_asc(tapatled.jump) );
-        strcat(pline, ", ");
-        strcat( pline, int_asc(tapatled.patlen) );
-        strcat(pline, ")");
+        XSTRCAT(pline, tap);
+        XSTRCAT(pline, "\"  (");
+        XSTRCAT( pline, int_asc(tapatled.jump) );
+        XSTRCAT(pline, ", ");
+        XSTRCAT( pline, int_asc(tapatled.patlen) );
+        XSTRCAT(pline, ")");
 
         mcptr = &tapcm[0];
     }
@@ -1557,8 +1557,8 @@ int PASCAL NEAR rmc_list P2_(int, f, int, n)
 
     /* add in the header text */
     XSTRCPY(pline, "Replacement Pattern = \"");
-    strcat(pline, rpat);
-    strcat(pline, "\"");
+    XSTRCAT(pline, rpat);
+    XSTRCAT(pline, "\"");
 
     /* scan through the regular expression pattern */
     cstr[0] = cstr[1] = '\0';
@@ -1578,14 +1578,14 @@ int PASCAL NEAR rmc_list P2_(int, f, int, n)
         /* and some additional information */
         switch ( rmcptr->mc_type ) {
         case LITSTRING:
-            strcat(pline, "\"");
-            strcat(pline, rmcptr->u.rstr);
-            strcat(pline, "\"");
+            XSTRCAT(pline, "\"");
+            XSTRCAT(pline, rmcptr->u.rstr);
+            XSTRCAT(pline, "\"");
             break;
 
         case GROUP:
             cstr[0] = rmcptr->u.group_no + '0';
-            strcat(pline, cstr);
+            XSTRCAT(pline, cstr);
             break;
         }
 
@@ -1603,63 +1603,63 @@ VOID PASCAL NEAR mctype_cat P2_(char *, pline, int, mc_type)
 {
     switch ( mc_type ) {
     case JMPTABLE:
-        strcat(pline, "JMPTABLE   ");
+        XSTRCAT(pline, "JMPTABLE   ");
         break;
 
     case LITSTRING:
-        strcat(pline, "LITSTRING  ");
+        XSTRCAT(pline, "LITSTRING  ");
         break;
 
     case LITCHAR:
-        strcat(pline, "LITCHAR    ");
+        XSTRCAT(pline, "LITCHAR    ");
         break;
 
     case ANY:
-        strcat(pline, "ANY        ");
+        XSTRCAT(pline, "ANY        ");
         break;
 
     case CCL:
-        strcat(pline, "CCL        ");
+        XSTRCAT(pline, "CCL        ");
         break;
 
     case NCCL:
-        strcat(pline, "NCCL       ");
+        XSTRCAT(pline, "NCCL       ");
         break;
 
     case BOL:
-        strcat(pline, "BOL        ");
+        XSTRCAT(pline, "BOL        ");
         break;
 
     case EOL:
-        strcat(pline, "EOL        ");
+        XSTRCAT(pline, "EOL        ");
         break;
 
     case BOWRD:
-        strcat(pline, "BOWORD     ");
+        XSTRCAT(pline, "BOWORD     ");
         break;
 
     case EOWRD:
-        strcat(pline, "EOWORD     ");
+        XSTRCAT(pline, "EOWORD     ");
         break;
 
     case GRPBEG:
-        strcat(pline, "GRPBEG     ");
+        XSTRCAT(pline, "GRPBEG     ");
         break;
 
     case GRPEND:
-        strcat(pline, "GRPEND     ");
+        XSTRCAT(pline, "GRPEND     ");
         break;
 
     case GROUP:
-        strcat(pline, "GROUP      ");
+        XSTRCAT(pline, "GROUP      ");
         break;
 
     case DITTO:
-        strcat(pline, "DITTO      ");
+        XSTRCAT(pline, "DITTO      ");
         break;
 
     default:
-        strcat(pline, "Unknown type");
+        XSTRCAT(pline, "Unknown type");
         break;
     }
 }

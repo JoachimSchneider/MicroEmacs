@@ -552,7 +552,7 @@ smgcres(char *value)
 	newwidth(TRUE, width);
 
 	/* Set resolution variable */
-	XSTRCPY(sres, value);
+	xstrcpy(sres, value);
 }
 
 /***
@@ -740,10 +740,10 @@ int smgcap()
 	/* Disable resolution if unreasonable */
 	if (narrow_char < 10 || wide_char < 10) {
 		width_wide = width_narrow = NULL;
-		XSTRCPY(sres, "NORMAL");
+		xstrcpy(sres, "NORMAL");
 	} else
 		/* Kludge resolution */
-		XSTRCPY(sres, orgchar.width == wide_char ? "WIDE" : "NORMAL");
+		xstrcpy(sres, orgchar.width == wide_char ? "WIDE" : "NORMAL");
 
 	/* Check for minimal operations */
 	if (set_cursor_abs == NULL || erase_whole_display == NULL) {

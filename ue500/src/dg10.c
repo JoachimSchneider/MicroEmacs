@@ -150,8 +150,8 @@ PASCAL NEAR dg10beep()
 
 PASCAL NEAR dg10open()
 {
-    XSTRCPY(sres, "NORMAL");
-    XSTRCPY(os, "DG10");
+    xstrcpy(sres, "NORMAL");
+    xstrcpy(os, "DG10");
     revexist = TRUE;
     ttopen();
 }

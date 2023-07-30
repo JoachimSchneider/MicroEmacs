@@ -186,8 +186,8 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
             if ( ( strlen (FullCmd) + strlen (ExecOption) + strlen (Cmd) ) >=
                  CMDLENGTH ) return FALSE;
 
-            strcat (FullCmd, ExecOption);
-            strcat (FullCmd, Cmd);
+            xstrcat (FullCmd, ExecOption);
+            xstrcat (FullCmd, Cmd);
         }
 #else
         if ( Synchronize || !Cmd ) {
@@ -202,7 +202,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
                 char    *s;
 
                 if ( ( s = flook ("DOSEXEC.PIF", TRUE) ) != NULL ) {
-                    XSTRCPY (FullCmd, s);
+                    xstrcpy (FullCmd, s);
                 }
             }
         } else FullCmd[0] = '\0';
@@ -218,8 +218,8 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
                 char    *s;
 
                 if ( ( s = flook ("DOSBOX.PIF", TRUE) ) != NULL ) {
-                    XSTRCPY (FullCmd, s);
-                } else XSTRCPY (FullCmd, "command.com");
+                    xstrcpy (FullCmd, s);
+                } else xstrcpy (FullCmd, "command.com");
             }
         }
         /* the DOSBox profileString should be the name of a PIF file for
@@ -230,23 +230,23 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
             if ( (strlen (FullCmd) + strlen (Cmd) + 4) >=
                  CMDLENGTH ) return FALSE;
 
-            strcat (FullCmd, " /c ");
-            strcat (FullCmd, Cmd);
+            xstrcat (FullCmd, " /c ");
+            xstrcat (FullCmd, Cmd);
         }
 #endif
         if ( InFile ) {
             if ( (strlen (FullCmd) + strlen (InFile) + 2) >=
                  CMDLENGTH ) return FALSE;
 
-            strcat (FullCmd, " <");
-            strcat (FullCmd, InFile);
+            xstrcat (FullCmd, " <");
+            xstrcat (FullCmd, InFile);
         }
         if ( OutFile ) {
             if ( (strlen (FullCmd) + strlen (OutFile) + 2) >=
                  CMDLENGTH ) return FALSE;
 
-            strcat (FullCmd, " >");
-            strcat (FullCmd, OutFile);
+            xstrcat (FullCmd, " >");
+            xstrcat (FullCmd, OutFile);
         }
     }
 #if WINDOW_MSWIN32
@@ -477,7 +477,7 @@ PASCAL f_filter (int f, int n)
     if ( mlreply ("#", Line, NLINE) != TRUE ) return FALSE;
 
     bp = curbp;
-    XSTRCPY (fname, bp->b_fname);
+    xstrcpy (fname, bp->b_fname);
 #if WINDOW_MSWIN32
     GetTempPath (NFILEN, TempDir);
     GetTempFileName (TempDir, "UE", 0, InFile);
@@ -512,7 +512,7 @@ PASCAL f_filter (int f, int n)
             }
         }
     }
-    XSTRCPY (bp->b_fname, fname);    /* restore original file name */
+    xstrcpy (bp->b_fname, fname);    /* restore original file name */
 
     return Result;
 } /* f_filter */

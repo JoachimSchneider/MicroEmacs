@@ -1874,7 +1874,7 @@ char *getnfile P0_(void)
 
     /* if this entry is a directory name, say so */
     if ( (fstat.st_mode & S_IFMT) == S_IFDIR )
-        strcat(rbuf, DIRSEPSTR);
+        XSTRCAT(rbuf, DIRSEPSTR);
 
     /* Return the next file name! */
     return (rbuf);
@@ -1988,8 +1988,8 @@ int mode;       /* umask for creation (which we blissfully ignore...) */
     char buf[80];
 
     XSTRCPY(buf, "mkdir ");
-    strcat(buf, name);
-    strcat(buf, " > /dev/null 2>&1");
+    XSTRCAT(buf, name);
+    XSTRCAT(buf, " > /dev/null 2>&1");
 
     return ( system(buf) );
 }
@@ -2000,8 +2000,8 @@ char *name;     /* name of directory to delete */
     char buf[80];
 
     XSTRCPY(buf, "rmdir ");
-    strcat(buf, name);
-    strcat(buf, " > /dev/null 2>&1");
+    XSTRCAT(buf, name);
+    XSTRCAT(buf, " > /dev/null 2>&1");
 
     return ( system(buf) );
 }

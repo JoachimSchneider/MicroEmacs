@@ -181,7 +181,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     case UFCALL:                /* construct buffer name to execute */
         result[0] = '[';
         xstrlcpy(&result[1], arg1, sizeof(result) - 1);
-        strcat(result, "]");
+        XSTRCAT(result, "]");
 
         /* find it, return ERROR if it does not exist */
         bp = bfind(result, FALSE, 0);
@@ -961,12 +961,12 @@ int n;          /* numeric arg (can overide prompted value) */
     if ( macbug && (strcmp(var, "%track") != 0) ) {
         xstrcpy(outline, "(((");
 
-        strcat(outline, var);
-        strcat(outline, " <- ");
+        xstrcat(outline, var);
+        xstrcat(outline, " <- ");
 
         /* and lastly the value we tried to assign */
-        strcat(outline, value);
-        strcat(outline, ")))");
+        xstrcat(outline, value);
+        xstrcat(outline, ")))");
 
         /* write out the debug line */
         mlforce(outline);
@@ -1025,8 +1025,8 @@ int n;          /* numeric arg (ignored here) */
     if ( macbug && (strcmp(var, "%track") != 0) ) {
         xstrcpy(outline, "(((Globally declare ");
 
-        strcat(outline, var);
-        strcat(outline, ")))");
+        xstrcat(outline, var);
+        xstrcat(outline, ")))");
 
         /* write out the debug line */
         mlforce(outline);
@@ -1085,8 +1085,8 @@ int n;          /* numeric arg (ignored here) */
     if ( macbug && (strcmp(var, "%track") != 0) ) {
         xstrcpy(outline, "(((Locally declare ");
 
-        strcat(outline, var);
-        strcat(outline, ")))");
+        xstrcat(outline, var);
+        xstrcat(outline, ")))");
 
         /* write out the debug line */
         mlforce(outline);
@@ -2193,10 +2193,10 @@ int n;          /* numeric arg (can overide prompted value) */
 
     /* and display the value */
     xstrcpy(outline, var);
-    strcat(outline, " = ");
+    xstrcat(outline, " = ");
 
     /* and lastly the current value */
-    strcat( outline, fixnull( getval(var) ) );
+    xstrcat( outline, fixnull( getval(var) ) );
 
     /* write out the result */
     mlforce(outline);
@@ -2240,7 +2240,7 @@ int f, n;        /* prefix flag and argument */
 
         /* add in the environment variable name */
         XSTRCPY(outseq, "$");
-        strcat(outseq, envars[uindex]);
+        XSTRCAT(outseq, envars[uindex]);
         pad(outseq, 14);
 
         /* add in the value */
@@ -2264,23 +2264,23 @@ int f, n;        /* prefix flag and argument */
         /* make a header for this list */
         XSTRCPY(outseq, "----- ");
         if ( ut->bufp == (BUFFER *)NULL )
-            strcat(outseq, "Global User Variables");
+            XSTRCAT(outseq, "Global User Variables");
         else {
-            strcat(outseq, "Defined in ");
-            strcat(outseq, ut->bufp->b_bname);
+            XSTRCAT(outseq, "Defined in ");
+            XSTRCAT(outseq, ut->bufp->b_bname);
             if ( ut->bufp->b_numargs > 0 ) {
-                strcat(outseq, "(");
+                XSTRCAT(outseq, "(");
                 cur_arg = ut->bufp->b_args;
                 while ( cur_arg ) {
                     if ( cur_arg != ut->bufp->b_args )
-                        strcat(outseq, ", ");
-                    strcat(outseq, cur_arg->name);
+                        XSTRCAT(outseq, ", ");
+                    XSTRCAT(outseq, cur_arg->name);
                     cur_arg = cur_arg->next;
                 }
-                strcat(outseq, ")");
+                XSTRCAT(outseq, ")");
             }
         }
-        strcat(outseq, " -----");
+        XSTRCAT(outseq, " -----");
 
         /* and add it as a line into the buffer */
         if ( addline(varbuf, outseq) != TRUE )
@@ -2293,7 +2293,7 @@ int f, n;        /* prefix flag and argument */
 
             /* add in the user variable name */
             XSTRCPY(outseq, "%");
-            strcat(outseq, ut->uv[uindex].u_name);
+            XSTRCAT(outseq, ut->uv[uindex].u_name);
             pad(outseq, 14);
 
             /* add in the value */
@@ -2346,7 +2346,7 @@ int f, n;        /* prefix flag and argument */
 
         /* add in the environment variable name */
         XSTRCPY(outseq, "&");
-        strcat(outseq, funcs[uindex].f_name);
+        XSTRCAT(outseq, funcs[uindex].f_name);
 
         /* and add it as a line into the buffer */
         if ( addline(fncbuf, outseq) != TRUE )
@@ -2370,7 +2370,7 @@ int len;        /* wanted length of string */
 
 {
     while ( strlen(s) < len ) {
-        strcat(s, "          ");
+        XSTRCAT(s, "          ");
         s[len] = 0;
     }
 }

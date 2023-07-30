@@ -388,7 +388,7 @@ PASCAL NEAR ttopen()
     int status;
     char *waitstr;
 
-    XSTRCPY(os, "VMS");
+    xstrcpy(os, "VMS");
     tyin = 0;
     tyout = 0;
     tylen = 0;
@@ -775,14 +775,14 @@ int PASCAL NEAR f_filter(int f, int n)
 
 	/* setup the proper file names */
 	bp = curbp;
-	XSTRCPY(tmpnam, bp->b_fname);	/* save the original name */
-	XSTRCPY(bp->b_fname, bname1);	/* set it to our new one */
+	xstrcpy(tmpnam, bp->b_fname);	/* save the original name */
+	xstrcpy(bp->b_fname, bname1);	/* set it to our new one */
 
 	/* write it out, checking for errors */
 	if (writeout(filnam1, "w") != TRUE) {
 		mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-		XSTRCPY(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		return(FALSE);
 	}
 
@@ -802,14 +802,14 @@ int PASCAL NEAR f_filter(int f, int n)
 	if (!s || (readin(filnam2,FALSE) == FALSE)) {
 		mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-		XSTRCPY(bp->b_fname, tmpnam);
+		xstrcpy(bp->b_fname, tmpnam);
 		unlink(filnam1);
 		unlink(filnam2);
 		return(s);
 	}
 
 	/* reset file name */
-	XSTRCPY(bp->b_fname, tmpnam);	/* restore name */
+	xstrcpy(bp->b_fname, tmpnam);	/* restore name */
 	bp->b_flag |= BFCHG;		/* flag it as changed */
 
 	/* and get rid of the temporary file */
@@ -857,7 +857,7 @@ char *PASCAL NEAR getffile(char *fspec)
 	register char *cp, c;
 
 	/* first parse the file path off the file spec */
-	XSTRCPY(path, fspec);
+	xstrcpy(path, fspec);
 	index = strlen(path) - 1;
 	while (index >= 0 && (path[index] != ']' && path[index] != ':'))
 		--index;
@@ -889,13 +889,13 @@ char *PASCAL NEAR getffile(char *fspec)
 	}
 
 	/* construct the composite wild card spec */
-	XSTRCPY(fname, path);
-	strcat(fname, &fspec[index+1]);
-	strcat(fname, "*");
+	xstrcpy(fname, path);
+	xstrcat(fname, &fspec[index+1]);
+	xstrcat(fname, "*");
 	if (!extflag)
-		strcat(fname, ".*");
+		xstrcat(fname, ".*");
 	if (!verflag)
-		strcat(fname, ";*");
+		xstrcat(fname, ";*");
 
 	pat_desc.dsc$a_pointer = fname;
 	pat_desc.dsc$w_length = strlen(fname);
@@ -922,7 +922,7 @@ char *PASCAL NEAR getffile(char *fspec)
 	for (cp--; *cp!=';' && cp>=rbuf; cp--) ;
 	*cp = 0;
 	for (cp--; *cp!=']' && cp>=rbuf; cp--) ;
-	strcat(path,++cp);
+	xstrcat(path,++cp);
 	mklower(path);
 	return(path);
 }
@@ -957,7 +957,7 @@ char *PASCAL NEAR getnfile()
 	*cp = 0;
 	for (cp--; *cp!=']' && cp>=rbuf; cp--)
 		;
-	strcat(path,++cp);
+	xstrcat(path,++cp);
 	mklower(path);
 	return(path);
 }
@@ -1002,10 +1002,10 @@ ME$EDIT(struct dsc$descriptor *infile, struct dsc$descriptor *outfile)
     makename( bname, outstr);
     unqname(bname);
     bp = bfind(bname, TRUE, 0);
-    XSTRCPY(bp->b_fname, instr);
+    xstrcpy(bp->b_fname, instr);
     bp->b_active = FALSE;
     swbuffer( bp);
-    XSTRCPY(bp->b_fname, outstr);
+    xstrcpy(bp->b_fname, outstr);
     bp->b_flag |= BFCHG;            /* flag it as changed */
     free( instr);
     free( outstr);

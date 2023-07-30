@@ -67,7 +67,7 @@ int PASCAL NEAR mlyesno P1_(char *, prompt)
     for (;; ) {
         /* build and prompt the user */
         XSTRCPY(buf, prompt);
-        strcat(buf, TEXT162);
+        XSTRCAT(buf, TEXT162);
 /*                          " [y/n]? " */
         mlwrite(buf);
 

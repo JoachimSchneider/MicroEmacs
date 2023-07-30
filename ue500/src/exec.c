@@ -148,8 +148,8 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
 
         /* construct the buffer name */
         XSTRCPY(bufn, "[");
-        strcat(bufn, tkn);
-        strcat(bufn, "]");
+        XSTRCAT(bufn, tkn);
+        XSTRCAT(bufn, "]");
 
         /* find the pointer to that buffer */
         if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) {
@@ -322,7 +322,7 @@ int PASCAL NEAR nextarg P4_(
     if ( ( sp = getval(buffer) ) == NULL )
         return (FALSE);
 
-    XSTRCPY(buffer, sp);
+    xstrlcpy(buffer, sp, size);
 
     return (TRUE);
 }
@@ -353,7 +353,7 @@ int PASCAL NEAR storeproc P2_(
 
     /* construct the macro buffer name */
     bname[0] = '[';
-    strcat(bname, "]");
+    XSTRCAT(bname, "]");
 
     /* set up the new macro buffer */
     if ( ( bp = bfind(bname, TRUE, BFINVS) ) == NULL ) {
@@ -425,7 +425,7 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
 
     /* construct the buffer name */
     bufn[0] = '[';
-    strcat(bufn, "]");
+    XSTRCAT(bufn, "]");
 
     /* find the pointer to that buffer */
     if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) {
@@ -1017,13 +1017,13 @@ VOID PASCAL NEAR errormesg P3_(
 
     /* build error message line */
     XSTRCPY(buf, "\n");
-    strcat(buf, mesg);
-    strcat(buf, TEXT229);
+    XSTRCAT(buf, mesg);
+    XSTRCAT(buf, TEXT229);
 /*      " in < " */
-    strcat(buf, bp->b_bname);
-    strcat(buf, TEXT230);
+    XSTRCAT(buf, bp->b_bname);
+    XSTRCAT(buf, TEXT230);
 /*      "> at line " */
-    strcat( buf, long_asc( getlinenum(bp, lp) ) );
+    XSTRCAT( buf, long_asc( getlinenum(bp, lp) ) );
     mlforce(buf);
 }
 
@@ -1058,18 +1058,18 @@ dbuild: /* Build the information line to be presented to the user */
         oldstatus = cmdstatus;
         docmd(track);
         cmdstatus = oldstatus;
-        strcat(outline, "[=");
-        strcat( outline, gtusr("track") );
-        strcat(outline, "]");
+        xstrcat(outline, "[=");
+        xstrcat(outline, gtusr("track"));
+        xstrcat(outline, "]");
     }
 
     /* debug macro name */
-    strcat(outline, bp->b_bname);
-    strcat(outline, ":");
+    xstrcat(outline, bp->b_bname);
+    xstrcat(outline, ":");
 
     /* and lastly the line */
-    strcat(outline, eline);
-    strcat(outline, ">>>");
+    xstrcat(outline, eline);
+    xstrcat(outline, ">>>");
 
     /* write out the debug line */
 dinput: outline[term.t_ncol - 1] = 0;
@@ -1132,8 +1132,8 @@ dinput: outline[term.t_ncol - 1] = 0;
             docmd(temp);
             cmdstatus = oldstatus;
             XSTRCPY(temp, " = [");
-            strcat( temp, gtusr("track") );
-            strcat(temp, "]");
+            XSTRCAT( temp, gtusr("track") );
+            XSTRCAT(temp, "]");
             mlforce(temp);
             c = get_key();
             goto dinput;
@@ -1145,7 +1145,7 @@ dinput: outline[term.t_ncol - 1] = 0;
             getstring( (unsigned char *)temp, NSTRING, ctoec(RETCHAR) );
             disinp = oldinp;
             XSTRCPY(track, "set %track ");
-            strcat(track, temp);
+            XSTRCAT(track, temp);
             goto dbuild;
 
         case 's':         /* execute a function */
@@ -1210,7 +1210,7 @@ int PASCAL NEAR execfile P2_(
 
         /* try to default the extension */
         if ( sindex(fname, ".") == 0 ) {
-            strcat(fname, ".cmd");
+            XSTRCAT(fname, ".cmd");
             fspec = flook(fname, TRUE);
             if ( fspec != NULL )
                 goto exec1;

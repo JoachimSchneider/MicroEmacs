@@ -227,7 +227,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         XSTRCPY(pathname, ".");
 
     /* merge the drive into the pathname */
-    strcat(drivename, pathname);
+    XSTRCAT(drivename, pathname);
     XSTRCPY(pathname, drivename);
 
 # if  LOCKDEBUG
@@ -243,13 +243,13 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         tgetc();
 #  endif
         XSTRCPY(result, LOCKMSG);
-        strcat(result, "Path not found");
+        XSTRCAT(result, "Path not found");
 
         return (result);
     }
     if ( (sb.st_mode & S_IFDIR) == 0 ) {
         XSTRCPY(result, LOCKMSG);
-        strcat(result, "Illegal Path");
+        XSTRCAT(result, "Illegal Path");
 
         return (result);
     }
@@ -257,8 +257,8 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
-    strcat(lockpath, DIRSEPSTR);
-    strcat(lockpath, LOCKDIR);
+    XSTRCAT(lockpath, DIRSEPSTR);
+    XSTRCAT(lockpath, LOCKDIR);
 # if  LOCKDEBUG
     printf("Lockdir [%s]\n", lockpath);
     tgetc();
@@ -280,11 +280,11 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
             switch ( errno ) {
 
             case EACCES:
-                strcat(result, "Permission Denied");
+                XSTRCAT(result, "Permission Denied");
                 break;
 
             case ENOENT:
-                strcat(result, "No such file or directory");
+                XSTRCAT(result, "No such file or directory");
                 break;
             }
 
@@ -297,8 +297,8 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 
     /* check for the existance of this lockfile */
     XSTRCPY(lockfile, lockpath);
-    strcat(lockfile, DIRSEPSTR);
-    strcat(lockfile, filename);
+    XSTRCAT(lockfile, DIRSEPSTR);
+    XSTRCAT(lockfile, filename);
 # if  LOCKDEBUG
     printf("Lockfile [%s]\n", lockfile);
     tgetc();
@@ -310,7 +310,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         fp = fopen(lockfile, "w");
         if ( fp == (FILE *)NULL ) {
             XSTRCPY(result, LOCKMSG);
-            strcat(result, "Can not open lock file");
+            XSTRCAT(result, "Can not open lock file");
 # if  LOCKDEBUG
             printf("Could not open lockfile [%s](%s)\n", lockfile, result);
             tgetc();
@@ -358,7 +358,7 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         fp = fopen(lockfile, "r");
         if ( fp == (FILE *)NULL ) {
             XSTRCPY(result, LOCKMSG);
-            strcat(result, "Can not read lock file");
+            XSTRCAT(result, "Can not read lock file");
 
             return (result);
         }
@@ -372,10 +372,10 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
         term_trim(result);
 
         /* get the host name */
-        strcat(result, "@");
+        XSTRCAT(result, "@");
         fgets(buf, NSTRING, fp);
         term_trim(buf);
-        strcat(result, buf);
+        XSTRCAT(result, buf);
 
 # if  ( IS_UNIX() )
         /* is it the current host? */
@@ -396,10 +396,10 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
 # endif
 
         /* get the time */
-        strcat(result, " at ");
+        XSTRCAT(result, " at ");
         fgets(buf, NSTRING, fp);
         term_trim(buf);
-        strcat(result, buf);
+        XSTRCAT(result, buf);
         fclose(fp);
 # if  LOCKDEBUG
         printf("Could not get lock: (%s)\n", result);
@@ -435,7 +435,7 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
         XSTRCPY(pathname, ".");
 
     /* merge the drive into the pathname */
-    strcat(drivename, pathname);
+    XSTRCAT(drivename, pathname);
     XSTRCPY(pathname, drivename);
 
 # if  LOCKDEBUG
@@ -445,22 +445,22 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
-    strcat(lockpath, DIRSEPSTR);
-    strcat(lockpath, LOCKDIR);
+    XSTRCAT(lockpath, DIRSEPSTR);
+    XSTRCAT(lockpath, LOCKDIR);
 # if  LOCKDEBUG
     printf("Lockdir [%s]\n", lockpath);
     tgetc();
 # endif
     /* check for the existance of this lockfile */
     XSTRCPY(lockfile, lockpath);
-    strcat(lockfile, DIRSEPSTR);
-    strcat(lockfile, filename);
+    XSTRCAT(lockfile, DIRSEPSTR);
+    XSTRCAT(lockfile, filename);
 # if  LOCKDEBUG
     printf("Lockfile [%s]\n", lockfile);
     tgetc();
 # endif
     if ( unlink(lockfile) ) {
-        strcat(result, "could not remove lock file");
+        XSTRCAT(result, "could not remove lock file");
 
         return (result);
     } else {

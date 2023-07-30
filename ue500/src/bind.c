@@ -209,11 +209,11 @@ int f, n;       /* command arguments [IGNORED] */
     /* build the responce string for later */
     XSTRCPY(outseq, TEXT215);
 /*         ": macro-to-key " */
-    strcat(outseq, &bufn[1]);
+    XSTRCAT(outseq, &bufn[1]);
 
     /* translate it to a buffer pointer */
     bufn[0] = '[';
-    strcat(bufn, "]");
+    XSTRCAT(bufn, "]");
     if ( ( kmacro=bfind(bufn, FALSE, 0) ) == NULL ) {
         mlwrite(TEXT130);
 
@@ -221,7 +221,7 @@ int f, n;       /* command arguments [IGNORED] */
         return (FALSE);
     }
 
-    strcat(outseq, " ");
+    XSTRCAT(outseq, " ");
     mlwrite(outseq);
 
     /* get the command sequence to bind */
@@ -612,7 +612,7 @@ char *sfname;   /* name of startup file (null if default) */
         /* default the extention */
         XSTRCPY(name, sfname);
         if ( sindex(name, ".") == 0 )
-            strcat(name, ".cmd");
+            XSTRCAT(name, ".cmd");
 
         fname = flook(name, TRUE);
     } else
@@ -681,10 +681,10 @@ int hflag;              /* Look in the HOME environment variable first? */
             /* build home dir file spec */
             XSTRCPY(fspec, home);
 # if WMCS
-            strcat(fspec, fname);
+            XSTRCAT(fspec, fname);
 # else
-            strcat(fspec, DIRSEPSTR);
-            strcat(fspec, fname);
+            XSTRCAT(fspec, DIRSEPSTR);
+            XSTRCAT(fspec, fname);
 # endif
 
             /* and try it out */
@@ -731,7 +731,7 @@ int hflag;              /* Look in the HOME environment variable first? */
             if ( (sp != fspec) && (*(sp-1) != DIRSEPCHAR) )
                 *sp++ = DIRSEPCHAR;
             *sp = 0;
-            strcat(fspec, fname);
+            XSTRCAT(fspec, fname);
 
             /* and try it out */
             if ( ffropen(fspec) == FIOSUC ) {
@@ -752,7 +752,7 @@ int hflag;              /* Look in the HOME environment variable first? */
     /* look it up via the old table method */
     for ( i=2; i < NPNAMES; i++ ) {
         XSTRCPY(fspec, pathname[i]);
-        strcat(fspec, fname);
+        XSTRCAT(fspec, fname);
 
         /* and try it out */
         if ( ffropen(fspec) == FIOSUC ) {
@@ -1110,8 +1110,8 @@ int set_key P2_(KEYTAB *, key,  /* ptr to key to set          */
 
     /* is it a procedure/macro? */
     XSTRCPY(bufn, "[");
-    strcat(bufn, name);
-    strcat(bufn, "]");
+    XSTRCAT(bufn, name);
+    XSTRCAT(bufn, "]");
     if ( ( kmacro=bfind(bufn, FALSE, 0) ) != NULL ) {
         key->k_ptr.buf = kmacro;
         key->k_type = BINDBUF;

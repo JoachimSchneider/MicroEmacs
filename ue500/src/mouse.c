@@ -177,10 +177,10 @@ int f, n;        /* prefix flag and argument */
 
         /* get the name of the screen to create */
         XSTRCPY(scr_name, "SCREEN_T");
-        strcat( scr_name, int_asc(temp_count++) );
+        XSTRCAT( scr_name, int_asc(temp_count++) );
         while ( lookup_screen(scr_name) != (SCREEN_T *)NULL ) {
             XSTRCPY(scr_name, "SCREEN_T");
-            strcat( scr_name, int_asc(temp_count++) );
+            XSTRCAT( scr_name, int_asc(temp_count++) );
         }
 
         /* save the current dot position in the buffer info so the new screen

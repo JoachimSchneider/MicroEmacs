@@ -73,7 +73,7 @@ static int newtags P1_(char *, path)
         return (FALSE);
     }
     XSTRCPY(tnewp->t_path, path);
-    strcat(path, "tags");
+    XSTRCAT(path, "tags");
     if ( ( tnewp->t_fp = fopen(path, "r") ) == NULL ) {
         free( (char *) tnewp );
 
@@ -267,7 +267,7 @@ char *filename;
         return;
 
     XSTRCPY(temp, curtp->t_path);
-    strcat(temp, filename);
+    XSTRCAT(temp, filename);
     XSTRCPY(filename, temp);
 }
 

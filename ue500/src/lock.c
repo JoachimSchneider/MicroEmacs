@@ -121,8 +121,8 @@ int xlock P1_(CONST char *, fname /* file name to lock */)
     /* someone else has it....override? */
     XSTRCPY(msg, TEXT176);
 /*                  "File in use by " */
-    strcat(msg, locker);
-    strcat(msg, TEXT177);
+    XSTRCAT(msg, locker);
+    XSTRCAT(msg, TEXT177);
 /*                  ", overide?" */
     status = mlyesno(msg);              /* ask them */
     if ( status == TRUE )
@@ -160,16 +160,16 @@ VOID lckerror P1_(char *, errstr /* lock error string to print out */)
     char *sys_errstr = strerror(errno);
 
     XSTRCPY(obuf, errstr);
-    strcat(obuf, " - ");
+    XSTRCAT(obuf, " - ");
 # if ( IS_UNIX() || WMCS )
     if ( sys_errstr && *sys_errstr )
-        strcat(obuf, sys_errstr);
+        XSTRCAT(obuf, sys_errstr);
     else
-        strcat(obuf, TEXT178);
+        XSTRCAT(obuf, TEXT178);
 /*                           "[can not get system error message]" */
 # else
-    strcat(obuf, "Error # ");
-    strcat( obuf, int_asc(errno) );
+    XSTRCAT(obuf, "Error # ");
+    XSTRCAT( obuf, int_asc(errno) );
 # endif
     mlwrite(obuf);
     update(TRUE);

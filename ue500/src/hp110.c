@@ -180,8 +180,8 @@ register int n;
 
 PASCAL NEAR h110open()
 {
-    XSTRCPY(sres, "15LINE");
-    XSTRCPY(os, "MSDOS");
+    xstrcpy(sres, "15LINE");
+    xstrcpy(os, "MSDOS");
     revexist = TRUE;
     ttopen();
 }

@@ -248,7 +248,7 @@ tcapopen()
     char err_str[72];
     char *tgetstr();
 
-    XSTRCPY(os, "UNIX");
+    xstrcpy(os, "UNIX");
     if ( ( tv_stype = getenv("TERM") ) == NULL ) {
         puts(TEXT182);
 /*           "Environment variable TERM not defined!" */
@@ -306,7 +306,7 @@ tcapopen()
 
     /* read definitions of various function keys into ttable */
     for ( index = 0; index < NTBINDS; index++ ) {
-        XSTRCPY( ttable[index].p_seq, fixnull( tgetstr(ttable[index].p_name,
+        xstrcpy( ttable[index].p_seq, fixnull( tgetstr(ttable[index].p_name,
                                                        &p) ) );
     }
 
@@ -341,7 +341,7 @@ tcapclose()
 
 tcapkopen()
 {
-    XSTRCPY(sres, "NORMAL");
+    xstrcpy(sres, "NORMAL");
 }
 
 tcapkclose()

@@ -1069,10 +1069,10 @@ int global;                             /* true = global flag,  false = current
 /*                "Mode to " */
 
     if ( kind == TRUE )
-        strcat(prompt, TEXT64);
+        XSTRCAT(prompt, TEXT64);
 /*                 "add: " */
     else
-        strcat(prompt, TEXT65);
+        XSTRCAT(prompt, TEXT65);
 /*                 "delete: " */
 
     /* prompt the user and get an answer */
@@ -1623,8 +1623,20 @@ char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 }
 #endif
 
+/* strcat of possibly overlapping regions   */
+char *xstrcat P2_(char *, s1, CONST char *, s2)
+{
+    int l = 0;
+
+    l = (NULL == s1)? 0 : strlen(s1);
+
+    return xstrcpy(s1 + l, s2);
+}
+
+
 /* Like FreeBSD's strlcpy(): Equivalent semantics:
  *  n = strlcpy(dst, src, len);
+ *  ---
  *  n = snprintf(dst, len, "%s", src);
  */
 int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
@@ -1676,9 +1688,25 @@ int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
     return l2;
 }
 
+/* Like FreeBSD's strlcat(): Equivalent semantics:
+ *  n = strlcat(dst, src, len);
+ *  ---
+ *  dup = strdup(dst);
+ *  n = snprintf(dst, len, "%s%s", dup, src);
+ *  free(dup);
+ */
+int xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
+{
+    int l   = 0;
+
+    l = (NULL == s1)? 0 : strlen(s1);
+
+    return xstrlcpy(s1 + l, s2, n - l) + l;
+}
+
 /* SFSTRCPY:
- *  if size .GE. 0 copy src to dst usling xstrlcpy(dst, src, sizeof(dst))
- *  else           copy src to dst usling xstrcpy(dst, src) and log
+ *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, sizeof(dst))
+ *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
  */
 char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src, const char *, file, int, line)
@@ -1688,6 +1716,23 @@ char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src, const char *,
     } else                {
         xstrcpy(dst, src);
         TRCK(("%s", "Warning unsafe string copy"), file, line);
+    }
+
+    return dst;
+}
+
+/* SFSTRCAT:
+ *  if size .GE. 0 append src to dst using xstrlcat(dst, src, sizeof(dst))
+ *  else           append src to dst using xstrcat(dst, src) and log a
+ *                 warning message.
+ */
+char *sfstrcat_ P5_(char *, dst, int, dst_size, const char *, src, const char *, file, int, line)
+{
+    if ( 0 <= dst_size )  {
+        xstrlcat(dst, src, dst_size);
+    } else                {
+        xstrcat(dst, src);
+        TRCK(("%s", "Warning unsafe string cat"), file, line);
     }
 
     return dst;
@@ -2065,7 +2110,14 @@ int DebugMessage (CONST char *fmt, ...)
 char lputc_ P5_(LINE *, lp, int, n, char, c, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
+#if ( 0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+#else
+    ASRTK_TRC(lp->l_used_ <= lp->l_size_,
+              ("lp->l_used_ = %d, lp->lsize_ = %d",
+              lp->l_used_, lp->l_size_),
+              fnam, lno);
+#endif
     ASRTK(0 <= n,                     fnam, lno);
     ASRTK(n < lp->l_size_,            fnam, lno);
 
@@ -2081,7 +2133,14 @@ unsigned char FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
 #endif
 {
     ASRTK(NULL != lp,                     fnam, lno);
+#if ( 0 )
     ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
+#else
+    ASRTK_TRC(lp->l_used_ <= lp->l_size_,
+              ("lp->l_used_ = %d, lp->lsize_ = %d",
+              lp->l_used_, lp->l_size_),
+              fnam, lno);
+#endif
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
     if ( n == lp->l_used_ ) {
@@ -2103,7 +2162,14 @@ unsigned char FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
 char *FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                     fnam, lno);
+#if ( 0 )
     ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
+#else
+    ASRTK_TRC(lp->l_used_ <= lp->l_size_,
+              ("lp->l_used_ = %d, lp->lsize_ = %d",
+              lp->l_used_, lp->l_size_),
+              fnam, lno);
+#endif
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
     if ( n == lp->l_used_ ) {
@@ -2117,7 +2183,14 @@ char *FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
 int get_lused_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
+#if ( 0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+#else
+    ASRTK_TRC(lp->l_used_ <= lp->l_size_,
+              ("lp->l_used_ = %d, lp->lsize_ = %d",
+              lp->l_used_, lp->l_size_),
+              fnam, lno);
+#endif
 
     return ( (lp)->l_used_ );
 }
@@ -2125,7 +2198,14 @@ int get_lused_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
 int set_lused_ P4_(LINE *, lp, int, used, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
+#if ( 0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+#else
+    ASRTK_TRC(lp->l_used_ <= lp->l_size_,
+              ("lp->l_used_ = %d, lp->lsize_ = %d",
+              lp->l_used_, lp->l_size_),
+              fnam, lno);
+#endif
     ASRTK(0 <= used,                  fnam, lno);
     ASRTK(used <= lp->l_size_,        fnam, lno);
 
@@ -2135,7 +2215,14 @@ int set_lused_ P4_(LINE *, lp, int, used, CONST char *, fnam, int, lno)
 int get_lsize_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
+#if ( 0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
+#else
+    ASRTK_TRC(lp->l_used_ <= lp->l_size_,
+              ("lp->l_used_ = %d, lp->lsize_ = %d",
+              lp->l_used_, lp->l_size_),
+              fnam, lno);
+#endif
 
     return ( (lp)->l_size_ );
 }

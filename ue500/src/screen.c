@@ -464,7 +464,7 @@ int iflag;      /* list hidden screen flag */
 
         /* construct the screen name */
         XSTRCPY(line, sp->s_screen_name);
-        strcat(line, "                ");
+        XSTRCAT(line, "                ");
         line[15] = 0;
 
         /* list this screens windows's buffer names */
@@ -484,8 +484,8 @@ int iflag;      /* list hidden screen flag */
 
             /* append this buffer name */
             if ( strlen(line) > 15 )
-                strcat(line, " ");
-            strcat(line, bname);
+                XSTRCAT(line, " ");
+            XSTRCAT(line, bname);
 
             /* on to the next window */
             wp = wp->w_wndp;

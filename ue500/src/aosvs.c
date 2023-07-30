@@ -242,9 +242,9 @@ char *sfilnam;    /* save file name or NULL */
     zero( (char *) &fstat_pkt, sizeof (fstat_pkt) );
     zero(acl_buf, $MXACL);
 
-    XSTRCPY(bfnam, bfilnam);
+    xstrcpy(bfnam, bfilnam);
     if ( sfilnam ) {
-        XSTRCPY(sfnam, sfilnam);
+        xstrcpy(sfnam, sfilnam);
         resolve_full_pathname(sfnam, sfnam);
         tptr = sfnam;
     } else {
@@ -362,7 +362,7 @@ char *del_fnam;        /* name of file to delete */
 {
     char dtmp[NFILEN];
 
-    XSTRCPY(dtmp, del_fnam);
+    xstrcpy(dtmp, del_fnam);
     resolve_full_pathname(dtmp, dtmp);
     ac0.cptr = dtmp;
     ac1.lng = 0L;
@@ -389,8 +389,8 @@ char *to_nam;       /* rename to name */
      * string and working our way backward until we find a pathname seperator
      * which under AOS/VS is a colon (:).
      */
-    XSTRCPY(ftmp, from_nam);
-    XSTRCPY(ttmp, to_nam);
+    xstrcpy(ftmp, from_nam);
+    xstrcpy(ttmp, to_nam);
     resolve_full_pathname(ftmp, ftmp);
     resolve_full_pathname(ttmp, ttmp);
 
@@ -652,7 +652,7 @@ int spawncli(f, n)
 
 # if     AOSVS
     init_tline();
-    strcat(tline, "CHAIN/1=AB/2=AB,:CLI,EMACS_SET_CLI_PREFIX");
+    xstrcat(tline, "CHAIN/1=AB/2=AB,:CLI,EMACS_SET_CLI_PREFIX");
     do_system();
 # endif
 
@@ -679,7 +679,7 @@ int spawn(f, n)
         return (s);
 
     init_tline();
-    strcat(tline, line);
+    xstrcat(tline, line);
     do_system();
     do_system_end();
 
@@ -704,7 +704,7 @@ int execprg(f, n)
     if ( ( s=mlreply("!", line, NLINE) ) != TRUE )
         return (s);
 
-    XSTRCPY(tline, line);
+    xstrcpy(tline, line);
     do_system();
     do_system_end();
 
@@ -747,8 +747,8 @@ int pipecmd(f, n)
     ac1.ulng = -1L;
     sys($PNAME, &ac0, &ac1, &ac2);    /* get our PID */
     itoa(ac1.in, line);
-    strcat(pipecmd_filnam, line);     /* build temp. filename */
-    strcat(pipecmd_filnam, ".micro_emacs_command");
+    xstrcat(pipecmd_filnam, line);    /* build temp. filename */
+    xstrcat(pipecmd_filnam, ".micro_emacs_command");
 
     zero( (char *) &create_pkt, sizeof (create_pkt) );
     zero(acl_buf, $MXACL);
@@ -792,23 +792,22 @@ int pipecmd(f, n)
             return (FALSE);
     }
 
-    s = 0;                          /* init. index into line        */
+    s = 0;                          /* init. index into line          */
     init_tline();
-    strcat(tline, "LISTFILE,");      /* give CLI an @LIST to use     */
-    strcat(tline, pipecmd_filnam);           /* tack on the filename for @LIST
-                                              */
-    strcat(tline, ";");              /* separate the commands        */
-    s = strpbrk(line, ",; \t");      /* check for cmd line delimiters */
-    if ( s ) {                        /* find any?    */
+    xstrcat(tline, "LISTFILE,");    /* give CLI an @LIST to use       */
+    xstrcat(tline, pipecmd_filnam); /* tack on the filename for @LIST */
+    xstrcat(tline, ";");            /* separate the commands          */
+    s = strpbrk(line, ",; \t");     /* check for cmd line delimiters  */
+    if ( s ) {                      /* find any?                      */
         strncat( tline, line, (s-(int) &line) );/* get whats before the
-                                                 * delimeter*/
-        strcat(tline, "/L");         /* tack on "use @LIST file" switch */
-        strcat(tline, s);            /* get the rest of the cmd line */
-    } else {                        /* no delimiers...      */
-        strcat(tline, line);        /* get the cmd line     */
-        strcat(tline, "/L");         /* tack on "use @LIST file" switch*/
+                                                 * delimeter  */
+        xstrcat(tline, "/L");       /* tack on "use @LIST file" switch*/
+        xstrcat(tline, s);          /* get the rest of the cmd line   */
+    } else {                        /* no delimiers...                */
+        xstrcat(tline, line);       /* get the cmd line               */
+        xstrcat(tline, "/L");       /* tack on "use @LIST file" switch*/
     }
-    strcat(tline, ";BYE/L=@NULL");   /* tell CLI to die quietly      */
+    xstrcat(tline, ";BYE/L=@NULL"); /* tell CLI to die quietly        */
     do_system();
     s = TRUE;
 
@@ -880,9 +879,9 @@ VOID init_tline()
     extern char *curdir();
 
     tline[0] = '\000';
-    strcat(tline, "DIR,");
+    xstrcat(tline, "DIR,");
     curdir(&tline[4]);
-    strcat(tline, ";");
+    xstrcat(tline, ";");
 
     return;
 }
@@ -1166,7 +1165,7 @@ VOID ttopen()
     signal(SIGSYS, &traceback);
     signal(SIGTERM, &traceback);
 
-    XSTRCPY(os, "AOS");         /* tell us what OS we run */
+    xstrcpy(os, "AOS");           /* tell us what OS we run */
     ac0.in = fchannel(stdout);    /* make sure it is opened */
     ac0.in = fchannel(stdin);     /* make sure it is opened */
     ac1.ulng = ( BIT0 | (sizeof (crt_info)/2) ); /* get characteristics flag */
@@ -1197,7 +1196,7 @@ VOID ttopen()
 
     switch ( termcode ) {
     case 0:     /* Generic ANSI compliant */
-        XSTRCPY(sres, "ANSI");
+        xstrcpy(sres, "ANSI");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1210,7 +1209,7 @@ VOID ttopen()
 
     case 1:     /* DEC VT100 */
     case 2:     /* DEC VT100K */
-        XSTRCPY(sres, "VT100");
+        xstrcpy(sres, "VT100");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1223,7 +1222,7 @@ VOID ttopen()
 
     case 4:     /* DEC VT102 */
     case 5:     /* DEC VT102K */
-        XSTRCPY(sres, "VT102");
+        xstrcpy(sres, "VT102");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1237,7 +1236,7 @@ VOID ttopen()
 
     case 7:     /* DEC VT220 */
     case 8:     /* DEC VT220K */
-        XSTRCPY(sres, "VT220");
+        xstrcpy(sres, "VT220");
         crt_eol     = "\033[K";
         crt_eop     = "\033[J";
         term.t_move = &ansimove;
@@ -1249,13 +1248,13 @@ VOID ttopen()
         break;
 
     case 6:     /* D.G. Dasher D4xx */
-        XSTRCPY(sres, "DGD400");
+        xstrcpy(sres, "DGD400");
         crt_func = (INS_CHAR | INS_LINE | DEL_CHAR | DEL_LINE);
         break;
 
     case 3:     /* D.G. Dasher D2xx */
         default;
-        XSTRCPY(sres, "DGD200");
+        xstrcpy(sres, "DGD200");
     }
 # else
     if ( (crt_info.char_cdt != char_d2xx)    /* is not CRT3 or D2xx ?  and */
@@ -1266,7 +1265,7 @@ VOID ttopen()
         term.t_move = &ansimove;
         term.t_rev  = &ansirev;
         term.t_dim  = &ansidim;
-        XSTRCPY(sres, "ANSI");
+        xstrcpy(sres, "ANSI");
     }
 # endif /* XXCRT */
 
@@ -1302,7 +1301,7 @@ VOID ttopen()
     /* assume terminal has following */
     eolexist = TRUE;
     revexist = TRUE;
-    XSTRCPY(sres, "NORMAL");
+    xstrcpy(sres, "NORMAL");
 
     /*
      *   here we lower the priority of this task so that the console reader task
@@ -1713,7 +1712,7 @@ char *u_path, *a_path;
      * C Functions" manual, DG part number 093-000585-00.
      */
     if ( (*up == '^') || (*up == '@') || (*up == '=') || (*up == ':') ) {
-        XSTRCPY(a_path, u_path);
+        xstrcpy(a_path, u_path);
 
         return;
     }
@@ -1743,7 +1742,7 @@ char *u_path, *a_path;
         otoa(dec1, octal);
         if ( dec1 < 64 )
             *ap++ = '0';
-        strcat(ap, octal);
+        xstrcat(ap, octal);
         if ( dec1 >= 64 )
             ap++;
         ap++;
@@ -1834,7 +1833,7 @@ char *c_path, *x_path;
     aosvs$ac1.cptr = x_path;
     if ( sys($GRNAME, &aosvs$ac0, &aosvs$ac1, &aosvs$ac2) )
         if ( (aosvs$ac0.in == ERFDE) || (aosvs$ac0.in == ERFDE) )
-            XSTRCPY(x_path, t_path);
+            xstrcpy(x_path, t_path);
         else
             return (1);
 
@@ -1888,7 +1887,7 @@ char *fspec;    /* pattern to match */
     gnfndirect = NULL;
 
     /* first parse the file path off the file spec */
-    XSTRCPY(gnfnpath, fspec);
+    xstrcpy(gnfnpath, fspec);
     index = strlen(gnfnpath) - 1;
     while ( index >= 0 &&
             (gnfnpath[index] != '/' &&gnfnpath[index] != '\\' &&
@@ -1901,8 +1900,8 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* build the wildcard or template to use in the lookup */
-    XSTRCPY(gnfntmp, &fspec[index+1]);
-    strcat(gnfntmp, "+");
+    xstrcpy(gnfntmp, &fspec[index+1]);
+    xstrcat(gnfntmp, "+");
     gnfndir->dd_buf = gnfntmp;
 
     return ( getnfile() );
@@ -1924,8 +1923,8 @@ char *PASCAL NEAR getnfile()
     }
 
     /* return the next file name! */
-    XSTRCPY(gnfnrbuf, gnfnpath);
-    strcat(gnfnrbuf, gnfndirect->d_name);
+    xstrcpy(gnfnrbuf, gnfnpath);
+    xstrcat(gnfnrbuf, gnfndirect->d_name);
     mklower(gnfnrbuf);
     free(gnfndirect);
     gnfndirect = NULL;
@@ -1940,11 +1939,11 @@ char *fn, *mode;
 {
     char tmppath[NFILEN];               /* temp. to hold expanded pathname */
 
-    XSTRCPY(tmppath, fn);                        /* load passed pathname */
-    resolve_full_pathname(tmppath, tmppath);    /* expand it... */
+    xstrcpy(tmppath, fn);                     /* load passed pathname */
+    resolve_full_pathname(tmppath, tmppath);  /* expand it... */
 
-    return ( fopen(tmppath, mode) );           /* try to open expanded pathname
-                                                */
+    return ( fopen(tmppath, mode) );          /* try to open expanded pathname
+                                               */
 }
 
 #endif  /* AOSVS | MV_UX */

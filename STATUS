@@ -234,7 +234,7 @@ Number of sprintf:  25
 
 Plan:
 
-- We repair the sprintf's manually by substitutingb them with xsnprintf's whereever possible.
+- We repair the sprintf's manually by substituting them with xsnprintf's whereever possible.
 
 - We introduce an XSTRCPY - Macro which is substituded for xstrcpy:
 
@@ -245,16 +245,58 @@ Plan:
    */
   extern char *sfstrcpy_(char *dst, int dst_size, const char *src, const char *file, int line);
 
-#define XSPRINTF(dst, src)  sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+#define XSTRCPY(dst, src)  sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
 
 - Some occurances of xstrcpy can't be replaced by XSTRCPY because dst
   is not an Lvalue: We use xstrcpy there:
   ===> These must be reviewed.
 
-- Handle bytecopy
+- Handle bytecopy: Is safe but might be expressed with strlcpy
 
-- Handle strcat
+- Handle strcat: Replace strcat by XSTRCAT.
 
+
+[2023-07-30.00]
+
+Next steps to handle the (hidden) overwrite:
+
+- Substitute strcat by xstrcat: Overlapping regions are OK                (\/)
+
+- Substitute xstrcat by XSTRCAT.                                          (\/)
+
+- XSTRCPY and XSTRCAT generate trce warnings ... unsafe ... when dst in
+  not an array: Sustitute these occurances with xstrcpy and xstrcat.      (\/)
+
+- *Manually* analyze the remaining `sprintf', `xstrcpy' and `xstrcat'
+  occurances.
+
+- Manually chack *all* occurences of XSTR{CPY,CAT} in the OS-Dependent
+  modules like
+
+  vms.c, os2.c, aosvs.c ,nt.c amigados.c, ...
+
+  Workaround: Substitute the lower case versions there, to not
+  produce broken code.                                                    (\/)
+
+- Remove *all* warnings in msdos.c and pcdos.c
+
+- Repair all doubtful statically returned strings in eval.c (the macro
+  processing module) by optionally introducoing the static stacks.
+
+- From step to step check with PCDOS/TURBO build.
+
+
+The error is still there and it is an overwrite:
+
+TRC (..\..\src\line.c/305): lgetcp_(): Read at Buffer Boundry: l_size_ = 64, l_used_ = 54, l_text_[54] = ' '
+TRC (..\..\src\line.c/305): lgetcp_(): Read at Buffer Boundry: l_size_ = 64, l_used_ = 55, l_text_[55] = ' '
+TRC (..\..\src\line.c/305): lgetcp_(): Read at Buffer Boundry: l_size_ = 64, l_used_ = 56, l_text_[56] = ' '
+TRC (..\..\src\display.c/827): lp->l_used_ = -1822, lp->lsize_ = -22013
+File: ..\..\src\display.c, Line: 827
+	Assertion `lp->l_used_ <= lp->l_size_' failed!
+OS: `Invalid argument
+'
+--- abort ...
 
 
 

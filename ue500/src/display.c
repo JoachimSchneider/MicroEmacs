@@ -1478,10 +1478,10 @@ EWINDOW *wp;    /* window to update modeline for */
     n  = 4;
     XSTRCPY(tline, " ");                        /* Buffer name. */
 #if     !WINDOW_MSWIN
-    strcat(tline, PROGNAME);
-    strcat(tline, " ");
-    strcat(tline, VERSION);
-    strcat(tline, " ");
+    XSTRCAT(tline, PROGNAME);
+    XSTRCAT(tline, " ");
+    XSTRCAT(tline, VERSION);
+    XSTRCAT(tline, " ");
 #endif
     /* display the time on the bottom most modeline if active */
     if ( timeflag && wp->w_wndp == (EWINDOW *)NULL ) {
@@ -1491,48 +1491,48 @@ EWINDOW *wp;    /* window to update modeline for */
         if ( strcmp(time, "") != 0 ) {
 
             /* append the hour/min string */
-            strcat(tline, "[");
-            strcat(tline, time);
-            strcat(tline, "] ");
+            XSTRCAT(tline, "[");
+            XSTRCAT(tline, time);
+            XSTRCAT(tline, "] ");
             xstrcpy(lasttime, time);
         }
     }
 
     /* display the size of the undo stack on the current modeline */
     if ( dispundo && wp == curwp ) {
-        strcat(tline, "{");
-        strcat( tline, long_asc(wp->w_bufp->undo_count) );
-        strcat(tline, "} ");
+        XSTRCAT(tline, "{");
+        XSTRCAT( tline, long_asc(wp->w_bufp->undo_count) );
+        XSTRCAT(tline, "} ");
     }
 
     /* are we horizontally scrolled? */
     if ( wp->w_fcol > 0 ) {
-        strcat(tline, "[<");
-        strcat( tline, int_asc(wp->w_fcol) );
-        strcat(tline, "]");
+        XSTRCAT(tline, "[<");
+        XSTRCAT( tline, int_asc(wp->w_fcol) );
+        XSTRCAT(tline, "]");
     }
 
     /* display the point position in buffer if on current modeline */
     if ( posflag && wp == curwp ) {
 
-        strcat(tline, "L:");
-        strcat( tline, long_asc( getlinenum(bp, wp->w_dotp) ) );
-        strcat(tline, " C:");
-        strcat( tline, int_asc( getccol(FALSE) ) );
-        strcat(tline, " ");
+        XSTRCAT(tline, "L:");
+        XSTRCAT( tline, long_asc( getlinenum(bp, wp->w_dotp) ) );
+        XSTRCAT(tline, " C:");
+        XSTRCAT( tline, int_asc( getccol(FALSE) ) );
+        XSTRCAT(tline, " ");
     }
 
     /* display the modes */
-    strcat(tline, "(");
+    XSTRCAT(tline, "(");
     firstm = TRUE;
     for ( i = 0; i < NUMMODES; i++ )    /* add in the mode flags */
         if ( wp->w_bufp->b_mode & (1 << i) ) {
             if ( firstm != TRUE )
-                strcat(tline, " ");
+                XSTRCAT(tline, " ");
             firstm = FALSE;
-            strcat(tline, modename[i]);
+            XSTRCAT(tline, modename[i]);
         }
-    strcat(tline, ") ");
+    XSTRCAT(tline, ") ");
 
     cp = &tline[0];
     while ( (c = *cp++) != 0 ) {
@@ -1611,7 +1611,7 @@ char *ts;
     }
 
     buf[16] = 0;
-    XSTRCPY(ts, &buf[11]);
+    xstrcpy(ts, &buf[11]);
 
     return;
 }

@@ -398,8 +398,8 @@ unsigned c;             /* byte following a zero extended char byte */
 
 PASCAL NEAR openhp()            /* open the HP150 screen for input */
 {
-    XSTRCPY(sres, "NORMAL");
-    XSTRCPY(os, "MSDOS");
+    xstrcpy(sres, "NORMAL");
+    xstrcpy(os, "MSDOS");
     revexist = TRUE;
 }
 

@@ -588,9 +588,9 @@ int f, n;
     else {
         XSTRCPY(filnam, tmp);
         if ( filnam[strlen(filnam) - 1] != '\\' )
-            strcat(filnam, "\\");
+            XSTRCAT(filnam, "\\");
     }
-    strcat(filnam, "command");
+    XSTRCAT(filnam, "command");
 
     /* get the command to pipe in */
     if ( mlreply("@", line, NLINE) != TRUE )
@@ -613,8 +613,8 @@ int f, n;
     }
 
     /* redirect the command output to the output file */
-    strcat(line, " >>");
-    strcat(line, filnam);
+    XSTRCAT(line, " >>");
+    XSTRCAT(line, filnam);
     movecursor(term.t_nrow - 1, 0);
 
     /* execute the command */
@@ -696,7 +696,7 @@ int f, n;
         return (FALSE);
     }
 
-    strcat(line, " <fltinp >fltout");
+    XSTRCAT(line, " <fltinp >fltout");
     movecursor(term.t_nrow - 1, 0);
     TTkclose();
     shellprog(line);
@@ -774,11 +774,11 @@ char *cmd;      /*  Incoming command line to execute  */
 
     if ( *cmd ) {
         XSTRCPY(comline, shell);
-        strcat(comline, " ");
+        XSTRCAT(comline, " ");
         comline[strlen(comline) + 1] = 0;
         comline[strlen(comline)] = swchar;
-        strcat(comline, "c ");
-        strcat(comline, cmd);
+        XSTRCAT(comline, "c ");
+        XSTRCAT(comline, cmd);
 
         return ( execprog(comline) );
     } else
@@ -825,13 +825,13 @@ char *cmd;      /*  Incoming command line to execute  */
     while ( *cmd && ( (*cmd == ' ') || (*cmd == '\t') ) )
         ++cmd;
     *tail = (char)( strlen(cmd) );   /* record the byte length */
-    XSTRCPY(&tail[1], cmd);
-    strcat(&tail[1], "\r");
+    xstrlcpy(&tail[1], cmd, sizeof(tail) - 1);
+    xstrlcat(&tail[1], "\r", sizeof(tail) - 1);
 
     /* look up the program on the path trying various extentions */
     if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(strcat(prog, ".exe"), TRUE) ) == NULL ) {
-            XSTRCPY(&prog[strlen(prog)-4], ".com");
+        if ( ( sp = flook(XSTRCAT(prog, ".exe"), TRUE) ) == NULL ) {
+            xstrcpy(&prog[strlen(prog)-4], ".com"); /**UNSAFE_OK**/
             if ( ( sp = flook(prog, TRUE) ) == NULL )
                 return (FALSE);
         }
@@ -899,7 +899,7 @@ char *cmd;      /*  Incoming command line to execute  */
         rv = -_doserrno;                /* failed child call */
 #  endif /* IC */
 # endif
-    XSTRCPY( rval, int_asc(rv) );
+    xstrcpy( rval, int_asc(rv) );   /**TODO: rval**/
 
     return ( (rval < 0) ? FALSE : TRUE );
 }
@@ -970,10 +970,10 @@ char *fspec;    /* pattern to match */
 
     /* construct the composite wild card spec */
     XSTRCPY(fname, path);
-    strcat(fname, &fspec[index+1]);
-    strcat(fname, "*");
+    XSTRCAT(fname, &fspec[index+1]);
+    XSTRCAT(fname, "*");
     if ( extflag == FALSE )
-        strcat(fname, ".*");
+        XSTRCAT(fname, ".*");
 
     /* and call for the first file */
     if ( findfirst(fname, &fileblock, FA_DIREC) == -1 )
@@ -981,10 +981,10 @@ char *fspec;    /* pattern to match */
 
     /* return the first file name! */
     XSTRCPY(rbuf, path);
-    strcat(rbuf, fileblock.ff_name);
+    XSTRCAT(rbuf, fileblock.ff_name);
     mklower(rbuf);
     if ( fileblock.ff_attrib == 16 )
-        strcat(rbuf, DIRSEPSTR);
+        XSTRCAT(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
@@ -1002,10 +1002,10 @@ char *PASCAL NEAR getnfile()
 
     /* return the first file name! */
     XSTRCPY(rbuf, path);
-    strcat(rbuf, fileblock.ff_name);
+    XSTRCAT(rbuf, fileblock.ff_name);
     mklower(rbuf);
     if ( fileblock.ff_attrib == 16 )
-        strcat(rbuf, DIRSEPSTR);
+        XSTRCAT(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
@@ -1049,10 +1049,10 @@ char *fspec;    /* pattern to match */
 
     /* construct the composite wild card spec */
     XSTRCPY(fname, path);
-    strcat(fname, &fspec[index+1]);
-    strcat(fname, "*");
+    XSTRCAT(fname, &fspec[index+1]);
+    XSTRCAT(fname, "*");
     if ( extflag == FALSE )
-        strcat(fname, ".*");
+        XSTRCAT(fname, ".*");
 
     /* and call for the first file */
     if ( _dos_findfirst(fname, _A_NORMAL|_A_SUBDIR, &fileblock) != 0 )
@@ -1060,10 +1060,10 @@ char *fspec;    /* pattern to match */
 
     /* return the first file name! */
     XSTRCPY(rbuf, path);
-    strcat(rbuf, fileblock.name);
+    XSTRCAT(rbuf, fileblock.name);
     mklower(rbuf);
     if ( fileblock.attrib == 16 )
-        strcat(rbuf, DIRSEPSTR);
+        XSTRCAT(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
@@ -1081,10 +1081,10 @@ char *PASCAL NEAR getnfile()
 
     /* return the first file name! */
     XSTRCPY(rbuf, path);
-    strcat(rbuf, fileblock.name);
+    XSTRCAT(rbuf, fileblock.name);
     mklower(rbuf);
     if ( fileblock.attrib == 16 )
-        strcat(rbuf, DIRSEPSTR);
+        XSTRCAT(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }

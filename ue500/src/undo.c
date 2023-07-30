@@ -303,7 +303,7 @@ int PASCAL NEAR undolist()
         /* and the offset into the line */
         XSTRCPY( b, int_asc(up->offset) );
         while ( strlen(b) < 6 )
-            strcat(b, " ");
+            XSTRCAT(b, " ");
         cp2 = &b[0];
         while ( *cp2 )
             *cp1++ = *cp2++;
@@ -312,7 +312,7 @@ int PASCAL NEAR undolist()
         /* and the count */
         XSTRCPY( b, int_asc(up->count) );
         while ( strlen(b) < 3 )
-            strcat(b, " ");
+            XSTRCAT(b, " ");
         cp2 = &b[0];
         while ( *cp2 )
             *cp1++ = *cp2++;
@@ -336,11 +336,11 @@ int PASCAL NEAR undolist()
 
         case OP_DSTR:
             xstrcpy(cp1, "DSTR  ");
-            strcat(cp1, "\"");
+            xstrcat(cp1, "\"");
             strncat(cp1, up->undo_obj.obj_string, 40);
             cp1[26] = '+';
             cp1[27] = 0;
-            strcat(cp1, "\"");
+            xstrcat(cp1, "\"");
             break;
 
         case OP_INSC:

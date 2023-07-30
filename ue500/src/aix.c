@@ -370,7 +370,7 @@ int hpterm;                             /* global flag braindead HP-terminal */
 /** Open terminal device **/
 int ttopen()
 {
-    XSTRCPY(os,
+    xstrcpy(os,
             "UNIX");
 # if (BSD && !TERMIOS)
     /* Get tty modes */
@@ -1222,7 +1222,7 @@ char * cmd;                             /* Palette command      */
         /* Move color code to capability structure */
         capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
         if ( capbind[CAP_C0 + code].store )
-            XSTRCPY(capbind[CAP_C0 + code].store, cp);
+            xstrcpy(capbind[CAP_C0 + code].store, cp);
     }
 #  endif /* COLOR */
 # endif /* TERMCAP */
@@ -1444,8 +1444,8 @@ int n;                                  /* Argument count       */
     }
 
     /* Add output specification */
-    strcat(line, ">");
-    strcat(line, filnam);
+    xstrcat(line, ">");
+    xstrcat(line, filnam);
 
     /* Do command */
     s = callout(line);
@@ -1501,19 +1501,19 @@ int n;                                  /* Argument count       */
 
     /* Setup the proper file names */
     bp = curbp;
-    XSTRCPY(tmpnam, bp->b_fname);       /* Save the original name */
-    XSTRCPY(bp->b_fname, bname1);       /* Set it to our new one */
+    xstrcpy(tmpnam, bp->b_fname);       /* Save the original name */
+    xstrcpy(bp->b_fname, bname1);       /* Set it to our new one */
 
     /* Write it out, checking for errors */
     if ( !writeout(filnam1, "w") ) {
         mlwrite("[Cannot write filter file]");
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
 
         return (0);
     }
 
     /* Setup input and output */
-    strcat(line, " <fltinp >fltout");
+    xstrcat(line, " <fltinp >fltout");
 
     /* Perform command */
     s = callout(line);
@@ -1528,7 +1528,7 @@ int n;                                  /* Argument count       */
 
 
     /* Reset file name */
-    XSTRCPY(bp->b_fname, tmpnam);
+    xstrcpy(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
     unlink(filnam1);
@@ -1548,7 +1548,7 @@ char *fspec;                            /* Filename specification   */
     int index, point, extflag;
 
     /* First parse the file path off the file spec */
-    XSTRCPY(path, fspec);
+    xstrcpy(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 && (path[index] != '/') )
         --index;
@@ -1577,7 +1577,7 @@ char *fspec;                            /* Filename specification   */
     if ( !dirptr )
         return (NULL);
 
-    XSTRCPY(rbuf, path);
+    xstrcpy(rbuf, path);
     nameptr = &rbuf[strlen(rbuf)];
 
     /* ...and call for the first file */
@@ -1598,7 +1598,7 @@ char *getnfile()
             return (NULL);
 
         /* Check to make sure we skip all weird entries except directories */
-        XSTRCPY(nameptr, dp->d_name);
+        xstrcpy(nameptr, dp->d_name);
 
     } while (stat(rbuf,
                   &fstat) ||
@@ -1606,7 +1606,7 @@ char *getnfile()
 
     /* if this entry is a directory name, say so */
     if ( (fstat.st_mode & S_IFMT) == S_IFDIR )
-        strcat(rbuf, DIRSEPSTR);
+        xstrcat(rbuf, DIRSEPSTR);
 
     /* Return the next file name! */
     return (rbuf);
@@ -1719,9 +1719,9 @@ int mode;       /* umask for creation (which we blissfully ignore...) */
 {
     char buf[80];
 
-    XSTRCPY(buf, "mkdir ");
-    strcat(buf, name);
-    strcat(buf, " > /dev/null 2>&1");
+    xstrcpy(buf, "mkdir ");
+    xstrcat(buf, name);
+    xstrcat(buf, " > /dev/null 2>&1");
 
     return ( system(buf) );
 }
@@ -1731,9 +1731,9 @@ char *name;     /* name of directory to delete */
 {
     char buf[80];
 
-    XSTRCPY(buf, "rmdir ");
-    strcat(buf, name);
-    strcat(buf, " > /dev/null 2>&1");
+    xstrcpy(buf, "rmdir ");
+    xstrcat(buf, name);
+    xstrcat(buf, " > /dev/null 2>&1");
 
     return ( system(buf) );
 }

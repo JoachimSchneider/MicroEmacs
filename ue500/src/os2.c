@@ -159,16 +159,16 @@ pipecmd(f, n)
     if ( ( tmp = getenv("TMP") ) == NULL )
         filnam[0] = 0;
     else {
-        XSTRCPY(filnam, tmp);
+        xstrcpy(filnam, tmp);
         if ( filnam[strlen(filnam) - 1] != '\\' )
-            strcat(filnam, "\\");
+            xstrcat(filnam, "\\");
     }
-    strcat(filnam, "eXXXXXX");
+    xstrcat(filnam, "eXXXXXX");
     mktemp(filnam);
 
     /* redirect the command output to the output file */
-    strcat(line, " >>");
-    strcat(line, filnam);
+    xstrcat(line, " >>");
+    xstrcat(line, filnam);
     movecursor(term.t_nrow - 1, 0);
 
     /* execute the command */
@@ -190,7 +190,7 @@ pipecmd(f, n)
         return (FALSE);
 
     /* rename the buffer */
-    XSTRCPY(curwp->w_bufp->b_bname, "command");
+    xstrcpy(curwp->w_bufp->b_bname, "command");
     /* make this window in VIEW mode, update all mode lines */
     curwp->w_bufp->b_mode |= MDVIEW;
     wp = wheadp;
@@ -237,36 +237,36 @@ f_filter(f, n)
     if ( ( tmp = getenv("TMP") ) == NULL )
         filnam1[0] = filnam2[0] = 0;
     else {
-        XSTRCPY(filnam1, tmp);
-        XSTRCPY(filnam2, tmp);
+        xstrcpy(filnam1, tmp);
+        xstrcpy(filnam2, tmp);
         if ( filnam1[strlen(filnam1) - 1] != '\\' ) {
-            strcat(filnam1, "\\");
-            strcat(filnam2, "\\");
+            xstrcat(filnam1, "\\");
+            xstrcat(filnam2, "\\");
         }
     }
-    strcat(filnam1, "eXXXXXX");
-    strcat(filnam2, "eXXXXXX");
+    xstrcat(filnam1, "eXXXXXX");
+    xstrcat(filnam2, "eXXXXXX");
     mktemp(filnam1);
 
     /* setup the proper file names */
     bp = curbp;
-    XSTRCPY(tmpnam, bp->b_fname);       /* save the original name */
-    XSTRCPY(bp->b_fname, filnam1);      /* set it to our new one */
+    xstrcpy(tmpnam, bp->b_fname);       /* save the original name */
+    xstrcpy(bp->b_fname, filnam1);      /* set it to our new one */
 
     /* write it out, checking for errors */
     if ( writeout(filnam1, "w") != TRUE ) {
         mlwrite(TEXT2);
 /*                      "[Cannot write filter file]" */
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
 
         return (FALSE);
     }
 
     mktemp(filnam2);
-    strcat(line, " <");                 /* construct the command line */
-    strcat(line, filnam1);
-    strcat(line, " >");
-    strcat(line, filnam2);
+    xstrcat(line, " <");                /* construct the command line */
+    xstrcat(line, filnam1);
+    xstrcat(line, " >");
+    xstrcat(line, filnam2);
 
     movecursor(term.t_nrow - 1, 0);
     TTkclose();
@@ -279,7 +279,7 @@ f_filter(f, n)
     if ( s != TRUE || (readin(filnam2, FALSE) == FALSE) ) {
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
-        XSTRCPY(bp->b_fname, tmpnam);
+        xstrcpy(bp->b_fname, tmpnam);
         unlink(filnam1);
         unlink(filnam2);
 
@@ -287,7 +287,7 @@ f_filter(f, n)
     }
 
     /* reset file name */
-    XSTRCPY(bp->b_fname, tmpnam);       /* restore name */
+    xstrcpy(bp->b_fname, tmpnam);       /* restore name */
     bp->b_flag |= BFCHG;                /* flag it as changed */
 
     /* and get rid of the temporary file */
@@ -353,12 +353,12 @@ execprog(char *cmd)
 
     /* look up the program on the path, trying various extentions */
     if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(strcat(prog, ".exe"), TRUE) ) == NULL ) {
-            XSTRCPY(&prog[strlen(prog)-4], ".com");
+        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
+            xstrcpy(&prog[strlen(prog)-4], ".com");
             if ( ( sp = flook(prog, TRUE) ) == NULL )
                 return (FALSE);
         }
-    XSTRCPY(prog,
+    xstrcpy(prog,
             sp);
 
     /*
@@ -391,7 +391,7 @@ char *fspec;    /* pattern to match */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
-    XSTRCPY(path, fspec);
+    xstrcpy(path, fspec);
     index = strlen(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
@@ -410,11 +410,11 @@ char *fspec;    /* pattern to match */
     }
 
     /* construct the composite wild card spec */
-    XSTRCPY(fname, path);
-    strcat(fname, &fspec[index+1]);
-    strcat(fname, "*");
+    xstrcpy(fname, path);
+    xstrcat(fname, &fspec[index+1]);
+    xstrcat(fname, "*");
     if ( extflag == FALSE )
-        strcat(fname, ".*");
+        xstrcat(fname, ".*");
 
     /* and call for the first file */
     num_found = 1;
@@ -424,11 +424,11 @@ char *fspec;    /* pattern to match */
         return (NULL);
 
     /* return the first file name! */
-    XSTRCPY(rbuf, path);
-    strcat(rbuf, pBuf.achName);
+    xstrcpy(rbuf, path);
+    xstrcat(rbuf, pBuf.achName);
     mklower(rbuf);
     if ( pBuf.attrFile == FILE_DIRECTORY )
-        strcat(rbuf, DIRSEPSTR);
+        xstrcat(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
@@ -445,11 +445,11 @@ char *PASCAL NEAR getnfile()
         return (NULL);
 
     /* return the first file name! */
-    XSTRCPY(rbuf, path);
-    strcat(rbuf, pBuf.achName);
+    xstrcpy(rbuf, path);
+    xstrcat(rbuf, pBuf.achName);
     mklower(rbuf);
     if ( pBuf.attrFile == FILE_DIRECTORY )
-        strcat(rbuf, DIRSEPSTR);
+        xstrcat(rbuf, DIRSEPSTR);
 
     return (rbuf);
 }
