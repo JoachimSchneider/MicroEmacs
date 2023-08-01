@@ -58,50 +58,52 @@ SDRIVE scr_drive[] =
     "CGA40", SCADC, 25, 40,             /* low resolution CGA       */
 };
 
-int dtype = -1;                         /* current display type     */
 
-long scadd;                             /* address of screen ram    */
-int *scptr[NROW];                       /* pointer to screen lines  */
-unsigned int sline[NCOL];               /* screen line image        */
-int num_cols;                           /* current number of columns    */
-int orig_mode;                          /* screen mode on entry     */
-int egaexist = FALSE;                   /* is an EGA card available?    */
-int vgaexist = FALSE;                   /* is video graphics array available? */
-extern union REGS rg;                   /* cpu register for use of DOS calls */
-int revflag = FALSE;                    /* are we currently in rev video? */
-int desk_rows;                          /* number of rows on current desktop */
-int desk_cols;                          /* number of cols on current desktop */
-int break_flag;                 /* state of MSDOS control break processing */
+extern union REGS rg;                     /* cpu register for use of DOS calls */
 
-int PASCAL NEAR ibmmove();
-int PASCAL NEAR ibmeeol();
-int PASCAL NEAR ibmputc();
-int PASCAL NEAR ibmeeop();
-int PASCAL NEAR ibmclrdesk();
-int PASCAL NEAR ibmrev();
-int PASCAL NEAR ibmcres();
+static int           dtype       = -1;    /* current display type     */
+static long          scadd       = 0;     /* address of screen ram    */
+static int           num_cols    = 0;     /* current number of columns    */
+static int           orig_mode   = 0;     /* screen mode on entry     */
+static int           egaexist    = FALSE; /* is an EGA card available?    */
+static int           vgaexist    = FALSE; /* is video graphics array available? */
+static int           revflag     = FALSE; /* are we currently in rev video? */
+static int           desk_rows   = 0;     /* number of rows on current desktop */
+static int           desk_cols   = 0;     /* number of cols on current desktop */
+static int           break_flag  = 0;     /* state of MSDOS control break processing */
+static int           *scptr[NROW];        /* pointer to screen lines  */
+static unsigned int  sline[NCOL];         /* screen line image        */
+
+static int PASCAL NEAR ibmmove();
+static int PASCAL NEAR ibmeeol();
+static int PASCAL NEAR ibmputc();
+static int PASCAL NEAR ibmeeop();
+static int PASCAL NEAR ibmclrdesk();
+static int PASCAL NEAR ibmrev();
+static int PASCAL NEAR ibmcres();
+static int PASCAL NEAR ibmbeep();
+static int PASCAL NEAR ibmopen();
+static int PASCAL NEAR ibmclose();
+static int PASCAL NEAR ibmkopen();
+static int PASCAL NEAR ibmkclose();
+static int PASCAL NEAR scinit();
+static int PASCAL NEAR screen_init();
+static int PASCAL NEAR getboard();
+static int PASCAL NEAR egaopen();
+static int PASCAL NEAR egaclose();
+static int PASCAL NEAR cga40_open();
+static int PASCAL NEAR cga40_close();
+static int PASCAL NEAR change_width();
+static int PASCAL NEAR fnclabel();
+
 int PASCAL NEAR spal();
-int PASCAL NEAR ibmbeep();
-int PASCAL NEAR ibmopen();
-int PASCAL NEAR ibmclose();
-int PASCAL NEAR ibmkopen();
-int PASCAL NEAR ibmkclose();
-int PASCAL NEAR scinit();
-int PASCAL NEAR screen_init();
-int PASCAL NEAR getboard();
-int PASCAL NEAR egaopen();
-int PASCAL NEAR egaclose();
-int PASCAL NEAR cga40_open();
-int PASCAL NEAR cga40_close();
-int PASCAL NEAR change_width();
-int PASCAL NEAR fnclabel();
 
 # if     COLOR
-int PASCAL NEAR ibmfcol();
-int PASCAL NEAR ibmbcol();
-int cfcolor = -1;               /* current forground color */
-int cbcolor = -1;               /* current background color */
-int ctrans[] =                  /* ansi to ibm color translation table */
+static int PASCAL NEAR ibmfcol();
+static int PASCAL NEAR ibmbcol();
+static int cfcolor = -1;                  /* current forground color */
+static int cbcolor = -1;                  /* current background color */
+static int ctrans[] =                     /* ansi to ibm color translation table */
 {
     0, 4, 2, 6, 1, 5, 3, 7, 8, 12, 10, 14, 9, 13, 11, 15
 };
@@ -128,6 +130,8 @@ int color;      /* color to set */
 
 {
     cfcolor = ctrans[color];
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmbcol(color)  /* set the current background color */
@@ -136,6 +140,8 @@ int color;      /* color to set */
 
 {
     cbcolor = ctrans[color];
+
+    return TRUE;
 }
 # endif
 
@@ -146,15 +152,17 @@ int PASCAL NEAR ibmmove(row, col)
     rg.h.dh = row + term.t_roworg;
     rg.h.bh = 0;                /* set screen page number */
     int86(0x10, &rg, &rg);
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmeeol()       /* erase to the end of the line */
 {
-    unsigned int attr;          /* attribute byte mask to place in RAM */
-    unsigned int *lnptr;        /* pointer to the destination line */
-    int i;
-    int ccol;           /* current column cursor lives */
-    int crow;           /*     row  */
+    unsigned int  attr  = 0;      /* attribute byte mask to place in RAM */
+    unsigned int *lnptr = NULL;   /* pointer to the destination line */
+    int           i     = 0;
+    int           ccol  = 0;      /* current column cursor lives */
+    int           crow  = 0;      /*     row  */
 
     /* find the current cursor position */
     rg.h.ah = 3;                /* read cursor position function code */
@@ -195,6 +203,8 @@ int PASCAL NEAR ibmeeol()       /* erase to the end of the line */
     /* and send the string out */
     movmem(&sline[0], scptr[crow+term.t_roworg]+ccol+term.t_colorg,
            (term.t_ncol-ccol)*2);
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmputc(ch) /* put a character at the current position in the
@@ -291,6 +301,8 @@ int ch;
 #  endif
     int86(0x10, &rg, &rg);
 # endif
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmeeop()
@@ -318,11 +330,13 @@ int PASCAL NEAR ibmeeop()
     rg.h.bh = 07;
 # endif
     int86(0x10, &rg, &rg);
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmclrdesk()
 {
-    int attr;                   /* attribute to fill screen with */
+    int attr  = 0;              /* attribute to fill screen with */
 
     rg.h.ah = 6;                /* scroll page up function code */
     rg.h.al = 0;                /* # lines to scroll (clear it) */
@@ -346,6 +360,8 @@ int PASCAL NEAR ibmclrdesk()
 
     rg.h.bh = attr;
     int86(0x10, &rg, &rg);
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmrev(state)   /* change reverse video state */
@@ -354,6 +370,8 @@ int state;      /* TRUE = reverse, FALSE = normal */
 
 {
     revflag = state;
+
+    return TRUE;
 }
 
 extern dumpscreens();
@@ -363,7 +381,7 @@ int PASCAL NEAR ibmcres(res) /* change screen resolution */
 char *res;      /* resolution to change to */
 
 {
-    int i;              /* index */
+    int i = 0;
 
     for ( i = 0; i < NDRIVE; i++ )
         if ( strcmp(res, scr_drive[i].drv_name) == 0 ) {
@@ -381,6 +399,8 @@ char *mode;
 
 {
     /* nothin here now..... */
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmbeep()
@@ -394,6 +414,8 @@ int PASCAL NEAR ibmbeep()
     bdos(6, BEL, 0);
 #  endif /* IC */
 # endif /* MWC */
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmopen()
@@ -402,6 +424,8 @@ int PASCAL NEAR ibmopen()
     revexist = TRUE;
     revflag = FALSE;
     ttopen();
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmclose()
@@ -419,6 +443,8 @@ int PASCAL NEAR ibmclose()
     }
     dtype = -1;
     ttclose();
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmkopen()      /* open the keyboard */
@@ -436,6 +462,8 @@ int PASCAL NEAR ibmkopen()      /* open the keyboard */
         rg.h.dl = 0;            /* turn it off */
         intdos(&rg, &rg);
     }
+
+    return TRUE;
 }
 
 int PASCAL NEAR ibmkclose() /* close the keyboard */
@@ -446,6 +474,8 @@ int PASCAL NEAR ibmkclose() /* close the keyboard */
         rg.h.dl = 1;            /* turn it on */
         intdos(&rg, &rg);
     }
+
+    return TRUE;
 }
 
 int PASCAL NEAR scinit(type) /* initialize the screen head pointers */
@@ -521,7 +551,7 @@ int dtype;      /* original screen type (-1 if first time!) */
 int type;       /* new type of adapter to adjust screens for */
 
 {
-    int full_screen;            /* is the active screen full size */
+    int full_screen = 0;    /* is the active screen full size */
 
     /* is the front screen full size? */
     if ( (dtype != -1) &&( scr_drive[dtype].drv_rows == (term.t_nrow + 1) ) &&
@@ -558,15 +588,17 @@ int ncols;      /* number of columns across */
     union {
         long laddr;             /* long form of address */
         int *paddr;             /* pointer form of address */
-    }
-    addr;
-    int i;
+    } addr;
+    int i = 0;
 
+    ZEROMEM(addr);
     /* re-initialize the screen pointer array */
     for ( i = 0; i < NROW; i++ ) {
         addr.laddr = scadd + (long)(ncols * i * 2);
         scptr[i] = addr.paddr;
     }
+
+    return TRUE;
 }
 
 /* getboard:    Determine which type of display board is attached. Current known
@@ -582,7 +614,7 @@ int ncols;      /* number of columns across */
 
 int PASCAL NEAR getboard()
 {
-    int type;           /* board type to return */
+    int type  = 0;      /* board type to return */
 
     type = CDCGA;
     int86(0x11, &rg, &rg);
@@ -685,6 +717,8 @@ int mode;       /* mode to select [CDEGA/CDVGA] */
     /* video bios bug patch */
     outp(0x3d4, 10);
     outp(0x3d5, 6);
+
+    return TRUE;
 }
 
 int PASCAL NEAR egaclose()
@@ -698,6 +732,8 @@ int PASCAL NEAR egaclose()
     /* put the beast into 80 column mode */
     rg.x.ax = 3;
     int86(16, &rg, &rg);
+
+    return TRUE;
 }
 
 int PASCAL NEAR cga40_open()
@@ -705,6 +741,8 @@ int PASCAL NEAR cga40_open()
     /* put the beast into 40 column mode */
     rg.x.ax = 1;
     int86(16, &rg, &rg);
+
+    return TRUE;
 }
 
 int PASCAL NEAR cga40_close()
@@ -712,6 +750,8 @@ int PASCAL NEAR cga40_close()
     /* put the beast into 80 column mode */
     rg.x.ax = 3;
     int86(16, &rg, &rg);
+
+    return TRUE;
 }
 
 /* scwrite: write a line out to the physical screen */
@@ -726,10 +766,10 @@ int revleft;    /* first character of reverse video area */
 int revright;   /* first character of non-reverse video area */
 
 {
-    unsigned int norm_attrib;           /* normal attribute byte mask */
-    unsigned int rev_attrib;            /* reversed attribute byte mask */
-    unsigned int *lnptr;        /* pointer to the destination line */
-    int i;
+    unsigned int  norm_attrib = 0;    /* normal attribute byte mask */
+    unsigned int  rev_attrib  = 0;    /* reversed attribute byte mask */
+    unsigned int  *lnptr      = NULL; /* pointer to the destination line */
+    int           i           = 0;
 
     /* build the attribute bytes */
 # if     COLOR
@@ -768,6 +808,8 @@ int revright;   /* first character of non-reverse video area */
 
     /* and send the string out */
     movmem(&sline[0], scptr[row+term.t_roworg]+term.t_colorg, term.t_ncol*2);
+
+    return TRUE;
 }
 
 # if     FLABEL
@@ -786,3 +828,6 @@ ibmhello()
 }
 #endif
 
+
+
+/* EOF */

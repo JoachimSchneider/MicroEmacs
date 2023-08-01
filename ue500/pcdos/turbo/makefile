@@ -16,11 +16,17 @@ INCD = e:\bc\include    # system include directory
 #           TODO: Split `random.c' into two pieces.
 CC = bcc -g0
 
-# These options are with debugging on!
-#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -v -w-par -y -Z
 
-# These options are production (no debugging)
-CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -w-par -Z
+# CFLAGS
+#
+# In *any* case use `-N' ("Check for Stack overflow") to avoid mysterious errors!
+
+# These options are with debugging on.
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -v -w-par -y -Z
+
+# These options are production (no debugging).
+CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -w-par -Z
+
 
 # list of header files
 H1 = ..\..\h\estruct.h ..\..\h\edef.h ..\..\h\efunc.h

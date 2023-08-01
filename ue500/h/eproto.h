@@ -1950,9 +1950,16 @@ extern int PASCAL NEAR backtagword DCL((int f, int n)); /* return from tagged wo
 
 /* some library redefinitions */
 
-#if WINXP == 0
+#if (WINXP | ZTC | TURBO | MSC) == 0
 extern char *strrev DCL((char *));
 #endif
+
+#if   MWC | MSC | ZTC
+extern char *ctime DCL((const char *));
+#elif IC  /* TURBO already has it defined */
+extern char *ctime DCL((const time_t *));
+#endif
+
 
 /**********************************************************************/
 

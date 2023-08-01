@@ -254,7 +254,7 @@ char *val;      /* value to set it to */
     return (upcase[C2I(*ch)] = C2I(*val));
 }
 
-#if (ZTC | TURBO | MSC) == 0
+#if (WINXP | ZTC | TURBO | MSC) == 0
 /*
  * strrev -- Reverse string in place.  Code here for those compilers that do not
  * have the function in their own library.

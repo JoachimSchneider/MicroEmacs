@@ -22,18 +22,19 @@
 #  include <dos.h>
 #  include <bios.h>
 
-struct ffblk fileblock; /* structure for directory searches */
+static struct ffblk fileblock;    /* structure for directory searches */
 # endif
 # if     MSC | ZTC
 #  include <dos.h>
 
-struct find_t fileblock;        /* structure for directory searches */
+static struct find_t  fileblock;  /* structure for directory searches */
 # endif
 
 # if     LATTICE | MSC | TURBO | IC | MWC | ZTC
-union REGS rg;          /* cpu register for use of DOS calls */
-struct SREGS segreg;    /* cpu segment registers         */
-int nxtchar = -1;       /* character held from type ahead    */
+union REGS          rg;           /* cpu register for use of DOS calls
+                                   */
+static struct SREGS segreg;       /* cpu segment registers          */
+static int          nxtchar = -1; /* character held from type ahead */
 # endif
 
 # if     MSC | TURBO
@@ -43,6 +44,14 @@ int nxtchar = -1;       /* character held from type ahead    */
 # if     IC
 #  include        <time.h>
 # endif
+
+/* Some constants which we do not want to have as literals inside
+ * the code:  */
+#if ( 0 ) /* Old value  */
+# define TIME_BUF_SIZE  16
+#else
+# define TIME_BUF_SIZE 256
+#endif
 
 /*  Some global variable    */
 # define INBUFSIZ        40
@@ -58,16 +67,16 @@ int PASCAL NEAR execprog(char *cmd);
 
 # define IBUFSIZE        64     /* this must be a power of 2 */
 
-unsigned char in_buf[IBUFSIZE]; /* input character buffer */
-int in_next = 0;                /* pos to retrieve next input character */
-int in_last = 0;                /* pos to place most recent input character */
+static unsigned char  in_buf[IBUFSIZE]; /* input character buffer */
+static int            in_next = 0;      /* pos to retrieve next input character */
+static int            in_last = 0;      /* pos to place most recent input character */
 
-in_init()       /* initialize the input buffer */
+static VOID in_init()   /* initialize the input buffer */
 {
     in_next = in_last = 0;
 }
 
-in_check()      /* is the input buffer non-empty? */
+static int in_check()   /* is the input buffer non-empty? */
 {
     if ( in_next == in_last )
         return (FALSE);
@@ -75,7 +84,7 @@ in_check()      /* is the input buffer non-empty? */
         return (TRUE);
 }
 
-in_put(event)
+static VOID in_put(event)
 
 int event;      /* event to enter into the input buffer */
 
@@ -86,7 +95,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    register int  event = 0;    /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -101,7 +110,7 @@ int in_get()    /* get an event from the input buffer */
 int PASCAL NEAR ttopen()
 {
 # if     MOUSE
-    long miaddr;        /* mouse interupt routine address */
+    long  miaddr  = 0;    /* mouse interupt routine address */
 # endif
 
     /* on all screens we are not sure of the initial position of the cursor                 */
@@ -161,9 +170,11 @@ int PASCAL NEAR ttopen()
 # else  /* !MOUSE */
     mexist = 0;
 # endif /* !MOUSE */
+
+    return TRUE;
 }
 
-maxlines(lines)         /* set number of vertical rows for mouse */
+VOID maxlines(lines) /* set number of vertical rows for mouse */
 
 int lines;      /* # of vertical lines */
 
@@ -187,6 +198,8 @@ int lines;      /* # of vertical lines */
 int PASCAL NEAR ttclose()
 {
     /* nothing here! */
+
+    return TRUE;
 }
 
 /*
@@ -208,6 +221,8 @@ int c;
 # if     (LATTICE | TURBO | IC | MSC | ZTC) & ~IBMPC
     bdos(6, c, 0);
 # endif
+
+    return TRUE;
 }
 
 /*
@@ -216,6 +231,7 @@ int c;
  */
 int PASCAL NEAR ttflush()
 {
+    return TRUE;
 }
 
 int doschar()   /* call the dos to get a char */
@@ -247,36 +263,36 @@ int doschar()   /* call the dos to get a char */
  * for extended char), high byte has extended key scan code.
  */
 
-    unsigned k = (unsigned)bioskey(0);
-    unsigned c;                 /* Extended character to return. */
+    unsigned int  k = (unsigned)bioskey(0);
+    unsigned int  c = 0;  /* Extended character to return. */
 
-    if ( (k & 0xFF) == 0 ) {    /* Check for extended key. */
-                                /* Convert extended key scan code to a uEMACS
-                                 * internal form. */
+    if ( (k & 0xFF) == 0 ) {      /* Check for extended key. */
+                                  /* Convert extended key scan code to a uEMACS
+                                   * internal form. */
         c = extcode(k >> 8);
-        in_put(c >> 8);         /* Report prefix and event code bytes. */
+        in_put(c >> 8);           /* Report prefix and event code bytes. */
         in_put(c & 0xFF);
 
-        return (0);             /* Return extended escape sequence. */
+        return (0);               /* Return extended escape sequence. */
     }
 
-    return (k & 0xFF);          /* Return regular ASCII value. */
+    return (k & 0xFF);            /* Return regular ASCII value. */
 
 #  else
-    register unsigned int c;            /* extended character to return */
+    register unsigned int c = 0;  /* extended character to return */
 
-    rg.h.ah = 7;                /* dos Direct Console Input call */
+    rg.h.ah = 7;                  /* dos Direct Console Input call */
     intdos(&rg, &rg);
-#   if     HP150 == 0           /* this translation level is deeper on the HP150
-                                 */
-    if ( rg.h.al == 0 ) {       /* function key!! */
-        rg.h.ah = 7;            /* get the next character */
+#   if     HP150 == 0             /* this translation level is deeper on the HP150
+                                   */
+    if ( rg.h.al == 0 ) {         /* function key!! */
+        rg.h.ah = 7;              /* get the next character */
         intdos(&rg, &rg);
         c = extcode(rg.h.al);
-        in_put(c >> 8);                 /* prefix byte */
-        in_put(c & 255);                /* event code byte */
+        in_put(c >> 8);           /* prefix byte */
+        in_put(c & 255);          /* event code byte */
 
-        return (0);                     /* extended escape sequence */
+        return (0);               /* extended escape sequence */
     }
 #   endif
 
@@ -292,8 +308,6 @@ int doschar()   /* call the dos to get a char */
  */
 int PASCAL NEAR ttgetc()
 {
-    register int c;             /* character read */
-
 ttc:    /* return any keystrokes waiting in the type ahead buffer */
     if ( in_check() )
         return ( in_get() );
@@ -335,13 +349,13 @@ ttc:    /* return any keystrokes waiting in the type ahead buffer */
 # if     MOUSE
 checkmouse()
 {
-    register int k;             /* current bit/button of mouse */
-    register int etype;         /* event type byte */
-    register int event;         /* encoded mouse event */
-    int mousecol;               /* current mouse column */
-    int mouserow;               /* current mouse row */
-    int sstate;                 /* current shift key status */
-    int newbut;                 /* new state of the mouse buttons */
+    register int  k         = 0;  /* current bit/button of mouse */
+    register int  etype     = 0;  /* event type byte */
+    register int  event     = 0;  /* encoded mouse event */
+    int           mousecol  = 0;  /* current mouse column */
+    int           mouserow  = 0;  /* current mouse row */
+    int           sstate    = 0;  /* current shift key status */
+    int           newbut    = 0;  /* new state of the mouse buttons */
 
     /* check to see if any mouse buttons are different */
     rg.x.ax = 3;        /* Get button status and mouse position */
@@ -370,7 +384,6 @@ checkmouse()
 
     /* no buttons changes */
     if ( oldbut == newbut ) {
-
         /* generate a mouse movement */
         if ( ( (mouse_move == 1) && (mmove_flag == TRUE) ) ||
              (mouse_move == 2) ) {
@@ -427,8 +440,6 @@ checkmouse()
 
 int PASCAL NEAR typahead()
 {
-    int flags;          /* cpu flags from dos call */
-
 #  if     (TURBO | IC ) && HP150 == 0 && ATKBD == 0
     if ( bioskey(1) == 0 )
         return FALSE;
@@ -436,6 +447,8 @@ int PASCAL NEAR typahead()
         return TRUE;
 
 #  else
+    int flags = 0;        /* cpu flags from dos call */
+
     rg.x.ax = 0x4406;           /* IOCTL input status */
     rg.x.bx = 0;                /* File handle = stdin */
 #   if     MSC
@@ -496,8 +509,10 @@ int PASCAL NEAR spawn(f, n)
 int f, n;
 
 {
-    register int s;
-    char line[NLINE];
+    register int  s = 0;
+    char          line[NLINE];
+
+    ZEROMEM(line);
 
     /* don't allow this command if restricted */
     if ( restflag )
@@ -535,8 +550,10 @@ int f, n;
 
 int PASCAL NEAR execprg(f, n)
 {
-    register int s;
-    char line[NLINE];
+    register int  s = 0;
+    char          line[NLINE];
+
+    ZEROMEM(line);
 
     /* don't allow this command if restricted */
     if ( restflag )
@@ -571,13 +588,15 @@ int PASCAL NEAR pipecmd(f, n)
 int f, n;
 
 {
-    register EWINDOW *wp;       /* pointer to new window */
-    register BUFFER *bp;        /* pointer to buffer to zot */
-    register char *tmp;         /* ptr to TMP DOS environment variable */
-    FILE *fp;
-    char line[NLINE];           /* command line send to shell */
-    static char bname[] = "command";
-    static char filnam[NSTRING] = "command";
+    register EWINDOW  *wp   = NULL;   /* pointer to new window */
+    register BUFFER   *bp   = NULL;   /* pointer to buffer to zot */
+    register char     *tmp  = NULL;   /* ptr to TMP DOS environment variable */
+    FILE              *fp   = NULL;
+    char              line[NLINE];    /* command line send to shell */
+    static char       bname[]         = "command";
+    static char       filnam[NSTRING] = "command";
+
+    ZEROMEM(line);
 
     /* don't allow this command if restricted */
     if ( restflag )
@@ -662,14 +681,16 @@ int PASCAL NEAR f_filter(f, n)
 int f, n;
 
 {
-    register int s;             /* return status from CLI */
-    register BUFFER *bp;        /* pointer to buffer to zot */
-    char line[NLINE];           /* command line send to shell */
-    char tmpnam[NFILEN];        /* place to store real file name */
-    static char bname1[] = "fltinp";
+    register int    s   = 0;        /* return status from CLI */
+    register BUFFER *bp = NULL;     /* pointer to buffer to zot */
+    char            line[NLINE];    /* command line send to shell */
+    char            tmpnam[NFILEN]; /* place to store real file name */
+    static char     bname1[]  = "fltinp";
+    static char     filnam1[] = "fltinp";
+    static char     filnam2[] = "fltout";
 
-    static char filnam1[] = "fltinp";
-    static char filnam2[] = "fltout";
+    ZEROMEM(line);
+    ZEROMEM(tmpnam);
 
     /* don't allow this command if restricted */
     if ( restflag )
@@ -748,10 +769,13 @@ int PASCAL NEAR shellprog(cmd)
 char *cmd;      /*  Incoming command line to execute  */
 
 {
-    char *shell;                /* Name of system command processor */
-    char swchar;                /* switch character to use */
-    union REGS regs;            /* parameters for dos call */
-    char comline[NSTRING];      /* constructed command line */
+    char        *shell  = NULL;     /* Name of system command processor */
+    char        swchar  = 0;        /* switch character to use */
+    union REGS  regs;               /* parameters for dos call */
+    char        comline[NSTRING];   /* constructed command line */
+
+    ZEROMEM(regs);
+    ZEROMEM(comline);
 
     /*  detect current switch character and set us up to use it */
     regs.h.ah = 0x37;           /*  get setting data  */
@@ -770,7 +794,7 @@ char *cmd;      /*  Incoming command line to execute  */
 
     /**  If the command line is not empty, bring up the shell  **/
     /**  and execute the command.  Otherwise, bring up the     **/
-    /**  shell in interactive mode.   **/
+    /**  shell in interactive mode.                            **/
 
     if ( *cmd ) {
         XSTRCPY(comline, shell);
@@ -797,13 +821,14 @@ int PASCAL NEAR execprog(cmd)
 char *cmd;      /*  Incoming command line to execute  */
 
 {
-    char *sp;                   /* temporary string pointer */
-    int rv;                     /* numeric return value from subprocess */
-    char f1[38];                /* FCB1 area (not initialized */
-    char f2[38];                /* FCB2 area (not initialized */
-    char prog[NSTRING];         /* program filespec */
-    char tail[NSTRING];         /* command tail with length byte */
-    union REGS regs;            /* parameters for dos call  */
+    char        *sp   = NULL;   /* temporary string pointer */
+    CONST char  *csp  = NULL;   /* temporary string pointer */
+    int         rv    = 0;      /* numeric return value from subprocess */
+    char        f1[38];         /* FCB1 area (not initialized */
+    char        f2[38];         /* FCB2 area (not initialized */
+    char        prog[NSTRING];  /* program filespec */
+    char        tail[NSTRING];  /* command tail with length byte */
+    union REGS  regs;           /* parameters for dos call  */
 # if     MWC == 0
     struct SREGS segreg;        /* segment registers for dis call */
 # endif
@@ -815,9 +840,19 @@ char *cmd;      /*  Incoming command line to execute  */
     }
     pblock;
 
+    ZEROMEM(f1);
+    ZEROMEM(f2);
+    ZEROMEM(prog);
+    ZEROMEM(tail);
+    ZEROMEM(regs);
+# if     MWC == 0
+    ZEROMEM(segreg);
+# endif
+    ZEROMEM(pblock);
+
     /* parse the command name from the command line */
     sp = prog;
-    while ( *cmd && (*cmd != ' ') && (*cmd != '\t') )
+    while ( (*cmd != '\0') && (*cmd != ' ') && (*cmd != '\t') )
         *sp++ = *cmd++;
     *sp = 0;
 
@@ -829,13 +864,13 @@ char *cmd;      /*  Incoming command line to execute  */
     xstrlcat(&tail[1], "\r", sizeof(tail) - 1);
 
     /* look up the program on the path trying various extentions */
-    if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(XSTRCAT(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( csp = flook(prog, TRUE) ) == NULL )
+        if ( ( csp = flook(XSTRCAT(prog, ".exe"), TRUE) ) == NULL ) {
             xstrcpy(&prog[strlen(prog)-4], ".com"); /**UNSAFE_OK**/
-            if ( ( sp = flook(prog, TRUE) ) == NULL )
+            if ( ( csp = flook(prog, TRUE) ) == NULL )
                 return (FALSE);
         }
-    XSTRCPY(prog, sp);
+    XSTRCPY(prog, csp);
 
 # if     MWC == 0
     /* get a pointer to this PSPs environment segment number */
@@ -908,14 +943,15 @@ char *cmd;      /*  Incoming command line to execute  */
 
 char *PASCAL NEAR timeset()
 {
-# if     MWC | TURBO | IC | MSC | ZTC
-    register char *sp;          /* temp string pointer */
-    char buf[16];               /* time data buffer */
-    extern char *ctime();
+# if  MWC | TURBO | IC | MSC | ZTC
+    register char *sp = NULL;     /* temp string pointer */
+    char     buf[TIME_BUF_SIZE];  /* time data buffer */
 
-#  if     IC
-    time( (time_t *)buf );
-    sp = ctime( (time_t *)buf );
+    ZEROMEM(buf);
+
+#  if IC | TURBO
+    time((time_t *)buf);
+    sp = ctime((time_t *)buf);
 #  else
     time(buf);
     sp = ctime(buf);
@@ -934,8 +970,8 @@ char *PASCAL NEAR timeset()
 # if     TURBO
 /*  FILE Directory routines     */
 
-char path[NFILEN];      /* path of file to find */
-char rbuf[NFILEN];      /* return file buffer */
+static char path[NFILEN];   /* path of file to find */
+static char rbuf[NFILEN];   /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
@@ -944,10 +980,12 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
-    char fname[NFILEN];                 /* file/path for DOS call */
+    register int  index   = 0;      /* index into various strings */
+    register int  point   = 0;      /* index into other strings */
+    register int  extflag = 0;      /* does the file have an extention? */
+    char          fname[NFILEN];    /* file/path for DOS call */
+
+    ZEROMEM(fname);
 
     /* first parse the file path off the file spec */
     XSTRCPY(path, fspec);
@@ -991,10 +1029,9 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL NEAR getnfile()
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
-    char fname[NFILEN];                 /* file/path for DOS call */
+    char    fname[NFILEN];    /* file/path for DOS call */
+
+    ZEROMEM(fname);
 
     /* and call for the first file */
     if ( findnext(&fileblock) == -1 )
@@ -1013,8 +1050,8 @@ char *PASCAL NEAR getnfile()
 #  if     MSC | ZTC
 /*  FILE Directory routines     */
 
-char path[NFILEN];      /* path of file to find */
-char rbuf[NFILEN];      /* return file buffer */
+static char path[NFILEN];   /* path of file to find */
+static char rbuf[NFILEN];   /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
@@ -1023,10 +1060,12 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
-    char fname[NFILEN];                 /* file/path for DOS call */
+    register int  index   = 0;    /* index into various strings */
+    register int  point   = 0;    /* index into other strings */
+    register int  extflag = 0;    /* does the file have an extention? */
+    char fname[NFILEN];           /* file/path for DOS call */
+
+    ZEROMEM(fname);
 
     /* first parse the file path off the file spec */
     XSTRCPY(path, fspec);
@@ -1070,10 +1109,12 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL NEAR getnfile()
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
-    char fname[NFILEN];                 /* file/path for DOS call */
+    register int  index   = 0;      /* index into various strings */
+    register int  point   = 0;      /* index into other strings */
+    register int  extflag = 0;      /* does the file have an extention? */
+    char          fname[NFILEN];    /* file/path for DOS call */
+
+    ZEROMEM(fname);
 
     /* and call for the first file */
     if ( _dos_findnext(&fileblock) != 0 )
@@ -1105,3 +1146,6 @@ char *PASCAL NEAR getnfile()
 # endif
 #endif
 
+
+
+/* EOF */

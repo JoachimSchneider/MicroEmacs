@@ -668,10 +668,16 @@ execl(va_alist)
 # endif
 #endif
 #define NBUFN   128             /* # of bytes, buffer name            */
-#define NLINE   512             /* # of bytes, input line             */
-#define NSTRING 512             /* # of bytes, string buffers         */
+#ifdef MSDOS  /* Reduce sizes to UE312 vals --- else `stack overflow' */
+# define NLINE   256            /* # of bytes, input line             */
+# define NSTRING 128            /* # of bytes, string buffers         */
+# define NPAT    128            /* # of bytes, pattern                */
+#else
+# define NLINE   512            /* # of bytes, input line             */
+# define NSTRING 512            /* # of bytes, string buffers         */
+# define NPAT    512            /* # of bytes, pattern                */
+#endif
 #define NKBDM   4096            /* # of strokes, keyboard macro       */
-#define NPAT    512             /* # of bytes, pattern                */
 #define HUGENUM 1000            /* Huge number                        */
 #define NLOCKS  256             /* max # of file locks active         */
 #define NCOLORS 16              /* number of supported colors         */
