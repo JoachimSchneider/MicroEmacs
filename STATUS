@@ -264,13 +264,15 @@ Next steps to handle the (hidden) overwrite:
 
 - Substitute xstrcat by XSTRCAT.                                          (\/)
 
-- XSTRCPY and XSTRCAT generate trce warnings ... unsafe ... when dst in
+- XSTRCPY and XSTRCAT generate tarce warnings ... unsafe ... when dst in
   not an array: Sustitute these occurances with xstrcpy and xstrcat.      (\/)
+
+- Replace --- if possible --- `strncat' by `strlcat'.
 
 - *Manually* analyze the remaining `sprintf', `xstrcpy' and `xstrcat'
   occurances.
 
-- Manually chack *all* occurences of XSTR{CPY,CAT} in the OS-Dependent
+- Manually check *all* occurences of XSTR{CPY,CAT} in the OS-Dependent
   modules like
 
   vms.c, os2.c, aosvs.c ,nt.c amigados.c, ...
@@ -278,10 +280,15 @@ Next steps to handle the (hidden) overwrite:
   Workaround: Substitute the lower case versions there, to not
   produce broken code.                                                    (\/)
 
-- Remove *all* warnings in msdos.c and pcdos.c
+- Remove *all* warnings in msdos.c and pcdos.c                            (\/)
+
+- Initialize *all* variables in msdos.c and pcdos.c                       (\/)
+  ===> Did not help
+
+- Bisect the F10 handler in ehelp.cmd
 
 - Repair all doubtful statically returned strings in eval.c (the macro
-  processing module) by optionally introducoing the static stacks.
+  processing module) by optionally introducing the static stacks.
 
 - From step to step check with PCDOS/TURBO build.
 
@@ -298,6 +305,68 @@ OS: `Invalid argument
 '
 --- abort ...
 
+
+[2023-07-30.01]
+The overwrite is not observalble if we set NSTRING from 512 down to 128
+(the previous UE312 value).
+
+- Additional steps:
+  + Check if reducing NSTRING in msdos.c only eliminates the error:
+    ===> NO
+
+
+[2023-07-31.00]
+
+* Indeed the DOS-Error is there since (at least) UE212: Redefining
+  NSTRING from 128 to 512 in estruct.h reproduces the error!
+
+* The Error does not vanish when one comments out the VGA/EGA related
+  code in the EHELP.CMD.
+
+
+[2023-08-01.00]
+
+DOS-Error: SOLVED! It is a Stack Overflow!
+
+* Enlardged NSTRING to 16834, compliled on Linux run it under
+  `valgrind': No Problems
+
+* Set the `-N' flag in the compile staement inside the makefile (before
+  it was `-N-': Switch off stack checking).
+
+  Compiled an run UE312 with
+
+  - NSTRING = 512:  Stack Overflow
+  - NSTRING = 128:  No Error --- everything is OK
+
+
+[2023-08-01.01]
+
+Next Steps:
+
+- Repair all doubtful statically returned strings in eval.c (the macro
+  processing module) by optionally introducing the static stacks.
+
+- Implement xstrdup with the function already available
+
+- Substitute `free' with `FREE'
+
+- Check modifications in DOS-Compile:                             (\/)
+  + ctime()
+  + strrev()
+- Handle bytecopy: Is safe but might be expressed with strlcpy
+
+- Do an `#ifdef MSDOS' or somehow increase the Stack-Size in DOS. (\/)
+
+  BAD:
+    NLINE   = 512
+    NSTRING = 512
+    NPAT    = 512
+
+  GOOD:
+    NLINE   = 256
+    NSTRING = 128
+    NPAT    = 128
 
 
 # EOF

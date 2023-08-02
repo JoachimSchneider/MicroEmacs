@@ -15,6 +15,13 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 ## Change Log
 
+[2023-08-01.00]
+* MSDOS with Borland C (pcdos/turbo): Fixed a regression introduced with
+  UE500: NSTRING was increased from 128 to 512 leading to `stack overflow'
+  which could only be detected (on MSDOS) by compliling with the `-N' switch!
+* Introduced Macros for safe string copy.
+
+
 [2023-07-25.00]
 * Added stack ADT for static returned strings (eval.c:gtfun()) to
   allow (indirect) recursive function calls.
