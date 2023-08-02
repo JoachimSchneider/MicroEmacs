@@ -368,5 +368,8 @@ Next Steps:
     NSTRING = 128
     NPAT    = 128
 
+- Reduce the size of the buffer for ctime() in msdos,c (it was
+  increased from 16 to 256 for debugging purposes).
+
 
 # EOF
