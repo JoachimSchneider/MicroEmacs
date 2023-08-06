@@ -292,7 +292,10 @@ RETURN_L:
                                                                       \
             return (type)STATIC_STR_RET_ARR_;                         \
         }                                                             \
-    } while ( 0 )
+    } while ( 0 );                                                    \
+    /* Keep silly compilers happy:  */                                \
+    return (type)NULL
+
 /* Usage example: */
 #if ( 0 )
 # define RETURN  STATIC_STR_RET_RETURN

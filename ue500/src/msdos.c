@@ -1,5 +1,7 @@
-/*  MSDOS.C:    Operating specific I/O and Spawning functions under the MS/PCDOS
- * operating system for MicroEMACS 4.00 (C)Copyright 1995 by Daniel M. Lawrence
+/*      MSDOS.C:        Operating specific I/O and Spawning functions
+ *                      under the MS/PCDOS operating system
+ *                      for MicroEMACS 4.00
+ *                      (C)Copyright 1995 by Daniel M. Lawrence
  */
 
 #include        <stdio.h>
@@ -262,7 +264,7 @@ int doschar()   /* call the dos to get a char */
 # else
 
 #  if     (TURBO | IC) && HP150 == 0
-/*  Added 8/13/89 by DRK to get Turbo C version to use BIOS for keyboard input.
+/* Added 8/13/89 by DRK to get Turbo C version to use BIOS for keyboard input.
  * Low byte of k has first byte of extended scan (ASCII value for reg. char, 0
  * for extended char), high byte has extended key scan code.
  */
@@ -438,10 +440,10 @@ checkmouse()
 # endif
 
 # if     TYPEAH
-/* typahead:    Check to see if any characters are already in the keyboard
- * buffer
+/* TYPAHEAD:
+ *
+ * Check to see if any characters are already in the keyboard buffer
  */
-
 int PASCAL NEAR typahead()
 {
 #  if     (TURBO | IC ) && HP150 == 0 && ATKBD == 0
@@ -503,10 +505,13 @@ int f, n;
     return (TRUE);
 }
 
-/*
+/* SPAWN:
+ *
  * Run a one-liner in a subjob. When the command returns, wait for a single
  * character to be typed, then mark the screen as garbage so a full repaint is
- * done. Bound to "C-X !".
+ * done.
+ *
+ * Bound to "C-X !".
  */
 int PASCAL NEAR spawn(f, n)
 
@@ -1152,4 +1157,6 @@ char *PASCAL NEAR getnfile()
 
 
 
-/* EOF */
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
