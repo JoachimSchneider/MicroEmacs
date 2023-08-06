@@ -1,7 +1,7 @@
 /*  EVAL.C: Expresion evaluation functions for
  *               MicroEMACS
  *
- *       written 1993 by Daniel Lawrence
+ *  written 1993 by Daniel Lawrence
  */
 
 #include <stdio.h>
@@ -10,6 +10,9 @@
 #include "edef.h"
 #include "elang.h"
 #include "evar.h"
+
+
+#define RETURN  STATIC_STR_RET_RETURN
 
 
 /* initialize the entries in one user variable table */
@@ -73,43 +76,29 @@ UTABLE *ut;     /* table to clear */
 
 /* GTFUN:
  *
- * evaluate a function
+ * Evaluate a function
+ *
+ * Function returns a static result string: Copy immediately!
  */
-CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
+CONST char * PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
 {
-    CONST char    *RETURN_VALUE_  = NULL;
-#define RETURN(e) do { RETURN_VALUE_ = (e); goto RETURN_L; } while ( 0 )
+    STATIC_STR_RET_PROLOG();
 
     char          *fnameL = NULL;
     register int  fnum    = 0;          /* index to function to eval  */
     register int  arg     = 0;          /* value of some arguments    */
     BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
-    int           rc      = 0;
     char          arg1[NSTRING];
     char          arg2[NSTRING];
     char          arg3[NSTRING];
     char          result[2 * NSTRING];
-
-#if UEMACS_FEATURE_USE_STATIC_STACK
-    static VOIDP  RValS   = NULL;
-    char          *RVAL_  = NULL;
-#else
-    static char   RVAL_[2 * NSTRING];
-#endif
 
     ZEROMEM(arg1);
     ZEROMEM(arg2);
     ZEROMEM(arg3);
     ZEROMEM(result);
 
-#if UEMACS_FEATURE_USE_STATIC_STACK
-    BEGIN_DO_ONCE {
-        RValS = NewStack(DFT_STATIC_STACKSIZE, 2 * NSTRING);
-    } END_DO_ONCE;
-    ASRT(NULL != (RVAL_ = NextStackElem(RValS)));
-#else
-    ZEROMEM(RVAL_);
-#endif
+    ASRT(NULL != fname);
 
     fnameL = xstrdup(fname);
     mklower(fnameL); /* and let it be upper or lower case */
@@ -144,7 +133,6 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
         }
     }
-
 
     /* and now evaluate it! */
     switch ( fnum ) {
@@ -218,14 +206,11 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFENV:
 #if     ENVFUNC
-
         RETURN ( fixnull( getenv(arg1) ) );
-
 #else
-
         RETURN ( "" );
-
 #endif
+
     case UFEQUAL:
         RETURN ( ltos( asc_int(arg1) == asc_int(arg2) ) );
 
@@ -245,7 +230,6 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
             RETURN ( bytecopy(result, errorm, NSTRING * 2) );
 
         RETURN ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2) );
-
 #else
         if ( arg == 0 )
             bytecopy(result, patmatch, NSTRING * 2);
@@ -253,8 +237,8 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
             RETURN ( bytecopy(result, errorm, NSTRING * 2) );
 
         RETURN ( result );
-
 #endif
+
     case UFGTCMD:
         RETURN ( cmdstr(getcmd(), result) );
 
@@ -381,21 +365,11 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     meexit(-11);        /* never should get here */
 
-RETURN_L:
-#undef RETURN
-    if ( 2 * NSTRING <= (rc = xstrlcpy(RVAL_, RETURN_VALUE_, 2 * NSTRING)) )  {
-        TRC(("gtfun(): RVAL_ truncated: 2 * NSTRING = %d <= rc = %d",
-             2 * NSTRING, rc));
-    }
 
-#if UEMACS_FEATURE_USE_STATIC_STACK
-    ASRT(NULL != DecStackPtr(RValS));
-#endif
-
-    return RVAL_;
+    STATIC_STR_RET_EPILOG(gtfun, CONST char *, 2 * NSTRING);
 }
 
-CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */
+CONST char * PASCAL NEAR gtusr(vname)    /* look up a user var's value */
 
 CONST char  *vname;             /* name of user variable to fetch */
 
@@ -443,7 +417,7 @@ next_ut:        ut = ut->next;
     return (errorm);
 }
 
-char *PASCAL NEAR funval(i)
+char * PASCAL NEAR funval(i)
 
 int i;
 
@@ -451,7 +425,7 @@ int i;
     return (funcs[i].f_name);
 }
 
-char *PASCAL NEAR envval(i)
+char * PASCAL NEAR envval(i)
 
 int i;
 
@@ -494,325 +468,335 @@ int klength;                    /* maximum length of string to compare */
     return (-1);
 }
 
-CONST char *PASCAL NEAR gtenv(vname)
-
-CONST char  *vname;             /* name of environment variable to retrieve */
-
+/* GTENV:
+ *
+ * Retrieve environmant variable
+ *
+ * Function returns a static result string: Copy immediately!
+ */
+CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
+/* vname: Name of environment variable to retrieve  */
 {
-    register int vnum;          /* ordinal number of var refrenced */
-    static char result[2 * NSTRING];            /* string result */
+    STATIC_STR_RET_PROLOG();
+
+    register int  vnum  = 0;            /* ordinal number of var
+                                         * referenced     */
+    char          result[2 * NSTRING];  /* string result  */
+
+    ZEROMEM(result);
+
+    ASRT(NULL != vname);
 
     /* scan the list, looking for the referenced name */
     vnum = binary(vname, envval, NEVARS, NVSIZE);
 
     /* return errorm on a bad reference */
     if ( vnum == -1 )
-        return (errorm);
+        RETURN ( errorm );
 
     /* otherwise, fetch the appropriate value */
     switch ( vnum ) {
     case EVABBELL:
-        return ( ltos(ab_bell) );
+        RETURN ( ltos(ab_bell) );
 
     case EVABCAP:
-        return ( ltos(ab_cap) );
+        RETURN ( ltos(ab_cap) );
 
     case EVABQUICK:
-        return ( ltos(ab_quick) );
+        RETURN ( ltos(ab_quick) );
 
     case EVACOUNT:
-        return ( int_asc(gacount) );
+        RETURN ( int_asc(gacount) );
 
     case EVASAVE:
-        return ( int_asc(gasave) );
+        RETURN ( int_asc(gasave) );
 
     case EVBUFHOOK:
-        return ( fixnull( getfname(&bufhook) ) );
+        RETURN ( fixnull(getfname(&bufhook)) );
 
     case EVCBFLAGS:
-        return ( int_asc(curbp->b_flag) );
+        RETURN ( int_asc(curbp->b_flag) );
 
     case EVCBUFNAME:
-        return (curbp->b_bname);
+        RETURN ( curbp->b_bname );
 
     case EVCFNAME:
-        return (curbp->b_fname);
+        RETURN ( curbp->b_fname );
 
     case EVCMDHK:
-        return ( fixnull( getfname(&cmdhook) ) );
+        RETURN ( fixnull( getfname(&cmdhook) ) );
 
     case EVCMODE:
-        return ( int_asc(curbp->b_mode) );
+        RETURN ( int_asc(curbp->b_mode) );
 
     case EVCQUOTE:
-        return ( int_asc(cquote) );
+        RETURN ( int_asc(cquote) );
 
     case EVCURCHAR:
-        return ( get_lused(curwp->w_dotp) ==
+        RETURN ( get_lused(curwp->w_dotp) ==
                  get_w_doto(curwp) ? int_asc('\r') :int_asc( lgetc(curwp->w_dotp,
                                                                get_w_doto(curwp)) ) );
 
     case EVCURCOL:
-        return ( int_asc( getccol(FALSE) ) );
+        RETURN ( int_asc(getccol(FALSE)) );
 
     case EVCURLINE:
-        return ( long_asc( getlinenum(curbp, curwp->w_dotp) ) );
+        RETURN ( long_asc(getlinenum(curbp, curwp->w_dotp)) );
 
     case EVCURWIDTH:
-        return ( int_asc(term.t_ncol) );
+        RETURN ( int_asc(term.t_ncol) );
 
     case EVCURWIND:
-        return ( int_asc( getcwnum() ) );
+        RETURN ( int_asc(getcwnum()) );
 
     case EVCWLINE:
-        return ( int_asc( getwpos() ) );
+        RETURN ( int_asc(getwpos()) );
 
     case EVDEBUG:
-        return ( ltos(macbug) );
+        RETURN ( ltos(macbug) );
 
     case EVDESKCLR:
-        return (cname[deskcolor]);
+        RETURN ( cname[deskcolor] );
 
     case EVDIAGFLAG:
-        return ( ltos(diagflag) );
+        RETURN ( ltos(diagflag) );
 
     case EVDISCMD:
-        return ( ltos(discmd) );
+        RETURN ( ltos(discmd) );
 
     case EVDISINP:
-        return ( ltos(disinp) );
+        RETURN ( ltos(disinp) );
 
     case EVDISPHIGH:
-        return ( ltos(disphigh) );
+        RETURN ( ltos(disphigh) );
 
     case EVDISPUNDO:
-        return ( ltos(dispundo) );
+        RETURN ( ltos(dispundo) );
 
     case EVEXBHOOK:
-        return ( fixnull( getfname(&exbhook) ) );
+        RETURN ( fixnull(getfname(&exbhook)) );
 
     case EVEXITHOOK:
-        return ( fixnull( getfname(&exithook) ) );
+        RETURN ( fixnull(getfname(&exithook)) );
 
     case EVFCOL:
-        return ( int_asc(curwp->w_fcol) );
+        RETURN ( int_asc(curwp->w_fcol) );
 
     case EVFILLCOL:
-        return ( int_asc(fillcol) );
+        RETURN ( int_asc(fillcol) );
 
     case EVFLICKER:
-        return ( ltos(flickcode) );
+        RETURN ( ltos(flickcode) );
 
     case EVFMTLEAD:
-        return (fmtlead);
+        RETURN ( fmtlead );
 
     case EVGFLAGS:
-        return ( int_asc(gflags) );
+        RETURN ( int_asc(gflags) );
 
     case EVGMODE:
-        return ( int_asc(gmode) );
+        RETURN ( int_asc(gmode) );
 
     case EVHARDTAB:
-        return ( int_asc(tabsize) );
+        RETURN ( int_asc(tabsize) );
 
     case EVHILITE:
-        return ( int_asc(hilite) );
+        RETURN ( int_asc(hilite) );
 
     case EVHJUMP:
-        return ( int_asc(hjump) );
+        RETURN ( int_asc(hjump) );
 
     case EVHSCRLBAR:
-        return ( ltos(hscrollbar) );
+        RETURN ( ltos(hscrollbar) );
 
     case EVHSCROLL:
-        return ( ltos(hscroll) );
+        RETURN ( ltos(hscroll) );
 
     case EVISTERM:
-        return ( cmdstr(isterm, result) );
+        RETURN ( cmdstr(isterm, result) );
 
     case EVKILL:
-        return ( getkill() );
+        RETURN ( getkill() );
 
     case EVLANG:
-        return (LANGUAGE);
+        RETURN ( LANGUAGE );
 
     case EVLASTKEY:
-        return ( int_asc(lastkey) );
+        RETURN ( int_asc(lastkey) );
 
     case EVLASTMESG:
-        return (lastmesg);
+        RETURN ( lastmesg );
 
     case EVLINE:
-        return ( getctext(result) );
+        RETURN ( getctext(result) );
 
     case EVLTERM:
-        return (lterm);
+        RETURN ( lterm );
 
     case EVLWIDTH:
-        return ( int_asc( get_lused(curwp->w_dotp) ) );
+        RETURN ( int_asc(get_lused(curwp->w_dotp)) );
 
     case EVMATCH:
-        return ( fixnull(patmatch) );
+        RETURN ( fixnull(patmatch) );
 
     case EVMMOVE:
-        return ( int_asc(mouse_move) );
+        RETURN ( int_asc(mouse_move) );
 
     case EVMODEFLAG:
-        return ( ltos(modeflag) );
+        RETURN ( ltos(modeflag) );
 
     case EVMSFLAG:
-        return ( ltos(mouseflag) );
+        RETURN ( ltos(mouseflag) );
 
     case EVNEWSCRN:
-        return ( ltos(newscreenflag) );
+        RETURN ( ltos(newscreenflag) );
 
     case EVNUMWIND:
-        return ( int_asc( gettwnum() ) );
+        RETURN ( int_asc( gettwnum() ) );
 
     case EVOQUOTE:
-        return ( int_asc(oquote) );
+        RETURN ( int_asc(oquote) );
 
     case EVORGCOL:
-        return ( int_asc(term.t_colorg) );
+        RETURN ( int_asc(term.t_colorg) );
 
     case EVORGROW:
-        return ( int_asc(term.t_roworg) );
+        RETURN ( int_asc(term.t_roworg) );
 
     case EVOS:
-        return (os);
+        RETURN ( os );
 
     case EVOVERLAP:
-        return ( int_asc(overlap) );
+        RETURN ( int_asc(overlap) );
 
     case EVPARINDENT:
-        return ( int_asc(parindent) );
+        RETURN ( int_asc(parindent) );
 
     case EVPAGELEN:
-        return ( int_asc(term.t_nrow + 1) );
+        RETURN ( int_asc(term.t_nrow + 1) );
 
     case EVPALETTE:
-        return (palstr);
+        RETURN ( palstr );
 
     case EVPARALEAD:
-        return (paralead);
+        RETURN ( paralead );
 
     case EVPENDING:
 #if     TYPEAH || WINDOW_MSWIN
-
-        return ( ltos( typahead() ) );
-
+        RETURN ( ltos(typahead()) );
 #else
-
-        return (falsem);
-
+        RETURN ( falsem );
 #endif
+
     case EVPOPFLAG:
-        return ( ltos(popflag) );
+        RETURN ( ltos(popflag) );
 
     case EVPOPWAIT:
-        return ( ltos(popwait) );
+        RETURN ( ltos(popwait) );
 
     case EVPOSFLAG:
-        return ( ltos(posflag) );
+        RETURN ( ltos(posflag) );
 
     case EVPROGNAME:
-        return (PROGNAME);
+        RETURN ( PROGNAME );
 
     case EVRAM:
-        return ( int_asc( (int)(envram / 1024l) ) );
+        RETURN ( int_asc((int)(envram / 1024l)) );
 
     case EVREADHK:
-        return ( fixnull( getfname(&readhook) ) );
+        RETURN ( fixnull(getfname(&readhook)) );
 
     case EVREGION:
-        return ( getreg(result) );
+        RETURN ( getreg(result) );
 
     case EVREPLACE:
-        return ( (char *)rpat );
+        RETURN ( (char *)rpat );
 
     case EVRVAL:
-        return (rval);
+        RETURN ( rval );
 
     case EVSCRNAME:
-        return (first_screen->s_screen_name);
+        RETURN ( first_screen->s_screen_name );
 
     case EVSEARCH:
-        return ( (char *)pat );
+        RETURN ( (char *)pat );
 
     case EVSEARCHPNT:
-        return ( int_asc(searchtype) );
+        RETURN ( int_asc(searchtype) );
 
     case EVSEED:
-        return ( int_asc( (int)seed ) );
+        RETURN ( int_asc((int)seed) );
 
     case EVSOFTTAB:
-        return ( int_asc(stabsize) );
+        RETURN ( int_asc(stabsize) );
 
     case EVSRES:
-        return (sres);
+        RETURN ( sres );
 
     case EVSSAVE:
-        return ( ltos(ssave) );
+        RETURN ( ltos(ssave) );
 
     case EVSSCROLL:
-        return ( ltos(sscroll) );
+        RETURN ( ltos(sscroll) );
 
     case EVSTATUS:
-        return ( ltos(cmdstatus) );
+        RETURN ( ltos(cmdstatus) );
 
     case EVSTERM:
-        return ( cmdstr(sterm, result) );
+        RETURN ( cmdstr(sterm, result) );
 
     case EVTARGET:
         saveflag = lastflag;
 
-        return ( int_asc(curgoal) );
+        RETURN ( int_asc(curgoal) );
 
     case EVTIME:
-        return ( timeset() );
+        RETURN ( timeset() );
 
     case EVTIMEFLAG:
-        return ( ltos(timeflag) );
+        RETURN ( ltos(timeflag) );
 
     case EVTPAUSE:
-        return ( int_asc(term.t_pause) );
+        RETURN ( int_asc(term.t_pause) );
 
     case EVUNDOFLAG:
-        return ( ltos(undoflag) );
+        RETURN ( ltos(undoflag) );
 
     case EVVERSION:
-        return (VERSION);
+        RETURN ( VERSION );
 
     case EVVSCRLBAR:
-        return ( ltos(vscrollbar) );
+        RETURN ( ltos(vscrollbar) );
 
     case EVWCHARS:
-        return ( getwlist(result) );
+        RETURN ( getwlist(result) );
 
     case EVWLINE:
-        return ( int_asc(curwp->w_ntrows) );
+        RETURN ( int_asc(curwp->w_ntrows) );
 
     case EVWRAPHK:
-        return ( fixnull( getfname(&wraphook) ) );
+        RETURN ( fixnull( getfname(&wraphook) ) );
 
     case EVWRITEHK:
-        return ( fixnull( getfname(&writehook) ) );
+        RETURN ( fixnull( getfname(&writehook) ) );
 
     case EVXPOS:
-        return ( int_asc(xpos) );
+        RETURN ( int_asc(xpos) );
 
     case EVYANKFLAG:
-        return ( ltos(yankflag) );
+        RETURN ( ltos(yankflag) );
 
     case EVYPOS:
-        return ( int_asc(ypos) );
+        RETURN ( int_asc(ypos) );
     }
+
     meexit(-12);        /* again, we should never get here */
 
-    return NULL;  /**AVOID_WARNING**/
+
+    STATIC_STR_RET_EPILOG(gtenv, CONST char *, 2 * NSTRING);
 }
 
-CONST char *PASCAL NEAR fixnull(s)      /* Don't return NULL pointers! */
+CONST char * PASCAL NEAR fixnull(s)      /* Don't return NULL pointers! */
 
 CONST char  *s;
 
@@ -823,22 +807,30 @@ CONST char  *s;
         return (s);
 }
 
-/* return some of the contents of the kill buffer */
-
-char *PASCAL NEAR getkill()
+/* GETKILL:
+ *
+ * Return some of the contents of the kill buffer
+ *
+ * Function returns a static result string: Copy immediately!
+ */
+char * PASCAL NEAR getkill P0_(void)
 {
-    register int size;          /* max number of chars left to return */
-    register char *sp;          /* ptr into KILL block data chunk */
-    register char *vp;          /* ptr into return value */
-    KILL *kptr;                 /* ptr to the current KILL block */
-    int counter;                /* index into data chunk */
-    static char value[NSTRING]; /* temp buffer for value */
+    STATIC_STR_RET_PROLOG();
+
+    register int  size    = 0;    /* max num of chars left to return  */
+    register char *sp     = NULL; /* ptr into KILL block data chunk   */
+    register char *vp     = NULL; /* ptr into return value            */
+    KILL          *kptr   = NULL; /* ptr to the current KILL block    */
+    int           counter = 0;    /* index into data chunk            */
+    char          value[NSTRING]; /* temp buffer for value            */
+
+    ZEROMEM(value);
 
     /* no kill buffer....just a null string */
     if ( kbufh[kill_index] == (KILL *)NULL ) {
         value[0] = 0;
 
-        return (value);
+        RETURN ( value );
     }
 
     /* set up the output buffer */
@@ -855,7 +847,7 @@ char *PASCAL NEAR getkill()
             if ( --size == 0 ) {
                 *vp = 0;
 
-                return (value);
+                RETURN ( value );
             }
         }
         kptr = kptr->d_next;
@@ -871,7 +863,7 @@ char *PASCAL NEAR getkill()
                 if ( --size == 0 ) {
                     *vp = 0;
 
-                    return (value);
+                    RETURN ( value );
                 }
             }
             kptr = kptr->d_next;
@@ -883,7 +875,7 @@ char *PASCAL NEAR getkill()
             if ( --size == 0 ) {
                 *vp = 0;
 
-                return (value);
+                RETURN ( value );
             }
         }
     }
@@ -891,10 +883,13 @@ char *PASCAL NEAR getkill()
     /* and return the constructed value */
     *vp = 0;
 
-    return (value);
+    RETURN ( value );
+
+
+    STATIC_STR_RET_EPILOG(getkill, char *, NSTRING);
 }
 
-char *PASCAL NEAR trimstr(s)    /* trim whitespace off the end of a string */
+char * PASCAL NEAR trimstr(s)    /* trim whitespace off the end of a string */
 
 char *s;        /* string to trim */
 
@@ -1692,24 +1687,33 @@ char *st;
     return (result * sign);
 }
 
-/* int_asc: integer to ascii string.......... This is too inconsistant to
- *          use the system's
+/* INT_ASC:
+ *
+ * Integer to ascii string .......... This is too inconsistant to use
+ * the system's
+ *
+ * Function returns a static result string: Copy immediately!
  */
-char *PASCAL NEAR int_asc(i)
-
-int i;  /* integer to translate to a string */
-
+char * PASCAL NEAR int_asc P1_(int, i)
+/* i: Integer to translate to a string  */
 {
-    register int digit;                 /* current digit being used */
-    register char *sp;                  /* pointer into result */
-    register int sign;                  /* sign of resulting number */
-    static char result[INTWIDTH+1];     /* resulting string */
+    STATIC_STR_RET_PROLOG();
 
-    /* this is a special case */
+    register int  digit = 0;            /* current digit being used */
+    register char *sp   = NULL;         /* pointer into result      */
+    register int  sign  = 0;            /* sign of resulting number */
+    char          result[INTWIDTH+1];   /* resulting string         */
+
+    ZEROMEM(result);
+
+    /* this is a special case for two byte integers but not wrong in
+     * the general case. One could extend this to four or eight byte
+     * integers as well --- TODO.
+     */
     if ( i == -32768 ) {
         XSTRCPY(result, "-32768");
 
-        return (result);
+        RETURN ( result );
     }
 
     /* record the sign...*/
@@ -1720,11 +1724,11 @@ int i;  /* integer to translate to a string */
     }
 
     /* and build the string (backwards!) */
-    sp = result + INTWIDTH;
+    sp = result + sizeof(result) - 1;
     *sp = 0;
     do {
         digit = i % 10;
-        *(--sp) = '0' + digit;          /* and install the new digit */
+        *(--sp) = '0' + digit;  /* and install the new digit */
         i = i / 10;
     } while (i);
 
@@ -1733,21 +1737,30 @@ int i;  /* integer to translate to a string */
         *(--sp) = '-';          /* and install the minus sign */
     }
 
-    return (sp);
+    RETURN ( sp );
+
+
+    STATIC_STR_RET_EPILOG(int_asc, char *, INTWIDTH + 1);
 }
 
-/*  long_asc:   long to ascii string.......... This is too inconsistant to use
- * the system's */
-
-char *PASCAL NEAR long_asc(num)
-
-long num;       /* integer to translate to a string */
-
+/* LONG_ASC:
+ *
+ * Long int to ascii string .......... This is too inconsistant to use
+ * the system's
+ *
+ * Function returns a static result string: Copy immediately!
+ */
+char * PASCAL NEAR long_asc P1_(long int, num)
+/* num: Integer to translate to a string  */
 {
-    register int digit;                 /* current digit being used */
-    register char *sp;                  /* pointer into result */
-    register int sign;                  /* sign of resulting number */
-    static char result[LONGWIDTH+1];     /* resulting string */
+    STATIC_STR_RET_PROLOG();
+
+    register int  digit = 0;    /* current digit being used */
+    register char *sp   = NULL; /* pointer into result      */
+    register int  sign  = 0;    /* sign of resulting number */
+    char result[LONGWIDTH+1];   /* resulting string         */
+
+    ZEROMEM(result);
 
     /* record the sign...*/
     sign = 1;
@@ -1757,7 +1770,7 @@ long num;       /* integer to translate to a string */
     }
 
     /* and build the string (backwards!) */
-    sp = result + LONGWIDTH;
+    sp = result + sizeof(result) - 1;
     *sp = 0;
     do {
         digit = num % 10;
@@ -1770,7 +1783,10 @@ long num;       /* integer to translate to a string */
         *(--sp) = '-';          /* and install the minus sign */
     }
 
-    return (sp);
+    RETURN ( sp );
+
+
+    STATIC_STR_RET_EPILOG(long_asc, char *, LONGWIDTH + 1);
 }
 
 int PASCAL NEAR gettyp(token)   /* find the type of a passed token */
@@ -1821,28 +1837,38 @@ char *token;    /* token to analyze */
     }
 }
 
-/* getval:  Find the value of a token */
-CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
+/* GETVAL:
+ *
+ * Find the value of a token
+ *
+ * Function returns a static result string: Copy immediately!
+ */
+CONST char * PASCAL NEAR getval P1_(char *, token)
+/* token: token to evaluate */
 {
-    register int    status  = 0;      /* error return */
-    register BUFFER *bp     = NULL;   /* temp buffer pointer */
-    register int    blen    = 0;      /* length of buffer argument */
-    static char buf[NSTRING];         /* string buffer for some returns */
+    STATIC_STR_RET_PROLOG();
+
+    register int    status  = 0;      /* error return                 */
+    register BUFFER *bp     = NULL;   /* temp buffer pointer          */
+    register int    blen    = 0;      /* length of buffer argument    */
+    char            buf[NSTRING];     /* string buf for some returns  */
 
     ZEROMEM(buf);
 
+    ASRT(NULL != token);
+
     switch ( gettyp(token) )  {
     case TKNUL:
-        return ("");
+        RETURN ( "" );
 
     case TKARG:                 /* interactive argument */
         XSTRCPY( token, fixnull( getval(&token[1]) ) );
         mlwrite("%s", token);
         status = getstring( (unsigned char *)buf, NSTRING, ctoec(RETCHAR) );
         if ( status == ABORT )
-            return (NULL);
+            RETURN ( NULL );
 
-        return (buf);
+        RETURN ( buf );
 
     case TKBUF:                 /* buffer contents fetch */
 
@@ -1850,7 +1876,7 @@ CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
         XSTRCPY( token, fixnull( getval(&token[1]) ) );
         bp = bfind(token, FALSE, 0);
         if ( bp == NULL )
-            return (NULL);
+            RETURN ( NULL );
 
         /* if the buffer is displayed, get the window vars instead of the buffer
          * vars */
@@ -1861,7 +1887,7 @@ CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
 
         /* if we are at the end, return <END> */
         if ( bp->b_linep == bp->b_dotp )
-            return ("<END>");
+            RETURN ( "<END>" );
 
         /* grab the line as an argument */
         blen = get_lused(bp->b_dotp) - get_b_doto(bp);
@@ -1882,34 +1908,35 @@ CONST char *PASCAL NEAR getval P1_(char *, token  /* token to evaluate */)
         }
 
         /* and return the spoils */
-        return (buf);
+        RETURN ( buf );
 
     case TKVAR:
-        return ( gtusr(token+1) );
+        RETURN ( gtusr(token+1) );
 
     case TKENV:
-        return ( gtenv(token+1) );
+        RETURN ( gtenv(token+1) );
 
     case TKFUN:
-        return ( gtfun(token+1) );
+        RETURN ( gtfun(token+1) );
 
     case TKDIR:
-        return (NULL);
+        RETURN ( NULL );
 
     case TKLBL:
-        return (NULL);
+        RETURN ( NULL );
 
     case TKLIT:
-        return (token);
+        RETURN ( token );
 
     case TKSTR:
-        return (token+1);
+        RETURN ( token + 1 );
 
     case TKCMD:
-        return (token);
+        RETURN ( token );
     }
 
-    return NULL;/**AVOID_WARNING**/
+
+    STATIC_STR_RET_EPILOG(getval, CONST char *, NSTRING);
 }
 
 int PASCAL NEAR stol(val)       /* convert a string to a numeric logical */
@@ -1928,7 +1955,7 @@ char *val;      /* value to check for stol */
     return ( (asc_int(val) != 0) );
 }
 
-CONST char *PASCAL NEAR ltos(val)   /* numeric logical to string logical */
+CONST char * PASCAL NEAR ltos(val)   /* numeric logical to string logical */
 
 int val;        /* value to translate */
 
@@ -1939,7 +1966,7 @@ int val;        /* value to translate */
         return (falsem);
 }
 
-char *PASCAL NEAR mkupper(str)  /* make a string upper case */
+char * PASCAL NEAR mkupper(str)  /* make a string upper case */
 
 char *str;              /* string to upper case */
 
@@ -1953,7 +1980,7 @@ char *str;              /* string to upper case */
     return (str);
 }
 
-char *PASCAL NEAR mklower(str)  /* make a string lower case */
+char * PASCAL NEAR mklower(str)  /* make a string lower case */
 
 char *str;              /* string to lower case */
 
@@ -2026,19 +2053,28 @@ char *pattern;  /* string to look for */
     return (0);
 }
 
-/*  Filter a string through a translation table */
-
-char *PASCAL NEAR xlat(source, lookup, trans)
-
-char *source;   /* string to filter */
-char *lookup;   /* characters to translate */
-char *trans;    /* resulting translated characters */
-
+/* XLAT:
+ *
+ * Filter a string through a translation table
+ *
+ * Function returns a static result string: Copy immediately!
+ */
+char * PASCAL NEAR xlat P3_(char *, source, char *, lookup, char *, trans)
+/* source:  string to filter                */
+/* lookup:  characters to translate         */
+/* trans:   resulting translated characters */
 {
-    register char *sp;            /* pointer into source table */
-    register char *lp;            /* pointer into lookup table */
-    register char *rp;            /* pointer into result */
-    static char result[NSTRING];  /* temporary result */
+    STATIC_STR_RET_PROLOG();
+    register char *sp = NULL;       /* pointer into source table  */
+    register char *lp = NULL;       /* pointer into lookup table  */
+    register char *rp = NULL;       /* pointer into result        */
+    char          result[NSTRING];  /* temporary result           */
+
+    ZEROMEM(result);
+
+    ASRT(NULL != source);
+    ASRT(NULL != lookup);
+    ASRT(NULL != trans);
 
     /* scan source string */
     sp = source;
@@ -2063,7 +2099,9 @@ xnext:  ++sp;
     /* terminate and return the result */
     *rp = 0;
 
-    return (result);
+    RETURN (result);
+
+    STATIC_STR_RET_EPILOG(xlat, char *, NSTRING);
 }
 
 /*  setwlist:   Set an alternative list of character to be considered "in a word
@@ -2098,7 +2136,7 @@ char *wclist;   /* list of characters to consider "in a word" */
 
 /*  getwlist:   place in a buffer a list of characters considered "in a word"           */
 
-char *PASCAL NEAR getwlist(buf)
+char * PASCAL NEAR getwlist(buf)
 
 char *buf;      /* buffer to place list of characters */
 

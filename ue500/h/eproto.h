@@ -1,3 +1,4 @@
+
 /*======================================================================
  * EPROTO:  Global function prototypes and declarations MicroEMACS 4.00
  *
@@ -198,7 +199,7 @@ extern int xvasprintf DCL((char **ret, CONST char *fmt, va_list ap));
 /* resulting string.                                            */
 extern int xasprintf(char **ret, CONST char *fmt, ...);
 
-extern char *xstrdup DCL((CONST char *str));
+#define xstrdup copystr
 
 extern char *xstrtok_r DCL((char *str, CONST char *sep, char **next));
 
@@ -259,6 +260,59 @@ RETURN_L:
 # endif
 /*--------------------------------------------------------------------*/
 #endif
+
+
+/*--------------------------------------------------------------------*/
+/* Macros to return static strings in a defined uniform way:          */
+/*--------------------------------------------------------------------*/
+#define STATIC_STR_RET_PROLOG() CONST char  *STATIC_STR_RET_VAL_  = NULL
+#define STATIC_STR_RET_RETURN(e)  do  {                               \
+        STATIC_STR_RET_VAL_ = (e);                                    \
+                                                                      \
+        goto STATIC_STR_RET_L_;                                       \
+    } while ( 0 )
+
+#define STATIC_STR_RET_EPILOG(func, type, size)                       \
+    STATIC_STR_RET_L_:  do  {                                         \
+        if ( NULL == STATIC_STR_RET_VAL_ )  {                         \
+            return NULL;                                              \
+        } else                              {                         \
+            static char STATIC_STR_RET_ARR_[(size)];                  \
+            int         rc_ = 0;                                      \
+                                                                      \
+            ZEROMEM(STATIC_STR_RET_ARR_);                             \
+                                                                      \
+            rc_ = xstrlcpy(STATIC_STR_RET_ARR_, STATIC_STR_RET_VAL_,  \
+                           sizeof(STATIC_STR_RET_ARR_));              \
+            if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+                TRC(("%s(): RVl truncated: sizeof(RVl) = %d <= rc"    \
+                    " = %d", #func, sizeof(STATIC_STR_RET_ARR_),      \
+                    rc_));                                            \
+            }                                                         \
+                                                                      \
+            return (type)STATIC_STR_RET_ARR_;                         \
+        }                                                             \
+    } while ( 0 )
+/* Usage example: */
+#if ( 0 )
+# define RETURN  STATIC_STR_RET_RETURN
+CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname)
+{
+    STATIC_STR_RET_PROLOG();
+
+    ...
+
+    case UFXLATE:
+        RETURN ( xlat(arg1, arg2, arg3) );
+    }
+
+    ...
+
+    STATIC_STR_RET_EPILOG(gtfun, CONST char *, 2 * NSTRING);
+}
+
+#endif
+/*--------------------------------------------------------------------*/
 
 /**********************************************************************/
 
@@ -1452,7 +1506,7 @@ extern char *getpath DCL((char *filespec));
 extern char *gtname DCL((char *filespec));
 extern char *PASCAL NEAR bytecopy DCL((char *dst, CONST char *src, int maxlen));
 extern char *PASCAL NEAR cmdstr DCL((int c, char *seq));
-extern char *PASCAL NEAR copystr DCL((char *));
+extern char *PASCAL NEAR copystr DCL((CONST char *));
 extern char *PASCAL NEAR complete DCL((char *prompt,
                                   char *defval,
                                   int  type,

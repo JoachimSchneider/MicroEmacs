@@ -203,6 +203,17 @@
 #define ASCII   1   /* always using ASCII char sequences for now      */
 #define EBCDIC  0   /* later IBM mainfraim versions will use EBCDIC   */
 
+/*      Settings related to tracing/debugging MicroEmacs              */
+/*====================================================================*/
+/* Fix overwrites of the line data instead of bailing out:            */
+/* -- All errors in the line code seem to be fixed now (2023-07-25),  */
+/* -- but if you want to find new errors set this to `0'.             */
+#define REPAIR_CODE_LINE      (!0)
+/* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
+/* into this file:                                                    */
+#define UEMACS_TRC            (!0)
+#define TRC_FILE_ENVVAR       "UEMACS_TRC_FILE"
+
 
 /*=================================================================== */
 

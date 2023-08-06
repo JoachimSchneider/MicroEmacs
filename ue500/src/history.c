@@ -964,7 +964,7 @@
  *		atoi	=>	asc_int
  *		ltoi	=>	long_int
  *		setmode =>	setmod
- *		xstrncpy =>	bytecopy
+ *		strncpy =>	bytecopy
  *	25-jan-88	By Jeff Lomicka
  *	- Added parsing of keypad keys, LK201 function key sequences, mouse
  *	  sequences (VaxStation form and BBN BitGraph form), and the cursor

@@ -1498,7 +1498,7 @@ char *sp;                               /* name to look up */
 #endif
 
 /* strcpy() possibly overlapping regions: */
-#if ( 0 )
+#if ( 0 ) /* Old --- straightforward --- implementation */
 char *xstrcpy P2_(char *, s1, CONST char *, s2)
 {
     char  *s  = NULL;
@@ -1552,7 +1552,7 @@ char *xstrcpy P2_(char *, s1, CONST char *, s2)
 #endif
 
 /* strncpy() possibly overlapping regions:  */
-#if ( 0 )
+#if ( 0 ) /* Old --- straightforward --- implementation */
 char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 {
     int   l2  = 0;
@@ -1709,7 +1709,8 @@ int xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
  *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
  */
-char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src, const char *, file, int, line)
+char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src,
+                    const char *, file, int, line)
 {
     if ( 0 <= dst_size )  {
         xstrlcpy(dst, src, dst_size);
@@ -1726,7 +1727,8 @@ char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src, const char *,
  *  else           append src to dst using xstrcat(dst, src) and log a
  *                 warning message.
  */
-char *sfstrcat_ P5_(char *, dst, int, dst_size, const char *, src, const char *, file, int, line)
+char *sfstrcat_ P5_(char *, dst, int, dst_size, const char *, src,
+                    const char *, file, int, line)
 {
     if ( 0 <= dst_size )  {
         xstrlcat(dst, src, dst_size);
@@ -1871,6 +1873,7 @@ int xasprintf (char **ret, CONST char *fmt, ...)
     return rc;
 }
 
+#if ( 0 ) /* Same as old `copystr'  */
 char *xstrdup P1_(CONST char *, str)
 {
     char  *res  = NULL;
@@ -1886,6 +1889,7 @@ char *xstrdup P1_(CONST char *, str)
 
     return res;
 }
+#endif
 
 char *xstrtok_r P3_(char *, str, CONST char *, sep, char **, next)
 {
@@ -1978,6 +1982,7 @@ char *astrcat P2_(CONST char *, str, CONST char *, s)
 /*====================================================================*/
 
 
+#if UEMACS_FEATURE_USE_STATIC_STACK
 /*--------------------------------------------------------------------*/
 /* A Stack ADT to be used for returning pointers to static variables  */
 /* (e.g. char arrays) from functions: It allows (limited) indirect    */
@@ -2049,7 +2054,7 @@ VOID  DelStack(CONST VOIDP stack)
     FREE(stk->arr);
     FREE(stk);
 }
-
+#endif
 
 /*====================================================================*/
 

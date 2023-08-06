@@ -1138,9 +1138,11 @@ int PASCAL NEAR unarg P2_(int, f, int, n)
  *
  * Copy a string...with length restrictions ALWAYS null terminate
  */
-char *PASCAL NEAR bytecopy P3_(char *,        dst,    /* destination of copied string */
-                               CONST char *,  src,    /* source */
-                               int,           maxlen  /* maximum length */)
+char * PASCAL NEAR bytecopy P3_(char *,       dst,    /* destination of copied string */
+                                CONST char *, src,    /* source */
+                                int,          maxlen  /* maximum length */)
+#if ( 0 ) /* Old implemantation: New implementation handles overlap and
+           * is more defensive  */
 {
     char *dptr;                         /* ptr into dst */
 
@@ -1151,21 +1153,31 @@ char *PASCAL NEAR bytecopy P3_(char *,        dst,    /* destination of copied s
 
     return (dst);
 }
+#else
+{
+    xstrlcpy(dst, src, maxlen);
+
+    return dst;
+}
+#endif
 
 /* COPYSTR:
  *
  * Make another copy of the argument.
  */
-char *PASCAL NEAR copystr P1_(char *, sp /* string to copy */)
+char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
 {
-    char *dp;                           /* copy of string */
+    char  *dp = NULL;   /* copy of string */
 
-    /* make room! */
-    dp = room(strlen(sp) + 1);
-    if ( dp == NULL )
-        return (NULL);
+    if ( NULL == sp ) {
+        return NULL;
+    }
 
-    xstrcpy(dp, sp);  /**UNSAFE_OK**/
+    /* make room!
+     * Bail out on error: Old version returned NULL.
+     */
+    ASRT(NULL !=(dp = room(strlen(sp) + 1)));
+    strcpy(dp, sp);   /**UNSAFE_OK**/
 
     return (dp);
 }

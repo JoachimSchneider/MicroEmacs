@@ -346,15 +346,17 @@ Next Steps:
 
 - Repair all doubtful statically returned strings in eval.c (the macro
   processing module) by optionally introducing the static stacks.
+  ===> Not solved in this way instead using STATIC_STR_RET-Macros (\/)
 
-- Implement xstrdup with the function already available
+- Implement xstrdup with the function already available           (\/)
 
 - Substitute `free' with `FREE'
 
 - Check modifications in DOS-Compile:                             (\/)
   + ctime()
   + strrev()
-- Handle bytecopy: Is safe but might be expressed with strlcpy
+
+- Handle bytecopy: Is safe but might be expressed with strlcpy    (\/)
 
 - Do an `#ifdef MSDOS' or somehow increase the Stack-Size in DOS. (\/)
 
@@ -368,8 +370,13 @@ Next Steps:
     NSTRING = 128
     NPAT    = 128
 
-- Reduce the size of the buffer for ctime() in msdos,c (it was
+- Reduce the size of the buffer for ctime() in msdos,c (it was    (\/)
   increased from 16 to 256 for debugging purposes).
+
+
+[2023-08-06.00]
+-
+
 
 
 # EOF

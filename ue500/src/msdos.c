@@ -50,7 +50,11 @@ static int          nxtchar = -1; /* character held from type ahead */
 #if ( 0 ) /* Old value  */
 # define TIME_BUF_SIZE  16
 #else
-# define TIME_BUF_SIZE 256
+# if IC | TURBO
+#   define TIME_BUF_SIZE ( sizeof(time_t) )
+# else
+#   define TIME_BUF_SIZE ( 32 )
+# endif
 #endif
 
 /*  Some global variable    */

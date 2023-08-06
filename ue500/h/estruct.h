@@ -214,10 +214,6 @@
 #define UEMACS_TRC            (!0)
 #define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
 
-/* Size of stacks for static return strings:                          */
-/*====================================================================*/
-#define DFT_STATIC_STACKSIZE  (12)
-
 
 /*=================================================================== */
 
