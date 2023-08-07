@@ -80,7 +80,7 @@ UTABLE *ut;     /* table to clear */
  *
  * Function returns a static result string: Copy immediately!
  */
-CONST char * PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
+CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
 {
     STATIC_STR_RET_PROLOG();
 
@@ -369,7 +369,7 @@ CONST char * PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to ev
     STATIC_STR_RET_EPILOG(gtfun, CONST char *, 2 * NSTRING);
 }
 
-CONST char * PASCAL NEAR gtusr(vname)    /* look up a user var's value */
+CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */
 
 CONST char  *vname;             /* name of user variable to fetch */
 
@@ -417,7 +417,7 @@ next_ut:        ut = ut->next;
     return (errorm);
 }
 
-char * PASCAL NEAR funval(i)
+char *PASCAL NEAR funval(i)
 
 int i;
 
@@ -425,7 +425,7 @@ int i;
     return (funcs[i].f_name);
 }
 
-char * PASCAL NEAR envval(i)
+char *PASCAL NEAR envval(i)
 
 int i;
 
@@ -474,7 +474,7 @@ int klength;                    /* maximum length of string to compare */
  *
  * Function returns a static result string: Copy immediately!
  */
-CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
+CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
 /* vname: Name of environment variable to retrieve  */
 {
     STATIC_STR_RET_PROLOG();
@@ -796,7 +796,7 @@ CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
     STATIC_STR_RET_EPILOG(gtenv, CONST char *, 2 * NSTRING);
 }
 
-CONST char * PASCAL NEAR fixnull(s)      /* Don't return NULL pointers! */
+CONST char *PASCAL NEAR fixnull(s)    /* Don't return NULL pointers! */
 
 CONST char  *s;
 
@@ -813,7 +813,7 @@ CONST char  *s;
  *
  * Function returns a static result string: Copy immediately!
  */
-char * PASCAL NEAR getkill P0_(void)
+char *PASCAL NEAR getkill P0_(void)
 {
     STATIC_STR_RET_PROLOG();
 
@@ -889,7 +889,7 @@ char * PASCAL NEAR getkill P0_(void)
     STATIC_STR_RET_EPILOG(getkill, char *, NSTRING);
 }
 
-char * PASCAL NEAR trimstr(s)    /* trim whitespace off the end of a string */
+char *PASCAL NEAR trimstr(s)    /* trim whitespace off the end of a string */
 
 char *s;        /* string to trim */
 
@@ -1694,7 +1694,7 @@ char *st;
  *
  * Function returns a static result string: Copy immediately!
  */
-char * PASCAL NEAR int_asc P1_(int, i)
+char *PASCAL NEAR int_asc P1_(int, i)
 /* i: Integer to translate to a string  */
 {
     STATIC_STR_RET_PROLOG();
@@ -1750,7 +1750,7 @@ char * PASCAL NEAR int_asc P1_(int, i)
  *
  * Function returns a static result string: Copy immediately!
  */
-char * PASCAL NEAR long_asc P1_(long int, num)
+char *PASCAL NEAR long_asc P1_(long int, num)
 /* num: Integer to translate to a string  */
 {
     STATIC_STR_RET_PROLOG();
@@ -1843,7 +1843,7 @@ char *token;    /* token to analyze */
  *
  * Function returns a static result string: Copy immediately!
  */
-CONST char * PASCAL NEAR getval P1_(char *, token)
+CONST char *PASCAL NEAR getval P1_(char *, token)
 /* token: token to evaluate */
 {
     STATIC_STR_RET_PROLOG();
@@ -1955,7 +1955,7 @@ char *val;      /* value to check for stol */
     return ( (asc_int(val) != 0) );
 }
 
-CONST char * PASCAL NEAR ltos(val)   /* numeric logical to string logical */
+CONST char *PASCAL NEAR ltos(val)   /* numeric logical to string logical */
 
 int val;        /* value to translate */
 
@@ -1966,7 +1966,7 @@ int val;        /* value to translate */
         return (falsem);
 }
 
-char * PASCAL NEAR mkupper(str)  /* make a string upper case */
+char *PASCAL NEAR mkupper(str)    /* make a string upper case */
 
 char *str;              /* string to upper case */
 
@@ -1980,7 +1980,7 @@ char *str;              /* string to upper case */
     return (str);
 }
 
-char * PASCAL NEAR mklower(str)  /* make a string lower case */
+char *PASCAL NEAR mklower(str)    /* make a string lower case */
 
 char *str;              /* string to lower case */
 
@@ -2059,7 +2059,7 @@ char *pattern;  /* string to look for */
  *
  * Function returns a static result string: Copy immediately!
  */
-char * PASCAL NEAR xlat P3_(char *, source, char *, lookup, char *, trans)
+char *PASCAL NEAR xlat P3_(char *, source, char *, lookup, char *, trans)
 /* source:  string to filter                */
 /* lookup:  characters to translate         */
 /* trans:   resulting translated characters */
@@ -2136,7 +2136,7 @@ char *wclist;   /* list of characters to consider "in a word" */
 
 /*  getwlist:   place in a buffer a list of characters considered "in a word"           */
 
-char * PASCAL NEAR getwlist(buf)
+char *PASCAL NEAR getwlist(buf)
 
 char *buf;      /* buffer to place list of characters */
 

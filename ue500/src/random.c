@@ -1499,7 +1499,7 @@ char *sp;                               /* name to look up */
 
 /* strcpy() possibly overlapping regions: */
 #if ( 0 ) /* Old --- straightforward --- implementation */
-char *xstrcpy P2_(char *, s1, CONST char *, s2)
+char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
 {
     char  *s  = NULL;
 
@@ -1514,7 +1514,7 @@ char *xstrcpy P2_(char *, s1, CONST char *, s2)
     return s1;
 }
 #else
-char *xstrcpy P2_(char *, s1, CONST char *, s2)
+char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
 {
     if ( NULL != s1 && NULL != s2 ) {
         if        ( s1 <  s2 )  {
@@ -1553,7 +1553,7 @@ char *xstrcpy P2_(char *, s1, CONST char *, s2)
 
 /* strncpy() possibly overlapping regions:  */
 #if ( 0 ) /* Old --- straightforward --- implementation */
-char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
+char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 {
     int   l2  = 0;
     char *s   = NULL;
@@ -1577,7 +1577,7 @@ char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
     return s1;
 }
 #else
-char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
+char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 {
     if ( NULL != s1 && NULL != s2 ) {
         int l2  = 0;
@@ -1624,7 +1624,7 @@ char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 #endif
 
 /* strcat of possibly overlapping regions   */
-char *xstrcat P2_(char *, s1, CONST char *, s2)
+char *PASCAL NEAR xstrcat P2_(char *, s1, CONST char *, s2)
 {
     int l = 0;
 
@@ -1639,7 +1639,7 @@ char *xstrcat P2_(char *, s1, CONST char *, s2)
  *  ---
  *  n = snprintf(dst, len, "%s", src);
  */
-int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
+int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
 {
     int l2  = 0;
 
@@ -1695,7 +1695,7 @@ int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
  *  n = snprintf(dst, len, "%s%s", dup, src);
  *  free(dup);
  */
-int xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
+int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
 {
     int l   = 0;
 
@@ -1709,8 +1709,9 @@ int xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
  *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
  */
-char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src,
-                    const char *, file, int, line)
+char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
+                                const char *, src,
+                                const char *, file, int, line)
 {
     if ( 0 <= dst_size )  {
         xstrlcpy(dst, src, dst_size);
@@ -1727,8 +1728,9 @@ char *sfstrcpy_ P5_(char *, dst, int, dst_size, const char *, src,
  *  else           append src to dst using xstrcat(dst, src) and log a
  *                 warning message.
  */
-char *sfstrcat_ P5_(char *, dst, int, dst_size, const char *, src,
-                    const char *, file, int, line)
+char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
+                                const char *, src,
+                                const char *, file, int, line)
 {
     if ( 0 <= dst_size )  {
         xstrlcat(dst, src, dst_size);
@@ -1745,7 +1747,8 @@ char *sfstrcat_ P5_(char *, dst, int, dst_size, const char *, src,
 /* be the result of an unrestricted write.                              */
 /* Returns the number of characters (not including the trailing '\0')   */
 /* that would have been written if n were large enough.                 */
-int xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt, va_list, ap)
+int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
+                               va_list, ap)
 {
     int nn  = n;                /* Want a signed value */
     int rc  = 0;
@@ -1807,7 +1810,7 @@ int xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt, va_list, ap)
 /* be the result of an unrestricted write.                              */
 /* Returns the number of characters (not including the trailing '\0')   */
 /* that would have been written if n were large enough.                 */
-int xsnprintf (char *s, size_t n, CONST char *fmt, ...)
+int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
 {
     int     rc  = 0;
     va_list ap;
@@ -1825,7 +1828,7 @@ int xsnprintf (char *s, size_t n, CONST char *fmt, ...)
 /* Like GNU C vasprintf:                                        */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-int xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
+int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 {
     int     rc  = 0;
     int     len = 0;
@@ -1857,7 +1860,7 @@ int xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 /* Like GNU C asprintf:                                         */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-int xasprintf (char **ret, CONST char *fmt, ...)
+int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
 {
     int     rc  = 0;
     va_list ap;
@@ -1874,7 +1877,7 @@ int xasprintf (char **ret, CONST char *fmt, ...)
 }
 
 #if ( 0 ) /* Same as old `copystr'  */
-char *xstrdup P1_(CONST char *, str)
+char *PASCAL NEAR xstrdup P1_(CONST char *, str)
 {
     char  *res  = NULL;
     int   len   = 0;
@@ -1891,7 +1894,8 @@ char *xstrdup P1_(CONST char *, str)
 }
 #endif
 
-char *xstrtok_r P3_(char *, str, CONST char *, sep, char **, next)
+char *PASCAL NEAR xstrtok_r P3_(char *, str, CONST char *, sep,
+                                char **, next)
 {
     char        *res  = NULL;
     CONST char  *sp   = sep;
@@ -1931,7 +1935,7 @@ char *xstrtok_r P3_(char *, str, CONST char *, sep, char **, next)
 
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
-char *astrcatc P2_(CONST char *, str, CONST char, c)
+char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 {
     char  *nstr = NULL;
     int   len   = 0;
@@ -1951,7 +1955,7 @@ char *astrcatc P2_(CONST char *, str, CONST char, c)
 
 /* Concatenate string d to string str and malloc the result.    */
 /* Input string must either be NULL or malloced.                */
-char *astrcat P2_(CONST char *, str, CONST char *, s)
+char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 {
     char  *nstr     = NULL;
     int   len       = 0;
@@ -2059,7 +2063,7 @@ VOID  DelStack(CONST VOIDP stack)
 /*====================================================================*/
 
 
-FILE  *GetTrcFP P0_(void)
+FILE *PASCAL NEAR GetTrcFP P0_(void)
 {
   static int  FirstCall = !0;
   static FILE *TrcFP    = NULL;
@@ -2087,7 +2091,7 @@ FILE  *GetTrcFP P0_(void)
 
 int          DebugMessage_lnno_   = 0;
 CONST char  *DebugMessage_fname_  = (CONST char *)"";
-int DebugMessage (CONST char *fmt, ...)
+int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
 {
     int     rc    = 0;
     va_list ap;
@@ -2112,10 +2116,11 @@ int DebugMessage (CONST char *fmt, ...)
 /*====================================================================*/
 
 
-char lputc_ P5_(LINE *, lp, int, n, char, c, CONST char *, fnam, int, lno)
+char PASCAL NEAR  lputc_ P5_(LINE *, lp, int, n, char, c,
+                             CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
-#if ( 0 )
+#if ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
 #else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
@@ -2132,13 +2137,15 @@ char lputc_ P5_(LINE *, lp, int, n, char, c, CONST char *, fnam, int, lno)
 #undef  FUNC_
 #define FUNC_ lgetc_
 #if ( IS_UNIX() )
-unsigned char FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
+unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
+                                    fnam, int, lno)
 #else
-         char FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
+         char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
+                                    fnam, int, lno)
 #endif
 {
     ASRTK(NULL != lp,                     fnam, lno);
-#if ( 0 )
+#if ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
 #else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
@@ -2164,10 +2171,11 @@ unsigned char FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
 
 #undef  FUNC_
 #define FUNC_ lgetcp_
-char *FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
+char *PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
+                            fnam, int, lno)
 {
     ASRTK(NULL != lp,                     fnam, lno);
-#if ( 0 )
+#if ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_,     fnam, lno);
 #else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
@@ -2185,10 +2193,10 @@ char *FUNC_ P4_(LINE *, lp, int, n, CONST char *, fnam, int, lno)
     return ( &(lp->l_text_[n]) );
 }
 
-int get_lused_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
+int PASCAL NEAR get_lused_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
-#if ( 0 )
+#if ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
 #else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
@@ -2200,10 +2208,11 @@ int get_lused_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
     return ( (lp)->l_used_ );
 }
 
-int set_lused_ P4_(LINE *, lp, int, used, CONST char *, fnam, int, lno)
+int PASCAL NEAR set_lused_ P4_(LINE *, lp, int, used,
+                               CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
-#if ( 0 )
+#if ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
 #else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
@@ -2217,10 +2226,10 @@ int set_lused_ P4_(LINE *, lp, int, used, CONST char *, fnam, int, lno)
     return ( (lp)->l_used_ = used );
 }
 
-int get_lsize_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
+int PASCAL NEAR get_lsize_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != lp,                 fnam, lno);
-#if ( 0 )
+#if ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
 #else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
@@ -2234,7 +2243,7 @@ int get_lsize_ P3_(LINE *, lp, CONST char *, fnam, int, lno)
 
 #undef  FUNC_
 #define FUNC_ get_w_doto_
-int FUNC_ P3_(EWINDOW *, wp, CONST char *, fnam, int, lno)
+int PASCAL NEAR FUNC_ P3_(EWINDOW *, wp, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != wp,                                 fnam, lno);
     ASRTK(NULL != wp->w_dotp,                         fnam, lno);
@@ -2252,7 +2261,8 @@ int FUNC_ P3_(EWINDOW *, wp, CONST char *, fnam, int, lno)
 
 #undef  FUNC_
 #define FUNC_ set_w_doto_
-int FUNC_ P4_(EWINDOW *, wp, int, doto, CONST char *, fnam, int, lno)
+int PASCAL NEAR FUNC_ P4_(EWINDOW *, wp, int, doto,
+                          CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != wp,                                 fnam, lno);
     ASRTK(NULL != wp->w_dotp,                         fnam, lno);
@@ -2277,7 +2287,7 @@ int FUNC_ P4_(EWINDOW *, wp, int, doto, CONST char *, fnam, int, lno)
 
 #undef  FUNC_
 #define FUNC_ get_b_doto_
-int FUNC_ P3_(BUFFER *, bp, CONST char *, fnam, int, lno)
+int PASCAL NEAR FUNC_ P3_(BUFFER *, bp, CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != bp,                                 fnam, lno);
     ASRTK(NULL != bp->b_dotp,                         fnam, lno);
@@ -2295,7 +2305,8 @@ int FUNC_ P3_(BUFFER *, bp, CONST char *, fnam, int, lno)
 
 #undef  FUNC_
 #define FUNC_ set_b_doto_
-int FUNC_ P4_(BUFFER *, bp, int, doto, CONST char *, fnam, int, lno)
+int PASCAL NEAR FUNC_ P4_(BUFFER *, bp, int, doto,
+                          CONST char *, fnam, int, lno)
 {
     ASRTK(NULL != bp,                                 fnam, lno);
     ASRTK(NULL != bp->b_dotp,                         fnam, lno);
@@ -2329,7 +2340,7 @@ int FUNC_ P4_(BUFFER *, bp, int, doto, CONST char *, fnam, int, lno)
 /*====================================================================*/
 
 
-int TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
+int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
 {
     LINE    *linep  = NULL;
     int     loffs   = 0;
@@ -2392,7 +2403,8 @@ int TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     return TRUE;
 }
 
-int TransformParagraph P2_(filter_func_T, filter, VOIDP, argp)
+int PASCAL NEAR TransformParagraph P2_(filter_func_T, filter,
+                                       VOIDP, argp)
 {
     /* make sure the cursor gets back to the right place on an undo */
     undo_insert(OP_CPOS, 0L, obj);
@@ -2411,7 +2423,7 @@ int TransformParagraph P2_(filter_func_T, filter, VOIDP, argp)
     return TransformRegion(filter, argp);
 }
 
-int TransformBuffer P2_(filter_func_T, filter, VOIDP, argp)
+int PASCAL NEAR TransformBuffer P2_(filter_func_T, filter, VOIDP, argp)
 {
     /* make sure the cursor gets back to the right place on an undo */
     undo_insert(OP_CPOS, 0L, obj);
@@ -2436,7 +2448,8 @@ int TransformBuffer P2_(filter_func_T, filter, VOIDP, argp)
 /*====================================================================*/
 
 #if ( 0 )
-static char  *filter_test_00 P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
+static char *PASCAL NEAR  filter_test_00 P3_(CONST char *, rstart,
+                                             CONST char *, rtext, VOIDP, argp)
 {
     char  *res  = NULL;
     char  *str  = NULL;
@@ -2458,7 +2471,9 @@ static char  *filter_test_00 P3_(CONST char *, rstart, CONST char *, rtext, VOID
 }
 #endif
 
-static char  *filter_test_01 P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
+static char *PASCAL NEAR  filter_test_01 P3_(CONST char *, rstart,
+                                             CONST char *, rtext,
+                                             VOIDP, argp)
 {
     char  *res  = NULL;
 
@@ -2470,12 +2485,14 @@ static char  *filter_test_01 P3_(CONST char *, rstart, CONST char *, rtext, VOID
     return res;
 }
 
-static char  *filter_test P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
+static char *PASCAL NEAR  filter_test P3_(CONST char *, rstart,
+                                          CONST char *, rtext,
+                                          VOIDP, argp)
 {
     return filter_test_01(rstart, rtext, argp);
 }
 
-static int  dsplen P1_(CONST char *, s)
+static int PASCAL NEAR  dsplen P1_(CONST char *, s)
 {
     int res = 0;
 
@@ -2507,11 +2524,11 @@ static int  dsplen P1_(CONST char *, s)
  * The routine skips leading and ignores trailing blanks. Words may be
  * separated by one ore more blanks.
  */
-static char *format_para P5_(CONST char *,  start,
-                             CONST char *,  input,
-                             int,           fcol,
-                             int,           ommit       /* Skip start in first line */,
-                             int,           parindent)
+static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
+                                          CONST char *,  input,
+                                          int,           fcol,
+/* Skip start in first line:  */          int,           ommit,
+                                          int,           parindent)
 {
     char        *res  = xstrdup("");
     int         slen  = 0;
@@ -2584,8 +2601,9 @@ static char *format_para P5_(CONST char *,  start,
     /***return  res;***/  /***NOT_REACHED***/
 }
 
-static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext,
-                             VOIDP, argp)
+static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
+                                          CONST char *, rtext,
+                                          VOIDP, argp)
 /*
  * Fill the region --- i.e.reformat it so that:
  * (1) Multiple empty lines are converted into one empty line.
@@ -2757,7 +2775,9 @@ static char *filter_fill P3_(CONST char *, rstart, CONST char *, rtext,
     return res;
 }
 
-static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
+static char *PASCAL NEAR  filter_indent P3_(CONST char *, rstart,
+                                            CONST char *, rtext,
+                                            VOIDP, argp)
 /*
  * Indent the region:
  *
@@ -2825,7 +2845,9 @@ static char *filter_indent P3_(CONST char *, rstart, CONST char *, rtext, VOIDP,
 #undef  filter_indent_do_indent_
 
 
-static char *filter_undent P3_(CONST char *, rstart, CONST char *, rtext, VOIDP, argp)
+static char *PASCAL NEAR  filter_undent P3_(CONST char *, rstart,
+                                            CONST char *, rtext,
+                                            VOIDP, argp)
 /*
  * undent the region:
  *

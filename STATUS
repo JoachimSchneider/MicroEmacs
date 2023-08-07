@@ -74,24 +74,25 @@ File Name     Formated Comments   Func. Proto.    Init.   Warnings  EOF
 ============================================================================
 src/bind.c      X                                           X         X
 src/exec.c      X                   X               X       X         X
-src/input.c     X                   X               X       X         X
 src/display.c   X                                           X
 src/eval.c      X                                           X         X
 src/file.c      X                                           X         X
+src/ibmpc.c     X                                   X       X         X
+src/input.c     X                   X               X       X         X
 src/isearch.c   X                   X               X       X         X
-src/line.c      X                   X               X       X         X
 src/keyboard.c  X                   X               X       X         X
+src/line.c      X                   X               X       X         X
 src/lock.c      X                   X               X       X         X
 src/main.c      X                   X                       X         X
 src/mouse.c                                                 X
+src/msdos.c     X                                   X       X         X
+src/random.c    X                                           X         X
+src/replace.c   X                                           X
 src/screen.c                                                X
 src/search.c    X                                           X
 src/unix.c                                                  X
-src/random.c    X                                           X         X
-src/replace.c   X                                           X
-src/main.c                                                  X
-h/estruct.h     X                                                     X
 h/eproto.h      X                                                     X
+h/estruct.h     X                                                     X
 h/mswin.h       X                                                     X
 
 
@@ -280,9 +281,9 @@ Next steps to handle the (hidden) overwrite:
   Workaround: Substitute the lower case versions there, to not
   produce broken code.                                                    (\/)
 
-- Remove *all* warnings in msdos.c and pcdos.c                            (\/)
+- Remove *all* warnings in msdos.c and ibmpc.c                            (\/)
 
-- Initialize *all* variables in msdos.c and pcdos.c                       (\/)
+- Initialize *all* variables in msdos.c and ibmpc.c                       (\/)
   ===> Did not help
 
 - Bisect the F10 handler in ehelp.cmd
@@ -375,7 +376,17 @@ Next Steps:
 
 
 [2023-08-06.00]
--
+Next Steps:
+- msdos.c and ibmpc.c: Check comments.                            (\/)
+- Check if `PASCAL NEAR' reduces pcdos/turbo code size            (\/)
+  ===> Yes, but only about 2500 bytes.
+- Check *all* well formatted special comments.
+- Build on AIX
+- Build on Windows XP.
+- Substitute `free' with `FREE'
+- Replace --- if possible --- `strncat' by `strlcat'.
+- *Manually* analyze the remaining `sprintf', `xstrcpy' and `xstrcat'
+  occurances.
 
 
 
