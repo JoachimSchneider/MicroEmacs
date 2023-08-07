@@ -17,9 +17,9 @@
 int PASCAL NEAR namedcmd P2_(int, f, int, n)
 /* command arguments [passed through to command executed] */
 {
-    int (PASCAL NEAR *kfunc)()  = NULL; /* ptr to the function to execute */
-    char buffer[NSTRING];               /* buffer to store function name */
-    int status                  = 0;
+    ue_fnc_T  kfunc   = NULL;   /* ptr to the function to execute */
+    char      buffer[NSTRING];  /* buffer to store function name  */
+    int       status  = 0;
 
     ZEROMEM(buffer);
 
@@ -99,7 +99,7 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
 {
     register int  f           = 0;      /* default argument flag */
     register int  n           = 0;      /* numeric repeat value */
-    int (PASCAL NEAR *fnc)()  = NULL;   /* function to execute */
+    ue_fnc_T      fnc         = NULL;   /* function to execute */
     BUFFER        *bp         = NULL;   /* buffer to execute */
     int           status      = 0;      /* return status of function */
     int           oldcle      = 0;      /* old contents of clexec flag */

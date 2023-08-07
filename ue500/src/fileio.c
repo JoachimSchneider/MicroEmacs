@@ -27,8 +27,7 @@ char file_buffer[FILE_BUFSIZE];
  */
 #if !(VMS & RMSIO)      /* if using RMS under VMS, the code */
                         /* is in VMS.C */
-int PASCAL NEAR ffropen(fn)
-CONST char    *fn;
+int PASCAL NEAR ffropen P1_(CONST char *, fn)
 {
     if ( ( ffp=fopen(fn, "r") ) == NULL )
         return (FIOFNF);

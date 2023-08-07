@@ -74,33 +74,33 @@ static int           break_flag  = 0;     /* state of MSDOS control break proces
 static int           *scptr[NROW];        /* pointer to screen lines  */
 static unsigned int  sline[NCOL];         /* screen line image        */
 
-static int PASCAL NEAR ibmmove();
-static int PASCAL NEAR ibmeeol();
-static int PASCAL NEAR ibmputc();
-static int PASCAL NEAR ibmeeop();
-static int PASCAL NEAR ibmclrdesk();
-static int PASCAL NEAR ibmrev();
-static int PASCAL NEAR ibmcres();
-static int PASCAL NEAR ibmbeep();
-static int PASCAL NEAR ibmopen();
-static int PASCAL NEAR ibmclose();
-static int PASCAL NEAR ibmkopen();
-static int PASCAL NEAR ibmkclose();
-static int PASCAL NEAR scinit();
-static int PASCAL NEAR screen_init();
-static int PASCAL NEAR getboard();
-static int PASCAL NEAR egaopen();
-static int PASCAL NEAR egaclose();
-static int PASCAL NEAR cga40_open();
-static int PASCAL NEAR cga40_close();
-static int PASCAL NEAR change_width();
-static int PASCAL NEAR fnclabel();
+static int PASCAL NEAR ibmmove      DCL((int, int));
+static int PASCAL NEAR ibmeeol      DCL((void));
+static int PASCAL NEAR ibmputc      DCL((int));
+static int PASCAL NEAR ibmeeop      DCL((void));
+static int PASCAL NEAR ibmclrdesk   DCL((void));
+static int PASCAL NEAR ibmrev       DCL((int));
+static int PASCAL NEAR ibmcres      DCL((char *));
+static int PASCAL NEAR ibmbeep      DCL((void));
+static int PASCAL NEAR ibmopen      DCL((void));
+static int PASCAL NEAR ibmclose     DCL((void));
+static int PASCAL NEAR ibmkopen     DCL((void));
+static int PASCAL NEAR ibmkclose    DCL((void));
+static int PASCAL NEAR scinit       DCL((int));
+static int PASCAL NEAR screen_init  DCL((int, int));
+static int PASCAL NEAR getboard     DCL((void));
+static int PASCAL NEAR egaopen      DCL((int));
+static int PASCAL NEAR egaclose     DCL((void));
+static int PASCAL NEAR cga40_open   DCL((void));
+static int PASCAL NEAR cga40_close  DCL((void));
+static int PASCAL NEAR change_width DCL((int));
+static int PASCAL NEAR fnclabel     DCL((int, int));
 
 int PASCAL NEAR spal();
 
 # if     COLOR
-static int PASCAL NEAR ibmfcol();
-static int PASCAL NEAR ibmbcol();
+static int PASCAL NEAR ibmfcol DCL((int));
+static int PASCAL NEAR ibmbcol DCL((int));
 static int cfcolor = -1;                  /* current forground color */
 static int cbcolor = -1;                  /* current background color */
 static int ctrans[] =                     /* ansi to ibm color translation table */
@@ -110,17 +110,39 @@ static int ctrans[] =                     /* ansi to ibm color translation table
 # endif
 
 /*
- * Standard terminal interface dispatch table. Most of the fields point into
- * "termio" code.
+ * Standard terminal interface dispatch table. Most of the fields point
+ * into "termio" code.
  */
 TERM term    =
 {
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, ibmopen, ibmclose,
-    ibmkopen, ibmkclose, ttgetc, ibmputc, ttflush, ibmmove, ibmeeol, ibmeeop,
-    ibmclrdesk, ibmbeep, ibmrev, ibmcres
-# if     COLOR
-    , ibmfcol, ibmbcol
-# endif
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0,
+    0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    ibmopen,
+    ibmclose,
+    ibmkopen,
+    ibmkclose,
+    ttgetc,
+    ibmputc,
+    ttflush,
+    ibmmove,
+    ibmeeol,
+    ibmeeop,
+    ibmclrdesk,
+    ibmbeep,
+    ibmrev,
+    ibmcres
+    # if     COLOR
+    ,
+    ibmfcol,
+    ibmbcol
+    # endif
 };
 
 # if     COLOR
@@ -145,7 +167,7 @@ int color;      /* color to set */
 }
 # endif
 
-int PASCAL NEAR ibmmove(row, col)
+int PASCAL NEAR ibmmove P2_(int, row, int, col)
 {
     rg.h.ah = 2;                /* set cursor position function code */
     rg.h.dl = col + term.t_colorg;
@@ -156,7 +178,7 @@ int PASCAL NEAR ibmmove(row, col)
     return TRUE;
 }
 
-int PASCAL NEAR ibmeeol()       /* erase to the end of the line */
+int PASCAL NEAR ibmeeol P0_(void) /* erase to the end of the line */
 {
     unsigned int  attr  = 0;      /* attribute byte mask to place in RAM */
     unsigned int *lnptr = NULL;   /* pointer to the destination line */
@@ -305,7 +327,7 @@ int ch;
     return TRUE;
 }
 
-int PASCAL NEAR ibmeeop()
+int PASCAL NEAR ibmeeop P0_(void)
 {
     rg.h.ah = 6;                /* scroll page up function code */
     rg.h.al = 0;                /* # lines to scroll (clear it) */
@@ -334,7 +356,7 @@ int PASCAL NEAR ibmeeop()
     return TRUE;
 }
 
-int PASCAL NEAR ibmclrdesk()
+int PASCAL NEAR ibmclrdesk P0_(void)
 {
     int attr  = 0;              /* attribute to fill screen with */
 
@@ -403,7 +425,7 @@ char *mode;
     return TRUE;
 }
 
-int PASCAL NEAR ibmbeep()
+int PASCAL NEAR ibmbeep P0_(void)
 {
 # if     MWC
     ttputc(BEL);
@@ -418,7 +440,7 @@ int PASCAL NEAR ibmbeep()
     return TRUE;
 }
 
-int PASCAL NEAR ibmopen()
+int PASCAL NEAR ibmopen P0_(void)
 {
     scinit(CDSENSE);
     revexist = TRUE;
@@ -428,7 +450,7 @@ int PASCAL NEAR ibmopen()
     return TRUE;
 }
 
-int PASCAL NEAR ibmclose()
+int PASCAL NEAR ibmclose P0_(void)
 {
 # if     COLOR
     ibmfcol(7);
@@ -447,7 +469,7 @@ int PASCAL NEAR ibmclose()
     return TRUE;
 }
 
-int PASCAL NEAR ibmkopen()      /* open the keyboard */
+int PASCAL NEAR ibmkopen P0_(void)    /* open the keyboard */
 {
     /* find the current state of the control break inturrupt */
     rg.h.ah = 0x33;     /* ctrl-break check */
@@ -466,7 +488,7 @@ int PASCAL NEAR ibmkopen()      /* open the keyboard */
     return TRUE;
 }
 
-int PASCAL NEAR ibmkclose() /* close the keyboard */
+int PASCAL NEAR ibmkclose P0_(void) /* close the keyboard */
 {
     if ( break_flag == 1 ) {
         rg.h.ah = 0x33;         /* ctrl-break check */
@@ -612,7 +634,7 @@ int ncols;      /* number of columns across */
  * = TRUE  VGAexist = FALSE VGA set to CGA  EGAexist = TRUE  VGAexist = TRUE
  */
 
-int PASCAL NEAR getboard()
+int PASCAL NEAR getboard P0_(void)
 {
     int type  = 0;      /* board type to return */
 
@@ -721,7 +743,7 @@ int mode;       /* mode to select [CDEGA/CDVGA] */
     return TRUE;
 }
 
-int PASCAL NEAR egaclose()
+int PASCAL NEAR egaclose P0_(void)
 {
     /* set the proper number of scan lines for CGA */
     rg.h.ah = 18;
@@ -736,7 +758,7 @@ int PASCAL NEAR egaclose()
     return TRUE;
 }
 
-int PASCAL NEAR cga40_open()
+int PASCAL NEAR cga40_open P0_(void)
 {
     /* put the beast into 40 column mode */
     rg.x.ax = 1;
@@ -745,7 +767,7 @@ int PASCAL NEAR cga40_open()
     return TRUE;
 }
 
-int PASCAL NEAR cga40_close()
+int PASCAL NEAR cga40_close P0_(void)
 {
     /* put the beast into 80 column mode */
     rg.x.ax = 3;

@@ -1846,7 +1846,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
         return len;
     }
     len += 1;
-    ASRT(NULL != (cp = calloc(len, sizeof(char))));
+    ASRT(NULL != (cp = (char *)calloc(len, sizeof(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
         FREE(cp);
@@ -2007,11 +2007,11 @@ VOIDP  NewStack(int stacksize, int len)
     ASRT(0 < stacksize);
     ASRT(0 < len);
 
-    ASRT(NULL != (stack = calloc(1, sizeof(*stack))));
+    ASRT(NULL != (stack = (STACK_T_ *)calloc(1, sizeof(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
     stack->sp        = (-1);
-    ASRT(NULL != (stack->arr = calloc(stacksize, len)));
+    ASRT(NULL != (stack->arr = (char *)calloc(stacksize, len)));
 
     return (VOIDP)stack;
 }

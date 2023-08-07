@@ -389,7 +389,7 @@ VOID undo_dump P0_(void)
  */
 char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 {
-    VOIDP     ptr   = NULL;   /* temporary pointer */
+    char      *ptr  = NULL;   /* temporary pointer */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
     UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free */
     UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
@@ -401,7 +401,7 @@ char *room P1_(int, nbytes  /* number of bytes to malloc() */)
     while ( ptr == (char *)NULL ) {
 
         /* attempt to allocate the memory */
-        ptr = malloc(nbytes);
+        ptr = (char *)malloc(nbytes);
         if ( ptr != (char *)NULL )  {
           memset(ptr, 0, nbytes);
 
@@ -443,7 +443,7 @@ nextbuf:        bp = getoldb();
  */
 char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
 {
-    VOIDP ptr;          /* temporary pointer */
+    char   *ptr;        /* temporary pointer */
     BUFFER *bp;         /* buffer to dealloc memory from */
     UNDO_OBJ *up;       /* ptr to undo struct to free */
     UNDO_OBJ *lp;       /* last undo struct before up */
@@ -463,7 +463,7 @@ char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */
     while ( ptr == (char *)NULL ) {
 
         /* attempt to allocate the memory */
-        ptr = realloc(orig_ptr, nbytes);
+        ptr = (char *)realloc(orig_ptr, nbytes);
         if ( ptr != (char *)NULL )
             return (ptr);
 

@@ -507,12 +507,10 @@ int PASCAL NEAR anycb()
  * with it. If the buffer is not found and the "cflag" is TRUE, create it. The
  * "bflag" is the settings for the flags in in buffer.
  */
-BUFFER *PASCAL NEAR bfind(bname, cflag, bflag)
-
-register char   *bname; /* name of buffer to find */
-int cflag;              /* create it if not found? */
-int bflag;              /* bit settings for a new buffer */
-
+BUFFER *PASCAL NEAR bfind P3_(char *, bname, int, cflag, int, bflag)
+/* bname: Name of buffer to find */
+/* cflag: Create it if not found? */
+/* bflag: Bit settings for a new buffer */
 {
     register BUFFER *bp;
     register BUFFER *sb;        /* buffer to insert after */

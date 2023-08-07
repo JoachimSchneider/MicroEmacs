@@ -22,10 +22,16 @@ CC = bcc -g0
 # In *any* case use `-N' ("Check for Stack overflow") to avoid mysterious errors!
 
 # These options are with debugging on.
+# `-2': Use 80286 instructions
+# `-P': C++ compile finds more errors.
 #CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -v -w-par -y -Z
+CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -2 -P -O -r -v -w-par -y -Z
 
-# These options are production (no debugging).
-CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -w-par -Z
+# These options are production (no debugging)
+# `-2': Use 80286 instructions
+# `-P': C++ compile finds more errors.
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -w-par -Z
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -2 -P -O -r -w-par -Z
 
 
 # list of header files

@@ -1,4 +1,3 @@
-
 /*======================================================================
  * EPROTO:  Global function prototypes and declarations MicroEMACS 4.00
  *
@@ -1168,54 +1167,79 @@ typedef struct UTABLE {
 
 
 /*
- * The editor communicates with the display using a high level interface. A
- * "TERM" structure holds useful variables, and indirect pointers to routines
- * that do useful operations. The low level get and put routines are here too.
- * This lets a terminal, in addition to having non standard commands, have funny
- * get and put character code too. The calls might get changed to
- * "termp->t_field" style in the future, to make it possible to run more than
- * one terminal type.
+ * The editor communicates with the display using a high level
+ * interface. A "TERM" structure holds useful variables, and indirect
+ * pointers to routines that do useful operations. The low level get
+ * and put routines are here too.
+ *
+ * This lets a terminal, in addition to having non standard commands,
+ * have funny get and put character code too. The calls might get
+ * changed to "termp->t_field" style in the future, to make it possible
+ * to run more than one terminal type.
  */
-
 typedef struct  {
-    short t_mrow;                                   /* max number of rows allowable */
-    short t_nrow;                                   /* current number of rows used  */
-    short t_mcol;                                   /* max Number of columns.       */
-    short t_ncol;                                   /* current Number of columns.   */
-    short t_roworg;                                 /* origin row (normally zero)   */
-    short t_colorg;                                 /* origin column (normally zero)*/
-    short t_margin;                                 /* min margin for extended lines*/
-    short t_scrsiz;                                 /* size of scroll region "      */
-    int t_pause;                                    /* # times thru update to pause */
-    int (PASCAL NEAR *t_open) DCL((void));          /* Open terminal at the start.  */
-    int (PASCAL NEAR *t_close) DCL((void));         /* Close terminal at end.       */
-    int (PASCAL NEAR *t_kopen) DCL((void));         /* Open keyboard                */
-    int (PASCAL NEAR *t_kclose) DCL((void));        /* Close keyboard               */
-    int (PASCAL NEAR *t_getchar) DCL((void));       /* Get character from keyboard. */
-    int (PASCAL NEAR *t_putchar) DCL((int));        /* Put character to display.    */
-    int (PASCAL NEAR *t_flush) DCL((void));         /* Flush output buffers.        */
-    int (PASCAL NEAR *t_move) DCL((int, int));      /* Move the cursor, origin 0.   */
-    int (PASCAL NEAR *t_eeol) DCL((void));          /* Erase to end of line.        */
-    int (PASCAL NEAR *t_eeop) DCL((void));          /* Erase to end of page.        */
-    int (PASCAL NEAR *t_clrdesk) DCL((void));       /* Clear the page totally       */
-    int (PASCAL NEAR *t_beep) DCL((void));          /* Beep.                        */
-    int (PASCAL NEAR *t_rev) DCL((int));            /* set reverse video state      */
-    int (PASCAL NEAR *t_rez) DCL((char *));         /* change screen resolution     */
+    short t_mrow;           /* max number of rows allowable */
+    short t_nrow;           /* current number of rows used  */
+    short t_mcol;           /* max Number of columns.       */
+    short t_ncol;           /* current Number of columns.   */
+    short t_roworg;         /* origin row (normally zero)   */
+    short t_colorg;         /* origin column (normally zero)*/
+    short t_margin;         /* min margin for extended lines*/
+    short t_scrsiz;         /* size of scroll region "      */
+    int t_pause;            /* # times thru update to pause */
+    int (PASCAL NEAR *t_open)
+        DCL((void));        /* Open terminal at the start.  */
+    int (PASCAL NEAR *t_close)
+        DCL((void));        /* Close terminal at end.       */
+    int (PASCAL NEAR *t_kopen)
+        DCL((void));        /* Open keyboard                */
+    int (PASCAL NEAR *t_kclose)
+        DCL((void));        /* Close keyboard               */
+    int (PASCAL NEAR *t_getchar)
+        DCL((void));        /* Get character from keyboard. */
+    int (PASCAL NEAR *t_putchar)
+        DCL((int));         /* Put character to display.    */
+    int (PASCAL NEAR *t_flush)
+        DCL((void));        /* Flush output buffers.        */
+    int (PASCAL NEAR *t_move)
+        DCL((int, int));    /* Move the cursor, origin 0. */
+    int (PASCAL NEAR *t_eeol)
+        DCL((void));        /* Erase to end of line.        */
+    int (PASCAL NEAR *t_eeop)
+        DCL((void));        /* Erase to end of page.        */
+    int (PASCAL NEAR *t_clrdesk)
+        DCL((void));        /* Clear the page totally       */
+    int (PASCAL NEAR *t_beep)
+        DCL((void));        /* Beep.                        */
+    int (PASCAL NEAR *t_rev)
+        DCL((int));         /* set reverse video state      */
+    int (PASCAL NEAR *t_rez)
+        DCL((char *));      /* change screen resolution     */
 #if     COLOR
-    int (PASCAL NEAR *t_setfor) DCL((int));         /* set forground color          */
-    int (PASCAL NEAR *t_setback) DCL((int));        /* set background color         */
+    int (PASCAL NEAR *t_setfor)
+        DCL((int));         /* set forground color          */
+    int (PASCAL NEAR *t_setback)
+        DCL((int));         /* set background color         */
 #endif
 #if     INSDEL
-    int (PASCAL NEAR *t_insline) DCL((int));        /* insert a screen line         */
-    int (PASCAL NEAR *t_delline) DCL((int));        /* delete a screen line         */
+    int (PASCAL NEAR *t_insline)
+        DCL((int));         /* insert a screen line         */
+    int (PASCAL NEAR *t_delline)
+        DCL((int));         /* delete a screen line         */
 #endif
 #if     WINDOW_MSWIN
-    int (PASCAL NEAR *t_sleep) DCL((int));          /* go to sleep for a while      */
-    int (PASCAL NEAR *t_newscr) DCL((SCREEN_T *));  /* create new screen display    */
-    int (PASCAL NEAR *t_delscr) DCL((SCREEN_T *));  /* destroy screen display       */
-    int (PASCAL NEAR *t_selscr) DCL((SCREEN_T *));  /* select screen display        */
-    int (PASCAL NEAR *t_sizscr) DCL((SCREEN_T *));  /* resize screen display        */
-    int (PASCAL NEAR *t_topscr) DCL((SCREEN_T *));  /* bring screen to top          */
+    int (PASCAL NEAR *t_sleep)
+        DCL((int));         /* go to sleep for a while      */
+    int (PASCAL NEAR *t_newscr)
+        DCL((SCREEN_T *));  /* create new screen display    */
+    int (PASCAL NEAR *t_delscr)
+        DCL((SCREEN_T *));  /* destroy screen display       */
+    int (PASCAL NEAR *t_selscr)
+        DCL((SCREEN_T *));  /* select screen display        */
+    int (PASCAL NEAR *t_sizscr)
+        DCL((SCREEN_T *));  /* resize screen display        */
+    int (PASCAL NEAR *t_topscr)
+        DCL((SCREEN_T *));  /* bring screen to top          */
 #endif
 }       TERM;
 
@@ -1453,6 +1477,9 @@ typedef struct {
 /* MicroEmacs named function type:  */
 typedef int PASCAL NEAR (*ue_fnc_T) DCL((int, int));
 
+/* MicroEmacs table value fetch function type:  */
+typedef char *PASCAL NEAR (*ue_tvfetch_T)DCL((int));
+
 /* Filter function used by TransformRegion():
  * Output string must be created by malloc(). */
 typedef char *PASCAL NEAR (*filter_func_T) DCL((CONST char *rstart,
@@ -1596,6 +1623,11 @@ extern int PASCAL NEAR biteq DCL((int bc, EBITMAP cclmap));
 extern int PASCAL NEAR bktoshell DCL((int f, int n));
 extern int PASCAL NEAR boundry DCL((LINE *curline, int curoff, int dir));
 extern int PASCAL NEAR cclmake DCL((char **ppatptr, MC *mcptr));
+#if MSDOS
+# if MOUSE
+extern int PASCAL NEAR checkmouse DCL((void));
+# endif
+#endif
 extern int PASCAL NEAR checknext DCL((int chr, int dir));
 extern int PASCAL NEAR clear_ring DCL((int f, int n));
 extern int PASCAL NEAR delins DCL((int dlength, char *instr, int use_rmc));
@@ -1608,6 +1640,11 @@ extern long PASCAL NEAR ernd DCL((void));
 extern int PASCAL NEAR execkey DCL((KEYTAB *key, int f, int n));
 #if VMS
 extern void PASCAL NEAR expandargs DCL((int *pargc, char ***pargv));
+#endif
+#if ( MSDOS || OS2 )
+# if ( !HP150 )
+extern int PASCAL NEAR extcode DCL((unsigned c));
+# endif
 #endif
 extern int PASCAL NEAR fbound DCL((DELTA *tbl,
                               int   jump,
@@ -1654,6 +1691,9 @@ extern int PASCAL NEAR local_var DCL((int f, int n));
 extern int PASCAL NEAR lookup_color DCL((char *sp));
 extern int PASCAL NEAR lover DCL((char *ostr));
 extern int PASCAL NEAR mceq DCL((unsigned char bc, MC *mt));
+#if MSDOS
+extern VOID PASCAL NEAR maxlines DCL((int lines));
+#endif
 extern int PASCAL NEAR mcscanner DCL((MC  *mcpatrn,
                                  int direct,
                                  int beg_or_end,
@@ -1714,10 +1754,10 @@ extern int PASCAL NEAR backline DCL((int f, int n));
 extern int PASCAL NEAR backpage DCL((register int f, register int n));
 extern int PASCAL NEAR backword DCL((int f, int n));
 extern int PASCAL NEAR bclear DCL((BUFFER *bp));
-extern int PASCAL NEAR binary(CONST char *key,
-                              char *(PASCAL NEAR *tval)(),
-                              int        tlength,
-                              int        klength);
+extern int PASCAL NEAR binary DCL((CONST char *key,
+                                   char *(PASCAL NEAR *tval)DCL((int)),
+                                   int        tlength,
+                                   int        klength));
 extern int PASCAL NEAR bindtokey DCL((int f, int n));
 extern int PASCAL NEAR buildlist DCL((int type, char *mstring));
 extern int PASCAL NEAR capword DCL((int f, int n));

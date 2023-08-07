@@ -180,10 +180,12 @@ int PASCAL NEAR ttopen()
     return TRUE;
 }
 
-VOID maxlines(lines) /* set number of vertical rows for mouse */
-
-int lines;      /* # of vertical lines */
-
+/* MAXLINES:
+ *
+ * Set number of vertical rows for mouse
+ */
+VOID PASCAL NEAR  maxlines P1_(int, lines)
+/* lines: # of vertical lines */
 {
 # if     MOUSE
     if ( mexist ) {
@@ -353,7 +355,7 @@ ttc:    /* return any keystrokes waiting in the type ahead buffer */
 }
 
 # if     MOUSE
-checkmouse()
+int PASCAL NEAR checkmouse P0_(void)
 {
     register int  k         = 0;  /* current bit/button of mouse */
     register int  etype     = 0;  /* event type byte */

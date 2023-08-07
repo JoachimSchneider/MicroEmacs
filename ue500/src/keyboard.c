@@ -28,7 +28,7 @@
 #if ( MSDOS || OS2 )
 # if ( !HP150 )
 
-int extcode P1_(unsigned, c)
+int PASCAL NEAR extcode P1_(unsigned, c)
 /* c: byte following a zero extended char byte
  *    High order normally contains 0x00 but may contain 0xE0 if an
  *    AT-style keyboard is attached

@@ -509,10 +509,7 @@ int f, n;        /* prefix flag and argument */
  * be part of the window.
  */
 
-EWINDOW *PASCAL NEAR mousewindow(row)
-
-register int row;
-
+EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
 {
     register EWINDOW *wp;
 
@@ -544,11 +541,7 @@ register int row;
  * the text in the buffer.
  */
 
-LINE *PASCAL NEAR mouseline(wp, row)
-
-register EWINDOW *wp;
-register int row;
-
+LINE *PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
 {
     register LINE   *lp;
 

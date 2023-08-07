@@ -92,9 +92,9 @@ int f, n;       /* command arguments [IGNORED] */
 
 {
     register unsigned int c;    /* command key to bind */
-    register int (PASCAL NEAR *kfunc)();    /* ptr to the requested function to
-                                             * bind to */
-    register KEYTAB *ktp;       /* pointer into the command table */
+    register ue_fnc_T kfunc;    /* ptr to the requested function to
+                                 * bind to  */
+    register KEYTAB *ktp;       /* pointer into the command table   */
     register int found;         /* matched command flag */
     char outseq[80];            /* output buffer for keystroke sequence */
 
@@ -642,11 +642,9 @@ char *sfname;   /* name of startup file (null if default) */
  *                 directories in table from EPATH.H
  */
 
-CONST char *PASCAL NEAR flook(fname, hflag)
-
-CONST char  *fname;     /* base file name to search for */
-int hflag;              /* Look in the HOME environment variable first? */
-
+CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
+/* fname: Base file name to search for                  */
+/* hflag: Look in the HOME environment variable first?  */
 {
     register char       *home;          /* path to home directory */
     register char       *path;          /* environmental PATH variable */
@@ -835,10 +833,8 @@ char *seq;      /* destination string for sequence */
 
 /*  This function looks a key binding up in the binding table   */
 
-KEYTAB *getbind(c)
-
-register int c; /* key to find what is bound to it */
-
+KEYTAB *getbind P1_(int, c)
+/* c: Key to find what is bound to it */
 {
     register KEYTAB *ktp;
 
@@ -864,7 +860,7 @@ char *PASCAL NEAR getfname(key)
 KEYTAB *key;    /* key binding to return a name of */
 
 {
-    int (PASCAL NEAR *func)();     /* ptr to the requested function */
+    register ue_fnc_T func;     /* ptr to the requested function */
     register NBIND *nptr;       /* pointer into the name binding table */
     register BUFFER *bp;        /* ptr to buffer to test */
     register BUFFER *kbuf;      /* ptr to requested buffer */
@@ -904,8 +900,10 @@ KEYTAB *key;    /* key binding to return a name of */
     return (NULL);
 }
 
-/* fncmatch:    match fname to a function in the names table and return any
- * match or NULL if none
+/* FNCMATCH:
+ *
+ * match fname to a function in the names table and return any match
+ * or NULL if none
  */
 ue_fnc_T fncmatch P1_(char *, fname)
 {
@@ -925,7 +923,9 @@ int index;      /* index of name to fetch out of the name table */
     return (names[index].n_name);
 }
 
-/* stock()         String key name TO Command Key
+/* STOCK:
+ *
+ * String key name TO Command Key
  *
  * A key binding consists of one or more prefix functions followed by
  * a keystroke.  Allowable prefixes must be in the following order:
@@ -942,11 +942,8 @@ int index;      /* index of name to fetch out of the name table */
  * case.  Real control characters are automatically converted to
  * the ^A form.
 */
-
-unsigned int PASCAL NEAR stock(keyname)
-
-CONST char  *keyname;   /* name of key to translate to Command key form */
-
+unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
+/* keyname: Name of key to translate to Command key form  */
 {
 
     char                    *keynameA   = xstrdup(keyname);
@@ -1024,11 +1021,12 @@ CONST char  *keyname;   /* name of key to translate to Command key form */
     return (c);
 }
 
-CONST char *PASCAL NEAR transbind(skey) /* string key name to binding name....
-                                         */
-
-CONST char *skey;   /* name of key to get binding for */
-
+/* TRANSBIND:
+ *
+ * String key name to binding name....
+ */
+CONST char *PASCAL NEAR transbind P1_(CONST char *, skey)
+/* skey:  Name of key to get binding for  */
 {
     CONST char  *bindname;
 
@@ -1088,10 +1086,10 @@ int set_key P2_(KEYTAB *, key,  /* ptr to key to set          */
                 char *, name    /* name of function or buffer */
               )
 {
-    int (PASCAL NEAR *ktemp)();         /* temp function pointer to assign */
-    register BUFFER *kmacro;            /* ptr to buffer of macro to bind to key
-                                         */
-    char bufn[NBUFN];                   /* buffer to hold macro name */
+    ue_fnc_T        ktemp;        /* temp function pointer to assign  */
+    register BUFFER *kmacro;      /* ptr to buffer of macro to bind
+                                   * to key                           */
+    char            bufn[NBUFN];  /* buffer to hold macro name        */
 
     /* are we unbinding it? */
     if ( *name == 0 ) {

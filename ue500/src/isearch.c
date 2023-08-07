@@ -120,8 +120,8 @@ int PASCAL NEAR isearch P1_(int, dir)
     int           curoff          = 0;    /* Current offset on entry            */
     int           init_direction  = 0;    /* The initial search direction       */
     KEYTAB        *ktp            = NULL; /* The command bound to the key       */
-    register int (PASCAL NEAR *kfunc)() = NULL; /* ptr to the requested function
-                                                 * to bind to */
+    ue_fnc_T      kfunc           = NULL; /* ptr to the requested function
+                                           * to bind to */
 
     ZEROMEM(pat_save);
 

@@ -209,11 +209,10 @@ int f, n;        /* prefix flag and argument */
 
 /* this function initializes a new screen.... */
 
-SCREEN_T *PASCAL NEAR init_screen(scr_name, scr_buf)
-
-char *scr_name;         /* screen name */
-BUFFER *scr_buf;        /* buffer to place in first window of screen */
-
+SCREEN_T *PASCAL NEAR init_screen P2_(char *, scr_name,
+                                      BUFFER *, scr_buf)
+/* scr_name:  screen name                               */
+/* scr_buf:   buffer to place in first window of screen */
 {
     int cmark;                  /* current mark to initialize */
     SCREEN_T *sp;               /* pointer to allocated screen */
@@ -304,10 +303,8 @@ BUFFER *scr_buf;        /* buffer to place in first window of screen */
     return (sp);
 }
 
-SCREEN_T *PASCAL NEAR lookup_screen(scr_name)
-
-char *scr_name;         /* named screen to find */
-
+SCREEN_T *PASCAL NEAR lookup_screen P1_(char *, scr_name)
+/* scr_name:  Named screen to find  */
 {
     SCREEN_T *result;
 

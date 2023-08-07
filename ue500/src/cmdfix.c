@@ -1,21 +1,24 @@
-/*  CMDFIX.C:   Translate pre 3.10 command and startup files to 3.10 and above
- * files (C)Copyright 1995 by Daniel Lawrence All Rights reserved
+/*	CMDFIX.C:	Translate pre 3.10 command and startup
+ *			files to 3.10 and above files
+ *			(C)Copyright 1993 by Daniel Lawrence
+ *			All Rights reserved
  *
- *       The names of function key command strings have been changed to help
- * make these names machine independent.  This program translates old files to
- * new.
+ *	The names of function key command strings have been changed to
+ *	help make these names machine independant.  This program translates
+ *	old files to new.
  *
  */
 
 #include <stdio.h>
 #include <stdlib.h>
 #include "estruct.h"
+#include "eproto.h"
 
-PASCAL fix();
+
+static int PASCAL fix DCL((char *));
 
 /*  Table of command key name changes */
-
-char *trans[][2] =
+static char *trans[][2] =
 {
     "FN ", "A-D", "FN!", "A-F", "FN#", "A-H", "FN$", "A-J", "FN%", "A-K", "FN&",
     "A-L", "FN,", "A-Z", "FN-", "A-X", "FN.", "A-C", "FN/", "A-V", "FN0", "A-B",
@@ -36,7 +39,7 @@ char *trans[][2] =
 
 #define NUMTRAN 71
 
-char *trans1[][2] =
+static char *trans1[][2] =
 {
     "FN^P", "A-Q", "FN^Q", "A-W", "FN^R", "A-E", "FN^S", "A-R", "FN^T", "A-T",
     "FN^U", "A-Y", "FN^V", "A-U", "FN^W", "A-I", "FN^X", "A-O", "FN^Y", "A-P",
@@ -50,7 +53,7 @@ char *trans1[][2] =
 FILE *infile;   /* current input file handle */
 FILE *outfile;  /* current output file handle */
 
-main(argc, argv)
+int main(argc, argv)
 
 int argc;       /* number of command line arguments */
 char *argv[];   /* text of command line arguments */
@@ -78,10 +81,8 @@ char *argv[];   /* text of command line arguments */
     exit(0);
 }
 
-PASCAL fix(fname)
-
-char *fname;    /* file to fix */
-
+int PASCAL fix P1_(char *, fname)
+/* fname: File to fix */
 {
     register int inp;
     register int index;

@@ -369,10 +369,12 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     STATIC_STR_RET_EPILOG(gtfun, CONST char *, 2 * NSTRING);
 }
 
-CONST char *PASCAL NEAR gtusr(vname)    /* look up a user var's value */
-
-CONST char  *vname;             /* name of user variable to fetch */
-
+/* GTUSR:
+ *
+ * Look up a user var's value
+ */
+CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
+/* vname: Name of user variable to fetch  */
 {
     char            *vnameA = xstrdup(vname);
     register int vnum;          /* ordinal number of user var */
@@ -433,14 +435,11 @@ int i;
     return (envars[i]);
 }
 
-int PASCAL NEAR binary(key, tval, tlength, klength)
-
-CONST char  *key;                   /* key string to look for */
-char        *(PASCAL NEAR *tval)();     /* ptr to function to fetch table value
-                                         * with */
-int tlength;                    /* length of table to search */
-int klength;                    /* maximum length of string to compare */
-
+int PASCAL NEAR binary P4_(CONST char *, key, ue_tvfetch_T, tval, int, tlength, int, klength)
+/* key:     Key string to look for                    */
+/* tval:    Ptr to function to fetch table value with */
+/* tlength: Length of table to search                 */
+/* klength: Maximum length of string to compare       */
 {
     int l, u;           /* lower and upper limits of binary search */
     int i;              /* current search index */
@@ -796,10 +795,11 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
     STATIC_STR_RET_EPILOG(gtenv, CONST char *, 2 * NSTRING);
 }
 
-CONST char *PASCAL NEAR fixnull(s)    /* Don't return NULL pointers! */
-
-CONST char  *s;
-
+/* FIXNULL:
+ *
+ * Don't return NULL pointers!
+ */
+CONST char *PASCAL NEAR fixnull P1_(CONST char *, s)
 {
     if ( s == NULL )
         return ( (CONST char *)"" );

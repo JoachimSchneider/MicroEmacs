@@ -387,7 +387,12 @@ Next Steps:
 - Replace --- if possible --- `strncat' by `strlcat'.
 - *Manually* analyze the remaining `sprintf', `xstrcpy' and `xstrcat'
   occurances.
-
+- Build with C++-Compiler on
+  + MSDOS                                                         (\/)
+  + FreeBSD
+  + Linux
+- Identify functions which could be declared module local (`static')
+- Sort eproto.h declarations and add platform specific sections therein.
 
 
 # EOF

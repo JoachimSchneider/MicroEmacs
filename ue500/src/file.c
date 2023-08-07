@@ -157,11 +157,9 @@ int PASCAL NEAR resetkey()      /* reset the encryption key if needed */
 }
 #endif
 
-int PASCAL NEAR getfile(fname, lockfl)
-
-CONST char *fname;      /* file name to find */
-int lockfl;             /* check the file for locks? */
-
+int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
+/* fname:   file name to find         */
+/* lockfl:  check the file for locks? */
 {
     register BUFFER *bp;
     register LINE   *lp;
@@ -253,11 +251,9 @@ int lockfl;             /* check the file for locks? */
  * read.
  */
 
-int PASCAL NEAR readin(fname, lockfl)
-
-CONST char *fname;              /* name of file to read */
-int lockfl;                     /* check for file locks? */
-
+int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
+/* fname:   Name of file to read  */
+/* lockfl:  Check for file locks? */
 {
     register LINE *lp1;
     register LINE *lp2;
