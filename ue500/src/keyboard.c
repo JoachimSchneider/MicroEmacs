@@ -459,7 +459,7 @@ typedef struct keyent {                 /* Key mapping entry            */
 } KEYENT;
 
 /* Needed Prototype */
-extern int PASCAL NEAR rec_seq DCL((char *buf, char *bufstart, KEYENT *node));
+EXTERN int PASCAL NEAR rec_seq DCL((char *buf, char *bufstart, KEYENT *node));
 
 /* some globals needed here */
 static unsigned char  keyseq[256];      /* Prefix escape sequence table */
@@ -671,7 +671,7 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
 # define TIMEOUT  (255)
 VOID cook P0_(void)
 {
-    register unsigned char  ch    = '\0';
+    REGISTER unsigned char  ch    = '\0';
     KEYENT                  *cur  = NULL;
 
     qin( ch = grabwait() ); /* Get first character untimed */

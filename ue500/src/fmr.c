@@ -63,15 +63,15 @@ KEYDEF newtab[NUMFKEYS] =
     "\000\010F"
 };
 
-union REGS rg;          /* cpu register for use of DOS calls */
+union REGS rg;          /* cpu REGISTER for use of DOS calls */
 struct SREGS sg;        /* cpu segment registers         */
 
-extern int PASCAL NEAR fnclabel DCL((int f, int n));
-extern int PASCAL NEAR readparam DCL((int *v));
-extern VOID PASCAL NEAR dobbnmouse DCL((void));
-extern VOID PASCAL NEAR docsi DCL((int oh));
-extern VOID PASCAL NEAR ttputs DCL((char *string));
-extern VOID PASCAL NEAR charwrite DCL((int row, char *outstr, int forg,
+EXTERN int PASCAL NEAR fnclabel DCL((int f, int n));
+EXTERN int PASCAL NEAR readparam DCL((int *v));
+EXTERN VOID PASCAL NEAR dobbnmouse DCL((void));
+EXTERN VOID PASCAL NEAR docsi DCL((int oh));
+EXTERN VOID PASCAL NEAR ttputs DCL((char *string));
+EXTERN VOID PASCAL NEAR charwrite DCL((int row, char *outstr, int forg,
                                        int left, int right));
 
 # define NROW    24                     /* Screen size.                 */
@@ -83,24 +83,24 @@ extern VOID PASCAL NEAR charwrite DCL((int row, char *outstr, int forg,
 # define ESC     0x1B                   /* ESC character.               */
 
 /* Forward references.          */
-extern int PASCAL NEAR fmrmove();
-extern int PASCAL NEAR fmreeol();
-extern int PASCAL NEAR fmreeop();
-extern int PASCAL NEAR fmrbeep();
-extern int PASCAL NEAR fmropen();
-extern int PASCAL NEAR fmrrev();
-extern int PASCAL NEAR fmrclose();
-extern int PASCAL NEAR fmrkopen();
-extern int PASCAL NEAR fmrkclose();
-extern int PASCAL NEAR fmrcres();
-extern int PASCAL NEAR fmrparm();
+EXTERN int PASCAL NEAR fmrmove();
+EXTERN int PASCAL NEAR fmreeol();
+EXTERN int PASCAL NEAR fmreeop();
+EXTERN int PASCAL NEAR fmrbeep();
+EXTERN int PASCAL NEAR fmropen();
+EXTERN int PASCAL NEAR fmrrev();
+EXTERN int PASCAL NEAR fmrclose();
+EXTERN int PASCAL NEAR fmrkopen();
+EXTERN int PASCAL NEAR fmrkclose();
+EXTERN int PASCAL NEAR fmrcres();
+EXTERN int PASCAL NEAR fmrparm();
 
 unsigned int octype;            /* original cursor type */
 unsigned int ocraster;          /* original cursor raster line limits */
 
 # if     COLOR
-extern int PASCAL NEAR fmrfcol();
-extern int PASCAL NEAR fmrbcol();
+EXTERN int PASCAL NEAR fmrfcol();
+EXTERN int PASCAL NEAR fmrbcol();
 
 static int cfcolor = -1;        /* current forground color */
 static int cbcolor = -1;        /* current background color */
@@ -220,9 +220,9 @@ PASCAL NEAR fmrbeep()
 }
 
 PASCAL NEAR fmrparm(n)
-register int n;
+REGISTER int n;
 {
-    register int q, r;
+    REGISTER int q, r;
 
     q = n/10;
     if ( q != 0 ) {

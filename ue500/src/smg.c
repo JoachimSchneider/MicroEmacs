@@ -394,8 +394,8 @@ smg_noop1(int param)
 /*
 	Parts of VMS.C that we'll want to access here
 */
-extern struct dsc$descriptor_s *descptr();
-extern struct dsc$descriptor_s *descrp();
+EXTERN struct dsc$descriptor_s *descptr();
+EXTERN struct dsc$descriptor_s *descrp();
 #define DESCPTR( s)	descrp( s, sizeof(s)-1)
 /*
 	These two structures, along with ttdef.h, are good for manipulating
@@ -409,7 +409,7 @@ typedef struct
     unsigned char page;
     unsigned long tt2;
     } TTCHAR;
-extern NOSHARE TTCHAR orgchar;			/* Original characteristics */
+EXTERN NOSHARE TTCHAR orgchar;			/* Original characteristics */
 /*
 	test macro is used to signal errors from system services
 */
@@ -446,17 +446,17 @@ static int * inbuft = inbuf;		/* Tail of input buffer		*/
 
 
 /* Forward references.          */
-extern int PASCAL NEAR smgmove();
-extern int PASCAL NEAR smgeeol();
-extern int PASCAL NEAR smgeeop();
-extern int PASCAL NEAR smgbeep();
-extern int PASCAL NEAR smgopen();
-extern int PASCAL NEAR smgrev();
-extern int PASCAL NEAR smgcres();
-extern int PASCAL NEAR smgparm();
-extern int PASCAL NEAR smggetc();
-extern int PASCAL NEAR smgputs();
-extern int PASCAL NEAR smgclose();
+EXTERN int PASCAL NEAR smgmove();
+EXTERN int PASCAL NEAR smgeeol();
+EXTERN int PASCAL NEAR smgeeop();
+EXTERN int PASCAL NEAR smgbeep();
+EXTERN int PASCAL NEAR smgopen();
+EXTERN int PASCAL NEAR smgrev();
+EXTERN int PASCAL NEAR smgcres();
+EXTERN int PASCAL NEAR smgparm();
+EXTERN int PASCAL NEAR smggetc();
+EXTERN int PASCAL NEAR smgputs();
+EXTERN int PASCAL NEAR smgclose();
 
 /** Terminal dispatch table **/
 NOSHARE TERM term = {

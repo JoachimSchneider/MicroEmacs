@@ -14,11 +14,11 @@
 
 #if     I55
 
-extern int PASCAL NEAR fnclabel DCL((int f, int n));
-extern int PASCAL NEAR readparam DCL((int *v));
-extern VOID PASCAL NEAR dobbnmouse DCL((void));
-extern VOID PASCAL NEAR docsi DCL((int oh));
-extern VOID PASCAL NEAR ttputs DCL((char *string));
+EXTERN int PASCAL NEAR fnclabel DCL((int f, int n));
+EXTERN int PASCAL NEAR readparam DCL((int *v));
+EXTERN VOID PASCAL NEAR dobbnmouse DCL((void));
+EXTERN VOID PASCAL NEAR docsi DCL((int oh));
+EXTERN VOID PASCAL NEAR ttputs DCL((char *string));
 
 # define NROW    24                     /* Screen size.                 */
 # define NCOL    80                     /* Edit if you want to.         */
@@ -29,22 +29,22 @@ extern VOID PASCAL NEAR ttputs DCL((char *string));
 # define ESC     0x1B                   /* ESC character.               */
 
 /* Forward references.          */
-extern int PASCAL NEAR i55move();
-extern int PASCAL NEAR i55eeol();
-extern int PASCAL NEAR i55eeop();
-extern int PASCAL NEAR i55beep();
-extern int PASCAL NEAR i55open();
-extern int PASCAL NEAR i55rev();
-extern int PASCAL NEAR i55close();
-extern int PASCAL NEAR i55kopen();
-extern int PASCAL NEAR i55kclose();
-extern int PASCAL NEAR i55cres();
-extern int PASCAL NEAR i55parm();
-extern int PASCAL NEAR i55getc();
+EXTERN int PASCAL NEAR i55move();
+EXTERN int PASCAL NEAR i55eeol();
+EXTERN int PASCAL NEAR i55eeop();
+EXTERN int PASCAL NEAR i55beep();
+EXTERN int PASCAL NEAR i55open();
+EXTERN int PASCAL NEAR i55rev();
+EXTERN int PASCAL NEAR i55close();
+EXTERN int PASCAL NEAR i55kopen();
+EXTERN int PASCAL NEAR i55kclose();
+EXTERN int PASCAL NEAR i55cres();
+EXTERN int PASCAL NEAR i55parm();
+EXTERN int PASCAL NEAR i55getc();
 
 # if     COLOR
-extern int PASCAL NEAR i55fcol();
-extern int PASCAL NEAR i55bcol();
+EXTERN int PASCAL NEAR i55fcol();
+EXTERN int PASCAL NEAR i55bcol();
 
 static int cfcolor = -1;        /* current forground color */
 static int cbcolor = -1;        /* current background color */
@@ -168,9 +168,9 @@ PASCAL NEAR i55beep()
 }
 
 PASCAL NEAR i55parm(n)
-register int n;
+REGISTER int n;
 {
-    register int q, r;
+    REGISTER int q, r;
 
     q = n/10;
     if ( q != 0 ) {

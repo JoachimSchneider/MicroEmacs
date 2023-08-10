@@ -21,25 +21,25 @@
 # define BEL     0x07                   /* BEL character.               */
 # define ESC     30                     /* DG10 ESC character.          */
 
-extern PASCAL NEAR ttopen();               /* Forward references.          */
-extern PASCAL NEAR ttgetc();
-extern PASCAL NEAR ttputc();
-extern PASCAL NEAR ttflush();
-extern PASCAL NEAR ttclose();
-extern PASCAL NEAR dg10kopen();
-extern PASCAL NEAR dg10kclose();
-extern PASCAL NEAR dg10move();
-extern PASCAL NEAR dg10eeol();
-extern PASCAL NEAR dg10eeop();
-extern PASCAL NEAR dg10beep();
-extern PASCAL NEAR dg10open();
-extern PASCAL NEAR dg10rev();
-extern PASCAL NEAR dg10close();
-extern PASCAL NEAR dg10cres();
+EXTERN PASCAL NEAR ttopen();               /* Forward references.          */
+EXTERN PASCAL NEAR ttgetc();
+EXTERN PASCAL NEAR ttputc();
+EXTERN PASCAL NEAR ttflush();
+EXTERN PASCAL NEAR ttclose();
+EXTERN PASCAL NEAR dg10kopen();
+EXTERN PASCAL NEAR dg10kclose();
+EXTERN PASCAL NEAR dg10move();
+EXTERN PASCAL NEAR dg10eeol();
+EXTERN PASCAL NEAR dg10eeop();
+EXTERN PASCAL NEAR dg10beep();
+EXTERN PASCAL NEAR dg10open();
+EXTERN PASCAL NEAR dg10rev();
+EXTERN PASCAL NEAR dg10close();
+EXTERN PASCAL NEAR dg10cres();
 
 # if     COLOR
-extern PASCAL NEAR dg10fcol();
-extern PASCAL NEAR dg10bcol();
+EXTERN PASCAL NEAR dg10fcol();
+EXTERN PASCAL NEAR dg10bcol();
 
 int cfcolor = -1;               /* current forground color */
 int cbcolor = -1;               /* current background color */

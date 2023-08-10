@@ -81,7 +81,7 @@ VOID    in_put (int event)
 
 int in_get (void)
 {
-    register int event; /* event to return */
+    REGISTER int event; /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);

@@ -114,7 +114,7 @@
 # define dashertermdef   1          /* might not be used any more */
 
 # nolist
-# include        "edef.h"           /* get the MicroEMACS extern's */
+# include        "edef.h"           /* get the MicroEMACS EXTERN's */
 # include        "elang.h"
 # list
 
@@ -150,8 +150,8 @@ char kbdq;                      /* char we've already read      */
  *   _toaos_fid() - changes UNIX(tm)  pathname to AOS/VS pathname (Thank you!)
  * traceback() - calls the ?SNAP LANG_RT routine for error traceback
  */
-/*extern int  _toaos_fid(char*, char* );*/
-extern VOID traceback(int);
+/*EXTERN int  _toaos_fid(char*, char* );*/
+EXTERN VOID traceback(int);
 
 /*
  *   This is how we make an MV/Eclipse accumulator in C with almost all options.
@@ -182,16 +182,16 @@ int su_mode;                        /* Superuser mode flag */
 char tline[TLINE_LEN];                /* command line for cli/shell/program
                                        * calls */
 
-extern VOID do_system();        /* calls the cli/shell/program */
-extern VOID do_system_end();    /* cleans up after cli/shell/program calls */
-extern VOID init_tline();       /* inits the command line for cli/shell... */
-extern VOID ttputs();
-extern VOID in_init();
-extern FILE *ffp;               /* file stream pointer used in fileio.c */
-extern int vttidy();            /* MicroEMACS routine to tidy up the screen */
+EXTERN VOID do_system();        /* calls the cli/shell/program */
+EXTERN VOID do_system_end();    /* cleans up after cli/shell/program calls */
+EXTERN VOID init_tline();       /* inits the command line for cli/shell... */
+EXTERN VOID ttputs();
+EXTERN VOID in_init();
+EXTERN FILE *ffp;               /* file stream pointer used in fileio.c */
+EXTERN int vttidy();            /* MicroEMACS routine to tidy up the screen */
 
-extern int              aosvs$expand_pathname();
-extern VOID             aosvs$unix_to_aosvs_path();
+EXTERN int              aosvs$expand_pathname();
+EXTERN VOID             aosvs$unix_to_aosvs_path();
 
 FILE *STDIN, *STDOUT;           /* Needed since the array of files went away.*/
                                 /* Of course, if _iob changes, we'll have to */
@@ -485,7 +485,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    REGISTER int event;         /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -495,8 +495,8 @@ int in_get()    /* get an event from the input buffer */
 # if     MOUSE
 int checkmouse()
 {
-    register int k;             /* current bit/button of mouse */
-    register int event;         /* encoded mouse event */
+    REGISTER int k;             /* current bit/button of mouse */
+    REGISTER int event;         /* encoded mouse event */
     int newbut;                 /* new state of the mouse buttons */
     int mousecol;               /* current mouse column */
     int mouserow;               /* current mouse row */
@@ -635,7 +635,7 @@ int typahead()
  */
 int spawncli(f, n)
 {
-    register char *cp;
+    REGISTER char *cp;
 
     /* don't allow this command if restricted */
     if ( restflag )
@@ -668,7 +668,7 @@ int spawncli(f, n)
  */
 int spawn(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -694,7 +694,7 @@ int spawn(f, n)
 
 int execprg(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -729,9 +729,9 @@ int execprg(f, n)
  */
 int pipecmd(f, n)
 {
-    register int s;         /* return status from CLI */
-    register WINDOW *wp;    /* pointer to new window */
-    register BUFFER *bp;    /* pointer to buffer to zot */
+    REGISTER int s;         /* return status from CLI */
+    REGISTER WINDOW *wp;    /* pointer to new window */
+    REGISTER BUFFER *bp;    /* pointer to buffer to zot */
     char line[NLINE];       /* command line send to shell */
     const char pipecmd_bname[] = "command";
     char pipecmd_filnam[NFILEN] = ":tmp:";  /* must be AOS/VS format!!!! */
@@ -857,9 +857,9 @@ int f_filter(f, n)
  */
 char *PASCAL NEAR timeset()
 {
-    register char *sp;      /* temp string pointer */
+    REGISTER char *sp;      /* temp string pointer */
     short int tvec[2];
-    extern char *dg_ctime();
+    EXTERN char *dg_ctime();
 
     ac0.ulng = 0L;
     ac1.ulng = 0L;
@@ -876,7 +876,7 @@ char *PASCAL NEAR timeset()
 
 VOID init_tline()
 {
-    extern char *curdir();
+    EXTERN char *curdir();
 
     tline[0] = '\000';
     xstrcat(tline, "DIR,");
@@ -918,24 +918,24 @@ VOID do_system_end()
  *     DASHER D2xx/4xx series - support primarily for D2xx series written by
  * Doug Rady (based on ANSI.C and VMSVT.C)
  */
-extern VOID    ttopen();
-extern VOID    ttkopen();
-extern VOID    ttkclose();
-extern VOID    tteeol();
-extern VOID    tteeop();
-extern VOID    ttbeep();
-extern VOID    dashermove();
-extern VOID    ansimove();
-extern VOID    dasherrev();
-extern VOID    ansirev();
-extern int     ttcres();
+EXTERN VOID    ttopen();
+EXTERN VOID    ttkopen();
+EXTERN VOID    ttkclose();
+EXTERN VOID    tteeol();
+EXTERN VOID    tteeop();
+EXTERN VOID    ttbeep();
+EXTERN VOID    dashermove();
+EXTERN VOID    ansimove();
+EXTERN VOID    dasherrev();
+EXTERN VOID    ansirev();
+EXTERN int     ttcres();
 # if     COLOR
-extern VOID    ttfcol();
-extern VOID    ttbcol();
+EXTERN VOID    ttfcol();
+EXTERN VOID    ttbcol();
 # endif
-extern VOID    dasherdim();
-extern VOID    ansidim();
-extern VOID    spal();
+EXTERN VOID    dasherdim();
+EXTERN VOID    ansidim();
+EXTERN VOID    spal();
 
 # define NROWS   24             /* normal # of screen rows */
 # define MXROWS  24             /* max # of screen rows */
@@ -1684,13 +1684,13 @@ VOID aosvs$unix_to_aosvs_path(u_path, a_path)
 char *u_path, *a_path;
 {
 
-    extern int _toaos_fid();        /* Data General library routine */
+    EXTERN int _toaos_fid();        /* Data General library routine */
 
     /*
      *  local variables
      */
-    register char *up, *ap;
-    register int dec1;
+    REGISTER char *up, *ap;
+    REGISTER int dec1;
     char t_path[$MXPL], octal[4];
 
     /*
@@ -1700,7 +1700,7 @@ char *u_path, *a_path;
         return;
 
     /*
-     *  copy to register vars.
+     *  copy to REGISTER vars.
      */
     up = u_path;            /* load ptr to Unix(tm) path */
     ap = t_path;            /* load ptr to temp. storage area */
@@ -1842,11 +1842,11 @@ char *c_path, *x_path;
     return (0);
 }
 
-extern DIR              *opendir();
-extern struct direct    *readdir();
-extern long             telldir();
-extern VOID             seekdir();
-extern VOID             closedir();
+EXTERN DIR              *opendir();
+EXTERN struct direct    *readdir();
+EXTERN long             telldir();
+EXTERN VOID             seekdir();
+EXTERN VOID             closedir();
 
 # define rewinddir(dirp)       seekdir(dirp, 0L)
 
@@ -1868,7 +1868,7 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
+    REGISTER int index;                 /* index into various strings */
 
     /* clean up from our last time in here... */
     if ( gnfndir ) {
@@ -1909,7 +1909,7 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL NEAR getnfile()
 {
-    register int index;                 /* index into various strings */
+    REGISTER int index;                 /* index into various strings */
 
     zero(gnfnrbuf, NFILEN);             /* init return buffer */
 

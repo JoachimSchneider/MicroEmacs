@@ -395,4 +395,136 @@ Next Steps:
 - Sort eproto.h declarations and add platform specific sections therein.
 
 
+[2023-08-08.00]
+
+<http://odl.sysworks.biz/disk$axpdocjun032/progtool/cpqc65/5492p017.htm>
+
+4.4 Storage-Class Modifiers
+
+Compaq C for OpenVMS Systems provides support for the storage-class
+modifiers noshare , readonly , and _align as VAX C keywords. The
+recognition of these three storage-class modifiers as keywords (along
+with the other VAX C specific keywords) is controlled by a combination
+of the compiler mode and the /ACCEPT command-line qualifier. The
+default behavior on OpenVMS systems is for the compiler to recognize
+these storage-class modifiers as keywords in the VAX C compatibility
+mode and relaxed ANSI C mode (assuming that /ACCEPT=NOVAX_KEYWORDS is
+not also specified.) Conversely, they are not recognized by default in
+all other modes unless overridden by /ACCEPT=VAX_KEYWORDS.
+
+Compaq C also provides the __inline , __forceinline and __align
+storage-class modifiers. These are recognized as valid keywords in all
+compiler modes on all platforms. They are in the namespace reserved to
+the C implementation, so it is not necessary to allow them to be
+treated as user-declared identifiers. They have the same effects on all
+platforms, except that on OpenVMS VAX systems, the __forceinline
+modifier does not cause any more inlining than the __inline modifier
+does.
+
+Compaq C also provides the inline storage-class modifier. This modifier
+is supported in relaxed ANSI C mode (/STANDARD=RELAXED_ANSI89) or if
+the /ACCEPT=C99_KEYWORDS or /ACCEPT=GCCINLINE qualifier is specified.
+
+For additional information about the __inline , __forceinline , __align
+, and inline storage-class modifiers, see the Compaq C Language
+Reference Manual.
+
+You can use a storage-class specifier and a storage-class modifier in
+any order; usually, the modifier is placed after the specifier in the
+source code. For example:
+
+
+extern  noshare  int  x;
+
+   /*  Or, equivalently...*/
+
+int  noshare  extern  x;
+
+The following sections describe each of the Compaq C storage-class
+modifiers.
+
+4.4.1 The noshare Modifier
+
+The noshare storage-class modifier assigns the attribute NOSHR to the
+program section of the variable. Use this modifier to allow other
+programs, used as shareable images, to have a copy of the variable's
+psect without the shareable images changing the variable's value in the
+original psect.
+
+When a variable is declared with the noshare modifier and a shared
+image that has been linked to your program refers to that variable, a
+copy is made of the variable's original psect to a new psect in the
+other image. The other program may alter the value of that variable
+within the local psect without changing the value still stored in the
+psect of the original program.
+
+For example, if you need to establish a set of data that will be used
+by several programs to initialize local data sets, then declare the
+external variables using the noshare specifier in a Compaq C program.
+Each program receives a copy of the original data set to manipulate,
+but the original data set remains for the next program to use. If you
+define the data as extern without the noshare modifier, a copy of the
+psect of that variable is not made; each program would be allowed
+access to the original data set, and the initial values would be lost
+as each program stores the values for the data in the psect. If the
+data is declared as const or readonly , each program is able to access
+the original data set, but none of the programs can then change the
+values.
+
+You can use the noshare modifier with the static , extern , globaldef ,
+and globaldef {"name"} storage-class specifiers. For more information
+about the possible combinations of specifiers and modifiers, and the
+effects of the storage-class modifiers on program-section attributes,
+see Section 4.8.
+
+You can use noshare alone, which implies an external definition of
+storage class extern . Also, when declaring variables using the extern
+and globaldef {"name"} storage-class specifiers, you can use noshare ,
+const , and readonly , together, in the declaration. If you declare
+variables using the static or the globaldef specifiers, and you use
+both of the modifiers in the declaration, the compiler ignores noshare
+and accepts const or readonly .
+
+4.4.2 The readonly Modifier
+
+The readonly storage-class modifier, like the const data-type
+qualifier, assigns the NOWRT attribute to the variable's program
+section; if used with the static or globaldef specifier, the variable
+is stored in the $CODE psect, which has the NOWRT attribute by default.
+
+You can use both the readonly and const modifiers with the static ,
+extern , globaldef , and globaldef {"psect"} storage-class specifiers.
+
+In addition, both the readonly modifier and the const modifier can be
+used alone. When you specify these modifiers alone, an external
+definition of storage class extern is implied.
+
+The const modifier restricts access to data in the same manner as the
+readonly modifier. However, in the declaration of a pointer, the
+readonly modifier cannot appear between the asterisk and the pointer
+variable to which it applies.
+
+The following example shows the similarity between the const and
+readonly modifiers. In both instances, the point variable represents a
+constant pointer to a nonconstant integer.
+
+
+readonly int * point;
+
+int * const point;
+
+Note
+
+For new program development, DIGITAL recommends that you use the const
+modifier, because const is ANSI C compliant and readonly is not.
+
+
+[2023-08-09.00]
+
+- Next Step (Monkey Work) necessary to complie with g++: Convert all
+  K&R definitions to the P#_-Format (which expands to ANSI-C
+  definitions with PROTO set.).
+- In this process repair the damages comments too.
+- Curren File: src/bind.c
+
 # EOF

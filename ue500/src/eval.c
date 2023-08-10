@@ -22,7 +22,7 @@ VOID PASCAL NEAR uv_init(ut)
 UTABLE *ut;     /* user variable table to initialize */
 
 {
-    register int i;
+    REGISTER int i;
 
     for ( i=0; i < ut->size; i++ ) {
         ut->uv[i].u_name[0] = 0;
@@ -49,7 +49,7 @@ VOID PASCAL NEAR uv_clean(ut)   /* discard the contents of a user variable table
 UTABLE *ut;     /* ptr to table to clear */
 
 {
-    register int i;
+    REGISTER int i;
 
     /* now clear the entries in this one */
     for ( i=0; i < ut->size; i++ )
@@ -85,8 +85,8 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     STATIC_STR_RET_PROLOG();
 
     char          *fnameL = NULL;
-    register int  fnum    = 0;          /* index to function to eval  */
-    register int  arg     = 0;          /* value of some arguments    */
+    REGISTER int  fnum    = 0;          /* index to function to eval  */
+    REGISTER int  arg     = 0;          /* value of some arguments    */
     BUFFER        *bp     = NULL;       /* scratch buffer pointer     */
     char          arg1[NSTRING];
     char          arg2[NSTRING];
@@ -377,9 +377,9 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 /* vname: Name of user variable to fetch  */
 {
     char            *vnameA = xstrdup(vname);
-    register int vnum;          /* ordinal number of user var */
-    register char   *vptr;      /* temp pointer to function value */
-    register UTABLE *ut;        /* ptr to the current variable table */
+    REGISTER int vnum;          /* ordinal number of user var */
+    REGISTER char   *vptr;      /* temp pointer to function value */
+    REGISTER UTABLE *ut;        /* ptr to the current variable table */
 
     /* limit comparisons to significant length */
     if ( strlen(vnameA) >= NVSIZE )     /* "%" counts, but is not passed */
@@ -478,7 +478,7 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
 {
     STATIC_STR_RET_PROLOG();
 
-    register int  vnum  = 0;            /* ordinal number of var
+    REGISTER int  vnum  = 0;            /* ordinal number of var
                                          * referenced     */
     char          result[2 * NSTRING];  /* string result  */
 
@@ -817,9 +817,9 @@ char *PASCAL NEAR getkill P0_(void)
 {
     STATIC_STR_RET_PROLOG();
 
-    register int  size    = 0;    /* max num of chars left to return  */
-    register char *sp     = NULL; /* ptr into KILL block data chunk   */
-    register char *vp     = NULL; /* ptr into return value            */
+    REGISTER int  size    = 0;    /* max num of chars left to return  */
+    REGISTER char *sp     = NULL; /* ptr into KILL block data chunk   */
+    REGISTER char *vp     = NULL; /* ptr into return value            */
     KILL          *kptr   = NULL; /* ptr to the current KILL block    */
     int           counter = 0;    /* index into data chunk            */
     char          value[NSTRING]; /* temp buffer for value            */
@@ -910,7 +910,7 @@ int f;          /* default flag */
 int n;          /* numeric arg (can overide prompted value) */
 
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
     char var[NVSIZE+1];         /* name of variable to fetch */
     char value[NSTRING];        /* value to set variable to */
@@ -985,7 +985,7 @@ int f;          /* default flag */
 int n;          /* numeric arg (ignored here) */
 
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
     char var[NVSIZE+1];         /* name of variable to fetch */
 
@@ -1045,7 +1045,7 @@ int f;          /* default flag */
 int n;          /* numeric arg (ignored here) */
 
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
     char var[NVSIZE+1];         /* name of variable to fetch */
 
@@ -1108,9 +1108,9 @@ VOID PASCAL NEAR findvar P4_(
         int,      scope /* intended scope of any created user variables */
     )
 {
-    register int    vnum  = 0;      /* subscript in varable arrays */
-    register int    vtype = 0;      /* type to return */
-    register UTABLE *vut  = NULL;   /* user var table to search */
+    REGISTER int    vnum  = 0;      /* subscript in varable arrays */
+    REGISTER int    vtype = 0;      /* type to return */
+    REGISTER UTABLE *vut  = NULL;   /* user var table to search */
 
 fvar:   vtype = -1;
     vut = uv_head;
@@ -1183,12 +1183,12 @@ VDESC *var;     /* variable to set */
 char *value;    /* value to set to */
 
 {
-    register int vnum;          /* ordinal number of var refrenced */
-    register int vtype;         /* type of variable to set */
-    register UTABLE *vut;       /* user table pointer */
-    register int status;        /* status return */
-    register int c;             /* translated character */
-    register char *sp;          /* scratch string pointer */
+    REGISTER int vnum;          /* ordinal number of var refrenced */
+    REGISTER int vtype;         /* type of variable to set */
+    REGISTER UTABLE *vut;       /* user table pointer */
+    REGISTER int status;        /* status return */
+    REGISTER int c;             /* translated character */
+    REGISTER char *sp;          /* scratch string pointer */
 
     /* simplify the vd structure (we are gonna look at it a lot) */
     vnum = var->v_num;
@@ -1699,9 +1699,9 @@ char *PASCAL NEAR int_asc P1_(int, i)
 {
     STATIC_STR_RET_PROLOG();
 
-    register int  digit = 0;            /* current digit being used */
-    register char *sp   = NULL;         /* pointer into result      */
-    register int  sign  = 0;            /* sign of resulting number */
+    REGISTER int  digit = 0;            /* current digit being used */
+    REGISTER char *sp   = NULL;         /* pointer into result      */
+    REGISTER int  sign  = 0;            /* sign of resulting number */
     char          result[INTWIDTH+1];   /* resulting string         */
 
     ZEROMEM(result);
@@ -1755,9 +1755,9 @@ char *PASCAL NEAR long_asc P1_(long int, num)
 {
     STATIC_STR_RET_PROLOG();
 
-    register int  digit = 0;    /* current digit being used */
-    register char *sp   = NULL; /* pointer into result      */
-    register int  sign  = 0;    /* sign of resulting number */
+    REGISTER int  digit = 0;    /* current digit being used */
+    REGISTER char *sp   = NULL; /* pointer into result      */
+    REGISTER int  sign  = 0;    /* sign of resulting number */
     char result[LONGWIDTH+1];   /* resulting string         */
 
     ZEROMEM(result);
@@ -1794,7 +1794,7 @@ int PASCAL NEAR gettyp(token)   /* find the type of a passed token */
 char *token;    /* token to analyze */
 
 {
-    register char c;            /* first char in token */
+    REGISTER char c;            /* first char in token */
 
     /* grab the first char (this is all we need) */
     c = *token;
@@ -1848,9 +1848,9 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
 {
     STATIC_STR_RET_PROLOG();
 
-    register int    status  = 0;      /* error return                 */
-    register BUFFER *bp     = NULL;   /* temp buffer pointer          */
-    register int    blen    = 0;      /* length of buffer argument    */
+    REGISTER int    status  = 0;      /* error return                 */
+    REGISTER BUFFER *bp     = NULL;   /* temp buffer pointer          */
+    REGISTER int    blen    = 0;      /* length of buffer argument    */
     char            buf[NSTRING];     /* string buf for some returns  */
 
     ZEROMEM(buf);
@@ -2065,9 +2065,9 @@ char *PASCAL NEAR xlat P3_(char *, source, char *, lookup, char *, trans)
 /* trans:   resulting translated characters */
 {
     STATIC_STR_RET_PROLOG();
-    register char *sp = NULL;       /* pointer into source table  */
-    register char *lp = NULL;       /* pointer into lookup table  */
-    register char *rp = NULL;       /* pointer into result        */
+    REGISTER char *sp = NULL;       /* pointer into source table  */
+    REGISTER char *lp = NULL;       /* pointer into lookup table  */
+    REGISTER char *rp = NULL;       /* pointer into result        */
     char          result[NSTRING];  /* temporary result           */
 
     ZEROMEM(result);
@@ -2112,7 +2112,7 @@ int PASCAL NEAR setwlist(wclist)
 char *wclist;   /* list of characters to consider "in a word" */
 
 {
-    register int index;
+    REGISTER int index;
 
     /* if we are turning this facility off, just flag so */
     if ( wclist == NULL || *wclist == 0 ) {
@@ -2141,8 +2141,8 @@ char *PASCAL NEAR getwlist(buf)
 char *buf;      /* buffer to place list of characters */
 
 {
-    register int index;
-    register char *sp;
+    REGISTER int index;
+    REGISTER char *sp;
 
     /* if we are defaulting to a standard word char list... */
     if ( wlflag == FALSE )
@@ -2203,7 +2203,7 @@ int f;          /* default flag */
 int n;          /* numeric arg (can overide prompted value) */
 
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
     char var[NVSIZE+1];         /* name of variable to fetch */
 
@@ -2252,9 +2252,9 @@ int PASCAL NEAR desvars(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register BUFFER *varbuf;    /* buffer to put variable list into */
-    register int uindex;        /* index into uvar table */
-    register int olen;          /* current length of output string */
+    REGISTER BUFFER *varbuf;    /* buffer to put variable list into */
+    REGISTER int uindex;        /* index into uvar table */
+    REGISTER int olen;          /* current length of output string */
     UTABLE *ut;                 /* user variable table pointer */
     PARG *cur_arg;              /* ptr to buffers argument list */
     char outseq[NSTRING];       /* output buffer for keystroke sequence */
@@ -2361,8 +2361,8 @@ int PASCAL NEAR desfunc(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register BUFFER *fncbuf;    /* buffer to put function list into */
-    register int uindex;        /* index into funcs table */
+    REGISTER BUFFER *fncbuf;    /* buffer to put function list into */
+    REGISTER int uindex;        /* index into funcs table */
     char outseq[80];            /* output buffer for keystroke sequence */
 
     /* get a buffer for the function list */

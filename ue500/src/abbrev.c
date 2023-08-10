@@ -77,12 +77,10 @@ VOID PASCAL NEAR ab_expand()
 
 /* add a new abbreviation */
 
-int PASCAL NEAR add_abbrev(f, n)
-
-int f, n;       /* numeric flag and argument */
-
+int PASCAL NEAR add_abbrev P2_(int, f, int, n)
+/* f, n:  Numeric flag and argument */
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     char sym_name[MAXSYM+1];    /* name of symbol to fetch */
     char value[NSTRING];        /* value to set symbol to */
 
@@ -108,12 +106,10 @@ int f, n;       /* numeric flag and argument */
 
 /* Delete a single abbreviation */
 
-int PASCAL NEAR del_abbrev(f, n)
-
-int f, n;       /* numeric flag and argument */
-
+int PASCAL NEAR del_abbrev P2_(int, f, int, n)
+/* f, n:  Numeric flag and argument */
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     char sym_name[MAXSYM+1];    /* name of symbol to fetch */
 
     /* first get the symbol name */
@@ -128,22 +124,18 @@ int f, n;       /* numeric flag and argument */
 
 /* Kill all abbreviations */
 
-int PASCAL NEAR kill_abbrevs(f, n)
-
-int f, n;       /* numeric flag and argument */
-
+int PASCAL NEAR kill_abbrevs P2_(int, f, int, n)
+/* f, n:  Numeric flag and argument */
 {
     /* kill them! */
     return ( ab_clean() );
 }
 
-int PASCAL NEAR desc_abbrevs(f, n)
-
-int f, n;       /* numeric flag and argument */
-
+int PASCAL NEAR desc_abbrevs P2_(int, f, int, n)
+/* f, n:  Numeric flag and argument */
 {
-    register BUFFER *abbbuf;    /* buffer to put abbreviation list into */
-    register ABBREV *cur_node;    /* ptr to current abbreviation */
+    REGISTER BUFFER *abbbuf;    /* buffer to put abbreviation list into */
+    REGISTER ABBREV *cur_node;    /* ptr to current abbreviation */
     char outseq[NSTRING];       /* output buffer for keystroke sequence */
 
     /* and get a buffer for it */
@@ -188,12 +180,10 @@ int f, n;       /* numeric flag and argument */
 
 /* insert a list of all the current abbreviations into the current buffer */
 
-int PASCAL NEAR ins_abbrevs(f, n)
-
-int f, n;       /* numeric flag and argument */
-
+int PASCAL NEAR ins_abbrevs P2_(int, f, int, n)
+/* f, n:  Numeric flag and argument */
 {
-    register ABBREV *cur_node;    /* ptr to current abbreviation */
+    REGISTER ABBREV *cur_node;    /* ptr to current abbreviation */
 
     /* insert the abbreviation list in the current buffer */
     cur_node = ab_head;
@@ -213,14 +203,12 @@ int f, n;       /* numeric flag and argument */
     return (TRUE);
 }
 
-int PASCAL NEAR def_abbrevs(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR def_abbrevs P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
-    register BUFFER *bp;        /* ptr to buffer to dump */
-    register LINE *lp;          /* ptr to current line in our buffer */
-    register int llength;       /* length of the current line being examined */
+    REGISTER BUFFER *bp;        /* ptr to buffer to dump */
+    REGISTER LINE *lp;          /* ptr to current line in our buffer */
+    REGISTER int llength;       /* length of the current line being examined */
     char cur_sym[MAXSYM+1];     /* current symbol being defined */
     char cur_exp[NSTRING];      /* current expansion */
 
@@ -264,7 +252,7 @@ int f, n;        /* prefix flag and argument */
     return TRUE;
 }
 
-VOID PASCAL NEAR ab_init()
+VOID PASCAL NEAR ab_init P0_(void)
 {
     ab_head = (ABBREV *)NULL;     /* abbreviation list empty */
     ab_bell = FALSE;            /* no ringing please! */
@@ -278,11 +266,9 @@ VOID PASCAL NEAR ab_init()
  *               <expansion>
  */
 
-int PASCAL NEAR ab_insert(sym, expansion)
-
-char *sym;              /* symbol to expand */
-char *expansion;        /* string to expand to */
-
+int PASCAL NEAR ab_insert P2_(char *, sym, char *, expansion)
+/* sym:       Symbol to expand    */
+/* expansion: String to expand to */
 {
     ABBREV *new_node;           /* pointer to the newly allocated node */
     ABBREV *cur_node;           /* pointer to travel down list */
@@ -351,10 +337,8 @@ char *expansion;        /* string to expand to */
  * is not in the list
  */
 
-char *PASCAL NEAR ab_lookup(sym)
-
-char *sym;      /* name of the symbol to look up */
-
+char *PASCAL NEAR ab_lookup P1_(char *, sym)
+/* sym: Name of the symbol to look up */
 {
 
     ABBREV *cur_node;           /* ptr to look through list */
@@ -376,10 +360,7 @@ char *sym;      /* name of the symbol to look up */
 
 /* ab_delete:   Delete <sym> from the abbreviation list */
 
-int PASCAL NEAR ab_delete(sym)
-
-char *sym;
-
+int PASCAL NEAR ab_delete P1_(char *, sym)
 {
 
     ABBREV *cur_node, *previous;        /* ptr to look through list */
@@ -416,7 +397,7 @@ char *sym;
     return (FALSE);
 }
 
-int PASCAL NEAR ab_clean()
+int PASCAL NEAR ab_clean P0_(void)
 {
 
     ABBREV *cur_node;           /* ptr to look through list */

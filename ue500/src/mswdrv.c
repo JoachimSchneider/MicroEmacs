@@ -265,7 +265,7 @@ int c;      /* character to write (or 0 for dummy write) */
 
     /*-set the colors and reverse status in the display buffer */
     if ( hIOWnd != hFrameWnd ) {  /* not supported on message line */
-        register VIDEO   *vp;
+        REGISTER VIDEO   *vp;
 
         vp = IOScr->s_physical[UpdateRow];
         vp->v_fcolor = ForgColor;
@@ -379,8 +379,8 @@ static int PASCAL msweeop ()
                      IOScr->s_ncol,
                      UpdateRow);
     if ( CurrentRow + 1 < IOScr->s_nrow ) {
-        register int r;
-        register VIDEO  *vp;
+        REGISTER int r;
+        REGISTER VIDEO  *vp;
 
         /*-propagate the colors and reverse status */
         for ( r = CurrentRow + 1; r < IOScr->s_nrow; r++ ) {

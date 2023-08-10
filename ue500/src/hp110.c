@@ -20,26 +20,26 @@
 # define BEL     0x07                   /* BEL character.               */
 # define ESC     0x1B                   /* ESC character.               */
 
-extern PASCAL NEAR ttopen();               /* Forward references.          */
-extern PASCAL NEAR ttgetc();
-extern PASCAL NEAR ttputc();
-extern PASCAL NEAR ttflush();
-extern PASCAL NEAR ttclose();
-extern PASCAL NEAR h110move();
-extern PASCAL NEAR h110eeol();
-extern PASCAL NEAR h110eeop();
-extern PASCAL NEAR h110beep();
-extern PASCAL NEAR h110open();
-extern PASCAL NEAR h110rev();
-extern PASCAL NEAR h110cres();
-extern PASCAL NEAR h110close();
-extern PASCAL NEAR h110kopen();
-extern PASCAL NEAR h110kclose();
-extern PASCAL NEAR h110parm();
+EXTERN PASCAL NEAR ttopen();               /* Forward references.          */
+EXTERN PASCAL NEAR ttgetc();
+EXTERN PASCAL NEAR ttputc();
+EXTERN PASCAL NEAR ttflush();
+EXTERN PASCAL NEAR ttclose();
+EXTERN PASCAL NEAR h110move();
+EXTERN PASCAL NEAR h110eeol();
+EXTERN PASCAL NEAR h110eeop();
+EXTERN PASCAL NEAR h110beep();
+EXTERN PASCAL NEAR h110open();
+EXTERN PASCAL NEAR h110rev();
+EXTERN PASCAL NEAR h110cres();
+EXTERN PASCAL NEAR h110close();
+EXTERN PASCAL NEAR h110kopen();
+EXTERN PASCAL NEAR h110kclose();
+EXTERN PASCAL NEAR h110parm();
 
 # if     COLOR
-extern PASCAL NEAR h110fcol();
-extern PASCAL NEAR h110bcol();
+EXTERN PASCAL NEAR h110fcol();
+EXTERN PASCAL NEAR h110bcol();
 
 int cfcolor = -1;               /* current forground color */
 int cbcolor = -1;               /* current background color */
@@ -151,7 +151,7 @@ PASCAL NEAR h110cres()  /* change screen resolution */
     return (TRUE);
 }
 
-PASCAL NEAR spal()              /* change pallette register */
+PASCAL NEAR spal()              /* change pallette REGISTER */
 {
     /*   not here */
 }
@@ -163,9 +163,9 @@ PASCAL NEAR h110beep()
 }
 
 PASCAL NEAR h110parm(n)
-register int n;
+REGISTER int n;
 {
-    register int q, r;
+    REGISTER int q, r;
 
     q = n/10;
     if ( q != 0 ) {

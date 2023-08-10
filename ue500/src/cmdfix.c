@@ -59,7 +59,7 @@ int argc;       /* number of command line arguments */
 char *argv[];   /* text of command line arguments */
 
 {
-    register carg;      /* current command line argument */
+    REGISTER carg;      /* current command line argument */
 
     puts("CMDFIX:	Startup and Command file updater");
     printf("		for MicroEMACS version %s\n", VERSION);
@@ -84,8 +84,8 @@ char *argv[];   /* text of command line arguments */
 int PASCAL fix P1_(char *, fname)
 /* fname: File to fix */
 {
-    register int inp;
-    register int index;
+    REGISTER int inp;
+    REGISTER int index;
     int nseq;           /* number of fixed function sequences */
     int buf[4];         /* buffer for characters going through */
 

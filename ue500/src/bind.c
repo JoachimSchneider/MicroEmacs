@@ -20,7 +20,7 @@
  */
 int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 {
-    register BUFFER *bp     = NULL;   /* buffer pointer to help */
+    REGISTER BUFFER *bp     = NULL;   /* buffer pointer to help */
     CONST char      *fname  = NULL;     /* file name of help file */
 
     /* first check if we are already here */
@@ -55,13 +55,15 @@ int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
     return (TRUE);
 }
 
-int PASCAL NEAR deskey(f, n)    /* describe the command for a certain key */
-
-int f, n;        /* prefix flag and argument */
-
+/* DESKEY:
+ *
+ * Describe the command for a certain key
+ */
+int PASCAL NEAR deskey P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
-    register int c;             /* key to describe */
-    register char *ptr;         /* string pointer to scan output strings */
+    REGISTER int c;             /* key to describe */
+    REGISTER char *ptr;         /* string pointer to scan output strings */
     char outseq[NSTRING];       /* output buffer for command sequence */
 
     /* prompt the user to type us a key to describe */
@@ -84,18 +86,18 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/* bindtokey:   add a new key to the key binding table      */
-
-int PASCAL NEAR bindtokey(f, n)
-
-int f, n;       /* command arguments [IGNORED] */
-
+/* BINDTOKEY:
+ *
+ * Add a new key to the key binding table
+ */
+int PASCAL NEAR bindtokey P2_(int, f, int, n)
+/* f, n:  Command arguments [IGNORED] */
 {
-    register unsigned int c;    /* command key to bind */
-    register ue_fnc_T kfunc;    /* ptr to the requested function to
+    REGISTER unsigned int c;    /* command key to bind */
+    REGISTER ue_fnc_T kfunc;    /* ptr to the requested function to
                                  * bind to  */
-    register KEYTAB *ktp;       /* pointer into the command table   */
-    register int found;         /* matched command flag */
+    REGISTER KEYTAB *ktp;       /* pointer into the command table   */
+    REGISTER int found;         /* matched command flag */
     char outseq[80];            /* output buffer for keystroke sequence */
 
     /* prompt the user to type in a key to bind */
@@ -186,18 +188,18 @@ int f, n;       /* command arguments [IGNORED] */
     return (TRUE);
 }
 
-/* macrotokey:  Bind a key to a macro in the key binding table */
-
-int PASCAL NEAR macrotokey(f, n)
-
-int f, n;       /* command arguments [IGNORED] */
-
+/* MACROTOKEY:
+ *
+ * Bind a key to a macro in the key binding table
+ */
+int PASCAL NEAR macrotokey P2_(int, f, int, n)
+/* f, n:  Command arguments [IGNORED] */
 {
-    register unsigned int c;    /* command key to bind */
-    register BUFFER *kmacro;    /* ptr to buffer of macro to bind to key */
-    register KEYTAB *ktp;       /* pointer into the command table */
-    register int found;         /* matched command flag */
-    register int status;        /* error return */
+    REGISTER unsigned int c;    /* command key to bind */
+    REGISTER BUFFER *kmacro;    /* ptr to buffer of macro to bind to key */
+    REGISTER KEYTAB *ktp;       /* pointer into the command table */
+    REGISTER int found;         /* matched command flag */
+    REGISTER int status;        /* error return */
     char outseq[80];            /* output buffer for keystroke sequence */
     char bufn[NBUFN];           /* buffer to hold macro name */
 
@@ -266,14 +268,14 @@ int f, n;       /* command arguments [IGNORED] */
     return (TRUE);
 }
 
-/* unbindkey:   delete a key from the key binding table */
-
-int PASCAL NEAR unbindkey(f, n)
-
-int f, n;       /* command arguments [IGNORED] */
-
+/* UNBINDKEY:
+ *
+ * Delete a key from the key binding table
+ */
+int PASCAL NEAR unbindkey P2_(int, f, int,n)
+/* f, n:  Command arguments [IGNORED] */
 {
-    register int c;             /* command key to unbind */
+    REGISTER int c;             /* command key to unbind */
     char outseq[80];            /* output buffer for keystroke sequence */
 
     /* prompt the user to type in a key to unbind */
@@ -298,14 +300,14 @@ int f, n;       /* command arguments [IGNORED] */
     return (TRUE);
 }
 
-int PASCAL NEAR unbindchar(c)
-
-int c;          /* command key to unbind */
-
+/* UNBINDCHAR:
+ */
+int PASCAL NEAR unbindchar P1_(int, c)
+/* c: Command key to unbind */
 {
-    register KEYTAB *ktp;       /* pointer into the command table */
-    register KEYTAB *sktp;      /* saved pointer into the command table */
-    register int found;         /* matched command flag */
+    REGISTER KEYTAB *ktp;       /* pointer into the command table */
+    REGISTER KEYTAB *sktp;      /* saved pointer into the command table */
+    REGISTER int found;         /* matched command flag */
 
     /* search the table to see if the key exists */
     ktp = &keytab[0];
@@ -344,14 +346,14 @@ int c;          /* command key to unbind */
     return (TRUE);
 }
 
-/* unbind all the keys bound to a buffer (which we can then delete */
-
-VOID PASCAL NEAR unbind_buf(bp)
-
-BUFFER *bp;     /* buffer to unbind all keys connected to */
-
+/* UNBIND_BUF:
+ *
+ * Unbind all the keys bound to a buffer (which we can then delete)
+ */
+VOID PASCAL NEAR unbind_buf P1_(BUFFER *, bp)
+/* bp:  Buffer to unbind all keys connected to  */
 {
-    register KEYTAB *ktp;       /* pointer into the command table */
+    REGISTER KEYTAB *ktp;       /* pointer into the command table */
 
     /* search the table to see if the key exists */
     ktp = &keytab[0];
@@ -366,25 +368,24 @@ BUFFER *bp;     /* buffer to unbind all keys connected to */
     }
 }
 
-/* Describe bindings:
+/* DESBIND:
  *
- *          bring up a fake buffer and list the key bindings into it with view
+ * Describe bindings:
+ *
+ * Bring up a fake buffer and list the key bindings into it with view
  * mode
  */
-
-int PASCAL NEAR desbind(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR desbind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     return ( buildlist(TRUE, "") );
 }
 
-int PASCAL NEAR apro(f, n)      /* Apropos (List functions that match a
-                                 * substring) */
-
-int f, n;        /* prefix flag and argument */
-
+/* APRO:
+ * Apropos (List functions that match a substring)
+ */
+int PASCAL NEAR apro P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     char mstring[NSTRING];      /* string to match cmd names to */
     int status;                 /* status return */
@@ -397,17 +398,18 @@ int f, n;        /* prefix flag and argument */
     return ( buildlist(FALSE, mstring) );
 }
 
-int PASCAL NEAR buildlist(type, mstring)  /* build a binding list (limited or
-                                           * full) */
-
-int type;       /* true = full list,   false = partial list */
-char *mstring;  /* match string if a partial list */
-
+/* BUILDLIST:
+ *
+ * build a binding list (limited or full)
+ */
+int PASCAL NEAR buildlist P2_(int, type, char *, mstring)
+/* type:    True = full list,   false = partial list  */
+/* mstring: Match string if a partial list            */
 {
-    register KEYTAB *ktp;       /* pointer into the command table */
-    register NBIND *nptr;       /* pointer into the name binding table */
-    register BUFFER *listbuf;    /* buffer to put binding list into */
-    register BUFFER *bp;        /* buffer ptr for function scan */
+    REGISTER KEYTAB *ktp;       /* pointer into the command table */
+    REGISTER NBIND *nptr;       /* pointer into the name binding table */
+    REGISTER BUFFER *listbuf;    /* buffer to put binding list into */
+    REGISTER BUFFER *bp;        /* buffer ptr for function scan */
     int cpos;                   /* current position to use in outseq */
     char outseq[80];            /* output buffer for keystroke sequence */
     int first_entry;            /* is this the first macro listing? */
@@ -535,11 +537,13 @@ bfail:  /* and on to the next buffer */
     return (TRUE);
 }
 
-int PASCAL NEAR strinc(source, sub) /* does source include sub? */
-
-char *source;   /* string to search in */
-char *sub;      /* substring to look for */
-
+/* STRINC:
+ *
+ * Does source include sub?
+ */
+int PASCAL NEAR strinc P2_(char *, source, char *, sub)
+/* source:  String to search in   */
+/* sub:     Substring to look for */
 {
     char *sp;           /* ptr into source */
     char *nxtsp;        /* next ptr into source */
@@ -570,14 +574,14 @@ char *sub;      /* substring to look for */
     return (FALSE);
 }
 
-/* get a command key sequence from the keyboard */
-
-unsigned int PASCAL NEAR getckey(mflag)
-
-int mflag;      /* going for a meta sequence? */
-
+/* GETCKEY:
+ *
+ * Get a command key sequence from the keyboard
+ */
+unsigned int PASCAL NEAR getckey P1_(int, mflag)
+/* mflag: Going for a meta sequence?  */
 {
-    register unsigned int c;            /* character fetched */
+    REGISTER unsigned int c;            /* character fetched */
     char tok[NSTRING];                  /* command incoming */
 
     /* check to see if we are executing a command line */
@@ -596,12 +600,12 @@ int mflag;      /* going for a meta sequence? */
     return (c);
 }
 
-/* execute the startup file */
-
-int PASCAL NEAR startup(sfname)
-
-char *sfname;   /* name of startup file (null if default) */
-
+/* STARTUP:
+ *
+ * Execute the startup file
+ */
+int PASCAL NEAR startup P1_(char *, sfname)
+/* sfname:  Name of startup file (null if default)  */
 {
     CONST char  *fname;             /* resulting file name to execute */
     char name[NSTRING];                 /* name with extention */
@@ -626,7 +630,9 @@ char *sfname;   /* name of startup file (null if default) */
     return ( dofile(fname) );
 }
 
-/* Look up the existance of a file along the normal or PATH environment
+/* FLOOK:
+ *
+ * Look up the existance of a file along the normal or PATH environment
  * variable.
  *
  * LOOKUP ORDER:
@@ -641,16 +647,15 @@ char *sfname;   /* name of startup file (null if default) */
  *                 all directories along PATH environment
  *                 directories in table from EPATH.H
  */
-
 CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
 /* fname: Base file name to search for                  */
 /* hflag: Look in the HOME environment variable first?  */
 {
-    register char       *home;          /* path to home directory */
-    register char       *path;          /* environmental PATH variable */
-    register CONST char *cp;            /* temp pointer CONST str */
-    register char       *sp;            /* pointer into path spec */
-    register int i;                 /* index */
+    REGISTER char       *home;          /* path to home directory */
+    REGISTER char       *path;          /* environmental PATH variable */
+    REGISTER CONST char *cp;            /* temp pointer CONST str */
+    REGISTER char       *sp;            /* pointer into path spec */
+    REGISTER int i;                 /* index */
     static char fspec[NFILEN];          /* full path spec to search */
 
     /* if we have an absolute path.. check only there! */
@@ -763,14 +768,14 @@ CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
     return (NULL);      /* no such luck */
 }
 
-/* Change a key command to a string we can print out. Return the string passed
- * in.
+/* CMDSTR:
+ *
+ * Change a key command to a string we can print out. Return the string
+ * passed in.
  */
-char *PASCAL NEAR cmdstr(c, seq)
-
-int c;          /* sequence to translate */
-char *seq;      /* destination string for sequence */
-
+char *PASCAL NEAR cmdstr P2_(int , c, char *, seq)
+/* c:   Sequence to translate           */
+/* seq: Destination string for sequence */
 {
     char *ptr;          /* pointer into current position in sequence */
 
@@ -831,12 +836,13 @@ char *seq;      /* destination string for sequence */
     return (seq);
 }
 
+/***HEREHEREHERE***/
 /*  This function looks a key binding up in the binding table   */
 
 KEYTAB *getbind P1_(int, c)
 /* c: Key to find what is bound to it */
 {
-    register KEYTAB *ktp;
+    REGISTER KEYTAB *ktp;
 
     /* scan through the binding table, looking for the key's entry */
     ktp = &keytab[0];
@@ -860,10 +866,10 @@ char *PASCAL NEAR getfname(key)
 KEYTAB *key;    /* key binding to return a name of */
 
 {
-    register ue_fnc_T func;     /* ptr to the requested function */
-    register NBIND *nptr;       /* pointer into the name binding table */
-    register BUFFER *bp;        /* ptr to buffer to test */
-    register BUFFER *kbuf;      /* ptr to requested buffer */
+    REGISTER ue_fnc_T func;     /* ptr to the requested function */
+    REGISTER NBIND *nptr;       /* pointer into the name binding table */
+    REGISTER BUFFER *bp;        /* ptr to buffer to test */
+    REGISTER BUFFER *kbuf;      /* ptr to requested buffer */
 
     /* if this isn't a valid key, it has no name */
     if ( key == NULL )
@@ -948,7 +954,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     char                    *keynameA   = xstrdup(keyname);
     unsigned char           *keynamePtr = (unsigned char *)keynameA;
-    register unsigned int c;        /* key sequence to return */
+    REGISTER unsigned int c;        /* key sequence to return */
 
     /* parse it up */
     c = 0;
@@ -1043,7 +1049,7 @@ KEYTAB *key;    /* key to execute */
 int f, n;       /* agruments to C function */
 
 {
-    register int status;        /* error return */
+    REGISTER int status;        /* error return */
 #if     LOGFLG
     FILE *fp;                           /* file handle for log file */
     char outseq[32];
@@ -1087,7 +1093,7 @@ int set_key P2_(KEYTAB *, key,  /* ptr to key to set          */
               )
 {
     ue_fnc_T        ktemp;        /* temp function pointer to assign  */
-    register BUFFER *kmacro;      /* ptr to buffer of macro to bind
+    REGISTER BUFFER *kmacro;      /* ptr to buffer of macro to bind
                                    * to key                           */
     char            bufn[NBUFN];  /* buffer to hold macro name        */
 

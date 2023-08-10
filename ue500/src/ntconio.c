@@ -126,7 +126,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    REGISTER int event;         /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -235,9 +235,9 @@ PASCAL NEAR ntflush(void)
 static VOID near MouseEvent(void)
 {
     MOUSE_EVENT_RECORD *m_event;        /* mouse event to decode */
-    register int k;             /* current bit/button of mouse */
-    register int event;         /* encoded mouse event */
-    register int etype;         /* event type byte */
+    REGISTER int k;             /* current bit/button of mouse */
+    REGISTER int event;         /* encoded mouse event */
+    REGISTER int etype;         /* event type byte */
     int mousecol;               /* current mouse column */
     int mouserow;               /* current mouse row */
     int sstate;                 /* current shift key status */

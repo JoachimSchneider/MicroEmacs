@@ -484,9 +484,9 @@ char *PASCAL getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
@@ -531,9 +531,9 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL getnfile()
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* and call for the first file */
@@ -563,9 +563,9 @@ char *PASCAL getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
@@ -621,9 +621,9 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL getnfile()
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* and call for the next file */

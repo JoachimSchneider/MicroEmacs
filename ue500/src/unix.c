@@ -143,10 +143,10 @@ int scnothing()
 /* Found in `curses.h':                                         */
 /*==============================================================*/
 # if(!0)
-extern int tgetflag DCL((char *id));
-extern int tgetnum  DCL((char *id));
-extern int tputs    DCL((const char *str, int affcnt, int (*putc)(int)));
-extern int tgetent  DCL((char *bp, const char *name));
+EXTERN int tgetflag DCL((char *id));
+EXTERN int tgetnum  DCL((char *id));
+EXTERN int tputs    DCL((const char *str, int affcnt, int (*putc)(int)));
+EXTERN int tgetent  DCL((char *bp, const char *name));
 # else
 #  include <curses.h>
 # endif
@@ -754,8 +754,8 @@ int scopen()
     char PC, * UP;
     short ospeed;
 # else /* not HPUX8 || HPUX9 || VAT || AUX */
-    extern char PC, * UP;
-    extern short ospeed;
+    EXTERN char PC, * UP;
+    EXTERN short ospeed;
 # endif /* HPUX8 || HPUX9 || VAT || AUX */
 
     /* Get terminal type */
@@ -2019,7 +2019,7 @@ VOID winch_changed(int signo)
 
 VOID winch_new_size()
 {
-    extern VOID winch_vtresize(int rows, int cols);
+    EXTERN VOID winch_vtresize(int rows, int cols);
 
     struct winsize win;
 

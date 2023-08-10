@@ -69,7 +69,7 @@ static VOID PASCAL SetHourglass (BOOL hg);
 /* =======                                        */
 char *PASCAL timeset()
 {
-    register char *sp;  /* temp string pointer */
+    REGISTER char *sp;  /* temp string pointer */
     time_t buf;         /* time data buffer */
 
     time(&buf);
@@ -319,7 +319,7 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
 
     argv [0] = ProgName;        /* dummy program name */
     {
-        register char   *s;
+        REGISTER char   *s;
 
         argc = 1;
         s = copystr (lpCmdLine);

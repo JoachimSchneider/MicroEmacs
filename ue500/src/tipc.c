@@ -65,10 +65,10 @@
  *
  *     I once thought there were three ways to correct the problems with DSR
  * writes to the *25th* line, I now know some don't work. One was to check the
- * start register before all screen writes. After some investigation and testing
+ * start REGISTER before all screen writes. After some investigation and testing
  * I found that the  6545A Start of screen registers are write only.  So there
  * is not way to correct cursor postioning and line position whenever DOS has
- * changed the register. Changing the start of screen pointer to offset 0 before
+ * changed the REGISTER. Changing the start of screen pointer to offset 0 before
  * screen writes also didn't solve the problem completely.  As soon as you
  * touched a key after the error you ended up with the screen properly
  * postioned, but you had the error message on the screen until that line was
@@ -85,7 +85,7 @@
  * the best way if it can be done since TI does not recommend mixing DSR and
  * direct writes to screen (if  I could read the 6545 registers 0Bh and 0Ch I
  * could manage it though).  This is because the DSR writes *can* change the
- * screen start register. The problem with a 2+3 solution is mainly that the
+ * screen start REGISTER. The problem with a 2+3 solution is mainly that the
  * extra code to handle single character writes, directly controlling the cursor
  * though the CRTC cursor registers, and the intercept/write/read error code
  * handling bloats the code a bit and coding in anything but assembly language
@@ -243,7 +243,7 @@ TERM term    =
 # endif
 };
 
-extern union REGS rg;
+EXTERN union REGS rg;
 
 
 PASCAL NEAR tifcol(color)           /* set the current output color */
@@ -312,7 +312,7 @@ int ch;
 PASCAL NEAR tieeop()        /* Actually a clear screen */
 {
     rg.h.ah = 0x13;         /* Clear Text Screen, Home Cursor and */
-    int86(0x49, &rg, &rg);  /* Set screen start register to 0     */
+    int86(0x49, &rg, &rg);  /* Set screen start REGISTER to 0     */
 }
 
 

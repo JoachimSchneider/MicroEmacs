@@ -186,8 +186,8 @@ static unsigned int meta_key = 0;       /* for GetKeyText */
 int PASCAL execmenu (int f, int n)
 /* f, n: arguments to target function */
 {
-    register UINT ID;
-    register MENUTAB *MTp;
+    REGISTER UINT ID;
+    REGISTER MENUTAB *MTp;
 
     ID = (xpos << 8) + ypos;    /* get_key sees MENU sequences as MOUS */
     if ( ID >= IDM_DYNAMIC ) {
@@ -431,7 +431,7 @@ UINT PASCAL    GetMenuEntryID (HMENU hMenu, int Position)
 
 KEYTAB * FAR PASCAL FindKeyBinding (VOIDP Func)
 {
-    register KEYTAB *KTp;
+    REGISTER KEYTAB *KTp;
 
     for ( KTp = &keytab[0]; KTp->k_type != BINDNUL; ++KTp ) {
         if ( ( (KTp->k_type == BINDFNC) && (KTp->k_ptr.fp == Func) ) ||
@@ -592,7 +592,7 @@ VOID PASCAL    UpdateMenuItemText (HMENU hMenu, int Position, MENUTAB *MTp)
     KEYTAB  *KTp;
     char NewText[MAXMENUTITLE];
     char OldText[MAXMENUTITLE];
-    register int i;
+    REGISTER int i;
 
     GetMenuString (hMenu, Position, OldText, MAXMENUTITLE, MF_BYPOSITION);
     xstrcpy (NewText, OldText);
@@ -628,7 +628,7 @@ VOID FAR PASCAL InitMenuPopup (HMENU hMenu, LPARAM lParam)
     int ItemCount;
     BOOL Enable;
     UINT EntryID;
-    register MENUTAB *MTp; /* points the appropriate entry in MenuStaticBind */
+    REGISTER MENUTAB *MTp; /* points the appropriate entry in MenuStaticBind */
     MENUTAB *PrevMTp;      /* to control MenuStaticBind scanning */
 
     if ( HIWORD(lParam) ) return;   /* do not process the system menu */
@@ -1069,7 +1069,7 @@ static BOOL PASCAL  ParseMenu (char *Name, char *Title, int *Posp)
  * specified, *Posp is set to -1. The returned BOOL is TRUE if no error occured
  * and FAILD if a syntax problem was diagnosed */
 {
-    register int i;
+    REGISTER int i;
 
     *Posp = -1;
     for ( i = 0; Name[i] != '\0'; i++ ) {

@@ -57,7 +57,7 @@ PASCAL NEAR spawncli(f, n)
  */
 PASCAL NEAR spawn(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -91,7 +91,7 @@ PASCAL NEAR spawn(f, n)
 
 PASCAL NEAR execprg(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -123,9 +123,9 @@ PASCAL NEAR execprg(f, n)
  */
 PASCAL NEAR pipecmd(f, n)
 {
-    register EWINDOW *wp;        /* pointer to new window */
-    register BUFFER *bp;        /* pointer to buffer to zot */
-    register char *tmp;         /* ptr to TMP DOS environment variable */
+    REGISTER EWINDOW *wp;        /* pointer to new window */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER char *tmp;         /* ptr to TMP DOS environment variable */
     char line[NLINE];           /* command line send to shell */
     static char bname[] = "command";
     static char filnam[NSTRING];
@@ -212,8 +212,8 @@ PASCAL NEAR pipecmd(f, n)
  */
 PASCAL NEAR f_filter(f, n)
 {
-    register int s;             /* return status from CLI */
-    register BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER int s;             /* return status from CLI */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     char line[NLINE];           /* command line send to shell */
     char tmpnam[NFILEN];        /* place to store real file name */
     char *tmp;                  /* ptr to TMP DOS environment variable */
@@ -380,9 +380,9 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
@@ -446,9 +446,9 @@ char *PASCAL NEAR getnfile()
 
 char *PASCAL NEAR timeset()
 {
-    register char *sp;          /* temp string pointer */
+    REGISTER char *sp;          /* temp string pointer */
     char buf[16];               /* time data buffer */
-    extern char *ctime();
+    EXTERN char *ctime();
 
     time(buf);
     sp = ctime(buf);

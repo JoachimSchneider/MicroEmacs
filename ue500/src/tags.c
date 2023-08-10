@@ -64,8 +64,8 @@ static TAG *curtp = NULL;       /* Currently in-use 'tags'. */
 
 static int newtags P1_(char *, path)
 {
-    register TAG    *tnewp;
-    register int i = NINDEXES;
+    REGISTER TAG    *tnewp;
+    REGISTER int i = NINDEXES;
 
     if ( ( tnewp = (TAG *) room( sizeof (TAG) ) ) == NULL ) {
         mlwrite("[OUT OF MEMORY]");
@@ -102,8 +102,8 @@ static int lookup P0_(void)
 {
     TAG           *tmp  = curtp;  /* Remember current 'tags'  */
     char          cpath[NFILEN];  /* Path of current file     */
-    register char *cp   = NULL;   /* Auxiliary pointer        */
-    register int  nope  = TRUE;   /* True if 'tags' is unknown    */
+    REGISTER char *cp   = NULL;   /* Auxiliary pointer        */
+    REGISTER int  nope  = TRUE;   /* True if 'tags' is unknown    */
 
     ZEROMEM(cpath);
 
@@ -147,8 +147,8 @@ static int lookup P0_(void)
 
 VOID fix_index()
 {
-    register int i = -1;
-    register long lastpos = 0L;
+    REGISTER int i = -1;
+    REGISTER long lastpos = 0L;
     char line[NLINE];
 
     if ( curtp->t_indexed == TRUE )
@@ -171,10 +171,10 @@ VOID fix_index()
  */
 static int restword P2_(char *, str, int, lmax)
 {
-    register int  i     = 0;
-    register int  go_on = TRUE;
-    register LINE *dotp = curwp->w_dotp;      /* Preserve '.' info  */
-    register int  doto  = get_w_doto(curwp);  /* Preserve '.' info  */
+    REGISTER int  i     = 0;
+    REGISTER int  go_on = TRUE;
+    REGISTER LINE *dotp = curwp->w_dotp;      /* Preserve '.' info  */
+    REGISTER int  doto  = get_w_doto(curwp);  /* Preserve '.' info  */
 
     for ( i = 0; go_on && i < lmax - 1 && inword(); i++ ) {
         str[i] = lgetc(curwp->w_dotp, get_w_doto(curwp));
@@ -214,10 +214,10 @@ static int backupword(int f, int n)
  * of the new FAST search routine, we have to remove the pattern anchoring (^
  * and $) and search direction characters (? or /)
  */
-static int alterpattern P1_(register char *, pattern)
+static int alterpattern P1_(REGISTER char *, pattern)
 {
-    register int i = 0;         /* EMACS pattern index  */
-    register int j = 1;         /* VI pattern -skip /or?*/
+    REGISTER int i = 0;         /* EMACS pattern index  */
+    REGISTER int j = 1;         /* VI pattern -skip /or?*/
     int len = strlen(pattern) - 1;                      /* pattern length - 1   */
     /* i.e. drop '/' or '?' */
 
@@ -378,7 +378,7 @@ int tagger P2_(char *, errmsg, int, retag)
  * '.' is preserved, and return information (= current filename) is saved.
  */
 
-extern int PASCAL NEAR tagword(f, n)
+EXTERN int PASCAL NEAR tagword(f, n)
 
 int f, n;
 
@@ -431,7 +431,7 @@ int f, n;
  * mess up the return information (tagf).
  */
 
-extern int PASCAL NEAR retagword(f, n)
+EXTERN int PASCAL NEAR retagword(f, n)
 
 int f, n;
 
@@ -451,7 +451,7 @@ int f, n;
  * return once for each tag.  If it's the same file we just swap mark with '.' .
  */
 
-extern int PASCAL NEAR backtagword(f, n)
+EXTERN int PASCAL NEAR backtagword(f, n)
 
 int f, n;
 

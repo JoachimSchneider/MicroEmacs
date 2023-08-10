@@ -104,7 +104,7 @@ struct la_data *aline;          /* Line A data structure */
 struct la_ext *naline;          /* extended Line A data structure */
 
 struct la_font **fonts; /* Array of pointers to the three system font headers
-                         * returned by init (in register A1) */
+                         * returned by init (in REGISTER A1) */
 
 struct la_font *system_font;    /* pointer to default system font */
 struct la_font *small_font;     /* pointer to small font */
@@ -150,7 +150,7 @@ OBJECT menu[] =
     G_STRING, LASTOB, NORMAL, "", 0, 112, 168, 16
 };
 
-extern mymouse();               /* .s file for calling two mouse handlers */
+EXTERN mymouse();               /* .s file for calling two mouse handlers */
 int (*first_mhandler)();        /* Address of first handler */
 int (*second_mhandler)();       /* Address of second handler */
 struct kbdvbase *kv;            /* Keyboard vector table */
@@ -162,27 +162,27 @@ static int mousekeys1 = 0;      /* Last mouse key event */
 static int mousecol = HUGENUM;  /* current mouse column */
 static int mouserow = HUGENUM;  /* current mouse row */
 
-extern int     ttopen();                /* Forward references.      */
-extern int     ttgetc();
-extern int     ttputc();
-extern int     ttflush();
-extern int     ttclose();
-extern int     stmove();
-extern int     steeol();
-extern int     steeop();
-extern int     stbeep();
-extern int     stopen();
-extern int     stclose();
-extern int     stgetc();
-extern int     stputc();
-extern int     strev();
-extern int     strez();
-extern int     stkopen();
-extern int     stkclose();
+EXTERN int     ttopen();                /* Forward references.      */
+EXTERN int     ttgetc();
+EXTERN int     ttputc();
+EXTERN int     ttflush();
+EXTERN int     ttclose();
+EXTERN int     stmove();
+EXTERN int     steeol();
+EXTERN int     steeop();
+EXTERN int     stbeep();
+EXTERN int     stopen();
+EXTERN int     stclose();
+EXTERN int     stgetc();
+EXTERN int     stputc();
+EXTERN int     strev();
+EXTERN int     strez();
+EXTERN int     stkopen();
+EXTERN int     stkclose();
 
 # if     COLOR
-extern int     stfcol();
-extern int     stbcol();
+EXTERN int     stfcol();
+EXTERN int     stbcol();
 # endif
 
 /*
@@ -230,7 +230,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    REGISTER int event;         /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -406,7 +406,7 @@ me_mh(a)
 
 char *a;
 {
-    register unsigned mousekeys;
+    REGISTER unsigned mousekeys;
 
     mousekeys = a[0] & 7;
     if ( mousekeys != 0 )
@@ -432,7 +432,7 @@ stkopen()       /* open the keyboard (and mouse) */
 
 stopen()        /* open the screen */
 {
-    register int i;
+    REGISTER int i;
 
     init();
     xstrcpy(os, "TOS");
@@ -622,7 +622,7 @@ static domousekey(newbut, sk)
 int sk;
 
 {
-    register int k;
+    REGISTER int k;
 
     for ( k=1; k!=4; k = k<<1 ) {       /* J is butnum, k is bit num */
         /* For each button on the mouse */
@@ -642,9 +642,9 @@ int sk;
 
 stgetc()        /* get a char from the keyboard */
 {
-    register int flashcounter;          /* Counter for flashing cursor */
-    register int ev_which;              /* Event returned */
-    register int sc;                    /* Keyboard scan code */
+    REGISTER int flashcounter;          /* Counter for flashing cursor */
+    REGISTER int ev_which;              /* Event returned */
+    REGISTER int sc;                    /* Keyboard scan code */
     static int bexpected = 1;           /* Expected next mouse state */
     int mx, my, bstate, sk, key, mc;    /* Event parameters */
     int mes[8];

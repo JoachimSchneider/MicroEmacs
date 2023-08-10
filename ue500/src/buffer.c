@@ -19,7 +19,7 @@ int PASCAL NEAR usebuffer(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register BUFFER *bp;        /* temporary buffer pointer */
+    REGISTER BUFFER *bp;        /* temporary buffer pointer */
 
     /* get the buffer name to switch to */
     bp = getdefb();
@@ -41,8 +41,8 @@ int PASCAL NEAR nextbuffer(f, n)        /* switch to the next buffer in the
 
 int f, n;       /* default flag, numeric argument */
 {
-    register BUFFER *bp;        /* current eligable buffer */
-    register int status;
+    REGISTER BUFFER *bp;        /* current eligable buffer */
+    REGISTER int status;
 
     /* make sure the arg is legit */
     if ( f == FALSE )
@@ -69,9 +69,9 @@ int PASCAL NEAR swbuffer(bp)    /* make buffer BP current */
 BUFFER *bp;
 
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
     SCREEN_T *scrp;             /* screen to fix pointers in */
-    register int cmark;                 /* current mark */
+    REGISTER int cmark;                 /* current mark */
 
     /* let a user macro get hold of things...if he wants */
     execkey(&exbhook, FALSE, 1);
@@ -152,7 +152,7 @@ int PASCAL NEAR killbuffer(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register BUFFER *bp;        /* ptr to buffer to dump */
+    REGISTER BUFFER *bp;        /* ptr to buffer to dump */
 
     /* get the buffer name to kill */
     bp = getdefb();
@@ -171,7 +171,7 @@ int PASCAL NEAR popbuffer(f, n)
 int f, n;       /* default and numeric arguments */
 
 {
-    register BUFFER *bp;        /* ptr to buffer to dump */
+    REGISTER BUFFER *bp;        /* ptr to buffer to dump */
 
     /* get the buffer name to pop */
     bp = getdefb();
@@ -213,13 +213,13 @@ BUFFER *PASCAL NEAR getdefb()   /* get the default buffer for a use or kill */
 
 int PASCAL NEAR zotbuf(bp)      /* kill the buffer pointed to by bp */
 
-register BUFFER *bp;
+REGISTER BUFFER *bp;
 
 {
-    register BUFFER *bp1;
-    register BUFFER *bp2;
-    register int result;
-    register PARG *tmp_arg;
+    REGISTER BUFFER *bp1;
+    REGISTER BUFFER *bp2;
+    REGISTER int result;
+    REGISTER PARG *tmp_arg;
 
     /* we can not kill a displayed buffer */
     if ( bp->b_nwnd != 0 ) {
@@ -275,7 +275,7 @@ int PASCAL NEAR namebuffer(f, n) /* Rename the current buffer   */
 int f, n;               /* default Flag & Numeric arg */
 
 {
-    register BUFFER *bp;        /* pointer to scan through all buffers */
+    REGISTER BUFFER *bp;        /* pointer to scan through all buffers */
     char bufn[NBUFN];           /* buffer to hold buffer name */
 
     /* prompt for and get the new buffer name */
@@ -310,7 +310,7 @@ int PASCAL NEAR listbuffers(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int status;        /* stutus return */
+    REGISTER int status;        /* stutus return */
 
     if ( ( status = makelist(f) ) != TRUE )
         return (status);
@@ -329,12 +329,12 @@ int PASCAL NEAR makelist(iflag)
 int iflag;      /* list hidden buffer flag */
 
 {
-    register char   *cp1;
-    register char   *cp2;
-    register BUFFER *bp;
-    register LINE   *lp;
-    register int s;
-    register int i;
+    REGISTER char   *cp1;
+    REGISTER char   *cp2;
+    REGISTER BUFFER *bp;
+    REGISTER LINE   *lp;
+    REGISTER int s;
+    REGISTER int i;
     long nbytes;                /* # of bytes in current buffer */
     char b[7+1];
     char line[128];
@@ -489,7 +489,7 @@ long num;
  */
 int PASCAL NEAR anycb()
 {
-    register BUFFER *bp;
+    REGISTER BUFFER *bp;
 
     bp = bheadp;
     while ( bp != NULL ) {
@@ -507,14 +507,14 @@ int PASCAL NEAR anycb()
  * with it. If the buffer is not found and the "cflag" is TRUE, create it. The
  * "bflag" is the settings for the flags in in buffer.
  */
-BUFFER *PASCAL NEAR bfind P3_(char *, bname, int, cflag, int, bflag)
+BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
 /* bname: Name of buffer to find */
 /* cflag: Create it if not found? */
 /* bflag: Bit settings for a new buffer */
 {
-    register BUFFER *bp;
-    register BUFFER *sb;        /* buffer to insert after */
-    register LINE   *lp;
+    REGISTER BUFFER *bp;
+    REGISTER BUFFER *sb;        /* buffer to insert after */
+    REGISTER LINE   *lp;
     int cmark;                  /* current mark */
 
     bp = bheadp;
@@ -597,10 +597,10 @@ BUFFER *PASCAL NEAR bfind P3_(char *, bname, int, cflag, int, bflag)
  * Return TRUE if everything looks good.
  */
 int PASCAL NEAR bclear(bp)
-register BUFFER *bp;
+REGISTER BUFFER *bp;
 {
-    register LINE   *lp;
-    register int s;
+    REGISTER LINE   *lp;
+    REGISTER int s;
     int cmark;                  /* current mark */
 
     if ( (bp->b_flag&BFINVS) == 0               /* Not scratch buffer.  */

@@ -54,7 +54,7 @@ static int cmd_reexecute  = -1; /* > 0 if re-executing command      */
  */
 int PASCAL NEAR risearch P2_(int, f, int, n/*prefix flag and argument*/)
 {
-    register int  status  = 0;
+    REGISTER int  status  = 0;
 
     /*
      * Make sure the search doesn't match where we already are by backing up a
@@ -74,7 +74,7 @@ int PASCAL NEAR risearch P2_(int, f, int, n/*prefix flag and argument*/)
  */
 int PASCAL NEAR fisearch P2_(int, f, int, n)
 {
-    register int  status  = 0;
+    REGISTER int  status  = 0;
 
     if ( 0 != (status = isearch(FORWARD)) )
         mlerase();        /* If happy, just erase the cmd line  */
@@ -112,9 +112,9 @@ int PASCAL NEAR isearch P1_(int, dir)
 {
     int           status          = 0;    /* Search status                      */
     int           col             = 0;    /* prompt column                      */
-    register int  cpos            = 0;    /* character number in search string  */
-    register int  c               = 0;    /* current input character            */
-    register int  expc            = 0;    /* function expanded input char       */
+    REGISTER int  cpos            = 0;    /* character number in search string  */
+    REGISTER int  c               = 0;    /* current input character            */
+    REGISTER int  expc            = 0;    /* function expanded input char       */
     char          pat_save[NPAT];         /* Saved copy of the old pattern str  */
     LINE          *curline        = NULL; /* Current line on entry              */
     int           curoff          = 0;    /* Current offset on entry            */
@@ -297,7 +297,7 @@ start_over: /* This is a good place to start a re-execution:  */
  */
 int PASCAL NEAR scanmore P1_(int, dir/*direction to search*/)
 {
-    register int  status  = 0;  /* search status  */
+    REGISTER int  status  = 0;  /* search status  */
 
     setjtable();                /* Set up fast search arrays  */
 
@@ -331,8 +331,8 @@ int PASCAL NEAR checknext P2_(int, chr, int, dir)
 {
     LINE          *curline  = NULL; /* current line during scan             */
     int           curoff    = 0;    /* position within current line         */
-    register char *patrn    = NULL; /* The entire search string (incl chr)  */
-    register int  sts       = 0;    /* how well things go                   */
+    REGISTER char *patrn    = NULL; /* The entire search string (incl chr)  */
+    REGISTER int  sts       = 0;    /* how well things go                   */
 
     /* setup the local scan pointer to current "."  */
 

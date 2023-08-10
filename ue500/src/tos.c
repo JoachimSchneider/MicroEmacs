@@ -154,7 +154,7 @@ spawncli(f, n)
  */
 spawn(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -187,7 +187,7 @@ spawn(f, n)
 
 execprg(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -217,9 +217,9 @@ execprg(f, n)
  */
 pipecmd(f, n)
 {
-    register int s;             /* return status from CLI */
-    register EWINDOW *wp;       /* pointer to new window */
-    register BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER int s;             /* return status from CLI */
+    REGISTER EWINDOW *wp;       /* pointer to new window */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     char line[NLINE];           /* command line send to shell */
     static char bname[] = "command";
     FILE *fp;
@@ -290,8 +290,8 @@ pipecmd(f, n)
  */
 f_filter(f, n)
 {
-    register int s;             /* return status from CLI */
-    register BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER int s;             /* return status from CLI */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     char line[NLINE];           /* command line send to shell */
     char tmpnam[NFILEN];        /* place to store real file name */
     static char bname1[] = "fltinp";
@@ -368,7 +368,7 @@ char *newname;          /* new file name */
 
 char *PASCAL NEAR timeset()
 {
-    register char *sp;          /* temp string pointer */
+    REGISTER char *sp;          /* temp string pointer */
     char buf[16];               /* time data buffer */
 
     time(buf);
@@ -391,9 +391,9 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* file to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */

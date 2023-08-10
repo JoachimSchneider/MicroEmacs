@@ -36,7 +36,7 @@ int PASCAL NEAR backchar(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register LINE   *lp;
+    REGISTER LINE   *lp;
 
     if ( n < 0 )
         return ( forwchar(f, -n) );
@@ -119,7 +119,7 @@ int PASCAL NEAR gotoline(f, n)  /* move to a particular line.
 int f, n;        /* prefix flag and argument */
 
 {
-    register int status;        /* status return */
+    REGISTER int status;        /* status return */
     char arg[NSTRING];          /* buffer to hold argument */
 
     /* get an argument if one doesnt exist */
@@ -188,7 +188,7 @@ int PASCAL NEAR forwline(f, n)
 int f, n;        /* argument flag and num */
 
 {
-    register LINE   *dlp;
+    REGISTER LINE   *dlp;
 
     if ( n < 0 )
         return ( backline(f, -n) );
@@ -235,7 +235,7 @@ int PASCAL NEAR backline(f, n)
 int f, n;        /* argument flag and num */
 
 {
-    register LINE   *dlp;
+    REGISTER LINE   *dlp;
 
     if ( n < 0 )
         return ( forwline(f, -n) );
@@ -283,9 +283,9 @@ int PASCAL NEAR gotobop(f, n) /* go back to the beginning of the current
 int f, n;       /* default Flag & Numeric argument */
 
 {
-    register int suc;           /* success of last backchar */
-    register int c;             /* current character in scan */
-    register char *sp;          /* ptr into character leadin lists */
+    REGISTER int suc;           /* success of last backchar */
+    REGISTER int c;             /* current character in scan */
+    REGISTER char *sp;          /* ptr into character leadin lists */
 
     if ( n < 0 )        /* the other way...*/
         return ( gotoeop(f, -n) );
@@ -351,9 +351,9 @@ int PASCAL NEAR gotoeop(f, n) /* go forword to the end of the current paragraph
 int f, n;       /* default Flag & Numeric argument */
 
 {
-    register int suc;           /* success of last backchar */
-    register int c;             /* current character in scan */
-    register char *sp;          /* ptr into character leadin lists */
+    REGISTER int suc;           /* success of last backchar */
+    REGISTER int c;             /* current character in scan */
+    REGISTER char *sp;          /* ptr into character leadin lists */
 
     if ( n < 0 )        /* the other way...*/
         return ( gotobop(f, -n) );
@@ -425,13 +425,13 @@ int f, n;       /* default Flag & Numeric argument */
 
 int PASCAL NEAR getgoal(dlp)
 
-register LINE   *dlp;
+REGISTER LINE   *dlp;
 
 {
-    register int c;
-    register int col;
-    register int newcol;
-    register int dbo;
+    REGISTER int c;
+    REGISTER int col;
+    REGISTER int newcol;
+    REGISTER int dbo;
 
     col = 0;
     dbo = 0;
@@ -463,7 +463,7 @@ int PASCAL NEAR forwpage(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register LINE   *lp;
+    REGISTER LINE   *lp;
 
     /*
      * Calculate the lines to scroll, taking into account the $overlap count and
@@ -494,13 +494,9 @@ int f, n;        /* prefix flag and argument */
  * is the overlap between the two windows. The value is from the ITS EMACS
  * manual. Bound to "M-V". We do a hard update for exactly the same reason.
  */
-int PASCAL NEAR backpage(f, n)
-
-register int f;
-register int n;
-
+int PASCAL NEAR backpage P2_(int, f, int, n)
 {
-    register LINE   *lp;
+    REGISTER LINE   *lp;
 
     /*
      * Calculate the lines to scroll, taking into account the $overlap count and
@@ -580,8 +576,8 @@ int PASCAL NEAR swapmark(f, n)
 int f, n;        /* argument flag and num */
 
 {
-    register LINE   *odotp;
-    register int odoto;
+    REGISTER LINE   *odotp;
+    REGISTER int odoto;
 
     /* make sure it is in range */
     if ( f == FALSE )

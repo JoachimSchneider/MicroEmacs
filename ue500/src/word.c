@@ -23,8 +23,8 @@ int f;          /* default flag */
 int n;          /* numeric argument */
 
 {
-    register int cnt;           /* size of word wrapped to next line */
-    register int c;             /* charector temporary */
+    REGISTER int cnt;           /* size of word wrapped to next line */
+    REGISTER int c;             /* charector temporary */
 
     /* backup from the <NL> 1 char */
     if ( !backchar(FALSE, 1) )
@@ -304,9 +304,9 @@ int PASCAL NEAR delfword(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register LINE   *dotp;      /* original cursor line */
-    register int doto;          /*  and row */
-    register int c;             /* temp char */
+    REGISTER LINE   *dotp;      /* original cursor line */
+    REGISTER int doto;          /*  and row */
+    REGISTER int c;             /* temp char */
     long size;                  /* # of chars to delete */
 
     /* don't allow this command if we are in read only mode */
@@ -495,11 +495,11 @@ int PASCAL NEAR fillpara(f, n)  /* Fill the current paragraph according to the
 int f, n;       /* Default flag and Numeric argument */
 
 {
-    register char *pp;          /* ptr into paragraph being reformed */
-    register char *para;        /* malloced buffer for paragraph */
-    register LINE *lp;          /* ptr to current line */
-    register int line_bytes;    /* bytes in current line */
-    register char *txtptr;      /* ptr into current line */
+    REGISTER char *pp;          /* ptr into paragraph being reformed */
+    REGISTER char *para;        /* malloced buffer for paragraph */
+    REGISTER LINE *lp;          /* ptr to current line */
+    REGISTER int line_bytes;    /* bytes in current line */
+    REGISTER char *txtptr;      /* ptr into current line */
     LINE *ptline;               /* line the point started on */
     int ptoff;                  /* offset of original point */
     int back;                   /* # of characters from origin point to eop */
@@ -596,9 +596,9 @@ VOID PASCAL NEAR reform(para)   /* reformat a paragraph as stored in a string */
 char *para;     /* string buffer containing paragraph */
 
 {
-    register char *sp;                  /* string scan pointer */
-    register int col;                   /* current colomn position */
-    register char *lastword;            /* ptr to end of last word */
+    REGISTER char *sp;                  /* string scan pointer */
+    REGISTER int col;                   /* current colomn position */
+    REGISTER char *lastword;            /* ptr to end of last word */
 
     /* scan string, replacing some whitespace with newlines */
     sp = para;
@@ -649,7 +649,7 @@ int f;  /* default flag */
 int n;  /* # of paras to delete */
 
 {
-    register int status;        /* returned status of functions */
+    REGISTER int status;        /* returned status of functions */
 
     while ( n-- ) {             /* for each paragraph to delete */
 
@@ -683,12 +683,12 @@ int PASCAL NEAR wordcount(f, n)
 int f, n;       /* ignored numeric arguments */
 
 {
-    register LINE *lp;          /* current line to scan */
-    register int offset;        /* current char to scan */
+    REGISTER LINE *lp;          /* current line to scan */
+    REGISTER int offset;        /* current char to scan */
     long size;                  /* size of region left to count */
-    register int ch;            /* current character to scan */
-    register int wordflag;      /* are we in a word now? */
-    register int lastword;      /* were we just in a word? */
+    REGISTER int ch;            /* current character to scan */
+    REGISTER int wordflag;      /* are we in a word now? */
+    REGISTER int lastword;      /* were we just in a word? */
     long nwords;                /* total # of words */
     long nchars;                /* total number of chars */
     int nlines;                 /* total number of lines in region */

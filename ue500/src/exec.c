@@ -71,7 +71,7 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
 int PASCAL NEAR execcmd P2_(int, f, int, n)
 /* default Flag and Numeric argument  */
 {
-    register int status   = 0;          /* status return */
+    REGISTER int status   = 0;          /* status return */
     char cmdstr[NSTRING];               /* string holding command to execute */
 
     ZEROMEM(cmdstr);
@@ -97,8 +97,8 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
  */
 int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
 {
-    register int  f           = 0;      /* default argument flag */
-    register int  n           = 0;      /* numeric repeat value */
+    REGISTER int  f           = 0;      /* default argument flag */
+    REGISTER int  n           = 0;      /* numeric repeat value */
     ue_fnc_T      fnc         = NULL;   /* function to execute */
     BUFFER        *bp         = NULL;   /* buffer to execute */
     int           status      = 0;      /* return status of function */
@@ -195,8 +195,8 @@ char *PASCAL NEAR token P3_(
         int,    size  /* maximum size of token */
     )
 {
-    register int  quotef  = 0;      /* is the current string quoted? */
-    register char c       = '\0';   /* temporary character */
+    REGISTER int  quotef  = 0;      /* is the current string quoted? */
+    REGISTER char c       = '\0';   /* temporary character */
 
     /* first scan past any whitespace in the source string */
     while ( *src == ' ' || *src == '\t' )
@@ -296,13 +296,13 @@ int PASCAL NEAR macarg P1_(char *, tok /* buffer to place argument */)
  * Get the next argument.
  */
 int PASCAL NEAR nextarg P4_(
-        char *, prompt,     /* prompt to use if we must be interactive */
-        char *, buffer,     /* buffer to put token into */
-        int,    size,       /* size of the buffer */
-        int,    terminator  /* terminating char to be used on interactive fetch */
+        CONST char *, prompt,     /* prompt to use if we must be interactive */
+        char *,       buffer,     /* buffer to put token into */
+        int,          size,       /* size of the buffer */
+        int,          terminator  /* terminating char to be used on interactive fetch */
     )
 {
-    register CONST char *sp = NULL; /* return pointer from getval() */
+    REGISTER CONST char *sp = NULL; /* return pointer from getval() */
 
     /* if we are interactive, go get it! */
     if ( clexec == FALSE ) {
@@ -337,7 +337,7 @@ int PASCAL NEAR storeproc P2_(
         int, n  /* macro number to use */
     )
 {
-    register struct BUFFER  *bp       = NULL;   /* pointer to macro buffer */
+    REGISTER struct BUFFER  *bp       = NULL;   /* pointer to macro buffer */
     PARG                    *last_arg = NULL;   /* last macro argument */
     PARG                    *cur_arg  = NULL;   /* current macro argument */
     char bname[NBUFN];                          /* name of buffer to use */
@@ -412,8 +412,8 @@ int PASCAL NEAR storeproc P2_(
 int PASCAL NEAR execproc P2_(int, f, int, n)
 /* default flag and numeric arg */
 {
-    register BUFFER *bp     = NULL;   /* ptr to buffer to execute */
-    register int    status  = 0;      /* status return */
+    REGISTER BUFFER *bp     = NULL;   /* ptr to buffer to execute */
+    REGISTER int    status  = 0;      /* status return */
     char bufn[NBUFN+2];               /* name of buffer to execute */
 
     ZEROMEM(bufn);
@@ -452,8 +452,8 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
 int PASCAL NEAR execbuf P2_(int, f, int, n)
 /* default flag and numeric arg */
 {
-    register BUFFER *bp     = NULL;   /* ptr to buffer to execute */
-    register int    status  = 0;      /* status return */
+    REGISTER BUFFER *bp     = NULL;   /* ptr to buffer to execute */
+    REGISTER int    status  = 0;      /* status return */
 
     /* find out what buffer the user wants to execute */
     if ( ( bp = getcbuf(TEXT117, curbp->b_bname, FALSE) ) == NULL )
@@ -491,10 +491,10 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
  */
 int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
 {
-    register int  status      = 0;    /* status return */
-    register LINE *lp         = NULL; /* pointer to line to execute */
-    register LINE *hlp        = NULL; /* pointer to line header */
-    register LINE *glp        = NULL; /* line to goto */
+    REGISTER int  status      = 0;    /* status return */
+    REGISTER LINE *lp         = NULL; /* pointer to line to execute */
+    REGISTER LINE *hlp        = NULL; /* pointer to line header */
+    REGISTER LINE *glp        = NULL; /* line to goto */
     LINE          *mp         = NULL; /* Macro line storage temp */
     int           dirnum      = 0;    /* directive index */
     int           linlen      = 0;    /* length of line to execute */
@@ -1039,11 +1039,11 @@ int PASCAL NEAR debug P3_(
         int *,    skipflag  /* are we skipping debugging? */
     )
 {
-    register int    oldcmd          = 0;    /* original command display flag */
-    register int    oldinp          = 0;    /* original connamd input flag */
-    register int    oldstatus       = 0;    /* status of last command */
-    register int    c               = '\0'; /* temp character */
-    register KEYTAB *key            = NULL; /* ptr to a key entry */
+    REGISTER int    oldcmd          = 0;    /* original command display flag */
+    REGISTER int    oldinp          = 0;    /* original connamd input flag */
+    REGISTER int    oldstatus       = 0;    /* status of last command */
+    REGISTER int    c               = '\0'; /* temp character */
+    REGISTER KEYTAB *key            = NULL; /* ptr to a key entry */
     static char     track[NSTRING]  = "";   /* expression to track value of */
     char            temp[NSTRING];          /* command or expression */
 
@@ -1186,7 +1186,7 @@ int PASCAL NEAR execfile P2_(
     )
 /* default flag and numeric arg to pass on to file */
 {
-    register int  status  = 0;      /* return status of name query */
+    REGISTER int  status  = 0;      /* return status of name query */
     char          fname[NSTRING];   /* name of file to execute */
     CONST char    *fspec  = NULL;   /* full file spec */
 
@@ -1240,9 +1240,9 @@ exec1:  /* otherwise, execute it */
  */
 int PASCAL NEAR dofile P1_(CONST char *, fname  /* file name to execute */)
 {
-    register BUFFER *bp     = NULL; /* buffer to place file to exeute */
-    register BUFFER *cb     = NULL; /* temp to hold current buf while we read */
-    register int    status  = 0;    /* results of various calls */
+    REGISTER BUFFER *bp     = NULL; /* buffer to place file to exeute */
+    REGISTER BUFFER *cb     = NULL; /* temp to hold current buf while we read */
+    REGISTER int    status  = 0;    /* results of various calls */
     char bname[NBUFN];              /* name of buffer */
 
     ZEROMEM(bname);

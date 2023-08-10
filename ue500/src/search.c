@@ -32,7 +32,7 @@ static int o = 0;       /* For longop() calls.*/
  */
 int PASCAL NEAR forwsearch P2_(int, f, int, n)
 {
-    register int status;
+    REGISTER int status;
 
     /* If n is negative, search backwards. Otherwise proceed by asking for the
      * search string.
@@ -58,8 +58,8 @@ int PASCAL NEAR forwsearch P2_(int, f, int, n)
  */
 int PASCAL NEAR forwhunt P2_(int, f, int, n)
 {
-    register int spoint = PTEND;
-    register int status;
+    REGISTER int spoint = PTEND;
+    REGISTER int status;
 
     if ( n < 0 )                /* search backwards */
         return ( backhunt(f, -n) );
@@ -128,7 +128,7 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
  */
 int PASCAL NEAR backsearch P2_(int, f, int, n)
 {
-    register int status;
+    REGISTER int status;
 
     /* If n is negative, search forwards. Otherwise proceed by asking for the
      * search string.
@@ -155,8 +155,8 @@ int PASCAL NEAR backsearch P2_(int, f, int, n)
  */
 int PASCAL NEAR backhunt P2_(int, f, int, n)
 {
-    register int spoint = PTBEG;
-    register int status;
+    REGISTER int spoint = PTBEG;
+    REGISTER int status;
 
     if ( n < 0 )
         return ( forwhunt(f, -n) );
@@ -636,9 +636,9 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
  */
 int PASCAL NEAR movelocalpoint P3_(int, n, int *, pcuroff, LINE **, pcurline)
 {
-    register int spare;
-    register int curoff;
-    register LINE *curline;
+    REGISTER int spare;
+    REGISTER int curoff;
+    REGISTER LINE *curline;
 
     curline = *pcurline;
     curoff = *pcuroff + n;
@@ -721,7 +721,7 @@ VOID PASCAL NEAR setjtable P0_(void)
  * eq -- Compare two characters.  The "bc" comes from the buffer, "pc"
  * from the pattern.  If we are not in EXACT mode, fold out the case.
  */
-int PASCAL NEAR eq P2_(register unsigned char, bc, register unsigned char, pc)
+int PASCAL NEAR eq P2_(unsigned char, bc, unsigned char, pc)
 {
     if ( (curwp->w_bufp->b_mode & MDEXACT) == 0 ) {
         if ( is_lower(bc) )
@@ -748,7 +748,7 @@ int PASCAL NEAR eq P2_(register unsigned char, bc, register unsigned char, pc)
  */
 int PASCAL NEAR readpattern P3_(char *, prompt, char *, apat, int, srch)
 {
-    register int status;
+    REGISTER int status;
     char tpat[NPAT+20];
 
     mlprompt(prompt, apat, sterm);
@@ -788,7 +788,7 @@ int PASCAL NEAR readpattern P3_(char *, prompt, char *, apat, int, srch)
  */
 int PASCAL NEAR savematch()
 {
-    register int j;
+    REGISTER int j;
     REGION tmpreg;
 
     if ( ( patmatch = reroom(patmatch, matchlen + 1) ) == NULL ) {
@@ -835,7 +835,7 @@ int PASCAL NEAR savematch()
  */
 int PASCAL NEAR boundry P3_(LINE *, curline, int, curoff, int, dir)
 {
-    register int border;
+    REGISTER int border;
 
     if ( dir == FORWARD ) {
         border = ( curoff == get_lused(curline) ) &&
@@ -855,9 +855,9 @@ int PASCAL NEAR boundry P3_(LINE *, curline, int, curoff, int, dir)
  */
 int PASCAL NEAR nextch P3_(LINE **, pcurline, int *, pcuroff, int, dir)
 {
-    register LINE   *curline;
-    register int curoff;
-    register int c;
+    REGISTER LINE   *curline;
+    REGISTER int curoff;
+    REGISTER int c;
 
     curline = *pcurline;
     curoff = *pcuroff;
@@ -891,8 +891,8 @@ int PASCAL NEAR liteq P4_(LINE **, curline, int *, curpos, int, direct, char *, 
 {
     LINE    *scanline = *curline;
     int scanpos = *curpos;
-    register int c;
-    register int count = 0;
+    REGISTER int c;
+    REGISTER int count = 0;
 
     while ( ( c = (unsigned char)(*lstring++) ) != '\0' ) {
         if ( !eq( c, nextch(&scanline, &scanpos, direct) ) )
@@ -1127,8 +1127,8 @@ litcase:    status = litmake(&patptr, mcptr);
  */
 VOID PASCAL NEAR mcclear()
 {
-    register MC     *mcptr;
-    register int j;
+    REGISTER MC     *mcptr;
+    REGISTER int j;
 
     /*
      * Free up any memory allocated for the meta-characters:
@@ -1181,7 +1181,7 @@ VOID PASCAL NEAR mcclear()
  */
 int PASCAL NEAR mceq P2_(unsigned char, bc, MC *, mt)
 {
-    register int result;
+    REGISTER int result;
 
     switch ( mt->mc_type & MASKCLO ) {
     case LITCHAR:
@@ -1225,8 +1225,8 @@ int PASCAL NEAR mceq P2_(unsigned char, bc, MC *, mt)
 int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
 {
     EBITMAP bmap;
-    register char   *patptr;
-    register int pchr, ochr;
+    REGISTER char   *patptr;
+    REGISTER int pchr, ochr;
 
     if ( ( bmap = (EBITMAP) room(BMAPSIZE) ) == NULL ) {
         mlabort(TEXT94);
@@ -1317,8 +1317,8 @@ int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
 {
     char collect[NPAT + 1];
     int collect_len;
-    register int pchr;
-    register char   *patptr;
+    REGISTER int pchr;
+    REGISTER char   *patptr;
 
     /*
      * The reason this function was called was because a literal

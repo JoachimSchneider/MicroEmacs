@@ -138,9 +138,10 @@ modern Linux and FreeBSD systems:
 
 
 ## TODO
-- Review all original comments so they aren't destryed by automatic reformatting.
-- Check Compilation on OpenVMS
-- Fix help-arrow issue for PCDOS with Borland C++
+- Review all original comments so they aren't destryed by         (\/)
+  automatic reformatting.
+- Check Compilation on OpenVMS                                    (\/)
+- Fix help-arrow issue for PCDOS with Borland C++                 (\/)
 - Compile on Windows:
   + Borland C++
   + CygWin
@@ -149,7 +150,8 @@ modern Linux and FreeBSD systems:
 - Try to compile on *really old* compilers:
   + Provide a `stdarg.h' *and* `varargs.h` version for all functions
     whit variable argumebnt lists.
-
+- Check the `NOSHARE' in edef.h especially the `NOSHARE EXTERN':  (\/)
+  Should it be EXTERN?
 
 # For completeness I quote Peter Chapman's README.md here:
 ```

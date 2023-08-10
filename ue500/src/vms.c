@@ -304,7 +304,7 @@ static void RemoveEscapes(char *str)
  */
 static brdaddline(BUFFER *msgbuf)
 {
-        register EWINDOW *wp;
+        REGISTER EWINDOW *wp;
 
 	if (addline(msgbuf, brdcstbuf) == FALSE)
 		return FALSE;
@@ -565,7 +565,7 @@ unsigned char PASCAL NEAR grabwait(VOID)
 
 int PASCAL NEAR ttgetc()
 {
-    register unsigned ret;
+    REGISTER unsigned ret;
 
     chkbrdcst();
     while (tylen == 0)
@@ -609,7 +609,7 @@ int PASCAL NEAR typahead()
  */
 int PASCAL NEAR spawncli(int f, int n)
 {
-    register char *cp;
+    REGISTER char *cp;
 
     /*
      * Don't allow this command if restricted
@@ -628,7 +628,7 @@ int PASCAL NEAR spawncli(int f, int n)
  */
 int PASCAL NEAR spawn(int f, int n)
 {
-    register int    s;
+    REGISTER int    s;
     char	    line[NLINE];
     /*
      * Don't allow this command if restricted.
@@ -661,7 +661,7 @@ int PASCAL NEAR spawn(int f, int n)
  */
 int PASCAL NEAR execprg(int f, int n)
 {
-        register int    s;
+        REGISTER int    s;
         char            line[NLINE];
 
 	/* Don't allow this command if restricted. */
@@ -686,9 +686,9 @@ int PASCAL NEAR execprg(int f, int n)
 
 int PASCAL NEAR pipecmd(int f, int n)
 {
-    register int    s;	    /* return status from CLI */
-    register EWINDOW *wp;    /* pointer to new window */
-    register BUFFER *bp;    /* pointer to buffer to zot */
+    REGISTER int    s;	    /* return status from CLI */
+    REGISTER EWINDOW *wp;    /* pointer to new window */
+    REGISTER BUFFER *bp;    /* pointer to buffer to zot */
     char    line[NLINE];    /* command line send to shell */
     static char bname[] = "command.log";
 
@@ -753,8 +753,8 @@ int PASCAL NEAR pipecmd(int f, int n)
 
 int PASCAL NEAR f_filter(int f, int n)
 {
-        /*register*/ int    s;	/* return status from CLI */
-	register BUFFER *bp;	/* pointer to buffer to zot */
+        /*REGISTER*/ int    s;	/* return status from CLI */
+	REGISTER BUFFER *bp;	/* pointer to buffer to zot */
         char line[NLINE];	/* command line send to shell */
 	char tmpnam[NFILEN];	/* place to store real file name */
 	static char bname1[] = "fltinp.com";
@@ -825,7 +825,7 @@ int PASCAL NEAR f_filter(int f, int n)
 
 char *PASCAL NEAR timeset()
 {
-    register char *sp;		/* temp string pointer */
+    REGISTER char *sp;		/* temp string pointer */
     time_t buf;			/* time data buffer */
 
     time(&buf);
@@ -850,11 +850,11 @@ static struct dsc$descriptor rbuf_desc;	/* descriptor for returned file name */
 char *PASCAL NEAR getffile(char *fspec)
 
 {
-	register int index;		/* index into various strings */
-	register int point;		/* index into other strings */
-	register int extflag;		/* does the file have an extention? */
-	register int verflag;		/* does the file have a version? */
-	register char *cp, c;
+	REGISTER int index;		/* index into various strings */
+	REGISTER int point;		/* index into other strings */
+	REGISTER int extflag;		/* does the file have an extention? */
+	REGISTER int verflag;		/* does the file have a version? */
+	REGISTER char *cp, c;
 
 	/* first parse the file path off the file spec */
 	xstrcpy(path, fspec);
@@ -929,11 +929,11 @@ char *PASCAL NEAR getffile(char *fspec)
 
 char *PASCAL NEAR getnfile()
 {
-	register int index;		/* index into various strings */
-	register int point;		/* index into other strings */
-	register int extflag;		/* does the file have an extention? */
+	REGISTER int index;		/* index into various strings */
+	REGISTER int point;		/* index into other strings */
+	REGISTER int extflag;		/* does the file have an extention? */
 	char fname[NFILEN];		/* file/path for DOS call */
-	register char *cp;
+	REGISTER char *cp;
 
 	/* and call for the next file */
 	for (cp=rbuf; cp!=rbuf+NFILEN; *cp++=' ') ;
@@ -973,8 +973,8 @@ ME$EDIT(struct dsc$descriptor *infile, struct dsc$descriptor *outfile)
 {
     static int first_time = 1;
     char *instr, *outstr;
-    register int status;
-    register BUFFER *bp;	/* buffer list pointer */
+    REGISTER int status;
+    REGISTER BUFFER *bp;	/* buffer list pointer */
     char bname[NBUFN];		/* buffer name of file to read */
 
     eexitflag = FALSE;
@@ -1242,7 +1242,7 @@ PASCAL NEAR ffclose()
  */
 PASCAL NEAR ffputline(char buf[], int nbuf)
 {
-        register char *obuf=buf;
+        REGISTER char *obuf=buf;
 
 #if	CRYPT
 	if (cryptflag)

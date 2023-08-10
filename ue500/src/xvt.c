@@ -42,21 +42,21 @@ int PASCAL NEAR fnclabel(int f, int n);
 # define ESC     0x1B                   /* ESC character.       */
 
 /* Forward references.      */
-extern int PASCAL NEAR xvtmove();
-extern int PASCAL NEAR xvteeol();
-extern int PASCAL NEAR xvteeop();
-extern int PASCAL NEAR xvtbeep();
-extern int PASCAL NEAR xvtopen();
-extern int PASCAL NEAR xvtrev();
-extern int PASCAL NEAR xvtclose();
-extern int PASCAL NEAR xvtkopen();
-extern int PASCAL NEAR xvtkclose();
-extern int PASCAL NEAR xvtcres();
-extern int PASCAL NEAR xvtgetc();
-extern int PASCAL NEAR xvtputc();
-extern int PASCAL NEAR xvtflush();
-extern int PASCAL NEAR xvtfcol();
-extern int PASCAL NEAR xvtbcol();
+EXTERN int PASCAL NEAR xvtmove();
+EXTERN int PASCAL NEAR xvteeol();
+EXTERN int PASCAL NEAR xvteeop();
+EXTERN int PASCAL NEAR xvtbeep();
+EXTERN int PASCAL NEAR xvtopen();
+EXTERN int PASCAL NEAR xvtrev();
+EXTERN int PASCAL NEAR xvtclose();
+EXTERN int PASCAL NEAR xvtkopen();
+EXTERN int PASCAL NEAR xvtkclose();
+EXTERN int PASCAL NEAR xvtcres();
+EXTERN int PASCAL NEAR xvtgetc();
+EXTERN int PASCAL NEAR xvtputc();
+EXTERN int PASCAL NEAR xvtflush();
+EXTERN int PASCAL NEAR xvtfcol();
+EXTERN int PASCAL NEAR xvtbcol();
 static int rev_state = FALSE;
 
 static int cfcolor = -1;        /* current foreground color */
@@ -190,8 +190,8 @@ dump_event(char *typ, EVENT *ep)
 
 static long windowHandler(WINDOW win, EVENT *ep)
 {
-    register int etype;         /* event type byte */
-    register int event;         /* encoded mouse event */
+    REGISTER int etype;         /* event type byte */
+    REGISTER int event;         /* encoded mouse event */
     int mouserow, mousecol;     /* mouse row/column position */
 
 /*dump_event("win", ep);*/

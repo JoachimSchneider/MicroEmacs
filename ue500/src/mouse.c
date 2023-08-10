@@ -30,9 +30,9 @@ int PASCAL NEAR movemd(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *wp;
-    register EWINDOW *lastwp;
-    register LINE   *lp;
+    REGISTER EWINDOW *wp;
+    REGISTER EWINDOW *lastwp;
+    REGISTER LINE   *lp;
 
     /* make sure we are on the proper screen */
     mouse_screen();
@@ -87,11 +87,11 @@ int PASCAL NEAR mmove(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *wp;
-    register EWINDOW *lastwp;
-    register LINE *lp;
-    register int lastmodeline;          /* was the dowbclick on a modeline? */
-    register int lastcmdline;           /* was the downclick on the command
+    REGISTER EWINDOW *wp;
+    REGISTER EWINDOW *lastwp;
+    REGISTER LINE *lp;
+    REGISTER int lastmodeline;          /* was the dowbclick on a modeline? */
+    REGISTER int lastcmdline;           /* was the downclick on the command
                                          * line? */
 
     /* ignore this if not hilighting */
@@ -145,9 +145,9 @@ int PASCAL NEAR mregdown(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *wp;
-    register EWINDOW *lastwp;
-    register LINE   *lp;
+    REGISTER EWINDOW *wp;
+    REGISTER EWINDOW *lastwp;
+    REGISTER LINE   *lp;
     SCREEN_T *sp;
     char scr_name[12];                  /* constructed temp screen name */
     static int temp_count = 0;          /* next temp screen number! */
@@ -253,12 +253,12 @@ int PASCAL NEAR mregup(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *wp;
-    register EWINDOW *lastwp;
-    register LINE *lp;
-    register SCREEN_T *sp;              /* ptr to screen to delete */
-    register int lastmodeline;          /* was the dowbclick on a modeline? */
-    register int lastcmdline;           /* was the downclick on the command
+    REGISTER EWINDOW *wp;
+    REGISTER EWINDOW *lastwp;
+    REGISTER LINE *lp;
+    REGISTER SCREEN_T *sp;              /* ptr to screen to delete */
+    REGISTER int lastmodeline;          /* was the dowbclick on a modeline? */
+    REGISTER int lastcmdline;           /* was the downclick on the command
                                          * line? */
 
     /* adjust position by screen offset */
@@ -374,13 +374,13 @@ int PASCAL NEAR movemu(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *lastwp;
-    register EWINDOW *wp;
-    register int lastmodeline;          /* was the downclick on a modeline? */
-    register int deltay;
-    register int deltax;
+    REGISTER EWINDOW *lastwp;
+    REGISTER EWINDOW *wp;
+    REGISTER int lastmodeline;          /* was the downclick on a modeline? */
+    REGISTER int deltay;
+    REGISTER int deltax;
 # if     WINDOW_TEXT
-    register int redraw_needed;         /* is a screen redraw required */
+    REGISTER int redraw_needed;         /* is a screen redraw required */
 # endif
 
     /* adjust position by screen offset */
@@ -511,7 +511,7 @@ int f, n;        /* prefix flag and argument */
 
 EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
 
     /* must be a positiove row! */
     if ( row < 0 )
@@ -543,7 +543,7 @@ EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
 
 LINE *PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
 {
-    register LINE   *lp;
+    REGISTER LINE   *lp;
 
     row -= wp->w_toprow;
     if ( row >= wp->w_ntrows + (modeflag ? 0 : 1) )
@@ -567,15 +567,15 @@ LINE *PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
 
 int PASCAL NEAR mouseoffset(wp, lp, col)
 
-register EWINDOW *wp;
-register LINE   *lp;
-register int col;
+REGISTER EWINDOW *wp;
+REGISTER LINE   *lp;
+REGISTER int col;
 
 {
-    register int c;
-    register int offset;
-    register int curcol;
-    register int newcol;
+    REGISTER int c;
+    REGISTER int offset;
+    REGISTER int curcol;
+    REGISTER int newcol;
 
     offset = 0;
     curcol = 0;
@@ -604,7 +604,7 @@ register int col;
 
 VOID PASCAL NEAR mouse_screen()
 {
-    register SCREEN_T *screen_ptr;      /* screen to test mouse in */
+    REGISTER SCREEN_T *screen_ptr;      /* screen to test mouse in */
 
     /* if we move the mouse off the windows, check for other windows */
     if ( (ypos < term.t_roworg) || (xpos < term.t_colorg) ||
@@ -662,7 +662,7 @@ int f, n;       /* these are ignored... we get the new size info from the mouse
                  * driver */
 {
 # if     WINDOW_TEXT
-    register int redraw_needed;         /* is a screen redraw required */
+    REGISTER int redraw_needed;         /* is a screen redraw required */
 # endif
 
     /* make sure we are on the proper screen */

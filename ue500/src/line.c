@@ -31,9 +31,9 @@ static long last_size = -1L;    /* last # of bytes yanked */
  * Return a pointer to the new block, or NULL if there isn't any memory
  * left. Print a message in the message line if no space.
  */
-LINE *PASCAL NEAR lalloc P1_(register int, used)
+LINE *PASCAL NEAR lalloc P1_(REGISTER int, used)
 {
-    register LINE *lp = NULL;
+    REGISTER LINE *lp = NULL;
 
     if ( ( lp = (LINE *)room( sizeof (LINE) + used ) ) == NULL ) {
         mlabort(TEXT94);
@@ -65,12 +65,12 @@ LINE *PASCAL NEAR lalloc P1_(register int, used)
  * be in. Release the memory. The buffers are updated too; the magic conditions
  * described in the above comments don't hold here.
  */
-int PASCAL NEAR lfree P1_(register LINE *, lp)
+int PASCAL NEAR lfree P1_(REGISTER LINE *, lp)
 {
-    register BUFFER   *bp     = NULL;
+    REGISTER BUFFER   *bp     = NULL;
     SCREEN_T          *scrp   = NULL; /* screen to fix pointers in  */
-    register EWINDOW  *wp     = NULL;
-    register int      cmark   = 0;    /* current mark               */
+    REGISTER EWINDOW  *wp     = NULL;
+    REGISTER int      cmark   = 0;    /* current mark               */
 
     /* in all screens.... */
     scrp = first_screen;
@@ -137,9 +137,9 @@ int PASCAL NEAR lfree P1_(register LINE *, lp)
  * more than 1 window we change EDIT t HARD. Set MODE if the mode line needs to
  * be updated (the "*" has to be set).
  */
-int PASCAL NEAR lchange P1_(register int, flag)
+int PASCAL NEAR lchange P1_(int, flag)
 {
-    register EWINDOW  *wp   = NULL;
+    REGISTER EWINDOW  *wp   = NULL;
     SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
 
     if ( curbp->b_nwnd != 1 )                   /* Ensure hard.     */
@@ -174,7 +174,7 @@ int PASCAL NEAR lchange P1_(register int, flag)
 int PASCAL NEAR insspace P2_(int, f, int, n)
 /* f, n:  default flag and numeric argument */
 {
-    register int  status  = 0;
+    REGISTER int  status  = 0;
 
     if ( ( status = linsert(n, ' ') ) == TRUE )
         status = backchar(f, n);
@@ -188,8 +188,8 @@ int PASCAL NEAR insspace P2_(int, f, int, n)
  */
 int PASCAL NEAR linstr P1_(CONST char *, instr)
 {
-    register int status     = 0;
-    register int saved_undo = 0;  /* saved undo flag  */
+    REGISTER int status     = 0;
+    REGISTER int saved_undo = 0;  /* saved undo flag  */
 
     status = TRUE;
     if ( instr != NULL && *instr != '\0' ) {
@@ -228,14 +228,14 @@ int PASCAL NEAR linstr P1_(CONST char *, instr)
  */
 int PASCAL NEAR linsert P2_(int, n, char, c)
 {
-    register char     *cp1  = NULL;
-    register char     *cp2  = NULL;
-    register LINE     *lp1  = NULL;
-    register LINE     *lp2  = NULL;
-    register LINE     *lp3  = NULL;
-    register int      doto  = 0;
-    register int      i     = 0;
-    register EWINDOW  *wp   = NULL;
+    REGISTER char     *cp1  = NULL;
+    REGISTER char     *cp2  = NULL;
+    REGISTER LINE     *lp1  = NULL;
+    REGISTER LINE     *lp2  = NULL;
+    REGISTER LINE     *lp3  = NULL;
+    REGISTER int      doto  = 0;
+    REGISTER int      i     = 0;
+    REGISTER EWINDOW  *wp   = NULL;
     SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
     int               cmark = 0;    /* current mark               */
 
@@ -358,7 +358,7 @@ int PASCAL NEAR lowrite P1_(char, c)
  */
 int PASCAL NEAR lover P1_(char *, ostr)
 {
-    register int status = TRUE;
+    REGISTER int status = TRUE;
 
     if ( ostr != NULL )
         while ( *ostr && status == TRUE ) {
@@ -387,12 +387,12 @@ int PASCAL NEAR lover P1_(char *, ostr)
  */
 int PASCAL NEAR lnewline P0_(void)
 {
-    register char     *cp1  = NULL;
-    register char     *cp2  = NULL;
-    register LINE     *lp1  = NULL;
-    register LINE     *lp2  = NULL;
-    register int      doto  = 0;
-    register EWINDOW  *wp   = NULL;
+    REGISTER char     *cp1  = NULL;
+    REGISTER char     *cp2  = NULL;
+    REGISTER LINE     *lp1  = NULL;
+    REGISTER LINE     *lp2  = NULL;
+    REGISTER int      doto  = 0;
+    REGISTER EWINDOW  *wp   = NULL;
     SCREEN_T          *scrp = NULL;     /* screen to fix pointers in  */
     int               cmark = 0;        /* current mark               */
 
@@ -467,13 +467,13 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
 /* n:     # of chars to delete                */
 /* kflag: put killed text in kill buffer flag */
 {
-    register char     *cp1  = NULL;
-    register char     *cp2  = NULL;
-    register LINE     *dotp = NULL;
-    register int      doto  = 0;
-    register int      chunk = 0;
-    register EWINDOW  *wp   = NULL;
-    register int      cmark = 0;  /* current mark */
+    REGISTER char     *cp1  = NULL;
+    REGISTER char     *cp2  = NULL;
+    REGISTER LINE     *dotp = NULL;
+    REGISTER int      doto  = 0;
+    REGISTER int      chunk = 0;
+    REGISTER EWINDOW  *wp   = NULL;
+    REGISTER int      cmark = 0;  /* current mark */
 
     if ( curbp->b_mode&MDVIEW )   /* don't allow this command if  */
         return ( rdonly() );      /* we are in read only mode     */
@@ -701,10 +701,10 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
  */
 char *PASCAL NEAR getctext P1_(char *, rline)
 {
-    register LINE *lp   = NULL;   /* line to copy                       */
-    register int  size  = 0;      /* length of line to return           */
-    register char *sp   = NULL;   /* string pointer into line           */
-    register char *dp   = NULL;   /* string pointer into returned line  */
+    REGISTER LINE *lp   = NULL;   /* line to copy                       */
+    REGISTER int  size  = 0;      /* length of line to return           */
+    REGISTER char *sp   = NULL;   /* string pointer into line           */
+    REGISTER char *dp   = NULL;   /* string pointer into returned line  */
 
     /* find the contents of the current line and its length */
     lp = curwp->w_dotp;
@@ -727,7 +727,7 @@ char *PASCAL NEAR getctext P1_(char *, rline)
  */
 int PASCAL NEAR putctext P1_(char *, iline/* contents of new line */)
 {
-    register int  status  = 0;
+    REGISTER int  status  = 0;
 
     /* delete the current line */
     set_w_doto(curwp, 0);   /* starting at the beginning of the line */
@@ -756,12 +756,12 @@ int PASCAL NEAR putctext P1_(char *, iline/* contents of new line */)
  */
 int PASCAL NEAR ldelnewline P0_(void)
 {
-    register char     *cp1  = NULL;
-    register char     *cp2  = NULL;
-    register LINE     *lp1  = NULL;
-    register LINE     *lp2  = NULL;
-    register LINE     *lp3  = NULL;
-    register EWINDOW  *wp   = NULL;
+    REGISTER char     *cp1  = NULL;
+    REGISTER char     *cp2  = NULL;
+    REGISTER LINE     *lp1  = NULL;
+    REGISTER LINE     *lp2  = NULL;
+    REGISTER LINE     *lp3  = NULL;
+    REGISTER EWINDOW  *wp   = NULL;
     SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
     int               cmark = 0;    /* current mark               */
 
@@ -878,9 +878,9 @@ int PASCAL NEAR addline P2_(BUFFER *, bp,   /* buffer to add text to  */
                             char *,   text  /* line to add            */
                           )
 {
-    register LINE *lp   = NULL;
-    register int  i     = 0;
-    register int  ntext = 0;
+    REGISTER LINE *lp   = NULL;
+    REGISTER int  i     = 0;
+    REGISTER int  ntext = 0;
 
     /* allocate the memory to hold the line */
     ntext = strlen(text);
@@ -1055,8 +1055,8 @@ int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to inse
 int PASCAL NEAR yank P2_(int, f, int, n)
 /* f, n:  prefix flag and argument  */
 {
-    register int  counter   = 0;    /* counter into kill buffer data    */
-    register char *sp       = NULL; /* pointer into string to insert    */
+    REGISTER int  counter   = 0;    /* counter into kill buffer data    */
+    REGISTER char *sp       = NULL; /* pointer into string to insert    */
     short int     curoff    = 0;    /* storage for line before yanking  */
     LINE          *curline  = NULL;
     KILL          *kptr     = NULL; /* pointer into kill buffer */
@@ -1137,7 +1137,7 @@ int PASCAL NEAR yank P2_(int, f, int, n)
 int PASCAL NEAR cycle_ring P2_(int, f, int, n)
 /* f, n:  prefix flag and argument  */
 {
-    register int  orig_index  = 0;  /* original kill_index */
+    REGISTER int  orig_index  = 0;  /* original kill_index */
 
     /* if there is an argument, cycle the kill index */
     if ( f ) {
@@ -1179,7 +1179,7 @@ int PASCAL NEAR yank_pop P2_(int, f, int, n)
 int PASCAL NEAR clear_ring P2_(int, f, int, n)
 /* f, n:  prefix flag and argument  */
 {
-    register int  index = 0;
+    REGISTER int  index = 0;
 
     for ( index = 0; index < NRING; index++ )
         next_kill();

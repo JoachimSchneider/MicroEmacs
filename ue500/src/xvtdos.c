@@ -32,7 +32,7 @@ struct find_t fileblock;        /* structure for directory searches */
 # endif
 
 # if     LATTICE | MSC | TURBO | IC | MWC | ZTC
-union REGS rg;          /* cpu register for use of DOS calls */
+union REGS rg;          /* cpu REGISTER for use of DOS calls */
 struct SREGS segreg;    /* cpu segment registers         */
 int nxtchar = -1;       /* character held from type ahead    */
 # endif
@@ -87,7 +87,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    REGISTER int event;         /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -180,7 +180,7 @@ int PASCAL NEAR spawn(f, n)
 int f, n;
 
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -219,7 +219,7 @@ int f, n;
 
 int PASCAL NEAR execprg(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     /* don't allow this command if restricted */
@@ -255,9 +255,9 @@ int PASCAL NEAR pipecmd(f, n)
 int f, n;
 
 {
-    register EWINDOW *wp;       /* pointer to new window */
-    register BUFFER *bp;        /* pointer to buffer to zot */
-    register char *tmp;         /* ptr to TMP DOS environment variable */
+    REGISTER EWINDOW *wp;       /* pointer to new window */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER char *tmp;         /* ptr to TMP DOS environment variable */
     FILE *fp;
     char line[NLINE];           /* command line send to shell */
     static char bname[] = "command";
@@ -346,8 +346,8 @@ int PASCAL NEAR f_filter(f, n)
 int f, n;
 
 {
-    register int s;             /* return status from CLI */
-    register BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER int s;             /* return status from CLI */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     char line[NLINE];           /* command line send to shell */
     char tmpnam[NFILEN];        /* place to store real file name */
     static char bname1[] = "fltinp";
@@ -414,15 +414,15 @@ int f, n;
 }
 
 # if     LATTICE
-extern int _oserr;
+EXTERN int _oserr;
 # endif
 
 # if     MWC
-extern int errno;
+EXTERN int errno;
 # endif
 
 # if     MSC
-extern int _doserrno;
+EXTERN int _doserrno;
 # endif
 
 /*  SHELLPROG: Execute a command in a subshell      */
@@ -593,9 +593,9 @@ char *cmd;      /*  Incoming command line to execute  */
 char *PASCAL NEAR timeset()
 {
 # if     MWC | TURBO | IC | MSC | ZTC
-    register char *sp;          /* temp string pointer */
+    REGISTER char *sp;          /* temp string pointer */
     char buf[16];               /* time data buffer */
-    extern char *ctime();
+    EXTERN char *ctime();
 
 #  if     IC
     time( (time_t *)buf );
@@ -628,9 +628,9 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
@@ -675,9 +675,9 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL NEAR getnfile()
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* and call for the first file */
@@ -707,9 +707,9 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
@@ -754,9 +754,9 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL NEAR getnfile()
 {
-    register int index;                 /* index into various strings */
-    register int point;                 /* index into other strings */
-    register int extflag;               /* does the file have an extention? */
+    REGISTER int index;                 /* index into various strings */
+    REGISTER int point;                 /* index into other strings */
+    REGISTER int extflag;               /* does the file have an extention? */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* and call for the first file */

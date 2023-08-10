@@ -43,8 +43,8 @@ int PASCAL NEAR replaces(kind, f, n)
   int f;      /* default flag */
   int n;      /* # of repetitions wanted */
 {
-    register int  status      = 0;    /* success flag on pattern inputs */
-    register int  nummatch    = 0;    /* number of found matches */
+    REGISTER int  status      = 0;    /* success flag on pattern inputs */
+    REGISTER int  nummatch    = 0;    /* number of found matches */
     long          numsub      = 0;    /* number of substitutions */
     int           nlflag      = 0;    /* last char of search string a <NL>? */
     int           nlrepl      = 0;    /* was a replace done on the last line? */
@@ -290,9 +290,9 @@ qprompt:
  */
 VOID PASCAL NEAR mlrquery()
 {
-    register int tcol;
+    REGISTER int tcol;
 #if     MAGIC
-    register RMC    *rmcptr;
+    REGISTER RMC    *rmcptr;
 #endif
 
     mlwrite(TEXT87);
@@ -333,10 +333,10 @@ int dlength;
 char    *instr;
 int use_rmc;
 {
-    register int status;
-    register CONST char     *rstr;
+    REGISTER int status;
+    REGISTER CONST char     *rstr;
 #if     MAGIC
-    register RMC        *rmcptr;
+    REGISTER RMC        *rmcptr;
 #endif
 
     replen = 0;
@@ -492,7 +492,7 @@ int PASCAL NEAR rmcstr()
  */
 VOID PASCAL NEAR rmcclear()
 {
-    register RMC    *rmcptr;
+    REGISTER RMC    *rmcptr;
 
     rmcptr = &rmcpat[0];
 

@@ -18,7 +18,7 @@
 # if     MSC || VMS
 #  include <errno.h>
 # else
-extern int errno;       /* current error  */
+EXTERN int errno;       /* current error  */
 # endif
 
 static char *lname[NLOCKS]; /* names of all locked files  */
@@ -30,8 +30,8 @@ static int  numlocks;       /* # of current locks active  */
  */
 int lockchk P1_(CONST char *, fname /* file to check for a lock */)
 {
-    register int  i       = 0;    /* loop indexes   */
-    register int  status  = 0;    /* return status  */
+    REGISTER int  i       = 0;    /* loop indexes   */
+    REGISTER int  status  = 0;    /* return status  */
 
     /* check to see if that file is already locked here */
     if ( numlocks > 0 )
@@ -78,8 +78,8 @@ int lockchk P1_(CONST char *, fname /* file to check for a lock */)
  */
 int lockrel P0_(void)
 {
-    register int  status  = 0;    /* status of locks      */
-    register int  s       = 0;    /* status of one unlock */
+    REGISTER int  status  = 0;    /* status of locks      */
+    REGISTER int  s       = 0;    /* status of one unlock */
 
     status = TRUE;
     while ( numlocks-- > 0 ) {
@@ -100,8 +100,8 @@ int lockrel P0_(void)
 
 int xlock P1_(CONST char *, fname /* file name to lock */)
 {
-    register char *locker = NULL; /* lock error message */
-    register int  status  = 0;    /* return status      */
+    REGISTER char *locker = NULL; /* lock error message */
+    REGISTER int  status  = 0;    /* return status      */
     char msg[NSTRING];            /* message string     */
 
     ZEROMEM(msg);
@@ -137,7 +137,7 @@ int xlock P1_(CONST char *, fname /* file name to lock */)
  */
 int xunlock P1_(char *, fname /* file to unlock */)
 {
-    register char *locker = NULL;   /* undolock return string */
+    REGISTER char *locker = NULL;   /* undolock return string */
 
     /* unclock and return */
     locker = undolock(fname);

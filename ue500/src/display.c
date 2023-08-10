@@ -26,13 +26,13 @@ static VIDEO   **pscreen;                      /* Physical screen. */
 /*  some local function declarations    */
 
 #if     MEMMAP
-extern VOID PASCAL NEAR update_line DCL((int row, struct VIDEO *vp1));
+EXTERN VOID PASCAL NEAR update_line DCL((int row, struct VIDEO *vp1));
 #else
-extern VOID PASCAL NEAR update_line DCL((int          row,
+EXTERN VOID PASCAL NEAR update_line DCL((int          row,
                                          struct VIDEO *vp1,
                                          struct VIDEO *vp2));
 #endif
-extern VOID PASCAL NEAR update_hilite DCL((void));
+EXTERN VOID PASCAL NEAR update_hilite DCL((void));
 
 /*
  * Initialize the data structures used by the display code. The edge vectors
@@ -44,8 +44,8 @@ extern VOID PASCAL NEAR update_hilite DCL((void));
 
 int PASCAL NEAR vtinit()
 {
-    register int i;
-    register VIDEO *vp;
+    REGISTER int i;
+    REGISTER VIDEO *vp;
 
     TTopen();                   /* open the screen */
     TTkopen();                  /* open the keyboard */
@@ -287,7 +287,7 @@ VOID PASCAL NEAR vtputc(c)
 int c;
 
 {
-    register VIDEO *vp;         /* ptr to line being updated */
+    REGISTER VIDEO *vp;         /* ptr to line being updated */
 
     /* defeate automatic sign extenstion */
     c = c & 0xff;
@@ -341,7 +341,7 @@ int c;
  */
 VOID PASCAL NEAR vteeol()
 {
-    register VIDEO      *vp;
+    REGISTER VIDEO      *vp;
 
     vp = vscreen[vtrow];
     while ( vtcol < term.t_ncol ) {
@@ -376,7 +376,7 @@ VOID PASCAL NEAR update(force)
 int force;      /* force update past type ahead? */
 
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
 #if     WINDOW_MSWIN
     SCREEN_T  *sp;
 #endif
@@ -520,12 +520,12 @@ VOID PASCAL NEAR reframe(wp)
 EWINDOW *wp;
 
 {
-    register LINE *lp;          /* search pointer */
-    register LINE *rp;          /* reverse search pointer */
-    register LINE *hp;          /* ptr to header line in buffer */
-    register LINE *tp;          /* temp debugging pointer */
-    register int i;             /* general index/# lines to scroll */
-    register int nlines;        /* number of lines in current window */
+    REGISTER LINE *lp;          /* search pointer */
+    REGISTER LINE *rp;          /* reverse search pointer */
+    REGISTER LINE *hp;          /* ptr to header line in buffer */
+    REGISTER LINE *tp;          /* temp debugging pointer */
+    REGISTER int i;             /* general index/# lines to scroll */
+    REGISTER int nlines;        /* number of lines in current window */
 
     /* figure out our window size */
     nlines = wp->w_ntrows;
@@ -768,9 +768,9 @@ VOID PASCAL NEAR updone(wp)
 EWINDOW *wp;     /* window to update current line in */
 
 {
-    register LINE *lp;          /* line to update */
-    register int sline;         /* physical screen line to update */
-    register int i;
+    REGISTER LINE *lp;          /* line to update */
+    REGISTER int sline;         /* physical screen line to update */
+    REGISTER int i;
 
     /* search down the line we want */
     lp = wp->w_linep;
@@ -803,10 +803,10 @@ VOID PASCAL NEAR updall(wp)
 EWINDOW *wp;     /* window to update lines in */
 
 {
-    register LINE *lp;          /* line to update */
-    register int sline;         /* physical screen line to update */
-    register int i;
-    register int nlines;        /* number of lines in the current window */
+    REGISTER LINE *lp;          /* line to update */
+    REGISTER int sline;         /* physical screen line to update */
+    REGISTER int i;
+    REGISTER int nlines;        /* number of lines in the current window */
 
     /* search down the lines, updating them */
     lp = wp->w_linep;
@@ -849,7 +849,7 @@ EWINDOW *wp;     /* window to update lines in */
 
 VOID PASCAL NEAR updpos()
 {
-    register LINE *lp;
+    REGISTER LINE *lp;
 
     /* find the current row */
     lp = curwp->w_linep;
@@ -898,10 +898,10 @@ VOID PASCAL NEAR updpos()
 
 VOID PASCAL NEAR upddex()
 {
-    register EWINDOW *wp;
-    register LINE *lp;
-    register int i, j;
-    register int nlines;        /* number of lines in the current window */
+    REGISTER EWINDOW *wp;
+    REGISTER LINE *lp;
+    REGISTER int i, j;
+    REGISTER int nlines;        /* number of lines in the current window */
 
     wp = wheadp;
 
@@ -941,10 +941,10 @@ VOID PASCAL NEAR upddex()
 
 VOID PASCAL NEAR updgar()
 {
-    register int i;
+    REGISTER int i;
 #if     MEMMAP == 0
-    register int j;
-    register char *txt;
+    REGISTER int j;
+    REGISTER char *txt;
 #endif
 
     for ( i = 0; i < term.t_nrow; ++i ) {
@@ -1018,9 +1018,9 @@ VOID PASCAL NEAR update_size()
 
 int PASCAL NEAR pop P1_(BUFFER *, popbuf)
 {
-    register int index;         /* index into the current output line */
-    register int llen;          /* length of the current output line */
-    register int cline;         /* current screen line number */
+    REGISTER int index;         /* index into the current output line */
+    REGISTER int llen;          /* length of the current output line */
+    REGISTER int cline;         /* current screen line number */
     LINE *lp;           /* ptr to next line to display */
     int numlines;       /* remaining number of lines to display */
     int c;              /* input character */
@@ -1110,8 +1110,8 @@ VOID PASCAL NEAR updupd(force)
 int force;      /* forced update flag */
 
 {
-    register VIDEO *vp1;
-    register int i;
+    REGISTER VIDEO *vp1;
+    REGISTER int i;
 
     for ( i = 0; i < term.t_nrow; ++i ) {
         vp1 = vscreen[i];
@@ -1140,9 +1140,9 @@ int force;      /* forced update flag */
  */
 VOID PASCAL NEAR updext()
 {
-    register int rcursor;       /* real cursor location */
-    register LINE *lp;          /* pointer to current line */
-    register int j;             /* index into line */
+    REGISTER int rcursor;       /* real cursor location */
+    REGISTER LINE *lp;          /* pointer to current line */
+    REGISTER int j;             /* index into line */
 
     /* calculate what column the real cursor will end up in */
     rcursor = ( (curcol - term.t_ncol) % term.t_scrsiz )+ term.t_margin;
@@ -1202,10 +1202,10 @@ struct VIDEO *pp;       /* physical screen image */
 
 {
 
-    register char *vir_left;            /* left pointer to virtual line */
-    register char *phy_left;            /* left pointer to physical line */
-    register char *vir_right;           /* right pointer to virtual line */
-    register char *phy_right;           /* right pointer to physical line */
+    REGISTER char *vir_left;            /* left pointer to virtual line */
+    REGISTER char *phy_left;            /* left pointer to physical line */
+    REGISTER char *vir_right;           /* right pointer to virtual line */
+    REGISTER char *phy_right;           /* right pointer to physical line */
     int rev_left;                       /* leftmost reversed char index */
     int rev_right;                      /* rightmost reversed char index */
     char *left_blank;                   /* left-most trailing blank */
@@ -1411,13 +1411,13 @@ VOID PASCAL NEAR modeline(wp)
 EWINDOW *wp;    /* window to update modeline for */
 
 {
-    register char *cp;
-    register unsigned char c;
-    register int n;             /* cursor position count */
-    register BUFFER *bp;
-    register int i;             /* loop index */
-    register int lchar;         /* character to draw line in buffer with */
-    register int firstm;        /* is this the first mode? */
+    REGISTER char *cp;
+    REGISTER unsigned char c;
+    REGISTER int n;             /* cursor position count */
+    REGISTER BUFFER *bp;
+    REGISTER int i;             /* loop index */
+    REGISTER int lchar;         /* character to draw line in buffer with */
+    REGISTER int firstm;        /* is this the first mode? */
     char tline[NLINE];          /* buffer for part of mode line */
     char time[6];               /* to hold current time */
 
@@ -1618,7 +1618,7 @@ char *ts;
 
 VOID PASCAL NEAR upmode()       /* update all the mode lines */
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
 #if     WINDOW_MSWIN
     SCREEN_T  *sp;
 
@@ -1645,7 +1645,7 @@ while ( sp != first_screen );
 
 VOID PASCAL NEAR upwind()       /* force hard updates on all windows */
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
 #if     WINDOW_MSWIN
     SCREEN_T  *sp;
 
@@ -1714,7 +1714,7 @@ int row, col;
 
 VOID PASCAL NEAR mlferase()
 {
-    register int save_discmd;
+    REGISTER int save_discmd;
 
     save_discmd = discmd;
     discmd = TRUE;
@@ -1788,9 +1788,9 @@ VOID CDECL NEAR mlwrite(va_alist)
 va_dcl          /* variable argument list arg1 = format string arg2+ = arguments
                  * in that string */
 {
-    register int c;             /* current char in format string */
-    register char *fmt;         /* ptr to format string */
-    register va_list ap;        /* ptr to current data field */
+    REGISTER int c;             /* current char in format string */
+    REGISTER char *fmt;         /* ptr to format string */
+    REGISTER va_list ap;        /* ptr to current data field */
     int arg_int;                /* integer argument */
     long arg_long;              /* long argument */
     char *arg_str;              /* string argument */
@@ -1870,11 +1870,11 @@ va_dcl          /* variable argument list arg1 = format string arg2+ = arguments
     va_end(ap);
 }
 # else
-VOID CDECL NEAR mlwrite (char *fmt, ...)
+VOID CDECL NEAR mlwrite (CONST char *fmt, ...)
 /* variable argument list arg1 = format string arg2+ = arguments in that string
  */
 {
-    register int c;             /* current char in format string */
+    REGISTER int c;             /* current char in format string */
     va_list ap;                 /* ptr to current data field */
     int arg_int;                /* integer argument */
     long arg_long;              /* long argument */
@@ -1962,13 +1962,11 @@ VOID CDECL NEAR mlwrite (char *fmt, ...)
 #  define ADJUST(ptr, dtype)      ptr += sizeof (dtype)
 # endif
 
-VOID CDECL NEAR mlwrite(fmt)
-
-char *fmt;      /* format string for output */
-
+VOID CDECL NEAR mlwrite P1_(CONST char *, fmt)
+/* fmt: Format string for output  */
 {
-    register int c;             /* current char in format string */
-    register char *ap;          /* ptr to current data field */
+    REGISTER int c;             /* current char in format string */
+    REGISTER char *ap;          /* ptr to current data field */
 
     /* if we are not currently echoing on the command line, abort this */
     if ( discmd == FALSE )
@@ -2054,7 +2052,7 @@ VOID PASCAL NEAR mlforce(s)
 char *s;        /* string to force out */
 
 {
-    register int oldcmd;        /* original command display flag */
+    REGISTER int oldcmd;        /* original command display flag */
 
     oldcmd = discmd;            /* save the discmd value */
     discmd = TRUE;              /* and turn display on */
@@ -2086,7 +2084,7 @@ VOID PASCAL NEAR mlputs(s)
 char *s;
 
 {
-    register int c;
+    REGISTER int c;
 
     while ( (c = *s++) != 0 ) {
         mlout(c);
@@ -2103,7 +2101,7 @@ VOID PASCAL NEAR mlputi(i, r)
 int i, r;
 
 {
-    register int q;
+    REGISTER int q;
     static char hexdigits[] = "0123456789ABCDEF";
 
     if ( i < 0 ) {
@@ -2129,7 +2127,7 @@ long l;
 int r;
 
 {
-    register long q;
+    REGISTER long q;
 
     if ( l < 0 ) {
         l = -l;
@@ -2174,7 +2172,7 @@ VOID winch_vtresize(rows, cols)
 int rows, cols;
 {
     int i;
-    register VIDEO *vp;
+    REGISTER VIDEO *vp;
 
     for ( i = 0; i < term.t_mrow; ++i ) {
         free(vscreen[i]);

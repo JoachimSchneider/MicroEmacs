@@ -138,8 +138,8 @@ char buf[];
 int nbuf;
 
 {
-    register int i;             /* index into line to write */
-    register char *lptr;        /* ptr into the line terminator */
+    REGISTER int i;             /* index into line to write */
+    REGISTER char *lptr;        /* ptr into the line terminator */
 # if     CRYPT
     char c;             /* character to translate */
 
@@ -199,8 +199,8 @@ int PASCAL NEAR ffgetline(nbytes)
 int *nbytes;
 
 {
-    register int c;             /* current character read */
-    register int i;             /* current index into fline */
+    REGISTER int c;             /* current character read */
+    REGISTER int i;             /* current index into fline */
 
     /* if we are at the end...return it */
     if ( eofflag )

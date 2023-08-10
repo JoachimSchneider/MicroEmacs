@@ -37,30 +37,30 @@ int dtype = CDCGA50;                    /* current display type     */
 long scadd;                             /* address of screen ram    */
 int *scptr[NROW];                       /* pointer to screen lines  */
 int sline[NCOL];                        /* screen line image        */
-extern union REGS rg;                   /* cpu register for use of DOS calls */
+EXTERN union REGS rg;                   /* cpu REGISTER for use of DOS calls */
 
-extern PASCAL NEAR ttopen();               /* Forward references.          */
-extern PASCAL NEAR ttgetc();
-extern PASCAL NEAR ttputc();
-extern PASCAL NEAR ttflush();
-extern PASCAL NEAR ttclose();
-extern PASCAL NEAR z309move();
-extern PASCAL NEAR z309eeol();
-extern PASCAL NEAR z309eeop();
-extern PASCAL NEAR z309beep();
-extern PASCAL NEAR z309open();
-extern PASCAL NEAR z309rev();
-extern PASCAL NEAR z309cres();
-extern PASCAL NEAR z309close();
-extern PASCAL NEAR z309putc();
-extern PASCAL NEAR z309kopen();
-extern PASCAL NEAR z309kclose();
-extern PASCAL NEAR scinit();
-extern PASCAL NEAR spal();
+EXTERN PASCAL NEAR ttopen();               /* Forward references.          */
+EXTERN PASCAL NEAR ttgetc();
+EXTERN PASCAL NEAR ttputc();
+EXTERN PASCAL NEAR ttflush();
+EXTERN PASCAL NEAR ttclose();
+EXTERN PASCAL NEAR z309move();
+EXTERN PASCAL NEAR z309eeol();
+EXTERN PASCAL NEAR z309eeop();
+EXTERN PASCAL NEAR z309beep();
+EXTERN PASCAL NEAR z309open();
+EXTERN PASCAL NEAR z309rev();
+EXTERN PASCAL NEAR z309cres();
+EXTERN PASCAL NEAR z309close();
+EXTERN PASCAL NEAR z309putc();
+EXTERN PASCAL NEAR z309kopen();
+EXTERN PASCAL NEAR z309kclose();
+EXTERN PASCAL NEAR scinit();
+EXTERN PASCAL NEAR spal();
 
 # if     COLOR
-extern PASCAL NEAR z309fcol();
-extern PASCAL NEAR z309bcol();
+EXTERN PASCAL NEAR z309fcol();
+EXTERN PASCAL NEAR z309bcol();
 
 int cfcolor = -1;               /* current forground color */
 int cbcolor = -1;               /* current background color */
@@ -82,7 +82,7 @@ TERM term    =
 # endif
 };
 
-extern union REGS rg;
+EXTERN union REGS rg;
 
 # if     COLOR
 PASCAL NEAR z309fcol(color)             /* set the current output color */

@@ -37,9 +37,9 @@ static BOOL PASCAL CopyToClipboard (REGION *Region)
     char huge *Data;
 #endif
     BOOL Result = TRUE;
-    register LINE *lp;
-    register int Offset;
-    register int lcnt;       /* used to reduce longop() overhead */
+    REGISTER LINE *lp;
+    REGISTER int Offset;
+    REGISTER int lcnt;       /* used to reduce longop() overhead */
 
     /*-figure out the size of the clipboard data (end of lines have to be turned
      * into CR-LF) */
@@ -472,8 +472,8 @@ PASCAL  updscrollbars (SCREEN_T *sp, char w_flag)
         int topline;
 
         {   /*-figure-out where we are at vertically */
-            register LINE   *lp;
-            register LINE   *linep; /* header (= last) line of buffer */
+            REGISTER LINE   *lp;
+            REGISTER LINE   *linep; /* header (= last) line of buffer */
             LINE    *toplp;         /* top line of window */
 
             linep = sp->s_cur_window->w_bufp->b_linep;

@@ -156,28 +156,28 @@ TBIND ttable[] =
 
 # define NTBINDS sizeof (ttable)/sizeof (TBIND)
 
-extern int      ttopen();
-extern int      ttgetc();
-extern int      ttputc();
-extern int      tgetnum();
-extern int      ttflush();
-extern int      ttclose();
-extern int      tcapkopen();
-extern int      tcapkclose();
-extern int      tcapgetc();
-extern int      tcapmove();
-extern int      tcapeeol();
-extern int      tcapeeop();
-extern int      tcapbeep();
-extern int      tcaprev();
-extern int      tcapcres();
-extern int      tcapopen();
-extern int      tcapclose();
-extern int      tput();
-extern char     *tgoto();
+EXTERN int      ttopen();
+EXTERN int      ttgetc();
+EXTERN int      ttputc();
+EXTERN int      tgetnum();
+EXTERN int      ttflush();
+EXTERN int      ttclose();
+EXTERN int      tcapkopen();
+EXTERN int      tcapkclose();
+EXTERN int      tcapgetc();
+EXTERN int      tcapmove();
+EXTERN int      tcapeeol();
+EXTERN int      tcapeeop();
+EXTERN int      tcapbeep();
+EXTERN int      tcaprev();
+EXTERN int      tcapcres();
+EXTERN int      tcapopen();
+EXTERN int      tcapclose();
+EXTERN int      tput();
+EXTERN char     *tgoto();
 # if     COLOR
-extern int     tcapfcol();
-extern int     tcapbcol();
+EXTERN int     tcapfcol();
+EXTERN int     tcapbcol();
 # endif
 
 # define TCAPSLEN 1024
@@ -227,7 +227,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    REGISTER int event;         /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -241,7 +241,7 @@ int in_get()    /* get an event from the input buffer */
 
 tcapopen()
 {
-    register int index;                 /* general index */
+    REGISTER int index;                 /* general index */
     char *t, *p;
     char tcbuf[1024];
     char *tv_stype;
@@ -408,8 +408,8 @@ int tcapgetc()
 
 int PASCAL NEAR get1key()
 {
-    register int c;
-    register int index;         /* index into termcap binding table */
+    REGISTER int c;
+    REGISTER int index;         /* index into termcap binding table */
     char *sp;
 # if     BSD | HPUX8 | HPUX9
     int fdset;
@@ -471,7 +471,7 @@ int PASCAL NEAR get1key()
 }
 
 tcapmove(row, col)
-register int row, col;
+REGISTER int row, col;
 {
     putpad( tgoto(CM, col, row) );
 }

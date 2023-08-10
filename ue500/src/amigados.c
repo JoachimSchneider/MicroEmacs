@@ -190,7 +190,7 @@ int event;      /* event to enter into the input buffer */
 
 int in_get()    /* get an event from the input buffer */
 {
-    register int event;         /* event to return */
+    REGISTER int event;         /* event to return */
 
     event = in_buf[in_next++];
     in_next &= (IBUFSIZE - 1);
@@ -208,7 +208,7 @@ ttopen()
     struct NewWindow new_win;
     int i;
 # if     AZTEC
-    extern Enable_Abort;        /* Turn off ctrl-C interrupt */
+    EXTERN Enable_Abort;        /* Turn off ctrl-C interrupt */
 
     Enable_Abort = 0;           /* for the Manx compiler */
 # endif
@@ -368,7 +368,7 @@ tcheck: /* if type ahead is already pending... */
 
 doevent()
 {
-    register int eventX, eventY;        /* local copies of the event info */
+    REGISTER int eventX, eventY;        /* local copies of the event info */
     struct IntuiMessage *event;         /* current event to repond to */
     ULONG class;        /* class of event */
     USHORT code;        /* data code */
@@ -477,8 +477,8 @@ dokey(code)
 int code;       /* raw keycode to convert */
 
 {
-    register int ekey;          /* translate emacs key */
-    register int dir;           /* key direction (up/down) */
+    REGISTER int ekey;          /* translate emacs key */
+    REGISTER int dir;           /* key direction (up/down) */
     char buf[NSTRING];
 
     /* decode the direction of the key */
@@ -562,7 +562,7 @@ int key;        /* extended keystroke to remember */
 int x, y;       /* mouse position to record */
 
 {
-    register int upper;         /* upper extended bits of key */
+    REGISTER int upper;         /* upper extended bits of key */
 
     /* split the extended keystroke */
     upper = key >> 8;
@@ -623,7 +623,7 @@ spawncli(f, n)
  */
 spawn(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     long newcli;
@@ -652,7 +652,7 @@ spawn(f, n)
 
 execprg(f, n)
 {
-    register int s;
+    REGISTER int s;
     char line[NLINE];
 
     long newcli;
@@ -678,9 +678,9 @@ execprg(f, n)
  */
 pipecmd(f, n)
 {
-    register int s;             /* return status from CLI */
-    register EWINDOW *wp;       /* pointer to new window */
-    register BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER int s;             /* return status from CLI */
+    REGISTER EWINDOW *wp;       /* pointer to new window */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     char line[NLINE];           /* command line send to shell */
     static char bname[] = "command";
 
@@ -749,8 +749,8 @@ pipecmd(f, n)
  */
 f_filter(f, n)
 {
-    register int s;             /* return status from CLI */
-    register BUFFER *bp;        /* pointer to buffer to zot */
+    REGISTER int s;             /* return status from CLI */
+    REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     char line[NLINE];           /* command line send to shell */
     char tmpnam[NFILEN];        /* place to store real file name */
     static char bname1[] = "fltinp";
@@ -825,7 +825,7 @@ char *PASCAL NEAR timeset()
 
 char path[NFILEN];      /* path of file to find */
 char rbuf[NFILEN];      /* return file buffer */
-extern char *scdir();
+EXTERN char *scdir();
 
 /*  do a wild card directory search (for file name completion) */
 
@@ -834,7 +834,7 @@ char *PASCAL NEAR getffile(fspec)
 char *fspec;    /* pattern to match */
 
 {
-    register int index;                 /* index into various strings */
+    REGISTER int index;                 /* index into various strings */
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* first parse the file path off the file spec */
@@ -859,7 +859,7 @@ char *fspec;    /* pattern to match */
 
 char *PASCAL NEAR getnfile()
 {
-    register char *sp;          /* return from scdir */
+    REGISTER char *sp;          /* return from scdir */
 
     /* and call for the next file */
     sp = scdir(path);

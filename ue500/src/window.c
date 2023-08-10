@@ -60,8 +60,8 @@ int PASCAL NEAR nextwind(f, n)
 int f, n;       /* default flag and numeric argument */
 
 {
-    register EWINDOW *wp;
-    register int nwindows;              /* total number of windows */
+    REGISTER EWINDOW *wp;
+    REGISTER int nwindows;              /* total number of windows */
 
     if ( f ) {
 
@@ -108,8 +108,8 @@ int PASCAL NEAR prevwind(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *wp1;
-    register EWINDOW *wp2;
+    REGISTER EWINDOW *wp1;
+    REGISTER EWINDOW *wp2;
 
     /* if we have an argument, we mean the nth window from the bottom */
     if ( f )
@@ -158,8 +158,8 @@ int PASCAL NEAR mvupwind(f, n)
 int f, n;       /* prefix flag and argument */
 
 {
-    register LINE *lp;
-    register int i;
+    REGISTER LINE *lp;
+    REGISTER int i;
 
     lp = curwp->w_linep;
 
@@ -207,9 +207,9 @@ int PASCAL NEAR onlywind(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *wp;
-    register LINE   *lp;
-    register int i;
+    REGISTER EWINDOW *wp;
+    REGISTER LINE   *lp;
+    REGISTER int i;
     int cmark;                  /* current mark */
 
     while ( wheadp != curwp ) {
@@ -264,9 +264,9 @@ int PASCAL NEAR delwind(f, n)
 int f, n;       /* arguments are ignored for this command */
 
 {
-    register EWINDOW *wp;       /* window to recieve deleted space */
-    register EWINDOW *lwp;      /* ptr window before curwp */
-    register int target;        /* target line to search for */
+    REGISTER EWINDOW *wp;       /* window to recieve deleted space */
+    REGISTER EWINDOW *lwp;      /* ptr window before curwp */
+    REGISTER int target;        /* target line to search for */
     int cmark;                  /* current mark */
 
     /* if there is only one window, don't delete it */
@@ -354,13 +354,13 @@ int PASCAL NEAR splitwind(f, n)
 int f, n;       /* default flag and numeric argument */
 
 {
-    register EWINDOW *wp;
-    register LINE   *lp;
-    register int ntru;
-    register int ntrl;
-    register int ntrd;
-    register EWINDOW *wp1;
-    register EWINDOW *wp2;
+    REGISTER EWINDOW *wp;
+    REGISTER LINE   *lp;
+    REGISTER int ntru;
+    REGISTER int ntrl;
+    REGISTER int ntrd;
+    REGISTER EWINDOW *wp1;
+    REGISTER EWINDOW *wp2;
     int cmark;                  /* current mark */
 
     /* make sure we have enough space */
@@ -449,9 +449,9 @@ int PASCAL NEAR enlargewind(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *adjwp;
-    register LINE   *lp;
-    register int i;
+    REGISTER EWINDOW *adjwp;
+    REGISTER LINE   *lp;
+    REGISTER int i;
 
     if ( n < 0 )
         return ( shrinkwind(f, -n) );
@@ -504,9 +504,9 @@ int PASCAL NEAR shrinkwind(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register EWINDOW *adjwp;
-    register LINE   *lp;
-    register int i;
+    REGISTER EWINDOW *adjwp;
+    REGISTER LINE   *lp;
+    REGISTER int i;
 
     if ( n < 0 )
         return ( enlargewind(f, -n) );
@@ -577,9 +577,9 @@ int f, n;       /* default flag and numeric argument */
 
 int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
 {
-    register EWINDOW *wp;
-    register BUFFER *bp;
-    register int cmark;                 /* current mark */
+    REGISTER EWINDOW *wp;
+    REGISTER BUFFER *bp;
+    REGISTER int cmark;                 /* current mark */
 
     /* on screen already? */
     if ( popbuf->b_nwnd != 0 )
@@ -669,7 +669,7 @@ int PASCAL NEAR restwnd(f, n)   /* restore the saved screen */
 int f, n;       /* prefix flag and argument */
 
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
 
     /* find the window */
     wp = wheadp;
@@ -809,7 +809,7 @@ int f;  /* default flag */
 int n;  /* numeric argument */
 
 {
-    register EWINDOW *wp;
+    REGISTER EWINDOW *wp;
 #if     LOGFLG
     FILE *fp;                           /* file handle for log file */
 #endif
@@ -917,8 +917,8 @@ int n;  /* numeric argument */
 int PASCAL NEAR getwpos()       /* get screen offset of current line in current
                                  * window */
 {
-    register int sline;         /* screen line from top of window */
-    register LINE *lp;          /* scannile line pointer */
+    REGISTER int sline;         /* screen line from top of window */
+    REGISTER LINE *lp;          /* scannile line pointer */
 
     /* search down the line we want */
     lp = curwp->w_linep;
@@ -934,8 +934,8 @@ int PASCAL NEAR getwpos()       /* get screen offset of current line in current
 
 int PASCAL NEAR getcwnum()              /* get current window number */
 {
-    register EWINDOW *wp;
-    register int num;
+    REGISTER EWINDOW *wp;
+    REGISTER int num;
 
     num = 1;
     wp = wheadp;
@@ -950,8 +950,8 @@ int PASCAL NEAR getcwnum()              /* get current window number */
 
 int PASCAL NEAR gettwnum()              /* get total window count */
 {
-    register EWINDOW *wp;
-    register int ctr;
+    REGISTER EWINDOW *wp;
+    REGISTER int ctr;
 
     ctr = 0;
     wp = wheadp;

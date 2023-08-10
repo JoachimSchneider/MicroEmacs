@@ -18,7 +18,7 @@ int f;          /* default flag */
 int n;          /* numeric argument */
 
 {
-    register int status;        /* return status */
+    REGISTER int status;        /* return status */
     int odisinp;                /* original vlaue of disinp */
     char key[NPAT];             /* new encryption string */
 
@@ -135,10 +135,10 @@ int n;          /* numeric argument */
 **********/
 
 VOID PASCAL NEAR ecrypt(bptr, len)
-register char *bptr;    /* buffer of characters to be encrypted */
-register unsigned len;  /* number of characters in the buffer */
+REGISTER char *bptr;    /* buffer of characters to be encrypted */
+REGISTER unsigned len;  /* number of characters in the buffer */
 {
-    register int cc;            /* current character being considered */
+    REGISTER int cc;            /* current character being considered */
 
     static long key = 0;        /* 29 bit encipherment key */
     static int salt = 0;        /* salt to spice up key with */
@@ -200,7 +200,7 @@ register unsigned len;  /* number of characters in the buffer */
 
 static int PASCAL NEAR mod95(val)
 
-register int val;
+REGISTER int val;
 
 {
     /*  The mathematical MOD does not match the computer MOD  */

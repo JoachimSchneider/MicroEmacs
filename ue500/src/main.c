@@ -55,7 +55,7 @@ long _stksize = 20000L;         /* reset stack size (must be even) */
 #endif
 
 #if     MSDOS && TURBO
-extern unsigned int _stklen = 10000;
+EXTERN unsigned int _stklen = 10000;
 #endif
 
 /*  make VMS happy...   */
@@ -105,7 +105,7 @@ int main P2_(int, argc, char **, argv)
 /* argc:    # of arguments    */
 /* argv[]:  argument strings  */
 {
-    register int  status  = 0;
+    REGISTER int  status  = 0;
 
 #if HANDLE_WINCH
     signal(SIGWINCH, winch_changed);
@@ -180,8 +180,8 @@ abortrun:
  */
 int PASCAL NEAR clean P0_(void)
 {
-    register BUFFER *bp;        /* buffer list pointer */
-    register SCREEN_T *scrp;            /* ptr to screen to dump */
+    REGISTER BUFFER *bp;        /* buffer list pointer */
+    REGISTER SCREEN_T *scrp;            /* ptr to screen to dump */
 
     /* first clean up the screens */
     scrp = first_screen;
@@ -231,10 +231,10 @@ int PASCAL NEAR clean P0_(void)
  */
 VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this the first time in? */)
 {
-    register BUFFER *bp;        /* temp buffer pointer */
-    register int firstfile;             /* first file flag */
-    register int carg;          /* current arg to scan */
-    register int startflag;             /* startup executed flag */
+    REGISTER BUFFER *bp;        /* temp buffer pointer */
+    REGISTER int firstfile;             /* first file flag */
+    REGISTER int carg;          /* current arg to scan */
+    REGISTER int startflag;             /* startup executed flag */
     BUFFER *firstbp = NULL;     /* ptr to first buffer in cmd line */
     int viewflag;               /* are we starting in view mode? */
     int gotoflag;               /* do we need to goto a line at start? */
@@ -457,7 +457,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
 
 static int PASCAL NEAR getbasekey P0_(void)
 {
-    register int c;
+    REGISTER int c;
 
     notquiescent = -1;  /* will be <= 0 only if get_key() is called directly
                          * from editloop(). This is used to restrict some
@@ -483,12 +483,12 @@ static int PASCAL NEAR getbasekey P0_(void)
  */
 int PASCAL NEAR editloop P0_(void)
 {
-    register int c;             /* command character */
-    register int f;             /* default flag */
-    register int n;             /* numeric repeat count */
-    register int mflag;         /* negative flag on repeat */
-    register int basec;         /* c stripped of meta character */
-    register int oldflag;       /* old last flag value */
+    REGISTER int c;             /* command character */
+    REGISTER int f;             /* default flag */
+    REGISTER int n;             /* numeric repeat count */
+    REGISTER int mflag;         /* negative flag on repeat */
+    REGISTER int basec;         /* c stripped of meta character */
+    REGISTER int oldflag;       /* old last flag value */
     char time[6];               /* current display time */
 
     /* setup to process commands */
@@ -670,8 +670,8 @@ loop:
  */
 VOID PASCAL NEAR edinit P1_(char *, bname /* name of buffer to initialize */)
 {
-    register BUFFER *bp;
-    register int index;
+    REGISTER BUFFER *bp;
+    REGISTER int index;
 
     /* the quote characters are LANGUAGE SPECIFIC so they need to be inited here
      * instrad of in the header file */
@@ -734,7 +734,7 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
                             int, f /* prefix argument flag */,
                             int, n /* prefix value */)
 {
-    register int  status  = 0;
+    REGISTER int  status  = 0;
     KEYTAB        *key    = NULL;   /* key entry to execute */
 #if DBCS
     int           schar   = 0;      /* second key in 2 byte sequence */
@@ -901,9 +901,9 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
 int PASCAL NEAR quickexit P2_(int, f /* prefix flag */,
                               int, n /* prefix argument */)
 {
-    register BUFFER *bp;        /* scanning pointer to buffers */
-    register BUFFER *oldcb;     /* original current buffer */
-    register int status;
+    REGISTER BUFFER *bp;        /* scanning pointer to buffers */
+    REGISTER BUFFER *oldcb;     /* original current buffer */
+    REGISTER int status;
 
     oldcb = curbp;              /* save in case we fail */
 
@@ -941,7 +941,7 @@ int PASCAL NEAR quickexit P2_(int, f /* prefix flag */,
 int PASCAL NEAR quit P2_(int, f /* prefix flag */,
                          int, n /* prefix argument */)
 {
-    register int status;        /* return status */
+    REGISTER int status;        /* return status */
 
     if ( f != FALSE             /* Argument forces it.  */
          || anycb() == FALSE    /* All buffers clean or user says it's OK. */

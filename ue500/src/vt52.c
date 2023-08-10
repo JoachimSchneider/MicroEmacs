@@ -24,24 +24,24 @@
 # define ESC     0x1B                   /* ESC character.               */
 # define BEL     0x07                   /* ascii bell character         */
 
-extern int     ttopen();                /* Forward references.          */
-extern int     ttgetc();
-extern int     ttputc();
-extern int     ttflush();
-extern int     ttclose();
-extern int     vt52move();
-extern int     vt52eeol();
-extern int     vt52eeop();
-extern int     vt52beep();
-extern int     vt52open();
-extern int     vt52rev();
-extern int     vt52cres();
-extern int     vt52kopen();
-extern int     vt52kclose();
+EXTERN int     ttopen();                /* Forward references.          */
+EXTERN int     ttgetc();
+EXTERN int     ttputc();
+EXTERN int     ttflush();
+EXTERN int     ttclose();
+EXTERN int     vt52move();
+EXTERN int     vt52eeol();
+EXTERN int     vt52eeop();
+EXTERN int     vt52beep();
+EXTERN int     vt52open();
+EXTERN int     vt52rev();
+EXTERN int     vt52cres();
+EXTERN int     vt52kopen();
+EXTERN int     vt52kclose();
 
 # if     COLOR
-extern int     vt52fcol();
-extern int     vt52bcol();
+EXTERN int     vt52fcol();
+EXTERN int     vt52bcol();
 # endif
 
 /*
@@ -116,7 +116,7 @@ vt52beep()
 vt52open()
 {
 # if     BSD
-    register char *cp;
+    REGISTER char *cp;
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
         puts(TEXT4);

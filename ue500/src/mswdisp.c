@@ -350,7 +350,7 @@ VOID FAR PASCAL ClientToCell (HWND hWnd, POINT Client, LPPOINT Cell)
         MaxCol = MLSIZE - 1;
         MaxRow = 0;
     } else {                    /* screen case */
-        register SCREEN_T *sp;
+        REGISTER SCREEN_T *sp;
 #if WINXP
         sp = (SCREEN_T*)GetWindowLongPtr(hWnd, GWL_SCRPTR);
 #else

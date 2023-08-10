@@ -15,11 +15,11 @@
 
 #if     ANSI
 
-extern int PASCAL NEAR fnclabel DCL((int f, int n));
-extern int PASCAL NEAR readparam DCL((int *v));
-extern VOID PASCAL NEAR dobbnmouse DCL((void));
-extern VOID PASCAL NEAR docsi DCL((int oh));
-extern VOID PASCAL NEAR ttputs DCL((char *string));
+EXTERN int PASCAL NEAR fnclabel DCL((int f, int n));
+EXTERN int PASCAL NEAR readparam DCL((int *v));
+EXTERN VOID PASCAL NEAR dobbnmouse DCL((void));
+EXTERN VOID PASCAL NEAR docsi DCL((int oh));
+EXTERN VOID PASCAL NEAR ttputs DCL((char *string));
 
 # if VMS
 #  include ttdef
@@ -36,7 +36,7 @@ typedef struct {/* Terminal characteristics buffer */
     unsigned char page;
     unsigned long tt2;
 } TTCHAR;
-extern NOSHARE TTCHAR orgchar;                  /* Original characteristics */
+EXTERN NOSHARE TTCHAR orgchar;                  /* Original characteristics */
 # endif
 
 # define NROW    25                     /* Screen size.                 */
@@ -48,22 +48,22 @@ extern NOSHARE TTCHAR orgchar;                  /* Original characteristics */
 # define ESC     0x1B                   /* ESC character.               */
 
 /* Forward references.          */
-extern int PASCAL NEAR ansimove();
-extern int PASCAL NEAR ansieeol();
-extern int PASCAL NEAR ansieeop();
-extern int PASCAL NEAR ansibeep();
-extern int PASCAL NEAR ansiopen();
-extern int PASCAL NEAR ansirev();
-extern int PASCAL NEAR ansiclose();
-extern int PASCAL NEAR ansikopen();
-extern int PASCAL NEAR ansikclose();
-extern int PASCAL NEAR ansicres();
-extern int PASCAL NEAR ansiparm();
-extern int PASCAL NEAR ansigetc();
+EXTERN int PASCAL NEAR ansimove();
+EXTERN int PASCAL NEAR ansieeol();
+EXTERN int PASCAL NEAR ansieeop();
+EXTERN int PASCAL NEAR ansibeep();
+EXTERN int PASCAL NEAR ansiopen();
+EXTERN int PASCAL NEAR ansirev();
+EXTERN int PASCAL NEAR ansiclose();
+EXTERN int PASCAL NEAR ansikopen();
+EXTERN int PASCAL NEAR ansikclose();
+EXTERN int PASCAL NEAR ansicres();
+EXTERN int PASCAL NEAR ansiparm();
+EXTERN int PASCAL NEAR ansigetc();
 
 # if     COLOR
-extern int PASCAL NEAR ansifcol();
-extern int PASCAL NEAR ansibcol();
+EXTERN int PASCAL NEAR ansifcol();
+EXTERN int PASCAL NEAR ansibcol();
 static int rev_state = FALSE;
 
 static int cfcolor = -1;        /* current foreground color */
@@ -221,9 +221,9 @@ PASCAL NEAR ansibeep()
 }
 
 PASCAL NEAR ansiparm(n)
-register int n;
+REGISTER int n;
 {
-    register int q, r;
+    REGISTER int q, r;
 
     q = n/10;
     if ( q != 0 ) {
@@ -239,7 +239,7 @@ register int n;
 PASCAL NEAR ansiopen()
 {
 # if     USG | AIX | AUX | HPUX8 | HPUX9 | BSD | SUN | XENIX
-    register char *cp;
+    REGISTER char *cp;
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
         puts(TEXT4);

@@ -122,9 +122,9 @@ VOID PASCAL NEAR free_screen(sp) /* free all resouces associated with a screen *
 SCREEN_T *sp;   /* screen to dump */
 
 {
-    register int cmark;         /* mark ordinal index */
-    register EWINDOW *wp;       /* ptr to window to free */
-    register EWINDOW *tp;       /* temp window pointer */
+    REGISTER int cmark;         /* mark ordinal index */
+    REGISTER EWINDOW *wp;       /* ptr to window to free */
+    REGISTER EWINDOW *tp;       /* temp window pointer */
 
     /* first, free the screen's windows */
     wp = sp->s_first_window;
@@ -408,7 +408,7 @@ int PASCAL NEAR list_screens(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int status;        /* stutus return */
+    REGISTER int status;        /* stutus return */
 
     if ( ( status = screenlist(f) ) != TRUE )
         return (status);

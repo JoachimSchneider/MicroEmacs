@@ -15,8 +15,8 @@
 
 int PASCAL NEAR reglines()
 {
-    register LINE *linep;       /* position while scanning */
-    register int n;             /* number of lines in this current region */
+    REGISTER LINE *linep;       /* position while scanning */
+    REGISTER int n;             /* number of lines in this current region */
     REGION region;
 
     /* check for a valid region first */
@@ -52,7 +52,7 @@ int PASCAL NEAR killregion(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int s;
+    REGISTER int s;
     REGION region;
 
     /* Don't do this command in read-only mode */
@@ -87,9 +87,9 @@ int PASCAL NEAR copyregion(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register LINE   *linep;
-    register int loffs;
-    register int s;
+    REGISTER LINE   *linep;
+    REGISTER int loffs;
+    REGISTER int s;
     REGION region;
 
     if ( ( s=getregion(&region) ) != TRUE )
@@ -132,10 +132,10 @@ int PASCAL NEAR lowerregion(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register LINE *save_dotp;    /* pointer and offset to position to preserve
+    REGISTER LINE *save_dotp;    /* pointer and offset to position to preserve
                                   */
-    register int save_doto;
-    register int status;        /* return status from fetching region */
+    REGISTER int save_doto;
+    REGISTER int status;        /* return status from fetching region */
     int c;                      /* current character */
     REGION region;              /* region which is being used */
 
@@ -198,10 +198,10 @@ int PASCAL NEAR upperregion(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register LINE *save_dotp;    /* pointer and offset to position to preserve
+    REGISTER LINE *save_dotp;    /* pointer and offset to position to preserve
                                   */
-    register int save_doto;
-    register int status;        /* return status from fetching region */
+    REGISTER int save_doto;
+    REGISTER int status;        /* return status from fetching region */
     int c;                      /* current character */
     REGION region;              /* region which is being used */
 
@@ -261,7 +261,7 @@ int PASCAL NEAR narrow(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int status;        /* return status */
+    REGISTER int status;        /* return status */
     BUFFER *bp;                 /* buffer being narrowed */
     SCREEN_T *scrp;             /* screen to fix pointers in */
     EWINDOW *wp;                /* windows to fix up pointers in as well */
@@ -447,11 +447,11 @@ int f, n;        /* prefix flag and argument */
 
 int PASCAL NEAR getregion(rp)
 
-register REGION *rp;
+REGISTER REGION *rp;
 
 {
-    register LINE   *flp;
-    register LINE   *blp;
+    REGISTER LINE   *flp;
+    REGISTER LINE   *blp;
     long fsize;
     long bsize;
 
@@ -517,10 +517,10 @@ char *buf;
 REGION *region;
 
 {
-    register LINE   *linep;
-    register int loffs;
-    register long rsize;
-    register char   *ptr;
+    REGISTER LINE   *linep;
+    REGISTER int loffs;
+    REGISTER long rsize;
+    REGISTER char   *ptr;
 
     ptr = buf;
     linep = region->r_linep;                    /* Current line.    */
@@ -570,7 +570,7 @@ int PASCAL NEAR indent_region(f, n) /* indent a region n tab-stops */
 int f, n;        /* default flag and numeric repeat count */
 
 {
-    register int inc;           /* increment to next line [sgn(n)] */
+    REGISTER int inc;           /* increment to next line [sgn(n)] */
     int count;
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
@@ -610,7 +610,7 @@ int PASCAL NEAR undent_region(f, n) /* undent a region n tab-stops */
 int f, n;        /* default flag and numeric repeat count */
 
 {
-    register int inc;           /* increment to next line [sgn(n)] */
+    REGISTER int inc;           /* increment to next line [sgn(n)] */
     int i, count;
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */

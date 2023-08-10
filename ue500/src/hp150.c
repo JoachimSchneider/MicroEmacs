@@ -23,21 +23,21 @@
 # define BEL     0x07                   /* BEL character.               */
 # define ESC     0x1B                   /* ESC character.               */
 
-extern int PASCAL NEAR  openhp();       /* Forward references.          */
-extern int PASCAL NEAR  hpflush();
-extern int PASCAL NEAR  closehp();
-extern int PASCAL NEAR  hp15kopen();
-extern int PASCAL NEAR  hp15kclose();
-extern int PASCAL NEAR  hp15move();
-extern int PASCAL NEAR  hp15eeol();
-extern int PASCAL NEAR  hp15eeop();
-extern int PASCAL NEAR  hp15beep();
-extern int PASCAL NEAR  gethpkey();
-extern int PASCAL NEAR  hp15rev();
-extern int PASCAL NEAR  hp15cres();
+EXTERN int PASCAL NEAR  openhp();       /* Forward references.          */
+EXTERN int PASCAL NEAR  hpflush();
+EXTERN int PASCAL NEAR  closehp();
+EXTERN int PASCAL NEAR  hp15kopen();
+EXTERN int PASCAL NEAR  hp15kclose();
+EXTERN int PASCAL NEAR  hp15move();
+EXTERN int PASCAL NEAR  hp15eeol();
+EXTERN int PASCAL NEAR  hp15eeop();
+EXTERN int PASCAL NEAR  hp15beep();
+EXTERN int PASCAL NEAR  gethpkey();
+EXTERN int PASCAL NEAR  hp15rev();
+EXTERN int PASCAL NEAR  hp15cres();
 # if     COLOR
-extern int PASCAL NEAR  hp15fcol();
-extern int PASCAL NEAR  hp15bcol();
+EXTERN int PASCAL NEAR  hp15fcol();
+EXTERN int PASCAL NEAR  hp15bcol();
 # endif
 
 PASCAL NEAR hp15parm();
@@ -54,7 +54,7 @@ PASCAL NEAR dsplbls();
 
 /*  Some needed locals  */
 
-union REGS r;           /* register set for bios and dos (AGIOS) calls */
+union REGS r;           /* REGISTER set for bios and dos (AGIOS) calls */
 int capslock = 0;       /* caps lock flag */
 int break_flag;         /* state of MSDOS control break processing */
 
@@ -116,7 +116,7 @@ PASCAL NEAR hp15cres()  /* change screen resolution */
     return (TRUE);
 }
 
-PASCAL NEAR spal()              /* change pallette register */
+PASCAL NEAR spal()              /* change pallette REGISTER */
 {
     /*   not here */
 }
@@ -129,10 +129,10 @@ PASCAL NEAR hp15beep()
 
 PASCAL NEAR hp15parm(n)
 
-register int n;
+REGISTER int n;
 
 {
-    register int q;
+    REGISTER int q;
 
     q = n/10;
     if ( q != 0 )
@@ -563,8 +563,8 @@ PASCAL NEAR fnclabel(f, n)              /* label a function key */
 int f, n;        /* default flag, numeric argument */
 
 {
-    register int status;        /* return status */
-    register int i;             /* loop index */
+    REGISTER int status;        /* return status */
+    REGISTER int i;             /* loop index */
     char lbl[17];       /* returned label contents */
     /* AGIOS command buffer */
     static char cmd[] = { 8, 0, 1, 0, 7, 7, 7, 7, 10, 0, 10, 0 };

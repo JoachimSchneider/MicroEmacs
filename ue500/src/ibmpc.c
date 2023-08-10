@@ -59,7 +59,7 @@ SDRIVE scr_drive[] =
 };
 
 
-extern union REGS rg;                     /* cpu register for use of DOS calls */
+EXTERN union REGS rg;                     /* cpu REGISTER for use of DOS calls */
 
 static int           dtype       = -1;    /* current display type     */
 static long          scadd       = 0;     /* address of screen ram    */
@@ -396,7 +396,7 @@ int state;      /* TRUE = reverse, FALSE = normal */
     return TRUE;
 }
 
-extern dumpscreens();
+EXTERN dumpscreens();
 
 int PASCAL NEAR ibmcres(res) /* change screen resolution */
 

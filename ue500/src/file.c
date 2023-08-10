@@ -46,7 +46,7 @@ int PASCAL NEAR insfile(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int  s         = 0;
+    REGISTER int  s         = 0;
     char          *fname    = NULL; /* file name */
     LINE          *curline  = NULL;
 
@@ -106,7 +106,7 @@ int f, n;        /* prefix flag and argument */
 
 {
     char *fname;        /* file user wishes to find */  /* file name */
-    register int s;     /* status return */
+    REGISTER int s;     /* status return */
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -127,7 +127,7 @@ int f, n;        /* prefix flag and argument */
 #if     CRYPT
 int PASCAL NEAR resetkey()      /* reset the encryption key if needed */
 {
-    register int s;     /* return status */
+    REGISTER int s;     /* return status */
 
     /* turn off the encryption flag */
     cryptflag = FALSE;
@@ -161,10 +161,10 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
 /* fname:   file name to find         */
 /* lockfl:  check the file for locks? */
 {
-    register BUFFER *bp;
-    register LINE   *lp;
-    register int i;
-    register int s;
+    REGISTER BUFFER *bp;
+    REGISTER LINE   *lp;
+    REGISTER int i;
+    REGISTER int s;
     SCREEN_T                *sp;        /* screen pointer, if we need it */
     char bname[NBUFN];          /* buffer name to put file */
     char prompt[NSTRING];       /* string for collisions prompt */
@@ -255,14 +255,14 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
 /* fname:   Name of file to read  */
 /* lockfl:  Check for file locks? */
 {
-    register LINE *lp1;
-    register LINE *lp2;
-    register int i;
-    register EWINDOW *wp;
-    register BUFFER *bp;
-    register int s;
-    register long nline;
-    register int cmark;         /* current mark */
+    REGISTER LINE *lp1;
+    REGISTER LINE *lp2;
+    REGISTER int i;
+    REGISTER EWINDOW *wp;
+    REGISTER BUFFER *bp;
+    REGISTER int s;
+    REGISTER long nline;
+    REGISTER int cmark;         /* current mark */
     int nbytes;
     char mesg[NSTRING];
 
@@ -389,10 +389,10 @@ char        *bname;
 CONST char  *fname;
 
 {
-    register char       *fnameA = xstrdup(fname);
-    register CONST char *cp1;
-    register char       *cp2;
-    register CONST char *pathp;
+    REGISTER char       *fnameA = xstrdup(fname);
+    REGISTER CONST char *cp1;
+    REGISTER char       *cp2;
+    REGISTER CONST char *pathp;
 
 #if     AOSVS | MV_UX
     resolve_full_pathname(fnameA, fnameA);
@@ -455,7 +455,7 @@ VOID PASCAL NEAR unqname(name)  /* make sure a buffer name is unique */
 char *name;     /* name to check on */
 
 {
-    register char *sp;
+    REGISTER char *sp;
 
     /* check to see if it is in the buffer list */
     while ( bfind(name, 0, FALSE) != NULL ) {
@@ -485,7 +485,7 @@ int PASCAL NEAR filewrite(f, n)
 int f, n;       /* emacs arguments */
 
 {
-    register int s;
+    REGISTER int s;
     char *fname;
 
     if ( restflag )             /* don't allow this command if restricted */
@@ -510,7 +510,7 @@ int PASCAL NEAR fileapp(f, n)   /* append file */
 int f, n;       /* emacs arguments */
 
 {
-    register int s;
+    REGISTER int s;
     char *fname;
 
     if ( restflag )             /* don't allow this command if restricted */
@@ -540,7 +540,7 @@ int PASCAL NEAR filesave(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int s;
+    REGISTER int s;
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -601,9 +601,9 @@ int PASCAL NEAR writeout(fn, mode)
 char *fn;       /* name of file to write current buffer to */
 char *mode;     /* mode to open file (w = write a = append) */
 {
-    register LINE *lp;          /* line to scan while writing */
-    register char *sp;          /* temporary string pointer */
-    register long nline;        /* number of lines written */
+    REGISTER LINE *lp;          /* line to scan while writing */
+    REGISTER char *sp;          /* temporary string pointer */
+    REGISTER long nline;        /* number of lines written */
     int status;                 /* return status */
     int sflag;                  /* are we safe saving? */
     char tname[NSTRING];        /* temporary file name */
@@ -732,7 +732,7 @@ int PASCAL NEAR filename(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int s;
+    REGISTER int s;
     char fname[NFILEN];
 
     if ( restflag )             /* don't allow this command if restricted */
@@ -760,13 +760,13 @@ int f, n;        /* prefix flag and argument */
 int PASCAL NEAR ifile(fname)
 char fname[];
 {
-    register LINE *lp0;
-    register LINE *lp1;
-    register LINE *lp2;
-    register int i;
-    register BUFFER *bp;
-    register int s;
-    register long nline;
+    REGISTER LINE *lp0;
+    REGISTER LINE *lp1;
+    REGISTER LINE *lp2;
+    REGISTER int i;
+    REGISTER BUFFER *bp;
+    REGISTER int s;
+    REGISTER long nline;
     int nbytes;
     int cmark;          /* current mark */
     char mesg[NSTRING];
@@ -878,7 +878,7 @@ int PASCAL NEAR showfiles(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register BUFFER *dirbuf;    /* buffer to put file list into */
+    REGISTER BUFFER *dirbuf;    /* buffer to put file list into */
     char outseq[NSTRING];       /* output buffer for file names */
     char *sp;                   /* output ptr for file names */
     char mstring[NSTRING];      /* string to match cmd names to */

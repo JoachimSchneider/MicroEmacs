@@ -49,7 +49,7 @@
 
 #if ( IS_UNIX() )
 # include       <pwd.h>
-extern struct passwd *getpwnam();
+EXTERN struct passwd *getpwnam();
 #endif
 /* mlyesno: Ask a yes or no question in the message line. Return either
  *          TRUE, FALSE, or * ABORT. The ABORT status is returned if
@@ -104,7 +104,7 @@ int PASCAL NEAR mlyesno P1_(char *, prompt)
  *          terminated by a carriage return. Handle * erase, kill, and
  *          * abort keys.
  */
-int PASCAL NEAR mlreply P3_(char *, prompt, char *, buf, int, nbuf)
+int PASCAL NEAR mlreply P3_(CONST char *, prompt, char *, buf, int, nbuf)
 {
     return ( nextarg( prompt, buf, nbuf, ctoec( (int) '\r' ) ) );
 }
@@ -159,9 +159,9 @@ ue_fnc_T getname P1_(char *, prompt)
  *          completion code.
  */
 BUFFER *PASCAL NEAR getcbuf P3_(
-                        char *, prompt,     /* prompt to user on command line   */
-                        char *, defval,     /* default value to display to user */
-                        int,    createflag  /* should this create a new buffer? */
+                        CONST char *, prompt, /* prompt to user on command line   */
+                        char *, defval,       /* default value to display to user */
+                        int,    createflag    /* should this create a new buffer? */
                       )
 {
     /* ptr to the returned string:  */
@@ -212,14 +212,14 @@ char *PASCAL NEAR gtfilename P1_(
 }
 
 char *PASCAL NEAR complete P4_(
-        char *, prompt, /* prompt to user on command line */
-        char *, defval, /* default value to display to user */
-        int,    type,   /* type of what we are completing */
-        int,    maxlen  /* maximum length of input field */
+        CONST char *, prompt, /* prompt to user on command line */
+        char *,       defval, /* default value to display to user */
+        int,          type,   /* type of what we are completing */
+        int,          maxlen  /* maximum length of input field */
     )
 {
-    register int  c         = 0;        /* current input character */
-    register int  ec        = 0;        /* extended input character */
+    REGISTER int  c         = 0;        /* current input character */
+    REGISTER int  ec        = 0;        /* extended input character */
     int           cpos      = 0;        /* current column on screen output */
     char          *home_ptr = NULL;     /* pointer to home directory string */
     char          *ptr      = NULL;     /* string pointer */
@@ -484,12 +484,12 @@ VOID PASCAL NEAR comp_command P2_(
         int *,  cpos  /* ptr to position of next character to insert */
     )
 {
-    register NBIND  *bp       = NULL; /* trial command to complete */
-    register int    index     = 0;    /* index into strings to compare */
-    register int    curbind   = 0;    /* index into the names[] array */
-    register NBIND  *match    = NULL; /* last command that matches string */
-    register int    matchflag = 0;    /* did this command name match? */
-    register int    comflag   = 0;    /* was there a completion at all? */
+    REGISTER NBIND  *bp       = NULL; /* trial command to complete */
+    REGISTER int    index     = 0;    /* index into strings to compare */
+    REGISTER int    curbind   = 0;    /* index into the names[] array */
+    REGISTER NBIND  *match    = NULL; /* last command that matches string */
+    REGISTER int    matchflag = 0;    /* did this command name match? */
+    REGISTER int    comflag   = 0;    /* was there a completion at all? */
 
     /* everything (or nothing) matches an empty string */
     if ( *cpos == 0 )
@@ -566,10 +566,10 @@ VOID PASCAL NEAR clist_command P2_(
         int *,  cpos  /* ptr to position of next character to insert */
     )
 {
-    register NBIND  *bp       = NULL;   /* trial command to complete */
-    register int    curbind   = 0;      /* index into the names[] array */
-    register int    name_len  = 0;      /* current length of input string */
-    register BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
+    REGISTER NBIND  *bp       = NULL;   /* trial command to complete */
+    REGISTER int    curbind   = 0;      /* index into the names[] array */
+    REGISTER int    name_len  = 0;      /* current length of input string */
+    REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
 
     /* get a buffer for the completion list */
     listbuf = bfind("[Completion list]", TRUE, BFINVS);
@@ -603,11 +603,11 @@ VOID PASCAL NEAR comp_buffer P2_(
         int *,  cpos  /* ptr to position of next character to insert    */
     )
 {
-    register BUFFER *bp       = NULL; /* trial buffer to complete         */
-    register int    index     = 0;    /* index into strings to compare    */
-    register BUFFER *match    = NULL; /* last buffer that matches string  */
-    register int    matchflag = 0;    /* did this buffer name match?      */
-    register int    comflag   = 0;    /* was there a completion at all?   */
+    REGISTER BUFFER *bp       = NULL; /* trial buffer to complete         */
+    REGISTER int    index     = 0;    /* index into strings to compare    */
+    REGISTER BUFFER *match    = NULL; /* last buffer that matches string  */
+    REGISTER int    matchflag = 0;    /* did this buffer name match?      */
+    REGISTER int    comflag   = 0;    /* was there a completion at all?   */
 
     /* everything (or nothing) matches an empty string */
     if ( *cpos == 0 )
@@ -682,9 +682,9 @@ VOID PASCAL NEAR clist_buffer P2_(
         int *,  cpos  /* ptr to position of next character to insert      */
     )
 {
-    register int    name_len  = 0;      /* current length of input string     */
-    register BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
-    register BUFFER *bp       = NULL;   /* trial buffer to complete           */
+    REGISTER int    name_len  = 0;      /* current length of input string     */
+    REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
+    REGISTER BUFFER *bp       = NULL;   /* trial buffer to complete           */
 
     /* get a buffer for the completion list */
     listbuf = bfind("[Completion list]", TRUE, BFINVS);
@@ -722,9 +722,9 @@ VOID PASCAL NEAR comp_file P2_(
         int *,  cpos  /* ptr to position of next character to insert  */
     )
 {
-    register char *fname      = NULL;     /* trial file to complete         */
-    register int  index       = 0;        /* index into strings to compare  */
-    register int  matches     = 0;        /* number of matches for name     */
+    REGISTER char *fname      = NULL;     /* trial file to complete         */
+    REGISTER int  index       = 0;        /* index into strings to compare  */
+    REGISTER int  matches     = 0;        /* number of matches for name     */
     char          longestmatch[NSTRING];  /* temp buffer for longest match  */
     int           longestlen  = 0;        /* length of longest match        */
                                           /*   (always > *cpos)             */
@@ -803,9 +803,9 @@ VOID PASCAL NEAR clist_file P2_(
         int *,  cpos  /* ptr to position of next character to insert      */
     )
 {
-    register int    name_len  = 0;      /* current length of input string     */
-    register BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
-    register char   *fname    = NULL;   /* trial file to complete             */
+    REGISTER int    name_len  = 0;      /* current length of input string     */
+    REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
+    REGISTER char   *fname    = NULL;   /* trial file to complete             */
 
     /* get a buffer for the completion list */
     listbuf = bfind("[Completion list]", TRUE, BFINVS);
@@ -981,10 +981,10 @@ int PASCAL NEAR getcmd P0_(void)
  */
 int PASCAL NEAR getstring P3_(unsigned char *, buf, int, nbuf, int, eolchar)
 {
-    register int  cpos    = 0;    /* current character position in string */
-    register int  c       = 0;    /* current input character              */
-    register int  ec      = 0;    /* extended current input character     */
-    register int  quotef  = 0;    /* are we quoting the next char?        */
+    REGISTER int  cpos    = 0;    /* current character position in string */
+    REGISTER int  c       = 0;    /* current input character              */
+    REGISTER int  ec      = 0;    /* extended current input character     */
+    REGISTER int  quotef  = 0;    /* are we quoting the next char?        */
     char          *kp     = NULL; /* pointer into key_name                */
     char key_name[10];            /* name of a quoted key                 */
 
@@ -1155,7 +1155,7 @@ int PASCAL NEAR ostring P1_(char *, s /* string to output */)
  */
 int PASCAL NEAR mlprompt P3_(char *, prompt, char *, dflt, int, iterm)
 {
-    register int  tcol  = 0;
+    REGISTER int  tcol  = 0;
     char          buf[NSTRING];
 
     ZEROMEM(buf);

@@ -47,8 +47,7 @@ int PASCAL NEAR is_upper P1_(char, ch)
  * then upper.  If it is not a letter, it gets returned unchanged.
  */
 
-unsigned int PASCAL NEAR chcase(ch)
-register unsigned int ch;
+unsigned int PASCAL NEAR chcase P1_(unsigned int, ch)
 {
     /* translate lowercase */
     if ( is_lower(ch) )
@@ -107,7 +106,7 @@ int PASCAL NEAR lowerc P1_(char, ch)  /* return the lower case equivalant of
 VOID PASCAL NEAR initchars()    /* initialize the character upper/lower case
                                  * tables */
 {
-    register int index;         /* index into tables */
+    REGISTER int index;         /* index into tables */
 
     /* all of both tables to zero */
     for ( index = 0; index < HICHAR; index++ ) {
@@ -262,8 +261,8 @@ char *val;      /* value to set it to */
 char *strrev(our_str)
 char *our_str;
 {
-    register char   *beg_str, *end_str;
-    register char the_char;
+    REGISTER char   *beg_str, *end_str;
+    REGISTER char the_char;
 
     end_str = beg_str = our_str;
     end_str += strlen(beg_str);
@@ -287,7 +286,7 @@ char *sp;       /* ptr to beginning of string containing character to test */
 char *cp;       /* ptr to character to test */
 
 {
-    register char *cc;          /* pointer to current character */
+    REGISTER char *cc;          /* pointer to current character */
 
     cc = sp;
     while ( *cc ) {

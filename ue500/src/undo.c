@@ -248,7 +248,7 @@ int PASCAL NEAR undo_list(f, n)
 int f, n;        /* prefix flag and argument */
 
 {
-    register int status;        /* stutus return */
+    REGISTER int status;        /* stutus return */
 
     if ( ( status = undolist() ) != TRUE )
         return (status);
@@ -256,10 +256,10 @@ int f, n;        /* prefix flag and argument */
     return ( wpopup(ulistp) );
 }
 
-int PASCAL NEAR undolist()
+int PASCAL NEAR undolist P0_(void)
 {
-    register char *cp1;         /* scanning pointer into line to build */
-    register char *cp2;
+    REGISTER char *cp1;         /* scanning pointer into line to build */
+    REGISTER char *cp2;
     long count;                 /* number of remaining undo elements in stack */
     UNDO_OBJ *up;               /* current undo object being listed */
     char b[8];                  /* place to build ascii version of longs */

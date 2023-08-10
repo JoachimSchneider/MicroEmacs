@@ -13,11 +13,11 @@
 #if     NEC
 # include        <dos.h>
 
-extern int PASCAL NEAR fnclabel DCL((int f, int n));
-extern int PASCAL NEAR readparam DCL((int *v));
-extern VOID PASCAL NEAR dobbnmouse DCL((void));
-extern VOID PASCAL NEAR docsi DCL((int oh));
-extern VOID PASCAL NEAR ttputs DCL((char *string));
+EXTERN int PASCAL NEAR fnclabel DCL((int f, int n));
+EXTERN int PASCAL NEAR readparam DCL((int *v));
+EXTERN VOID PASCAL NEAR dobbnmouse DCL((void));
+EXTERN VOID PASCAL NEAR docsi DCL((int oh));
+EXTERN VOID PASCAL NEAR ttputs DCL((char *string));
 
 # define NROW    24                     /* Screen size.                 */
 # define NCOL    80                     /* Edit if you want to.         */
@@ -28,26 +28,26 @@ extern VOID PASCAL NEAR ttputs DCL((char *string));
 # define ESC     0x1B                   /* ESC character.               */
 
 /* Forward references.          */
-extern int PASCAL NEAR necmove();
-extern int PASCAL NEAR neceeol();
-extern int PASCAL NEAR neceeop();
-extern int PASCAL NEAR necbeep();
-extern int PASCAL NEAR necopen();
-extern int PASCAL NEAR necrev();
-extern int PASCAL NEAR necclose();
-extern int PASCAL NEAR neckopen();
-extern int PASCAL NEAR neckclose();
-extern int PASCAL NEAR neccres();
-extern int PASCAL NEAR necparm();
-extern int PASCAL NEAR necgetc();
+EXTERN int PASCAL NEAR necmove();
+EXTERN int PASCAL NEAR neceeol();
+EXTERN int PASCAL NEAR neceeop();
+EXTERN int PASCAL NEAR necbeep();
+EXTERN int PASCAL NEAR necopen();
+EXTERN int PASCAL NEAR necrev();
+EXTERN int PASCAL NEAR necclose();
+EXTERN int PASCAL NEAR neckopen();
+EXTERN int PASCAL NEAR neckclose();
+EXTERN int PASCAL NEAR neccres();
+EXTERN int PASCAL NEAR necparm();
+EXTERN int PASCAL NEAR necgetc();
 # if     INSDEL
-extern int PASCAL NEAR necins();
-extern int PASCAL NEAR necdel();
+EXTERN int PASCAL NEAR necins();
+EXTERN int PASCAL NEAR necdel();
 # endif
 
 # if     COLOR
-extern int PASCAL NEAR necfcol();
-extern int PASCAL NEAR necbcol();
+EXTERN int PASCAL NEAR necfcol();
+EXTERN int PASCAL NEAR necbcol();
 
 static int cfcolor = -1;        /* current forground color */
 static int cbcolor = -1;        /* current background color */
@@ -97,7 +97,7 @@ static unsigned char curkeys[FSIZE] =   /* current key save buffer */
     0x1d, 0, 0, 0, 0, 0,        /* end */
 };
 
-extern union REGS rg;           /* cpu register for use of DOS calls */
+EXTERN union REGS rg;           /* cpu REGISTER for use of DOS calls */
 # endif
 
 /*
@@ -251,9 +251,9 @@ PASCAL NEAR necbeep()
 }
 
 PASCAL NEAR necparm(n)
-register int n;
+REGISTER int n;
 {
-    register int q, r;
+    REGISTER int q, r;
 
     q = n/10;
     if ( q != 0 ) {

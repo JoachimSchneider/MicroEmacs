@@ -26,12 +26,12 @@ int PASCAL NEAR showcpos(f, n)
 int f, n;                             /* prefix flag and argument */
 
 {
-    register LINE *lp       = NULL;   /* current line */
-    register long numchars  = 0;      /* # of chars in file */
-    register long numlines  = 0;      /* # of lines in file */
-    register long predchars = 0;      /* # chars preceding point */
-    register long predlines = 0;      /* # lines preceding point */
-    register int  curchar   = 0;      /* character under cursor */
+    REGISTER LINE *lp       = NULL;   /* current line */
+    REGISTER long numchars  = 0;      /* # of chars in file */
+    REGISTER long numlines  = 0;      /* # of lines in file */
+    REGISTER long predchars = 0;      /* # chars preceding point */
+    REGISTER long predlines = 0;      /* # lines preceding point */
+    REGISTER int  curchar   = 0;      /* character under cursor */
     int           ratio     = 0;
     int           col       = 0;
     int           savepos   = 0;      /* temp save for current offset */
@@ -110,8 +110,8 @@ long PASCAL NEAR getlinenum(bp, sline)  /* get the a line number */
 BUFFER *bp;                             /* buffer to get current line from */
 LINE *sline;                    /* line to search for */
 {
-    register LINE   *lp;        /* current line */
-    register long numlines;             /* # of lines before point */
+    REGISTER LINE   *lp;        /* current line */
+    REGISTER long numlines;             /* # of lines before point */
 
     /* starting at the beginning of the buffer */
     lp = lforw(bp->b_linep);
@@ -177,7 +177,7 @@ int PASCAL NEAR findcol(lp, pos)
 LINE * lp;                              /* line to scan */
 int pos;                                /* character offset */
 {
-    register int c, i, col;
+    REGISTER int c, i, col;
 
     col = 0;
     for ( i = 0; i < pos; ++i ) {
@@ -206,10 +206,10 @@ int PASCAL NEAR setccol(pos)
 
 int pos;                                /* position to set cursor */
 {
-    register int c;             /* character being scanned */
-    register int i;             /* index into current line */
-    register int col;           /* current cursor column   */
-    register int llen;          /* length of line in bytes */
+    REGISTER int c;             /* character being scanned */
+    REGISTER int i;             /* index into current line */
+    REGISTER int col;           /* current cursor column   */
+    REGISTER int llen;          /* length of line in bytes */
 
     col = 0;
     llen = get_lused(curwp->w_dotp);
@@ -257,10 +257,10 @@ int PASCAL NEAR twiddle(f, n)
 int f, n;                               /* prefix flag and argument */
 
 {
-    register LINE *dotp;                /* shorthand to current line pointer */
+    REGISTER LINE *dotp;                /* shorthand to current line pointer */
     int saved_doto;                     /* restore the cursor afterwards */
-    register int cl;                    /* characters to swap! */
-    register int cr;
+    REGISTER int cl;                    /* characters to swap! */
+    REGISTER int cr;
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -319,9 +319,9 @@ int PASCAL NEAR quote(f, n)
 
 int f, n;                               /* prefix flag and argument */
 {
-    register int ec;            /* current extended key fetched     */
-    register int c;             /* current ascii key fetched        */
-    register int status;        /* return value to hold from linstr */
+    REGISTER int ec;            /* current extended key fetched     */
+    REGISTER int c;             /* current ascii key fetched        */
+    REGISTER int status;        /* return value to hold from linstr */
     char key_name[10];          /* name of a keystroke for quoting  */
 
     if ( curbp->b_mode & MDVIEW )   /* don't allow this command if  */
@@ -386,7 +386,7 @@ int PASCAL NEAR detab(f, n)     /* change tabs to spaces */
 int f, n;                               /* default flag and numeric repeat count
                                          */
 {
-    register int inc;           /* increment to next line [sgn(n)] */
+    REGISTER int inc;           /* increment to next line [sgn(n)] */
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -430,10 +430,10 @@ int PASCAL NEAR entab(f, n)     /* change spaces to tabs where posible */
 int f, n;                               /* default flag and numeric repeat count
                                          */
 {
-    register int inc;           /* increment to next line [sgn(n)] */
-    register int fspace;        /* pointer to first space if in a run */
-    register int ccol;          /* current cursor column */
-    register char cchar;        /* current character */
+    REGISTER int inc;           /* increment to next line [sgn(n)] */
+    REGISTER int fspace;        /* pointer to first space if in a run */
+    REGISTER int ccol;          /* current cursor column */
+    REGISTER char cchar;        /* current character */
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -508,10 +508,10 @@ int PASCAL NEAR trim(f, n)
 int f, n;                               /* default flag and numeric repeat count
                                          */
 {
-    register LINE *lp;          /* current line pointer */
-    register int offset;        /* original line offset position */
-    register int length;        /* current length */
-    register int inc;           /* increment to next line [sgn(n)] */
+    REGISTER LINE *lp;          /* current line pointer */
+    REGISTER int offset;        /* original line offset position */
+    REGISTER int length;        /* current length */
+    REGISTER int inc;           /* increment to next line [sgn(n)] */
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -554,8 +554,8 @@ int PASCAL NEAR openline(f, n)
 
 int f, n;                               /* prefix flag and argument */
 {
-    register int i;
-    register int s;
+    REGISTER int i;
+    REGISTER int s;
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -585,7 +585,7 @@ int PASCAL NEAR newline(f, n)
 
 int f, n;                               /* prefix flag and argument */
 {
-    register int s;
+    REGISTER int s;
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -617,12 +617,12 @@ int f, n;                               /* prefix flag and argument */
 
 int PASCAL NEAR cinsert()       /* insert a newline and indentation for C */
 {
-    register char *cptr;        /* string pointer into text to copy */
-    register int i;             /* index into line to copy indent from */
-    register int llen;          /* length of line to copy indent from */
-    register int bracef;        /* was there a brace at the end of line? */
-    register LINE *lp;          /* current line pointer */
-    register int offset;
+    REGISTER char *cptr;        /* string pointer into text to copy */
+    REGISTER int i;             /* index into line to copy indent from */
+    REGISTER int llen;          /* length of line to copy indent from */
+    REGISTER int bracef;        /* was there a brace at the end of line? */
+    REGISTER LINE *lp;          /* current line pointer */
+    REGISTER int offset;
     char ichar[NSTRING];        /* buffer to hold indent of last line */
 
     /* trim the whitespace before the point */
@@ -679,12 +679,12 @@ int PASCAL NEAR insbrace(n, c)  /* insert a brace into the text here...we are in
 int n;                                  /* repeat count */
 int c;                                  /* brace to insert (always } for now) */
 {
-    register int ch;            /* last character before input */
-    register int oc;            /* caractere oppose a c */
-    register int i, count;
-    register int target;        /* column brace should go after */
-    register LINE *oldlp;
-    register int oldoff;
+    REGISTER int ch;            /* last character before input */
+    REGISTER int oc;            /* caractere oppose a c */
+    REGISTER int i, count;
+    REGISTER int target;        /* column brace should go after */
+    REGISTER LINE *oldlp;
+    REGISTER int oldoff;
 
     /* if we aren't at the beginning of the line... */
     if ( get_w_doto(curwp) != 0 )
@@ -775,8 +775,8 @@ int c;                                  /* brace to insert (always } for now) */
 int PASCAL NEAR inspound()      /* insert a # into the text here...we are in
                                  * CMODE */
 {
-    register int ch;            /* last character before input */
-    register int i;
+    REGISTER int ch;            /* last character before input */
+    REGISTER int i;
 
     /* if we are at the beginning of the line, no go */
     if ( get_w_doto(curwp) == 0 )
@@ -809,8 +809,8 @@ int PASCAL NEAR deblank(f, n)
 
 int f, n;                               /* prefix flag and argument */
 {
-    register LINE   *lp1;
-    register LINE   *lp2;
+    REGISTER LINE   *lp1;
+    REGISTER LINE   *lp2;
     long nld;
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
@@ -845,9 +845,9 @@ int PASCAL NEAR indent(f, n)
 
 int f, n;                               /* prefix flag and argument */
 {
-    register int nicol;
-    register int c;
-    register int i;
+    REGISTER int nicol;
+    REGISTER int c;
+    REGISTER int i;
 
     if ( curbp->b_mode & MDVIEW )       /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
@@ -929,7 +929,7 @@ int PASCAL NEAR backdel(f, n)
 int f, n;       /* prefix flag and argument */
 
 {
-    register int status;
+    REGISTER int status;
 
     /* Don't do this command in read-only mode */
     if ( curbp->b_mode & MDVIEW )
@@ -970,7 +970,7 @@ int PASCAL NEAR killtext(f, n)
 int f, n;       /* prefix flag and argument */
 
 {
-    register LINE *nextp  = NULL;
+    REGISTER LINE *nextp  = NULL;
     long          chunk   = 0;
 
     /* Don't do this command in read-only mode */
@@ -1051,11 +1051,11 @@ int kind;                               /* true = set,      false = delete */
 int global;                             /* true = global flag,  false = current
                                          * buffer flag */
 {
-    register char *scan;        /* scanning pointer to convert prompt */
-    register int i;             /* loop index */
-    register int status;        /* error return on input */
+    REGISTER char *scan;        /* scanning pointer to convert prompt */
+    REGISTER int i;             /* loop index */
+    REGISTER int status;        /* error return on input */
 #if     COLOR
-    register int uflag;         /* was modename uppercase?  */
+    REGISTER int uflag;         /* was modename uppercase?  */
 #endif
     char prompt[50];            /* string to prompt user with */
     char cbuf[NPAT];            /* buffer to recieve mode name into */
@@ -1180,7 +1180,7 @@ int PASCAL NEAR writemsg(f, n)
 
 int f, n;                               /* arguments ignored */
 {
-    register int status;
+    REGISTER int status;
     char buf[NPAT];             /* buffer to recieve message into */
 
     if ( ( status = mlreply(TEXT67, buf, NPAT - 1) ) != TRUE )
@@ -1199,14 +1199,14 @@ int PASCAL NEAR getfence(f, n)
 
 int f, n;                               /* not used */
 {
-    register LINE *oldlp;       /* original line pointer */
-    register int oldoff;        /* and offset */
-    register int sdir;          /* direction of search (1/-1) */
-    register int count;         /* current fence level count */
-    register char ch;           /* fence type to match against */
-    register char ofence;       /* open fence */
-    register char c;            /* current character in scan */
-    register int qlevel;        /* quote level */
+    REGISTER LINE *oldlp;       /* original line pointer */
+    REGISTER int oldoff;        /* and offset */
+    REGISTER int sdir;          /* direction of search (1/-1) */
+    REGISTER int count;         /* current fence level count */
+    REGISTER char ch;           /* fence type to match against */
+    REGISTER char ofence;       /* open fence */
+    REGISTER char c;            /* current character in scan */
+    REGISTER int qlevel;        /* quote level */
 
     /* save the original cursor position */
     oldlp = curwp->w_dotp;
@@ -1322,14 +1322,14 @@ int f, n;                               /* not used */
 
 int PASCAL NEAR fmatch P1_(char, ch /* fence type to match against */)
 {
-    register LINE *oldlp;       /* original line pointer */
-    register int oldoff;        /* and offset */
-    register LINE *toplp;       /* top line in current window */
-    register int count;         /* current fence level count */
-    register char opench;       /* open fence */
-    register char c;            /* current character in scan */
-    register int qlevel;        /* quote level */
-    register int i;
+    REGISTER LINE *oldlp;       /* original line pointer */
+    REGISTER int oldoff;        /* and offset */
+    REGISTER LINE *toplp;       /* top line in current window */
+    REGISTER int count;         /* current fence level count */
+    REGISTER char opench;       /* open fence */
+    REGISTER char c;            /* current character in scan */
+    REGISTER int qlevel;        /* quote level */
+    REGISTER int i;
 
     /* first get the display update out there */
     update(FALSE);
@@ -1419,7 +1419,7 @@ int PASCAL NEAR istring(f, n)
 int f, n;                               /* ignored arguments */
 
 {
-    register int status;        /* status return code */
+    REGISTER int status;        /* status return code */
     char tstring[NPAT + 1];     /* string to add */
 
     /* ask for string to insert */
@@ -1446,7 +1446,7 @@ int PASCAL NEAR ovstring(f, n)  /* ask for and overwite a string into the
 
 int f, n;                               /* ignored arguments */
 {
-    register int status;        /* status return code */
+    REGISTER int status;        /* status return code */
     char tstring[NPAT + 1];     /* string to add */
 
     /* ask for string to insert */
@@ -1472,7 +1472,7 @@ int PASCAL NEAR lookup_color(sp)
 
 char *sp;                               /* name to look up */
 {
-    register int i;             /* index into color list */
+    REGISTER int i;             /* index into color list */
 
     /* test it against the colors we know */
     for ( i = 0; i < NCOLORS; i++ ) {
