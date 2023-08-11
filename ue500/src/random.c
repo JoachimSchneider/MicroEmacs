@@ -2063,7 +2063,7 @@ VOID  DelStack(CONST VOIDP stack)
 /*====================================================================*/
 
 
-FILE *PASCAL NEAR GetTrcFP P0_(void)
+FILE *PASCAL NEAR GetTrcFP P0_()
 {
   static int  FirstCall = !0;
   static FILE *TrcFP    = NULL;

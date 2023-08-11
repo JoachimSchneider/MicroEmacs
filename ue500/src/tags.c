@@ -98,7 +98,7 @@ static int newtags P1_(char *, path)
  * Look-up 'tags' file; first in our list and if it isn't there try it the hard
  * way.  If we find the file we return TRUE.
  */
-static int lookup P0_(void)
+static int lookup P0_()
 {
     TAG           *tmp  = curtp;  /* Remember current 'tags'  */
     char          cpath[NFILEN];  /* Path of current file     */

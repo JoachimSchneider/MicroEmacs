@@ -669,7 +669,7 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
  * To use, we need a grabwait(), grabnowait(), qin() and qrep() function.
  */
 # define TIMEOUT  (255)
-VOID cook P0_(void)
+VOID cook P0_()
 {
     REGISTER unsigned char  ch    = '\0';
     KEYENT                  *cur  = NULL;

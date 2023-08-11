@@ -178,7 +178,7 @@ int PASCAL NEAR ibmmove P2_(int, row, int, col)
     return TRUE;
 }
 
-int PASCAL NEAR ibmeeol P0_(void) /* erase to the end of the line */
+int PASCAL NEAR ibmeeol P0_() /* erase to the end of the line */
 {
     unsigned int  attr  = 0;      /* attribute byte mask to place in RAM */
     unsigned int *lnptr = NULL;   /* pointer to the destination line */
@@ -327,7 +327,7 @@ int ch;
     return TRUE;
 }
 
-int PASCAL NEAR ibmeeop P0_(void)
+int PASCAL NEAR ibmeeop P0_()
 {
     rg.h.ah = 6;                /* scroll page up function code */
     rg.h.al = 0;                /* # lines to scroll (clear it) */
@@ -356,7 +356,7 @@ int PASCAL NEAR ibmeeop P0_(void)
     return TRUE;
 }
 
-int PASCAL NEAR ibmclrdesk P0_(void)
+int PASCAL NEAR ibmclrdesk P0_()
 {
     int attr  = 0;              /* attribute to fill screen with */
 
@@ -425,7 +425,7 @@ char *mode;
     return TRUE;
 }
 
-int PASCAL NEAR ibmbeep P0_(void)
+int PASCAL NEAR ibmbeep P0_()
 {
 # if     MWC
     ttputc(BEL);
@@ -440,7 +440,7 @@ int PASCAL NEAR ibmbeep P0_(void)
     return TRUE;
 }
 
-int PASCAL NEAR ibmopen P0_(void)
+int PASCAL NEAR ibmopen P0_()
 {
     scinit(CDSENSE);
     revexist = TRUE;
@@ -450,7 +450,7 @@ int PASCAL NEAR ibmopen P0_(void)
     return TRUE;
 }
 
-int PASCAL NEAR ibmclose P0_(void)
+int PASCAL NEAR ibmclose P0_()
 {
 # if     COLOR
     ibmfcol(7);
@@ -469,7 +469,7 @@ int PASCAL NEAR ibmclose P0_(void)
     return TRUE;
 }
 
-int PASCAL NEAR ibmkopen P0_(void)    /* open the keyboard */
+int PASCAL NEAR ibmkopen P0_()    /* open the keyboard */
 {
     /* find the current state of the control break inturrupt */
     rg.h.ah = 0x33;     /* ctrl-break check */
@@ -488,7 +488,7 @@ int PASCAL NEAR ibmkopen P0_(void)    /* open the keyboard */
     return TRUE;
 }
 
-int PASCAL NEAR ibmkclose P0_(void) /* close the keyboard */
+int PASCAL NEAR ibmkclose P0_() /* close the keyboard */
 {
     if ( break_flag == 1 ) {
         rg.h.ah = 0x33;         /* ctrl-break check */
@@ -634,7 +634,7 @@ int ncols;      /* number of columns across */
  * = TRUE  VGAexist = FALSE VGA set to CGA  EGAexist = TRUE  VGAexist = TRUE
  */
 
-int PASCAL NEAR getboard P0_(void)
+int PASCAL NEAR getboard P0_()
 {
     int type  = 0;      /* board type to return */
 
@@ -743,7 +743,7 @@ int mode;       /* mode to select [CDEGA/CDVGA] */
     return TRUE;
 }
 
-int PASCAL NEAR egaclose P0_(void)
+int PASCAL NEAR egaclose P0_()
 {
     /* set the proper number of scan lines for CGA */
     rg.h.ah = 18;
@@ -758,7 +758,7 @@ int PASCAL NEAR egaclose P0_(void)
     return TRUE;
 }
 
-int PASCAL NEAR cga40_open P0_(void)
+int PASCAL NEAR cga40_open P0_()
 {
     /* put the beast into 40 column mode */
     rg.x.ax = 1;
@@ -767,7 +767,7 @@ int PASCAL NEAR cga40_open P0_(void)
     return TRUE;
 }
 
-int PASCAL NEAR cga40_close P0_(void)
+int PASCAL NEAR cga40_close P0_()
 {
     /* put the beast into 80 column mode */
     rg.x.ax = 3;

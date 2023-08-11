@@ -813,7 +813,7 @@ CONST char *PASCAL NEAR fixnull P1_(CONST char *, s)
  *
  * Function returns a static result string: Copy immediately!
  */
-char *PASCAL NEAR getkill P0_(void)
+char *PASCAL NEAR getkill P0_()
 {
     STATIC_STR_RET_PROLOG();
 

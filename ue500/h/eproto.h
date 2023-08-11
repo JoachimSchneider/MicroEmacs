@@ -94,7 +94,7 @@ EXTERN char *realloc DCL((char *block, int siz));
 
 /**********************************************************************/
 #if     PROTO
-# define P0_(x0)                        (void)
+# define P0_()                          (void)
 # define P1_(t1, x1)                                                                  \
   (t1 x1)
 # define P2_(t1, x1, t2, x2)                                                          \
@@ -115,7 +115,7 @@ EXTERN char *realloc DCL((char *block, int siz));
   (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
 # define DCL(args)                      args
 #else
-# define P0_(x0)                        ()
+# define P0_()                          ()
 # define P1_(t1, x1)                                                                  \
   (x1)                                  t1 x1;
 # define P2_(t1, x1, t2, x2)                                                          \
@@ -1625,7 +1625,7 @@ EXTERN int PASCAL NEAR del_abbrev DCL((int f, int n));
 EXTERN int PASCAL NEAR kill_abbrevs DCL((int f, int n));
 EXTERN int PASCAL NEAR ins_abbrevs DCL((int f, int n));
 EXTERN int PASCAL NEAR def_abbrevs DCL((int f, int n));
-EXTERN int PASCAL NEAR addline DCL((BUFFER *bp, char *text));
+EXTERN int PASCAL NEAR addline DCL((BUFFER *bp, CONST char *text));
 EXTERN int PASCAL NEAR amatch DCL((MC *mcptr, int direct, LINE **pcwline,
                               int *pcwoff));
 EXTERN int PASCAL NEAR backhunt DCL((int f, int n));
@@ -2029,7 +2029,7 @@ EXTERN VOID PASCAL NEAR mcclear DCL((void));
 EXTERN VOID PASCAL NEAR mlabort DCL((char *s));
 EXTERN VOID PASCAL NEAR mlerase DCL((void));
 EXTERN VOID PASCAL NEAR mlferase DCL((void));
-EXTERN VOID PASCAL NEAR mlforce DCL((char *s));
+EXTERN VOID PASCAL NEAR mlforce DCL((CONST char *s));
 EXTERN VOID PASCAL NEAR mlout DCL((int c));
 EXTERN VOID PASCAL NEAR mlputf DCL((int s));
 EXTERN VOID PASCAL NEAR mlputi DCL((int i, int r));

@@ -472,7 +472,7 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
 
 
 #else
-VOID dohello P0_(void)
+VOID dohello P0_()
 {
 }
 #endif

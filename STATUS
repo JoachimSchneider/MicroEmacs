@@ -72,9 +72,9 @@ These files have been reviewed:
 
 File Name     Formated Comments   Func. Proto.    Init.   Warnings  EOF
 ============================================================================
-src/bind.c      X                                           X         X
+src/bind.c      X                   X                       X         X
 src/exec.c      X                   X               X       X         X
-src/display.c   X                                           X
+src/display.c   X                   X                       X         X
 src/eval.c      X                                           X         X
 src/file.c      X                                           X         X
 src/ibmpc.c     X                                   X       X         X
@@ -520,11 +520,12 @@ modifier, because const is ANSI C compliant and readonly is not.
 
 
 [2023-08-09.00]
+[2023-08-10.00]
 
 - Next Step (Monkey Work) necessary to complie with g++: Convert all
   K&R definitions to the P#_-Format (which expands to ANSI-C
   definitions with PROTO set.).
 - In this process repair the damages comments too.
-- Curren File: src/bind.c
+- Current File: src/display.c
 
 # EOF

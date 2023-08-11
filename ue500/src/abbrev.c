@@ -252,7 +252,7 @@ int PASCAL NEAR def_abbrevs P2_(int, f, int, n)
     return TRUE;
 }
 
-VOID PASCAL NEAR ab_init P0_(void)
+VOID PASCAL NEAR ab_init P0_()
 {
     ab_head = (ABBREV *)NULL;     /* abbreviation list empty */
     ab_bell = FALSE;            /* no ringing please! */
@@ -397,7 +397,7 @@ int PASCAL NEAR ab_delete P1_(char *, sym)
     return (FALSE);
 }
 
-int PASCAL NEAR ab_clean P0_(void)
+int PASCAL NEAR ab_clean P0_()
 {
 
     ABBREV *cur_node;           /* ptr to look through list */

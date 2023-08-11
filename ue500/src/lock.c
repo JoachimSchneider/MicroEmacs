@@ -76,7 +76,7 @@ int lockchk P1_(CONST char *, fname /* file to check for a lock */)
  *
  * Release all the file locks so others may edit
  */
-int lockrel P0_(void)
+int lockrel P0_()
 {
     REGISTER int  status  = 0;    /* status of locks      */
     REGISTER int  s       = 0;    /* status of one unlock */
@@ -177,7 +177,7 @@ VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 
 #else
 
-VOID lckhello P0_(void)   /* dummy function */
+VOID lckhello P0_()   /* dummy function */
 {
 }
 

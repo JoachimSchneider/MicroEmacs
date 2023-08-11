@@ -385,7 +385,7 @@ int PASCAL NEAR lover P1_(char *, ostr)
  * update of dot and mark is a bit easier then in the above case, because the
  * split forces more updating.
  */
-int PASCAL NEAR lnewline P0_(void)
+int PASCAL NEAR lnewline P0_()
 {
     REGISTER char     *cp1  = NULL;
     REGISTER char     *cp2  = NULL;
@@ -754,7 +754,7 @@ int PASCAL NEAR putctext P1_(char *, iline/* contents of new line */)
  * about in memory. Return FALSE on error and TRUE if all looks ok. Called by
  * "ldelete" only.
  */
-int PASCAL NEAR ldelnewline P0_(void)
+int PASCAL NEAR ldelnewline P0_()
 {
     REGISTER char     *cp1  = NULL;
     REGISTER char     *cp2  = NULL;
@@ -874,8 +874,8 @@ int PASCAL NEAR ldelnewline P0_(void)
  * - Return FALSE if we run out of memory.
  * - Note that this works on non-displayed buffers as well!
  */
-int PASCAL NEAR addline P2_(BUFFER *, bp,   /* buffer to add text to  */
-                            char *,   text  /* line to add            */
+int PASCAL NEAR addline P2_(BUFFER *,     bp,   /* buffer to add text to  */
+                            CONST char *, text  /* line to add            */
                           )
 {
     REGISTER LINE *lp   = NULL;
@@ -911,7 +911,7 @@ int PASCAL NEAR addline P2_(BUFFER *, bp,   /* buffer to add text to  */
  * new kill context is being created. The kill buffer array is released, just in
  * case the buffer has grown to immense size. No errors.
  */
-VOID PASCAL NEAR kdelete P0_(void)
+VOID PASCAL NEAR kdelete P0_()
 {
     KILL  *kp = NULL;   /* ptr to scan kill buffer chunk list */
 
@@ -947,7 +947,7 @@ VOID PASCAL NEAR kdelete P0_(void)
  * Advance to the next position in the kill ring, pushing the current
  * kill buffer and clearing what will be the new kill buffer
  */
-VOID PASCAL NEAR next_kill P0_(void)
+VOID PASCAL NEAR next_kill P0_()
 {
     /* advance to the next kill ring entry */
     kill_index++;
@@ -1190,7 +1190,7 @@ int PASCAL NEAR clear_ring P2_(int, f, int, n)
 }
 
 #if     0
-dispkill P0_(void)
+dispkill P0_()
 {
     KILL  *kptr   = NULL;
     int   index   = 0;

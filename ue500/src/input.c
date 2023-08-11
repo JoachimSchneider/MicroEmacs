@@ -841,7 +841,7 @@ VOID PASCAL NEAR clist_file P2_(
 /* tgetc: Get a key from the terminal driver, resolve any keyboard
  *        macro action
  */
-int PASCAL NEAR tgetc P0_(void)
+int PASCAL NEAR tgetc P0_()
 {
     int c = 0;  /* fetched character */
 
@@ -902,7 +902,7 @@ int PASCAL NEAR tgetc P0_(void)
 /* get_key: Get one keystroke. The legal prefixs here are the SPEC,
  *          MOUS and * CTRL prefixes.
  */
-int PASCAL NEAR get_key P0_(void)
+int PASCAL NEAR get_key P0_()
 {
     int c     = 0;  /* next input character                 */
     int upper = 0;  /* upper byte of the extended sequence  */
@@ -941,7 +941,7 @@ int PASCAL NEAR get_key P0_(void)
 /* GETCMD: Get a command from the keyboard. Process all applicable
  *         prefix keys
  */
-int PASCAL NEAR getcmd P0_(void)
+int PASCAL NEAR getcmd P0_()
 {
     int     c     = 0;    /* fetched keystroke  */
     KEYTAB  *key  = NULL; /* ptr to a key entry */

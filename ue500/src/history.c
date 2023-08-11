@@ -2592,7 +2592,7 @@
 #include "eproto.h"
 
 
-VOID history P0_(void)
+VOID history P0_()
 {
 	/* this is here to keep compilers from complaining... it's not needed */
 }

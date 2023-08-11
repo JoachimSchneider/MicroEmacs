@@ -377,7 +377,7 @@ int PASCAL NEAR checknext P2_(int, chr, int, dir)
  * before we get the char.  Otherwise, we must be re-executing the command
  * string, so just return the next character.
  */
-int PASCAL NEAR get_char P0_(void)
+int PASCAL NEAR get_char P0_()
 {
     int     c     = 0;
     KEYTAB  *key  = NULL;
@@ -432,7 +432,7 @@ int PASCAL NEAR get_char P0_(void)
  *
  * Come here on the next term.t_getchar call:
  */
-int PASCAL NEAR uneat P0_(void)
+int PASCAL NEAR uneat P0_()
 {
     int c = 0;
 

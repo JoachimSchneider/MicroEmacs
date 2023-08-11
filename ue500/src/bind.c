@@ -836,9 +836,10 @@ char *PASCAL NEAR cmdstr P2_(int , c, char *, seq)
     return (seq);
 }
 
-/***HEREHEREHERE***/
-/*  This function looks a key binding up in the binding table   */
-
+/* GETBIND:
+ *
+ * This function looks a key binding up in the binding table
+ */
 KEYTAB *getbind P1_(int, c)
 /* c: Key to find what is bound to it */
 {
@@ -857,14 +858,13 @@ KEYTAB *getbind P1_(int, c)
     return ( (KEYTAB *)NULL );
 }
 
-/* getfname:    This function takes a ptr to KEYTAB entry and gets the name
+/* GETFNAME:
+ *
+ * This function takes a ptr to KEYTAB entry and gets the name
  * associated with it
  */
-
-char *PASCAL NEAR getfname(key)
-
-KEYTAB *key;    /* key binding to return a name of */
-
+char *PASCAL NEAR getfname P1_(KEYTAB *, key)
+/* key: Key binding to return a name of */
 {
     REGISTER ue_fnc_T func;     /* ptr to the requested function */
     REGISTER NBIND *nptr;       /* pointer into the name binding table */
@@ -921,10 +921,10 @@ ue_fnc_T fncmatch P1_(char *, fname)
         return (names[nval].n_func);
 }
 
-char *PASCAL NEAR namval(index)
-
-int index;      /* index of name to fetch out of the name table */
-
+/* NAMVAL:
+ */
+char *PASCAL NEAR namval P1_(int, index)
+/* index: Index of name to fetch out of the name table  */
 {
     return (names[index].n_name);
 }
@@ -1043,11 +1043,13 @@ CONST char *PASCAL NEAR transbind P1_(CONST char *, skey)
     return (bindname);
 }
 
-int PASCAL NEAR execkey(key, f, n)      /* execute a function bound to a key */
-
-KEYTAB *key;    /* key to execute */
-int f, n;       /* agruments to C function */
-
+/* EXECKEY:
+ *
+ * Execute a function bound to a key
+ */
+int PASCAL NEAR execkey P3_(KEYTAB *, key, int , f, int, n)
+/* key:   Key to execute          */
+/* f, n:  Arguments to C function */
 {
     REGISTER int status;        /* error return */
 #if     LOGFLG
@@ -1086,11 +1088,13 @@ int f, n;       /* agruments to C function */
     return (TRUE);
 }
 
-/* set a KEYTAB to the given name of the given type */
-
-int set_key P2_(KEYTAB *, key,  /* ptr to key to set          */
-                char *, name    /* name of function or buffer */
-              )
+/* SET_KEY:
+ *
+ * Set a KEYTAB to the given name of the given type
+ */
+int set_key P2_(KEYTAB *, key, char *, name)
+/* key:   Ptr to key to set           */
+/* name:  Name of function or buffer  */
 {
     ue_fnc_T        ktemp;        /* temp function pointer to assign  */
     REGISTER BUFFER *kmacro;      /* ptr to buffer of macro to bind

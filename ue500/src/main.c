@@ -178,7 +178,7 @@ abortrun:
  * subprogram to a larger project, emacs needs to de-alloc its own used
  * memory, otherwise we just exit.
  */
-int PASCAL NEAR clean P0_(void)
+int PASCAL NEAR clean P0_()
 {
     REGISTER BUFFER *bp;        /* buffer list pointer */
     REGISTER SCREEN_T *scrp;            /* ptr to screen to dump */
@@ -455,7 +455,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
 
 # define GETBASEKEY getbasekey
 
-static int PASCAL NEAR getbasekey P0_(void)
+static int PASCAL NEAR getbasekey P0_()
 {
     REGISTER int c;
 
@@ -481,7 +481,7 @@ static int PASCAL NEAR getbasekey P0_(void)
  * arrange to be able to call this from a macro, you will have invented
  * the "recursive-edit" function.
  */
-int PASCAL NEAR editloop P0_(void)
+int PASCAL NEAR editloop P0_()
 {
     REGISTER int c;             /* command character */
     REGISTER int f;             /* default flag */
@@ -1069,7 +1069,7 @@ int PASCAL NEAR ctrlg P2_(int, f /* prefix flag */,
  * tell the user that this command is illegal while we are in VIEW
  * (read-only) mode
  */
-int PASCAL NEAR rdonly P0_(void)
+int PASCAL NEAR rdonly P0_()
 {
     TTbeep();
     mlwrite(TEXT109);
@@ -1078,7 +1078,7 @@ int PASCAL NEAR rdonly P0_(void)
     return (FALSE);
 }
 
-int PASCAL NEAR resterr P0_(void)
+int PASCAL NEAR resterr P0_()
 {
     TTbeep();
     mlwrite(TEXT110);
@@ -1269,7 +1269,7 @@ Erelease P1_(char *, mp /* chunk of RAM to release */)
 
 # if     RAMSHOW
 
-VOID dspram P0_(void) /* display the amount of RAM currently malloced */
+VOID dspram P0_() /* display the amount of RAM currently malloced */
 {
     char mbuf[20];
     char *sp;

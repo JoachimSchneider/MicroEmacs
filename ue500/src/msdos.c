@@ -355,7 +355,7 @@ ttc:    /* return any keystrokes waiting in the type ahead buffer */
 }
 
 # if     MOUSE
-int PASCAL NEAR checkmouse P0_(void)
+int PASCAL NEAR checkmouse P0_()
 {
     REGISTER int  k         = 0;  /* current bit/button of mouse */
     REGISTER int  etype     = 0;  /* event type byte */

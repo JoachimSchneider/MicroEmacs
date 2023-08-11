@@ -711,7 +711,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
  * initialization and for substitution purposes.  The default for any character
  * to jump is the pattern length.
  */
-VOID PASCAL NEAR setjtable P0_(void)
+VOID PASCAL NEAR setjtable P0_()
 {
     make_delta((CONST char *)pat, &deltapat);
     make_delta(strrev( xstrcpy( (char *)tap, (char *)pat ) ), &tapatled);

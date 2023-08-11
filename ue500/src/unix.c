@@ -877,7 +877,7 @@ int scopen()
 }
 
 /** Close screen package **/
-int scclose P0_(void)
+int scclose P0_()
 {
     /* Turn off keypad mode */
     putpad(capbind[CAP_KE].store);
@@ -896,7 +896,7 @@ int scclose P0_(void)
 }
 
 /* open keyboard -hm */
-int sckopen P0_(void)
+int sckopen P0_()
 {
     putpad(capbind[CAP_KS].store);
     ttflush();
@@ -908,7 +908,7 @@ int sckopen P0_(void)
 }
 
 /* close keyboard -hm */
-int sckclose P0_(void)
+int sckclose P0_()
 {
     putpad(capbind[CAP_KE].store);
     ttflush();
@@ -1004,7 +1004,7 @@ int state;                              /* New state            */
 }
 
 /** Beep **/
-int scbeep P0_(void)
+int scbeep P0_()
 {
 # if !NOISY
     /* Send out visible bell, if it exists */
@@ -1852,7 +1852,7 @@ char *fspec;                            /* Filename specification   */
 }
 
 /** Get next filename from pattern **/
-char *getnfile P0_(void)
+char *getnfile P0_()
 {
     struct DIRENTRY *dp = NULL;
     struct stat     fstat;

@@ -100,7 +100,7 @@ VOID undo_insert P3_(OPTYPE,  op_type,  /* type of operation being recorded */
 /* reverse the editing operation at the top of the current buffer's undo stack.
  */
 
-int undo_op P0_(void)
+int undo_op P0_()
 {
     OPTYPE op_type;             /* type of operation being recorded */
     UNDO_OBJ *up;               /* ptr to the undo object */
@@ -256,7 +256,7 @@ int f, n;        /* prefix flag and argument */
     return ( wpopup(ulistp) );
 }
 
-int PASCAL NEAR undolist P0_(void)
+int PASCAL NEAR undolist P0_()
 {
     REGISTER char *cp1;         /* scanning pointer into line to build */
     REGISTER char *cp2;
@@ -372,7 +372,7 @@ int PASCAL NEAR undolist P0_(void)
 
 /* clear ALL the undo stacks */
 
-VOID undo_dump P0_(void)
+VOID undo_dump P0_()
 {
     BUFFER *bp;
 
