@@ -13,7 +13,10 @@
 #include        "edef.h"
 #include        "elang.h"
 
+
 #if     IBMPC
+
+
 # define NROW    50                     /* Max Screen size.     */
 # define NCOL    80                     /* Edit if you want to.         */
 # define MARGIN  8                      /* size of minimim margin and   */
@@ -146,27 +149,35 @@ TERM term    =
 };
 
 # if     COLOR
-int PASCAL NEAR ibmfcol(color)  /* set the current output color */
 
-int color;      /* color to set */
-
+/* IBMFCOL:
+ *
+/* set the current output color
+ */
+int PASCAL NEAR ibmfcol P1_(int, color)
+/* color: Color to set  */
 {
     cfcolor = ctrans[color];
 
     return TRUE;
 }
 
-int PASCAL NEAR ibmbcol(color)  /* set the current background color */
-
-int color;      /* color to set */
-
+/* IBMBCOL:
+ *
+ * Set the current background color
+ */
+int PASCAL NEAR ibmbcol P1_(int, color)
+/* color: Color to set  */
 {
     cbcolor = ctrans[color];
 
     return TRUE;
 }
+
 # endif
 
+/* IBMMOVE:
+ */
 int PASCAL NEAR ibmmove P2_(int, row, int, col)
 {
     rg.h.ah = 2;                /* set cursor position function code */
@@ -178,7 +189,11 @@ int PASCAL NEAR ibmmove P2_(int, row, int, col)
     return TRUE;
 }
 
-int PASCAL NEAR ibmeeol P0_() /* erase to the end of the line */
+/* IBMEEOL:
+ *
+ * erase to the end of the line
+ */
+int PASCAL NEAR ibmeeol P0_()
 {
     unsigned int  attr  = 0;      /* attribute byte mask to place in RAM */
     unsigned int *lnptr = NULL;   /* pointer to the destination line */
@@ -229,11 +244,11 @@ int PASCAL NEAR ibmeeol P0_() /* erase to the end of the line */
     return TRUE;
 }
 
-int PASCAL NEAR ibmputc(ch) /* put a character at the current position in the
-                             * current colors */
-
-int ch;
-
+/* IBMPUTC:
+ *
+ * put a character at the current position in the current colors
+ */
+int PASCAL NEAR ibmputc P1_(int, ch)
 {
     /* if its a newline, we have to move the cursor */
     if ( ch == '\n' || ch == '\r' ) {
@@ -327,6 +342,8 @@ int ch;
     return TRUE;
 }
 
+/* IBMEEOP:
+ */
 int PASCAL NEAR ibmeeop P0_()
 {
     rg.h.ah = 6;                /* scroll page up function code */
@@ -356,6 +373,8 @@ int PASCAL NEAR ibmeeop P0_()
     return TRUE;
 }
 
+/* IBMCLRDESK:
+ */
 int PASCAL NEAR ibmclrdesk P0_()
 {
     int attr  = 0;              /* attribute to fill screen with */
@@ -386,22 +405,27 @@ int PASCAL NEAR ibmclrdesk P0_()
     return TRUE;
 }
 
-int PASCAL NEAR ibmrev(state)   /* change reverse video state */
-
-int state;      /* TRUE = reverse, FALSE = normal */
-
+/* IBMREV:
+ *
+ * change reverse video state
+ */
+int PASCAL NEAR ibmrev P1_(int, state)
+/* state: TRUE = reverse, FALSE = normal  */
 {
     revflag = state;
 
     return TRUE;
 }
 
-EXTERN dumpscreens();
+/* In `screen.c' for debug purposes.  */
+EXTERN VOID dumpscreens DCL((char *msg));
 
-int PASCAL NEAR ibmcres(res) /* change screen resolution */
-
-char *res;      /* resolution to change to */
-
+/* IBMCRES:
+ *
+ * Change screen resolution
+ */
+int PASCAL NEAR ibmcres P1_(char *, res)
+/* res: Resolution to change to */
 {
     int i = 0;
 
@@ -415,16 +439,19 @@ char *res;      /* resolution to change to */
     return (FALSE);
 }
 
-int PASCAL NEAR spal(mode)      /* reset the pallette registers */
-
-char *mode;
-
+/* SPAL:
+ *
+ * Reset the pallette registers
+ */
+int PASCAL NEAR spal P1_(char *, mode)
 {
     /* nothin here now..... */
 
     return TRUE;
 }
 
+/* IBMBEEP:
+ */
 int PASCAL NEAR ibmbeep P0_()
 {
 # if     MWC
@@ -440,6 +467,8 @@ int PASCAL NEAR ibmbeep P0_()
     return TRUE;
 }
 
+/* IBMOPEN:
+ */
 int PASCAL NEAR ibmopen P0_()
 {
     scinit(CDSENSE);
@@ -450,6 +479,8 @@ int PASCAL NEAR ibmopen P0_()
     return TRUE;
 }
 
+/* IBMCLOSE:
+ */
 int PASCAL NEAR ibmclose P0_()
 {
 # if     COLOR
@@ -469,7 +500,11 @@ int PASCAL NEAR ibmclose P0_()
     return TRUE;
 }
 
-int PASCAL NEAR ibmkopen P0_()    /* open the keyboard */
+/* IBMKOPEN:
+ *
+ * Open the keyboard
+ */
+int PASCAL NEAR ibmkopen P0_()
 {
     /* find the current state of the control break inturrupt */
     rg.h.ah = 0x33;     /* ctrl-break check */
@@ -488,7 +523,11 @@ int PASCAL NEAR ibmkopen P0_()    /* open the keyboard */
     return TRUE;
 }
 
-int PASCAL NEAR ibmkclose P0_() /* close the keyboard */
+/* IBMKCLOSE:
+ *
+ * Close the keyboard
+ */
+int PASCAL NEAR ibmkclose P0_()
 {
     if ( break_flag == 1 ) {
         rg.h.ah = 0x33;         /* ctrl-break check */
@@ -500,10 +539,12 @@ int PASCAL NEAR ibmkclose P0_() /* close the keyboard */
     return TRUE;
 }
 
-int PASCAL NEAR scinit(type) /* initialize the screen head pointers */
-
-int type;       /* type of adapter to init for */
-
+/* SCINIT:
+ *
+ * Initialize the screen head pointers
+ */
+int PASCAL NEAR scinit P1_(int, type)
+/* type:  Type of adapter to init for */
 {
     /* if asked...find out what display is connected */
     if ( type == CDSENSE )
@@ -566,12 +607,13 @@ int type;       /* type of adapter to init for */
     return (TRUE);
 }
 
-int PASCAL NEAR screen_init(dtype, type) /* initialize the screen head pointers
-                                          */
-
-int dtype;      /* original screen type (-1 if first time!) */
-int type;       /* new type of adapter to adjust screens for */
-
+/* SCREEN_INIT:
+ *
+ * Initialize the screen head pointers
+ */
+int PASCAL NEAR screen_init P2_(int, dtype, int, type)
+/* dtype: Original screen type (-1 if first time!)  */
+/* type:  New type of adapter to adjust screens for */
 {
     int full_screen = 0;    /* is the active screen full size */
 
@@ -602,10 +644,10 @@ int type;       /* new type of adapter to adjust screens for */
     return (TRUE);
 }
 
-int PASCAL NEAR change_width(ncols)
-
-int ncols;      /* number of columns across */
-
+/* CHANGE_WIDTH:
+ */
+int PASCAL NEAR change_width P1_(int, ncols)
+/* ncols: Number of columns across  */
 {
     union {
         long laddr;             /* long form of address */
@@ -623,17 +665,22 @@ int ncols;      /* number of columns across */
     return TRUE;
 }
 
-/* getboard:    Determine which type of display board is attached. Current known
- * types include:
+/* GETBOARD:
  *
- *               CDMONO Monochrome graphics adapter CDCGA   Color Graphics
- * Adapter CDEGA    Extended graphics Adapter CDVGA Vidio Graphics Array
+ * Determine which type of display board is attached.
+ * Current known types include:
  *
- *               if MONO    set to MONO CGA40 set to CGA40  test as appropriate
- * CGA  set to CGA  EGAexist = FALSE VGAexist = FALSE EGA   set to CGA  EGAexist
- * = TRUE  VGAexist = FALSE VGA set to CGA  EGAexist = TRUE  VGAexist = TRUE
+ * CDMONO       Monochrome graphics adapter
+ * CDCGA        Color Graphics Adapter
+ * CDEGA        Extended graphics Adapter
+ * CDVGA        Vidio Graphics Array
+ *
+ * if MONO      set to MONO
+ *   CGA40 set to CGA40 test as appropriate
+ *   CGA        set to CGA      EGAexist = FALSE VGAexist = FALSE
+ *   EGA        set to CGA      EGAexist = TRUE  VGAexist = FALSE
+ *   VGA        set to CGA      EGAexist = TRUE  VGAexist = TRUE
  */
-
 int PASCAL NEAR getboard P0_()
 {
     int type  = 0;      /* board type to return */
@@ -685,11 +732,12 @@ int PASCAL NEAR getboard P0_()
     return (type);
 }
 
-int PASCAL NEAR egaopen(mode) /* init the computer to work with the EGA or VGA
-                               */
-
-int mode;       /* mode to select [CDEGA/CDVGA] */
-
+/* EGAOPEN:
+ *
+ * Init the computer to work with the EGA or VGA
+ */
+int PASCAL NEAR egaopen P1_(int, mode)
+/* mode:  Mode to select [CDEGA/CDVGA]  */
 {
     /* set the proper number of scan lines */
     rg.h.ah = 18;
@@ -743,6 +791,8 @@ int mode;       /* mode to select [CDEGA/CDVGA] */
     return TRUE;
 }
 
+/* EGACLOSE:
+ */
 int PASCAL NEAR egaclose P0_()
 {
     /* set the proper number of scan lines for CGA */
@@ -758,6 +808,8 @@ int PASCAL NEAR egaclose P0_()
     return TRUE;
 }
 
+/* CGA40_OPEN:
+ */
 int PASCAL NEAR cga40_open P0_()
 {
     /* put the beast into 40 column mode */
@@ -767,6 +819,8 @@ int PASCAL NEAR cga40_open P0_()
     return TRUE;
 }
 
+/* CGA40_CLOSE:
+ */
 int PASCAL NEAR cga40_close P0_()
 {
     /* put the beast into 80 column mode */
@@ -776,17 +830,22 @@ int PASCAL NEAR cga40_close P0_()
     return TRUE;
 }
 
-/* scwrite: write a line out to the physical screen */
-
-int PASCAL NEAR scwrite(row, outstr, forg, bacg, revleft, revright)
-
-int row;        /* row of screen to place outstr on */
-char *outstr;   /* string to write out (must be term.t_ncol long) */
-int forg;       /* forground color of string to write */
-int bacg;       /* background color */
-int revleft;    /* first character of reverse video area */
-int revright;   /* first character of non-reverse video area */
-
+/* SCWRITE:
+ *
+ * Write a line out to the physical screen
+ */
+int PASCAL NEAR scwrite P6_(int,    row,
+                            char *, outstr,
+                            int,    forg,
+                            int,    bacg,
+                            int,    revleft,
+                            int,    revright)
+/* row:       Row of screen to place outstr on                */
+/* outstr:    String to write out (must be term.t_ncol long)  */
+/* forg:      Forground color of string to write              */
+/* bacg:      Background color                                */
+/* revleft:   First character of reverse video area           */
+/* revright:  First character of non-reverse video area       */
 {
     unsigned int  norm_attrib = 0;    /* normal attribute byte mask */
     unsigned int  rev_attrib  = 0;    /* reversed attribute byte mask */
@@ -835,20 +894,27 @@ int revright;   /* first character of non-reverse video area */
 }
 
 # if     FLABEL
-int PASCAL NEAR fnclabel(f, n)  /* label a function key */
 
-int f, n;        /* default flag, numeric argument [unused] */
-
+/* FNCLABEL:
+ *
+ * Label a function key
+ */
+int PASCAL NEAR fnclabel P2_(int, f, int, n)
+/* f, n:  Default flag, numeric argument [unused] */
 {
     /* on machines with no function keys...don't bother */
     return (TRUE);
 }
+
 # endif
+
 #else
-ibmhello()
+
+VOID  ibmhello P0_()
 {
 }
-#endif
+
+#endif  /* IBMPC  */
 
 
 

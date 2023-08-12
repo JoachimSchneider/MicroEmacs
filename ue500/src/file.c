@@ -16,7 +16,8 @@
 # include <unistd.h>
 #endif
 
-/*
+/* FILEREAD:
+ *
  * Read a file into the current buffer. This is really easy; all you do is find
  * the name of the file, and call the standard
  * "read a file into the current buffer" code. Bound to "C-X C-R".
@@ -36,15 +37,14 @@ int PASCAL NEAR fileread P2_(int, f, int, n)
     return ( readin(fname, TRUE) );
 }
 
-/*
+/* INSFILE:
+ *
  * Insert a file into the current buffer. This is really easy; all you do it
  * find the name of the file, and call the standard
  * "insert a file into the current buffer" code. Bound to "C-X C-I".
  */
-int PASCAL NEAR insfile(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR insfile P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int  s         = 0;
     char          *fname    = NULL; /* file name */
@@ -77,16 +77,15 @@ int f, n;        /* prefix flag and argument */
     return (s);
 }
 
-/*
+/* FILEFIND:
+ *
  * Select a file for editing. Look around to see if you can find the fine in
  * another buffer; if you can find it just switch to the buffer. If you cannot
  * find the file, create a new buffer, read in the text, and switch to the new
  * buffer. Bound to C-X C-F.
  */
-int PASCAL NEAR filefind(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR filefind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     char *fname;        /* file user wishes to find */  /* file name */
 
@@ -100,10 +99,12 @@ int f, n;        /* prefix flag and argument */
     return ( getfile(fname, TRUE) );
 }
 
-int PASCAL NEAR viewfile(f, n)  /* visit a file in VIEW mode */
-
-int f, n;        /* prefix flag and argument */
-
+/* VIEWFILE:
+ *
+ * Visit a file in VIEW mode
+ */
+int PASCAL NEAR viewfile P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     char *fname;        /* file user wishes to find */  /* file name */
     REGISTER int s;     /* status return */
@@ -125,7 +126,12 @@ int f, n;        /* prefix flag and argument */
 }
 
 #if     CRYPT
-int PASCAL NEAR resetkey()      /* reset the encryption key if needed */
+
+/* RESETKEY:
+ *
+ * Reset the encryption key if needed
+ */
+int PASCAL NEAR resetkey P0_()
 {
     REGISTER int s;     /* return status */
 
@@ -155,8 +161,11 @@ int PASCAL NEAR resetkey()      /* reset the encryption key if needed */
 
     return (TRUE);
 }
+
 #endif
 
+/* GETFILE:
+ */
 int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
 /* fname:   file name to find         */
 /* lockfl:  check the file for locks? */
@@ -242,7 +251,8 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
     return ( readin(fname, lockfl) );   /* Read it in.      */
 }
 
-/*
+/* READIN:
+ *
  * Read file "fname" into the current buffer, blowing away any text
  * found there. Called by both the read and find commands. Return the
  * final status of the read. Also called by the mainline, to read in a
@@ -250,7 +260,6 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
  * $readhook is called after the buffer is set up and before it is
  * read.
  */
-
 int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
 /* fname:   Name of file to read  */
 /* lockfl:  Check for file locks? */
@@ -287,7 +296,6 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
     s = resetkey();
     if ( s != TRUE )
         return (s);
-
 #endif
 
     /* turn off ALL keyboard translation in case we get a dos error */
@@ -376,18 +384,15 @@ out:    TTkopen();      /* open the keyboard again */
     return (TRUE);
 }
 
-/*
+/* MAKENAME:
+ *
  * Take a file name, and from it fabricate a buffer name. This routine knows
  * about the syntax of file names on the target system. I suppose that this
  * information could be put in a better place than a line of code. Returns a
  * pointer into fname indicating the end of the file path; i.e., 1 character
  * BEYOND the path name.
  */
-CONST char *PASCAL NEAR makename(bname, fname)
-
-char        *bname;
-CONST char  *fname;
-
+CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
 {
     REGISTER char       *fnameA = xstrdup(fname);
     REGISTER CONST char *cp1;
@@ -450,10 +455,12 @@ CONST char  *fname;
     return (pathp);
 }
 
-VOID PASCAL NEAR unqname(name)  /* make sure a buffer name is unique */
-
-char *name;     /* name to check on */
-
+/* UNQNAME:
+ *
+ * Make sure a buffer name is unique
+ */
+VOID PASCAL NEAR unqname P1_(char *, name)
+/* name:  Name to check on  */
 {
     REGISTER char *sp;
 
@@ -472,18 +479,16 @@ char *name;     /* name to check on */
     }
 }
 
-/*
+/* FILEWRITE:
+ *
  * Ask for a file name, and write the contents of the current buffer to that
  * file. Update the remembered file name and clear the buffer changed flag. This
  * handling of file names is different from the earlier versions, and is more
  * compatable with Gosling EMACS than with ITS EMACS. Bound to "C-X C-W" for
  * writing and ^X^A for appending.
  */
-
-int PASCAL NEAR filewrite(f, n)
-
-int f, n;       /* emacs arguments */
-
+int PASCAL NEAR filewrite P2_(int, f, int, n)
+/* f, n:  Emacs arguments */
 {
     REGISTER int s;
     char *fname;
@@ -505,10 +510,12 @@ int f, n;       /* emacs arguments */
     return (s);
 }
 
-int PASCAL NEAR fileapp(f, n)   /* append file */
-
-int f, n;       /* emacs arguments */
-
+/* FILEAPP:
+ *
+ * Append file
+ */
+int PASCAL NEAR fileapp P2_(int, f, int, n)
+/* f, n:  Emacs arguments */
 {
     REGISTER int s;
     char *fname;
@@ -529,16 +536,15 @@ int f, n;       /* emacs arguments */
     return (s);
 }
 
-/*
+/* FILESAVE:
+ *
  * Save the contents of the current buffer in its associatd file. Do nothing if
  * nothing has changed (this may be a bug, not a feature). Error if there is no
  * remembered file name for the buffer. Bound to "C-X C-S". May get called by
  * "C-Z".
  */
-int PASCAL NEAR filesave(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR filesave P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int s;
 
@@ -586,7 +592,8 @@ int f, n;        /* prefix flag and argument */
     return (s);
 }
 
-/*
+/* WRITEOUT:
+ *
  * This function performs the details of file writing. It uses the file
  * management routines in the "fileio.c" package. The number of lines written is
  * displayed. Several errors are posible, and cause writeout to return a FALSE
@@ -595,11 +602,9 @@ int f, n;        /* prefix flag and argument */
  * old file is unlinked and the temporary renamed to the original name.  Before
  * the file is written, a user specifyable routine (in $writehook) can be run.
  */
-
-int PASCAL NEAR writeout(fn, mode)
-
-char *fn;       /* name of file to write current buffer to */
-char *mode;     /* mode to open file (w = write a = append) */
+int PASCAL NEAR writeout P2_(char *, fn, char *, mode)
+/* fn:    Name of file to write current buffer to   */
+/* mode:  Mode to open file (w = write a = append)  */
 {
     REGISTER LINE *lp;          /* line to scan while writing */
     REGISTER char *sp;          /* temporary string pointer */
@@ -625,7 +630,6 @@ char *mode;     /* mode to open file (w = write a = append) */
     status = resetkey();
     if ( status != TRUE )
         return (status);
-
 #endif
 
     /* turn off ALL keyboard translation in case we get a dos error */
@@ -720,17 +724,15 @@ char *mode;     /* mode to open file (w = write a = append) */
     return (status == FIOSUC);
 }
 
-/*
+/* FILENAME:
+ *
  * The command allows the user to modify the file name associated with the
  * current buffer. It is like the "f" command in UNIX "ed". The operation is
  * simple; just zap the name in the BUFFER structure, and mark the windows as
  * needing an update. You can type a blank line at the prompt if you wish.
  */
-
-int PASCAL NEAR filename(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR filename P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int s;
     char fname[NFILEN];
@@ -753,12 +755,12 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* IFILE:
+ *
  * Insert file "fname" into the current buffer, Called by insert file command.
  * Return the final status of the read.
  */
-int PASCAL NEAR ifile(fname)
-char fname[];
+int PASCAL NEAR ifile P1_(char *, fname)
 {
     REGISTER LINE *lp0;
     REGISTER LINE *lp1;
@@ -869,14 +871,13 @@ out:
     return (TRUE);
 }
 
-/*  show-files  Bring up a fake buffer and list the names of all the files in a
- * given directory
+/* SHOWFILES:
+ *
+ *      show-files: Bring up a fake buffer and list the names of all
+ *                  the files in a given directory
  */
-
-int PASCAL NEAR showfiles(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR showfiles P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER BUFFER *dirbuf;    /* buffer to put file list into */
     char outseq[NSTRING];       /* output buffer for file names */

@@ -1,5 +1,7 @@
-/*  MOUSE.C:    Mouse functionality commands for MicroEMACS 4.00 originally
- * written by Dave G. Conroy modified by Jeff Lomicka and Daniel Lawrence
+/*      MOUSE.C:        Mouse functionality commands
+ *                      for MicroEMACS 4.00
+ *                      originally written by Dave G. Conroy
+ *                      modified by Jeff Lomicka and Daniel Lawrence
  */
 
 #include        <stdio.h>
@@ -20,15 +22,14 @@ NOSHARE int lastypos = HUGENUM;         /* Last mouse event row.    */
 NOSHARE int lastxpos = HUGENUM;         /* Last mouse event column. */
 NOSHARE int lastmcmd = MNONE;           /* Last mouse command.      */
 
-/*
+/* MOVEMD:
+ *
  * Move mouse button, down. The window that the mouse is in is always selected
  * (this lets you select a window by clicking anyplace in it, even off the end
  * of the text). If the mouse points at text then dot is moved to that location.
  */
-int PASCAL NEAR movemd(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR movemd P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp;
     REGISTER EWINDOW *lastwp;
@@ -77,15 +78,13 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-
-/*  mouse-move: adjust the hilited region by setting mark(hilite+1) only if we
- * are holding down the proper button
+/* MMOVE:
+ *
+ *      mouse-move: Adjust the hilited region by setting mark(hilite+1)
+ *                  only if we are holding down the proper button
  */
-
-int PASCAL NEAR mmove(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR mmove P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp;
     REGISTER EWINDOW *lastwp;
@@ -132,18 +131,20 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*  mouse-region-down:  mouse region operations
+/* MREGDOWN:
  *
- *       nclicks = 0:   move cursor to mouse if hiliting then hilite set-mark
- * set-mark
+ *      mouse-region-down:      mouse region operations
  *
- *                 1:   move cursor to mouse kill-region
+ *      nclicks = 0:    move cursor to mouse
+ *                      if hiliting then
+ *                              hilite set-mark
+ *                      set-mark
+ *
+ *                1:    move cursor to mouse
+ *                      kill-region
  */
-
-int PASCAL NEAR mregdown(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR mregdown P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp;
     REGISTER EWINDOW *lastwp;
@@ -235,23 +236,24 @@ int f, n;        /* prefix flag and argument */
     }
 }
 
-/*  mouse-region-up:    mouse region operations
+/* MREGUP:
  *
- *       If the corrosponding downclick was on a modeline, then we wish to
- * delete the indicated window. Otherwise we are using this button to
- * copy/paste.
+ *      mouse-region-up:        mouse region operations
  *
- *       nclicks = 0:   move cursor to mouse copy-region
+ *      If the corrosponding downclick was on a modeline, then we
+ *      wish to delete the indicated window. Otherwise we are using
+ *      this button to copy/paste.
  *
- *                 1:   move cursor to mouse yank
+ *      nclicks = 0:    move cursor to mouse
+ *                      copy-region
  *
- *                 3:   reset nclicks to 0
+ *                1:    move cursor to mouse
+ *                      yank
+ *
+ *                3:    reset nclicks to 0
  */
-
-int PASCAL NEAR mregup(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR mregup P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp;
     REGISTER EWINDOW *lastwp;
@@ -363,16 +365,15 @@ int f, n;        /* prefix flag and argument */
     }
 }
 
-/*
+/* MOVEMU:
+ *
  * Move mouse button, up. The up click must be in the text region of a window.
  * If the old click was in a mode line then the mode line moves to the row of
  * the up click. If the old click is not in a mode line then the window scrolls.
  * The code in this function is just too complex!
  */
-int PASCAL NEAR movemu(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR movemu P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *lastwp;
     REGISTER EWINDOW *wp;
@@ -503,12 +504,12 @@ int f, n;        /* prefix flag and argument */
     return ( mvdnwind(TRUE, deltay) );
 }
 
-/*
+/* MOUSEWINDOW:
+ *
  * Return a pointer to the WINDOW structure for the window in which "row" is
  * located, or NULL if "row" isn't in any window. The mode line is considered to
  * be part of the window.
  */
-
 EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
 {
     REGISTER EWINDOW *wp;
@@ -533,14 +534,14 @@ EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
     return (NULL);
 }
 
-/*
+/* MOUSELINE:
+ *
  * The row "row" is a row within the window whose WINDOW structure is pointed to
  * by the "wp"
  * argument. Find the associated line, and return a pointer to it. Return NULL
  * if the mouse is on the mode line, or if the mouse is pointed off the end of
  * the text in the buffer.
  */
-
 LINE *PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
 {
     REGISTER LINE   *lp;
@@ -560,17 +561,12 @@ LINE *PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
     return (lp);
 }
 
-/*
+/* MOUSEOFFSET:
+ *
  * Return the best character offset to use to describe column "col", as viewed
  * from the line whose LINE structure is pointed to by "lp".
  */
-
-int PASCAL NEAR mouseoffset(wp, lp, col)
-
-REGISTER EWINDOW *wp;
-REGISTER LINE   *lp;
-REGISTER int col;
-
+int PASCAL NEAR mouseoffset P3_(EWINDOW *, wp, LINE *, lp, int, col)
 {
     REGISTER int c;
     REGISTER int offset;
@@ -602,7 +598,9 @@ REGISTER int col;
     return (offset);
 }
 
-VOID PASCAL NEAR mouse_screen()
+/* MOUSE_SCREEN:
+ */
+VOID PASCAL NEAR mouse_screen P0_()
 {
     REGISTER SCREEN_T *screen_ptr;      /* screen to test mouse in */
 
@@ -634,11 +632,9 @@ VOID PASCAL NEAR mouse_screen()
     }
 }
 
-int PASCAL NEAR ismodeline(wp, row)
-
-EWINDOW *wp;
-int row;
-
+/* ISMODELINE:
+ */
+int PASCAL NEAR ismodeline P2_(EWINDOW *, wp, int, row)
 {
     /* not on a legal window, say we aren't on a mode line either */
     if ( wp == (EWINDOW *)NULL )
@@ -652,14 +648,14 @@ int row;
     return (FALSE);
 }
 
-/* The mouse has been used to resize the physical window. Now we need to let
+/* RESIZM:
+ *
+ * The mouse has been used to resize the physical window. Now we need to let
  * emacs know about the newsize, and have him force a re-draw
  */
-
-int PASCAL NEAR resizm(f, n)
-
-int f, n;       /* these are ignored... we get the new size info from the mouse
-                 * driver */
+int PASCAL NEAR resizm P2_(int, f, int, n)
+/* f, n:  These are ignored... we get the new size info from the  */
+/*        mouse driver                                            */
 {
 # if     WINDOW_TEXT
     REGISTER int redraw_needed;         /* is a screen redraw required */
@@ -692,10 +688,11 @@ int f, n;       /* these are ignored... we get the new size info from the mouse
     return (TRUE);
 }
 
-int PASCAL NEAR resizm2(f, n)
-
-int f, n;       /* these are ignored... we get the new size info from the mouse
-                 * driver */
+/* RESIZM2:
+ */
+int PASCAL NEAR resizm2 P2_(int, f, int, n)
+/* f, n:  These are ignored... we get the new size info from the  */
+/*        mouse driver                                            */
 {
     /* make sure we are on the proper screen */
     mouse_screen();
@@ -712,8 +709,15 @@ int f, n;       /* these are ignored... we get the new size info from the mouse
 }
 
 #else
-mousehello()
+
+VOID mousehello P0_()
 {
 }
+
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

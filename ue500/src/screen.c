@@ -8,11 +8,10 @@
 #include        "edef.h"
 #include        "elang.h"
 
+
 #if     0
-dumpscreens(msg)
 
-char *msg;
-
+VOID dumpscreens P1_(char *, msg)
 {
     SCREEN_T *sp;
 
@@ -31,6 +30,7 @@ char *msg;
     printf("   0     -   [EOL]\n");
     tgetc();
 }
+
 #endif
 
 #if     WINDOW_TEXT

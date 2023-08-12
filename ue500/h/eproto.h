@@ -1847,7 +1847,7 @@ EXTERN int PASCAL NEAR gotoeop DCL((int f, int n));
 EXTERN int PASCAL NEAR gotoline DCL((int f, int n));
 EXTERN int PASCAL NEAR gotomark DCL((int f, int n));
 EXTERN int PASCAL NEAR help DCL((int f, int n));
-EXTERN int PASCAL NEAR ifile DCL((char fname[]));
+EXTERN int PASCAL NEAR ifile DCL((char *fname));
 EXTERN int PASCAL NEAR indent DCL((int f, int n));
 EXTERN int PASCAL NEAR insbrace DCL((int n, int c));
 EXTERN int PASCAL NEAR insfile DCL((int f, int n));
