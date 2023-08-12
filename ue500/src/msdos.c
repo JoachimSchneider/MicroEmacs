@@ -67,7 +67,7 @@ static int oldbut;      /* Previous state of mouse buttons */
 static int oldcol;      /* previous x position of mouse */
 static int oldrow;      /* previous y position of mouse */
 
-int PASCAL NEAR execprog(char *cmd);
+static int PASCAL NEAR execprog DCL((CONST char *cmd));
 
 /*  input buffers and pointers  */
 
@@ -77,12 +77,20 @@ static unsigned char  in_buf[IBUFSIZE]; /* input character buffer */
 static int            in_next = 0;      /* pos to retrieve next input character */
 static int            in_last = 0;      /* pos to place most recent input character */
 
-static VOID in_init()   /* initialize the input buffer */
+/* IN_INIT:
+ *
+ * Initialize the input buffer
+ */
+static VOID in_init P0_()
 {
     in_next = in_last = 0;
 }
 
-static int in_check()   /* is the input buffer non-empty? */
+/* IN_CHECK:
+ *
+ * Is the input buffer non-empty?
+ */
+static int in_check P0_()
 {
     if ( in_next == in_last )
         return (FALSE);
@@ -90,16 +98,20 @@ static int in_check()   /* is the input buffer non-empty? */
         return (TRUE);
 }
 
-static VOID in_put(event)
-
-int event;      /* event to enter into the input buffer */
-
+/* IN_PUT:
+ */
+static VOID in_put P1_(int, event)
+/* event: Event to enter into the input buffer  */
 {
     in_buf[in_last++] = event;
     in_last &= (IBUFSIZE - 1);
 }
 
-int in_get()    /* get an event from the input buffer */
+/* IN_GET:
+ *
+ * Get an event from the input buffer
+ */
+int in_get P0_()
 {
     REGISTER int  event = 0;    /* event to return */
 
@@ -109,11 +121,11 @@ int in_get()    /* get an event from the input buffer */
     return (event);
 }
 
-/*
+/* TTOPEN:
+ *
  * This function is called once to set up the terminal device streams.
  */
-
-int PASCAL NEAR ttopen()
+int PASCAL NEAR ttopen P0_()
 {
 # if     MOUSE
     long  miaddr  = 0;    /* mouse interupt routine address */
@@ -198,29 +210,27 @@ VOID PASCAL NEAR  maxlines P1_(int, lines)
 # endif
 }
 
-/*
+/* TTCLOSE:
+ *
  * This function gets called just before we go back home to the command
  * interpreter. On VMS it puts the terminal back in a reasonable state. Another
  * no-operation on CPM.
  */
-int PASCAL NEAR ttclose()
+int PASCAL NEAR ttclose P0_()
 {
     /* nothing here! */
 
     return TRUE;
 }
 
-/*
+/* TTPUTC:
+ *
  * Write a character to the display. On VMS, terminal output is buffered, and we
  * just put the characters in the big array, after checking for overflow. On CPM
  * terminal I/O unbuffered, so we just write the byte out. Ditto on MS-DOS (use
  * the very very raw console output routine).
  */
-
-int PASCAL NEAR ttputc(c)
-
-int c;
-
+int PASCAL NEAR ttputc P1_(int, c)
 {
 # if     MWC
     putcnb(c);
@@ -233,16 +243,21 @@ int c;
     return TRUE;
 }
 
-/*
+/* TTFLUSH:
+ *
  * Flush terminal buffer. Does real work where the terminal output is buffered
  * up. A no-operation on systems where byte at a time terminal I/O is done.
  */
-int PASCAL NEAR ttflush()
+int PASCAL NEAR ttflush P0_()
 {
     return TRUE;
 }
 
-int doschar()   /* call the dos to get a char */
+/* doschar:
+ *
+ * Call the dos to get a char
+ */
+int doschar P0_()
 {
 # if ATKBD      /* AT-style extended keyboard with grey keys */
 
@@ -310,11 +325,12 @@ int doschar()   /* call the dos to get a char */
 # endif
 }
 
-/*
+/* TTGETC:
+ *
  * Read a character from the terminal, performing no editing and doing no echo
  * at all. Also mouse events are forced into the input stream here.
  */
-int PASCAL NEAR ttgetc()
+int PASCAL NEAR ttgetc P0_()
 {
 ttc:    /* return any keystrokes waiting in the type ahead buffer */
     if ( in_check() )
@@ -355,6 +371,9 @@ ttc:    /* return any keystrokes waiting in the type ahead buffer */
 }
 
 # if     MOUSE
+
+/* CHECKMOUSE:
+ */
 int PASCAL NEAR checkmouse P0_()
 {
     REGISTER int  k         = 0;  /* current bit/button of mouse */
@@ -439,14 +458,16 @@ int PASCAL NEAR checkmouse P0_()
 
     return (FALSE);
 }
+
 # endif
 
 # if     TYPEAH
+
 /* TYPAHEAD:
  *
  * Check to see if any characters are already in the keyboard buffer
  */
-int PASCAL NEAR typahead()
+int PASCAL NEAR typahead P0_()
 {
 #  if     (TURBO | IC ) && HP150 == 0 && ATKBD == 0
     if ( bioskey(1) == 0 )
@@ -477,18 +498,17 @@ int PASCAL NEAR typahead()
 
 #  endif
 }
+
 # endif
 
-/*
+/* SPAWNCLI:
+ *
  * Create a subjob with a copy of the command intrepreter in it. When the
  * command interpreter exits, mark the screen as garbage so that you do a full
  * repaint. Bound to "^X C".
  */
-
-int PASCAL NEAR spawncli(f, n)
-
-int f, n;
-
+int PASCAL NEAR spawncli P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     /* don't allow this command if restricted */
     if ( restflag )
@@ -515,10 +535,8 @@ int f, n;
  *
  * Bound to "C-X !".
  */
-int PASCAL NEAR spawn(f, n)
-
-int f, n;
-
+int PASCAL NEAR spawn P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int  s = 0;
     char          line[NLINE];
@@ -553,13 +571,14 @@ int f, n;
     return (TRUE);
 }
 
-/*
+/* EXECPRG:
+ *
  * Run an external program with arguments. When it returns, wait for a single
  * character to be typed, then mark the screen as garbage so a full repaint is
  * done. Bound to "C-X $".
  */
-
-int PASCAL NEAR execprg(f, n)
+int PASCAL NEAR execprg P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int  s = 0;
     char          line[NLINE];
@@ -591,13 +610,12 @@ int PASCAL NEAR execprg(f, n)
     return (TRUE);
 }
 
-/*
+/* PIPECMD:
+ *
  * Pipe a one line command into a window Bound to ^X @
  */
-int PASCAL NEAR pipecmd(f, n)
-
-int f, n;
-
+int PASCAL NEAR pipecmd P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW  *wp   = NULL;   /* pointer to new window */
     REGISTER BUFFER   *bp   = NULL;   /* pointer to buffer to zot */
@@ -684,13 +702,12 @@ int f, n;
     return (TRUE);
 }
 
-/*
- * filter a buffer through an external DOS program Bound to ^X #
+/* F_FILTER:
+ *
+ * Filter a buffer through an external DOS program Bound to ^X #
  */
-int PASCAL NEAR f_filter(f, n)
-
-int f, n;
-
+int PASCAL NEAR f_filter P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int    s   = 0;        /* return status from CLI */
     REGISTER BUFFER *bp = NULL;     /* pointer to buffer to zot */
@@ -773,12 +790,12 @@ EXTERN int errno;
 EXTERN int _doserrno;
 # endif
 
-/*  SHELLPROG: Execute a command in a subshell      */
-
-int PASCAL NEAR shellprog(cmd)
-
-char *cmd;      /*  Incoming command line to execute  */
-
+/* SHELLPROG:
+ *
+ * Execute a command in a subshell
+ */
+int PASCAL NEAR shellprog P1_(char *, cmd)
+/* cmd: Incoming command line to execute  */
 {
     char        *shell  = NULL;     /* Name of system command processor */
     char        swchar  = 0;        /* switch character to use */
@@ -820,18 +837,18 @@ char *cmd;      /*  Incoming command line to execute  */
         return ( execprog(shell) );
 }
 
-/*  EXECPROG:   A function to execute a named program with arguments
- */
 
+/* EXECPROG:
+ *
+ * A function to execute a named program with arguments
+ */
+static int PASCAL NEAR execprog P1_(CONST char *, cmd)
+/* cmd: Incoming command line to execute  */
+{
 # if     LATTICE | MWC
 #  define CFLAG   1
 # endif
 
-int PASCAL NEAR execprog(cmd)
-
-char *cmd;      /*  Incoming command line to execute  */
-
-{
     char        *sp   = NULL;   /* temporary string pointer */
     CONST char  *csp  = NULL;   /* temporary string pointer */
     int         rv    = 0;      /* numeric return value from subprocess */
@@ -950,9 +967,11 @@ char *cmd;      /*  Incoming command line to execute  */
     return ( (rval < 0) ? FALSE : TRUE );
 }
 
-/* return a system dependant string with the current time */
-
-char *PASCAL NEAR timeset()
+/* TIMESET:
+ *
+ * Return a system dependant string with the current time
+ */
+char *PASCAL NEAR timeset P0_()
 {
 # if  MWC | TURBO | IC | MSC | ZTC
     REGISTER char *sp = NULL;     /* temp string pointer */
@@ -984,12 +1003,12 @@ char *PASCAL NEAR timeset()
 static char path[NFILEN];   /* path of file to find */
 static char rbuf[NFILEN];   /* return file buffer */
 
-/*  do a wild card directory search (for file name completion) */
-
-char *PASCAL NEAR getffile(fspec)
-
-char *fspec;    /* pattern to match */
-
+/* GETFFILE:
+ *
+ * Do a wild card directory search (for file name completion)
+ */
+char *PASCAL NEAR getffile P1_(char *, fspec)
+/* fspec: Pattern to match  */
 {
     REGISTER int  index   = 0;      /* index into various strings */
     REGISTER int  point   = 0;      /* index into other strings */
@@ -1038,7 +1057,9 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL NEAR getnfile()
+/* GETNFILE:
+ */
+char *PASCAL NEAR getnfile P0_()
 {
     char    fname[NFILEN];    /* file/path for DOS call */
 
@@ -1064,12 +1085,12 @@ char *PASCAL NEAR getnfile()
 static char path[NFILEN];   /* path of file to find */
 static char rbuf[NFILEN];   /* return file buffer */
 
-/*  do a wild card directory search (for file name completion) */
-
-char *PASCAL NEAR getffile(fspec)
-
-char *fspec;    /* pattern to match */
-
+/* GETFFILE:
+ *
+ * Do a wild card directory search (for file name completion)
+ */
+char *PASCAL NEAR getffile P1_(char *, fspec)
+/* fspec: Pattern to match  */
 {
     REGISTER int  index   = 0;    /* index into various strings */
     REGISTER int  point   = 0;    /* index into other strings */
@@ -1118,7 +1139,9 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL NEAR getnfile()
+/* GETNFILE:
+ */
+char *PASCAL NEAR getnfile P0_()
 {
     REGISTER int  index   = 0;      /* index into various strings */
     REGISTER int  point   = 0;      /* index into other strings */
@@ -1140,19 +1163,24 @@ char *PASCAL NEAR getnfile()
 
     return (rbuf);
 }
+
 #  else
-char *PASCAL NEAR getffile(fspec)
 
-char *fspec;    /* file to match */
-
+/* GETFFILE:
+ */
+char *PASCAL NEAR getffile P1_(char *, fspec)
+/* fspec: File to match */
 {
     return (NULL);
 }
 
-char *PASCAL NEAR getnfile()
+/* GETNFILE:
+ */
+char *PASCAL NEAR getnfile P0_()
 {
     return (NULL);
 }
+
 #  endif
 # endif
 #endif

@@ -85,7 +85,7 @@ src/line.c      X                   X               X       X         X
 src/lock.c      X                   X               X       X         X
 src/main.c      X                   X                       X         X
 src/mouse.c     X                   X                       X         X
-src/msdos.c     X                                   X       X         X
+src/msdos.c     X                   X               X       X         X
 src/random.c    X                                           X         X
 src/replace.c   X                                           X
 src/screen.c                                                X
@@ -529,6 +529,6 @@ modifier, because const is ANSI C compliant and readonly is not.
   K&R definitions to the P#_-Format (which expands to ANSI-C
   definitions with PROTO set.).
 - In this process repair the damages comments too.
-- Current File: src/mouse.c
+- Current File: src/random.c
 
 # EOF
