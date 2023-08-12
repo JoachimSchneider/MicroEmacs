@@ -2091,7 +2091,7 @@ VOID PASCAL NEAR mlforce P1_(CONST char *, s)
     discmd = oldcmd;            /* and restore the original setting */
 }
 
-/***HEREHEREHERE***/
+
 #if     !WINDOW_MSWIN
 
 /* MLABORT:
@@ -2262,4 +2262,3 @@ VOID winch_vtresize P2_(int, rows, int, cols)
 /**********************************************************************/
 /* EOF                                                                */
 /**********************************************************************/
-

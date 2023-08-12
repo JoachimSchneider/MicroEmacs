@@ -15,12 +15,12 @@
 #define RETURN  STATIC_STR_RET_RETURN
 
 
-/* initialize the entries in one user variable table */
-
-VOID PASCAL NEAR uv_init(ut)
-
-UTABLE *ut;     /* user variable table to initialize */
-
+/* UV_INIT:
+ *
+ * Initialize the entries in one user variable table
+ */
+VOID PASCAL NEAR uv_init P1_(UTABLE *, ut)
+/* ut:  User variable table to initialize */
 {
     REGISTER int i;
 
@@ -30,7 +30,11 @@ UTABLE *ut;     /* user variable table to initialize */
     }
 }
 
-VOID PASCAL NEAR varinit()      /* initialize the global user variable table */
+/* VARINIT:
+ *
+ * Initialize the global user variable table
+ */
+VOID PASCAL NEAR varinit P0_()
 {
     /* allocate the global user variable table */
     uv_global = uv_head =
@@ -43,11 +47,12 @@ VOID PASCAL NEAR varinit()      /* initialize the global user variable table */
     uv_init(uv_head);
 }
 
-VOID PASCAL NEAR uv_clean(ut)   /* discard the contents of a user variable table
-                                 */
-
-UTABLE *ut;     /* ptr to table to clear */
-
+/* UV_CLEAN:
+ *
+ * Discard the contents of a user variable table
+ */
+VOID PASCAL NEAR uv_clean P1_(UTABLE *, ut)
+/* ut:  Ptr to table to clear */
 {
     REGISTER int i;
 
@@ -58,10 +63,12 @@ UTABLE *ut;     /* ptr to table to clear */
 
 }
 
-VOID PASCAL NEAR varclean(ut)   /* discard and clear all user variable tables */
-
-UTABLE *ut;     /* table to clear */
-
+/* VARCLEAN:
+ *
+ * Discard and clear all user variable tables
+ */
+VOID PASCAL NEAR varclean P1_(UTABLE *, ut)
+/* ut:  Table to clear  */
 {
     /* first clean all the ones under this one */
     if ( ut->next != (UTABLE *)NULL )
@@ -419,22 +426,22 @@ next_ut:        ut = ut->next;
     return (errorm);
 }
 
-char *PASCAL NEAR funval(i)
-
-int i;
-
+/* FUNVAL:
+ */
+char *PASCAL NEAR funval P1_(int, i)
 {
     return (funcs[i].f_name);
 }
 
-char *PASCAL NEAR envval(i)
-
-int i;
-
+/* ENVVAL:
+ */
+char *PASCAL NEAR envval P1_(int, i)
 {
     return (envars[i]);
 }
 
+/* BINARY:
+ */
 int PASCAL NEAR binary P4_(CONST char *, key, ue_tvfetch_T, tval, int, tlength, int, klength)
 /* key:     Key string to look for                    */
 /* tval:    Ptr to function to fetch table value with */
@@ -889,10 +896,12 @@ char *PASCAL NEAR getkill P0_()
     STATIC_STR_RET_EPILOG(getkill, char *, NSTRING);
 }
 
-char *PASCAL NEAR trimstr(s)    /* trim whitespace off the end of a string */
-
-char *s;        /* string to trim */
-
+/* TRIMSTR:
+ *
+ * Trim whitespace off the end of a string
+ */
+char *PASCAL NEAR trimstr P1_(char *, s)
+/* s: String to trim  */
 {
     char *sp;           /* backward index */
 
@@ -904,11 +913,13 @@ char *s;        /* string to trim */
     return (s);
 }
 
-int PASCAL NEAR setvar(f, n)            /* set a variable */
-
-int f;          /* default flag */
-int n;          /* numeric arg (can overide prompted value) */
-
+/* SETVAR:
+ *
+ * set a variable
+ */
+int PASCAL NEAR setvar P2_(int, f, int, n)
+/* f: Default flag                              */
+/* n: Numeric arg (can overide prompted value)  */
 {
     REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
@@ -979,11 +990,13 @@ int n;          /* numeric arg (can overide prompted value) */
     return (status);
 }
 
-int PASCAL NEAR global_var(f, n)        /* declare a global variable */
-
-int f;          /* default flag */
-int n;          /* numeric arg (ignored here) */
-
+/* GLOBAL_VAR:
+ *
+ * Declare a global variable
+ */
+int PASCAL NEAR global_var P2_(int, f, int, n)
+/* f: Default flag                */
+/* n: Numeric arg (ignored here)  */
 {
     REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
@@ -1039,11 +1052,13 @@ int n;          /* numeric arg (ignored here) */
     return (status);
 }
 
-int PASCAL NEAR local_var(f, n) /* declare a local variable */
-
-int f;          /* default flag */
-int n;          /* numeric arg (ignored here) */
-
+/* LOCAL_VAR:
+ *
+ * Declare a local variable
+ */
+int PASCAL NEAR local_var P2_(int, f, int, n)
+/* f: Default flag                */
+/* n: Numeric arg (ignored here)  */
 {
     REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
@@ -1099,8 +1114,10 @@ int n;          /* numeric arg (ignored here) */
     return (status);
 }
 
-/* find a variables type and name */
-
+/* FINDVAR:
+ *
+ * Find a variables type and name
+ */
 VOID PASCAL NEAR findvar P4_(
         char  *,  var,  /* name of var to get */
         VDESC *,  vd,   /* structure to hold type and ptr */
@@ -1177,11 +1194,13 @@ retvar: vd->v_num = vnum;
     return;
 }
 
-int PASCAL NEAR svar(var, value)        /* set a variable */
-
-VDESC *var;     /* variable to set */
-char *value;    /* value to set to */
-
+/* SVAR:
+ *
+ * Set a variable
+ */
+int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
+/* var:   Variable to set */
+/* value: Value to set to */
 {
     REGISTER int vnum;          /* ordinal number of var refrenced */
     REGISTER int vtype;         /* type of variable to set */
@@ -1649,13 +1668,12 @@ char *value;    /* value to set to */
     return (status);
 }
 
-/* asc_int: ascii string to integer......This is too inconsistant to use the
- *          system's
+/* ASC_INT:
+ *
+ * ASCII string to integer......This is too inconsistant to use the
+ * system's
  */
-int PASCAL NEAR asc_int(st)
-
-char *st;
-
+int PASCAL NEAR asc_int P1_(char *, st)
 {
     int result;         /* resulting number */
     int sign;           /* sign of resulting number */
@@ -1789,10 +1807,12 @@ char *PASCAL NEAR long_asc P1_(long int, num)
     STATIC_STR_RET_EPILOG(long_asc, char *, LONGWIDTH + 1);
 }
 
-int PASCAL NEAR gettyp(token)   /* find the type of a passed token */
-
-char *token;    /* token to analyze */
-
+/* GETTYP:
+ *
+ * Find the type of a passed token
+ */
+int PASCAL NEAR gettyp P1_(char *, token)
+/* token: Token to analyze  */
 {
     REGISTER char c;            /* first char in token */
 
@@ -1939,10 +1959,12 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
     STATIC_STR_RET_EPILOG(getval, CONST char *, NSTRING);
 }
 
-int PASCAL NEAR stol(val)       /* convert a string to a numeric logical */
-
-char *val;      /* value to check for stol */
-
+/* STOL:
+ *
+ * Convert a string to a numeric logical
+ */
+int PASCAL NEAR stol P1_(char *, val)
+/* val: Value to check for stol */
 {
     /* check for logical values */
     if ( val[0] == 'F' )
@@ -1955,10 +1977,12 @@ char *val;      /* value to check for stol */
     return ( (asc_int(val) != 0) );
 }
 
-CONST char *PASCAL NEAR ltos(val)   /* numeric logical to string logical */
-
-int val;        /* value to translate */
-
+/* LTOS:
+ *
+ * Numeric logical to string logical
+ */
+CONST char *PASCAL NEAR ltos P1_(int, val)
+/* val: Value to translate  */
 {
     if ( val )
         return (truem);
@@ -1966,10 +1990,12 @@ int val;        /* value to translate */
         return (falsem);
 }
 
-char *PASCAL NEAR mkupper(str)    /* make a string upper case */
-
-char *str;              /* string to upper case */
-
+/* MKUPPER:
+ *
+ * Make a string upper case
+ */
+char *PASCAL NEAR mkupper P1_(char *, str)
+/* str: String to upper case  */
 {
     char *sp;
 
@@ -1980,10 +2006,12 @@ char *str;              /* string to upper case */
     return (str);
 }
 
-char *PASCAL NEAR mklower(str)    /* make a string lower case */
-
-char *str;              /* string to lower case */
-
+/* MKLOWER:
+ *
+ * Make a string lower case
+ */
+char *PASCAL NEAR mklower P1_(char *, str)
+/* str: String to lower case  */
 {
     char *sp;
 
@@ -1994,19 +2022,24 @@ char *str;              /* string to lower case */
     return (str);
 }
 
-int PASCAL NEAR absv(x) /* take the absolute value of an integer */
-
-int x;
-
+/* ABSV:
+ *
+ * Take the absolute value of an integer
+ */
+int PASCAL NEAR absv P1_(int, x)
 {
     return (x < 0 ? -x : x);
 }
 
-long PASCAL NEAR ernd() /* returns a random integer */
-/* This function implements the "minimal standard" RNG from the paper "RNGs:
+/* ERND:
+ *
+ * Returns a random integer
+ *
+ * This function implements the "minimal standard" RNG from the paper "RNGs:
  * Good Ones are Hard to Find" by Park and Miller, CACM, Volume 31, Number 10,
  * October 1988.
  */
+long PASCAL NEAR ernd P0_()
 {
     long int a=16807L, m=2147483647L, q=127773L, r=2836L;
     long lo, hi, test;
@@ -2019,11 +2052,13 @@ long PASCAL NEAR ernd() /* returns a random integer */
     return (seed);
 }
 
-int PASCAL NEAR sindex(source, pattern) /* find pattern within source */
-
-char *source;   /* source string to search */
-char *pattern;  /* string to look for */
-
+/* SINDEX:
+ *
+ * Find pattern within source
+ */
+int PASCAL NEAR sindex P2_(char *, source, char *, pattern)
+/* source:  Source string to search */
+/* pattern: String to look for      */
 {
     char *sp;           /* ptr to current position to scan */
     char *csp;          /* ptr to source string during comparison */
@@ -2104,13 +2139,12 @@ xnext:  ++sp;
     STATIC_STR_RET_EPILOG(xlat, char *, NSTRING);
 }
 
-/*  setwlist:   Set an alternative list of character to be considered "in a word
+/* SETWLIST:
+ *
+ * Set an alternative list of character to be considered "in a word
  */
-
-int PASCAL NEAR setwlist(wclist)
-
-char *wclist;   /* list of characters to consider "in a word" */
-
+int PASCAL NEAR setwlist P1_(char *, wclist)
+/* wclist:  List of characters to consider "in a word"  */
 {
     REGISTER int index;
 
@@ -2134,12 +2168,12 @@ char *wclist;   /* list of characters to consider "in a word" */
     return 0;
 }
 
-/*  getwlist:   place in a buffer a list of characters considered "in a word"           */
-
-char *PASCAL NEAR getwlist(buf)
-
-char *buf;      /* buffer to place list of characters */
-
+/* GETWLIST:
+ *
+ * Place in a buffer a list of characters considered "in a word"
+ */
+char *PASCAL NEAR getwlist P1_(char *, buf) /***TODO: Missing size info */
+/* buf: Buffer to place list of characters  */
 {
     REGISTER int index;
     REGISTER char *sp;
@@ -2159,13 +2193,12 @@ char *buf;      /* buffer to place list of characters */
     return (buf);
 }
 
-/*  is_num: ascii string is integer......This is too inconsistant to use the
- * system's */
-
-int PASCAL NEAR is_num(st)
-
-char *st;
-
+/* IS_NUM:
+ *
+ * ASCII string is integer......This is too inconsistant to use the
+ * system's
+ */
+int PASCAL NEAR is_num P1_(char *, st)
 {
     int period_flag;            /* have we seen a period yet? */
 
@@ -2197,11 +2230,13 @@ char *st;
     return (TRUE);
 }
 
-int PASCAL NEAR dispvar(f, n)           /* display a variable's value */
-
-int f;          /* default flag */
-int n;          /* numeric arg (can overide prompted value) */
-
+/* DISPVAR:
+ *
+ * Display a variable's value
+ */
+int PASCAL NEAR dispvar P2_(int, f, int, n)
+/* f: Default flag                              */
+/* n: Numeric arg (can overide prompted value)  */
 {
     REGISTER int status;        /* status return */
     VDESC vd;                   /* variable num/type */
@@ -2244,13 +2279,13 @@ int n;          /* numeric arg (can overide prompted value) */
     return (TRUE);
 }
 
-/* describe-variables:  Bring up a fake buffer and list the contents of all the
- *                      environment variables
+/* DESVARS:
+ *
+ * describe-variables:  Bring up a fake buffer and list the contents
+ *                      of all the environment variables
  */
-int PASCAL NEAR desvars(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR desvars P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER BUFFER *varbuf;    /* buffer to put variable list into */
     REGISTER int uindex;        /* index into uvar table */
@@ -2353,13 +2388,13 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/* describe-functions:  Bring up a fake buffer and list the names of all the
- *                      functions
+/* DESFUNC:
+ *
+ * describe-functions:  Bring up a fake buffer and list the names
+ *                      of all the functions
  */
-int PASCAL NEAR desfunc(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR desfunc P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER BUFFER *fncbuf;    /* buffer to put function list into */
     REGISTER int uindex;        /* index into funcs table */
@@ -2401,11 +2436,13 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-VOID PASCAL NEAR pad(s, len)    /* pad a string to indicated length */
-
-char *s;        /* string to add spaces to */
-int len;        /* wanted length of string */
-
+/* PAD:
+ *
+ * Pad a string to indicated length
+ */
+VOID PASCAL NEAR pad P2_(char *, s, int, len)
+/* s:   String to add spaces to */
+/* len: Wanted length of string */
 {
     while ( strlen(s) < len ) {
         XSTRCAT(s, "          ");
