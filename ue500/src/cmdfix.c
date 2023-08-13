@@ -59,7 +59,7 @@ int argc;       /* number of command line arguments */
 char *argv[];   /* text of command line arguments */
 
 {
-    REGISTER carg;      /* current command line argument */
+    REGISTER int carg;  /* current command line argument */
 
     puts("CMDFIX:	Startup and Command file updater");
     printf("		for MicroEMACS version %s\n", VERSION);

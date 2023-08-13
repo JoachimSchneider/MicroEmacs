@@ -30,7 +30,11 @@
 
 /**********************************************************************/
 #ifdef __cplusplus
-# define EXTERN   extern "C"
+# if TURBO
+#   define EXTERN   extern
+# else
+#   define EXTERN   extern "C"
+# endif
 # define REGISTER
 #else
 # define EXTERN   extern

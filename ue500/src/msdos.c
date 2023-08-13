@@ -26,6 +26,7 @@
 
 static struct ffblk fileblock;    /* structure for directory searches */
 # endif
+
 # if     MSC | ZTC
 #  include <dos.h>
 
@@ -49,15 +50,15 @@ static int          nxtchar = -1; /* character held from type ahead */
 
 /* Some constants which we do not want to have as literals inside
  * the code:  */
-#if ( 0 ) /* Old value  */
-# define TIME_BUF_SIZE  16
-#else
-# if IC | TURBO
-#   define TIME_BUF_SIZE ( sizeof(time_t) )
+# if ( 0 ) /* Old value  */
+#   define TIME_BUF_SIZE  16
 # else
-#   define TIME_BUF_SIZE ( 32 )
+#   if IC | TURBO
+#     define TIME_BUF_SIZE ( sizeof(time_t) )
+#   else
+#     define TIME_BUF_SIZE ( 32 )
+#   endif
 # endif
-#endif
 
 /*  Some global variable    */
 # define INBUFSIZ        40
@@ -187,7 +188,7 @@ int PASCAL NEAR ttopen P0_()
     int86(0x33, &rg, &rg);
 # else  /* !MOUSE */
     mexist = 0;
-# endif /* !MOUSE */
+# endif /* MOUSE  */
 
     return TRUE;
 }
@@ -278,7 +279,7 @@ int doschar P0_()
 
     return (rg.h.al & 255);
 
-# else
+# else  /* !ATKBD */
 
 #  if     (TURBO | IC) && HP150 == 0
 /* Added 8/13/89 by DRK to get Turbo C version to use BIOS for keyboard input.
@@ -321,8 +322,8 @@ int doschar P0_()
 
     return (rg.h.al & 255);
 
-#  endif
-# endif
+#  endif  /* (TURBO | IC) && HP150 == 0 */
+# endif /* ATKBD  */
 }
 
 /* TTGETC:
@@ -362,8 +363,8 @@ ttc:    /* return any keystrokes waiting in the type ahead buffer */
     int86(0x33, &rg, &rg);
 
     goto ttc;
-#  endif /* MOUSE */
-# else  /* TYPEAH */
+#  endif  /* MOUSE  */
+# else  /* !TYPEAH  */
 
     return ( doschar() );
 
@@ -459,7 +460,7 @@ int PASCAL NEAR checkmouse P0_()
     return (FALSE);
 }
 
-# endif
+# endif /* MOUSE  */
 
 # if     TYPEAH
 
@@ -499,7 +500,7 @@ int PASCAL NEAR typahead P0_()
 #  endif
 }
 
-# endif
+# endif /* TYPEAH */
 
 /* SPAWNCLI:
  *
@@ -1078,7 +1079,8 @@ char *PASCAL NEAR getnfile P0_()
 
     return (rbuf);
 }
-# else
+# else  /* !TURBO */
+
 #  if     MSC | ZTC
 /*  FILE Directory routines     */
 
@@ -1164,7 +1166,7 @@ char *PASCAL NEAR getnfile P0_()
     return (rbuf);
 }
 
-#  else
+#  else /* !(MSC | ZTC) */
 
 /* GETFFILE:
  */
@@ -1181,9 +1183,11 @@ char *PASCAL NEAR getnfile P0_()
     return (NULL);
 }
 
-#  endif
-# endif
-#endif
+#  endif  /* MSC | ZTC  */
+
+# endif /* TURBO  */
+
+#endif  /* MSDOS  */
 
 
 
