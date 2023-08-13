@@ -2,6 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <assert.h>
 
 
 #define xsnprintf snprintf
@@ -296,6 +297,7 @@ char *xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
  *  n = strlcpy(dst, src, len);
  *  n = snprintf(dst, len, "%s", src);
  */
+# if ( 0 )
 int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
 {
     int l2  = 0;
@@ -336,6 +338,63 @@ int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
 
     return l2;
 }
+#else
+int xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
+{
+    int l2  = 0;
+
+    if ( NULL != s1 && NULL != s2 ) {
+        /* Characters (not counting the terminating '\0') to copy:  */
+        int ncpy  = 0;
+
+        l2    = strlen(s2);
+        ncpy  = MIN2(l2, n - 1);
+
+        if ( 0 > ncpy ) {
+            return l2;
+        }
+        
+        if        ( s1 <  s2 )  {
+            int i     = 0;
+
+            for ( i = 0; i < ncpy; i++ )  {
+                s1[i] = s2[i];
+            }
+            s1[i] = '\0';
+        } else if ( s1 == s2 )  {
+            /**EMPTY**/
+        } else if ( s1 >  s2 )  {
+            int i = 0;
+
+            s1[ncpy]  = '\0';
+
+            for ( i = ncpy - 1; i >= 0; i-- ) {
+                s1[i] = s2[i];
+            }
+        } else                  { /* Possible on e.g. OS/400 */
+            /* No `ASRT()' here: So we may use this function
+             * inside of `ASRT()'
+             */
+            assert(0);
+            abort();
+        }
+    } else if ( NULL == s1 )  {
+        if ( NULL != s2 && '\0' != *s2 )  {
+            /* No `ASRT()' here: So we may use this function
+             * inside of `ASRT()'
+             */
+            assert(0);
+            abort();
+        }
+    } else if ( NULL == s2 )  {
+        if ( 0 < n )  {
+            *s1 = '\0';
+        }
+    }
+
+    return l2;
+}
+#endif
 
 
 int main(int argc, char *argv[])
@@ -344,7 +403,9 @@ int main(int argc, char *argv[])
     char A1[]  = "abcdefhijklmnopqrstuvwxyz";
     char B0[]  = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
     char B1[]  = "ABCDEFHIJKLMNOPQRSTUVWXYZ";
-
+    char C0[]  = "XXXXXXXXXXXXXXXXXXXXXXXXX";
+    char C1[]  = "0123456789ABCDEFGHIJKLMNO";
+    
     char *s1  = &A1[7];   /* 'i'  */
     char *s2  = &A1[10];  /* 'l'  */
     char *s3  = &A1[18];  /* 'u'  */
@@ -377,6 +438,10 @@ int main(int argc, char *argv[])
 
     fprintf(stdout, "%s\n", s1);
 
+    xstrlcpy(C0, C1, 4);
+
+    fprintf(stdout, "%s\n", C0);
+    
     return 0;
 }
 

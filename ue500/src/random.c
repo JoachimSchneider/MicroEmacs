@@ -1644,11 +1644,16 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
     int l2  = 0;
 
     if ( NULL != s1 && NULL != s2 ) {
+        /* Characters (not counting the terminating '\0') to copy:  */
         int ncpy  = 0;
 
         l2    = strlen(s2);
-        ncpy  = MIN2(l2, n);
+        ncpy  = MIN2(l2, n - 1);
 
+        if ( 0 > ncpy ) {
+            return l2;
+        }
+        
         if        ( s1 <  s2 )  {
             int i     = 0;
 
@@ -1674,7 +1679,7 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
             abort();
         }
     } else if ( NULL == s1 )  {
-        if ( '\0' != *s2 )  {
+        if ( NULL != s2 && '\0' != *s2 )  {
             /* No `ASRT()' here: So we may use this function
              * inside of `ASRT()'
              */
@@ -1682,7 +1687,9 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
             abort();
         }
     } else if ( NULL == s2 )  {
-        *s1 = '\0';
+        if ( 0 < n )  {
+            *s1 = '\0';
+        }
     }
 
     return l2;

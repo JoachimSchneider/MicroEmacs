@@ -1,8 +1,22 @@
-/*  EDEF:       Global variable definitions for MicroEMACS 3.9
+/*======================================================================
+ * EDEF:           Global variable definitions for
+ *                 MicroEMACS 3.9
  *
- *                       written by Daniel Lawrence based on code by Dave G.
- * Conroy, Steve Wilhite and George Jones
- */
+ *                 written by Daniel Lawrence
+ *                 based on code by Dave G. Conroy,
+ *                 Steve Wilhite and George Jones
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef EDEF_H_
+#define EDEF_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #ifdef  maindef
 
@@ -252,7 +266,7 @@ NOSHARE int pending_msg = FALSE;        /* Flag - have we notified user yet.*/
 int winch_flag=0;                       /* Window size changed flag */
 # endif
 
-#else
+#else /* !maindef */
 
 /* for all the other .C files */
 
@@ -480,7 +494,8 @@ EXTERN NOSHARE int pending_msg;         /* Flag - have we notified user yet.*/
 EXTERN NOSHARE int winch_flag;          /* Window size changed flag */
 # endif
 
-#endif
+#endif  /* maindef  */
+
 
 /* terminal table defined only in TERM.C */
 
@@ -488,3 +503,12 @@ EXTERN NOSHARE int winch_flag;          /* Window size changed flag */
 EXTERN NOSHARE TERM term;               /* Terminal information.    */
 #endif
 
+
+
+/*====================================================================*/
+#endif/**#ifndef EEDEF_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

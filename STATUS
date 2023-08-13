@@ -91,6 +91,7 @@ src/replace.c   X                                           X
 src/screen.c                                                X
 src/search.c    X                                           X
 src/unix.c                                                  X
+h/edef.h        X                                                     X
 h/eproto.h      X                                                     X
 h/estruct.h     X                                                     X
 h/mswin.h       X                                                     X

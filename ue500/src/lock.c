@@ -67,7 +67,7 @@ int lockchk P1_(CONST char *, fname /* file to check for a lock */)
     }
 
     /* everthing is cool, add it to the table */
-    XSTRCPY(lname[numlocks-1], fname);
+    xstrlcpy(lname[numlocks - 1], fname, sizeof(lname) - (numlocks - 1));
 
     return (TRUE);
 }
