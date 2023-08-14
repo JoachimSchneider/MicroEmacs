@@ -13,18 +13,16 @@
 #include "elang.h"
 
 
-/*
+/* SHOWCPOS:
+ *
  * Display the current position of the cursor, in origin 1 X-Y coordinates, the
  * character that is under the cursor (in hex), and the fraction of the text
  * that is before the cursor. The displayed column is not the current column,
  * but the column that would be used on an infinite width display. Normally this
  * is bound to "C-X =".
  */
-
-int PASCAL NEAR showcpos(f, n)
-
-int f, n;                             /* prefix flag and argument */
-
+int PASCAL NEAR showcpos P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *lp       = NULL;   /* current line */
     REGISTER long numchars  = 0;      /* # of chars in file */
@@ -105,10 +103,13 @@ int f, n;                             /* prefix flag and argument */
     return (TRUE);
 }
 
-long PASCAL NEAR getlinenum(bp, sline)  /* get the a line number */
-
-BUFFER *bp;                             /* buffer to get current line from */
-LINE *sline;                    /* line to search for */
+/* GETLINENUM:
+ *
+ * Get the a line number
+ */
+long PASCAL NEAR getlinenum P2_(BUFFER *, bp, LINE *, sline)
+/* bp:    Buffer to get current line from */
+/* sline: Line to search for              */
 {
     REGISTER LINE   *lp;        /* current line */
     REGISTER long numlines;             /* # of lines before point */
@@ -131,13 +132,11 @@ LINE *sline;                    /* line to search for */
 }
 
 
-/*
+/* GETCCOL:
+ *
  * Return current column.  Stop at first non-blank given TRUE argument.
  */
-
-int PASCAL NEAR getccol(bflg)
-int bflg;
-
+int PASCAL NEAR getccol P1_(int, bflg)
 {
     int           i     = 0;
     int           col   = 0;
@@ -170,12 +169,13 @@ int bflg;
     return (col);
 }
 
-/*  findcol: Return display column in line at char position */
-
-int PASCAL NEAR findcol(lp, pos)
-
-LINE * lp;                              /* line to scan */
-int pos;                                /* character offset */
+/* FINDCOL:
+ *
+ * Return display column in line at char position
+ */
+int PASCAL NEAR findcol P2_(LINE *, lp, int, pos)
+/* lp:  Line to scan      */
+/* pos: Character offset  */
 {
     REGISTER int c, i, col;
 
@@ -198,13 +198,12 @@ int pos;                                /* character offset */
     return (col);
 }
 
-/*
+/* SETCCOL:
+ *
  * Set current column.
  */
-
-int PASCAL NEAR setccol(pos)
-
-int pos;                                /* position to set cursor */
+int PASCAL NEAR setccol P1_(int, pos)
+/* pos: Position to set cursor  */
 {
     REGISTER int c;             /* character being scanned */
     REGISTER int i;             /* index into current line */
@@ -242,7 +241,8 @@ int pos;                                /* position to set cursor */
     return (col >= pos);
 }
 
-/*
+/* TWIDDLE:
+ *
  * Twiddle the two characters on either side of dot. If dot is at the end of the
  * line twiddle the two characters before it. Return with an error if dot is at
  * the beginning of line; it seems to be a bit pointless to make this work. This
@@ -251,11 +251,8 @@ int pos;                                /* position to set cursor */
  * compatibility forces the save/restore of the cursor position to keep this
  * working as it always has.
  */
-
-int PASCAL NEAR twiddle(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR twiddle P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *dotp;                /* shorthand to current line pointer */
     int saved_doto;                     /* restore the cursor afterwards */
@@ -307,17 +304,16 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* QUOTE:
+ *
  * Quote the next character, and insert it into the buffer. All the characters
  * are taken literally, including the newline, which does not then have its line
  * splitting meaning. The character is always read, even if it is inserted 0
  * times, for regularity. Bound to "C-Q". If a mouse action or function key is
  * pressed, its symbolic MicroEMACS name gets inserted!
  */
-
-int PASCAL NEAR quote(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR quote P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int ec;            /* current extended key fetched     */
     REGISTER int c;             /* current ascii key fetched        */
@@ -355,17 +351,16 @@ int f, n;                               /* prefix flag and argument */
     return ( linsert(n, c) );
 }
 
-/*
+/* TAB:
+ *
  * Set tab size if given non-default argument (n <> 1).  Otherwise, insert a tab
  * into file.  If given argument, n, of zero, change to hard tabs. If n > 1,
  * simulate tab stop every n-characters using spaces. This has to be done in
  * this slightly funny way because the tab (in ASCII) has been turned into "C-I"
  * (in 10 bit code) already. Bound to "C-I".
  */
-
-int PASCAL NEAR tab(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR tab P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( n < 0 )
         return (FALSE);
@@ -381,10 +376,12 @@ int f, n;                               /* prefix flag and argument */
     return ( linsert(stabsize - (getccol(FALSE) % stabsize), ' ') );
 }
 
-int PASCAL NEAR detab(f, n)     /* change tabs to spaces */
-
-int f, n;                               /* default flag and numeric repeat count
-                                         */
+/* detab:
+ *
+ * Change tabs to spaces
+ */
+int PASCAL NEAR detab P2_(int, f, int, n)
+/* f, n:  Default flag and numeric repeat count */
 {
     REGISTER int inc;           /* increment to next line [sgn(n)] */
 
@@ -424,11 +421,12 @@ int f, n;                               /* default flag and numeric repeat count
     return (TRUE);
 }
 
-
-int PASCAL NEAR entab(f, n)     /* change spaces to tabs where posible */
-
-int f, n;                               /* default flag and numeric repeat count
-                                         */
+/* ENTAB:
+ *
+ * Change spaces to tabs where posible
+ */
+int PASCAL NEAR entab P2_(int, f, int, n)
+/* f, n:  Default flag and numeric repeat count */
 {
     REGISTER int inc;           /* increment to next line [sgn(n)] */
     REGISTER int fspace;        /* pointer to first space if in a run */
@@ -499,14 +497,13 @@ int f, n;                               /* default flag and numeric repeat count
     return (TRUE);
 }
 
-/* trim:    trim trailing whitespace from the point to eol with no arguments, it
+/* TRIM:
+ *
+ * Trim trailing whitespace from the point to eol with no arguments, it
  * trims the current region
  */
-
-int PASCAL NEAR trim(f, n)
-
-int f, n;                               /* default flag and numeric repeat count
-                                         */
+int PASCAL NEAR trim P2_(int, f, int, n)
+/* f, n:  Default flag and numeric repeat count */
 {
     REGISTER LINE *lp;          /* current line pointer */
     REGISTER int offset;        /* original line offset position */
@@ -544,15 +541,14 @@ int f, n;                               /* default flag and numeric repeat count
     return (TRUE);
 }
 
-/*
+/* OPENLINE:
+ *
  * Open up some blank space. The basic plan is to insert a bunch of newlines,
  * and then back up over them. Everything is done by the subcommand procerssors.
  * They even handle the looping. Normally this is bound to "C-O".
  */
-
-int PASCAL NEAR openline(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR openline P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int i;
     REGISTER int s;
@@ -576,14 +572,13 @@ int f, n;                               /* prefix flag and argument */
     return (s);
 }
 
-/*
+/* NEWLINE:
+ *
  * Insert a newline. Bound to "C-M". If we are in CMODE, do automatic
  * indentation as specified.
  */
-
-int PASCAL NEAR newline(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR newline P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int s;
 
@@ -615,7 +610,11 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-int PASCAL NEAR cinsert()       /* insert a newline and indentation for C */
+/* CINSERT:
+ *
+ * Insert a newline and indentation for C
+ */
+int PASCAL NEAR cinsert P0_()
 {
     REGISTER char *cptr;        /* string pointer into text to copy */
     REGISTER int i;             /* index into line to copy indent from */
@@ -673,11 +672,13 @@ int PASCAL NEAR cinsert()       /* insert a newline and indentation for C */
     return (TRUE);
 }
 
-int PASCAL NEAR insbrace(n, c)  /* insert a brace into the text here...we are in
-                                 * CMODE */
-
-int n;                                  /* repeat count */
-int c;                                  /* brace to insert (always } for now) */
+/* INSBRACE:
+ *
+ * Insert a brace into the text here...we are in CMODE
+ */
+int PASCAL NEAR insbrace P2_(int, n, int, c)
+/* n: Repeat count                        */
+/* c: Brace to insert (always } for now)  */
 {
     REGISTER int ch;            /* last character before input */
     REGISTER int oc;            /* caractere oppose a c */
@@ -772,8 +773,11 @@ int c;                                  /* brace to insert (always } for now) */
     return ( linsert(n, c) );
 }
 
-int PASCAL NEAR inspound()      /* insert a # into the text here...we are in
-                                 * CMODE */
+/* INSPOUND:
+ *
+ * Insert a # into the text here...we are in CMODE
+ */
+int PASCAL NEAR inspound P0_()
 {
     REGISTER int ch;            /* last character before input */
     REGISTER int i;
@@ -797,17 +801,16 @@ int PASCAL NEAR inspound()      /* insert a # into the text here...we are in
     return ( linsert(1, '#') );
 }
 
-/*
+/* DEBLANK:
+ *
  * Delete blank lines around dot. What this command does depends if dot is
  * sitting on a blank line. If dot is sitting on a blank line, this command
  * deletes all the blank lines above and below the current line. If it is
  * sitting on a non blank line then it deletes all of the blank lines after the
  * line. Normally this command is bound to "C-X C-O". Any argument is ignored.
  */
-
-int PASCAL NEAR deblank(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR deblank P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE   *lp1;
     REGISTER LINE   *lp2;
@@ -832,6 +835,7 @@ int f, n;                               /* prefix flag and argument */
     return ( ldelete(nld, FALSE) );
 }
 
+/***HEREHEREHERE***/
 /*
  * Insert a newline, then enough tabs and spaces to duplicate the indentation of
  * the previous line. Tabs are every tabsize characters. Quite simple. Figure
@@ -1720,8 +1724,11 @@ char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
                                 const char *, src,
                                 const char *, file, int, line)
 {
-    if ( 0 <= dst_size )  {
+    if        ( 2 <= dst_size ) {
         xstrlcpy(dst, src, dst_size);
+    } else if ( 0 <= dst_size ) {
+        xstrlcpy(dst, src, dst_size);
+        TRCK(("Warning safe string copy with size %d", dst_size), file, line);
     } else                {
         xstrcpy(dst, src);
         TRCK(("%s", "Warning unsafe string copy"), file, line);

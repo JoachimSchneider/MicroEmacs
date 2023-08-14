@@ -1138,9 +1138,12 @@ int PASCAL NEAR unarg P2_(int, f, int, n)
  *
  * Copy a string...with length restrictions ALWAYS null terminate
  */
-char * PASCAL NEAR bytecopy P3_(char *,       dst,    /* destination of copied string */
-                                CONST char *, src,    /* source */
-                                int,          maxlen  /* maximum length */)
+char * PASCAL NEAR bytecopy P3_(char *,       dst,
+                                CONST char *, src,
+                                int,          maxlen)
+/* dst:     Destination of copied string        */
+/* src:     Source                              */
+/* maxlen:  Maximum string (not buffer!) length */
 #if ( 0 ) /* Old implemantation: New implementation handles overlap and
            * is more defensive  */
 {
@@ -1155,7 +1158,7 @@ char * PASCAL NEAR bytecopy P3_(char *,       dst,    /* destination of copied s
 }
 #else
 {
-    xstrlcpy(dst, src, maxlen);
+    xstrlcpy(dst, src, maxlen + 1);
 
     return dst;
 }

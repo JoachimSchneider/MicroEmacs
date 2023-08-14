@@ -400,7 +400,7 @@ int PASCAL NEAR storeproc P2_(
 
     /* and set the macro store pointers to it */
     mstore = TRUE;
-    bstore = bp;
+    bstore = bp;  /* This is the *only* place where bstore is set */
 
     return (TRUE);
 }
@@ -763,6 +763,11 @@ nxtscan:        /* on to the next line */
                 lputc(mp, i, eline[i]);
 
             /* attach the line to the end of the buffer */
+            if ( NULL == bstore ) {
+                errormesg(TEXT113, bp, lp);
+/*                                      "Can not create macro"  */
+                goto eabort;
+            }
             bstore->b_linep->l_bp->l_fp = mp;
             mp->l_bp = bstore->b_linep->l_bp;
             bstore->b_linep->l_bp = mp;

@@ -282,13 +282,14 @@ int PASCAL NEAR ab_insert P2_(char *, sym, char *, expansion)
         ab_delete(sym);
 
     /* allocate a new node to hold abbreviation */
-    new_node = (ABBREV *)room(sizeof (ABBREV)+strlen(expansion)+1);
+    new_node = (ABBREV *)room(sizeof(ABBREV) + strlen(expansion) +1);
     if ( new_node == NULL )
         return (FALSE);
 
     /* copy data to that node */
     XSTRCPY(new_node->ab_sym, sym);
-    XSTRCPY(new_node->ab_exp, expansion);
+    /* new_node->ab_exp has faked length: Use `xstrcpy' (safe here) */
+    xstrcpy(new_node->ab_exp, expansion);
 
     /* do we have an empty list */
     if ( ab_head == NULL ) {

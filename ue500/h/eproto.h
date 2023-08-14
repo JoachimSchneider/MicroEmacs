@@ -179,6 +179,12 @@ EXTERN int PASCAL NEAR  xstrlcat P3_(char *, s1, CONST char *, s2, int, n);
 EXTERN char *PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
                                         const char *src,
                                         const char *file, int line));
+/* Safe string copy (if dst is an array): Do not use if dst is a char
+ * array with faked length, e.g. var->txt in
+ * typedef struct { ..., char txt[1] } s_T;
+ * s_T *var = (s_T *)malloc(42);
+ * XSTRCPY(var->txt, .);
+ */
 #define XSTRCPY(dst, src) sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
 
 /* SFSTRCAT:

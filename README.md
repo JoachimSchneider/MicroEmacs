@@ -152,6 +152,9 @@ modern Linux and FreeBSD systems:
     whit variable argumebnt lists.
 - Check the `NOSHARE' in edef.h especially the `NOSHARE EXTERN':  (\/)
   Should it be EXTERN?
+- add-abbrev is broken (adds only the first character of repl.)   (\/)
+
+
 
 # For completeness I quote Peter Chapman's README.md here:
 ```
