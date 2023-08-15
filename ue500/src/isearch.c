@@ -138,9 +138,10 @@ int PASCAL NEAR isearch P1_(int, dir)
      * if isearch.  Unmake the meta-character array, so that it will get re-made
      * automatically with the (maybe) new search string on a MAGIC mode search.
      */
-    bytecopy(pat_save, (char *) pat, NPAT); /* Save the old pattern string    */
-    curline = curwp->w_dotp;                /* Save the current line pointer  */
-    curoff = get_w_doto(curwp);             /* Save the current offset        */
+    /* Save the old pattern string: */
+    xstrlcpy(pat_save, (char *)pat, NPAT);
+    curline = curwp->w_dotp;      /* Save the current line pointer  */
+    curoff = get_w_doto(curwp);   /* Save the current offset        */
 # if MAGIC
     mcclear();
 # endif
@@ -229,7 +230,7 @@ start_over: /* This is a good place to start a re-execution:  */
                 curwp->w_dotp = curline;
                 set_w_doto(curwp, curoff);
                 dir = init_direction;
-                bytecopy( (char *) pat, pat_save, NPAT );
+                xstrlcpy((char *)pat, pat_save, NPAT);
                 setjtable();
                 cmd_reexecute = 0;
                 goto start_over;
@@ -258,7 +259,7 @@ start_over: /* This is a good place to start a re-execution:  */
          */
         if ( cpos >= NPAT ) {
             mlwrite(TEXT166/*"? Search string too long"*/);
-            bytecopy( (char *) pat, pat_save, NPAT );
+            xstrlcpy((char *)pat, pat_save, NPAT);
             setjtable();
             mmove_flag = TRUE;
 

@@ -1729,7 +1729,7 @@ char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
     } else if ( 0 <= dst_size ) {
         xstrlcpy(dst, src, dst_size);
         TRCK(("Warning safe string copy with size %d", dst_size), file, line);
-    } else                {
+    } else                      {
         xstrcpy(dst, src);
         TRCK(("%s", "Warning unsafe string copy"), file, line);
     }
@@ -1746,9 +1746,12 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
                                 const char *, src,
                                 const char *, file, int, line)
 {
-    if ( 0 <= dst_size )  {
+    if        ( 2 <= dst_size ) {
         xstrlcat(dst, src, dst_size);
-    } else                {
+    } else if ( 0 <= dst_size ) {
+        xstrlcat(dst, src, dst_size);
+        TRCK(("Warning safe string cat with size %d", dst_size), file, line);
+    } else                      {
         xstrcat(dst, src);
         TRCK(("%s", "Warning unsafe string cat"), file, line);
     }

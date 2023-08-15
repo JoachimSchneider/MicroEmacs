@@ -190,8 +190,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFCAT:
         XSTRCPY(result, arg1);
-        strncat(result, arg2, NSTRING);
-        result[NSTRING - 1] = 0;
+        XSTRCAT(result, arg2);
 
         RETURN ( result );
 
@@ -234,14 +233,14 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         arg = asc_int(arg1);
 #if     MAGIC
         if ( arg < 0 || arg >= MAXGROUPS )
-            RETURN ( bytecopy(result, errorm, NSTRING * 2) );
+            RETURN ( bytecopy(result, errorm, NSTRING * 2 - 1) );
 
-        RETURN ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2) );
+        RETURN ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2 - 1) );
 #else
         if ( arg == 0 )
-            bytecopy(result, patmatch, NSTRING * 2);
+            bytecopy(result, patmatch, NSTRING * 2 - 1);
         else
-            RETURN ( bytecopy(result, errorm, NSTRING * 2) );
+            RETURN ( bytecopy(result, errorm, NSTRING * 2 - 1) );
 
         RETURN ( result );
 #endif
@@ -262,6 +261,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( ltos( is_num(arg1) ) );
 
     case UFLEFT:
+        /***TODO: OVERWRITE POSSIBLE***/
         RETURN ( bytecopy( result, arg1, asc_int(arg2) ) );
 
     case UFLENGTH:
@@ -278,6 +278,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         if ( arg > strlen(arg1) )
             RETURN ( XSTRCPY(result, "") );
 
+        /***TODO: OVERWRITE POSSIBLE***/
         RETURN ( bytecopy( result, &arg1[arg-1], asc_int(arg3) ) );
 
     case UFMKCOL:
@@ -320,7 +321,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( ltos( stol(arg1) || stol(arg2) ) );
 
     case UFREVERSE:
-        RETURN ( strrev( bytecopy(result, arg1, NSTRING * 2) ) );
+        RETURN ( strrev( bytecopy(result, arg1, NSTRING * 2 - 1) ) );
 
     case UFRIGHT:
         arg = asc_int(arg2);
@@ -1386,7 +1387,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVFMTLEAD:
-            bytecopy(fmtlead, value, NSTRING);
+            xstrlcpy(fmtlead, value, NSTRING);
             break;
 
         case EVGFLAGS:
@@ -1450,7 +1451,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVLTERM:
-            bytecopy(lterm, value, NSTRING);
+            xstrlcpy(lterm, value, NSTRING);
             break;
 
         case EVLWIDTH:
@@ -1509,12 +1510,12 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVPALETTE:
-            bytecopy(palstr, value, 48);
+            xstrlcpy(palstr, value, palstr_LEN);
             spal(palstr);
             break;
 
         case EVPARALEAD:
-            bytecopy(paralead, value, NSTRING);
+            xstrlcpy(paralead, value, NSTRING);
             break;
 
         case EVPENDING:
@@ -1911,10 +1912,10 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
 
         /* grab the line as an argument */
         blen = get_lused(bp->b_dotp) - get_b_doto(bp);
-        if ( blen > NSTRING )
-            blen = NSTRING;
+        if ( blen >= NSTRING )
+            blen = NSTRING - 1;
         bytecopy(buf, ltext(bp->b_dotp) + get_b_doto(bp), blen);
-        buf[blen] = 0;
+        /* buf[blen] = 0; /o Done by bytecopy 0/  */
 
         /* and step the buffer's line ptr ahead a line */
         bp->b_dotp = lforw(bp->b_dotp);
@@ -2289,7 +2290,6 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
 {
     REGISTER BUFFER *varbuf;    /* buffer to put variable list into */
     REGISTER int uindex;        /* index into uvar table */
-    REGISTER int olen;          /* current length of output string */
     UTABLE *ut;                 /* user variable table pointer */
     PARG *cur_arg;              /* ptr to buffers argument list */
     char outseq[NSTRING];       /* output buffer for keystroke sequence */
@@ -2317,9 +2317,7 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
         pad(outseq, 14);
 
         /* add in the value */
-        olen = strlen(outseq);
-        strncat(outseq, gtenv(envars[uindex]), NSTRING - olen - 1);
-        outseq[NSTRING - 1] = 0;
+        XSTRCAT(outseq, gtenv(envars[uindex]));
 
         /* and add it as a line into the buffer */
         if ( addline(varbuf, outseq) != TRUE )
@@ -2370,9 +2368,7 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
             pad(outseq, 14);
 
             /* add in the value */
-            olen = strlen(outseq);
-            strncat(outseq, ut->uv[uindex].u_value, NSTRING - olen - 1);
-            outseq[NSTRING - 1] = 0;
+            XSTRCAT(outseq, ut->uv[uindex].u_value);
 
             /* and add it as a line into the buffer */
             if ( addline(varbuf, outseq) != TRUE )

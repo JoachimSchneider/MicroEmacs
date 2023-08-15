@@ -18,6 +18,13 @@
 /*====================================================================*/
 
 
+/*====================================================================*/
+/* Define array lengths here: Avoid Literals!                         */
+/*====================================================================*/
+#define palstr_LEN  49
+/*====================================================================*/
+
+
 #ifdef  maindef
 
 /* for MAIN.C */
@@ -138,7 +145,7 @@ CONST char errorm[] = "ERROR";          /* error literal        */
 CONST char truem[] = "TRUE";            /* true literal         */
 CONST char falsem[] = "FALSE";          /* false litereal       */
 NOSHARE int DNEAR cmdstatus = TRUE;     /* last command status      */
-NOSHARE char palstr[49] = "";           /* palette string       */
+NOSHARE char palstr[palstr_LEN] = "";   /* palette string       */
 NOSHARE char lastmesg[NSTRING] = "";    /* last message posted      */
 NOSHARE char rval[NSTRING] = "0";       /* result of last procedure/sub */
 NOSHARE char *lastptr = NULL;           /* ptr to lastmesg[]        */

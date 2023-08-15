@@ -330,7 +330,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
             case 's':                   /* -s for initial search string */
             case 'S':
                 searchflag = TRUE;
-                bytecopy( (char *) pat, &argv[carg][2], NPAT );
+                xstrlcpy((char *)pat, &argv[carg][2], NPAT);
                 setjtable();
                 break;
 
@@ -397,7 +397,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
                 bp->b_mode |= MDCRYPT;
                 ecrypt( (char *) NULL, 0 );
                 ecrypt( ekey, strlen(ekey) );
-                bytecopy(bp->b_key, ekey, NPAT);
+                xstrlcpy(bp->b_key, ekey, sizeof(bp->b_key));
             }
 #endif
         }

@@ -694,7 +694,8 @@ nxtscan:        /* on to the next line */
             goto freeut;
         }
         bytecopy(eline, ltext(lp), linlen);
-        eline[linlen] = 0;              /* make sure it ends */
+        /* eline[linlen] = 0; /o make sure it ends:
+         * Handled by bytecopy o/ */
 
         /* trim leading whitespace */
         while ( *eline == ' ' || *eline == '\t' )
