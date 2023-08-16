@@ -175,7 +175,8 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFCALL:                /* construct buffer name to execute */
         result[0] = '[';
-        xstrlcpy(&result[1], arg1, sizeof(result) - 1);
+        xstrlcpy(&result[1], arg1, sizeof(result) - 2);
+        /* `-2' instead `-1' above to have room for ']' in any case */
         XSTRCAT(result, "]");
 
         /* find it, return ERROR if it does not exist */
@@ -191,6 +192,11 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     case UFCAT:
         XSTRCPY(result, arg1);
         XSTRCAT(result, arg2);
+        /***TODO: The original code did a `result[NSTRING - 1] = 0;' at
+         ***      this place effectively cutting result to NSTRING - 1.
+         ***      This is inconsistent with all other uses inside of
+         ***      this function.
+         ***/
 
         RETURN ( result );
 
@@ -1915,7 +1921,7 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
         if ( blen >= NSTRING )
             blen = NSTRING - 1;
         bytecopy(buf, ltext(bp->b_dotp) + get_b_doto(bp), blen);
-        /* buf[blen] = 0; /o Done by bytecopy 0/  */
+        /* buf[blen] = 0; /o Done by bytecopy o/  */
 
         /* and step the buffer's line ptr ahead a line */
         bp->b_dotp = lforw(bp->b_dotp);
@@ -2173,7 +2179,8 @@ int PASCAL NEAR setwlist P1_(char *, wclist)
  *
  * Place in a buffer a list of characters considered "in a word"
  */
-char *PASCAL NEAR getwlist P1_(char *, buf) /***TODO: Missing size info */
+ /***TODO: Missing size info***/
+char *PASCAL NEAR getwlist P1_(char *, buf)
 /* buf: Buffer to place list of characters  */
 {
     REGISTER int index;

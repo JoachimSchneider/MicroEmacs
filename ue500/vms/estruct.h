@@ -348,8 +348,12 @@
 # if     MSC || IC
 #  undef CDECL
 #  define CDECL   __cdecl
-#  define DUMMYSZ 1  /* dummy size for unsized extern arrays to avoid silly
-                      * DGROUP fixup */
+/* dummy size for unsized extern arrays to avoid silly DGROUP fixup:  */
+/* I don't like this hack --- JES, 2023-08-13 --- TODO                */
+/*  sizeof(.) would be wrong, but compilation on other platforms      */
+/*  shows, that this does not happen as sizeof gives a compile error  */
+/*  with incomplete array types.                                      */
+#  define DUMMYSZ 1
 # else
 #  if     TURBO
 #   define DUMMYSZ  /* nothing */
@@ -376,7 +380,8 @@
 #   define EXPORT  _export/* Fine for TURBO and ZTC */
 #  endif
 # endif
-#else
+
+#else /* !(WINNT || WINDOW_MSWIN || WINDOW_MSWIN32) */
 
 /* neither Windows NT nor MS-Windows */
 
