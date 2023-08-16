@@ -376,7 +376,7 @@ int PASCAL NEAR tab P2_(int, f, int, n)
     return ( linsert(stabsize - (getccol(FALSE) % stabsize), ' ') );
 }
 
-/* detab:
+/* DETAB:
  *
  * Change tabs to spaces
  */
@@ -835,8 +835,8 @@ int PASCAL NEAR deblank P2_(int, f, int, n)
     return ( ldelete(nld, FALSE) );
 }
 
-/***HEREHEREHERE***/
-/*
+/* INDENT:
+ *
  * Insert a newline, then enough tabs and spaces to duplicate the indentation of
  * the previous line. Tabs are every tabsize characters. Quite simple. Figure
  * out the indentation of the current line. Insert a newline by calling the
@@ -845,9 +845,8 @@ int PASCAL NEAR deblank P2_(int, f, int, n)
  * failed. Normally bound to "C-J".
  */
 
-int PASCAL NEAR indent(f, n)
-
-int f, n;                               /* prefix flag and argument */
+int PASCAL NEAR indent P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int nicol;
     REGISTER int c;
@@ -891,17 +890,15 @@ int f, n;                               /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* FORWDEL:
+ *
  * Delete forward. This is real easy, because the basic delete routine does all
  * of the work. Watches for negative arguments, and does the right thing. If any
  * argument is present, it kills rather than deletes, to prevent loss of text if
  * typed with a big argument. Normally bound to "C-D".
  */
-
-int PASCAL NEAR forwdel(f, n)
-
-int f, n;                               /* prefix flag and argument */
-
+int PASCAL NEAR forwdel P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     /* Don't allow this in read-only mode */
     if ( curbp->b_mode & MDVIEW )
@@ -921,17 +918,15 @@ int f, n;                               /* prefix flag and argument */
     return ( ldelete( (long)n, f ) );
 }
 
-/*
+/* BACKDEL:
+ *
  * Delete backwards. This is quite easy too, because it's all done with other
  * functions. Just move the cursor back, and delete forwards. Like delete
  * forward, this actually does a kill if presented with an argument. Bound to
  * both "RUBOUT" and "C-H".
  */
-
-int PASCAL NEAR backdel(f, n)
-
-int f, n;       /* prefix flag and argument */
-
+int PASCAL NEAR backdel P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;
 
@@ -960,7 +955,8 @@ int f, n;       /* prefix flag and argument */
     return (status);
 }
 
-/*
+/* KILLTEXT:
+ *
  * Kill text. If called without an argument, it kills from dot to the end of the
  * line, unless it is at the end of the line, when it kills the newline. If
  * called with an argument of 0, it kills from the start of the line to dot. If
@@ -968,11 +964,8 @@ int f, n;       /* prefix flag and argument */
  * of newlines. If called with a negative argument it kills backwards that
  * number of newlines. Normally bound to "C-K".
  */
-
-int PASCAL NEAR killtext(f, n)
-
-int f, n;       /* prefix flag and argument */
-
+int PASCAL NEAR killtext P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *nextp  = NULL;
     long          chunk   = 0;
@@ -1020,40 +1013,53 @@ int f, n;       /* prefix flag and argument */
     return ( ldelete(chunk, TRUE) );
 }
 
-int PASCAL NEAR setmod(f, n)    /* prompt and set an editor mode */
-
-int f, n;                               /* default and argument */
+/* SETMOD:
+ *
+ * Prompt and set an editor mode
+ */
+int PASCAL NEAR setmod P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     return ( adjustmode(TRUE, FALSE) );
 }
 
-int PASCAL NEAR delmode(f, n)   /* prompt and delete an editor mode */
-
-int f, n;                               /* default and argument */
+/* DELMODE:
+ *
+ * Prompt and delete an editor mode
+ */
+int PASCAL NEAR delmode P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     return ( adjustmode(FALSE, FALSE) );
 }
 
-int PASCAL NEAR setgmode(f, n)  /* prompt and set a global editor mode */
-
-int f, n;                               /* default and argument */
+/* SETGMODE:
+ *
+ * Prompt and set a global editor mode
+ */
+int PASCAL NEAR setgmode P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     return ( adjustmode(TRUE, TRUE) );
 }
 
-int PASCAL NEAR delgmode(f, n)  /* prompt and delete a global editor mode */
-
-int f, n;                               /* default and argument */
+/* DELGMODE:
+ *
+ * Prompt and delete a global editor mode
+ */
+int PASCAL NEAR delgmode P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     return ( adjustmode(FALSE, TRUE) );
 }
 
-int PASCAL NEAR adjustmode(kind, global)        /* change the editor mode status
-                                                 */
-
-int kind;                               /* true = set,      false = delete */
-int global;                             /* true = global flag,  false = current
-                                         * buffer flag */
+/* ADJUSTMODE:
+ *
+ * Change the editor mode status
+ */
+int PASCAL NEAR adjustmode P2_(int, kind, int, global)
+/* kind:    True = set,          false = delete               */
+/* global:  True = global flag,  false = current buffer flag  */
 {
     REGISTER char *scan;        /* scanning pointer to convert prompt */
     REGISTER int i;             /* loop index */
@@ -1167,22 +1173,24 @@ int global;                             /* true = global flag,  false = current
     return (FALSE);
 }
 
-/*  This function simply clears the message line, mainly for macro usage            */
-
-int PASCAL NEAR clrmes(f, n)
-
-int f, n;                               /* arguments ignored */
+/* CLRMES:
+ *
+ * This function simply clears the message line, mainly for macro usage
+ */
+int PASCAL NEAR clrmes P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     mlforce("");
 
     return (TRUE);
 }
 
-/*  This function writes a string on the message line mainly for macro usage            */
-
-int PASCAL NEAR writemsg(f, n)
-
-int f, n;                               /* arguments ignored */
+/* WRITEMSG:
+ *
+ * This function writes a string on the message line mainly for macro usage
+ */
+int PASCAL NEAR writemsg P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;
     char buf[NPAT];             /* buffer to recieve message into */
@@ -1197,11 +1205,12 @@ int f, n;                               /* arguments ignored */
     return (TRUE);
 }
 
-/*  the cursor is moved to a matching fence */
-
-int PASCAL NEAR getfence(f, n)
-
-int f, n;                               /* not used */
+/* GETFENCE:
+ *
+ * The cursor is moved to a matching fence
+ */
+int PASCAL NEAR getfence P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *oldlp;       /* original line pointer */
     REGISTER int oldoff;        /* and offset */
@@ -1321,10 +1330,13 @@ int f, n;                               /* not used */
     return (FALSE);
 }
 
-/*  Close fences are matched against their partners, and if on screen the cursor
- * briefly lights there     */
-
-int PASCAL NEAR fmatch P1_(char, ch /* fence type to match against */)
+/* FMATCH:
+ *
+ * Close fences are matched against their partners, and if on screen
+ * the cursor briefly lights there
+ */
+int PASCAL NEAR fmatch P1_(char, ch)
+/* ch:  Fence type to match against */
 {
     REGISTER LINE *oldlp;       /* original line pointer */
     REGISTER int oldoff;        /* and offset */
@@ -1416,12 +1428,12 @@ int PASCAL NEAR fmatch P1_(char, ch /* fence type to match against */)
     return (TRUE);
 }
 
-/* ask for and insert a string into the current buffer at the current point */
-
-int PASCAL NEAR istring(f, n)
-
-int f, n;                               /* ignored arguments */
-
+/* ISTRING:
+ *
+ * Ask for and insert a string into the current buffer at the current point
+ */
+int PASCAL NEAR istring P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* status return code */
     char tstring[NPAT + 1];     /* string to add */
@@ -1445,10 +1457,13 @@ int f, n;                               /* ignored arguments */
     return (status);
 }
 
-int PASCAL NEAR ovstring(f, n)  /* ask for and overwite a string into the
-                                 * current buffer at the current point */
-
-int f, n;                               /* ignored arguments */
+/* OVSTRING:
+ *
+ * Ask for and overwite a string into the current buffer at the
+ * current point
+ */
+int PASCAL NEAR ovstring P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* status return code */
     char tstring[NPAT + 1];     /* string to add */
@@ -1472,9 +1487,10 @@ int f, n;                               /* ignored arguments */
     return (status);
 }
 
-int PASCAL NEAR lookup_color(sp)
-
-char *sp;                               /* name to look up */
+/* LOOKUP_COLOR:
+ */
+int PASCAL NEAR lookup_color P1_(char *, sp)
+/* sp:  Name to look up */
 {
     REGISTER int i;             /* index into color list */
 
@@ -1501,7 +1517,10 @@ char *sp;                               /* name to look up */
 # undef   NDEBUG
 #endif
 
-/* strcpy() possibly overlapping regions: */
+/* XSTRCPY:
+ *
+ * strcpy() possibly overlapping regions:
+ */
 #if ( 0 ) /* Old --- straightforward --- implementation */
 char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
 {
@@ -1555,7 +1574,10 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
 }
 #endif
 
-/* strncpy() possibly overlapping regions:  */
+/* XSTRNCPY:
+ *
+ * strncpy() possibly overlapping regions:
+ */
 #if ( 0 ) /* Old --- straightforward --- implementation */
 char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 {
@@ -1627,7 +1649,10 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 }
 #endif
 
-/* strcat of possibly overlapping regions   */
+/* XSTRCAT:
+ *
+ * strcat of possibly overlapping regions
+ */
 char *PASCAL NEAR xstrcat P2_(char *, s1, CONST char *, s2)
 {
     int l = 0;
@@ -1637,8 +1662,9 @@ char *PASCAL NEAR xstrcat P2_(char *, s1, CONST char *, s2)
     return xstrcpy(s1 + l, s2);
 }
 
-
-/* Like FreeBSD's strlcpy(): Equivalent semantics:
+/* XSTRLCPY:
+ *
+ * Like FreeBSD's strlcpy(): Equivalent semantics:
  *  n = strlcpy(dst, src, len);
  *  ---
  *  n = snprintf(dst, len, "%s", src);
@@ -1657,7 +1683,7 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
         if ( 0 > ncpy ) {
             return l2;
         }
-        
+
         if        ( s1 <  s2 )  {
             int i     = 0;
 
@@ -1699,7 +1725,9 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
     return l2;
 }
 
-/* Like FreeBSD's strlcat(): Equivalent semantics:
+/* XSTRLCAT:
+ *
+ * Like FreeBSD's strlcat(): Equivalent semantics:
  *  n = strlcat(dst, src, len);
  *  ---
  *  dup = strdup(dst);
@@ -1715,7 +1743,8 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
     return xstrlcpy(s1 + l, s2, n - l) + l;
 }
 
-/* SFSTRCPY:
+/* SFSTRCPY_:
+ *
  *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, sizeof(dst))
  *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
@@ -1737,7 +1766,8 @@ char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
-/* SFSTRCAT:
+/* SFSTRCAT_:
+ *
  *  if size .GE. 0 append src to dst using xstrlcat(dst, src, sizeof(dst))
  *  else           append src to dst using xstrcat(dst, src) and log a
  *                 warning message.
@@ -1759,11 +1789,14 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
-/* An unelegant but portable version of C99 vsnprintf():                */
-/* May be called with NULL == s .AND. 0 == n to get the size that would */
-/* be the result of an unrestricted write.                              */
-/* Returns the number of characters (not including the trailing '\0')   */
-/* that would have been written if n were large enough.                 */
+/* XVSNPRINTF:
+ *
+ * An unelegant but portable version of C99 vsnprintf():
+ * May be called with NULL == s .AND. 0 == n to get the size that would
+ * be the result of an unrestricted write.
+ * Returns the number of characters (not including the trailing '\0')
+ * that would have been written if n were large enough.
+ */
 int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
                                va_list, ap)
 {
@@ -1822,11 +1855,14 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
     return rc;
 }
 
-/* Like the C99 snprintf():                                             */
-/* May be called with NULL == s .AND. 0 == n to get the size that would */
-/* be the result of an unrestricted write.                              */
-/* Returns the number of characters (not including the trailing '\0')   */
-/* that would have been written if n were large enough.                 */
+/* XSNPRINTF:
+ *
+ * Like the C99 snprintf():
+ * May be called with NULL == s .AND. 0 == n to get the size that would
+ * be the result of an unrestricted write.
+ * Returns the number of characters (not including the trailing '\0')
+ * that would have been written if n were large enough.
+ */
 int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
 {
     int     rc  = 0;
@@ -1842,9 +1878,12 @@ int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
     return rc;
 }
 
-/* Like GNU C vasprintf:                                        */
-/* Allocate (using malloc()) a string large enough to hold the  */
-/* resulting string.                                            */
+/* XVASPRINTF:
+ *
+ * Like GNU C vasprintf:
+ * Allocate (using malloc()) a string large enough to hold the
+ * resulting string.
+ */
 int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 {
     int     rc  = 0;
@@ -1874,9 +1913,12 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
     return rc;
 }
 
-/* Like GNU C asprintf:                                         */
-/* Allocate (using malloc()) a string large enough to hold the  */
-/* resulting string.                                            */
+/* XASPRINTF:
+ *
+ * Like GNU C asprintf:
+ * Allocate (using malloc()) a string large enough to hold the
+ * resulting string.
+ */
 int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
 {
     int     rc  = 0;
@@ -1893,24 +1935,8 @@ int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
     return rc;
 }
 
-#if ( 0 ) /* Same as old `copystr'  */
-char *PASCAL NEAR xstrdup P1_(CONST char *, str)
-{
-    char  *res  = NULL;
-    int   len   = 0;
-
-
-    if ( NULL == str ) {
-        return NULL;
-    }
-    len = strlen(str);
-    ASRT(NULL != (res = (char *)calloc( len + 1, sizeof (char) )));
-    strcpy(res, str);
-
-    return res;
-}
-#endif
-
+/* XSTRTOK_R:
+ */
 char *PASCAL NEAR xstrtok_r P3_(char *, str, CONST char *, sep,
                                 char **, next)
 {
@@ -1950,8 +1976,11 @@ char *PASCAL NEAR xstrtok_r P3_(char *, str, CONST char *, sep,
 /*====================================================================*/
 
 
-/* Concatenate character c to string str and malloc the result. */
-/* Input string must either be NULL or malloced.                */
+/* ASTRCATC:
+ *
+ * Concatenate character c to string str and malloc the result.
+ * Input string must either be NULL or malloced.
+ */
 char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 {
     char  *nstr = NULL;
@@ -1970,8 +1999,11 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
     return nstr;
 }
 
-/* Concatenate string d to string str and malloc the result.    */
-/* Input string must either be NULL or malloced.                */
+/* ASTRCAT:
+ *
+ * Concatenate string d to string str and malloc the result.
+ * Input string must either be NULL or malloced.
+ */
 char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 {
     char  *nstr     = NULL;
@@ -2017,7 +2049,7 @@ typedef struct  STACK_S_  {
     char  *arr;
 } STACK_T_;
 
-VOIDP  NewStack(int stacksize, int len)
+VOIDP  NewStack P2_(int, stacksize, int, len)
 {
     STACK_T_  *stack = NULL;
 
@@ -2033,7 +2065,7 @@ VOIDP  NewStack(int stacksize, int len)
     return (VOIDP)stack;
 }
 
-char  *NextStackElem_(CONST VOIDP stack, CONST char *file, int line)
+char  *NextStackElem_ P3_(CONST VOIDP, stack, CONST char *, file, int, line)
 {
     STACK_T_  *stk  = (STACK_T_ *)stack;
 
@@ -2051,7 +2083,7 @@ char  *NextStackElem_(CONST VOIDP stack, CONST char *file, int line)
     return &stk->arr[stk->sp * stk->len];
 }
 
-char  *DecStackPtr_(CONST VOIDP stack, CONST char *file, int line)
+char  *DecStackPtr_ P3_(CONST VOIDP, stack, CONST char *, file, int, line)
 {
     STACK_T_  *stk  = (STACK_T_ *)stack;
 
@@ -2066,7 +2098,7 @@ char  *DecStackPtr_(CONST VOIDP stack, CONST char *file, int line)
     return &stk->arr[(stk->sp + 1) * stk->len];
 }
 
-VOID  DelStack(CONST VOIDP stack)
+VOID  DelStack P1_(CONST VOIDP, stack)
 {
     STACK_T_  *stk  = (STACK_T_ *)stack;
 

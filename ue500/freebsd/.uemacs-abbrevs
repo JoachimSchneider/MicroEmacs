@@ -1,8 +1,9 @@
 ; SOF(Abbreviations for uemacs)
 
 
-add-abbrev \um MicroEmacs
-
+add-abbrev \um  MicroEmacs
+add-abbrev \p2  "P2_(int, f, int, n)"
+add-abbrev \fn  "/* f, n:  Prefix flag and argument  */"
 
 
 ; EOF(Abbreviations for uemacs)
