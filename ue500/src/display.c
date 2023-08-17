@@ -2101,7 +2101,7 @@ VOID PASCAL NEAR mlforce P1_(CONST char *, s)
  * kind of errors is used, so that the user can be offered to abort the
  * application
  */
-VOID PASCAL NEAR mlabort P1_(char *, s)
+VOID PASCAL NEAR mlabort P1_(CONST char *, s)
 {
     mlforce(s);
 }
@@ -2114,7 +2114,7 @@ VOID PASCAL NEAR mlabort P1_(char *, s)
  * the characters in the string all have width "1"; if this is not the case
  * things will get screwed up a little.
  */
-VOID PASCAL NEAR mlputs P1_(char *, s)
+VOID PASCAL NEAR mlputs P1_(CONST char *, s)
 {
     REGISTER int c;
 

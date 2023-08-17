@@ -734,19 +734,21 @@ int PASCAL NEAR eq P2_(unsigned char, bc, unsigned char, pc)
     return (bc == pc);
 }
 
-/*
- * readpattern -- Read a pattern.  Stash it in apat.  If it is the search string
- * (which means that the global variable pat[] has been passed in), create the
- * reverse pattern and the magic pattern, assuming we are in MAGIC mode (and
- * #defined that way).
+/* READPATTERN:
  *
- *  Apat is not updated if the user types in an empty line.  If the user typed
- * an empty line, and there is no old pattern, it is an error.  Display the old
- * pattern, in the style of Jeff Lomicka. There is some do-it-yourself control
- * expansion.  Change to using
- *  <META> to delimit the end-of-pattern to allow <NL>s in the search string.
+ * Read a pattern.  Stash it in apat.  If it is the search string (which
+ * means that the global variable pat[] has been passed in), create the
+ * reverse pattern and the magic pattern, assuming we are in MAGIC mode
+ * (and #defined that way).
+ *
+ * Apat is not updated if the user types in an empty line.  If the user
+ * typed an empty line, and there is no old pattern, it is an error.
+ * Display the old pattern, in the style of Jeff Lomicka. There is some
+ * do-it-yourself control expansion. Change to using
+ * <META> to delimit the end-of-pattern to allow <NL>s in the search
+ * string.
  */
-int PASCAL NEAR readpattern P3_(char *, prompt, char *, apat, int, srch)
+int PASCAL NEAR readpattern P3_(CONST char *, prompt, char *, apat, int, srch)
 {
     REGISTER int status;
     char tpat[NPAT+20];

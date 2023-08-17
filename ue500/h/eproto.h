@@ -1722,12 +1722,12 @@ EXTERN int PASCAL NEAR mcscanner DCL((MC  *mcpatrn,
                                  int beg_or_end,
                                  int repeats));
 EXTERN int PASCAL NEAR mcstr DCL((void));
-EXTERN int PASCAL NEAR mlprompt DCL((char *, char *, int));
+EXTERN int PASCAL NEAR mlprompt DCL((CONST char *, char *, int));
 EXTERN int PASCAL NEAR movelocalpoint DCL((int n, int *pcuroff, LINE **pcurline));
 EXTERN int PASCAL NEAR nextch DCL((LINE **pcurline, int *pcuroff, int dir));
 EXTERN int PASCAL NEAR pop DCL((BUFFER *popbuffer));
 EXTERN int PASCAL NEAR qreplace DCL((int f, int n));
-EXTERN int PASCAL NEAR readpattern DCL((char *prompt, char apat[], int srch));
+EXTERN int PASCAL NEAR readpattern DCL((CONST char *prompt, char apat[], int srch));
 #if     WINDOW_TEXT
 EXTERN VOID PASCAL NEAR refresh_screen DCL((SCREEN_T *sp));
 #endif
@@ -1890,7 +1890,7 @@ EXTERN int PASCAL NEAR screenlist DCL((int iflag));
 EXTERN int PASCAL NEAR meexit DCL((int status));
 EXTERN int PASCAL NEAR f_meta DCL((int f, int n));
 EXTERN int PASCAL NEAR mlreply DCL((CONST char *prompt, char *buf, int nbuf));
-EXTERN int PASCAL NEAR mlyesno DCL((char *prompt));
+EXTERN int PASCAL NEAR mlyesno DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR mouseoffset DCL((EWINDOW *wp, LINE *lp, int col));
 EXTERN int PASCAL NEAR movemd DCL((int f, int n));
 EXTERN int PASCAL NEAR movemu DCL((int f, int n));
@@ -2038,7 +2038,7 @@ EXTERN VOID PASCAL NEAR initchars DCL((void));
 EXTERN VOID PASCAL NEAR kdelete DCL((void));
 EXTERN VOID PASCAL NEAR lowercase DCL((unsigned char *cp));
 EXTERN VOID PASCAL NEAR mcclear DCL((void));
-EXTERN VOID PASCAL NEAR mlabort DCL((char *s));
+EXTERN VOID PASCAL NEAR mlabort DCL((CONST char *s));
 EXTERN VOID PASCAL NEAR mlerase DCL((void));
 EXTERN VOID PASCAL NEAR mlferase DCL((void));
 EXTERN VOID PASCAL NEAR mlforce DCL((CONST char *s));
@@ -2046,7 +2046,7 @@ EXTERN VOID PASCAL NEAR mlout DCL((int c));
 EXTERN VOID PASCAL NEAR mlputf DCL((int s));
 EXTERN VOID PASCAL NEAR mlputi DCL((int i, int r));
 EXTERN VOID PASCAL NEAR mlputli DCL((long l, int r));
-EXTERN VOID PASCAL NEAR mlputs DCL((char *s));
+EXTERN VOID PASCAL NEAR mlputs DCL((CONST char *s));
 EXTERN VOID PASCAL NEAR mlrquery DCL((void));
 EXTERN VOID PASCAL NEAR modeline DCL((EWINDOW *wp));
 EXTERN VOID PASCAL NEAR movecursor DCL((int row, int col));

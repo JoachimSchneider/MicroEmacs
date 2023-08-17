@@ -12,36 +12,40 @@
 #include "elang.h"
 
 static int  replen        = 0;      /* length of replacement string */
-static char *oldpatmatch  = NULL;   /* allocated memory for un-do.*/
+static char *oldpatmatch  = NULL;   /* allocated memory for un-do.  */
 
-/*
- * sreplace -- Search and replace.
+
+/* SREPLACE:
+ *
+ * Search and replace.
  */
-int PASCAL NEAR sreplace(f, n)
-int f;                                  /* default flag */
-int n;                                  /* # of repetitions wanted */
+int PASCAL NEAR sreplace P2_(int, f, int, n)
+/* f: Default flag            */
+/* n: # of repetitions wanted */
 {
     return ( replaces(FALSE, f, n) );
 }
 
-/*
- * qreplace -- search and replace with query.
+/* QREPLACE:
+ *
+ * Search and replace with query.
  */
-int PASCAL NEAR qreplace(f, n)
-int f;                                  /* default flag */
-int n;                                  /* # of repetitions wanted */
+int PASCAL NEAR qreplace P2_(int, f, int, n)
+/* f: Default flag            */
+/* n: # of repetitions wanted */
 {
     return ( replaces(TRUE, f, n) );
 }
 
-/*
- * replaces -- Search for a string and replace it with another string.  Query
+/* REPLACES:
+ *
+ * Search for a string and replace it with another string.  Query
  * might be enabled (according to kind).
  */
-int PASCAL NEAR replaces(kind, f, n)
-  int kind;   /* Query enabled flag */
-  int f;      /* default flag */
-  int n;      /* # of repetitions wanted */
+int PASCAL NEAR replaces P3_(int, kind, int, f, int, n)
+/* kind:  Query enabled flag  */
+/* f: Default flag            */
+/* n: # of repetitions wanted */
 {
     REGISTER int  status      = 0;    /* success flag on pattern inputs */
     REGISTER int  nummatch    = 0;    /* number of found matches */
@@ -285,10 +289,11 @@ qprompt:
     return (TRUE);
 }
 
-/*
- * mlrquery -- The prompt for query-replace-string.
+/* MLRQUERY:
+ *
+ * The prompt for query-replace-string.
  */
-VOID PASCAL NEAR mlrquery()
+VOID PASCAL NEAR mlrquery P0_()
 {
     REGISTER int tcol;
 #if     MAGIC
@@ -324,14 +329,12 @@ VOID PASCAL NEAR mlrquery()
     mlputs("'? ");
 }
 
-/*
- * delins -- Delete a specified length from the current point then either insert
+/* DELINS:
+ *
+ * Delete a specified length from the current point then either insert
  * the string directly, or make use of replacement meta-array.
  */
-int PASCAL NEAR delins(dlength, instr, use_rmc)
-int dlength;
-char    *instr;
-int use_rmc;
+int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
 {
     REGISTER int status;
     REGISTER CONST char     *rstr;
@@ -369,14 +372,17 @@ int use_rmc;
 
     return (status);
 }
+
 #if MAGIC
-/*
- * rmcstr -- Set up the replacement 'magic' array.  Note that if there are no
- * meta-characters encountered in the replacement string, the array is never
- * actually created - we will just use the character array rpat[] as the
- * replacement string.
+
+/* RMCSTR:
+ *
+ * Set up the replacement 'magic' array.  Note that if there are no
+ * meta-characters encountered in the replacement string, the array is
+ * never actually created - we will just use the character array rpat[]
+ * as the replacement string.
  */
-int PASCAL NEAR rmcstr()
+int PASCAL NEAR rmcstr P0_()
 {
     RMC     *rmcptr;
     char    *patptr;
@@ -487,10 +493,11 @@ int PASCAL NEAR rmcstr()
     return (status);
 }
 
-/*
- * rmcclear -- Free up any strings, and MCNIL the RMC array.
+/* RMCCLEAR:
+ *
+ * Free up any strings, and MCNIL the RMC array.
  */
-VOID PASCAL NEAR rmcclear()
+VOID PASCAL NEAR rmcclear P0_()
 {
     REGISTER RMC    *rmcptr;
 
@@ -508,5 +515,12 @@ VOID PASCAL NEAR rmcclear()
         free(oldpatmatch);
     oldpatmatch = NULL;
 }
-#endif
+
+#endif  /* MAGIC  */
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
 

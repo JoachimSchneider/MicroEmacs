@@ -52,12 +52,12 @@
 EXTERN struct passwd *getpwnam();
 #endif
 /* mlyesno: Ask a yes or no question in the message line. Return either
- *          TRUE, FALSE, or * ABORT. The ABORT status is returned if
- *          the user * bumps out of the question * with a ^G. Used any
- *          time a confirmation * is required.
+ *          TRUE, FALSE, or ABORT. The ABORT status is returned if
+ *          the user bumps out of the question with a ^G. Used any
+ *          time a confirmation is required.
  */
 #if     !WINDOW_MSWIN   /* for MS Windows, mlyesno is defined in mswsys.c */
-int PASCAL NEAR mlyesno P1_(char *, prompt)
+int PASCAL NEAR mlyesno P1_(CONST char *, prompt)
 {
     int   c = 0;      /* input character */
     char  buf[NPAT];  /* prompt to user */
@@ -97,12 +97,12 @@ int PASCAL NEAR mlyesno P1_(char *, prompt)
 
 
 /* mlreply: Write a prompt into the message line, then read back a
- *          response. Keep track * of the physical position of the
- *          cursor. If we * are in a keyboard macro throw * the prompt
- *          away, and return the * remembered response. This lets
- *          macros run at * full speed. The reply * is always
- *          terminated by a carriage return. Handle * erase, kill, and
- *          * abort keys.
+ *          response. Keep track of the physical position of the
+ *          cursor. If we are in a keyboard macro throw the prompt
+ *          away, and return the remembered response. This lets
+ *          macros run at full speed. The reply is always
+ *          terminated by a carriage return. Handle erase, kill, and
+ *          abort keys.
  */
 int PASCAL NEAR mlreply P3_(CONST char *, prompt, char *, buf, int, nbuf)
 {
@@ -138,8 +138,8 @@ int PASCAL NEAR ctoec P1_(int, c)
 }
 
 /* getname: get a command name from the command line. Command
- *          completion means that * pressing a <SPACE> will attempt to
- *          complete * an unfinished command name if it * is unique.
+ *          completion means that pressing a <SPACE> will attempt to
+ *          complete an unfinished command name if it is unique.
  */
 ue_fnc_T getname P1_(char *, prompt)
 {
@@ -900,7 +900,7 @@ int PASCAL NEAR tgetc P0_()
 }
 
 /* get_key: Get one keystroke. The legal prefixs here are the SPEC,
- *          MOUS and * CTRL prefixes.
+ *          MOUS and CTRL prefixes.
  */
 int PASCAL NEAR get_key P0_()
 {
@@ -1153,7 +1153,8 @@ int PASCAL NEAR ostring P1_(char *, s /* string to output */)
 /* mlprompt:  Display a prompt [with optional default] and the input
  *            terminator.
  */
-int PASCAL NEAR mlprompt P3_(char *, prompt, char *, dflt, int, iterm)
+int PASCAL NEAR mlprompt P3_(CONST char *, prompt, char *, dflt,
+                             int, iterm)
 {
     REGISTER int  tcol  = 0;
     char          buf[NSTRING];
