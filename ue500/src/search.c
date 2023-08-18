@@ -25,10 +25,11 @@ static REGION group_reg[MAXGROUPS];
 static int o = 0;       /* For longop() calls.*/
 #endif
 
-/*
- * forwsearch -- Search forward.  Get a search string from the user, and search
- * for the string.  If found, reset the "." to be just after the match string,
- * and (perhaps) repaint the display.
+/* FORWSEARCH:
+ *
+ * Search forward.  Get a search string from the user, and search for
+ * the string.  If found, reset the "." to be just after the match
+ * string, and (perhaps) repaint the display.
  */
 int PASCAL NEAR forwsearch P2_(int, f, int, n)
 {
@@ -51,10 +52,11 @@ int PASCAL NEAR forwsearch P2_(int, f, int, n)
     return (status);
 }
 
-/*
- * forwhunt -- Search forward for a previously acquired search string. If found,
- * reset the "." to be just after the match string, and (perhaps) repaint the
- * display.
+/* FORWHUNT:
+ *
+ * Search forward for a previously acquired search string. If found,
+ * reset the "." to be just after the match string, and (perhaps)
+ * repaint the display.
  */
 int PASCAL NEAR forwhunt P2_(int, f, int, n)
 {
@@ -120,11 +122,12 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
     return (status);
 }
 
-/*
- * backsearch -- Reverse search.  Get a search string from the user, and search,
- * starting at "." and proceeding toward the front of the buffer. If found "."
- * is left pointing at the first character of the pattern (the last character
- * that was matched).
+/* BACKSEARCH:
+ *
+ * Reverse search.  Get a search string from the user, and search,
+ * starting at "." and proceeding toward the front of the buffer. If
+ * found "." is left pointing at the first character of the pattern
+ * (the last character that was matched).
  */
 int PASCAL NEAR backsearch P2_(int, f, int, n)
 {
@@ -147,11 +150,12 @@ int PASCAL NEAR backsearch P2_(int, f, int, n)
     return (status);
 }
 
-/*
- * backhunt -- Reverse search for a previously acquired search string, starting
- * at "." and proceeding toward the front of the buffer. If found "." is left
- * pointing at the first character of the pattern (the last character that was
- * matched).
+/* BACKHUNT:
+ *
+ * Reverse search for a previously acquired search string, starting
+ * at "." and proceeding toward the front of the buffer. If found "."
+ * is left pointing at the first character of the pattern (the last
+ * character that was matched).
  */
 int PASCAL NEAR backhunt P2_(int, f, int, n)
 {
@@ -218,10 +222,12 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
 }
 
 #if MAGIC
-/*
- * mcscanner -- Search for a meta-pattern in either direction.  If found, reset
- * the "." to be at the start or just after the match string, and (perhaps)
- * repaint the display.
+
+/* MCSCANNER:
+ *
+ * Search for a meta-pattern in either direction.  If found, reset
+ * the "." to be at the start or just after the match string, and
+ * (perhaps) repaint the display.
  */
 int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, repeats)
 {
@@ -341,10 +347,11 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
     return FALSE;       /* We could not find a match.*/
 }
 
-/*
- * amatch -- Search for a meta-pattern in either direction.  Update the
- * passed-in LINE and offset values if successful. Based on the recursive
- * routine amatch() (for "anchored match") in Kernighan & Plauger's "Software
+/* AMATCH:
+ *
+ * Search for a meta-pattern in either direction.  Update the passed-in
+ * LINE and offset values if successful. Based on the recursive routine
+ * amatch() (for "anchored match") in Kernighan & Plauger's "Software
  * Tools".
  */
 int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pcwoff)
@@ -463,13 +470,15 @@ success: *pcwline = curline;
 
     return (TRUE);
 }
-#else
 
-/*
- * scanner -- Search for a pattern in either direction.  If found, reset the "."
- * to be at the start or just after the match string, and (perhaps) repaint the
- * display. Fast version using simplified version of Boyer and Moore
- * Software-Practice and Experience, vol 10, 501-506 (1980)
+#else /* !MAGIC */
+
+/* SCANNER:
+ *
+ * Search for a pattern in either direction.  If found, reset the "."
+ * to be at the start or just after the match string, and (perhaps)
+ * repaint the display. Fast version using simplified version of Boyer
+ * and Moore Software-Practice and Experience, vol 10, 501-506 (1980)
  */
 int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
 {
@@ -566,12 +575,14 @@ fail:       ;           /* continue to search */
 
     return FALSE;       /* We could not find a match */
 }
-#endif
 
-/*
- * fbound -- Return information depending on whether we have hit a boundry (and
- * may therefore search no further) or if a trailing character of the search
- * string has been found.  See boundry() for search restrictions.
+#endif  /* MAGIC  */
+
+/* FBOUND:
+ *
+ * Return information depending on whether we have hit a boundry (and
+ * may therefore search no further) or if a trailing character of the
+ * search string has been found.  See boundry() for search restrictions.
  */
 int PASCAL NEAR fbound P5_( DELTA *,  tbl,
                             int,      jump,
@@ -629,10 +640,11 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
     return FALSE;
 }
 
-/*
- * movelocalpoint -- Take the passed-in offset and LINE pointers, and adjust
- * them by n characters.  If boundry is hit, leave the pointers alone and return
- * TRUE.  Otherwise all went well, and return FALSE.
+/* MOVELOCALPOINT:
+ *
+ * Take the passed-in offset and LINE pointers, and adjust them by n
+ * characters. If boundry is hit, leave the pointers alone and return
+ * TRUE. Otherwise all went well, and return FALSE.
  */
 int PASCAL NEAR movelocalpoint P3_(int, n, int *, pcuroff, LINE **, pcurline)
 {
@@ -667,8 +679,9 @@ int PASCAL NEAR movelocalpoint P3_(int, n, int *, pcuroff, LINE **, pcurline)
     return FALSE;
 }
 
-/*
- * make_delta -- Create the delta tables.
+/* MAKE_DELTA:
+ *
+ * Create the delta tables.
  */
 static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
 {
@@ -705,11 +718,12 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
     tbl->delta[ch] = 0;
 }
 
-/*
- * setjtable -- Settting up search delta forward and delta backward tables.  The
+/* SETJTABLE:
+ *
+ * Settting up search delta forward and delta backward tables.  The
  * reverse search string and string lengths are set here, for table
- * initialization and for substitution purposes.  The default for any character
- * to jump is the pattern length.
+ * initialization and for substitution purposes.  The default for any
+ * character to jump is the pattern length.
  */
 VOID PASCAL NEAR setjtable P0_()
 {
@@ -717,9 +731,10 @@ VOID PASCAL NEAR setjtable P0_()
     make_delta(strrev( xstrcpy( (char *)tap, (char *)pat ) ), &tapatled);
 }
 
-/*
- * eq -- Compare two characters.  The "bc" comes from the buffer, "pc"
- * from the pattern.  If we are not in EXACT mode, fold out the case.
+/* EQ:
+ *
+ * Compare two characters.  The "bc" comes from the buffer, "pc" from
+ * the pattern.  If we are not in EXACT mode, fold out the case.
  */
 int PASCAL NEAR eq P2_(unsigned char, bc, unsigned char, pc)
 {
@@ -785,10 +800,11 @@ int PASCAL NEAR readpattern P3_(CONST char *, prompt, char *, apat, int, srch)
     return (status);
 }
 
-/*
- * savematch -- We found the pattern?  Let's save it away.
+/* SAVEMATCH:
+ *
+ * We found the pattern?  Let's save it away.
  */
-int PASCAL NEAR savematch()
+int PASCAL NEAR savematch P0_()
 {
     REGISTER int j;
     REGION tmpreg;
@@ -829,11 +845,13 @@ int PASCAL NEAR savematch()
     return TRUE;
 }
 
-/*
- * boundry -- Return information depending on whether we may search no further.
- *  Beginning of file and end of file are the obvious cases, but we may want to
- * add further optional boundry restrictions in future, a' la VMS EDT.  At the
- * moment, just return (TRUE) or FALSE depending on if a boundry is hit (ouch).
+/* BOUNDRY:
+ *
+ * Return information depending on whether we may search no further.
+ * Beginning of file and end of file are the obvious cases, but we may
+ * want to add further optional boundry restrictions in future, a' la
+ * VMS EDT. At the moment, just return (TRUE) or FALSE depending on if
+ * a boundry is hit (ouch).
  */
 int PASCAL NEAR boundry P3_(LINE *, curline, int, curoff, int, dir)
 {
@@ -849,11 +867,13 @@ int PASCAL NEAR boundry P3_(LINE *, curline, int, curoff, int, dir)
     return (border);
 }
 
-/*
- * nextch -- retrieve the next/previous character in the buffer, and
- * advance/retreat the point. The order in which this is done is significant,
- * and depends upon the direction of the search.  Forward searches look at the
- * current character and move, reverse searches move and look at the character.
+/* NEXTCH:
+ *
+ * Retrieve the next/previous character in the buffer, and
+ * advance/retreat the point. The order in which this is done is
+ * significant, and depends upon the direction of the search. Forward
+ * searches look at the current character and move, reverse searches
+ * move and look at the character.
  */
 int PASCAL NEAR nextch P3_(LINE **, pcurline, int *, pcuroff, int, dir)
 {
@@ -885,8 +905,10 @@ int PASCAL NEAR nextch P3_(LINE **, pcurline, int *, pcuroff, int, dir)
     return (c);
 }
 
-/*
- * liteq -- compare the string versus the current characters in the line.
+/* LITEQ:
+ *
+ * Compare the string versus the current characters in the line.
+ *
  * Returns 0 (no match) or the number of characters matched.
  */
 int PASCAL NEAR liteq P4_(LINE **, curline, int *, curpos, int, direct, char *, lstring)
@@ -910,18 +932,21 @@ int PASCAL NEAR liteq P4_(LINE **, curline, int *, curpos, int, direct, char *, 
 }
 
 #if MAGIC
-/*
- * mcstr -- Set up the 'magic' array.  The closure symbol is taken as a literal
- * character when (1) it is the first character in the pattern, and (2) when
- * preceded by a symbol that does not allow closure, such as beginning or end of
- * line symbol, or another closure symbol.
+
+/* MCSTR:
  *
- *  Coding comment (jmg):  yes, i know i have gotos that are, strictly speaking,
- * unnecessary.  But right now we are so cramped for code space that i will grab
- * what i can in order to remain within the 64K limit.  C compilers actually do
- * very little in the way of optimizing - they expect you to do that.
+ * Set up the 'magic' array.  The closure symbol is taken as a literal
+ * character when (1) it is the first character in the pattern, and (2)
+ * when preceded by a symbol that does not allow closure, such as
+ * beginning or end of line symbol, or another closure symbol.
+ *
+ * Coding comment (jmg): Yes, I know I have gotos that are, strictly
+ * speaking, unnecessary. But right now we are so cramped for code space
+ * that I will grab what I can in order to remain within the 64K limit.
+ * C compilers actually do very little in the way of optimizing - they
+ * expect you to do that.
  */
-int PASCAL NEAR mcstr()
+int PASCAL NEAR mcstr P0_()
 {
     MC      *mcptr, *rtpcm;
     DELTA   *tbl;
@@ -1055,15 +1080,15 @@ litcase:    status = litmake(&patptr, mcptr);
         mj++;
     }                   /* End of while.*/
 
-
-    /* Close off the meta-string, then set up the reverse array, if the status
-     * is good.
-     *
-     * If the status is not good, free up any bitmaps or strings, and make
-     * mcpat[0].mc_type MCNIL.
-     *
-     * Please note the structure assignment - your compiler may not like that.
-     */
+     /* Close off the meta-string, then set up the reverse array,
+      * if the status is good.
+      *
+      * If the status is not good, free up any bitmaps or strings,
+      * and make mcpat[0].mc_type MCNIL.
+      *
+      * Please note the structure assignment - your compiler may
+      * not like that.
+      */
     mcptr->mc_type = MCNIL;
 
     if ( stacklevel ) {
@@ -1124,10 +1149,11 @@ litcase:    status = litmake(&patptr, mcptr);
     return (status);
 }
 
-/*
- * mcclear -- Free up any CCL bitmaps, and MCNIL the MC search arrays.
+/* MCCLEAR:
+ *
+ * Free up any CCL bitmaps, and MCNIL the MC search arrays.
  */
-VOID PASCAL NEAR mcclear()
+VOID PASCAL NEAR mcclear P0_()
 {
     REGISTER MC     *mcptr;
     REGISTER int j;
@@ -1176,10 +1202,11 @@ VOID PASCAL NEAR mcclear()
     magical = FALSE;
 }
 
-/*
- * mceq -- meta-character equality with a character.  In Kernighan & Plauger's
- * Software Tools, this is the function omatch(), but i felt there were too many
- * functions with the 'match' name already.
+/* MCEQ:
+ *
+ * Meta-character equality with a character.  In Kernighan & Plauger's
+ * Software Tools, this is the function omatch(), but i felt there were
+ * too many functions with the 'match' name already.
  */
 int PASCAL NEAR mceq P2_(unsigned char, bc, MC *, mt)
 {
@@ -1219,10 +1246,12 @@ int PASCAL NEAR mceq P2_(unsigned char, bc, MC *, mt)
     return (result);
 }
 
-/*
- * cclmake -- create the bitmap for the character class.
- *  ppatptr is left pointing to the end-of-character-class character, so that a
- * loop may automatically increment with safety.
+/* CCLMAKE:
+ *
+ * Create the bitmap for the character class.
+ *
+ * ppatptr is left pointing to the end-of-character-class character,
+ * so that a loop may automatically increment with safety.
  */
 int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
 {
@@ -1307,12 +1336,14 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     return TRUE;
 }
 
-/*
- * litmake -- create the literal string from the collection of
- * characters. If there is only one character in the collection,
- * then no memory needs to be allocated.
+/* LITMAKE:
  *
- *  Please Note:  If new meta-characters are added (see estruct.h)
+ * Create the literal string from the collection of characters.
+ *
+ * If there is only one character in the collection, then no memory
+ * needs to be allocated.
+ *
+ * Please Note:  If new meta-characters are added (see estruct.h)
  * then you will also need to update this function!
  */
 int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
@@ -1399,8 +1430,9 @@ int PASCAL NEAR litmake P2_(char **, ppatptr, MC *, mcptr)
     return (mcptr->mc_type != MCNIL);
 }
 
-/*
- * biteq -- is the character in the bitmap?
+/* BITEQ:
+ *
+ * Is the character in the bitmap?
  */
 int PASCAL NEAR biteq P2_(int, bc, EBITMAP, cclmap)
 {
@@ -1410,18 +1442,22 @@ int PASCAL NEAR biteq P2_(int, bc, EBITMAP, cclmap)
     return ( ( *( cclmap + (bc >> 3) ) & BIT(bc & 7) )? TRUE: FALSE );
 }
 
-/*
- * setbit -- Set a bit (ON only) in the bitmap.
+/* SETBIT:
+ *
+ * Set a bit (ON only) in the bitmap.
  */
 VOID PASCAL NEAR setbit P2_(int, bc, EBITMAP, cclmap)
 {
     if ( (unsigned)bc < HICHAR )
         *( cclmap + (bc >> 3) ) |= BIT(bc & 7);
 }
-#endif
+
+#endif  /* MAGIC  */
 
 #if DEBUG_SEARCH
 
+/* MC_LIST:
+ */
 int PASCAL NEAR mc_list P2_(int, f, int, n)
 {
     MC      *mcptr;
@@ -1536,6 +1572,8 @@ int PASCAL NEAR mc_list P2_(int, f, int, n)
     return ( wpopup(patbuf) );
 }
 
+/* RMC_LIST:
+ */
 int PASCAL NEAR rmc_list P2_(int, f, int, n)
 {
     RMC     *rmcptr;
@@ -1601,6 +1639,8 @@ int PASCAL NEAR rmc_list P2_(int, f, int, n)
     return ( wpopup(patbuf) );
 }
 
+/* MCTYPE_CAT:
+ */
 VOID PASCAL NEAR mctype_cat P2_(char *, pline, int, mc_type)
 {
     switch ( mc_type ) {
@@ -1665,10 +1705,12 @@ VOID PASCAL NEAR mctype_cat P2_(char *, pline, int, mc_type)
         break;
     }
 }
-#endif
+
+#endif  /* DEBUG_SEARCH */
 
 
 
 /**********************************************************************/
 /* EOF                                                                */
 /**********************************************************************/
+

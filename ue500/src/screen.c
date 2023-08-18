@@ -1,7 +1,7 @@
-/*  SCREEN_T.C: Screen manipulation commands for MicroEMACS 4.00 written by
- * Daniel Lawrence
+/*      SCREEN.C:       Screen manipulation commands
+ *                      for MicroEMACS 4.00
+ *                      written by Daniel Lawrence
  */
-
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
@@ -34,12 +34,13 @@ VOID dumpscreens P1_(char *, msg)
 #endif
 
 #if     WINDOW_TEXT
-/* Redraw given screen and all screens behind it */
 
-VOID PASCAL NEAR refresh_screen(sp)
-
-SCREEN_T *sp;   /* screen image to refresh */
-
+/* refresh_screen:
+ *
+ * Redraw given screen and all screens behind it
+ */
+VOID PASCAL NEAR refresh_screen P1_(SCREEN_T *, sp)
+/* sp:  Screen image to refresh */
 {
     /* if we are suppressing redraws */
     if ( gflags & GFSDRAW )
@@ -63,17 +64,17 @@ SCREEN_T *sp;   /* screen image to refresh */
     select_screen(sp, FALSE);
     update(TRUE);
 }
-#endif
 
-/*  This command takes the last window in the linked window list, which is
- * visibly rearmost, and brings it to front. It is bound to A-N on machines with
- * an ALT key
+#endif  /* WINDOW_TEXT  */
+
+/* CYCLE_SCREENS:
+ *
+ * This command takes the last window in the linked window list, which
+ * is visibly rearmost, and brings it to front. It is bound to A-N on
+ * machines with an ALT key
  */
-
-int PASCAL NEAR cycle_screens(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR cycle_screens P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     SCREEN_T *sp;               /* ptr to screen to switch to */
 
@@ -86,10 +87,10 @@ int f, n;        /* prefix flag and argument */
     return ( select_screen(sp, TRUE) );
 }
 
-int PASCAL NEAR find_screen(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+/* FIND_SCREEN:
+ */
+int PASCAL NEAR find_screen P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     char scr_name[NSTRING];     /* buffer to hold screen name */
     SCREEN_T *sp;               /* ptr to screen to switch to */
@@ -117,10 +118,12 @@ int f, n;        /* prefix flag and argument */
     return ( select_screen(sp, TRUE) );
 }
 
-VOID PASCAL NEAR free_screen(sp) /* free all resouces associated with a screen */
-
-SCREEN_T *sp;   /* screen to dump */
-
+/* free_screen:
+ *
+ * Free all resouces associated with a screen
+ */
+VOID PASCAL NEAR free_screen P1_(SCREEN_T *, sp)
+/* sp:  Screen to dump  */
 {
     REGISTER int cmark;         /* mark ordinal index */
     REGISTER EWINDOW *wp;       /* ptr to window to free */
@@ -153,9 +156,10 @@ SCREEN_T *sp;   /* screen to dump */
     free( (char *) sp );
 }
 
-VOID PASCAL NEAR unlist_screen(sp)
-
-SCREEN_T *sp;         /* screen to remove from the list */
+/* UNLIST_SCREEN:
+ */
+VOID PASCAL NEAR unlist_screen P1_(SCREEN_T *, sp)
+/* sp:  Screen to remove from the list  */
 {
     SCREEN_T *last_scr;         /* screen previous to one to delete */
 
@@ -168,10 +172,10 @@ SCREEN_T *sp;         /* screen to remove from the list */
     last_scr->s_next_screen = sp->s_next_screen;
 }
 
-int PASCAL NEAR delete_screen(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+/* DELETE_SCREEN:
+ */
+int PASCAL NEAR delete_screen P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     char scr_name[NSTRING];     /* buffer to hold screen name */
     SCREEN_T *sp;               /* ptr to screen to switch to */
@@ -207,8 +211,10 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/* this function initializes a new screen.... */
-
+/* INIT_SCREEN:
+ *
+ * This function initializes a new screen....
+ */
 SCREEN_T *PASCAL NEAR init_screen P2_(char *, scr_name,
                                       BUFFER *, scr_buf)
 /* scr_name:  screen name                               */
@@ -303,6 +309,8 @@ SCREEN_T *PASCAL NEAR init_screen P2_(char *, scr_name,
     return (sp);
 }
 
+/* LOOKUP_SCREEN:
+ */
 SCREEN_T *PASCAL NEAR lookup_screen P1_(char *, scr_name)
 /* scr_name:  Named screen to find  */
 {
@@ -324,11 +332,11 @@ SCREEN_T *PASCAL NEAR lookup_screen P1_(char *, scr_name)
     return ( (SCREEN_T *)NULL );
 }
 
-int PASCAL NEAR select_screen(sp, announce)
-
-SCREEN_T *sp;   /* ptr to screen to switch to */
-int announce;   /* announce the selection? */
-
+/* SELECT_SCREEN:
+ */
+int PASCAL NEAR select_screen P2_(SCREEN_T *, sp, int, announce)
+/* sp:        Ptr to screen to switch to  */
+/* announce:  Announce the selection?     */
 {
     EWINDOW *temp_wp;           /* backup of current window ptr (curwp) */
     SCREEN_T *temp_screen;      /* temp ptr into screen list */
@@ -400,13 +408,13 @@ int announce;   /* announce the selection? */
     return (TRUE);
 }
 
-/*  Build and popup a buffer containing the list of all screens. Bound to "A-B".
+/* LIST_SCREENS:
+ *
+ * Build and popup a buffer containing the list of all screens. Bound
+ * to "A-B".
  */
-
-int PASCAL NEAR list_screens(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR list_screens P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* stutus return */
 
@@ -417,16 +425,15 @@ int f, n;        /* prefix flag and argument */
 }
 
 
-/*
+/* SCREENLIST:
+ *
  * This routine rebuilds the text in the special secret buffer that holds the
  * screen list. It is called by the list screens command. Return TRUE if
  * everything works. Return FALSE if there is an error (if there is no memory).
  * Iflag indicates whether to list hidden screens.
  */
-int PASCAL NEAR screenlist(iflag)
-
-int iflag;      /* list hidden screen flag */
-
+int PASCAL NEAR screenlist P1_(int, iflag)
+/* iflag: List hidden screen flag */
 {
     SCREEN_T *sp;               /* ptr to current screen to list */
     EWINDOW *wp;                /* ptr into current screens window list */
@@ -500,12 +507,12 @@ int iflag;      /* list hidden screen flag */
     return (TRUE);
 }
 
-/* rename_screen:    change the current screen's name   */
-
-int PASCAL NEAR rename_screen(f, n)
-
-int f, n;       /* default number and arguments */
-
+/* RENAME_SCREEN:
+ *
+ * Change the current screen's name
+ */
+int PASCAL NEAR rename_screen P2_(int, f, int, n)
+/* f, n:  Default number and arguments  */
 {
     char scr_name[NSTRING];      /* buffer to hold screen name */
     int result;
@@ -534,3 +541,8 @@ int f, n;       /* default number and arguments */
 
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
