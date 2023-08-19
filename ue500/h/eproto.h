@@ -494,11 +494,11 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 #ifndef maindef
 EXTERN char *PASCAL NEAR  uitostr_memacs DCL((unsigned int i));
 #else
-char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
+EXTERN char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 {
     unsigned int  base  = 10;
 
-    /*********************************************************************
+    /*******************************************************************
      * a hat n (> 0) Dezimalstellen <==> 10^(n-1) <= a < 10^n
      *                              <==> n -1 <= log_10(a) < n
      * Also n <= 1 + log_10(a).
@@ -517,7 +517,7 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
      *
      * Damit n <= 1 + 3*sizeof(a)
      *
-     ********************************************************************/
+     ******************************************************************/
     static char buf[1 + 3*sizeof(i) + 1];
     int           pos   = sizeof(buf) - 2;
     unsigned int  rest  = 0;
@@ -571,7 +571,7 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 EXTERN VOID PASCAL NEAR ASRT_Catch DCL((CONST char *file, int line,
                                         CONST char *cond));
 #else
-VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
+EXTERN VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
                                 CONST char *, cond)
 {
     int errno_sv_ = errno;
