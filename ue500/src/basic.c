@@ -1,40 +1,41 @@
-/*  basic.c:    Basic movement functions for MicroEMACS (C)Copyright 1995 by
- * Daniel Lawrence
+/*      basic.c:        Basic movement functions for
+ *                      MicroEMACS
+ *                      (C)Copyright 1995 by Daniel Lawrence
  *
- * The routines in this file move the cursor around on the screen. They compute
- * a new value for the cursor, then adjust ".". The display code always updates
- * the cursor location, so only moves between lines, or functions that adjust
- * the top line in the window and invalidate the framing, are hard.
+ * The routines in this file move the cursor around on the screen. They
+ * compute a new value for the cursor, then adjust ".". The display code
+ * always updates the cursor location, so only moves between lines, or
+ * functions that adjust the top line in the window and invalidate the
+ * framing, are hard.
  */
+
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
 
-/*
+/* GOTOBOL:
+ *
  * Move the cursor to the beginning of the current line. Trivial.
  */
-int PASCAL NEAR gotobol(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR gotobol P2_(int, f, int, n)
+/* f, n:  argument flag and num */
 {
     set_w_doto(curwp, 0);
 
     return (TRUE);
 }
 
-/*
+/* BACKCHAR:
+ *
  * Move the cursor backwards by "n" characters. If "n" is less than zero call
  * "forwchar" to actually do the move. Otherwise compute the new cursor
  * location. Error if you try and move out of the buffer. Set the flag if the
  * line pointer for dot changes.
  */
-int PASCAL NEAR backchar(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR backchar P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE   *lp;
 
@@ -63,29 +64,27 @@ int f, n;        /* prefix flag and argument */
 #endif
 }
 
-/*
+/* GOTOEOL:
+ *
  * Move the cursor to the end of the current line. Trivial. No errors.
  */
-int PASCAL NEAR gotoeol(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR gotoeol P2_(int, f, int, n)
+/* f, n:  argument flag and num */
 {
     set_w_doto(curwp, get_lused(curwp->w_dotp));
 
     return (TRUE);
 }
 
-/*
+/* FORWCHAR:
+ *
  * Move the cursor forwards by "n" characters. If "n" is less than zero call
  * "backchar" to actually do the move. Otherwise compute the new cursor
  * location, and move ".". Error if you try and move off the end of the buffer.
  * Set the flag if the line pointer for dot changes.
  */
-int PASCAL NEAR forwchar(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR forwchar P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( n < 0 )
         return ( backchar(f, -n) );
@@ -112,12 +111,14 @@ int f, n;        /* prefix flag and argument */
 #endif
 }
 
-int PASCAL NEAR gotoline(f, n)  /* move to a particular line.
-                                 *  argument (n) must be a positive integer for
-                                 * this to actually do anything     */
-
-int f, n;        /* prefix flag and argument */
-
+/* GOTOLINE:
+ *
+ * Move to a particular line.
+ * argument (n) must be a positive integer for
+ * this to actually do anything
+ */
+int PASCAL NEAR gotoline P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* status return */
     char arg[NSTRING];          /* buffer to hold argument */
@@ -144,15 +145,14 @@ int f, n;        /* prefix flag and argument */
     return ( forwline(f, n-1) );
 }
 
-/*
+/* GOTOBOB:
+ *
  * Goto the beginning of the buffer. Massive adjustment of dot. This is
  * considered to be hard motion; it really isn't if the original value of dot is
  * the same as the new value of dot. Normally bound to "M-<".
  */
-int PASCAL NEAR gotobob(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR gotobob P2_(int, f, int, n)
+/* f, n:  argument flag and num */
 {
     curwp->w_dotp  = lforw(curbp->b_linep);
     set_w_doto(curwp, 0);
@@ -161,15 +161,14 @@ int f, n;        /* argument flag and num */
     return (TRUE);
 }
 
-/*
+/* GOTOEOB:
+ *
  * Move to the end of the buffer. Dot is always put at the end of the file (ZJ).
  * The standard screen code does most of the hard parts of update. Bound to
  * "M->".
  */
-int PASCAL NEAR gotoeob(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR gotoeob P2_(int, f, int, n)
+/* f, n: argument flag and num  */
 {
     curwp->w_dotp  = curbp->b_linep;
     set_w_doto(curwp, 0);
@@ -178,6 +177,7 @@ int f, n;        /* argument flag and num */
     return (TRUE);
 }
 
+/***HEREHERE***/
 /*
  * Move forward by full lines. If the number of lines to move is less than zero,
  * call the backward line function to actually do it. The last command controls

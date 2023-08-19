@@ -36,7 +36,7 @@ typedef struct {/* Terminal characteristics buffer */
     unsigned char page;
     unsigned long tt2;
 } TTCHAR;
-extern NOSHARE TTCHAR orgchar;                  /* Original characteristics */
+COMMON NOSHARE TTCHAR orgchar;                  /* Original characteristics */
 # endif
 
 # define NROW    25                     /* Screen size.                 */

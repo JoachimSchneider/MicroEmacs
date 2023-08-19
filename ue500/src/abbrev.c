@@ -1,5 +1,6 @@
-/*  Code to handle Abbreviation Expansions for MicroEMACS 4.00 (C)Copyright 1995
- * by Daniel M. Lawrence
+/*      Code to handle Abbreviation Expansions
+ *      for MicroEMACS 4.00
+ *      (C)Copyright 1995 by Daniel M. Lawrence
  */
 
 #include        <stdio.h>
@@ -7,6 +8,7 @@
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
+
 
 VOID PASCAL NEAR ab_save P1_(char, c)
 /* c: character to add to current word buffer */
@@ -33,7 +35,7 @@ VOID PASCAL NEAR ab_save P1_(char, c)
     *ab_pos = 0;
 }
 
-VOID PASCAL NEAR ab_expand()
+VOID PASCAL NEAR ab_expand P0_()
 {
     char *exp;          /* expansion of current symbol */
     char c;             /* current character to insert */
@@ -75,8 +77,10 @@ VOID PASCAL NEAR ab_expand()
     *ab_pos = 0;
 }
 
-/* add a new abbreviation */
-
+/* ADD_ABBREV:
+ *
+ * Add a new abbreviation
+ */
 int PASCAL NEAR add_abbrev P2_(int, f, int, n)
 /* f, n:  Numeric flag and argument */
 {
@@ -104,8 +108,10 @@ int PASCAL NEAR add_abbrev P2_(int, f, int, n)
     return ( ab_insert(sym_name, value) );
 }
 
-/* Delete a single abbreviation */
-
+/* DEL_ABBREV:
+ *
+ * Delete a single abbreviation
+ */
 int PASCAL NEAR del_abbrev P2_(int, f, int, n)
 /* f, n:  Numeric flag and argument */
 {
@@ -122,8 +128,10 @@ int PASCAL NEAR del_abbrev P2_(int, f, int, n)
     return ( ab_delete(sym_name) );
 }
 
-/* Kill all abbreviations */
-
+/* KILL_ABBREVS:
+ *
+ * Kill all abbreviations
+ */
 int PASCAL NEAR kill_abbrevs P2_(int, f, int, n)
 /* f, n:  Numeric flag and argument */
 {
@@ -131,6 +139,8 @@ int PASCAL NEAR kill_abbrevs P2_(int, f, int, n)
     return ( ab_clean() );
 }
 
+/* DESC_ABBREVS:
+ */
 int PASCAL NEAR desc_abbrevs P2_(int, f, int, n)
 /* f, n:  Numeric flag and argument */
 {
@@ -178,8 +188,10 @@ int PASCAL NEAR desc_abbrevs P2_(int, f, int, n)
     return (TRUE);
 }
 
-/* insert a list of all the current abbreviations into the current buffer */
-
+/* INS_ABBREVS:
+ *
+ * Insert a list of all the current abbreviations into the current buffer
+ */
 int PASCAL NEAR ins_abbrevs P2_(int, f, int, n)
 /* f, n:  Numeric flag and argument */
 {
@@ -203,6 +215,8 @@ int PASCAL NEAR ins_abbrevs P2_(int, f, int, n)
     return (TRUE);
 }
 
+/* DEF_ABBREVS:
+ */
 int PASCAL NEAR def_abbrevs P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
@@ -252,6 +266,8 @@ int PASCAL NEAR def_abbrevs P2_(int, f, int, n)
     return TRUE;
 }
 
+/* AB_INIT:
+ */
 VOID PASCAL NEAR ab_init P0_()
 {
     ab_head = (ABBREV *)NULL;     /* abbreviation list empty */
@@ -262,10 +278,10 @@ VOID PASCAL NEAR ab_init P0_()
     ab_end = &ab_word[NSTRING - 1];     /* ptr to detect end of this buffer */
 }
 
-/* ab_insert:   Insert a <sym> in the abbreviation list defined as
- *               <expansion>
+/* AB_INSERT:
+ *
+ * Insert a <sym> in the abbreviation list defined as <expansion>
  */
-
 int PASCAL NEAR ab_insert P2_(char *, sym, char *, expansion)
 /* sym:       Symbol to expand    */
 /* expansion: String to expand to */
@@ -334,10 +350,11 @@ int PASCAL NEAR ab_insert P2_(char *, sym, char *, expansion)
     return (TRUE);
 }
 
-/* ab_lookup:   look up and return the expansion of <sym>. Return a NULL if it
- * is not in the list
+/* AB_LOOKUP:
+ *
+ * Look up and return the expansion of <sym>. Return a NULL if it is
+ * not in the list
  */
-
 char *PASCAL NEAR ab_lookup P1_(char *, sym)
 /* sym: Name of the symbol to look up */
 {
@@ -359,8 +376,10 @@ char *PASCAL NEAR ab_lookup P1_(char *, sym)
     return (NULL);
 }
 
-/* ab_delete:   Delete <sym> from the abbreviation list */
-
+/* AB_DELETE:
+ *
+ * Delete <sym> from the abbreviation list
+ */
 int PASCAL NEAR ab_delete P1_(char *, sym)
 {
 
@@ -398,6 +417,8 @@ int PASCAL NEAR ab_delete P1_(char *, sym)
     return (FALSE);
 }
 
+/* AB_CLEAN:
+ */
 int PASCAL NEAR ab_clean P0_()
 {
 
@@ -420,3 +441,8 @@ int PASCAL NEAR ab_clean P0_()
     return (TRUE);
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -33,6 +33,11 @@
 /**********************************************************************/
 
 /**********************************************************************/
+/* Use                                                                */
+/* - COMMON for variables                                             */
+/* - EXTERN for functions                                             */
+/**********************************************************************/
+#define  COMMON   extern
 #ifdef __cplusplus
 # define EXTERN   extern "C"
 # define REGISTER
@@ -491,10 +496,9 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 
 
 /**********************************************************************/
-#ifndef maindef
 EXTERN char *PASCAL NEAR  uitostr_memacs DCL((unsigned int i));
-#else
-EXTERN char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
+#ifdef maindef
+char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 {
     unsigned int  base  = 10;
 
@@ -562,20 +566,19 @@ EXTERN char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
  * `ASRT(NULL != (fp = fopen("FileName", "rw")));' is correct!
  */
 /**********************************************************************/
-/*
- * We will use fputs instead of fprintf, because fprintf
- * might use malloc(), but we want to use ASRT to exit
- * when malloc() fails
- */
-#ifndef maindef
 EXTERN VOID PASCAL NEAR ASRT_Catch DCL((CONST char *file, int line,
                                         CONST char *cond));
-#else
-EXTERN VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
+#ifdef maindef
+VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
                                 CONST char *, cond)
 {
     int errno_sv_ = errno;
 
+    /*
+     * We will use fputs instead of fprintf, because fprintf
+     * might use malloc(), but we want to use ASRT to exit
+     * when malloc() fails
+     */
     eputs("File: "); eputs(file); eputs(", Line: ");
     eputi(line); eputs("\n");
     eputs("\tAssertion `"); eputs(cond); eputs("' failed!\n");
@@ -586,12 +589,11 @@ EXTERN VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
 }
 #endif
 
-#ifndef maindef
 EXTERN VOID PASCAL NEAR ASRTM_Catch DCL((CONST char *file,
                                          int line,
                                          CONST char *cond,
                                          CONST char *msg));
-#else
+#ifdef maindef
 VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                                   CONST char *, cond, CONST char *, msg)
 {

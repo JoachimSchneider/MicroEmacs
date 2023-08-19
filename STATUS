@@ -72,6 +72,7 @@ These files have been reviewed:
 
 File Name     Formated Comments   Func. Proto.    Init.   Warnings  EOF
 ============================================================================
+src/abbrev.c    X                   X                       X         X
 src/bind.c      X                   X                       X         X
 src/exec.c      X                   X               X       X         X
 src/display.c   X                   X                       X         X
@@ -95,6 +96,19 @@ h/edef.h        X                                                     X
 h/eproto.h      X                                                     X
 h/estruct.h     X                                                     X
 h/mswin.h       X                                                     X
+............................................................................
+src/basic.c
+src/buffer.c
+src/char.c
+src/crypt.c
+src/dolock.c
+src/exec.c
+src/fileio.c
+src/region.c
+src/tags.c
+src/undo.c
+src/window.c
+src/word.c
 
 
 [2023-07-13.00]
@@ -535,7 +549,7 @@ Next Steps
         - Convert all K&R definitions to the P#_-Format (which
           expands to ANSI-C definitions with PROTO set.).
         - While reviewing the files repair broken comments
-        - Current File is: src/unix.c
+        - Current File is: src/basic.c
       done
 
     + #define SIZEOF(x) ( (int)sizeof((x)) )

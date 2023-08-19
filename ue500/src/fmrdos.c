@@ -635,15 +635,15 @@ int f, n;
 }
 
 # if     LATTICE
-extern int _oserr;
+COMMON int _oserr;
 # endif
 
 # if     MWC
-extern int errno;
+COMMON int errno;
 # endif
 
 # if     MSC
-extern int _doserrno;
+COMMON int _doserrno;
 # endif
 
 /*  SHELLPROG: Execute a command in a subshell      */

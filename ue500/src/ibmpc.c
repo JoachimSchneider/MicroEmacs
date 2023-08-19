@@ -62,7 +62,7 @@ SDRIVE scr_drive[] =
 };
 
 
-extern union REGS rg;                     /* cpu REGISTER for use of DOS calls */
+COMMON union REGS rg;                     /* cpu REGISTER for use of DOS calls */
 
 static int           dtype       = -1;    /* current display type     */
 static long          scadd       = 0;     /* address of screen ram    */

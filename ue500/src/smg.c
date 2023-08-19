@@ -409,7 +409,7 @@ typedef struct
     unsigned char page;
     unsigned long tt2;
     } TTCHAR;
-extern NOSHARE TTCHAR orgchar;			/* Original characteristics */
+COMMON NOSHARE TTCHAR orgchar;			/* Original characteristics */
 /*
 	test macro is used to signal errors from system services
 */

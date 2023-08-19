@@ -37,7 +37,7 @@ int dtype = CDCGA50;                    /* current display type     */
 long scadd;                             /* address of screen ram    */
 int *scptr[NROW];                       /* pointer to screen lines  */
 int sline[NCOL];                        /* screen line image        */
-extern union REGS rg;                   /* cpu REGISTER for use of DOS calls */
+COMMON union REGS rg;                   /* cpu REGISTER for use of DOS calls */
 
 EXTERN PASCAL NEAR ttopen();               /* Forward references.          */
 EXTERN PASCAL NEAR ttgetc();
@@ -82,7 +82,7 @@ TERM term    =
 # endif
 };
 
-extern union REGS rg;
+COMMON union REGS rg;
 
 # if     COLOR
 PASCAL NEAR z309fcol(color)             /* set the current output color */

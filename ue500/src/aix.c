@@ -811,8 +811,8 @@ int scopen()
     char PC, * UP;
     short ospeed;
 #  else /* not HPUX8 || HPUX9 || VAT || AUX */
-    extern char PC, * UP;
-    extern short ospeed;
+    COMMON char PC, * UP;
+    COMMON short ospeed;
 #  endif /* HPUX8 || HPUX9 || VAT || AUX */
 
     /* Get terminal type */

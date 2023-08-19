@@ -187,7 +187,7 @@ EXTERN VOID do_system_end();    /* cleans up after cli/shell/program calls */
 EXTERN VOID init_tline();       /* inits the command line for cli/shell... */
 EXTERN VOID ttputs();
 EXTERN VOID in_init();
-extern FILE *ffp;               /* file stream pointer used in fileio.c */
+COMMON FILE *ffp;               /* file stream pointer used in fileio.c */
 EXTERN int vttidy();            /* MicroEMACS routine to tidy up the screen */
 
 EXTERN int              aosvs$expand_pathname();

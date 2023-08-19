@@ -55,7 +55,7 @@ long _stksize = 20000L;         /* reset stack size (must be even) */
 #endif
 
 #if     MSDOS && TURBO
-extern unsigned int _stklen = 10000;
+COMMON unsigned int _stklen = 10000;
 #endif
 
 /*  make VMS happy...   */
