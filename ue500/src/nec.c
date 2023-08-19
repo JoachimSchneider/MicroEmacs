@@ -97,7 +97,7 @@ static unsigned char curkeys[FSIZE] =   /* current key save buffer */
     0x1d, 0, 0, 0, 0, 0,        /* end */
 };
 
-EXTERN union REGS rg;           /* cpu REGISTER for use of DOS calls */
+extern union REGS rg;           /* cpu REGISTER for use of DOS calls */
 # endif
 
 /*

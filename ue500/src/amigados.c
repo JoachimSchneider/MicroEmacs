@@ -208,7 +208,7 @@ ttopen()
     struct NewWindow new_win;
     int i;
 # if     AZTEC
-    EXTERN Enable_Abort;        /* Turn off ctrl-C interrupt */
+    extern Enable_Abort;        /* Turn off ctrl-C interrupt */
 
     Enable_Abort = 0;           /* for the Manx compiler */
 # endif

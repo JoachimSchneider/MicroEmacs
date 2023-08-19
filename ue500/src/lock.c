@@ -18,7 +18,7 @@
 # if     MSC || VMS
 #  include <errno.h>
 # else
-EXTERN int errno;       /* current error  */
+extern int errno;       /* current error  */
 # endif
 
 static char *lname[NLOCKS]; /* names of all locked files  */

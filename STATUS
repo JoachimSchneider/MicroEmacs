@@ -90,7 +90,7 @@ src/random.c    X                   X                       X         X
 src/replace.c   X                   X                       X         X
 src/screen.c    X                   X                       X         X
 src/search.c    X                   X                       X         X
-src/unix.c                                                  X
+src/unix.c      X                   X                       X         X
 h/edef.h        X                                                     X
 h/eproto.h      X                                                     X
 h/estruct.h     X                                                     X
@@ -570,6 +570,6 @@ Next Steps
       ue500/src/xp.c:execprog(char *cmd)
       ue500/src/xvtdos.c:int PASCAL NEAR execprog(cmd)
 
-
+    - Re-Check the int/char case with VMS
 
 # EOF

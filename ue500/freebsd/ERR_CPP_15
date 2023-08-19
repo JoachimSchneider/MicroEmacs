@@ -1,0 +1,2779 @@
+../src/basic.c:18:25: error: 'int gotobol' redeclared as different kind of entity
+   18 | int PASCAL NEAR gotobol(f, n)
+      |                         ^
+In file included from ../src/basic.c:11:
+../h/eproto.h:1851:24: note: previous declaration 'int gotobol(int, int)'
+ 1851 | EXTERN int PASCAL NEAR gotobol DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:18:25: error: 'f' was not declared in this scope
+   18 | int PASCAL NEAR gotobol(f, n)
+      |                         ^
+../src/basic.c:18:28: error: 'n' was not declared in this scope
+   18 | int PASCAL NEAR gotobol(f, n)
+      |                            ^
+../src/basic.c:22:1: error: expected unqualified-id before '{' token
+   22 | {
+      | ^
+../src/basic.c:34:26: error: 'int backchar' redeclared as different kind of entity
+   34 | int PASCAL NEAR backchar(f, n)
+      |                          ^
+../h/eproto.h:1771:24: note: previous declaration 'int backchar(int, int)'
+ 1771 | EXTERN int PASCAL NEAR backchar DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:34:26: error: 'f' was not declared in this scope
+   34 | int PASCAL NEAR backchar(f, n)
+      |                          ^
+../src/basic.c:34:29: error: 'n' was not declared in this scope
+   34 | int PASCAL NEAR backchar(f, n)
+      |                             ^
+../src/basic.c:38:1: error: expected unqualified-id before '{' token
+   38 | {
+      | ^
+../src/basic.c:69:25: error: 'int gotoeol' redeclared as different kind of entity
+   69 | int PASCAL NEAR gotoeol(f, n)
+      |                         ^
+../h/eproto.h:1854:24: note: previous declaration 'int gotoeol(int, int)'
+ 1854 | EXTERN int PASCAL NEAR gotoeol DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:69:25: error: 'f' was not declared in this scope
+   69 | int PASCAL NEAR gotoeol(f, n)
+      |                         ^
+../src/basic.c:69:28: error: 'n' was not declared in this scope
+   69 | int PASCAL NEAR gotoeol(f, n)
+      |                            ^
+../src/basic.c:73:1: error: expected unqualified-id before '{' token
+   73 | {
+      | ^
+../src/basic.c:85:26: error: 'int forwchar' redeclared as different kind of entity
+   85 | int PASCAL NEAR forwchar(f, n)
+      |                          ^
+../h/eproto.h:1839:24: note: previous declaration 'int forwchar(int, int)'
+ 1839 | EXTERN int PASCAL NEAR forwchar DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:85:26: error: 'f' was not declared in this scope
+   85 | int PASCAL NEAR forwchar(f, n)
+      |                          ^
+../src/basic.c:85:29: error: 'n' was not declared in this scope
+   85 | int PASCAL NEAR forwchar(f, n)
+      |                             ^
+../src/basic.c:89:1: error: expected unqualified-id before '{' token
+   89 | {
+      | ^
+../src/basic.c:115:26: error: 'int gotoline' redeclared as different kind of entity
+  115 | int PASCAL NEAR gotoline(f, n)  /* move to a particular line.
+      |                          ^
+../h/eproto.h:1856:24: note: previous declaration 'int gotoline(int, int)'
+ 1856 | EXTERN int PASCAL NEAR gotoline DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:115:26: error: 'f' was not declared in this scope
+  115 | int PASCAL NEAR gotoline(f, n)  /* move to a particular line.
+      |                          ^
+../src/basic.c:115:29: error: 'n' was not declared in this scope
+  115 | int PASCAL NEAR gotoline(f, n)  /* move to a particular line.
+      |                             ^
+../src/basic.c:121:1: error: expected unqualified-id before '{' token
+  121 | {
+      | ^
+../src/basic.c:152:25: error: 'int gotobob' redeclared as different kind of entity
+  152 | int PASCAL NEAR gotobob(f, n)
+      |                         ^
+../h/eproto.h:1850:24: note: previous declaration 'int gotobob(int, int)'
+ 1850 | EXTERN int PASCAL NEAR gotobob DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:152:25: error: 'f' was not declared in this scope
+  152 | int PASCAL NEAR gotobob(f, n)
+      |                         ^
+../src/basic.c:152:28: error: 'n' was not declared in this scope
+  152 | int PASCAL NEAR gotobob(f, n)
+      |                            ^
+../src/basic.c:156:1: error: expected unqualified-id before '{' token
+  156 | {
+      | ^
+../src/basic.c:169:25: error: 'int gotoeob' redeclared as different kind of entity
+  169 | int PASCAL NEAR gotoeob(f, n)
+      |                         ^
+../h/eproto.h:1853:24: note: previous declaration 'int gotoeob(int, int)'
+ 1853 | EXTERN int PASCAL NEAR gotoeob DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:169:25: error: 'f' was not declared in this scope
+  169 | int PASCAL NEAR gotoeob(f, n)
+      |                         ^
+../src/basic.c:169:28: error: 'n' was not declared in this scope
+  169 | int PASCAL NEAR gotoeob(f, n)
+      |                            ^
+../src/basic.c:173:1: error: expected unqualified-id before '{' token
+  173 | {
+      | ^
+../src/basic.c:186:26: error: 'int forwline' redeclared as different kind of entity
+  186 | int PASCAL NEAR forwline(f, n)
+      |                          ^
+../h/eproto.h:1841:24: note: previous declaration 'int forwline(int, int)'
+ 1841 | EXTERN int PASCAL NEAR forwline DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:186:26: error: 'f' was not declared in this scope
+  186 | int PASCAL NEAR forwline(f, n)
+      |                          ^
+../src/basic.c:186:29: error: 'n' was not declared in this scope
+  186 | int PASCAL NEAR forwline(f, n)
+      |                             ^
+../src/basic.c:190:1: error: expected unqualified-id before '{' token
+  190 | {
+      | ^
+../src/basic.c:233:26: error: 'int backline' redeclared as different kind of entity
+  233 | int PASCAL NEAR backline(f, n)
+      |                          ^
+../h/eproto.h:1773:24: note: previous declaration 'int backline(int, int)'
+ 1773 | EXTERN int PASCAL NEAR backline DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:233:26: error: 'f' was not declared in this scope
+  233 | int PASCAL NEAR backline(f, n)
+      |                          ^
+../src/basic.c:233:29: error: 'n' was not declared in this scope
+  233 | int PASCAL NEAR backline(f, n)
+      |                             ^
+../src/basic.c:237:1: error: expected unqualified-id before '{' token
+  237 | {
+      | ^
+../src/basic.c:275:25: error: 'int gotobop' redeclared as different kind of entity
+  275 | int PASCAL NEAR gotobop(f, n) /* go back to the beginning of the current
+      |                         ^
+../h/eproto.h:1852:24: note: previous declaration 'int gotobop(int, int)'
+ 1852 | EXTERN int PASCAL NEAR gotobop DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:275:25: error: 'f' was not declared in this scope
+  275 | int PASCAL NEAR gotobop(f, n) /* go back to the beginning of the current
+      |                         ^
+../src/basic.c:275:28: error: 'n' was not declared in this scope
+  275 | int PASCAL NEAR gotobop(f, n) /* go back to the beginning of the current
+      |                            ^
+../src/basic.c:285:1: error: expected unqualified-id before '{' token
+  285 | {
+      | ^
+../src/basic.c:345:25: error: 'int gotoeop' redeclared as different kind of entity
+  345 | int PASCAL NEAR gotoeop(f, n) /* go forword to the end of the current paragraph
+      |                         ^
+../h/eproto.h:1855:24: note: previous declaration 'int gotoeop(int, int)'
+ 1855 | EXTERN int PASCAL NEAR gotoeop DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:345:25: error: 'f' was not declared in this scope
+  345 | int PASCAL NEAR gotoeop(f, n) /* go forword to the end of the current paragraph
+      |                         ^
+../src/basic.c:345:28: error: 'n' was not declared in this scope
+  345 | int PASCAL NEAR gotoeop(f, n) /* go forword to the end of the current paragraph
+      |                            ^
+../src/basic.c:353:1: error: expected unqualified-id before '{' token
+  353 | {
+      | ^
+../src/basic.c:426:28: error: 'int getgoal' redeclared as different kind of entity
+  426 | int PASCAL NEAR getgoal(dlp)
+      |                            ^
+../h/eproto.h:1683:24: note: previous declaration 'int getgoal(LINE*)'
+ 1683 | EXTERN int PASCAL NEAR getgoal DCL((LINE *dlp));
+      |                        ^~~~~~~
+../src/basic.c:426:25: error: 'dlp' was not declared in this scope
+  426 | int PASCAL NEAR getgoal(dlp)
+      |                         ^~~
+../src/basic.c:430:1: error: expected unqualified-id before '{' token
+  430 | {
+      | ^
+../src/basic.c:461:26: error: 'int forwpage' redeclared as different kind of entity
+  461 | int PASCAL NEAR forwpage(f, n)
+      |                          ^
+../h/eproto.h:1842:24: note: previous declaration 'int forwpage(int, int)'
+ 1842 | EXTERN int PASCAL NEAR forwpage DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:461:26: error: 'f' was not declared in this scope
+  461 | int PASCAL NEAR forwpage(f, n)
+      |                          ^
+../src/basic.c:461:29: error: 'n' was not declared in this scope
+  461 | int PASCAL NEAR forwpage(f, n)
+      |                             ^
+../src/basic.c:465:1: error: expected unqualified-id before '{' token
+  465 | {
+      | ^
+../src/basic.c:529:25: error: 'int setmark' redeclared as different kind of entity
+  529 | int PASCAL NEAR setmark(f, n)
+      |                         ^
+../h/eproto.h:1951:24: note: previous declaration 'int setmark(int, int)'
+ 1951 | EXTERN int PASCAL NEAR setmark DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:529:25: error: 'f' was not declared in this scope
+  529 | int PASCAL NEAR setmark(f, n)
+      |                         ^
+../src/basic.c:529:28: error: 'n' was not declared in this scope
+  529 | int PASCAL NEAR setmark(f, n)
+      |                            ^
+../src/basic.c:533:1: error: expected unqualified-id before '{' token
+  533 | {
+      | ^
+../src/basic.c:550:25: error: 'int remmark' redeclared as different kind of entity
+  550 | int PASCAL NEAR remmark(f, n)
+      |                         ^
+../h/eproto.h:1932:24: note: previous declaration 'int remmark(int, int)'
+ 1932 | EXTERN int PASCAL NEAR remmark DCL((int f, int n));
+      |                        ^~~~~~~
+../src/basic.c:550:25: error: 'f' was not declared in this scope
+  550 | int PASCAL NEAR remmark(f, n)
+      |                         ^
+../src/basic.c:550:28: error: 'n' was not declared in this scope
+  550 | int PASCAL NEAR remmark(f, n)
+      |                            ^
+../src/basic.c:554:1: error: expected unqualified-id before '{' token
+  554 | {
+      | ^
+../src/basic.c:574:26: error: 'int swapmark' redeclared as different kind of entity
+  574 | int PASCAL NEAR swapmark(f, n)
+      |                          ^
+../h/eproto.h:1966:24: note: previous declaration 'int swapmark(int, int)'
+ 1966 | EXTERN int PASCAL NEAR swapmark DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:574:26: error: 'f' was not declared in this scope
+  574 | int PASCAL NEAR swapmark(f, n)
+      |                          ^
+../src/basic.c:574:29: error: 'n' was not declared in this scope
+  574 | int PASCAL NEAR swapmark(f, n)
+      |                             ^
+../src/basic.c:578:1: error: expected unqualified-id before '{' token
+  578 | {
+      | ^
+../src/basic.c:609:26: error: 'int gotomark' redeclared as different kind of entity
+  609 | int PASCAL NEAR gotomark(f, n)
+      |                          ^
+../h/eproto.h:1857:24: note: previous declaration 'int gotomark(int, int)'
+ 1857 | EXTERN int PASCAL NEAR gotomark DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/basic.c:609:26: error: 'f' was not declared in this scope
+  609 | int PASCAL NEAR gotomark(f, n)
+      |                          ^
+../src/basic.c:609:29: error: 'n' was not declared in this scope
+  609 | int PASCAL NEAR gotomark(f, n)
+      |                             ^
+../src/basic.c:613:1: error: expected unqualified-id before '{' token
+  613 | {
+      | ^
+../src/bind.c: In function 'int deskey(int, int)':
+../src/bind.c:77:13: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   77 |     ostring(" ");
+      |             ^~~
+../src/bind.c:81:15: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   81 |         ptr = "Not Bound";
+      |               ^~~~~~~~~~~
+In file included from ../h/elang.h:6,
+                 from ../src/bind.c:13:
+../src/bind.c: In function 'int bindtokey(int, int)':
+../h/english.h:23:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   23 | #define TEXT15  ": bind-to-key "
+      |                 ^~~~~~~~~~~~~~~~
+../src/bind.c:105:21: note: in expansion of macro 'TEXT15'
+  105 |     kfunc = getname(TEXT15);
+      |                     ^~~~~~
+../src/bind.c:114:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  114 |         ostring(" ");
+      |                 ^~~
+../src/bind.c:154:26: warning: comparison of integer expressions of different signedness: 'short int' and 'unsigned int' [-Wsign-compare]
+  154 |         if ( ktp->k_code == c ) {
+      |              ~~~~~~~~~~~~^~~~
+../src/bind.c: In function 'int macrotokey(int, int)':
+../src/bind.c:240:26: warning: comparison of integer expressions of different signedness: 'short int' and 'unsigned int' [-Wsign-compare]
+  240 |         if ( ktp->k_code == c ) {
+      |              ~~~~~~~~~~~~^~~~
+../src/bind.c: In function 'int desbind(int, int)':
+../src/bind.c:381:30: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  381 |     return ( buildlist(TRUE, "") );
+      |                              ^~
+../src/bind.c: In function 'int startup(char*)':
+../src/bind.c:618:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  618 |         if ( sindex(name, ".") == 0 )
+      |                           ^~~
+../src/bind.c: In function 'const char* flook(const char*, int)':
+../src/bind.c:756:18: warning: comparison of integer expressions of different signedness: 'int' and 'long unsigned int' [-Wsign-compare]
+  756 |     for ( i=2; i < NPNAMES; i++ ) {
+../src/buffer.c:17:27: error: 'int usebuffer' redeclared as different kind of entity
+   17 | int PASCAL NEAR usebuffer(f, n)
+      |                           ^
+In file included from ../src/buffer.c:9:
+../h/eproto.h:1994:24: note: previous declaration 'int usebuffer(int, int)'
+ 1994 | EXTERN int PASCAL NEAR usebuffer DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/buffer.c:17:27: error: 'f' was not declared in this scope
+   17 | int PASCAL NEAR usebuffer(f, n)
+      |                           ^
+../src/buffer.c:17:30: error: 'n' was not declared in this scope
+   17 | int PASCAL NEAR usebuffer(f, n)
+      |                              ^
+../src/buffer.c:21:1: error: expected unqualified-id before '{' token
+   21 | {
+      | ^
+../src/buffer.c:39:28: error: 'int nextbuffer' redeclared as different kind of entity
+   39 | int PASCAL NEAR nextbuffer(f, n)        /* switch to the next buffer in the
+      |                            ^
+../h/eproto.h:1911:24: note: previous declaration 'int nextbuffer(int, int)'
+ 1911 | EXTERN int PASCAL NEAR nextbuffer DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/buffer.c:39:28: error: 'f' was not declared in this scope
+   39 | int PASCAL NEAR nextbuffer(f, n)        /* switch to the next buffer in the
+      |                            ^
+../src/buffer.c:39:31: error: 'n' was not declared in this scope
+   39 | int PASCAL NEAR nextbuffer(f, n)        /* switch to the next buffer in the
+      |                               ^
+../src/buffer.c:43:1: error: expected unqualified-id before '{' token
+   43 | {
+      | ^
+../src/buffer.c:67:28: error: 'int swbuffer' redeclared as different kind of entity
+   67 | int PASCAL NEAR swbuffer(bp)    /* make buffer BP current */
+      |                            ^
+../h/eproto.h:1967:24: note: previous declaration 'int swbuffer(BUFFER*)'
+ 1967 | EXTERN int PASCAL NEAR swbuffer DCL((BUFFER *bp));
+      |                        ^~~~~~~~
+../src/buffer.c:67:26: error: 'bp' was not declared in this scope
+   67 | int PASCAL NEAR swbuffer(bp)    /* make buffer BP current */
+      |                          ^~
+../src/buffer.c:71:1: error: expected unqualified-id before '{' token
+   71 | {
+      | ^
+../src/buffer.c:150:28: error: 'int killbuffer' redeclared as different kind of entity
+  150 | int PASCAL NEAR killbuffer(f, n)
+      |                            ^
+../h/eproto.h:1869:24: note: previous declaration 'int killbuffer(int, int)'
+ 1869 | EXTERN int PASCAL NEAR killbuffer DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/buffer.c:150:28: error: 'f' was not declared in this scope
+  150 | int PASCAL NEAR killbuffer(f, n)
+      |                            ^
+../src/buffer.c:150:31: error: 'n' was not declared in this scope
+  150 | int PASCAL NEAR killbuffer(f, n)
+      |                               ^
+../src/buffer.c:154:1: error: expected unqualified-id before '{' token
+  154 | {
+      | ^
+../src/buffer.c:169:27: error: 'int popbuffer' redeclared as different kind of entity
+  169 | int PASCAL NEAR popbuffer(f, n)
+      |                           ^
+../h/eproto.h:1922:24: note: previous declaration 'int popbuffer(int, int)'
+ 1922 | EXTERN int PASCAL NEAR popbuffer DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/buffer.c:169:27: error: 'f' was not declared in this scope
+  169 | int PASCAL NEAR popbuffer(f, n)
+      |                           ^
+../src/buffer.c:169:30: error: 'n' was not declared in this scope
+  169 | int PASCAL NEAR popbuffer(f, n)
+      |                              ^
+../src/buffer.c:173:1: error: expected unqualified-id before '{' token
+  173 | {
+      | ^
+../src/buffer.c:214:26: error: 'int zotbuf' redeclared as different kind of entity
+  214 | int PASCAL NEAR zotbuf(bp)      /* kill the buffer pointed to by bp */
+      |                          ^
+../h/eproto.h:2005:24: note: previous declaration 'int zotbuf(BUFFER*)'
+ 2005 | EXTERN int PASCAL NEAR zotbuf DCL((BUFFER *bp));
+      |                        ^~~~~~
+../src/buffer.c:214:24: error: 'bp' was not declared in this scope
+  214 | int PASCAL NEAR zotbuf(bp)      /* kill the buffer pointed to by bp */
+      |                        ^~
+../src/buffer.c:218:1: error: expected unqualified-id before '{' token
+  218 | {
+      | ^
+../src/buffer.c:273:28: error: 'int namebuffer' redeclared as different kind of entity
+  273 | int PASCAL NEAR namebuffer(f, n) /* Rename the current buffer   */
+      |                            ^
+../h/eproto.h:1899:24: note: previous declaration 'int namebuffer(int, int)'
+ 1899 | EXTERN int PASCAL NEAR namebuffer DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/buffer.c:273:28: error: 'f' was not declared in this scope
+  273 | int PASCAL NEAR namebuffer(f, n) /* Rename the current buffer   */
+      |                            ^
+../src/buffer.c:273:31: error: 'n' was not declared in this scope
+  273 | int PASCAL NEAR namebuffer(f, n) /* Rename the current buffer   */
+      |                               ^
+../src/buffer.c:277:1: error: expected unqualified-id before '{' token
+  277 | {
+      | ^
+../src/buffer.c:308:29: error: 'int listbuffers' redeclared as different kind of entity
+  308 | int PASCAL NEAR listbuffers(f, n)
+      |                             ^
+../h/eproto.h:1877:24: note: previous declaration 'int listbuffers(int, int)'
+ 1877 | EXTERN int PASCAL NEAR listbuffers DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/buffer.c:308:29: error: 'f' was not declared in this scope
+  308 | int PASCAL NEAR listbuffers(f, n)
+      |                             ^
+../src/buffer.c:308:32: error: 'n' was not declared in this scope
+  308 | int PASCAL NEAR listbuffers(f, n)
+      |                                ^
+../src/buffer.c:312:1: error: expected unqualified-id before '{' token
+  312 | {
+      | ^
+../src/buffer.c:327:31: error: 'int makelist' redeclared as different kind of entity
+  327 | int PASCAL NEAR makelist(iflag)
+      |                               ^
+../h/eproto.h:1884:24: note: previous declaration 'int makelist(int)'
+ 1884 | EXTERN int PASCAL NEAR makelist DCL((int iflag));
+      |                        ^~~~~~~~
+../src/buffer.c:327:26: error: 'iflag' was not declared in this scope; did you mean 'wlflag'?
+  327 | int PASCAL NEAR makelist(iflag)
+      |                          ^~~~~
+      |                          wlflag
+../src/buffer.c:331:1: error: expected unqualified-id before '{' token
+  331 | {
+      | ^
+../src/buffer.c:467:18: error: variable or field 'flong_asc' declared void
+  467 | VOID PASCAL NEAR flong_asc(buf, width, num)
+      |                  ^~~~~~~~~
+../src/buffer.c:467:28: error: 'buf' was not declared in this scope; did you mean 'kbufp'?
+  467 | VOID PASCAL NEAR flong_asc(buf, width, num)
+      |                            ^~~
+      |                            kbufp
+../src/buffer.c:467:33: error: 'width' was not declared in this scope
+  467 | VOID PASCAL NEAR flong_asc(buf, width, num)
+      |                                 ^~~~~
+../src/buffer.c:467:40: error: 'num' was not declared in this scope; did you mean 'enum'?
+  467 | VOID PASCAL NEAR flong_asc(buf, width, num)
+      |                                        ^~~
+      |                                        enum
+../src/buffer.c:473:1: error: expected unqualified-id before '{' token
+  473 | {
+      | ^
+../src/buffer.c:599:26: error: 'int bclear' redeclared as different kind of entity
+  599 | int PASCAL NEAR bclear(bp)
+      |                          ^
+../h/eproto.h:1776:24: note: previous declaration 'int bclear(BUFFER*)'
+ 1776 | EXTERN int PASCAL NEAR bclear DCL((BUFFER *bp));
+      |                        ^~~~~~
+../src/buffer.c:599:24: error: 'bp' was not declared in this scope
+  599 | int PASCAL NEAR bclear(bp)
+      |                        ^~
+../src/buffer.c:601:1: error: expected unqualified-id before '{' token
+  601 | {
+      | ^
+../src/buffer.c:627:24: error: 'int unmark' redeclared as different kind of entity
+  627 | int PASCAL NEAR unmark(f, n)    /* unmark the current buffers change flag */
+      |                        ^
+../h/eproto.h:1991:24: note: previous declaration 'int unmark(int, int)'
+ 1991 | EXTERN int PASCAL NEAR unmark DCL((int f, int n));
+      |                        ^~~~~~
+../src/buffer.c:627:24: error: 'f' was not declared in this scope
+  627 | int PASCAL NEAR unmark(f, n)    /* unmark the current buffers change flag */
+      |                        ^
+../src/buffer.c:627:27: error: 'n' was not declared in this scope
+  627 | int PASCAL NEAR unmark(f, n)    /* unmark the current buffers change flag */
+      |                           ^
+../src/buffer.c:631:1: error: expected unqualified-id before '{' token
+  631 | {
+      | ^
+../src/char.c:66:18: error: variable or field 'uppercase' declared void
+   66 | VOID PASCAL NEAR uppercase(cp)
+      |                  ^~~~~~~~~
+../src/char.c:66:28: error: 'cp' was not declared in this scope
+   66 | VOID PASCAL NEAR uppercase(cp)
+      |                            ^~
+../src/char.c:70:1: error: expected unqualified-id before '{' token
+   70 | {
+      | ^
+../src/char.c:78:18: error: variable or field 'lowercase' declared void
+   78 | VOID PASCAL NEAR lowercase(cp)
+      |                  ^~~~~~~~~
+../src/char.c:78:28: error: 'cp' was not declared in this scope
+   78 | VOID PASCAL NEAR lowercase(cp)
+      |                            ^~
+../src/char.c:82:1: error: expected unqualified-id before '{' token
+   82 | {
+      | ^
+../src/char.c:236:26: error: 'int setlower' redeclared as different kind of entity
+  236 | int PASCAL NEAR setlower(ch, val)
+      |                          ^~
+In file included from ../src/char.c:12:
+../h/eproto.h:1741:24: note: previous declaration 'int setlower(char*, char*)'
+ 1741 | EXTERN int PASCAL NEAR setlower DCL((char *ch, char *val));
+      |                        ^~~~~~~~
+../src/char.c:236:26: error: 'ch' was not declared in this scope
+  236 | int PASCAL NEAR setlower(ch, val)
+      |                          ^~
+../src/char.c:236:30: error: 'val' was not declared in this scope; did you mean 'rval'?
+  236 | int PASCAL NEAR setlower(ch, val)
+      |                              ^~~
+      |                              rval
+../src/char.c:241:1: error: expected unqualified-id before '{' token
+  241 | {
+      | ^
+../src/char.c:247:26: error: 'int setupper' redeclared as different kind of entity
+  247 | int PASCAL NEAR setupper(ch, val)
+      |                          ^~
+../h/eproto.h:1742:24: note: previous declaration 'int setupper(char*, char*)'
+ 1742 | EXTERN int PASCAL NEAR setupper DCL((char *ch, char *val));
+      |                        ^~~~~~~~
+../src/char.c:247:26: error: 'ch' was not declared in this scope
+  247 | int PASCAL NEAR setupper(ch, val)
+      |                          ^~
+../src/char.c:250:7: error: redefinition of 'char* val'
+  250 | char *val;      /* value to set it to */
+      |       ^~~
+../src/char.c:239:7: note: 'char* val' previously declared here
+  239 | char *val;      /* value to set it to */
+      |       ^~~
+../src/char.c:252:1: error: expected unqualified-id before '{' token
+  252 | {
+      | ^
+../src/char.c:261:21: error: 'char* strrev' redeclared as different kind of entity
+  261 | char *strrev(our_str)
+      |                     ^
+../h/eproto.h:2091:14: note: previous declaration 'char* strrev(char*)'
+ 2091 | EXTERN char *strrev DCL((char *));
+      |              ^~~~~~
+../src/char.c:261:14: error: 'our_str' was not declared in this scope
+  261 | char *strrev(our_str)
+      |              ^~~~~~~
+../src/char.c:263:1: error: expected unqualified-id before '{' token
+  263 | {
+      | ^
+../src/crypt.c:15:25: error: 'int setekey' redeclared as different kind of entity
+   15 | int PASCAL NEAR setekey(f, n)   /* reset encryption key of current buffer */
+      |                         ^
+In file included from ../src/crypt.c:7:
+../h/eproto.h:1948:24: note: previous declaration 'int setekey(int, int)'
+ 1948 | EXTERN int PASCAL NEAR setekey DCL((int f, int n));
+      |                        ^~~~~~~
+../src/crypt.c:15:25: error: 'f' was not declared in this scope
+   15 | int PASCAL NEAR setekey(f, n)   /* reset encryption key of current buffer */
+      |                         ^
+../src/crypt.c:15:28: error: 'n' was not declared in this scope
+   15 | int PASCAL NEAR setekey(f, n)   /* reset encryption key of current buffer */
+      |                            ^
+../src/crypt.c:20:1: error: expected unqualified-id before '{' token
+   20 | {
+      | ^
+../src/crypt.c:137:18: error: variable or field 'ecrypt' declared void
+  137 | VOID PASCAL NEAR ecrypt(bptr, len)
+      |                  ^~~~~~
+../src/crypt.c:137:25: error: 'bptr' was not declared in this scope; did you mean 'kbdptr'?
+  137 | VOID PASCAL NEAR ecrypt(bptr, len)
+      |                         ^~~~
+      |                         kbdptr
+../src/crypt.c:137:31: error: 'len' was not declared in this scope; did you mean 'flen'?
+  137 | VOID PASCAL NEAR ecrypt(bptr, len)
+      |                               ^~~
+      |                               flen
+../src/crypt.c:140:1: error: expected unqualified-id before '{' token
+  140 | {
+      | ^
+../src/crypt.c:201:33: error: 'int mod95' redeclared as different kind of entity
+  201 | static int PASCAL NEAR mod95(val)
+      |                                 ^
+../src/crypt.c:13:24: note: previous declaration 'int mod95(int)'
+   13 | static int PASCAL NEAR mod95 DCL((int));
+      |                        ^~~~~
+../src/crypt.c:201:30: error: 'val' was not declared in this scope; did you mean 'rval'?
+  201 | static int PASCAL NEAR mod95(val)
+      |                              ^~~
+      |                              rval
+../src/crypt.c:205:1: error: expected unqualified-id before '{' token
+  205 | {
+      | ^
+../src/crypt.c:13:24: warning: 'int mod95(int)' declared 'static' but never defined [-Wunused-function]
+   13 | static int PASCAL NEAR mod95 DCL((int));
+      |                        ^~~~~
+In file included from ../src/eval.c:12:
+../h/evar.h:12:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   12 |     "abbell",                   /* ring bell on abbreviation expansion? */
+      |     ^~~~~~~~
+../h/evar.h:13:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   13 |     "abcap",                    /* match capitolization in expansions */
+      |     ^~~~~~~
+../h/evar.h:14:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   14 |     "abquick",                  /* quick, aggressive expansions enabled? */
+      |     ^~~~~~~~~
+../h/evar.h:15:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   15 |     "acount",                   /* # of chars until next auto-save */
+      |     ^~~~~~~~
+../h/evar.h:16:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   16 |     "asave",                    /* # of chars between auto-saves */
+      |     ^~~~~~~
+../h/evar.h:17:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   17 |     "bufhook",                  /* enter buffer switch hook */
+      |     ^~~~~~~~~
+../h/evar.h:18:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   18 |     "cbflags",                  /* current buffer flags */
+      |     ^~~~~~~~~
+../h/evar.h:19:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   19 |     "cbufname",                 /* current buffer name */
+      |     ^~~~~~~~~~
+../h/evar.h:20:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   20 |     "cfname",                   /* current file name */
+      |     ^~~~~~~~
+../h/evar.h:21:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   21 |     "cmdhook",                  /* command loop hook */
+      |     ^~~~~~~~~
+../h/evar.h:22:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   22 |     "cmode",                    /* mode of current buffer */
+      |     ^~~~~~~
+../h/evar.h:23:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   23 |     "cquote",                   /* close quote character */
+      |     ^~~~~~~~
+../h/evar.h:24:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   24 |     "curchar",                  /* current character under the cursor */
+      |     ^~~~~~~~~
+../h/evar.h:25:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   25 |     "curcol",                   /* current column pos of cursor */
+      |     ^~~~~~~~
+../h/evar.h:26:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   26 |     "curline",                  /* current line in file */
+      |     ^~~~~~~~~
+../h/evar.h:27:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   27 |     "curwidth",                 /* current screen width */
+      |     ^~~~~~~~~~
+../h/evar.h:28:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   28 |     "curwind",                  /* current window ordinal on current screen */
+      |     ^~~~~~~~~
+../h/evar.h:29:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   29 |     "cwline",                   /* current screen line in window */
+      |     ^~~~~~~~
+../h/evar.h:30:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   30 |     "debug",                    /* macro debugging */
+      |     ^~~~~~~
+../h/evar.h:31:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   31 |     "deskcolor",                /* desktop color */
+      |     ^~~~~~~~~~~
+../h/evar.h:32:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   32 |     "diagflag",                 /* diagonal mouse movements enabled? */
+      |     ^~~~~~~~~~
+../h/evar.h:33:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   33 |     "discmd",                   /* display commands on command line */
+      |     ^~~~~~~~
+../h/evar.h:34:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   34 |     "disinp",                   /* display command line input characters */
+      |     ^~~~~~~~
+../h/evar.h:35:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   35 |     "disphigh",                 /* display high bit characters escaped */
+      |     ^~~~~~~~~~
+../h/evar.h:36:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   36 |     "dispundo",                 /* display undo depth on command line */
+      |     ^~~~~~~~~~
+../h/evar.h:37:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   37 |     "exbhook",                  /* exit buffer switch hook */
+      |     ^~~~~~~~~
+../h/evar.h:38:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   38 |     "exithook",                 /* exiting emacs hook */
+      |     ^~~~~~~~~~
+../h/evar.h:39:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   39 |     "fcol",                     /* first displayed column in curent window */
+      |     ^~~~~~
+../h/evar.h:40:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   40 |     "fillcol",                  /* current fill column */
+      |     ^~~~~~~~~
+../h/evar.h:41:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   41 |     "flicker",                  /* flicker supression */
+      |     ^~~~~~~~~
+../h/evar.h:42:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   42 |     "fmtlead",                  /* format command lead characters */
+      |     ^~~~~~~~~
+../h/evar.h:43:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   43 |     "gflags",                   /* global internal emacs flags */
+      |     ^~~~~~~~
+../h/evar.h:44:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   44 |     "gmode",                    /* global modes */
+      |     ^~~~~~~
+../h/evar.h:45:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   45 |     "hardtab",                  /* current hard tab size */
+      |     ^~~~~~~~~
+../h/evar.h:46:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   46 |     "hilight",                  /* region # to hilight (255 to turn off) */
+      |     ^~~~~~~~~
+../h/evar.h:47:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   47 |     "hjump",                    /* horizontal screen jump size */
+      |     ^~~~~~~
+../h/evar.h:48:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   48 |     "hscrlbar",                 /* horizontal scroll bar flag */
+      |     ^~~~~~~~~~
+../h/evar.h:49:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   49 |     "hscroll",                  /* horizontal scrolling flag */
+      |     ^~~~~~~~~
+../h/evar.h:50:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   50 |     "isterm",                   /* incremental-search terminator character */
+      |     ^~~~~~~~
+../h/evar.h:51:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   51 |     "kill",                     /* kill buffer (read only) */
+      |     ^~~~~~
+../h/evar.h:52:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   52 |     "language",                 /* language of text messages */
+      |     ^~~~~~~~~~
+../h/evar.h:53:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   53 |     "lastkey",                  /* last keyboard char struck */
+      |     ^~~~~~~~~
+../h/evar.h:54:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   54 |     "lastmesg",                 /* last string mlwrite()ed */
+      |     ^~~~~~~~~~
+../h/evar.h:55:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   55 |     "line",                     /* text of current line */
+      |     ^~~~~~
+../h/evar.h:56:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   56 |     "lterm",                    /* current line terminator for writes */
+      |     ^~~~~~~
+../h/evar.h:57:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   57 |     "lwidth",                   /* width of current line */
+      |     ^~~~~~~~
+../h/evar.h:58:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   58 |     "match",                    /* last matched magic pattern */
+      |     ^~~~~~~
+../h/evar.h:59:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   59 |     "mmove",                    /* mouse moves events style */
+      |     ^~~~~~~
+../h/evar.h:60:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   60 |     "modeflag",                 /* Modelines displayed flag */
+      |     ^~~~~~~~~~
+../h/evar.h:61:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   61 |     "msflag",                   /* activate mouse? */
+      |     ^~~~~~~~
+../h/evar.h:62:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   62 |     "newscreen",                /* new screen with new buffer? */
+      |     ^~~~~~~~~~~
+../h/evar.h:63:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   63 |     "numwind",                  /* number of windows on current screen */
+      |     ^~~~~~~~~
+../h/evar.h:64:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   64 |     "oquote",                   /* open quote character */
+      |     ^~~~~~~~
+../h/evar.h:65:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   65 |     "orgcol",                   /* screen origin column */
+      |     ^~~~~~~~
+../h/evar.h:66:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   66 |     "orgrow",                   /* screen origin row */
+      |     ^~~~~~~~
+../h/evar.h:67:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   67 |     "os",                       /* what Operating System? */
+      |     ^~~~
+../h/evar.h:68:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   68 |     "overlap",                  /* line overlap when paging */
+      |     ^~~~~~~~~
+../h/evar.h:69:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   69 |     "pagelen",                  /* number of lines used by editor */
+      |     ^~~~~~~~~
+../h/evar.h:70:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   70 |     "palette",                  /* current palette string */
+      |     ^~~~~~~~~
+../h/evar.h:71:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   71 |     "paralead",                 /* paragraph leadin characters */
+      |     ^~~~~~~~~~
+../h/evar.h:72:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   72 |     "parindent",                /* paragraph first line indent with fill */
+      |     ^~~~~~~~~~~
+../h/evar.h:73:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   73 |     "pending",                  /* type ahead pending flag */
+      |     ^~~~~~~~~
+../h/evar.h:74:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   74 |     "popflag",                  /* pop-up windows active? */
+      |     ^~~~~~~~~
+../h/evar.h:75:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   75 |     "popwait",                  /* user wait on end of pop-up window? */
+      |     ^~~~~~~~~
+../h/evar.h:76:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   76 |     "posflag",                  /* display point position on modeline? */
+      |     ^~~~~~~~~
+../h/evar.h:77:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   77 |     "progname",                 /* returns current prog name - "MicroEMACS" */
+      |     ^~~~~~~~~~
+../h/evar.h:78:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   78 |     "ram",                      /* ram in use by malloc */
+      |     ^~~~~
+../h/evar.h:79:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   79 |     "readhook",                 /* read file execution hook */
+      |     ^~~~~~~~~~
+../h/evar.h:80:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   80 |     "region",                   /* current region (read only) */
+      |     ^~~~~~~~
+../h/evar.h:81:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   81 |     "replace",                  /* replacement pattern */
+      |     ^~~~~~~~~
+../h/evar.h:82:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   82 |     "rval",                     /* child process return value */
+      |     ^~~~~~
+../h/evar.h:83:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   83 |     "scrname",                  /* current screen name */
+      |     ^~~~~~~~~
+../h/evar.h:84:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   84 |     "search",                   /* search pattern */
+      |     ^~~~~~~~
+../h/evar.h:85:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   85 |     "searchpnt",                /* differing search styles (term point) */
+      |     ^~~~~~~~~~~
+../h/evar.h:86:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   86 |     "seed",                     /* current random number seed */
+      |     ^~~~~~
+../h/evar.h:87:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   87 |     "softtab",                  /* current soft tab size */
+      |     ^~~~~~~~~
+../h/evar.h:88:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   88 |     "sres",                     /* current screen resolution */
+      |     ^~~~~~
+../h/evar.h:89:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   89 |     "ssave",                    /* safe save flag */
+      |     ^~~~~~~
+../h/evar.h:90:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   90 |     "sscroll",                  /* smooth scrolling flag */
+      |     ^~~~~~~~~
+../h/evar.h:91:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   91 |     "status",                   /* returns the status of the last command */
+      |     ^~~~~~~~
+../h/evar.h:92:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   92 |     "sterm",                    /* search terminator character */
+      |     ^~~~~~~
+../h/evar.h:93:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   93 |     "target",                   /* target for line moves */
+      |     ^~~~~~~~
+../h/evar.h:94:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   94 |     "time",                     /* date and time */
+      |     ^~~~~~
+../h/evar.h:95:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   95 |     "timeflag",                 /* display time? */
+      |     ^~~~~~~~~~
+../h/evar.h:96:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   96 |     "tpause",                   /* length to pause for paren matching */
+      |     ^~~~~~~~
+../h/evar.h:97:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   97 |     "undoflag",                 /* currently processing undos */
+      |     ^~~~~~~~~~
+../h/evar.h:98:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   98 |     "version",                  /* current version number */
+      |     ^~~~~~~~~
+../h/evar.h:99:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   99 |     "vscrlbar",                 /* vertical scroll bar flag */
+      |     ^~~~~~~~~~
+../h/evar.h:100:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  100 |     "wchars",                   /* set of characters legal in words */
+      |     ^~~~~~~~
+../h/evar.h:101:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  101 |     "wline",                    /* # of lines in current window */
+      |     ^~~~~~~
+../h/evar.h:102:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  102 |     "wraphook",                 /* wrap word execution hook */
+      |     ^~~~~~~~~~
+../h/evar.h:103:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  103 |     "writehook",                /* write file hook */
+      |     ^~~~~~~~~~~
+../h/evar.h:104:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  104 |     "xpos",                     /* current mouse X position */
+      |     ^~~~~~
+../h/evar.h:105:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  105 |     "yankflag",                 /* point placement at yanked/included text */
+      |     ^~~~~~~~~~
+../h/evar.h:106:5: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  106 |     "ypos"                      /* current mouse Y position */
+      |     ^~~~~~
+../h/evar.h:223:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  223 |     { "abbrev",   MONAMIC   },  /* look up abbreviation */
+      |       ^~~~~~~~
+../h/evar.h:224:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  224 |     { "abs",      MONAMIC   },  /* absolute value of a number */
+      |       ^~~~~
+../h/evar.h:225:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  225 |     { "add",      DYNAMIC   },  /* add two numbers together */
+      |       ^~~~~
+../h/evar.h:226:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  226 |     { "and",      DYNAMIC   },  /* logical and */
+      |       ^~~~~
+../h/evar.h:227:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  227 |     { "ascii",    MONAMIC   },  /* char to integer conversion */
+      |       ^~~~~~~
+../h/evar.h:228:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  228 |     { "band",     DYNAMIC   },  /* bitwise and   9-10-87  jwm */
+      |       ^~~~~~
+../h/evar.h:229:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  229 |     { "bind",     MONAMIC   },  /* loopup what function name is bound to a key */
+      |       ^~~~~~
+../h/evar.h:230:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  230 |     { "bnot",     MONAMIC   },  /* bitwise not */
+      |       ^~~~~~
+../h/evar.h:231:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  231 |     { "bor",      DYNAMIC   },  /* bitwise or    9-10-87  jwm */
+      |       ^~~~~
+../h/evar.h:232:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  232 |     { "bxor",     DYNAMIC   },  /* bitwise xor   9-10-87  jwm */
+      |       ^~~~~~
+../h/evar.h:233:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  233 |     { "call",     MONAMIC   },  /* call a procedure */
+      |       ^~~~~~
+../h/evar.h:234:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  234 |     { "cat",      DYNAMIC   },  /* concatenate string */
+      |       ^~~~~
+../h/evar.h:235:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  235 |     { "chr",      MONAMIC   },  /* integer to char conversion */
+      |       ^~~~~
+../h/evar.h:236:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  236 |     { "divide",   DYNAMIC   },  /* division */
+      |       ^~~~~~~~
+../h/evar.h:237:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  237 |     { "env",      MONAMIC   },  /* retrieve a system environment var */
+      |       ^~~~~
+../h/evar.h:238:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  238 |     { "equal",    DYNAMIC   },  /* logical equality check */
+      |       ^~~~~~~
+../h/evar.h:239:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  239 |     { "exist",    MONAMIC   },  /* check if a file exists */
+      |       ^~~~~~~
+../h/evar.h:240:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  240 |     { "find",     MONAMIC   },  /* look for a file on the path... */
+      |       ^~~~~~
+../h/evar.h:241:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  241 |     { "greater",  DYNAMIC   },  /* logical greater than */
+      |       ^~~~~~~~~
+../h/evar.h:242:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  242 |     { "group",    MONAMIC   },  /* return group match in MAGIC mode */
+      |       ^~~~~~~
+../h/evar.h:243:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  243 |     { "gtc",      NILNAMIC  },  /* get 1 emacs command */
+      |       ^~~~~
+../h/evar.h:244:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  244 |     { "gtk",      NILNAMIC  },  /* get 1 charater */
+      |       ^~~~~
+../h/evar.h:245:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  245 |     { "indirect", MONAMIC   },  /* evaluate indirect value */
+      |       ^~~~~~~~~~
+../h/evar.h:246:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  246 |     { "isnum",    MONAMIC   },  /* is the arg a number? */
+      |       ^~~~~~~
+../h/evar.h:247:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  247 |     { "left",     DYNAMIC   },  /* left string(string, len) */
+      |       ^~~~~~
+../h/evar.h:248:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  248 |     { "length",   MONAMIC   },  /* string length */
+      |       ^~~~~~~~
+../h/evar.h:249:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  249 |     { "less",     DYNAMIC   },  /* logical less than */
+      |       ^~~~~~
+../h/evar.h:250:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  250 |     { "lower",    MONAMIC   },  /* lower case string */
+      |       ^~~~~~~
+../h/evar.h:251:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  251 |     { "mid",      TRINAMIC  },  /* mid string(string, pos, len) */
+      |       ^~~~~
+../h/evar.h:252:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  252 |     { "mkcol",    MONAMIC   },  /* column position of a mark */
+      |       ^~~~~~~
+../h/evar.h:253:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  253 |     { "mkline",   MONAMIC   },  /* line number of a mark */
+      |       ^~~~~~~~
+../h/evar.h:254:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  254 |     { "modulo",   DYNAMIC   },  /* mod */
+      |       ^~~~~~~~
+../h/evar.h:255:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  255 |     { "negate",   MONAMIC   },  /* negate */
+      |       ^~~~~~~~
+../h/evar.h:256:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  256 |     { "not",      MONAMIC   },  /* logical not */
+      |       ^~~~~
+../h/evar.h:257:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  257 |     { "or",       DYNAMIC   },  /* logical or */
+      |       ^~~~
+../h/evar.h:258:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  258 |     { "reverse",  MONAMIC   },  /* reverse */
+      |       ^~~~~~~~~
+../h/evar.h:259:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  259 |     { "right",    DYNAMIC   },  /* right string(string, pos) */
+      |       ^~~~~~~
+../h/evar.h:260:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  260 |     { "rnd",      MONAMIC   },  /* get a random number */
+      |       ^~~~~
+../h/evar.h:261:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  261 |     { "sequal",   DYNAMIC   },  /* string logical equality check */
+      |       ^~~~~~~~
+../h/evar.h:262:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  262 |     { "sgreater", DYNAMIC   },  /* string logical greater than */
+      |       ^~~~~~~~~~
+../h/evar.h:263:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  263 |     { "sindex",   DYNAMIC   },  /* find the index of one string in another */
+      |       ^~~~~~~~
+../h/evar.h:264:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  264 |     { "sless",    DYNAMIC   },  /* string logical less than */
+      |       ^~~~~~~
+../h/evar.h:265:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  265 |     { "slower",   DYNAMIC   },  /* set lower to upper char translation */
+      |       ^~~~~~~~
+../h/evar.h:266:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  266 |     { "subtract", DYNAMIC   },  /* subtraction */
+      |       ^~~~~~~~~~
+../h/evar.h:267:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  267 |     { "supper",   DYNAMIC   },  /* set upper to lower char translation */
+      |       ^~~~~~~~
+../h/evar.h:268:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  268 |     { "times",    DYNAMIC   },  /* multiplication */
+      |       ^~~~~~~
+../h/evar.h:269:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  269 |     { "trim",     MONAMIC   },  /* trim whitespace off the end of a string */
+      |       ^~~~~~
+../h/evar.h:270:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  270 |     { "true",     MONAMIC   },  /* Truth of the universe logical test */
+      |       ^~~~~~
+../h/evar.h:271:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  271 |     { "upper",    MONAMIC   },  /* uppercase string */
+      |       ^~~~~~~
+../h/evar.h:272:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  272 |     { "xlate",    TRINAMIC  }   /* XLATE character string translation */
+      |       ^~~~~~~
+../src/eval.c: In function 'const char* gtfun(const char*)':
+../src/eval.c:284:18: warning: comparison of integer expressions of different signedness: 'int' and 'size_t' {aka 'long unsigned int'} [-Wsign-compare]
+  284 |         if ( arg > strlen(arg1) )
+      |              ~~~~^~~~~~~~~~~~~~
+../src/eval.c:334:18: warning: comparison of integer expressions of different signedness: 'int' and 'size_t' {aka 'long unsigned int'} [-Wsign-compare]
+  334 |         if ( arg > strlen(arg1) )
+      |              ~~~~^~~~~~~~~~~~~~
+In file included from ../src/eval.c:9:
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:383:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+  383 |     STATIC_STR_RET_EPILOG(gtfun, CONST char *, 2 * NSTRING);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'const char* gtenv(const char*)':
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:809:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+  809 |     STATIC_STR_RET_EPILOG(gtenv, CONST char *, 2 * NSTRING);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'char* getkill()':
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:903:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+  903 |     STATIC_STR_RET_EPILOG(getkill, char *, NSTRING);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'int global_var(int, int)':
+../src/eval.c:1035:24: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1035 |     status = svar(&vd, "");
+      |                        ^~
+../src/eval.c: In function 'int local_var(int, int)':
+../src/eval.c:1097:24: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1097 |     status = svar(&vd, "");
+      |                        ^~
+../src/eval.c: In function 'char* int_asc(int)':
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:1768:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+ 1768 |     STATIC_STR_RET_EPILOG(int_asc, char *, INTWIDTH + 1);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'char* long_asc(long int)':
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:1814:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+ 1814 |     STATIC_STR_RET_EPILOG(long_asc, char *, LONGWIDTH + 1);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'const char* getval(char*)':
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:1966:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+ 1966 |     STATIC_STR_RET_EPILOG(getval, CONST char *, NSTRING);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'char* xlat(char*, char*, char*)':
+../h/eproto.h:309:46: warning: comparison of integer expressions of different signedness: 'long unsigned int' and 'int' [-Wsign-compare]
+  309 |             if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+      |                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~^~~~~~
+../src/eval.c:2146:5: note: in expansion of macro 'STATIC_STR_RET_EPILOG'
+ 2146 |     STATIC_STR_RET_EPILOG(xlat, char *, NSTRING);
+      |     ^~~~~~~~~~~~~~~~~~~~~
+../src/eval.c: In function 'char* getwlist(char*)':
+../src/eval.c:2191:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 2191 |         return ("");
+      |                ~^~~
+../src/eval.c: In function 'int desvars(int, int)':
+../src/eval.c:2319:30: warning: comparison of integer expressions of different signedness: 'int' and 'long unsigned int' [-Wsign-compare]
+ 2319 |     for ( uindex = 0; uindex < NEVARS; uindex++ ) {
+../src/eval.c: In function 'int desfunc(int, int)':
+../src/eval.c:2421:30: warning: comparison of integer expressions of different signedness: 'int' and 'long unsigned int' [-Wsign-compare]
+ 2421 |     for ( uindex = 0; uindex < NFUNCS; uindex++ ) {
+../src/eval.c: In function 'void pad(char*, int)':
+../src/eval.c:2450:23: warning: comparison of integer expressions of different signedness: 'size_t' {aka 'long unsigned int'} and 'int' [-Wsign-compare]
+ 2450 |     while ( strlen(s) < len ) {
+      |             ~~~~~~~~~~^~~~~
+../src/exec.c: In function 'int namedcmd(int, int)':
+../src/exec.c:55:21: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   55 |     kfunc = getname(": ");
+      |                     ^~~~
+In file included from ../h/elang.h:6,
+                 from ../src/exec.c:11:
+../src/exec.c: In function 'int dobuf(BUFFER*)':
+../h/english.h:128:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  128 | #define TEXT119 "%%Out of memory during while scan"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:128:17: note: in definition of macro 'TEXT119'
+  128 | #define TEXT119 "%%Out of memory during while scan"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:129:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  129 | #define TEXT120 "%%!BREAK outside of any !WHILE loop"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:129:17: note: in definition of macro 'TEXT120'
+  129 | #define TEXT120 "%%!BREAK outside of any !WHILE loop"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:130:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  130 | #define TEXT121 "%%!ENDWHILE with no preceding !WHILE"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:130:17: note: in definition of macro 'TEXT121'
+  130 | #define TEXT121 "%%!ENDWHILE with no preceding !WHILE"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:131:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  131 | #define TEXT122 "%%!WHILE with no matching !ENDWHILE"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:131:17: note: in definition of macro 'TEXT122'
+  131 | #define TEXT122 "%%!WHILE with no matching !ENDWHILE"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/exec.c:649:19: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  649 |         errormesg("%%Out of memory allocating locals", bp, lp);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:132:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  132 | #define TEXT123 "%%Out of Memory during macro execution"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:132:17: note: in definition of macro 'TEXT123'
+  132 | #define TEXT123 "%%Out of Memory during macro execution"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:62:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   62 | #define TEXT54  "[Macro aborted]"
+      |                 ^~~~~~~~~~~~~~~~~
+../src/exec.c:719:27: note: in expansion of macro 'TEXT54'
+  719 |                 errormesg(TEXT54, bp, lp);
+      |                           ^~~~~~
+../h/english.h:133:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  133 | #define TEXT124 "%%Unknown Directive"
+      |                 ^~~~~~~~~~~~~~~~~~~~~
+../src/exec.c:736:27: note: in expansion of macro 'TEXT124'
+  736 |                 errormesg(TEXT124, bp, lp);
+      |                           ^~~~~~~
+../h/english.h:134:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  134 | #define TEXT125 "Out of memory while storing macro"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:134:17: note: in definition of macro 'TEXT125'
+  134 | #define TEXT125 "Out of memory while storing macro"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/english.h:122:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  122 | #define TEXT113 "Can not create macro"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~
+../src/exec.c:768:27: note: in expansion of macro 'TEXT113'
+  768 |                 errormesg(TEXT113, bp, lp);
+      |                           ^~~~~~~
+../h/english.h:135:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  135 | #define TEXT126 "%%Internal While loop error"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/exec.c:832:31: note: in expansion of macro 'TEXT126'
+  832 |                     errormesg(TEXT126, bp, lp);
+      |                               ^~~~~~~
+../h/english.h:136:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  136 | #define TEXT127 "%%No such label"
+      |                 ^~~~~~~~~~~~~~~~~
+../src/exec.c:874:31: note: in expansion of macro 'TEXT127'
+  874 |                     errormesg(TEXT127, bp, lp);
+      |                               ^~~~~~~
+../h/english.h:135:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  135 | #define TEXT126 "%%Internal While loop error"
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/exec.c:911:35: note: in expansion of macro 'TEXT126'
+  911 |                         errormesg(TEXT126, bp, lp);
+      |                                   ^~~~~~~
+../h/english.h:229:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  229 | #define TEXT219 "%%Macro Failed"
+      |                 ^~~~~~~~~~~~~~~~
+../src/exec.c:958:23: note: in expansion of macro 'TEXT219'
+  958 |             errormesg(TEXT219, bp, lp);
+      |                       ^~~~~~~
+../src/exec.c: In function 'int execfile(int, int)':
+../src/exec.c:1218:28: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1218 |         if ( sindex(fname, ".") == 0 ) {
+      |                            ^~~
+In file included from ../h/elang.h:6,
+                 from ../src/file.c:12:
+../src/file.c: In function 'int fileread(int, int)':
+../h/english.h:141:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  141 | #define TEXT131 "Read file"
+      |                 ^~~~~~~~~~~
+../src/file.c:33:31: note: in expansion of macro 'TEXT131'
+   33 |     if ( ( fname = gtfilename(TEXT131) ) == NULL )
+      |                               ^~~~~~~
+../src/file.c: In function 'int insfile(int, int)':
+../h/english.h:142:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  142 | #define TEXT132 "Insert file"
+      |                 ^~~~~~~~~~~~~
+../src/file.c:59:31: note: in expansion of macro 'TEXT132'
+   59 |     if ( ( fname = gtfilename(TEXT132) ) == NULL )
+      |                               ^~~~~~~
+../src/file.c: In function 'int filefind(int, int)':
+../h/english.h:143:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  143 | #define TEXT133 "Find file"
+      |                 ^~~~~~~~~~~
+../src/file.c:95:31: note: in expansion of macro 'TEXT133'
+   95 |     if ( ( fname = gtfilename(TEXT133) ) == NULL )
+      |                               ^~~~~~~
+../src/file.c: In function 'int viewfile(int, int)':
+../h/english.h:144:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  144 | #define TEXT134 "View file"
+      |                 ^~~~~~~~~~~
+../src/file.c:115:31: note: in expansion of macro 'TEXT134'
+  115 |     if ( ( fname = gtfilename(TEXT134) ) == NULL )
+      |                               ^~~~~~~
+../src/file.c: In function 'int filewrite(int, int)':
+../h/english.h:154:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  154 | #define TEXT144 "Write file: "
+      |                 ^~~~~~~~~~~~~~
+../src/file.c:499:31: note: in expansion of macro 'TEXT144'
+  499 |     if ( ( fname = gtfilename(TEXT144) ) == NULL )
+      |                               ^~~~~~~
+../src/file.c:503:30: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  503 |     if ( ( s=writeout(fname, "w") ) == TRUE ) {
+      |                              ^~~
+../src/file.c: In function 'int fileapp(int, int)':
+../h/english.h:228:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  228 | #define TEXT218 "Append file: "
+      |                 ^~~~~~~~~~~~~~~
+../src/file.c:526:31: note: in expansion of macro 'TEXT218'
+  526 |     if ( ( fname = gtfilename(TEXT218) ) == NULL )
+      |                               ^~~~~~~
+../src/file.c:530:30: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  530 |     if ( ( s=writeout(fname, "a") ) == TRUE ) {
+      |                              ^~~
+../src/file.c: In function 'int filesave(int, int)':
+../src/file.c:586:39: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  586 |     if ( ( s=writeout(curbp->b_fname, "w") ) == TRUE ) {
+      |                                       ^~~
+../src/file.c: In function 'int writeout(char*, char*)':
+../src/file.c:654:33: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  654 |         status = ffwopen(tname, "w");
+      |                                 ^~~
+../src/fileio.c:53:25: error: 'int ffwopen' redeclared as different kind of entity
+   53 | int PASCAL NEAR ffwopen(fn, mode)
+      |                         ^~
+In file included from ../src/fileio.c:9:
+../h/eproto.h:1828:24: note: previous declaration 'int ffwopen(char*, char*)'
+ 1828 | EXTERN int PASCAL NEAR ffwopen DCL((char *fn, char *mode));
+      |                        ^~~~~~~
+../src/fileio.c:53:25: error: 'fn' was not declared in this scope
+   53 | int PASCAL NEAR ffwopen(fn, mode)
+      |                         ^~
+../src/fileio.c:53:29: error: 'mode' was not declared in this scope; did you mean 'gmode'?
+   53 | int PASCAL NEAR ffwopen(fn, mode)
+      |                             ^~~~
+      |                             gmode
+../src/fileio.c:56:1: error: expected unqualified-id before '{' token
+   56 | {
+      | ^
+../src/fileio.c:135:27: error: 'int ffputline' redeclared as different kind of entity
+  135 | int PASCAL NEAR ffputline(buf, nbuf)
+      |                           ^~~
+../h/eproto.h:1826:24: note: previous declaration 'int ffputline(char*, int)'
+ 1826 | EXTERN int PASCAL NEAR ffputline DCL((char buf[], int nbuf));
+      |                        ^~~~~~~~~
+../src/fileio.c:135:27: error: 'buf' was not declared in this scope; did you mean 'kbufp'?
+  135 | int PASCAL NEAR ffputline(buf, nbuf)
+      |                           ^~~
+      |                           kbufp
+../src/fileio.c:135:32: error: 'nbuf' was not declared in this scope
+  135 | int PASCAL NEAR ffputline(buf, nbuf)
+      |                                ^~~~
+../src/fileio.c:140:1: error: expected unqualified-id before '{' token
+  140 | {
+      | ^
+../src/fileio.c:197:33: error: 'int ffgetline' redeclared as different kind of entity
+  197 | int PASCAL NEAR ffgetline(nbytes)
+      |                                 ^
+../h/eproto.h:1825:24: note: previous declaration 'int ffgetline(int*)'
+ 1825 | EXTERN int PASCAL NEAR ffgetline DCL((int *nbytes));
+      |                        ^~~~~~~~~
+../src/fileio.c:197:27: error: 'nbytes' was not declared in this scope
+  197 | int PASCAL NEAR ffgetline(nbytes)
+      |                           ^~~~~~
+../src/fileio.c:201:1: error: expected unqualified-id before '{' token
+  201 | {
+      | ^
+../src/fileio.c:275:29: error: 'int fexist' redeclared as different kind of entity
+  275 | int PASCAL NEAR fexist(fname)   /* does <fname> exist on disk? */
+      |                             ^
+../h/eproto.h:1674:24: note: previous declaration 'int fexist(char*)'
+ 1674 | EXTERN int PASCAL NEAR fexist DCL((char *fname));
+      |                        ^~~~~~
+../src/fileio.c:275:24: error: 'fname' was not declared in this scope; did you mean 'dname'?
+  275 | int PASCAL NEAR fexist(fname)   /* does <fname> exist on disk? */
+      |                        ^~~~~
+      |                        dname
+../src/fileio.c:279:1: error: expected unqualified-id before '{' token
+  279 | {
+      | ^
+../src/input.c:52:23: error: conflicting declaration of C function 'passwd* getpwnam()'
+   52 | EXTERN struct passwd *getpwnam();
+      |                       ^~~~~~~~
+In file included from ../src/input.c:51:
+/usr/include/pwd.h:150:18: note: previous declaration 'passwd* getpwnam(const char*)'
+  150 | struct passwd   *getpwnam(const char *);
+      |                  ^~~~~~~~
+../src/input.c: In function 'int getstring(unsigned char*, int, int)':
+../src/input.c:1032:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1032 |                 outstring("\b \b");
+      |                           ^~~~~~~
+../src/input.c:1036:31: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1036 |                     outstring("\b \b");
+      |                               ^~~~~~~
+../src/input.c:1041:31: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1041 |                     outstring("\b\b  \b\b");
+      |                               ^~~~~~~~~~~~
+../src/input.c:1066:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1066 |                 outstring("\b \b");
+      |                           ^~~~~~~
+../src/input.c:1070:31: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1070 |                     outstring("\b \b");
+      |                               ^~~~~~~
+../src/input.c:1074:31: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1074 |                     outstring("\b\b  \b\b");
+      |                               ^~~~~~~~~~~~
+../src/input.c:1113:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1113 |                 outstring("^");
+      |                           ^~~
+../src/input.c:1122:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1122 |                 outstring("<NL>");
+      |                           ^~~~~~
+../src/keyboard.c: In function 'int addkeymap(int, int)':
+../src/keyboard.c:511:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  511 |         ostring(" ");
+      |                 ^~~
+../src/keyboard.c: In function 'int addkey(unsigned char*, int)':
+../src/keyboard.c:635:32: warning: comparison of integer expressions of different signedness: 'size_t' {aka 'long unsigned int'} and 'long int' [-Wsign-compare]
+  635 |     if ( strlen( (char *)seq ) > NKEYSEQ - (nxtkey - keymap) ) {
+      |          ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+In file included from ../src/main.c:31:
+../h/efunc.h:19:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   19 |     { "_goto-bop", gotobop },
+      |       ^~~~~~~~~~~
+../h/efunc.h:20:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   20 |     { "_goto-eop", gotoeop },
+      |       ^~~~~~~~~~~
+../h/efunc.h:21:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   21 |     { "_tr-buffer-test", trBufTest_ },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:22:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   22 |     { "_tr-paragraph-test", trParTest_ },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:23:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   23 |     { "_tr-region-test", trRegTest_ },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:24:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   24 |     { "abort-command", ctrlg },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:25:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   25 |     { "add-abbrev", add_abbrev },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:26:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   26 |     { "add-global-mode", setgmode },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:28:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   28 |     { "add-keymap", addkeymap },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:30:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   30 |     { "add-mode", setmod },
+      |       ^~~~~~~~~~
+../h/efunc.h:31:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   31 |     { "append-file", fileapp },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:32:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   32 |     { "apropos", apro },
+      |       ^~~~~~~~~
+../h/efunc.h:34:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   34 |     { "back-from-tag-word", backtagword },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:36:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   36 |     { "backward-character", backchar },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:37:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   37 |     { "begin-macro", ctlxlp },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:38:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   38 |     { "beginning-of-file", gotobob },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:39:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   39 |     { "beginning-of-line", gotobol },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:40:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   40 |     { "bind-to-key", bindtokey },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:44:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   44 |     { "buffer-position", showcpos },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:48:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   48 |     { "case-region-lower", lowerregion },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:49:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   49 |     { "case-region-upper", upperregion },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:50:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   50 |     { "case-word-capitalize", capword },
+      |       ^~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:51:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   51 |     { "case-word-lower", lowerword },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:52:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   52 |     { "case-word-upper", upperword },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:53:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   53 |     { "change-file-name", filename },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:54:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   54 |     { "change-screen-column", new_col_org },
+      |       ^~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:55:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   55 |     { "change-screen-row", new_row_org },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:56:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   56 |     { "change-screen-size", newsize },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:57:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   57 |     { "change-screen-width", newwidth },
+      |       ^~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:58:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   58 |     { "clear-and-redraw", refresh },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:59:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   59 |     { "clear-message-line", clrmes },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:63:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   63 |     { "copy-region", copyregion },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:64:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   64 |     { "count-words", wordcount },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:65:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   65 |     { "ctlx-prefix", cex },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:69:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   69 |     { "cycle-ring", cycle_ring },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:70:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   70 |     { "cycle-screens", cycle_screens },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:71:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   71 |     { "define-abbrevs", def_abbrevs },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:72:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   72 |     { "delete-abbrev", del_abbrev },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:73:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   73 |     { "delete-blank-lines", deblank },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:74:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   74 |     { "delete-buffer", killbuffer },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:75:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   75 |     { "delete-global-mode", delgmode },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:76:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   76 |     { "delete-kill-ring", clear_ring },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:77:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   77 |     { "delete-mode", delmode },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:78:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   78 |     { "delete-next-character", forwdel },
+      |       ^~~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:79:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   79 |     { "delete-next-word", delfword },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:80:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   80 |     { "delete-other-windows", onlywind },
+      |       ^~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:81:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   81 |     { "delete-previous-character", backdel },
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:82:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   82 |     { "delete-previous-word", delbword },
+      |       ^~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:83:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   83 |     { "delete-screen", delete_screen },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:84:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   84 |     { "delete-undos", undo_delete },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:85:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   85 |     { "delete-window", delwind },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:86:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   86 |     { "describe-abbrevs", desc_abbrevs },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:87:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   87 |     { "describe-bindings", desbind },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:88:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   88 |     { "describe-functions", desfunc },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:89:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   89 |     { "describe-key", deskey },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:90:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   90 |     { "describe-variables", desvars },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:91:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   91 |     { "detab-region", detab },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:92:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   92 |     { "display", dispvar },
+      |       ^~~~~~~~~
+../h/efunc.h:93:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   93 |     { "end-macro", ctlxrp },
+      |       ^~~~~~~~~~~
+../h/efunc.h:94:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   94 |     { "end-of-file", gotoeob },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:95:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   95 |     { "end-of-line", gotoeol },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:96:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   96 |     { "end-of-word", endword },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:97:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   97 |     { "entab-region", entab },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:98:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   98 |     { "exchange-point-and-mark", swapmark },
+      |       ^~~~~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:99:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+   99 |     { "execute-buffer", execbuf },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:100:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  100 |     { "execute-command-line", execcmd },
+      |       ^~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:101:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  101 |     { "execute-file", execfile },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:102:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  102 |     { "execute-macro", ctlxe },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:103:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  103 |     { "execute-named-command", namedcmd },
+      |       ^~~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:104:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  104 |     { "execute-procedure", execproc },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:105:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  105 |     { "execute-program", execprg },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:106:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  106 |     { "exit-emacs", quit },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:107:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  107 |     { "fill-buffer", trBufFill },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:108:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  108 |     { "fill-paragraph", trParFill },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:109:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  109 |     { "fill-region", trRegFill },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:110:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  110 |     { "filter-buffer", f_filter },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:111:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  111 |     { "find-file", filefind },
+      |       ^~~~~~~~~~~
+../h/efunc.h:112:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  112 |     { "find-screen", find_screen },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:113:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  113 |     { "forward-character", forwchar },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:114:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  114 |     { "global", global_var },
+      |       ^~~~~~~~
+../h/efunc.h:115:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  115 |     { "goto-line", gotoline },
+      |       ^~~~~~~~~~~
+../h/efunc.h:116:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  116 |     { "goto-mark", gotomark },
+      |       ^~~~~~~~~~~
+../h/efunc.h:117:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  117 |     { "goto-matching-fence", getfence },
+      |       ^~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:118:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  118 |     { "grow-window", enlargewind },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:119:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  119 |     { "handle-tab", tab },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:120:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  120 |     { "help", help },
+      |       ^~~~~~
+../h/efunc.h:124:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  124 |     { "hunt-backward", backhunt },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:125:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  125 |     { "hunt-forward", forwhunt },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:126:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  126 |     { "i-shell", spawncli },
+      |       ^~~~~~~~~
+../h/efunc.h:128:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  128 |     { "incremental-search", fisearch },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:130:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  130 |     { "indent-region", trRegIndent },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:131:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  131 |     { "insert-abbrevs", ins_abbrevs },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:135:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  135 |     { "insert-file", insfile },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:136:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  136 |     { "insert-space", insspace },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:137:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  137 |     { "insert-string", istring },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:138:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  138 |     { "kill-abbrevs", kill_abbrevs },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:139:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  139 |     { "kill-paragraph", killpara },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:140:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  140 |     { "kill-region", killregion },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:141:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  141 |     { "kill-to-end-of-line", killtext },
+      |       ^~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:145:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  145 |     { "list-buffers", listbuffers },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:149:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  149 |     { "list-screens", list_screens },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:150:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  150 |     { "list-undos", undo_list },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:151:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  151 |     { "local", local_var },
+      |       ^~~~~~~
+../h/efunc.h:152:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  152 |     { "macro-to-key", macrotokey },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:157:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  157 |     { "meta-prefix", f_meta },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:162:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  162 |     { "mouse-move", mmove },
+      |       ^~~~~~~~~~~~
+../h/efunc.h:163:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  163 |     { "mouse-move-down", movemd },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:164:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  164 |     { "mouse-move-up", movemu },
+      |       ^~~~~~~~~~~~~~~
+../h/efunc.h:165:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  165 |     { "mouse-region-down", mregdown },
+      |       ^~~~~~~~~~~~~~~~~~~
+../h/efunc.h:166:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  166 |     { "mouse-region-up", mregup },
+      |       ^~~~~~~~~~~~~~~~~
+../h/efunc.h:167:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  167 |     { "mouse-resize-screen", resizm },
+      |       ^~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:168:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  168 |     { "mouse-resize2-screen", resizm2 },
+      |       ^~~~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:170:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  170 |     { "move-window-down", mvdnwind },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:171:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  171 |     { "move-window-up", mvupwind },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:172:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  172 |     { "name-buffer", namebuffer },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:173:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  173 |     { "narrow-to-region", narrow },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:174:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  174 |     { "newline", newline },
+      |       ^~~~~~~~~
+../h/efunc.h:175:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  175 |     { "newline-and-indent", indent },
+      |       ^~~~~~~~~~~~~~~~~~~~
+../h/efunc.h:176:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  176 |     { "next-buffer", nextbuffer },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:177:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  177 |     { "next-line", forwline },
+      |       ^~~~~~~~~~~
+../h/efunc.h:178:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  178 |     { "next-page", forwpage },
+      |       ^~~~~~~~~~~
+../h/efunc.h:179:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  179 |     { "next-paragraph", gotoeop },
+      |       ^~~~~~~~~~~~~~~~
+../h/efunc.h:180:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  180 |     { "next-window", nextwind },
+      |       ^~~~~~~~~~~~~
+../h/efunc.h:181:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  181 |     { "next-word", forwword },
+      |       ^~~~~~~~~~~
+../h/efunc.h:182:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  182 |     { "nop", nullproc },
+      |       ^~~~~
+../h/efunc.h:183:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  183 |     { "open-line", openline },
+      |       ^~~~~~~~~~~
+../h/efunc.h:184:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  184 |     { "overwrite-string", ovstring },
+      |       ^~~~~~~~~~~~~~~~~~
+../h/efunc.h:185:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  185 |     { "pipe-command", pipecmd },
+      |       ^~~~~~~~~~~~~~
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  259 | };
+      | ^
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../h/efunc.h:259:1: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+../src/main.c: In function 'void dcline(int, char**, int)':
+../src/main.c:408:22: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  408 |         if ( startup("error.cmd") == TRUE )
+      |                      ^~~~~~~~~~~
+../src/main.c:415:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  415 |         startup("");
+      |                 ^~
+../src/main.c: In function 'void edinit(char*)':
+../src/main.c:717:17: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  717 |     init_screen("MAIN", bp);
+      |                 ^~~~~~
+../src/region.c:50:28: error: 'int killregion' redeclared as different kind of entity
+   50 | int PASCAL NEAR killregion(f, n)
+      |                            ^
+In file included from ../src/region.c:8:
+../h/eproto.h:1871:24: note: previous declaration 'int killregion(int, int)'
+ 1871 | EXTERN int PASCAL NEAR killregion DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/region.c:50:28: error: 'f' was not declared in this scope
+   50 | int PASCAL NEAR killregion(f, n)
+      |                            ^
+../src/region.c:50:31: error: 'n' was not declared in this scope
+   50 | int PASCAL NEAR killregion(f, n)
+      |                               ^
+../src/region.c:54:1: error: expected unqualified-id before '{' token
+   54 | {
+      | ^
+../src/region.c:85:28: error: 'int copyregion' redeclared as different kind of entity
+   85 | int PASCAL NEAR copyregion(f, n)
+      |                            ^
+../h/eproto.h:1788:24: note: previous declaration 'int copyregion(int, int)'
+ 1788 | EXTERN int PASCAL NEAR copyregion DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/region.c:85:28: error: 'f' was not declared in this scope
+   85 | int PASCAL NEAR copyregion(f, n)
+      |                            ^
+../src/region.c:85:31: error: 'n' was not declared in this scope
+   85 | int PASCAL NEAR copyregion(f, n)
+      |                               ^
+../src/region.c:89:1: error: expected unqualified-id before '{' token
+   89 | {
+      | ^
+../src/region.c:130:29: error: 'int lowerregion' redeclared as different kind of entity
+  130 | int PASCAL NEAR lowerregion(f, n)
+      |                             ^
+../h/eproto.h:1879:24: note: previous declaration 'int lowerregion(int, int)'
+ 1879 | EXTERN int PASCAL NEAR lowerregion DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/region.c:130:29: error: 'f' was not declared in this scope
+  130 | int PASCAL NEAR lowerregion(f, n)
+      |                             ^
+../src/region.c:130:32: error: 'n' was not declared in this scope
+  130 | int PASCAL NEAR lowerregion(f, n)
+      |                                ^
+../src/region.c:134:1: error: expected unqualified-id before '{' token
+  134 | {
+      | ^
+../src/region.c:196:29: error: 'int upperregion' redeclared as different kind of entity
+  196 | int PASCAL NEAR upperregion(f, n)
+      |                             ^
+../h/eproto.h:1992:24: note: previous declaration 'int upperregion(int, int)'
+ 1992 | EXTERN int PASCAL NEAR upperregion DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/region.c:196:29: error: 'f' was not declared in this scope
+  196 | int PASCAL NEAR upperregion(f, n)
+      |                             ^
+../src/region.c:196:32: error: 'n' was not declared in this scope
+  196 | int PASCAL NEAR upperregion(f, n)
+      |                                ^
+../src/region.c:200:1: error: expected unqualified-id before '{' token
+  200 | {
+      | ^
+../src/region.c:259:24: error: 'int narrow' redeclared as different kind of entity
+  259 | int PASCAL NEAR narrow(f, n)
+      |                        ^
+../h/eproto.h:1901:24: note: previous declaration 'int narrow(int, int)'
+ 1901 | EXTERN int PASCAL NEAR narrow DCL((int f, int n));
+      |                        ^~~~~~
+../src/region.c:259:24: error: 'f' was not declared in this scope
+  259 | int PASCAL NEAR narrow(f, n)
+      |                        ^
+../src/region.c:259:27: error: 'n' was not declared in this scope
+  259 | int PASCAL NEAR narrow(f, n)
+      |                           ^
+../src/region.c:263:1: error: expected unqualified-id before '{' token
+  263 | {
+      | ^
+../src/region.c:353:23: error: 'int widen' redeclared as different kind of entity
+  353 | int PASCAL NEAR widen(f, n)
+      |                       ^
+../h/eproto.h:2000:24: note: previous declaration 'int widen(int, int)'
+ 2000 | EXTERN int PASCAL NEAR widen DCL((int f, int n));
+      |                        ^~~~~
+../src/region.c:353:23: error: 'f' was not declared in this scope
+  353 | int PASCAL NEAR widen(f, n)
+      |                       ^
+../src/region.c:353:26: error: 'n' was not declared in this scope
+  353 | int PASCAL NEAR widen(f, n)
+      |                          ^
+../src/region.c:357:1: error: expected unqualified-id before '{' token
+  357 | {
+      | ^
+../src/region.c:448:29: error: 'int getregion' redeclared as different kind of entity
+  448 | int PASCAL NEAR getregion(rp)
+      |                             ^
+../h/eproto.h:1849:24: note: previous declaration 'int getregion(REGION*)'
+ 1849 | EXTERN int PASCAL NEAR getregion DCL((REGION *rp));
+      |                        ^~~~~~~~~
+../src/region.c:448:27: error: 'rp' was not declared in this scope
+  448 | int PASCAL NEAR getregion(rp)
+      |                           ^~
+../src/region.c:452:1: error: expected unqualified-id before '{' token
+  452 | {
+      | ^
+../src/region.c:514:28: error: 'char* regtostr' redeclared as different kind of entity
+  514 | char *PASCAL NEAR regtostr(buf, region)
+      |                            ^~~
+../h/eproto.h:1615:26: note: previous declaration 'char* regtostr(char*, REGION*)'
+ 1615 | EXTERN char *PASCAL NEAR regtostr DCL((char *buf, REGION *region));
+      |                          ^~~~~~~~
+../src/region.c:514:28: error: 'buf' was not declared in this scope; did you mean 'kbufp'?
+  514 | char *PASCAL NEAR regtostr(buf, region)
+      |                            ^~~
+      |                            kbufp
+../src/region.c:514:33: error: 'region' was not declared in this scope
+  514 | char *PASCAL NEAR regtostr(buf, region)
+      |                                 ^~~~~~
+../src/region.c:519:1: error: expected unqualified-id before '{' token
+  519 | {
+      | ^
+../src/region.c:545:37: error: 'const char* getreg' redeclared as different kind of entity
+  545 | CONST char *PASCAL NEAR getreg(value)   /* return some of the contents of the
+      |                                     ^
+../h/eproto.h:1594:32: note: previous declaration 'const char* getreg(char*)'
+ 1594 | EXTERN CONST char *PASCAL NEAR getreg DCL((char *value));
+      |                                ^~~~~~
+../src/region.c:545:32: error: 'value' was not declared in this scope
+  545 | CONST char *PASCAL NEAR getreg(value)   /* return some of the contents of the
+      |                                ^~~~~
+../src/region.c:550:1: error: expected unqualified-id before '{' token
+  550 | {
+      | ^
+../src/tags.c:253:6: error: variable or field 'add_path' declared void
+  253 | VOID add_path(filename)
+      |      ^~~~~~~~
+../src/tags.c:255:1: error: expected unqualified-id before '{' token
+  255 | {
+      | ^
+../src/tags.c: In function 'int tagger(char*, int)':
+../src/tags.c:319:5: error: 'add_path' was not declared in this scope
+  319 |     add_path(tagf);
+      |     ^~~~~~~~
+../src/tags.c: At global scope:
+../src/tags.c:381:24: warning: 'tagword' initialized and declared 'extern'
+  381 | EXTERN int PASCAL NEAR tagword(f, n)
+      |                        ^~~~~~~
+../src/tags.c:381:32: error: 'int tagword' redeclared as different kind of entity
+  381 | EXTERN int PASCAL NEAR tagword(f, n)
+      |                                ^
+In file included from ../src/tags.c:30:
+../h/eproto.h:2083:24: note: previous declaration 'int tagword(int, int)'
+ 2083 | EXTERN int PASCAL NEAR tagword DCL((int f, int n));   /* vi-like tagging */
+      |                        ^~~~~~~
+../src/tags.c:381:32: error: 'f' was not declared in this scope
+  381 | EXTERN int PASCAL NEAR tagword(f, n)
+      |                                ^
+../src/tags.c:381:35: error: 'n' was not declared in this scope
+  381 | EXTERN int PASCAL NEAR tagword(f, n)
+      |                                   ^
+../src/tags.c:385:1: error: expected unqualified-id before '{' token
+  385 | {
+      | ^
+../src/tags.c:434:24: warning: 'retagword' initialized and declared 'extern'
+  434 | EXTERN int PASCAL NEAR retagword(f, n)
+      |                        ^~~~~~~~~
+../src/tags.c:434:34: error: 'int retagword' redeclared as different kind of entity
+  434 | EXTERN int PASCAL NEAR retagword(f, n)
+      |                                  ^
+../h/eproto.h:2084:24: note: previous declaration 'int retagword(int, int)'
+ 2084 | EXTERN int PASCAL NEAR retagword DCL((int f, int n)); /* Try again (if redefined) */
+      |                        ^~~~~~~~~
+../src/tags.c:434:34: error: 'f' was not declared in this scope
+  434 | EXTERN int PASCAL NEAR retagword(f, n)
+      |                                  ^
+../src/tags.c:434:37: error: 'n' was not declared in this scope
+  434 | EXTERN int PASCAL NEAR retagword(f, n)
+      |                                     ^
+../src/tags.c:438:1: error: expected unqualified-id before '{' token
+  438 | {
+      | ^
+../src/tags.c:454:24: warning: 'backtagword' initialized and declared 'extern'
+  454 | EXTERN int PASCAL NEAR backtagword(f, n)
+      |                        ^~~~~~~~~~~
+../src/tags.c:454:36: error: 'int backtagword' redeclared as different kind of entity
+  454 | EXTERN int PASCAL NEAR backtagword(f, n)
+      |                                    ^
+../h/eproto.h:2085:24: note: previous declaration 'int backtagword(int, int)'
+ 2085 | EXTERN int PASCAL NEAR backtagword DCL((int f, int n)); /* return from tagged word */
+      |                        ^~~~~~~~~~~
+../src/tags.c:454:36: error: 'f' was not declared in this scope
+  454 | EXTERN int PASCAL NEAR backtagword(f, n)
+      |                                    ^
+../src/tags.c:454:39: error: 'n' was not declared in this scope
+  454 | EXTERN int PASCAL NEAR backtagword(f, n)
+      |                                       ^
+../src/tags.c:458:1: error: expected unqualified-id before '{' token
+  458 | {
+      | ^
+../src/tags.c:246:12: warning: 'tagvalid' defined but not used [-Wunused-variable]
+  246 | static int tagvalid = FALSE;    /* TRUE if last tag was a succes*/
+      |            ^~~~~~~~
+../src/tags.c:197:12: warning: 'int backupword(int, int)' defined but not used [-Wunused-function]
+  197 | static int backupword(int f, int n)
+      |            ^~~~~~~~~~
+../src/tags.c:172:12: warning: 'int restword(char*, int)' defined but not used [-Wunused-function]
+  172 | static int restword P2_(char *, str, int, lmax)
+      |            ^~~~~~~~
+../src/tags.c:101:12: warning: 'int lookup()' defined but not used [-Wunused-function]
+  101 | static int lookup P0_()
+      |            ^~~~~~
+../src/undo.c:170:6: error: variable or field 'undo_zot' declared void
+  170 | VOID undo_zot(bp)
+      |      ^~~~~~~~
+../src/undo.c:170:15: error: 'bp' was not declared in this scope
+  170 | VOID undo_zot(bp)
+      |               ^~
+../src/undo.c:174:1: error: expected unqualified-id before '{' token
+  174 | {
+      | ^
+../src/undo.c:196:22: error: 'int undo' redeclared as different kind of entity
+  196 | int PASCAL NEAR undo(f, n)
+      |                      ^
+In file included from ../src/undo.c:15:
+../h/eproto.h:1553:24: note: previous declaration 'int undo(int, int)'
+ 1553 | EXTERN int PASCAL NEAR undo DCL((int f, int n));
+      |                        ^~~~
+../src/undo.c:196:22: error: 'f' was not declared in this scope
+  196 | int PASCAL NEAR undo(f, n)
+      |                      ^
+../src/undo.c:196:25: error: 'n' was not declared in this scope
+  196 | int PASCAL NEAR undo(f, n)
+      |                         ^
+../src/undo.c:200:1: error: expected unqualified-id before '{' token
+  200 | {
+      | ^
+../src/undo.c:233:29: error: 'int undo_delete' redeclared as different kind of entity
+  233 | int PASCAL NEAR undo_delete(f, n)
+      |                             ^
+../h/eproto.h:1554:24: note: previous declaration 'int undo_delete(int, int)'
+ 1554 | EXTERN int PASCAL NEAR undo_delete DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/undo.c:233:29: error: 'f' was not declared in this scope
+  233 | int PASCAL NEAR undo_delete(f, n)
+      |                             ^
+../src/undo.c:233:32: error: 'n' was not declared in this scope
+  233 | int PASCAL NEAR undo_delete(f, n)
+      |                                ^
+../src/undo.c:237:1: error: expected unqualified-id before '{' token
+  237 | {
+      | ^
+../src/undo.c:246:27: error: 'int undo_list' redeclared as different kind of entity
+  246 | int PASCAL NEAR undo_list(f, n)
+      |                           ^
+../h/eproto.h:1555:24: note: previous declaration 'int undo_list(int, int)'
+ 1555 | EXTERN int PASCAL NEAR undo_list DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/undo.c:246:27: error: 'f' was not declared in this scope
+  246 | int PASCAL NEAR undo_list(f, n)
+      |                           ^
+../src/undo.c:246:30: error: 'n' was not declared in this scope
+  246 | int PASCAL NEAR undo_list(f, n)
+      |                              ^
+../src/undo.c:250:1: error: expected unqualified-id before '{' token
+  250 | {
+      | ^
+../src/undo.c: In function 'char* room(int)':
+../src/undo.c:398:38: error: invalid conversion from 'voidp_' {aka 'void*'} to 'char*' [-fpermissive]
+  398 |     if ( 0 >= nbytes ) return (VOIDP)0;
+      |                                      ^
+      |                                      |
+      |                                      voidp_ {aka void*}
+../src/undo.c: In function 'char* reroom(voidp_, int)':
+../src/undo.c:452:38: error: invalid conversion from 'voidp_' {aka 'void*'} to 'char*' [-fpermissive]
+  452 |     if ( 0 >= nbytes ) return (VOIDP)0;
+      |                                      ^
+      |                                      |
+      |                                      voidp_ {aka void*}
+../src/unix.c:241:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  241 |     { "cl" },                           /* Clear to end of page       */
+      |       ^~~~
+../src/unix.c:242:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  242 |     { "cm" },                           /* Cursor motion              */
+      |       ^~~~
+../src/unix.c:243:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  243 |     { "ce" },                           /* Clear to end of line       */
+      |       ^~~~
+../src/unix.c:244:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  244 |     { "se" },                           /* Standout ends              */
+      |       ^~~~
+../src/unix.c:245:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  245 |     { "so" },                           /* Standout (reverse video)   */
+      |       ^~~~
+../src/unix.c:246:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  246 |     { "is" },                           /* Initialize screen          */
+      |       ^~~~
+../src/unix.c:247:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  247 |     { "ks" },                           /* Keypad mode starts         */
+      |       ^~~~
+../src/unix.c:248:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  248 |     { "ke" },                           /* Keypad mode ends           */
+      |       ^~~~
+../src/unix.c:249:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  249 |     { "vb" },                           /* Visible bell               */
+      |       ^~~~
+../src/unix.c:251:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  251 |     { "c0" },                           /* Foreground color #0        */
+      |       ^~~~
+../src/unix.c:252:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  252 |     { "c1" },                           /* Foreground color #1        */
+      |       ^~~~
+../src/unix.c:253:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  253 |     { "c2" },                           /* Foreground color #2        */
+      |       ^~~~
+../src/unix.c:254:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  254 |     { "c3" },                           /* Foreground color #3        */
+      |       ^~~~
+../src/unix.c:255:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  255 |     { "c4" },                           /* Foreground color #4        */
+      |       ^~~~
+../src/unix.c:256:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  256 |     { "c5" },                           /* Foreground color #5        */
+      |       ^~~~
+../src/unix.c:257:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  257 |     { "c6" },                           /* Foreground color #6        */
+      |       ^~~~
+../src/unix.c:258:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  258 |     { "c7" },                           /* Foreground color #7        */
+      |       ^~~~
+../src/unix.c:259:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  259 |     { "d0" },                           /* Background color #0        */
+      |       ^~~~
+../src/unix.c:260:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  260 |     { "d1" },                           /* Background color #1        */
+      |       ^~~~
+../src/unix.c:261:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  261 |     { "d2" },                           /* Background color #2        */
+      |       ^~~~
+../src/unix.c:262:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  262 |     { "d3" },                           /* Background color #3        */
+      |       ^~~~
+../src/unix.c:263:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  263 |     { "d4" },                           /* Background color #4        */
+      |       ^~~~
+../src/unix.c:264:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  264 |     { "d5" },                           /* Background color #5        */
+      |       ^~~~
+../src/unix.c:265:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  265 |     { "d6" },                           /* Background color #6        */
+      |       ^~~~
+../src/unix.c:266:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  266 |     { "d7" },                           /* Background color #7        */
+      |       ^~~~
+../src/unix.c:279:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  279 |     { "bt", SHFT|CTRL|'i' },            /* Back-tab key               */
+      |       ^~~~
+../src/unix.c:280:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  280 |     { "k1", SPEC|'1' },                 /* F1 key                     */
+      |       ^~~~
+../src/unix.c:281:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  281 |     { "k2", SPEC|'2' },                 /* F2 key                     */
+      |       ^~~~
+../src/unix.c:282:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  282 |     { "k3", SPEC|'3' },                 /* F3 key                     */
+      |       ^~~~
+../src/unix.c:283:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  283 |     { "k4", SPEC|'4' },                 /* F4 key                     */
+      |       ^~~~
+../src/unix.c:284:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  284 |     { "k5", SPEC|'5' },                 /* F5 key                     */
+      |       ^~~~
+../src/unix.c:285:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  285 |     { "k6", SPEC|'6' },                 /* F6 key                     */
+      |       ^~~~
+../src/unix.c:286:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  286 |     { "k7", SPEC|'7' },                 /* F7 key                     */
+      |       ^~~~
+../src/unix.c:287:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  287 |     { "k8", SPEC|'8' },                 /* F8 key                     */
+      |       ^~~~
+../src/unix.c:288:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  288 |     { "k9", SPEC|'9' },                 /* F9 key                     */
+      |       ^~~~
+../src/unix.c:289:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  289 |     { "k0", SPEC|'0' },                 /* F0 or F10 key              */
+      |       ^~~~
+../src/unix.c:290:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  290 |     { "k;", SPEC|'0' },                 /* F0 or F10 key    (kjc)     */
+      |       ^~~~
+../src/unix.c:291:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  291 |     { "F1", SHFT|SPEC|'1' },            /* Shift-F1 or F11 key        */
+      |       ^~~~
+../src/unix.c:292:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  292 |     { "F2", SHFT|SPEC|'2' },            /* Shift-F2 or F12 key        */
+      |       ^~~~
+../src/unix.c:293:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  293 |     { "F3", SHFT|SPEC|'3' },            /* Shift-F3 or F13 key        */
+      |       ^~~~
+../src/unix.c:294:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  294 |     { "F4", SHFT|SPEC|'4' },            /* Shift-F4 or F14 key        */
+      |       ^~~~
+../src/unix.c:295:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  295 |     { "F5", SHFT|SPEC|'5' },            /* Shift-F5 or F15 key        */
+      |       ^~~~
+../src/unix.c:296:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  296 |     { "F6", SHFT|SPEC|'6' },            /* Shift-F6 or F16 key        */
+      |       ^~~~
+../src/unix.c:297:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  297 |     { "F7", SHFT|SPEC|'7' },            /* Shift-F7 or F17 key        */
+      |       ^~~~
+../src/unix.c:298:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  298 |     { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key        */
+      |       ^~~~
+../src/unix.c:299:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  299 |     { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key        */
+      |       ^~~~
+../src/unix.c:300:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  300 |     { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key        */
+      |       ^~~~
+../src/unix.c:301:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  301 |     { "kA", CTRL|'O' },                 /* Insert line key            */
+      |       ^~~~
+../src/unix.c:302:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  302 |     { "kb", CTRL|'H' },                 /* Backspace key              */
+      |       ^~~~
+../src/unix.c:303:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  303 |     { "kC", CTRL|'L' },                 /* Clear screen key           */
+      |       ^~~~
+../src/unix.c:304:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  304 |     { "kD", SPEC|'D' },                 /* Delete character key       */
+      |       ^~~~
+../src/unix.c:305:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  305 |     { "kd", SPEC|'N' },                 /* Down arrow key             */
+      |       ^~~~
+../src/unix.c:306:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  306 |     { "kE", CTRL|'K' },                 /* Clear to end of line key   */
+      |       ^~~~
+../src/unix.c:307:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  307 |     { "kF", CTRL|'V' },                 /* Scroll forward key         */
+      |       ^~~~
+../src/unix.c:308:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  308 |     { "kH", SPEC|'>' },                 /* Home down key              */
+      |       ^~~~
+../src/unix.c:309:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  309 |     { "@7", SPEC|'>' },                 /* Home down key    (kjc)     */
+      |       ^~~~
+../src/unix.c:310:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  310 |     { "kh", SPEC|'<' },                 /* Home key                   */
+      |       ^~~~
+../src/unix.c:311:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  311 |     { "kI", SPEC|'C' },                 /* Insert character key       */
+      |       ^~~~
+../src/unix.c:312:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  312 |     { "kL", CTRL|'K' },                 /* Delete line key            */
+      |       ^~~~
+../src/unix.c:313:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  313 |     { "kl", SPEC|'B' },                 /* Left arrow key             */
+      |       ^~~~
+../src/unix.c:314:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  314 |     { "kN", SPEC|'V' },                 /* Next page key              */
+      |       ^~~~
+../src/unix.c:315:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  315 |     { "kP", SPEC|'Z' },                 /* Previous page key          */
+      |       ^~~~
+../src/unix.c:316:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  316 |     { "kR", CTRL|'Z' },                 /* Scroll backward key        */
+      |       ^~~~
+../src/unix.c:317:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  317 |     { "kr", SPEC|'F' },                 /* Right arrow key            */
+      |       ^~~~
+../src/unix.c:318:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  318 |     { "ku", SPEC|'P' },                 /* Up arrow key               */
+      |       ^~~~
+../src/unix.c:319:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  319 |     { "K1", SPEC|'<' },                 /* Keypad 7 -> Home           */
+      |       ^~~~
+../src/unix.c:320:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  320 |     { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up        */
+      |       ^~~~
+../src/unix.c:321:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  321 |     { "K3", ' ' },                      /* Keypad 5                   */
+      |       ^~~~
+../src/unix.c:322:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  322 |     { "K4", SPEC|'>' },                 /* Keypad 1 -> End            */
+      |       ^~~~
+../src/unix.c:323:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  323 |     { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down      */
+      |       ^~~~
+../src/unix.c:324:7: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  324 |     { "kw", CTRL|'E' }                  /* End of line                */
+      |       ^~~~
+../src/unix.c: In function 'int scopen()':
+../src/unix.c:801:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  801 |     term.t_nrow = tgetnum("li") - 1;
+      |                           ^~~~
+../src/unix.c:802:27: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  802 |     term.t_ncol = tgetnum("co");
+      |                           ^~~~
+../src/unix.c:816:21: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  816 |     reset = TGETSTR("is", &cp);
+      |                     ^
+../src/unix.c:764:37: note: in definition of macro 'TGETSTR'
+  764 | #  define TGETSTR(a, b)   tgetstr( (a), (b) )
+      |                                     ^
+../src/unix.c:819:18: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  819 |     if ( tgetstr("pc", &cp) )
+      |                  ^~~~
+../src/unix.c:823:18: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  823 |     UP = TGETSTR("up", &cp);
+      |                  ^
+../src/unix.c:764:37: note: in definition of macro 'TGETSTR'
+  764 | #  define TGETSTR(a, b)   tgetstr( (a), (b) )
+      |                                     ^
+../src/unix.c:852:23: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+  852 |     hpterm = tgetflag("xs");
+      |                       ^~~~
+../src/unix.c: In function 'int scmove(int, int)':
+../src/unix.c:948:18: error: too many arguments to function 'char* tgoto()'
+  948 |     putpad( tgoto(capbind[CAP_CM].store, col, row) );
+      |             ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+../src/unix.c:945:11: note: declared here
+  945 |     char *tgoto();
+      |           ^~~~~
+../src/unix.c: In function 'int spal(char*)':
+../src/unix.c:1170:46: error: invalid conversion from 'void*' to 'char*' [-fpermissive]
+ 1170 |         capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
+      |                                        ~~~~~~^~~~~~~~~~~~~~~~
+      |                                              |
+      |                                              void*
+../src/unix.c: In function 'char* timeset()':
+../src/unix.c:1216:15: error: too many arguments to function 'char* ctime()'
+ 1216 |     sp = ctime(&buf);
+      |          ~~~~~^~~~~~
+../src/unix.c:1210:12: note: declared here
+ 1210 |     char * ctime();
+      |            ^~~~~
+../src/unix.c: In function 'int spawncli(int, int)':
+../src/unix.c:1313:14: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1313 |         sh = "/bin/sh";
+      |              ^~~~~~~~~
+../src/unix.c: In function 'int pipecmd(int, int)':
+../src/unix.c:1643:37: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1643 |     if ( NULL != ( cp = gettmpfname("fltinp") ) ) {
+      |                                     ^~~~~~~~
+../src/unix.c:1648:37: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1648 |     if ( NULL != ( cp = gettmpfname("command") ) ) {
+      |                                     ^~~~~~~~~
+../src/unix.c:1660:28: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1660 |     if ( !writeout(InFile, "w") ) {
+      |                            ^~~
+../src/unix.c: In function 'int f_filter(int, int)':
+../src/unix.c:1765:37: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1765 |     if ( NULL != ( cp = gettmpfname("fltinp") ) ) {
+      |                                     ^~~~~~~~
+../src/unix.c:1770:37: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1770 |     if ( NULL != ( cp = gettmpfname("fltout") ) ) {
+      |                                     ^~~~~~~~
+../src/unix.c:1798:28: warning: ISO C++ forbids converting a string constant to 'char*' [-Wwrite-strings]
+ 1798 |     if ( !writeout(InFile, "w") ) {
+      |                            ^~~
+In file included from ../src/unix.c:116:
+../src/unix.c: In function 'void winch_new_size()':
+../h/eproto.h:37:26: error: expected unqualified-id before string constant
+   37 | # define EXTERN   extern "C"
+      |                          ^~~
+../src/unix.c:2049:5: note: in expansion of macro 'EXTERN'
+ 2049 |     EXTERN VOID winch_vtresize(int rows, int cols);
+      |     ^~~~~~
+../src/unix.c:2057:5: error: 'winch_vtresize' was not declared in this scope; did you mean 'winch_new_size'?
+ 2057 |     winch_vtresize(win.ws_row, win.ws_col);
+      |     ^~~~~~~~~~~~~~
+      |     winch_new_size
+../src/window.c:18:28: error: 'int reposition' redeclared as different kind of entity
+   18 | int PASCAL NEAR reposition(f, n)
+      |                            ^
+In file included from ../src/window.c:8:
+../h/eproto.h:1933:24: note: previous declaration 'int reposition(int, int)'
+ 1933 | EXTERN int PASCAL NEAR reposition DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/window.c:18:28: error: 'f' was not declared in this scope
+   18 | int PASCAL NEAR reposition(f, n)
+      |                            ^
+../src/window.c:18:31: error: 'n' was not declared in this scope
+   18 | int PASCAL NEAR reposition(f, n)
+      |                               ^
+../src/window.c:22:1: error: expected unqualified-id before '{' token
+   22 | {
+      | ^
+../src/window.c:35:25: error: 'int refresh' redeclared as different kind of entity
+   35 | int PASCAL NEAR refresh(f, n)
+      |                         ^
+../h/eproto.h:1931:24: note: previous declaration 'int refresh(int, int)'
+ 1931 | EXTERN int PASCAL NEAR refresh DCL((int f, int n));
+      |                        ^~~~~~~
+../src/window.c:35:25: error: 'f' was not declared in this scope
+   35 | int PASCAL NEAR refresh(f, n)
+      |                         ^
+../src/window.c:35:28: error: 'n' was not declared in this scope
+   35 | int PASCAL NEAR refresh(f, n)
+      |                            ^
+../src/window.c:39:1: error: expected unqualified-id before '{' token
+   39 | {
+      | ^
+../src/window.c:58:26: error: 'int nextwind' redeclared as different kind of entity
+   58 | int PASCAL NEAR nextwind(f, n)
+      |                          ^
+../h/eproto.h:1914:24: note: previous declaration 'int nextwind(int, int)'
+ 1914 | EXTERN int PASCAL NEAR nextwind DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/window.c:58:26: error: 'f' was not declared in this scope
+   58 | int PASCAL NEAR nextwind(f, n)
+      |                          ^
+../src/window.c:58:29: error: 'n' was not declared in this scope
+   58 | int PASCAL NEAR nextwind(f, n)
+      |                             ^
+../src/window.c:62:1: error: expected unqualified-id before '{' token
+   62 | {
+      | ^
+../src/window.c:106:26: error: 'int prevwind' redeclared as different kind of entity
+  106 | int PASCAL NEAR prevwind(f, n)
+      |                          ^
+../h/eproto.h:1923:24: note: previous declaration 'int prevwind(int, int)'
+ 1923 | EXTERN int PASCAL NEAR prevwind DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/window.c:106:26: error: 'f' was not declared in this scope
+  106 | int PASCAL NEAR prevwind(f, n)
+      |                          ^
+../src/window.c:106:29: error: 'n' was not declared in this scope
+  106 | int PASCAL NEAR prevwind(f, n)
+      |                             ^
+../src/window.c:110:1: error: expected unqualified-id before '{' token
+  110 | {
+      | ^
+../src/window.c:141:26: error: 'int mvdnwind' redeclared as different kind of entity
+  141 | int PASCAL NEAR mvdnwind(f, n)
+      |                          ^
+../h/eproto.h:1897:24: note: previous declaration 'int mvdnwind(int, int)'
+ 1897 | EXTERN int PASCAL NEAR mvdnwind DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/window.c:141:26: error: 'f' was not declared in this scope
+  141 | int PASCAL NEAR mvdnwind(f, n)
+      |                          ^
+../src/window.c:141:29: error: 'n' was not declared in this scope
+  141 | int PASCAL NEAR mvdnwind(f, n)
+      |                             ^
+../src/window.c:145:1: error: expected unqualified-id before '{' token
+  145 | {
+      | ^
+../src/window.c:156:26: error: 'int mvupwind' redeclared as different kind of entity
+  156 | int PASCAL NEAR mvupwind(f, n)
+      |                          ^
+../h/eproto.h:1898:24: note: previous declaration 'int mvupwind(int, int)'
+ 1898 | EXTERN int PASCAL NEAR mvupwind DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/window.c:156:26: error: 'f' was not declared in this scope
+  156 | int PASCAL NEAR mvupwind(f, n)
+      |                          ^
+../src/window.c:156:29: error: 'n' was not declared in this scope
+  156 | int PASCAL NEAR mvupwind(f, n)
+      |                             ^
+../src/window.c:160:1: error: expected unqualified-id before '{' token
+  160 | {
+      | ^
+../src/window.c:205:26: error: 'int onlywind' redeclared as different kind of entity
+  205 | int PASCAL NEAR onlywind(f, n)
+      |                          ^
+../h/eproto.h:1916:24: note: previous declaration 'int onlywind(int, int)'
+ 1916 | EXTERN int PASCAL NEAR onlywind DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/window.c:205:26: error: 'f' was not declared in this scope
+  205 | int PASCAL NEAR onlywind(f, n)
+      |                          ^
+../src/window.c:205:29: error: 'n' was not declared in this scope
+  205 | int PASCAL NEAR onlywind(f, n)
+      |                             ^
+../src/window.c:209:1: error: expected unqualified-id before '{' token
+  209 | {
+      | ^
+../src/window.c:262:25: error: 'int delwind' redeclared as different kind of entity
+  262 | int PASCAL NEAR delwind(f, n)
+      |                         ^
+../h/eproto.h:1803:24: note: previous declaration 'int delwind(int, int)'
+ 1803 | EXTERN int PASCAL NEAR delwind DCL((int f, int n));
+      |                        ^~~~~~~
+../src/window.c:262:25: error: 'f' was not declared in this scope
+  262 | int PASCAL NEAR delwind(f, n)
+      |                         ^
+../src/window.c:262:28: error: 'n' was not declared in this scope
+  262 | int PASCAL NEAR delwind(f, n)
+      |                            ^
+../src/window.c:266:1: error: expected unqualified-id before '{' token
+  266 | {
+      | ^
+../src/window.c:352:27: error: 'int splitwind' redeclared as different kind of entity
+  352 | int PASCAL NEAR splitwind(f, n)
+      |                           ^
+../h/eproto.h:1962:24: note: previous declaration 'int splitwind(int, int)'
+ 1962 | EXTERN int PASCAL NEAR splitwind DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/window.c:352:27: error: 'f' was not declared in this scope
+  352 | int PASCAL NEAR splitwind(f, n)
+      |                           ^
+../src/window.c:352:30: error: 'n' was not declared in this scope
+  352 | int PASCAL NEAR splitwind(f, n)
+      |                              ^
+../src/window.c:356:1: error: expected unqualified-id before '{' token
+  356 | {
+      | ^
+../src/window.c:447:29: error: 'int enlargewind' redeclared as different kind of entity
+  447 | int PASCAL NEAR enlargewind(f, n)
+      |                             ^
+../h/eproto.h:1816:24: note: previous declaration 'int enlargewind(int, int)'
+ 1816 | EXTERN int PASCAL NEAR enlargewind DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/window.c:447:29: error: 'f' was not declared in this scope
+  447 | int PASCAL NEAR enlargewind(f, n)
+      |                             ^
+../src/window.c:447:32: error: 'n' was not declared in this scope
+  447 | int PASCAL NEAR enlargewind(f, n)
+      |                                ^
+../src/window.c:451:1: error: expected unqualified-id before '{' token
+  451 | {
+      | ^
+../src/window.c:502:28: error: 'int shrinkwind' redeclared as different kind of entity
+  502 | int PASCAL NEAR shrinkwind(f, n)
+      |                            ^
+../h/eproto.h:1958:24: note: previous declaration 'int shrinkwind(int, int)'
+ 1958 | EXTERN int PASCAL NEAR shrinkwind DCL((int f, int n));
+      |                        ^~~~~~~~~~
+../src/window.c:502:28: error: 'f' was not declared in this scope
+  502 | int PASCAL NEAR shrinkwind(f, n)
+      |                            ^
+../src/window.c:502:31: error: 'n' was not declared in this scope
+  502 | int PASCAL NEAR shrinkwind(f, n)
+      |                               ^
+../src/window.c:506:1: error: expected unqualified-id before '{' token
+  506 | {
+      | ^
+../src/window.c:554:24: error: 'int resize' redeclared as different kind of entity
+  554 | int PASCAL NEAR resize(f, n)
+      |                        ^
+../h/eproto.h:1935:24: note: previous declaration 'int resize(int, int)'
+ 1935 | EXTERN int PASCAL NEAR resize DCL((int f, int n));
+      |                        ^~~~~~
+../src/window.c:554:24: error: 'f' was not declared in this scope
+  554 | int PASCAL NEAR resize(f, n)
+      |                        ^
+../src/window.c:554:27: error: 'n' was not declared in this scope
+  554 | int PASCAL NEAR resize(f, n)
+      |                           ^
+../src/window.c:558:1: error: expected unqualified-id before '{' token
+  558 | {
+      | ^
+../src/window.c:657:25: error: 'int savewnd' redeclared as different kind of entity
+  657 | int PASCAL NEAR savewnd(f, n)   /* save ptr to current window */
+      |                         ^
+../h/eproto.h:1940:24: note: previous declaration 'int savewnd(int, int)'
+ 1940 | EXTERN int PASCAL NEAR savewnd DCL((int f, int n));
+      |                        ^~~~~~~
+../src/window.c:657:25: error: 'f' was not declared in this scope
+  657 | int PASCAL NEAR savewnd(f, n)   /* save ptr to current window */
+      |                         ^
+../src/window.c:657:28: error: 'n' was not declared in this scope
+  657 | int PASCAL NEAR savewnd(f, n)   /* save ptr to current window */
+      |                            ^
+../src/window.c:661:1: error: expected unqualified-id before '{' token
+  661 | {
+      | ^
+../src/window.c:667:25: error: 'int restwnd' redeclared as different kind of entity
+  667 | int PASCAL NEAR restwnd(f, n)   /* restore the saved screen */
+      |                         ^
+../h/eproto.h:1939:24: note: previous declaration 'int restwnd(int, int)'
+ 1939 | EXTERN int PASCAL NEAR restwnd DCL((int f, int n));
+      |                        ^~~~~~~
+../src/window.c:667:25: error: 'f' was not declared in this scope
+  667 | int PASCAL NEAR restwnd(f, n)   /* restore the saved screen */
+      |                         ^
+../src/window.c:667:28: error: 'n' was not declared in this scope
+  667 | int PASCAL NEAR restwnd(f, n)   /* restore the saved screen */
+      |                            ^
+../src/window.c:671:1: error: expected unqualified-id before '{' token
+  671 | {
+      | ^
+../src/window.c:693:25: error: 'int newsize' redeclared as different kind of entity
+  693 | int PASCAL NEAR newsize(f, n)   /* resize the screen, re-writing the screen */
+      |                         ^
+../h/eproto.h:1905:24: note: previous declaration 'int newsize(int, int)'
+ 1905 | EXTERN int PASCAL NEAR newsize DCL((int f, int n));
+      |                        ^~~~~~~
+../src/window.c:693:25: error: 'f' was not declared in this scope
+  693 | int PASCAL NEAR newsize(f, n)   /* resize the screen, re-writing the screen */
+      |                         ^
+../src/window.c:693:28: error: 'n' was not declared in this scope
+  693 | int PASCAL NEAR newsize(f, n)   /* resize the screen, re-writing the screen */
+      |                            ^
+../src/window.c:698:1: error: expected unqualified-id before '{' token
+  698 | {
+      | ^
+../src/window.c:806:26: error: 'int newwidth' redeclared as different kind of entity
+  806 | int PASCAL NEAR newwidth(f, n)  /* resize the screen, re-writing the screen */
+      |                          ^
+../h/eproto.h:1906:24: note: previous declaration 'int newwidth(int, int)'
+ 1906 | EXTERN int PASCAL NEAR newwidth DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/window.c:806:26: error: 'f' was not declared in this scope
+  806 | int PASCAL NEAR newwidth(f, n)  /* resize the screen, re-writing the screen */
+      |                          ^
+../src/window.c:809:5: error: redefinition of 'int n'
+  809 | int n;  /* numeric argument */
+      |     ^
+../src/window.c:696:5: note: 'int n' previously declared here
+  696 | int n;  /* numeric argument */
+      |     ^
+../src/window.c:811:1: error: expected unqualified-id before '{' token
+  811 | {
+      | ^
+../src/window.c:856:29: error: 'int new_col_org' redeclared as different kind of entity
+  856 | int PASCAL NEAR new_col_org(f, n)       /* reposition the screen, re-writing the
+      |                             ^
+../h/eproto.h:1903:24: note: previous declaration 'int new_col_org(int, int)'
+ 1903 | EXTERN int PASCAL NEAR new_col_org DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/window.c:856:29: error: 'f' was not declared in this scope
+  856 | int PASCAL NEAR new_col_org(f, n)       /* reposition the screen, re-writing the
+      |                             ^
+../src/window.c:860:5: error: redefinition of 'int n'
+  860 | int n;  /* numeric argument */
+      |     ^
+../src/window.c:696:5: note: 'int n' previously declared here
+  696 | int n;  /* numeric argument */
+      |     ^
+../src/window.c:862:1: error: expected unqualified-id before '{' token
+  862 | {
+      | ^
+../src/window.c:886:29: error: 'int new_row_org' redeclared as different kind of entity
+  886 | int PASCAL NEAR new_row_org(f, n)       /* reposition the screen, re-writing the
+      |                             ^
+../h/eproto.h:1904:24: note: previous declaration 'int new_row_org(int, int)'
+ 1904 | EXTERN int PASCAL NEAR new_row_org DCL((int f, int n));
+      |                        ^~~~~~~~~~~
+../src/window.c:886:29: error: 'f' was not declared in this scope
+  886 | int PASCAL NEAR new_row_org(f, n)       /* reposition the screen, re-writing the
+      |                             ^
+../src/window.c:890:5: error: redefinition of 'int n'
+  890 | int n;  /* numeric argument */
+      |     ^
+../src/window.c:696:5: note: 'int n' previously declared here
+  696 | int n;  /* numeric argument */
+      |     ^
+../src/window.c:892:1: error: expected unqualified-id before '{' token
+  892 | {
+      | ^
+../src/word.c:20:26: error: 'int wrapword' redeclared as different kind of entity
+   20 | int PASCAL NEAR wrapword(f, n)
+      |                          ^
+In file included from ../src/word.c:9:
+../h/eproto.h:2002:24: note: previous declaration 'int wrapword(int, int)'
+ 2002 | EXTERN int PASCAL NEAR wrapword DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/word.c:20:26: error: 'f' was not declared in this scope
+   20 | int PASCAL NEAR wrapword(f, n)
+      |                          ^
+../src/word.c:20:29: error: 'n' was not declared in this scope
+   20 | int PASCAL NEAR wrapword(f, n)
+      |                             ^
+../src/word.c:25:1: error: expected unqualified-id before '{' token
+   25 | {
+      | ^
+../src/word.c:79:26: error: 'int backword' redeclared as different kind of entity
+   79 | int PASCAL NEAR backword(f, n)
+      |                          ^
+../h/eproto.h:1775:24: note: previous declaration 'int backword(int, int)'
+ 1775 | EXTERN int PASCAL NEAR backword DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/word.c:79:26: error: 'f' was not declared in this scope
+   79 | int PASCAL NEAR backword(f, n)
+      |                          ^
+../src/word.c:83:1: error: expected unqualified-id before '{' token
+   83 | {
+      | ^
+../src/word.c:108:26: error: 'int forwword' redeclared as different kind of entity
+  108 | int PASCAL NEAR forwword(f, n)
+      |                          ^
+../h/eproto.h:1843:24: note: previous declaration 'int forwword(int, int)'
+ 1843 | EXTERN int PASCAL NEAR forwword DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/word.c:108:26: error: 'f' was not declared in this scope
+  108 | int PASCAL NEAR forwword(f, n)
+      |                          ^
+../src/word.c:112:1: error: expected unqualified-id before '{' token
+  112 | {
+      | ^
+../src/word.c:137:25: error: 'int endword' redeclared as different kind of entity
+  137 | int PASCAL NEAR endword(f, n)
+      |                         ^
+../h/eproto.h:1815:24: note: previous declaration 'int endword(int, int)'
+ 1815 | EXTERN int PASCAL NEAR endword DCL((int f, int n));
+      |                        ^~~~~~~
+../src/word.c:137:25: error: 'f' was not declared in this scope
+  137 | int PASCAL NEAR endword(f, n)
+      |                         ^
+../src/word.c:141:1: error: expected unqualified-id before '{' token
+  141 | {
+      | ^
+../src/word.c:167:27: error: 'int upperword' redeclared as different kind of entity
+  167 | int PASCAL NEAR upperword(f, n)
+      |                           ^
+../h/eproto.h:1993:24: note: previous declaration 'int upperword(int, int)'
+ 1993 | EXTERN int PASCAL NEAR upperword DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/word.c:167:27: error: 'f' was not declared in this scope
+  167 | int PASCAL NEAR upperword(f, n)
+      |                           ^
+../src/word.c:171:1: error: expected unqualified-id before '{' token
+  171 | {
+      | ^
+../src/word.c:207:27: error: 'int lowerword' redeclared as different kind of entity
+  207 | int PASCAL NEAR lowerword(f, n)
+      |                           ^
+../h/eproto.h:1880:24: note: previous declaration 'int lowerword(int, int)'
+ 1880 | EXTERN int PASCAL NEAR lowerword DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/word.c:207:27: error: 'f' was not declared in this scope
+  207 | int PASCAL NEAR lowerword(f, n)
+      |                           ^
+../src/word.c:211:1: error: expected unqualified-id before '{' token
+  211 | {
+      | ^
+../src/word.c:248:25: error: 'int capword' redeclared as different kind of entity
+  248 | int PASCAL NEAR capword(f, n)
+      |                         ^
+../h/eproto.h:1783:24: note: previous declaration 'int capword(int, int)'
+ 1783 | EXTERN int PASCAL NEAR capword DCL((int f, int n));
+      |                        ^~~~~~~
+../src/word.c:248:25: error: 'f' was not declared in this scope
+  248 | int PASCAL NEAR capword(f, n)
+      |                         ^
+../src/word.c:252:1: error: expected unqualified-id before '{' token
+  252 | {
+      | ^
+../src/word.c:302:26: error: 'int delfword' redeclared as different kind of entity
+  302 | int PASCAL NEAR delfword(f, n)
+      |                          ^
+../h/eproto.h:1800:24: note: previous declaration 'int delfword(int, int)'
+ 1800 | EXTERN int PASCAL NEAR delfword DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/word.c:302:26: error: 'f' was not declared in this scope
+  302 | int PASCAL NEAR delfword(f, n)
+      |                          ^
+../src/word.c:306:1: error: expected unqualified-id before '{' token
+  306 | {
+      | ^
+../src/word.c:401:26: error: 'int delbword' redeclared as different kind of entity
+  401 | int PASCAL NEAR delbword(f, n)
+      |                          ^
+../h/eproto.h:1798:24: note: previous declaration 'int delbword(int, int)'
+ 1798 | EXTERN int PASCAL NEAR delbword DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/word.c:401:26: error: 'f' was not declared in this scope
+  401 | int PASCAL NEAR delbword(f, n)
+      |                          ^
+../src/word.c:405:1: error: expected unqualified-id before '{' token
+  405 | {
+      | ^
+../src/word.c:645:26: error: 'int killpara' redeclared as different kind of entity
+  645 | int PASCAL NEAR killpara(f, n)  /* delete n paragraphs starting with the current
+      |                          ^
+../h/eproto.h:1870:24: note: previous declaration 'int killpara(int, int)'
+ 1870 | EXTERN int PASCAL NEAR killpara DCL((int f, int n));
+      |                        ^~~~~~~~
+../src/word.c:645:26: error: 'f' was not declared in this scope
+  645 | int PASCAL NEAR killpara(f, n)  /* delete n paragraphs starting with the current
+      |                          ^
+../src/word.c:649:5: error: redefinition of 'int n'
+  649 | int n;  /* # of paras to delete */
+      |     ^
+../src/word.c:23:5: note: 'int n' previously declared here
+   23 | int n;          /* numeric argument */
+      |     ^
+../src/word.c:651:1: error: expected unqualified-id before '{' token
+  651 | {
+      | ^
+../src/word.c:681:27: error: 'int wordcount' redeclared as different kind of entity
+  681 | int PASCAL NEAR wordcount(f, n)
+      |                           ^
+../h/eproto.h:2001:24: note: previous declaration 'int wordcount(int, int)'
+ 2001 | EXTERN int PASCAL NEAR wordcount DCL((int f, int n));
+      |                        ^~~~~~~~~
+../src/word.c:681:27: error: 'f' was not declared in this scope
+  681 | int PASCAL NEAR wordcount(f, n)
+      |                           ^
+../src/word.c:685:1: error: expected unqualified-id before '{' token
+  685 | {
+      | ^

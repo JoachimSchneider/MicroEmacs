@@ -279,226 +279,226 @@ int winch_flag=0;                       /* Window size changed flag */
 
 /* initialized global external declarations */
 
-EXTERN NOSHARE int DNEAR fillcol;       /* Current fill column      */
-EXTERN NOSHARE short kbdm[DUMMYSZ];     /* Holds keyboard macro data    */
-EXTERN NOSHARE char *execstr;           /* pointer to string to execute */
-EXTERN NOSHARE char golabel[DUMMYSZ];   /* current line to go to    */
-EXTERN NOSHARE char paralead[DUMMYSZ];  /* paragraph leadin chars   */
-EXTERN NOSHARE char fmtlead[DUMMYSZ];   /* format command leadin chars  */
-EXTERN NOSHARE char mainbuf[DUMMYSZ];   /* name of main buffer      */
-EXTERN NOSHARE char lterm[DUMMYSZ];     /* line terminators on file write */
-EXTERN NOSHARE unsigned char wordlist[DUMMYSZ];/* characters considered "in
+extern NOSHARE int DNEAR fillcol;       /* Current fill column      */
+extern NOSHARE short kbdm[DUMMYSZ];     /* Holds keyboard macro data    */
+extern NOSHARE char *execstr;           /* pointer to string to execute */
+extern NOSHARE char golabel[DUMMYSZ];   /* current line to go to    */
+extern NOSHARE char paralead[DUMMYSZ];  /* paragraph leadin chars   */
+extern NOSHARE char fmtlead[DUMMYSZ];   /* format command leadin chars  */
+extern NOSHARE char mainbuf[DUMMYSZ];   /* name of main buffer      */
+extern NOSHARE char lterm[DUMMYSZ];     /* line terminators on file write */
+extern NOSHARE unsigned char wordlist[DUMMYSZ];/* characters considered "in
                                                 * words" */
-EXTERN NOSHARE int DNEAR wlflag;        /* word list enabled flag   */
-EXTERN NOSHARE int DNEAR clearflag;     /* clear screen on screen change? */
-EXTERN NOSHARE int DNEAR execlevel;     /* execution IF level       */
-EXTERN NOSHARE int DNEAR eolexist;      /* does clear to EOL exist? */
-EXTERN NOSHARE int DNEAR revexist;      /* does reverse video exist?    */
-EXTERN NOSHARE int DNEAR exec_error;    /* macro execution error pending? */
-EXTERN NOSHARE int DNEAR flickcode;     /* do flicker supression?   */
-EXTERN NOSHARE int DNEAR mouse_move;    /* user allow tracking mouse moves? */
-EXTERN NOSHARE int DNEAR mmove_flag;    /* code currently allowing mmoves? */
-EXTERN NOSHARE int DNEAR newscreenflag; /* Create new screen on reads? */
-EXTERN NOSHARE int DNEAR overlap;       /* overlap when paging screens */
-EXTERN NOSHARE int DNEAR parindent;     /* parindent to be used with fill */
-EXTERN CONST char *modename[DUMMYSZ];   /* text names of modes      */
-EXTERN CONST char modecode[DUMMYSZ];    /* letters to represent modes   */
-EXTERN NOSHARE int DNEAR numfunc;       /* number of bindable functions */
-EXTERN NOSHARE KEYTAB keytab[DUMMYSZ];  /* key bind to functions table  */
-EXTERN NOSHARE NBIND names[DUMMYSZ];    /* name to function table   */
-EXTERN NOSHARE int DNEAR gmode;         /* global editor mode       */
-EXTERN NOSHARE int DNEAR gflags;        /* global control flag      */
-EXTERN NOSHARE int DNEAR gfcolor;       /* global forgrnd color (white) */
-EXTERN NOSHARE int DNEAR gbcolor;       /* global backgrnd color (black)*/
-EXTERN NOSHARE int DNEAR deskcolor;     /* desktop background color */
-EXTERN NOSHARE int DNEAR gasave;        /* global ASAVE size        */
-EXTERN NOSHARE int DNEAR gacount;       /* count until next ASAVE   */
-EXTERN NOSHARE int DNEAR sgarbf;        /* State of screen unknown  */
-EXTERN NOSHARE int DNEAR mpresf;        /* Stuff in message line    */
-EXTERN NOSHARE int DNEAR clexec;        /* command line execution flag  */
-EXTERN NOSHARE int DNEAR mstore;        /* storing text to macro flag   */
-EXTERN NOSHARE int DNEAR discmd;        /* display command flag     */
-EXTERN NOSHARE int DNEAR disinp;        /* display input characters */
-EXTERN NOSHARE int DNEAR modeflag;      /* display modelines flag   */
-EXTERN NOSHARE int DNEAR timeflag;      /* display time         */
-EXTERN NOSHARE int DNEAR undoflag;      /* processing undo commands */
-EXTERN NOSHARE OBJECT obj;              /* scratch undo object      */
-EXTERN NOSHARE int DNEAR undoing;       /* currently undoing a command? */
-EXTERN NOSHARE char DNEAR lasttime[DUMMYSZ];/* last time string displayed*/
-EXTERN NOSHARE int DNEAR popflag;       /* pop-up windows enabled?  */
-EXTERN NOSHARE int DNEAR popwait;       /* user wait on pops enabled?   */
-EXTERN NOSHARE int DNEAR posflag;       /* display point position   */
-EXTERN NOSHARE int cpending;            /* input character pending? */
-EXTERN NOSHARE int charpending;         /* character pushed back    */
-EXTERN NOSHARE int DNEAR sscroll;       /* smooth scrolling enabled flag*/
-EXTERN NOSHARE int DNEAR hscroll;       /* horizontal scrolling flag    */
-EXTERN NOSHARE int DNEAR hscrollbar;    /* horizontal scroll bar flag   */
-EXTERN NOSHARE int DNEAR vscrollbar;    /* vertical scroll bar flag */
-EXTERN NOSHARE int DNEAR hjump;         /* horizontal jump size     */
-EXTERN NOSHARE int DNEAR ssave;         /* safe save flag       */
-EXTERN NOSHARE struct BUFFER *bstore;   /* buffer to store macro text to*/
-EXTERN NOSHARE int DNEAR vtrow;         /* Row location of SW cursor    */
-EXTERN NOSHARE int DNEAR vtcol;         /* Column location of SW cursor */
-EXTERN NOSHARE int DNEAR ttrow;         /* Row location of HW cursor    */
-EXTERN NOSHARE int DNEAR ttcol;         /* Column location of HW cursor */
-EXTERN NOSHARE int DNEAR lbound;        /* leftmost column of current line being
+extern NOSHARE int DNEAR wlflag;        /* word list enabled flag   */
+extern NOSHARE int DNEAR clearflag;     /* clear screen on screen change? */
+extern NOSHARE int DNEAR execlevel;     /* execution IF level       */
+extern NOSHARE int DNEAR eolexist;      /* does clear to EOL exist? */
+extern NOSHARE int DNEAR revexist;      /* does reverse video exist?    */
+extern NOSHARE int DNEAR exec_error;    /* macro execution error pending? */
+extern NOSHARE int DNEAR flickcode;     /* do flicker supression?   */
+extern NOSHARE int DNEAR mouse_move;    /* user allow tracking mouse moves? */
+extern NOSHARE int DNEAR mmove_flag;    /* code currently allowing mmoves? */
+extern NOSHARE int DNEAR newscreenflag; /* Create new screen on reads? */
+extern NOSHARE int DNEAR overlap;       /* overlap when paging screens */
+extern NOSHARE int DNEAR parindent;     /* parindent to be used with fill */
+extern CONST char *modename[DUMMYSZ];   /* text names of modes      */
+extern CONST char modecode[DUMMYSZ];    /* letters to represent modes   */
+extern NOSHARE int DNEAR numfunc;       /* number of bindable functions */
+extern NOSHARE KEYTAB keytab[DUMMYSZ];  /* key bind to functions table  */
+extern NOSHARE NBIND names[DUMMYSZ];    /* name to function table   */
+extern NOSHARE int DNEAR gmode;         /* global editor mode       */
+extern NOSHARE int DNEAR gflags;        /* global control flag      */
+extern NOSHARE int DNEAR gfcolor;       /* global forgrnd color (white) */
+extern NOSHARE int DNEAR gbcolor;       /* global backgrnd color (black)*/
+extern NOSHARE int DNEAR deskcolor;     /* desktop background color */
+extern NOSHARE int DNEAR gasave;        /* global ASAVE size        */
+extern NOSHARE int DNEAR gacount;       /* count until next ASAVE   */
+extern NOSHARE int DNEAR sgarbf;        /* State of screen unknown  */
+extern NOSHARE int DNEAR mpresf;        /* Stuff in message line    */
+extern NOSHARE int DNEAR clexec;        /* command line execution flag  */
+extern NOSHARE int DNEAR mstore;        /* storing text to macro flag   */
+extern NOSHARE int DNEAR discmd;        /* display command flag     */
+extern NOSHARE int DNEAR disinp;        /* display input characters */
+extern NOSHARE int DNEAR modeflag;      /* display modelines flag   */
+extern NOSHARE int DNEAR timeflag;      /* display time         */
+extern NOSHARE int DNEAR undoflag;      /* processing undo commands */
+extern NOSHARE OBJECT obj;              /* scratch undo object      */
+extern NOSHARE int DNEAR undoing;       /* currently undoing a command? */
+extern NOSHARE char DNEAR lasttime[DUMMYSZ];/* last time string displayed*/
+extern NOSHARE int DNEAR popflag;       /* pop-up windows enabled?  */
+extern NOSHARE int DNEAR popwait;       /* user wait on pops enabled?   */
+extern NOSHARE int DNEAR posflag;       /* display point position   */
+extern NOSHARE int cpending;            /* input character pending? */
+extern NOSHARE int charpending;         /* character pushed back    */
+extern NOSHARE int DNEAR sscroll;       /* smooth scrolling enabled flag*/
+extern NOSHARE int DNEAR hscroll;       /* horizontal scrolling flag    */
+extern NOSHARE int DNEAR hscrollbar;    /* horizontal scroll bar flag   */
+extern NOSHARE int DNEAR vscrollbar;    /* vertical scroll bar flag */
+extern NOSHARE int DNEAR hjump;         /* horizontal jump size     */
+extern NOSHARE int DNEAR ssave;         /* safe save flag       */
+extern NOSHARE struct BUFFER *bstore;   /* buffer to store macro text to*/
+extern NOSHARE int DNEAR vtrow;         /* Row location of SW cursor    */
+extern NOSHARE int DNEAR vtcol;         /* Column location of SW cursor */
+extern NOSHARE int DNEAR ttrow;         /* Row location of HW cursor    */
+extern NOSHARE int DNEAR ttcol;         /* Column location of HW cursor */
+extern NOSHARE int DNEAR lbound;        /* leftmost column of current line being
                                          * displayed        */
-EXTERN NOSHARE int DNEAR taboff;        /* tab offset for display   */
-EXTERN NOSHARE int DNEAR tabsize;       /* current hard tab size    */
-EXTERN NOSHARE int DNEAR stabsize;      /* current soft tab size (0: use hard
+extern NOSHARE int DNEAR taboff;        /* tab offset for display   */
+extern NOSHARE int DNEAR tabsize;       /* current hard tab size    */
+extern NOSHARE int DNEAR stabsize;      /* current soft tab size (0: use hard
                                          * tabs)  */
-EXTERN NOSHARE int DNEAR reptc;         /* current universal repeat char*/
-EXTERN NOSHARE int DNEAR abortc;        /* current abort command char   */
-EXTERN NOSHARE int DNEAR sterm;         /* search terminating character */
-EXTERN NOSHARE int DNEAR isterm;        /* incremental-search terminating char
+extern NOSHARE int DNEAR reptc;         /* current universal repeat char*/
+extern NOSHARE int DNEAR abortc;        /* current abort command char   */
+extern NOSHARE int DNEAR sterm;         /* search terminating character */
+extern NOSHARE int DNEAR isterm;        /* incremental-search terminating char
                                          */
-EXTERN NOSHARE int DNEAR searchtype;    /* current search style     */
-EXTERN NOSHARE int DNEAR yankflag;      /* current yank style       */
+extern NOSHARE int DNEAR searchtype;    /* current search style     */
+extern NOSHARE int DNEAR yankflag;      /* current yank style       */
 
-EXTERN NOSHARE int DNEAR prefix;        /* currently pending prefix bits */
-EXTERN NOSHARE int DNEAR prenum;        /*     "       "     numeric arg */
-EXTERN NOSHARE int DNEAR predef;        /*     "       "     default flag */
+extern NOSHARE int DNEAR prefix;        /* currently pending prefix bits */
+extern NOSHARE int DNEAR prenum;        /*     "       "     numeric arg */
+extern NOSHARE int DNEAR predef;        /*     "       "     default flag */
 
-EXTERN NOSHARE int DNEAR quotec;        /* quote char during mlreply() */
-EXTERN NOSHARE CONST char *cname[DUMMYSZ];/* names of colors        */
+extern NOSHARE int DNEAR quotec;        /* quote char during mlreply() */
+extern NOSHARE CONST char *cname[DUMMYSZ];/* names of colors        */
 
-EXTERN NOSHARE int kill_index;          /* current index into kill ring */
-EXTERN NOSHARE KILL *kbufp[DUMMYSZ];    /* current kill buffer chunk pointer */
-EXTERN NOSHARE KILL *kbufh[DUMMYSZ];    /* kill buffer header pointer   */
-EXTERN NOSHARE int kskip[DUMMYSZ];      /* # of bytes to skip in 1st kill chunk
+extern NOSHARE int kill_index;          /* current index into kill ring */
+extern NOSHARE KILL *kbufp[DUMMYSZ];    /* current kill buffer chunk pointer */
+extern NOSHARE KILL *kbufh[DUMMYSZ];    /* kill buffer header pointer   */
+extern NOSHARE int kskip[DUMMYSZ];      /* # of bytes to skip in 1st kill chunk
                                          */
-EXTERN NOSHARE int kused[DUMMYSZ];      /* # of bytes used in kill buffer*/
-EXTERN NOSHARE EWINDOW *swindow;        /* saved window pointer     */
-EXTERN NOSHARE int cryptflag;           /* currently encrypting?    */
-EXTERN NOSHARE int oldcrypt;            /* using old(broken) encryption? */
-EXTERN NOSHARE short *kbdptr;           /* current position in keyboard buf */
-EXTERN NOSHARE short *kbdend;           /* ptr to end of the keyboard */
-EXTERN NOSHARE int kbdmode;             /* current keyboard macro mode  */
-EXTERN NOSHARE int kbdrep;              /* number of repetitions    */
-EXTERN NOSHARE int restflag;            /* restricted use?      */
-EXTERN NOSHARE int lastkey;             /* last keystoke        */
-EXTERN NOSHARE long seed;               /* random number seed       */
-EXTERN NOSHARE long envram;             /* # of bytes current in use by malloc
+extern NOSHARE int kused[DUMMYSZ];      /* # of bytes used in kill buffer*/
+extern NOSHARE EWINDOW *swindow;        /* saved window pointer     */
+extern NOSHARE int cryptflag;           /* currently encrypting?    */
+extern NOSHARE int oldcrypt;            /* using old(broken) encryption? */
+extern NOSHARE short *kbdptr;           /* current position in keyboard buf */
+extern NOSHARE short *kbdend;           /* ptr to end of the keyboard */
+extern NOSHARE int kbdmode;             /* current keyboard macro mode  */
+extern NOSHARE int kbdrep;              /* number of repetitions    */
+extern NOSHARE int restflag;            /* restricted use?      */
+extern NOSHARE int lastkey;             /* last keystoke        */
+extern NOSHARE long seed;               /* random number seed       */
+extern NOSHARE long envram;             /* # of bytes current in use by malloc
                                          */
-EXTERN NOSHARE long access_time;        /* counter of buffer access */
-EXTERN NOSHARE int DNEAR macbug;        /* macro debugging flag     */
-EXTERN NOSHARE int DNEAR mouseflag;     /* use the mouse?       */
-EXTERN NOSHARE int DNEAR diagflag;      /* diagonal mouse movements?    */
-EXTERN CONST char errorm[DUMMYSZ];      /* error literal        */
-EXTERN CONST char truem[DUMMYSZ];       /* true literal         */
-EXTERN CONST char falsem[DUMMYSZ];      /* false litereal       */
-EXTERN NOSHARE int DNEAR cmdstatus;     /* last command status      */
-EXTERN NOSHARE char palstr[DUMMYSZ];    /* palette string       */
-EXTERN NOSHARE char lastmesg[DUMMYSZ];  /* last message posted      */
-EXTERN NOSHARE char rval[DUMMYSZ];      /* result of last procedure */
-EXTERN NOSHARE char *lastptr;           /* ptr to lastmesg[]        */
-EXTERN NOSHARE int DNEAR saveflag;      /* Flags, saved with the $target var */
-EXTERN NOSHARE char *fline;             /* dynamic return line */
-EXTERN NOSHARE int DNEAR flen;          /* current length of fline */
-EXTERN NOSHARE int DNEAR eexitflag;     /* EMACS exit flag */
-EXTERN NOSHARE int DNEAR eexitval;      /* and the exit return value */
-EXTERN NOSHARE int xpos;                /* current column mouse is positioned to
+extern NOSHARE long access_time;        /* counter of buffer access */
+extern NOSHARE int DNEAR macbug;        /* macro debugging flag     */
+extern NOSHARE int DNEAR mouseflag;     /* use the mouse?       */
+extern NOSHARE int DNEAR diagflag;      /* diagonal mouse movements?    */
+extern CONST char errorm[DUMMYSZ];      /* error literal        */
+extern CONST char truem[DUMMYSZ];       /* true literal         */
+extern CONST char falsem[DUMMYSZ];      /* false litereal       */
+extern NOSHARE int DNEAR cmdstatus;     /* last command status      */
+extern NOSHARE char palstr[DUMMYSZ];    /* palette string       */
+extern NOSHARE char lastmesg[DUMMYSZ];  /* last message posted      */
+extern NOSHARE char rval[DUMMYSZ];      /* result of last procedure */
+extern NOSHARE char *lastptr;           /* ptr to lastmesg[]        */
+extern NOSHARE int DNEAR saveflag;      /* Flags, saved with the $target var */
+extern NOSHARE char *fline;             /* dynamic return line */
+extern NOSHARE int DNEAR flen;          /* current length of fline */
+extern NOSHARE int DNEAR eexitflag;     /* EMACS exit flag */
+extern NOSHARE int DNEAR eexitval;      /* and the exit return value */
+extern NOSHARE int xpos;                /* current column mouse is positioned to
                                          */
-EXTERN NOSHARE int ypos;                /* current screen row        "   */
-EXTERN NOSHARE int nclicks;             /* cleared on any non-mouse event*/
-EXTERN NOSHARE int disphigh;            /* display high bit chars escaped*/
-EXTERN NOSHARE int dispundo;    /* display undo stack depth on comand line */
-EXTERN NOSHARE int defferupdate;        /* if TRUE, update(TRUE) should be
+extern NOSHARE int ypos;                /* current screen row        "   */
+extern NOSHARE int nclicks;             /* cleared on any non-mouse event*/
+extern NOSHARE int disphigh;            /* display high bit chars escaped*/
+extern NOSHARE int dispundo;    /* display undo stack depth on comand line */
+extern NOSHARE int defferupdate;        /* if TRUE, update(TRUE) should be
                                          * called before yielding to another
                                          * Windows application */
-EXTERN NOSHARE int notquiescent;        /* <=0 only when getkey called directly
+extern NOSHARE int notquiescent;        /* <=0 only when getkey called directly
                                          * by editloop () */
-EXTERN NOSHARE int fbusy;               /* indicates file activity if FREADING
+extern NOSHARE int fbusy;               /* indicates file activity if FREADING
                                          * or FWRITING. Used by abort mechanism
                                          */
-EXTERN NOSHARE int hilite;              /* current region to highlight (255 if
+extern NOSHARE int hilite;              /* current region to highlight (255 if
                                          * none) */
 
 /* uninitialized global external declarations */
 
-EXTERN NOSHARE int oquote;              /* open quote variable */
-EXTERN NOSHARE int cquote;              /* close quote variable */
-EXTERN NOSHARE int DNEAR currow;        /* Cursor row           */
-EXTERN NOSHARE int DNEAR curcol;        /* Cursor column        */
-EXTERN NOSHARE int DNEAR thisflag;      /* Flags, this command      */
-EXTERN NOSHARE int DNEAR lastflag;      /* Flags, last command      */
-EXTERN NOSHARE int DNEAR curgoal;       /* Goal for C-P, C-N        */
-EXTERN NOSHARE EWINDOW *curwp;          /* Current window       */
-EXTERN NOSHARE BUFFER *curbp;           /* Current buffer       */
-EXTERN NOSHARE EWINDOW *wheadp;         /* Head of list of windows  */
-EXTERN NOSHARE BUFFER *bheadp;          /* Head of list of buffers  */
-EXTERN NOSHARE ABBREV *ab_head;         /* head of the abbreviation list */
-EXTERN NOSHARE UTABLE *uv_head;         /* head of list of user variables */
-EXTERN NOSHARE UTABLE *uv_global;       /* global variable table */
-EXTERN NOSHARE int DNEAR ab_bell;       /* are we ringing the bell on
+extern NOSHARE int oquote;              /* open quote variable */
+extern NOSHARE int cquote;              /* close quote variable */
+extern NOSHARE int DNEAR currow;        /* Cursor row           */
+extern NOSHARE int DNEAR curcol;        /* Cursor column        */
+extern NOSHARE int DNEAR thisflag;      /* Flags, this command      */
+extern NOSHARE int DNEAR lastflag;      /* Flags, last command      */
+extern NOSHARE int DNEAR curgoal;       /* Goal for C-P, C-N        */
+extern NOSHARE EWINDOW *curwp;          /* Current window       */
+extern NOSHARE BUFFER *curbp;           /* Current buffer       */
+extern NOSHARE EWINDOW *wheadp;         /* Head of list of windows  */
+extern NOSHARE BUFFER *bheadp;          /* Head of list of buffers  */
+extern NOSHARE ABBREV *ab_head;         /* head of the abbreviation list */
+extern NOSHARE UTABLE *uv_head;         /* head of list of user variables */
+extern NOSHARE UTABLE *uv_global;       /* global variable table */
+extern NOSHARE int DNEAR ab_bell;       /* are we ringing the bell on
                                          * completion? */
-EXTERN NOSHARE int DNEAR ab_cap;        /* match capatilization on expansion? */
-EXTERN NOSHARE int DNEAR ab_quick;      /* aggressive completion enabled? */
-EXTERN NOSHARE char ab_word[DUMMYSZ];   /* current word being typed */
-EXTERN NOSHARE char *ab_pos;            /* current place in ab_word */
-EXTERN NOSHARE char *ab_end;            /* ptr to physical end of ab_word */
-EXTERN NOSHARE SCREEN_T *first_screen;  /* Head and current screen in list */
-EXTERN NOSHARE BUFFER *blistp;          /* Buffer for C-X C-B       */
-EXTERN NOSHARE BUFFER *ulistp;          /* Buffer for C-X U     */
-EXTERN NOSHARE BUFFER *slistp;          /* Buffer for A-B       */
+extern NOSHARE int DNEAR ab_cap;        /* match capatilization on expansion? */
+extern NOSHARE int DNEAR ab_quick;      /* aggressive completion enabled? */
+extern NOSHARE char ab_word[DUMMYSZ];   /* current word being typed */
+extern NOSHARE char *ab_pos;            /* current place in ab_word */
+extern NOSHARE char *ab_end;            /* ptr to physical end of ab_word */
+extern NOSHARE SCREEN_T *first_screen;  /* Head and current screen in list */
+extern NOSHARE BUFFER *blistp;          /* Buffer for C-X C-B       */
+extern NOSHARE BUFFER *ulistp;          /* Buffer for C-X U     */
+extern NOSHARE BUFFER *slistp;          /* Buffer for A-B       */
 
-EXTERN NOSHARE char sres[NBUFN];        /* current screen resolution    */
-EXTERN NOSHARE char os[NBUFN];          /* what OS are we running under */
+extern NOSHARE char sres[NBUFN];        /* current screen resolution    */
+extern NOSHARE char os[NBUFN];          /* what OS are we running under */
 
-EXTERN NOSHARE char lowcase[HICHAR];    /* lower casing map     */
-EXTERN NOSHARE char upcase[HICHAR];     /* upper casing map     */
+extern NOSHARE char lowcase[HICHAR];    /* lower casing map     */
+extern NOSHARE char upcase[HICHAR];     /* upper casing map     */
 
-EXTERN NOSHARE unsigned char pat[DUMMYSZ]; /* Search pattern        */
-EXTERN NOSHARE unsigned char tap[DUMMYSZ]; /* Reversed pattern array.   */
-EXTERN NOSHARE unsigned char rpat[DUMMYSZ]; /* replacement pattern  */
+extern NOSHARE unsigned char pat[DUMMYSZ]; /* Search pattern        */
+extern NOSHARE unsigned char tap[DUMMYSZ]; /* Reversed pattern array.   */
+extern NOSHARE unsigned char rpat[DUMMYSZ]; /* replacement pattern  */
 
 /*  Various "Hook" execution variables  */
 
-EXTERN NOSHARE KEYTAB readhook;         /* executed on all file reads */
-EXTERN NOSHARE KEYTAB wraphook;         /* executed when wrapping text */
-EXTERN NOSHARE KEYTAB cmdhook;          /* executed before looking for a cmd */
-EXTERN NOSHARE KEYTAB writehook;        /* executed on all file writes */
-EXTERN NOSHARE KEYTAB exbhook;          /* executed when exiting a buffer */
-EXTERN NOSHARE KEYTAB bufhook;          /* executed when entering a buffer */
-EXTERN NOSHARE KEYTAB exithook;         /* executed when exiting emacs */
+extern NOSHARE KEYTAB readhook;         /* executed on all file reads */
+extern NOSHARE KEYTAB wraphook;         /* executed when wrapping text */
+extern NOSHARE KEYTAB cmdhook;          /* executed before looking for a cmd */
+extern NOSHARE KEYTAB writehook;        /* executed on all file writes */
+extern NOSHARE KEYTAB exbhook;          /* executed when exiting a buffer */
+extern NOSHARE KEYTAB bufhook;          /* executed when entering a buffer */
+extern NOSHARE KEYTAB exithook;         /* executed when exiting emacs */
 
-EXTERN NOSHARE int matchlen;
-EXTERN NOSHARE int matchoff;
-EXTERN NOSHARE LINE *matchline;
-EXTERN NOSHARE char *patmatch;
+extern NOSHARE int matchlen;
+extern NOSHARE int matchoff;
+extern NOSHARE LINE *matchline;
+extern NOSHARE char *patmatch;
 
 # if     MAGIC
-EXTERN NOSHARE short int magical;
-EXTERN NOSHARE short int rmagical;
-EXTERN NOSHARE MC mcpat[NPAT];          /* the magic pattern        */
-EXTERN NOSHARE MC tapcm[NPAT];          /* the reversed magic pattern   */
-EXTERN NOSHARE MC mcdeltapat[2];        /* the no-magic pattern     */
-EXTERN NOSHARE MC tapatledcm[2];        /* the reversed no-magic pattern*/
-EXTERN NOSHARE RMC rmcpat[NPAT];        /* the replacement magic array  */
-EXTERN NOSHARE char *grpmatch[MAXGROUPS];       /* holds groups found in search
+extern NOSHARE short int magical;
+extern NOSHARE short int rmagical;
+extern NOSHARE MC mcpat[NPAT];          /* the magic pattern        */
+extern NOSHARE MC tapcm[NPAT];          /* the reversed magic pattern   */
+extern NOSHARE MC mcdeltapat[2];        /* the no-magic pattern     */
+extern NOSHARE MC tapatledcm[2];        /* the reversed no-magic pattern*/
+extern NOSHARE RMC rmcpat[NPAT];        /* the replacement magic array  */
+extern NOSHARE char *grpmatch[MAXGROUPS];       /* holds groups found in search
                                                  */
 # endif
 
-EXTERN NOSHARE DELTA deltapat;  /* Forward pattern delta structure.*/
-EXTERN NOSHARE DELTA tapatled;  /* Reverse pattern delta structure.*/
+extern NOSHARE DELTA deltapat;  /* Forward pattern delta structure.*/
+extern NOSHARE DELTA tapatled;  /* Reverse pattern delta structure.*/
 
-EXTERN CONST char *dname[DUMMYSZ];      /* directive name table     */
-EXTERN CONST short int dname_len[NUMDIRS]; /* directive lengths     */
+extern CONST char *dname[DUMMYSZ];      /* directive name table     */
+extern CONST short int dname_len[NUMDIRS]; /* directive lengths     */
 
 /*  var needed for macro debugging output   */
-EXTERN NOSHARE char outline[DUMMYSZ];   /* global string to hold debug line text
+extern NOSHARE char outline[DUMMYSZ];   /* global string to hold debug line text
                                          */
 
 /*
  * System message notification (at the moment, VMS only).
  */
 # if     VMS
-EXTERN NOSHARE char brdcstbuf[1024];            /* Broadcast messages */
-EXTERN NOSHARE int pending_msg;         /* Flag - have we notified user yet.*/
+extern NOSHARE char brdcstbuf[1024];            /* Broadcast messages */
+extern NOSHARE int pending_msg;         /* Flag - have we notified user yet.*/
 # endif
 
 # if     HANDLE_WINCH
-EXTERN NOSHARE int winch_flag;          /* Window size changed flag */
+extern NOSHARE int winch_flag;          /* Window size changed flag */
 # endif
 
 #endif  /* maindef  */
@@ -507,7 +507,7 @@ EXTERN NOSHARE int winch_flag;          /* Window size changed flag */
 /* terminal table defined only in TERM.C */
 
 #ifndef termdef
-EXTERN NOSHARE TERM term;               /* Terminal information.    */
+extern NOSHARE TERM term;               /* Terminal information.    */
 #endif
 
 

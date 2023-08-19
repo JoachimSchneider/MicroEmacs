@@ -34,12 +34,7 @@
 
 /**********************************************************************/
 #ifdef __cplusplus
-/* Borland C doesn't like `extern "C"' with incomplete array types: */
-# if TURBO
-#   define EXTERN   extern
-# else
-#   define EXTERN   extern "C"
-# endif
+# define EXTERN   extern "C"
 # define REGISTER
 #else
 # define EXTERN   extern
@@ -169,7 +164,7 @@ EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
  *  n = snprintf(dst, len, "%s%s", dup, src);
  *  free(dup);
  */
-EXTERN int PASCAL NEAR  xstrlcat P3_(char *, s1, CONST char *, s2, int, n);
+EXTERN int PASCAL NEAR  xstrlcat DCL((char * s1, CONST char * s2, int n));
 
 /* SFSTRCPY:
  *  if size .GE. 0 copy src to dst usling xstrlcpy(dst, src, sizeof(dst))
@@ -192,9 +187,11 @@ EXTERN char *PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
  *  else           append src to dst usling xstrcat(dst, src) and log a
  *                 warning message.
  */
-EXTERN char *PASCAL NEAR  sfstrcat_ P5_(char *, dst, int, dst_size,
-                                        const char *, src,
-                                        const char *, file, int, line);
+EXTERN char *PASCAL NEAR  sfstrcat_ DCL((char       *dst,
+                                         int        dst_size,
+                                         const char *src,
+                                         const char *file,
+                                         int        line));
 #define XSTRCAT(dst, src) sfstrcat_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
 
 /* Like the C99 vsnprintf():                                            */
@@ -350,8 +347,8 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname)
 /**********************************************************************/
 EXTERN FILE *PASCAL NEAR  GetTrcFP DCL((void));
 
-EXTERN int         DebugMessage_lnno_;
-EXTERN CONST char *DebugMessage_fname_;
+extern int         DebugMessage_lnno_;
+extern CONST char *DebugMessage_fname_;
 EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 #if UEMACS_TRC
 # define  TRC(arg)  do {                        \
@@ -1541,6 +1538,7 @@ EXTERN int emacs DCL((int argc, char *argv[]));
 #if HANDLE_WINCH
 EXTERN VOID winch_changed DCL((int));
 EXTERN VOID winch_new_size DCL((void));
+EXTERN VOID winch_vtresize DCL((int rows, int cols));
 #endif
 
 #if DEBUG_SEARCH

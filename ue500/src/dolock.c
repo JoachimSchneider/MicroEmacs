@@ -81,10 +81,10 @@ char *undolock P1_(CONST char *, fname)
 
 # if  ( !OS2 )
 #  if  ( ZTC )
-EXTERN volatile int errno;
+extern volatile int errno;
 #  else
 #   if  ( !MSC )
-EXTERN int errno;
+extern int errno;
 #   endif
 #  endif
 # endif

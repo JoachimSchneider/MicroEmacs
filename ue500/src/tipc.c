@@ -243,7 +243,7 @@ TERM term    =
 # endif
 };
 
-EXTERN union REGS rg;
+extern union REGS rg;
 
 
 PASCAL NEAR tifcol(color)           /* set the current output color */

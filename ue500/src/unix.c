@@ -1,65 +1,74 @@
-/*  UNIX:   Unix specific terminal driver for MicroEMACS 4.0 (C)Copyright 1995
- * D. Lawrence, C. Smith
+/*      UNIX:   Unix specific terminal driver
+ *              for MicroEMACS 4.0
+ *      (C)Copyright 1995 D. Lawrence, C. Smith
  */
+
 /**
- *       New features: (as of version 3.10)
+ *      New features: (as of version 3.10)
  *
- *       1. Timeouts waiting on a function key have been changed from 35000 to
- * 500000 microseconds.
+ *      1. Timeouts waiting on a function key have been changed from
+ *      35000 to 500000 microseconds.
  *
- *       2. Additional keymapping entries can be made from the command language
- * by issuing a 'set $palette xxx'.  The format of xxx is a string as follows:
- *               "KEYMAP keybinding escape-sequence". To add "<ESC><[><A>" as a
- * keybinding of FNN, issue:
- *               "KEYMAP FNN ~e[A". Note that the "~e" sequence represents the
- * escape character in the MicroEMACS command language.
+ *      2. Additional keymapping entries can be made from the command
+ *      language by issuing a 'set $palette xxx'.  The format of
+ *      xxx is a string as follows:
+ *              "KEYMAP keybinding escape-sequence".
+ *      To add "<ESC><[><A>" as a keybinding of FNN, issue:
+ *              "KEYMAP FNN ~e[A".
+ *      Note that the "~e" sequence represents the escape character in
+ *      the MicroEMACS command language.
  *
- *       3. Colors are supported.  Under AIX the colors will be pulled in
- * automaticly.  For other environments, you can either add the termcap entries,
- * C0 to D7.  Or the colors may be defined using the command language by issuing
- * a 'set $palette xxx'
- *       command.  The format of xxx is a string as follows:
- *               "CLRMAP # escape-sequence". The number is a number from 0 to
- * 15, where 0 to 7 is the foreground colors, and 8 to 15 as background colors.
- * To add foreground color 0 for ansi terminals, issue:
- *               "CLRMAP 0 ~e[30m".
+ *      3. Colors are supported.  Under AIX the colors will be pulled
+ *      in automaticly.  For other environments, you can either add
+ *      the termcap entries, C0 to D7.  Or the colors may be defined
+ *      using the command language by issuing a 'set $palette xxx'
+ *      command.  The format of xxx is a string as follows:
+ *              "CLRMAP # escape-sequence".
+ *      The number is a number from 0 to 15, where 0 to 7 is the
+ *      foreground colors, and 8 to 15 as background colors.
+ *      To add foreground color 0 for ansi terminals, issue:
+ *              "CLRMAP 0 ~e[30m".
  *
- *       'Porting notes:
+ *      'Porting notes:
  *
- *       I have tried to create this file so that it should work as well as
- * possible without changes on your part.
+ *      I have tried to create this file so that it should work
+ *      as well as possible without changes on your part.
  *
- *       However, if something does go wrong, read the following helpful hints:
+ *      However, if something does go wrong, read the following
+ *      helpful hints:
  *
- *       1. On SUN-OS4, there is a problem trying to include both the termio.h
- * and ioctl.h files.  I wish Sun would get their act together.  Even though you
- * get lots of redefined messages, it shouldn't cause any problems with the
- * final object.
+ *      1. On SUN-OS4, there is a problem trying to include both
+ *      the termio.h and ioctl.h files.  I wish Sun would get their
+ *      act together.  Even though you get lots of redefined messages,
+ *      it shouldn't cause any problems with the final object.
  *
- *       2. In the type-ahead detection code, the individual UNIX system either
- * has a FIONREAD or a FIORDCHK ioctl call. Hopefully, your system uses one of
- * them and this be detected correctly without any intervention.
+ *      2. In the type-ahead detection code, the individual UNIX
+ *      system either has a FIONREAD or a FIORDCHK ioctl call.
+ *      Hopefully, your system uses one of them and this be detected
+ *      correctly without any intervention.
  *
- *       3. Also lookout for directory handling.  The SCO Xenix system is the
- * weirdest I've seen, requiring a special load file (see below).  Some machine
- * call the result of a readdir() call a "struct direct" or "struct dirent".
- *  Includes files are named differently depending of the O/S.  If your system
- * doesn't have an opendir()/closedir()/readdir() library call, then you should
- * use the public domain utility "ndir".
+ *      3. Also lookout for directory handling.  The SCO Xenix system
+ *      is the weirdest I've seen, requiring a special load file
+ *      (see below).  Some machine call the result of a readdir() call
+ *      a "struct direct" or "struct dirent".  Includes files are
+ *      named differently depending of the O/S.  If your system doesn't
+ *      have an opendir()/closedir()/readdir() library call, then
+ *      you should use the public domain utility "ndir".
  *
- *       To compile:
- *               Compile all files normally. To link:
- *               Select one of the following operating systems:
- *                       SCO Xenix:
- *                               use "-ltermcap" and "-lx";
- *                       SUN 3 and 4:
- *                               use "-ltermcap";
- *                       IBM-RT, IBM-AIX, ATT UNIX, Altos UNIX, Interactive:
- *                               use "-lcurses".
+ *      To compile:
+ *              Compile all files normally.
+ *      To link:
+ *              Select one of the following operating systems:
+ *                      SCO Xenix:
+ *                              use "-ltermcap" and "-lx";
+ *                      SUN 3 and 4:
+ *                              use "-ltermcap";
+ *                      IBM-RT, IBM-AIX, ATT UNIX, Altos UNIX, Interactive:
+ *                              use "-lcurses".
  *
- *       - 20 feb 95    New version 4.00 features We added new code to implient
- * a TERMIOS driver
- **/
+ *      - 20 feb 95     New version 4.00 features
+ *        We added new code to implient a TERMIOS driver
+**/
 
 /** Include files **/
 #include <stdio.h>              /* Standard I/O definitions */
@@ -91,7 +100,11 @@
 
 
 /** Do nothing routine **/
+#if PROTO
+int scnothing(char *s)
+#else
 int scnothing()
+#endif
 {
     return (0);
 }
@@ -123,7 +136,7 @@ int scnothing()
 #  include <termios.h>                  /* Terminal I/O definitions */
 # elif ( USE_CURSES )
 #  include <curses.h>                   /* Curses screen output     */
-#  undef WINDOW                         /* Oh no!           */
+#  undef WINDOW                         /* Oh no!                   */
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
 # endif
@@ -142,242 +155,246 @@ int scnothing()
 /*==============================================================*/
 /* Found in `curses.h':                                         */
 /*==============================================================*/
-# if(!0)
-EXTERN int tgetflag DCL((char *id));
-EXTERN int tgetnum  DCL((char *id));
-EXTERN int tputs    DCL((const char *str, int affcnt, int (*putc)(int)));
-EXTERN int tgetent  DCL((char *bp, const char *name));
-# else
-#  include <curses.h>
+# if ( !USE_CURSES )
+EXTERN int  tgetflag  DCL((char *id));
+EXTERN int  tgetnum   DCL((char *id));
+EXTERN int  tputs     DCL((CONST char *str, int affcnt, int (*putc)(int)));
+EXTERN int  tgetent   DCL((char *bp, const char *name));
+EXTERN char *tgetstr  DCL((char *, char **));
+EXTERN char *tgoto    DCL((CONST char *cap, int col, int row));
 # endif
 /*==============================================================*/
 
 
 /** Restore predefined definitions **/
-# undef CTRL                            /* Restore CTRL         */
+# undef CTRL                            /* Restore CTRL               */
 # define CTRL 0x0100
 
 /** Parameters **/
-# define NINCHAR         64             /* Input buffer size        */
-# define NOUTCHAR        256            /* Output buffer size       */
-# define NCAPBUF         1024           /* Termcap storage size     */
-# define MARGIN          8              /* Margin size          */
-# define SCRSIZ          64             /* Scroll for margin        */
-# define NPAUSE          10             /* # times thru update to pause */
+# define NINCHAR         64             /* Input buffer size          */
+# define NOUTCHAR        256            /* Output buffer size         */
+# define NCAPBUF         1024           /* Termcap storage size       */
+# define MARGIN          8              /* Margin size                */
+# define SCRSIZ          64             /* Scroll for margin          */
+# define NPAUSE          10           /* # times thru update to pause */
 
 /** CONSTANTS **/
-# define TIMEOUT         255            /* No character available   */
+# define TIMEOUT         255            /* No character available     */
 # define MLWAIT          3
 
-struct capbind {                        /* Capability binding entry */
-    char * name;                        /* Termcap name         */
-    char * store;                       /* Storage variable     */
+struct capbind {                        /* Capability binding entry   */
+    char * name;                        /* Termcap name               */
+    char * store;                       /* Storage variable           */
 };
-struct keybind {                        /* Keybinding entry     */
-    char * name;                        /* Termcap name         */
-    int value;                          /* Binding value        */
+struct keybind {                        /* Keybinding entry           */
+    char * name;                        /* Termcap name               */
+    int value;                          /* Binding value              */
 };
 # if ( !AIX )
-char *reset = (char*) NULL;             /* reset string kjc */
+char *reset = (char*) NULL;             /* reset string kjc           */
 # endif
 
 /** Local variables **/
 # if ( USE_TERMIO_IOCTL )
-static struct termio curterm;           /* Current modes        */
-static struct termio oldterm;           /* Original modes       */
+static struct termio curterm;           /* Current modes              */
+static struct termio oldterm;           /* Original modes             */
 # elif ( USE_TERMIOS_TCXX )
-static struct termios curterm;          /* Current modes        */
-static struct termios oldterm;          /* Original modes       */
+static struct termios curterm;          /* Current modes              */
+static struct termios oldterm;          /* Original modes             */
 # elif ( USE_CURSES )
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
 # endif
-static char tcapbuf[NCAPBUF];           /* Termcap character storage    */
-# define CAP_CL          0              /* Clear to end of page     */
-# define CAP_CM          1              /* Cursor motion        */
-# define CAP_CE          2              /* Clear to end of line     */
-# define CAP_SE          3              /* Standout ends        */
-# define CAP_SO          4              /* Standout (reverse video) */
-# define CAP_IS          5              /* Initialize screen        */
-# define CAP_KS          6              /* Keypad mode starts       */
-# define CAP_KE          7              /* Keypad mode ends     */
-# define CAP_VB          8              /* Visible bell         */
+static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
+# define CAP_CL          0              /* Clear to end of page       */
+# define CAP_CM          1              /* Cursor motion              */
+# define CAP_CE          2              /* Clear to end of line       */
+# define CAP_SE          3              /* Standout ends              */
+# define CAP_SO          4              /* Standout (reverse video)   */
+# define CAP_IS          5              /* Initialize screen          */
+# define CAP_KS          6              /* Keypad mode starts         */
+# define CAP_KE          7              /* Keypad mode ends           */
+# define CAP_VB          8              /* Visible bell               */
 # if COLOR
-#  define CAP_C0          9             /* Foreground color #0      */
-#  define CAP_C1          10            /* Foreground color #1      */
-#  define CAP_C2          11            /* Foreground color #2      */
-#  define CAP_C3          12            /* Foreground color #3      */
-#  define CAP_C4          13            /* Foreground color #4      */
-#  define CAP_C5          14            /* Foreground color #5      */
-#  define CAP_C6          15            /* Foreground color #6      */
-#  define CAP_C7          16            /* Foreground color #7      */
-#  define CAP_D0          17            /* Background color #0      */
-#  define CAP_D1          18            /* Background color #1      */
-#  define CAP_D2          19            /* Background color #2      */
-#  define CAP_D3          20            /* Background color #3      */
-#  define CAP_D4          21            /* Background color #4      */
-#  define CAP_D5          22            /* Background color #5      */
-#  define CAP_D6          23            /* Background color #6      */
-#  define CAP_D7          24            /* Background color #7      */
+#  define CAP_C0          9             /* Foreground color #0        */
+#  define CAP_C1          10            /* Foreground color #1        */
+#  define CAP_C2          11            /* Foreground color #2        */
+#  define CAP_C3          12            /* Foreground color #3        */
+#  define CAP_C4          13            /* Foreground color #4        */
+#  define CAP_C5          14            /* Foreground color #5        */
+#  define CAP_C6          15            /* Foreground color #6        */
+#  define CAP_C7          16            /* Foreground color #7        */
+#  define CAP_D0          17            /* Background color #0        */
+#  define CAP_D1          18            /* Background color #1        */
+#  define CAP_D2          19            /* Background color #2        */
+#  define CAP_D3          20            /* Background color #3        */
+#  define CAP_D4          21            /* Background color #4        */
+#  define CAP_D5          22            /* Background color #5        */
+#  define CAP_D6          23            /* Background color #6        */
+#  define CAP_D7          24            /* Background color #7        */
 #  if ( USG || AIX || AUX )
-#   define CAP_SF          25           /* Set foreground color     */
-#   define CAP_SB          26           /* Set background color     */
+#   define CAP_SF          25           /* Set foreground color       */
+#   define CAP_SB          26           /* Set background color       */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
-static struct capbind capbind[] =       /* Capability binding list  */
+static struct capbind capbind[] =       /* Capability binding list    */
 {
-    { "cl" },                           /* Clear to end of page     */
-    { "cm" },                           /* Cursor motion        */
-    { "ce" },                           /* Clear to end of line     */
-    { "se" },                           /* Standout ends        */
-    { "so" },                           /* Standout (reverse video) */
-    { "is" },                           /* Initialize screen        */
-    { "ks" },                           /* Keypad mode starts       */
-    { "ke" },                           /* Keypad mode ends     */
-    { "vb" },                           /* Visible bell         */
+    { "cl" },                           /* Clear to end of page       */
+    { "cm" },                           /* Cursor motion              */
+    { "ce" },                           /* Clear to end of line       */
+    { "se" },                           /* Standout ends              */
+    { "so" },                           /* Standout (reverse video)   */
+    { "is" },                           /* Initialize screen          */
+    { "ks" },                           /* Keypad mode starts         */
+    { "ke" },                           /* Keypad mode ends           */
+    { "vb" },                           /* Visible bell               */
 # if COLOR
-    { "c0" },                           /* Foreground color #0      */
-    { "c1" },                           /* Foreground color #1      */
-    { "c2" },                           /* Foreground color #2      */
-    { "c3" },                           /* Foreground color #3      */
-    { "c4" },                           /* Foreground color #4      */
-    { "c5" },                           /* Foreground color #5      */
-    { "c6" },                           /* Foreground color #6      */
-    { "c7" },                           /* Foreground color #7      */
-    { "d0" },                           /* Background color #0      */
-    { "d1" },                           /* Background color #1      */
-    { "d2" },                           /* Background color #2      */
-    { "d3" },                           /* Background color #3      */
-    { "d4" },                           /* Background color #4      */
-    { "d5" },                           /* Background color #5      */
-    { "d6" },                           /* Background color #6      */
-    { "d7" },                           /* Background color #7      */
+    { "c0" },                           /* Foreground color #0        */
+    { "c1" },                           /* Foreground color #1        */
+    { "c2" },                           /* Foreground color #2        */
+    { "c3" },                           /* Foreground color #3        */
+    { "c4" },                           /* Foreground color #4        */
+    { "c5" },                           /* Foreground color #5        */
+    { "c6" },                           /* Foreground color #6        */
+    { "c7" },                           /* Foreground color #7        */
+    { "d0" },                           /* Background color #0        */
+    { "d1" },                           /* Background color #1        */
+    { "d2" },                           /* Background color #2        */
+    { "d3" },                           /* Background color #3        */
+    { "d4" },                           /* Background color #4        */
+    { "d5" },                           /* Background color #5        */
+    { "d6" },                           /* Background color #6        */
+    { "d7" },                           /* Background color #7        */
 #  if ( USG || AIX || AUX )
-    { "Sf" },                           /* Set foreground color     */
-    { "Sb" },                           /* Set background color     */
+    { "Sf" },                           /* Set foreground color       */
+    { "Sb" },                           /* Set background color       */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
 };
 # if COLOR
-static int cfcolor = -1;                /* Current forground color  */
-static int cbcolor = -1;                /* Current background color */
+static int cfcolor = -1;                /* Current forground color    */
+static int cbcolor = -1;                /* Current background color   */
 # endif /* COLOR */
-static struct keybind keybind[] =       /* Keybinding list      */
+static struct keybind keybind[] =       /* Keybinding list            */
 {
-    { "bt", SHFT|CTRL|'i' },            /* Back-tab key         */
-    { "k1", SPEC|'1' },                 /* F1 key           */
-    { "k2", SPEC|'2' },                 /* F2 key           */
-    { "k3", SPEC|'3' },                 /* F3 key           */
-    { "k4", SPEC|'4' },                 /* F4 key           */
-    { "k5", SPEC|'5' },                 /* F5 key           */
-    { "k6", SPEC|'6' },                 /* F6 key           */
-    { "k7", SPEC|'7' },                 /* F7 key           */
-    { "k8", SPEC|'8' },                 /* F8 key           */
-    { "k9", SPEC|'9' },                 /* F9 key           */
-    { "k0", SPEC|'0' },                 /* F0 or F10 key        */
-    { "k;", SPEC|'0' },                 /* F0 or F10 key    (kjc)   */
-    { "F1", SHFT|SPEC|'1' },            /* Shift-F1 or F11 key      */
-    { "F2", SHFT|SPEC|'2' },            /* Shift-F2 or F12 key      */
-    { "F3", SHFT|SPEC|'3' },            /* Shift-F3 or F13 key      */
-    { "F4", SHFT|SPEC|'4' },            /* Shift-F4 or F14 key      */
-    { "F5", SHFT|SPEC|'5' },            /* Shift-F5 or F15 key      */
-    { "F6", SHFT|SPEC|'6' },            /* Shift-F6 or F16 key      */
-    { "F7", SHFT|SPEC|'7' },            /* Shift-F7 or F17 key      */
-    { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key      */
-    { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key      */
-    { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key      */
-    { "kA", CTRL|'O' },                 /* Insert line key      */
-    { "kb", CTRL|'H' },                 /* Backspace key        */
-    { "kC", CTRL|'L' },                 /* Clear screen key     */
-    { "kD", SPEC|'D' },                 /* Delete character key     */
-    { "kd", SPEC|'N' },                 /* Down arrow key       */
-    { "kE", CTRL|'K' },                 /* Clear to end of line key */
-    { "kF", CTRL|'V' },                 /* Scroll forward key       */
-    { "kH", SPEC|'>' },                 /* Home down key        */
-    { "@7", SPEC|'>' },                 /* Home down key    (kjc)   */
-    { "kh", SPEC|'<' },                 /* Home key         */
-    { "kI", SPEC|'C' },                 /* Insert character key     */
-    { "kL", CTRL|'K' },                 /* Delete line key      */
-    { "kl", SPEC|'B' },                 /* Left arrow key       */
-    { "kN", SPEC|'V' },                 /* Next page key        */
-    { "kP", SPEC|'Z' },                 /* Previous page key        */
-    { "kR", CTRL|'Z' },                 /* Scroll backward key      */
-    { "kr", SPEC|'F' },                 /* Right arrow key      */
-    { "ku", SPEC|'P' },                 /* Up arrow key         */
-    { "K1", SPEC|'<' },                 /* Keypad 7 -> Home     */
-    { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up      */
-    { "K3", ' ' },                      /* Keypad 5             */
-    { "K4", SPEC|'>' },                 /* Keypad 1 -> End      */
-    { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down    */
-    { "kw", CTRL|'E' }                  /* End of line          */
+    { "bt", SHFT|CTRL|'i' },            /* Back-tab key               */
+    { "k1", SPEC|'1' },                 /* F1 key                     */
+    { "k2", SPEC|'2' },                 /* F2 key                     */
+    { "k3", SPEC|'3' },                 /* F3 key                     */
+    { "k4", SPEC|'4' },                 /* F4 key                     */
+    { "k5", SPEC|'5' },                 /* F5 key                     */
+    { "k6", SPEC|'6' },                 /* F6 key                     */
+    { "k7", SPEC|'7' },                 /* F7 key                     */
+    { "k8", SPEC|'8' },                 /* F8 key                     */
+    { "k9", SPEC|'9' },                 /* F9 key                     */
+    { "k0", SPEC|'0' },                 /* F0 or F10 key              */
+    { "k;", SPEC|'0' },                 /* F0 or F10 key    (kjc)     */
+    { "F1", SHFT|SPEC|'1' },            /* Shift-F1 or F11 key        */
+    { "F2", SHFT|SPEC|'2' },            /* Shift-F2 or F12 key        */
+    { "F3", SHFT|SPEC|'3' },            /* Shift-F3 or F13 key        */
+    { "F4", SHFT|SPEC|'4' },            /* Shift-F4 or F14 key        */
+    { "F5", SHFT|SPEC|'5' },            /* Shift-F5 or F15 key        */
+    { "F6", SHFT|SPEC|'6' },            /* Shift-F6 or F16 key        */
+    { "F7", SHFT|SPEC|'7' },            /* Shift-F7 or F17 key        */
+    { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key        */
+    { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key        */
+    { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key        */
+    { "kA", CTRL|'O' },                 /* Insert line key            */
+    { "kb", CTRL|'H' },                 /* Backspace key              */
+    { "kC", CTRL|'L' },                 /* Clear screen key           */
+    { "kD", SPEC|'D' },                 /* Delete character key       */
+    { "kd", SPEC|'N' },                 /* Down arrow key             */
+    { "kE", CTRL|'K' },                 /* Clear to end of line key   */
+    { "kF", CTRL|'V' },                 /* Scroll forward key         */
+    { "kH", SPEC|'>' },                 /* Home down key              */
+    { "@7", SPEC|'>' },                 /* Home down key    (kjc)     */
+    { "kh", SPEC|'<' },                 /* Home key                   */
+    { "kI", SPEC|'C' },                 /* Insert character key       */
+    { "kL", CTRL|'K' },                 /* Delete line key            */
+    { "kl", SPEC|'B' },                 /* Left arrow key             */
+    { "kN", SPEC|'V' },                 /* Next page key              */
+    { "kP", SPEC|'Z' },                 /* Previous page key          */
+    { "kR", CTRL|'Z' },                 /* Scroll backward key        */
+    { "kr", SPEC|'F' },                 /* Right arrow key            */
+    { "ku", SPEC|'P' },                 /* Up arrow key               */
+    { "K1", SPEC|'<' },                 /* Keypad 7 -> Home           */
+    { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up        */
+    { "K3", ' ' },                      /* Keypad 5                   */
+    { "K4", SPEC|'>' },                 /* Keypad 1 -> End            */
+    { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down      */
+    { "kw", CTRL|'E' }                  /* End of line                */
 };
-static int inbuf[NINCHAR];              /* Input buffer         */
-static int * inbufh =                   /* Head of input buffer     */
-                      inbuf;
-static int * inbuft =                   /* Tail of input buffer     */
-                      inbuf;
-static unsigned char outbuf[NOUTCHAR];  /* Output buffer        */
-static unsigned char * outbuft =        /* Output buffer tail       */
-                                 outbuf;
+static int inbuf[NINCHAR];              /* Input buffer               */
+static int * inbufh = inbuf;            /* Head of input buffer       */
+static int * inbuft = inbuf;            /* Tail of input buffer       */
+static unsigned char outbuf[NOUTCHAR];  /* Output buffer              */
+static unsigned char * outbuft = outbuf;/* Output buffer tail         */
 
-static DIR *dirptr = NULL;              /* Current directory stream */
-static char path[NFILEN];               /* Path of file to find     */
-static char rbuf[NFILEN];               /* Return file buffer       */
-static char *nameptr;                   /* Ptr past end of path in rbuf */
+
+static DIR *dirptr = NULL;              /* Current directory stream   */
+static char path[NFILEN];               /* Path of file to find       */
+static char rbuf[NFILEN];               /* Return file buffer         */
+static char *nameptr;                 /* Ptr past end of path in rbuf */
 
 /** Terminal definition block **/
-int scopen(), ttgetc(), ttputc(), ttflush();
-int scmove(), sceeol(), sceeop(), screv();
+static int scopen   DCL((void));
+static int scmove   DCL((int, int));
+static int sceeol   DCL((void));
+static int sceeop   DCL((void));
+static int screv    DCL((int));
 static int scbeep   DCL((void));
 static int sckclose DCL((void));
 static int scclose  DCL((void));
 static int sckopen  DCL((void));
 # if COLOR
-int scfcol(), scbcol();
+static int scfcol   DCL((int));
+static int scbcol   DCL((int));
 # endif /* COLOR */
 
 # if ( FLABEL )
-static VOID dis_sfk(), dis_ufk();
+static VOID dis_sfk DCL((void));
+static VOID dis_ufk DCL((void));
 # endif
 
 TERM term =
 {
-    120,                                /* Maximum number of rows   */
-    0,                                  /* Current number of rows   */
-    132,                                /* Maximum number of columns    */
-    0,                                  /* Current number of columns    */
-    0, 0,                               /* upper left corner default screen */
-    MARGIN,                             /* Margin for extending lines   */
-    SCRSIZ,                             /* Scroll size for extending    */
-    NPAUSE,                             /* # times thru update to pause */
-    scopen,                             /* Open terminal routine    */
-    scclose,                            /* Close terminal routine   */
-    sckopen,                            /* Open keyboard routine    */
-    sckclose,                           /* Close keyboard routine   */
-    ttgetc,                             /* Get character routine    */
-    ttputc,                             /* Put character routine    */
-    ttflush,                            /* Flush output routine     */
-    scmove,                             /* Move cursor routine      */
-    sceeol,                             /* Erase to end of line routine */
-    sceeop,                             /* Erase to end of page routine */
-    sceeop,                             /* Clear the desktop        */
-    scbeep,                             /* Beep! routine        */
-    screv,                              /* Set reverse video routine    */
-    scnothing,                          /* Set resolution routine   */
+    120,                        /* Maximum number of rows             */
+    0,                          /* Current number of rows             */
+    132,                        /* Maximum number of columns          */
+    0,                          /* Current number of columns          */
+    0, 0,                       /* upper left corner default screen   */
+    MARGIN,                     /* Margin for extending lines         */
+    SCRSIZ,                     /* Scroll size for extending          */
+    NPAUSE,                     /* # times thru update to pause       */
+    scopen,                     /* Open terminal routine              */
+    scclose,                    /* Close terminal routine             */
+    sckopen,                    /* Open keyboard routine              */
+    sckclose,                   /* Close keyboard routine             */
+    ttgetc,                     /* Get character routine              */
+    ttputc,                     /* Put character routine              */
+    ttflush,                    /* Flush output routine               */
+    scmove,                     /* Move cursor routine                */
+    sceeol,                     /* Erase to end of line routine       */
+    sceeop,                     /* Erase to end of page routine       */
+    sceeop,                     /* Clear the desktop                  */
+    scbeep,                     /* Beep! routine                      */
+    screv,                      /* Set reverse video routine          */
+    scnothing,                  /* Set resolution routine             */
 # if COLOR
-    scfcol,                             /* Set forground color routine  */
-    scbcol,                             /* Set background color routine */
+    scfcol,                     /* Set forground color routine        */
+    scbcol,                     /* Set background color routine       */
 # endif /* COLOR */
 # if     INSDEL
-    scinsline,                           /* insert a screen line    */
-    scdelline,                           /* delete a screen line    */
+    scinsline,                  /* insert a screen line               */
+    scdelline,                  /* delete a screen line               */
 # endif /* INSDEL */
 };
 
-int hpterm;                             /* global flag braindead HP-terminal */
+static int hpterm =0;           /* global flag braindead HP-terminal  */
+
 
 /** Open terminal device **/
-int ttopen()
+int ttopen P0_()
 {
     XSTRCPY(os, "UNIX");
 # if ( USE_TERMIO_IOCTL )
@@ -474,7 +491,7 @@ int ttopen()
 }
 
 /** Close terminal device **/
-int ttclose()
+int ttclose P0_()
 {
 # if ( !AIX  )
     /* Restore original terminal modes */
@@ -508,7 +525,7 @@ int ttclose()
 }
 
 /** Flush output buffer to display **/
-int ttflush()
+int ttflush P0_()
 {
 # if ( !USE_CURSES )
     int len;
@@ -533,12 +550,13 @@ int ttflush()
 }
 
 /** Put character onto display **/
-int ttputc(ch)
-char ch;                                /* Character to display     */
+int ttputc P1_(int, ch)
+/* ch:  Character to display                                        */
+/*      int will be converted to unsigned char like e.g. in fputc() */
 {
 # if ( !USE_CURSES )
     /* Check for buffer full */
-    if ( outbuft == &outbuf[sizeof (outbuf)] )
+    if ( outbuft == &outbuf[sizeof(outbuf)] )
         ttflush();
 
     /* Add to buffer */
@@ -550,7 +568,6 @@ char ch;                                /* Character to display     */
 
     return (0);
 }
-
 
 /** Grab input characters, with wait **/
 unsigned char grabwait()
@@ -590,7 +607,7 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
-unsigned char grabnowait()
+unsigned char grabnowait P0_()
 {
     int count;
     unsigned char ch;
@@ -630,8 +647,9 @@ unsigned char grabnowait()
     return (ch);
 }
 
-/*
- * qin - queue in a character to the input buffer.
+/* QIN:
+ *
+ * Queue in a character to the input buffer.
  */
 VOID qin P1_(int, ch)
 {
@@ -647,8 +665,9 @@ VOID qin P1_(int, ch)
     *inbuft++ = ch;
 }
 
-/*
- * qrep - replace a key sequence with a single character in the input buffer.
+/* QREP:
+ *
+ * Replace a key sequence with a single character in the input buffer.
  */
 VOID qrep P1_(int, ch)
 {
@@ -656,9 +675,8 @@ VOID qrep P1_(int, ch)
     qin(ch);
 }
 
-
 /** Return cooked characters **/
-int ttgetc()
+int ttgetc P0_()
 {
     int ch;
     ttflush();
@@ -679,7 +697,8 @@ int ttgetc()
 }
 
 # if TYPEAH
-int typahead()
+
+int typahead P0_()
 {
     int count;
 
@@ -717,11 +736,12 @@ int typahead()
 #   endif /* VAT */
 #  endif /* FIONREAD */
 }
+
 # endif /* TYPEAH */
 
 /** Put out sequence, with padding **/
-VOID putpad(seq)
-char * seq;                             /* Character sequence       */
+VOID putpad P1_(char *, seq)
+/* seq: Character sequence  */
 {
     /* Check for null */
     if ( !seq )
@@ -733,15 +753,13 @@ char * seq;                             /* Character sequence       */
 }
 
 /** Initialize screen package **/
-int scopen()
+int scopen P0_()
 {
     char * cp, tcbuf[1024];
     int status;
     struct capbind * cb;
     struct keybind * kp;
     char err_str[NSTRING];
-
-    char  * tgetstr();
 
 # ifndef VAT
 #  define TGETSTR(a, b)   tgetstr( (a), (b) )
@@ -754,8 +772,9 @@ int scopen()
     char PC, * UP;
     short ospeed;
 # else /* not HPUX8 || HPUX9 || VAT || AUX */
-    EXTERN char PC, * UP;
-    EXTERN short ospeed;
+    extern char   PC;
+    extern char   *UP;
+    extern short  ospeed;
 # endif /* HPUX8 || HPUX9 || VAT || AUX */
 
     /* Get terminal type */
@@ -920,12 +939,10 @@ int sckclose P0_()
 }
 
 /** Move cursor **/
-int scmove(row, col)
-int row;                                /* Row number           */
-int col;                                /* Column number        */
+int scmove P2_(int, row, int, col)
+/* row: Row number    */
+/* col: Column number */
 {
-    char *tgoto();
-
     /* Call on termcap to create move sequence */
     putpad( tgoto(capbind[CAP_CM].store, col, row) );
 
@@ -938,7 +955,7 @@ int col;                                /* Column number        */
 }
 
 /** Erase to end of line **/
-int sceeol()
+int sceeol P0_()
 {
     /* Send erase sequence */
     putpad(capbind[CAP_CE].store);
@@ -952,7 +969,7 @@ int sceeol()
 }
 
 /** Clear screen **/
-int sceeop()
+int sceeop P0_()
 {
 # if COLOR
     scfcol(gfcolor);
@@ -971,8 +988,8 @@ int sceeop()
 }
 
 /** Set reverse video state **/
-int screv(state)
-int state;                              /* New state            */
+int screv P1_(int, state)
+/* state: New state */
 {
 # if COLOR
     int ftmp, btmp;             /* temporaries for colors */
@@ -1030,8 +1047,8 @@ static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
 #  endif /* USG || AUX */
 
 /** Set foreground color **/
-int scfcol(color)
-int color;              /* Color to set         */
+int scfcol P1_(int, color)
+/* color: Color to set  */
 {
     TRC( ("scfcol(%d)", (int) color) );
     /* Skip if already the correct color */
@@ -1064,8 +1081,8 @@ int color;              /* Color to set         */
 }
 
 /** Set background color **/
-int scbcol(color)
-int color;                      /* Color to set         */
+int scbcol P1_(int, color)
+/* color: Color to set  */
 {
     TRC( ("scbcol(%d)", (int) color) );
     /* Skip if already the correct color */
@@ -1099,7 +1116,8 @@ int color;                      /* Color to set         */
 # endif /* COLOR */
 
 /** Set palette **/
-int spal P1_(char *, cmd  /* Palette command */)
+int spal P1_(char *, cmd)
+/* cmd: Palette command */
 {
     int   code      = 0;
     int   dokeymap  = 0;
@@ -1148,7 +1166,7 @@ int spal P1_(char *, cmd  /* Palette command */)
             return (1);
 
         /* Move color code to capability structure */
-        capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
+        capbind[CAP_C0 + code].store = (char *)malloc(strlen(cp) + 1);
         if ( capbind[CAP_C0 + code].store ) {
             XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
@@ -1160,12 +1178,10 @@ int spal P1_(char *, cmd  /* Palette command */)
     return (0);
 }
 
-/* Surely more than just BSD systems do this */
+/* Surely more than just BSD systems do this: */
 
 /** Perform a stop signal **/
-int bktoshell(f, n)
-  int f;
-  int n;
+int bktoshell P2_(int, f, int, n)
 {
     /* Reset the terminal and go to the last line */
     vttidy();
@@ -1185,12 +1201,10 @@ int bktoshell(f, n)
 }
 
 /** Get time of day **/
-char * timeset()
+char * timeset P0_()
 {
     time_t buf;
     char * sp, * cp;
-
-    char * ctime();
 
     /* Get system time */
     time(&buf);
@@ -1213,9 +1227,9 @@ char * timeset()
 /*====================================================================*/
 # if ( 0 )
 /** Rename a file **/
-int rename(file1, file2)
-char * file1;                           /* Old file name        */
-char * file2;                           /* New file name        */
+int rename P2_(char *, file1, char *, file2)
+/* file1: Old file name */
+/* file2: New file name */
 {
     struct stat buf1;
     struct stat buf2;
@@ -1248,8 +1262,8 @@ char * file2;                           /* New file name        */
 /*====================================================================*/
 
 /** Callout to system to perform command **/
-int callout(cmd)
-char * cmd;                             /* Command to execute       */
+int callout P1_(char *, cmd)
+/* cmd: Command to execute  */
 {
     int status;
 
@@ -1275,9 +1289,9 @@ char * cmd;                             /* Command to execute       */
 }
 
 /** Create subshell **/
-int spawncli(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int spawncli P2_(int, f, int, n)
+/* f: Flags           */
+/* n: Argument count  */
 {
     char * sh;
 
@@ -1301,9 +1315,9 @@ int n;                                  /* Argument count       */
 }
 
 /** Spawn a command **/
-int spawn(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int spawn P2_(int, f, int, n)
+/* f: Flags           */
+/* n: Argument count  */
 {
     char line[NLINE];
     int s;
@@ -1331,9 +1345,9 @@ int n;                                  /* Argument count       */
 }
 
 /** Execute program **/
-int execprg(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int execprg P2_(int, f, int, n)
+/* f: Flags           */
+/* n: Argument count  */
 {
     /* Same as spawn */
     return ( spawn(f, n) );
@@ -1341,14 +1355,15 @@ int n;                                  /* Argument count       */
 
 
 /*=============================================================================*/
-/* Joachim Schneider, 2018-11-02, joachim<at>hal.rhein-neckar.de
- *               */
+/* Joachim Schneider, 2018-11-02/2023-08-19, joachim<at>hal.rhein-neckar.org   */
 /*=============================================================================*/
 
-/* Return in a static buffer the name of a temporary currently not existing
- *     */
-/* file name containing ident in its name                                   */
-char *gettmpfname(char *ident)
+/* gettmpfname:
+ *
+ * Return in a static buffer the name of a temporary currently not
+ * existing file name containing ident in its name.
+ */
+char *gettmpfname P1_(char *, ident)
 {
     char str[NFILEN];
     int i;
@@ -1373,27 +1388,28 @@ char *gettmpfname(char *ident)
     return NULL;
 }
 
-/* LaunchPrg:   launches an external program    */
-/* =========                                    */
-
-static int LaunchPrg(const char *Cmd,
-                     const char *InFile,
-                     const char *OutFile,
-                     const char *ErrFile)
-/* Returns TRUE if all went well, FALSE if failed to launch or return code is
- * not 0.
+/* LAUNCHPRG:
  *
- *  Cmd is the command string to launch. It must be a valid SH command.
+ * Launches an external program
  *
- *  InFile is the name of the file to pipe into stdin (if NULL, nothing is piped
- * in)
+ * Returns TRUE if all went well, FALSE if failed to launch or return code
+ * is not 0.
  *
- *  OutFile is the name of the file where stdout is expected to be redirected.
- * If it is NULL or an empty string, stdout is not redirected.
+ * Cmd is the command string to launch. It must be a valid SH command.
  *
- *  ErrFile is the name of the file where stderr is expected to be redirected.
- * If it is NULL or an empty string, stdout is not redirected.
- */
+ * InFile is the name of the file to pipe into stdin (if NULL, nothing
+ * is piped in)
+ *
+ * OutFile is the name of the file where stdout is expected to be
+ * redirected. If it is NULL or an empty string, stdout is not redirected.
+ *
+ * ErrFile is the name of the file where stderr is expected to be
+ * redirected. If it is NULL or an empty string, stdout is not redirected.
+*/
+static int LaunchPrg P4_(const char *,  Cmd,
+                         const char *,  InFile,
+                         const char *,  OutFile,
+                         const char *,  ErrFile)
 {
     char FullCmd[NLINE];
 
@@ -1423,15 +1439,13 @@ static int LaunchPrg(const char *Cmd,
 } /* LaunchPrg */
 
 /*=============================================================================*/
-/* Some helper functions that could also be in char.c/eproto.h
- *                 */
-/* We do nit want to use the ctype.h functions as they depend on the locale.
- *   */
+/* Some helper functions that could also be in char.c/eproto.h                 */
+/* We do nit want to use the ctype.h functions as they depend on the locale.   */
 /*=============================================================================*/
 
-static int IsIn(const char c, const char *set, int len)
+static int IsIn P3_(const char, c, const char *, set, int, len)
 {
-    int i   = 0;
+    int i = 0;
 
     if ( len <=0 || !set || !*set ) {
         return FALSE;
@@ -1491,13 +1505,16 @@ static char ToLower P1_(const char, c)
 /*=============================================================================*/
 
 # if ( 0 )
-static int makecmdbname(char *bname, int size, const char *cmd, const char *tag)
+static int makecmdbname P4_(char *,       bname,
+                            int,          size,
+                            const char *, cmd,
+                            const char *, tag)
 /* Create a buffer name for the output of s shell command */
 {
-    static int seed    = 0;
-    int i       = 0;
-    int j       = 0;
-    int l       = 0;
+    static int  seed = 0;
+    int         i    = 0;
+    int         j    = 0;
+    int         l    = 0;
 
     if ( !bname || size <= 1 || !cmd || !*cmd ) {
         return FALSE;
@@ -1536,7 +1553,10 @@ static int makecmdbname(char *bname, int size, const char *cmd, const char *tag)
     }
 }
 # else
-static int makecmdbname(char *bname, int size, const char *cmd, const char *tag)
+static int makecmdbname P4_(char *,       bname,
+                            int,          size,
+                            const char *, cmd,
+                            const char *, tag)
 /* Create a buffer name for the output of s shell command */
 {
     static int seed    = 0;
@@ -1594,9 +1614,9 @@ static int makecmdbname(char *bname, int size, const char *cmd, const char *tag)
 /*=============================================================================*/
 
 /** Pipe output of program to buffer **/
-int pipecmd(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int pipecmd P2_(int, f, int, n)
+/* f: Flags           */
+/* n: Argument count  */
 {
     char Command[NLINE];
     int Result;
@@ -1691,9 +1711,9 @@ int n;                                  /* Argument count       */
         char bflag;
         int Result;
 
-# if ( 0 )      /* Use multiple "command" windows       */
-                /* Split the current window to make room for the command output
-                 */
+# if ( 0 )
+/* Use multiple "command" windows                               */
+/* Split the current window to make room for the command output */
         if ( !splitwind(FALSE, 1) ) {
             unlink(InFile);
             unlink(OutFile);
@@ -1701,8 +1721,7 @@ int n;                                  /* Argument count       */
             return FALSE;
         }
 # endif
-        swbuffer(bp);                           /* make this buffer the current
-                                                 * one */
+        swbuffer(bp);       /* make this buffer the current one */
         bmode = bp->b_mode;
         bp->b_mode &= ~MDVIEW;
         bflag = bp->b_flag;
@@ -1728,9 +1747,9 @@ int n;                                  /* Argument count       */
 }
 
 /** Filter buffer through command **/
-int f_filter(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int f_filter P2_(int, f, int, n)
+/* f: Flags           */
+/* n: Argument count  */
 {
     char line[NLINE];
     int s;
@@ -1811,8 +1830,8 @@ int n;                                  /* Argument count       */
 }
 
 /** Get first filename from pattern **/
-char *getffile(fspec)
-char *fspec;                            /* Filename specification   */
+char *getffile P1_(char *, fspec)
+/* fspec: Filename specification  */
 {
     int index, point;
 
@@ -1881,23 +1900,26 @@ char *getnfile P0_()
 }
 
 # if FLABEL
-/*---------------------------------------------------------------------------*
-*
-*      handle the function keys and function key labels on HP-Terminals
-*      -----------------------------------------------------------------
-*
-*      Hellmuth Michaelis   e-mail: hm@hcshh.hcs.de
-*
-*---------------------------------------------------------------------------*/
 
-static unsigned char flabstor[8][50];           /* label & xmit backup store */
-static char flabstof[8] = { 0, 0, 0, 0, 0, 0, 0, 0 };    /* filled flag */
+/*---------------------------------------------------------------------*
+ *
+ *     handle the function keys and function key labels on HP-Terminals
+ *     -----------------------------------------------------------------
+ *
+ *     Hellmuth Michaelis       e-mail: hm@hcshh.hcs.de
+ *
+ *--------------------------------------------------------------------*/
 
-int fnclabel(f, n)              /* label a function key */
+static unsigned char flabstor[8][50];    /* label & xmit backup store */
+static char flabstof[8] = { 0,0,0,0,0,0,0,0 };  /* filled flag        */
 
-int f;          /* Default argument */
-int n;          /* function key number 1...8 on hp-terminals */
-
+/* FNCLABEL:
+ *
+ * Label a function key
+ */
+int fnclabel P2_(int, f, int, n)
+/* f: Default argument                          */
+/* n: Function key number 1...8 on hp-terminals */
 {
     char lbl[20];       /* label string buffer */
     char xmit[5];       /* transmitted string ( ESC 'p'...'w' ) */
@@ -1951,7 +1973,7 @@ int n;          /* function key number 1...8 on hp-terminals */
 }
 
 /* display user function key labels */
-static VOID dis_ufk()
+static VOID dis_ufk P0_()
 {
     int label_num;
     char buf[6];
@@ -1968,7 +1990,7 @@ static VOID dis_ufk()
 }
 
 /* display system function key labels */
-static VOID dis_sfk()
+static VOID dis_sfk P0_()
 {
     char buf[6];
 
@@ -1978,12 +2000,14 @@ static VOID dis_sfk()
     sprintf(buf, "%c&jA", (char)0x1b);
     write( 1, buf, strlen(buf) );
 }
+
 # endif /* FLABEL */
 
 # if XENIX && FILOCK
-int mkdir(name, mode)
-char *name;     /* name of directory to create */
-int mode;       /* umask for creation (which we blissfully ignore...) */
+
+int mkdir P2(char *, name, int , mode)
+/* name:  Name of directory to create                         */
+/* mode:  Umask for creation (which we blissfully ignore...)  */
 {
     char buf[80];
 
@@ -1994,8 +2018,8 @@ int mode;       /* umask for creation (which we blissfully ignore...) */
     return ( system(buf) );
 }
 
-int rmdir(name)
-char *name;     /* name of directory to delete */
+int rmdir P1_(char *, name)
+/* name:  Name of directory to delete */
 {
     char buf[80];
 
@@ -2005,22 +2029,20 @@ char *name;     /* name of directory to delete */
 
     return ( system(buf) );
 }
+
 # endif /* XENIX & FILOCK */
 
 # if HANDLE_WINCH
-/*
- * Window size changes handled via signals.
- */
-VOID winch_changed(int signo)
+/* Window size changes handled via signals. */
+
+VOID winch_changed P1_(int, signo)
 {
     signal(SIGWINCH, winch_changed);
     winch_flag = 1;
 }
 
-VOID winch_new_size()
+VOID winch_new_size P0_()
 {
-    EXTERN VOID winch_vtresize(int rows, int cols);
-
     struct winsize win;
 
     ZEROMEM(win);
@@ -2032,7 +2054,8 @@ VOID winch_new_size()
     TTmove(0, 0);
     TTeeop();
 }
-# endif
+
+# endif /* HANDLE_WINCH */
 
 #endif /* IS_UNIX() */
 
