@@ -1,0 +1,41 @@
+head	1.1;
+access;
+symbols;
+locks
+	joachim:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2023.08.21.18.51.15;	author joachim;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@#!/bin/sh -
+
+
+mydir=`dirname "$0"`
+mydir=`(cd "$mydir" && pwd -L)`
+
+tmpl="${mydir}/../etc/htemplate"
+
+nam=`basename "$1"`
+nam=`echo "$nam"|tr a-z A-Z|sed 's/\./_/g'`
+nam="${nam}_"
+
+cat "$tmpl" | sed 's/@@(hdr)/'"${nam}"'/g'
+
+
+
+# EOF
+@
