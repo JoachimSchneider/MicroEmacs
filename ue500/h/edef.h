@@ -29,7 +29,7 @@
 /* Variable declarations of variables that are *defined* in a C-file:*/
 /**********************************************************************/
 COMMON NOSHARE KEYTAB keytab[NBINDS]; /* main.c via ebind.h */
-COMMON NOSHARE NBIND  names[];        /* main.c via efunc.h */  /***HEREHEREHERE***/
+COMMON NOSHARE NBIND  names[DUMMYSZ]; /* main.c via efunc.h */
 #ifndef termdef
 /* terminal table defined only in TERM.C */
 COMMON NOSHARE TERM term; /* Terminal information.    */
