@@ -1,10 +1,20 @@
-/*
- * The routines in this file provide support for the Zenith Z-100 PC family.  It
- * goes directly to the graphics RAM to do screen output.
+/*======================================================================
+ * The routines in this file provide support for the Zenith Z-100 PC family.
+ * It goes directly to the graphics RAM to do screen output.
  * It compiles into nothing if not a Zenith driver.
- */
+ *====================================================================*/
 
-#define termdef 1                       /* don't define "term" external */
+/*====================================================================*/
+#define Z309_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+#define termdef 1                     /* don't define "term" external */
 
 #include        <stdio.h>
 #include        "estruct.h"
@@ -15,31 +25,31 @@
 #if     Z309
 
 /* set NROW to 25 for 25-line interlaced mode */
-# define NROW    50                     /* Screen size.                 */
-# define NCOL    80                     /* Edit if you want to.         */
-# define MARGIN  8                      /* size of minimim margin and   */
-# define SCRSIZ  64                     /* scroll size for extended lines */
-# define NPAUSE  200                    /* # times thru update to pause */
-# define BEL     0x07                   /* BEL character.               */
-# define ESC     0x1B                   /* ESC character.               */
-# define SPACE   32                     /* space character      */
+# define NROW    50               /* Screen size.                   */
+# define NCOL    80               /* Edit if you want to.           */
+# define MARGIN  8                /* size of minimim margin and     */
+# define SCRSIZ  64               /* scroll size for extended lines */
+# define NPAUSE  200              /* # times thru update to pause   */
+# define BEL     0x07             /* BEL character.                 */
+# define ESC     0x1B             /* ESC character.                 */
+# define SPACE   32               /* space character                */
 
-# define SCADC   0xb8000000L            /* CGA address of screen RAM    */
-# define SCADM   0xb0000000L            /* MONO address of screen RAM   */
+# define SCADC   0xb8000000L      /* CGA address of screen RAM      */
+# define SCADM   0xb0000000L      /* MONO address of screen RAM     */
 
-# define CDMONO  0                      /* monochrome text card     */
-# define CDCGA50 1                      /* 50-line color graphics card  */
-# define CDCGI25 2                      /* 25-line interlaced CGA text  */
-# define CDCGA25 3                      /* 25-line color graphics card  */
-# define CDSENSE 9                      /* detect the card type     */
+# define CDMONO  0                /* monochrome text card           */
+# define CDCGA50 1                /* 50-line color graphics card    */
+# define CDCGI25 2                /* 25-line interlaced CGA text    */
+# define CDCGA25 3                /* 25-line color graphics card    */
+# define CDSENSE 9                /* detect the card type           */
 
-int dtype = CDCGA50;                    /* current display type     */
-long scadd;                             /* address of screen ram    */
-int *scptr[NROW];                       /* pointer to screen lines  */
-int sline[NCOL];                        /* screen line image        */
-COMMON union REGS rg;                   /* cpu REGISTER for use of DOS calls */
+int dtype = CDCGA50;              /* current display type           */
+long scadd;                       /* address of screen ram          */
+int *scptr[NROW];                 /* pointer to screen lines        */
+int sline[NCOL];                  /* screen line image              */
+COMMON union REGS rg;         /* cpu REGISTER for use of DOS calls  */
 
-EXTERN PASCAL NEAR ttopen();               /* Forward references.          */
+EXTERN PASCAL NEAR ttopen();      /* Forward references.            */
 EXTERN PASCAL NEAR ttgetc();
 EXTERN PASCAL NEAR ttputc();
 EXTERN PASCAL NEAR ttflush();
@@ -72,14 +82,32 @@ int ctrans[] =                  /* ansi to z309 color translation table */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, MARGIN, SCRSIZ, NPAUSE, z309open, z309close,
-    z309kopen, z309kclose, ttgetc, z309putc, ttflush, z309move, z309eeol,
-    z309eeop, z309eeop, z309beep, z309rev, z309cres
-# if     COLOR
-    , z309fcol, z309bcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    z309open,
+    z309close,
+    z309kopen,
+    z309kclose,
+    ttgetc,
+    z309putc,
+    ttflush,
+    z309move,
+    z309eeol,
+    z309eeop,
+    z309eeop,
+    z309beep,
+    z309rev,
+    z309cres
+#if     COLOR
+    , z309fcol,
+    z309bcol
+#endif
 };
 
 COMMON union REGS rg;
@@ -352,3 +380,8 @@ PASCAL NEAR z309hello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

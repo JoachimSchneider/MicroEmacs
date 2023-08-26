@@ -1,14 +1,24 @@
-/*      XP.C:           Operating specific I/O and Spawning functions for the
- * Window XP operating system (console mode) for MicroEMACS 5.00 (C)Copyright
- * 2008 by Daniel M. Lawrence
+/*======================================================================
+ *      XP.C:           Operating specific I/O and Spawning functions
+ *                      for the Window XP operating system (console mode)
+ *                      for MicroEMACS 5.00
+ *                      (C)Copyright 2008 by Daniel M. Lawrence
  *
  * Note:  don't try to compile this on non Windows NT systems....  The header
- * files won't exist.
+ *        files won't exist.
  *
  * Modifications needed: check that we don't construct command lines and
  * temporary filenames which are too large for their buffers.
- *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define XP_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
 
 
 #undef  PASCAL
@@ -30,8 +40,9 @@
 /*
  * Create a subjob with a copy of the command intrepreter in it. When the
  * command interpreter exits, mark the screen as garbage so that you do a full
- * repaint. Bound to "^X C". The message at the start in VMS puts out a newline.
- * Under some (unknown) condition, you don't get one free when DCL starts up.
+ * repaint.
+ *
+ * Bound to "^X C".
  */
 PASCAL NEAR spawncli(f, n)
 {
@@ -53,7 +64,9 @@ PASCAL NEAR spawncli(f, n)
 /*
  * Run a one-liner in a subjob. When the command returns, wait for a single
  * character to be typed, then mark the screen as garbage so a full repaint is
- * done. Bound to "C-X !".
+ * done.
+ *
+ * Bound to "C-X !".
  */
 PASCAL NEAR spawn(f, n)
 {
@@ -86,7 +99,9 @@ PASCAL NEAR spawn(f, n)
 /*
  * Run an external program with arguments. When it returns, wait for a single
  * character to be typed, then mark the screen as garbage so a full repaint is
- * done. Bound to "C-X $".
+ * done.
+ *
+ * Bound to "C-X $".
  */
 
 PASCAL NEAR execprg(f, n)
@@ -117,7 +132,10 @@ PASCAL NEAR execprg(f, n)
 }
 
 /*
- * Pipe a one line command into a window Bound to ^X @
+ * Pipe a one line command into a window
+ *
+ * Bound to ^X @
+ *
  * We use a unique temporary file name so that multiple instances of MicroEMACS
  * don't try to use the same file.
  */
@@ -206,7 +224,10 @@ PASCAL NEAR pipecmd(f, n)
 
 
 /*
- * filter a buffer through an external DOS program Bound to ^X #
+ * filter a buffer through an external DOS program
+ *
+ * Bound to ^X #
+ *
  * We use unique temporary file names so that multiple instances of MicroEMACS
  * don't try to use the same file.
  */
@@ -459,3 +480,8 @@ char *PASCAL NEAR timeset()
 
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,6 +1,16 @@
-/*
+/*======================================================================
  *  HP110:  Hewlett Packard 110 Screen Driver
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define HP110_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define "term" external */
 
@@ -49,14 +59,32 @@ int cbcolor = -1;               /* current background color */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, MARGIN, SCRSIZ, NPAUSE, h110open, h110close,
-    h110kopen, h110kclose, ttgetc, ttputc, ttflush, h110move, h110eeol,
-    h110eeop, h110eeop, h110beep, h110rev, h110cres
-# if     COLOR
-    , h110fcol, h110bcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    h110open,
+    h110close,
+    h110kopen,
+    h110kclose,
+    ttgetc,
+    ttputc,
+    ttflush,
+    h110move,
+    h110eeol,
+    h110eeop,
+    h110eeop,
+    h110beep,
+    h110rev,
+    h110cres
+#if     COLOR
+    , h110fcol,
+    h110bcol
+#endif
 };
 
 # if     COLOR
@@ -219,3 +247,8 @@ h110hello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

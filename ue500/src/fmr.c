@@ -1,8 +1,20 @@
-/*  FMR.C:  Fujitsu FMR series Driver for MicroEMACS 4.00 (C)Copyright 1995 by
- * Daniel M. Lawrence
+/*======================================================================
+ *      FMR.C:  Fujitsu FMR series Driver
+ *              for MicroEMACS 4.00
+ *              (C)Copyright 1995 by Daniel M. Lawrence
  *
- *  Note that this driver relies on GDS.SYS being loaded!
- */
+ *      Note that this driver relies on GDS.SYS being loaded!
+ *====================================================================*/
+
+/*====================================================================*/
+#define FMR_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define term external */
 
@@ -22,45 +34,77 @@ typedef struct KEYDEF {
     char *kf_def;                       /* keystroke sequence */
 } KEYDEF;
 
-KEYDEF functab[] =
-{
-
+KEYDEF  functab[] = {
     /* F1 - F10 */
-    0x8001, 0, NULL, 0x8002, 0, NULL, 0x8003, 0, NULL, 0x8004, 0, NULL, 0x8005,
-    0, NULL, 0x8006, 0, NULL, 0x8007, 0, NULL, 0x8008, 0, NULL, 0x8009, 0, NULL,
+    0x8001, 0, NULL,
+    0x8002, 0, NULL,
+    0x8003, 0, NULL,
+    0x8004, 0, NULL,
+    0x8005, 0, NULL,
+    0x8006, 0, NULL,
+    0x8007, 0, NULL,
+    0x8008, 0, NULL,
+    0x8009, 0, NULL,
     0x800a, 0, NULL,
+
     /* S-F1 - S-F10 */
-    0x800b, 0, NULL, 0x801d, 0, NULL, 0x8021, 0, NULL, 0x8022, 0, NULL, 0x8023,
-    0, NULL, 0x8024, 0, NULL, 0x8025, 0, NULL, 0x8026, 0, NULL, 0x8027, 0, NULL,
+    0x800b, 0, NULL,
+    0x801d, 0, NULL,
+    0x8021, 0, NULL,
+    0x8022, 0, NULL,
+    0x8023, 0, NULL,
+    0x8024, 0, NULL,
+    0x8025, 0, NULL,
+    0x8026, 0, NULL,
+    0x8027, 0, NULL,
     0x8028, 0, NULL,
+
     /* other special keys */
 
     /* cursor arrows */
-    0x1e, 0, NULL, 0x1f, 0, NULL, 0x1d, 0, NULL, 0x1c, 0, NULL
+    0x1e, 0, NULL,
+    0x1f, 0, NULL,
+    0x1d, 0, NULL,
+    0x1c, 0, NULL
+
 };
 
-# define NUMFKEYS        sizeof (functab)/sizeof (KEYDEF)
+#define NUMFKEYS        sizeof(functab)/sizeof(KEYDEF)
 
-/*  EMACS internal key sequences mapped from FMR keys   */
+/* EMACS internal key sequences mapped from FMR keys  */
 
-KEYDEF newtab[NUMFKEYS] =
-{
-
+KEYDEF  newtab[NUMFKEYS]  = {
     /* F1 - F10 */
-    0x8001, 3, "\000\0101", 0x8002, 3, "\000\0102", 0x8003, 3, "\000\0103",
-    0x8004, 3, "\000\0104", 0x8005, 3, "\000\0105", 0x8006, 3, "\000\0106",
-    0x8007, 3, "\000\0107", 0x8008, 3, "\000\0108", 0x8009, 3, "\000\0109",
+    0x8001, 3, "\000\0101",
+    0x8002, 3, "\000\0102",
+    0x8003, 3, "\000\0103",
+    0x8004, 3, "\000\0104",
+    0x8005, 3, "\000\0105",
+    0x8006, 3, "\000\0106",
+    0x8007, 3, "\000\0107",
+    0x8008, 3, "\000\0108",
+    0x8009, 3, "\000\0109",
     0x800a, 3, "\000\0100",
+
     /* S-F1 - S-F10 */
-    0x800b, 3, "\000\0501", 0x801d, 3, "\000\0502", 0x8021, 3, "\000\0503",
-    0x8022, 3, "\000\0504", 0x8023, 3, "\000\0505", 0x8024, 3, "\000\0506",
-    0x8025, 3, "\000\0507", 0x8026, 3, "\000\0508", 0x8027, 3, "\000\0509",
+    0x800b, 3, "\000\0501",
+    0x801d, 3, "\000\0502",
+    0x8021, 3, "\000\0503",
+    0x8022, 3, "\000\0504",
+    0x8023, 3, "\000\0505",
+    0x8024, 3, "\000\0506",
+    0x8025, 3, "\000\0507",
+    0x8026, 3, "\000\0508",
+    0x8027, 3, "\000\0509",
     0x8028, 3, "\000\0500",
+
     /* other special keys */
 
     /* cursor arrows */
-    0x1e, 3, "\000\010P", 0x1f, 3, "\000\010N", 0x1d, 3, "\000\010B", 0x1c, 3,
-    "\000\010F"
+    0x1e, 3, "\000\010P",
+    0x1f, 3, "\000\010N",
+    0x1d, 3, "\000\010B",
+    0x1c, 3, "\000\010F"
 };
 
 union REGS rg;          /* cpu REGISTER for use of DOS calls */
@@ -115,14 +159,33 @@ int bcmap[16] =                 /* background color map */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-NOSHARE TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, fmropen, fmrclose,
-    fmrkopen, fmrkclose, ttgetc, ttputc, ttflush, fmrmove, fmreeol, fmreeop,
-    fmreeop, fmrbeep, fmrrev, fmrcres
-# if     COLOR
-    , fmrfcol, fmrbcol
-# endif
+NOSHARE TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    fmropen,
+    fmrclose,
+    fmrkopen,
+    fmrkclose,
+    ttgetc,
+    ttputc,
+    ttflush,
+    fmrmove,
+    fmreeol,
+    fmreeop,
+    fmreeop,
+    fmrbeep,
+    fmrrev,
+    fmrcres
+#if     COLOR
+    , fmrfcol,
+    fmrbcol
+#endif
 };
 
 # if     COLOR
@@ -595,3 +658,8 @@ fmrhello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

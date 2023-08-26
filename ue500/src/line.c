@@ -5,7 +5,7 @@
  * touch the buffer and window structures, to make sure that the
  * necessary updating gets done. There are routines in this file that
  * handle the kill buffer too. It isn't here for any good reason.
-
+ *
  * Note that this code only updates the dot and mark values in the
  * window list. Since all the code acts on the current window, the
  * buffer that we are editing must be being displayed, which means that
@@ -13,6 +13,16 @@
  * the buffer headers are nonsense.
  *
  *====================================================================*/
+
+/*====================================================================*/
+#define LINE_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"

@@ -1,7 +1,17 @@
-/*
+/*======================================================================
  * The routines in this file provide support for the Data General Model 10
  * Microcomputer.
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define DG10_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define "term" external */
 
@@ -53,14 +63,32 @@ int ctrans[] =                  /* emacs -> DG10 color translation table */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, MARGIN, SCRSIZ, NPAUSE, dg10open, dg10close,
-    dg10kopen, dg10kclose, ttgetc, ttputc, ttflush, dg10move, dg10eeol,
-    dg10eeop, dg10eeop, dg10beep, dg10rev, dg10cres
-# if     COLOR
-    , dg10fcol, dg10bcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    dg10open,
+    dg10close,
+    dg10kopen,
+    dg10kclose,
+    ttgetc,
+    ttputc,
+    ttflush,
+    dg10move,
+    dg10eeol,
+    dg10eeop,
+    dg10eeop,
+    dg10beep,
+    dg10rev,
+    dg10cres
+#if     COLOR
+    , dg10fcol,
+    dg10bcol
+#endif
 };
 
 # if     COLOR
@@ -189,3 +217,8 @@ dg10hello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

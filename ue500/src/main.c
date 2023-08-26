@@ -1,4 +1,4 @@
-/*
+/*======================================================================
  *	MicroEMACS 5.00
  *		written by Daniel M. Lawrence
  *		based on code by Dave G. Conroy.
@@ -10,13 +10,19 @@
  *
  * This file contains the main driving routine, and some keyboard processing
  * code, for the MicroEMACS screen editor.
- *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define MAIN_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include <stdio.h>
-
-/* make global definitions not external */
-#define maindef
 
 #if VMS
 /* Suppress 'the referenced type of the pointer value "nextdown"/"nextup" is

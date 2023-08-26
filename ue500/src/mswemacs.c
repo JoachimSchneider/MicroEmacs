@@ -1,11 +1,24 @@
-/* The routines in this file provide extra emacs functions available under the
- * Microsoft Windows environment on an IBM-PC or compatible computer. The
- * following functions are supplied: cutregion, clipregion, insertclip and
- * helpengine. Also implemented here is the support for scroll bars
+/*======================================================================
+ * The routines in this file provide extra emacs functions available
+ * under the Microsoft Windows environment on an IBM-PC or compatible
+ * computer. The following functions are supplied: cutregion,
+ * clipregion, insertclip and helpengine.
+ * Also implemented here is the support for scroll bars
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWEMACS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    <stdio.h>
@@ -530,3 +543,8 @@ PASCAL  updscrollbars (SCREEN_T *sp, char w_flag)
     }
 } /* updscrollbars */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

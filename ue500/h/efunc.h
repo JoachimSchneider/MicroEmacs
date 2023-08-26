@@ -1,17 +1,32 @@
-/*  EFUNC.H:    MicroEMACS function declarations and names
+/*======================================================================
+ *      EFUNC.H:        MicroEMACS function declarations and names
  *
- *               This file list all the C code functions used by MicroEMACS and
- * the names to use to bind keys to them. To add functions, declare it here in
- * both the EXTERN function list and the name binding table.
+ *              This file list all the C code functions used by MicroEMACS
+ *      and the names to use to bind keys to them. To add functions,
+ *      declare it here in both the extern function list and the name
+ *      binding table.
  *
- */
-/*  Name to function binding table
+ *====================================================================*/
+
+/*======================================================================
+ *      Name to function binding table
  *
- *               This table gives the names of all the bindable functions end
- * their C function address. These are used for the bind-to-key function.
+ *              This table gives the names of all the bindable functions
+ *      end their C function address. These are used for the bind-to-key
+ *      function.
  *
- *       THE TABLE MUST BE SORTED ALPHABETICALLY.
- */
+ *      THE TABLE MUST BE SORTED ALPHABETICALLY.
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef EFUNC_H_
+#define EFUNC_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
 
 
 NOSHARE NBIND names[] =
@@ -262,6 +277,10 @@ NOSHARE NBIND names[] =
 #define NFUNCS  ( sizeof (names) / sizeof (names[0]) - 1 )
 
 
+
+/*====================================================================*/
+#endif/**#ifndef EFUNC_H_**/
+/*====================================================================*/
 
 /**********************************************************************/
 /* EOF                                                                */

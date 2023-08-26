@@ -1,9 +1,22 @@
-/* The routines in this file provide support for external program execution
- * under the Microsoft Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide support for external program
+ * execution under the Microsoft Windows environment on an IBM-PC or
+ * compatible computer.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWEXEC_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    <stdio.h>
@@ -115,29 +128,33 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
                                BOOL DOSApp,
                                char *InFile,
                                char *OutFile)
-/* Returns TRUE if all went well, FALSE if wait cancelled and FAILD if failed to
- * launch.
+/*
+ * Returns TRUE if all went well, FALSE if wait cancelled and FAILD if
+ * failed to launch.
  *
- *  Cmd is the command string to launch.
+ * Cmd is the command string to launch.
  *
- *  DOSApp is TRUE if the external program is a DOS program to be run under a
- * DOS shell. If DOSApp is FALSE, the program is launched directly as a Windows
- * application. In that case, the InFile parameter is ignored, and the value of
- * the OutFile parameter is used only to determine if the program should be
- * monitored. the text of the string referenced by OutFile is irrelevant.
+ * DOSApp is TRUE if the external program is a DOS program to be run
+ * under a DOS shell. If DOSApp is FALSE, the program is launched
+ * directly as a Windows application. In that case, the InFile parameter
+ * is ignored, and the value of the OutFile parameter is used only to
+ * determine if the program should be monitored. the text of the string
+ * referenced by OutFile is irrelevant.
  *
- *  InFile is the name of the file to pipe into stdin (if NULL, nothing is piped
- * in)
+ * InFile is the name of the file to pipe into stdin (if NULL, nothing
+ * is piped in)
  *
- *  OutFile is the name of the file where stdout is expected to be redirected.
- * If it is NULL or an empty string, stdout is not redirected
+ * OutFile is the name of the file where stdout is expected to be
+ * redirected. If it is NULL or an empty string, stdout is not redirected
  *
- *  If Outfile is NULL, LaunchPrg returns immediately after starting the DOS
- * box.
+ * If Outfile is NULL, LaunchPrg returns immediately after starting the
+ * DOS box.
  *
- *  If OutFile is not NULL, the external program is monitored. LaunchPrg returns
- * only when the external program has terminated or the user has cancelled the
- * wait (in which case LaunchPrg returns FALSE). */
+ * If OutFile is not NULL, the external program is monitored.
+ * LaunchPrg returns only when the external program has terminated or
+ * the user has cancelled the wait (in which case LaunchPrg returns
+ * FALSE).
+ */
 {
     char FullCmd[CMDLENGTH];
     HANDLE hModule;
@@ -455,7 +472,7 @@ PASCAL pipecmd (int f, int n)
 } /* pipecmd */
 
 /* f_filter:  filter a buffer through a DOS box. Bound to ^X-# */
-/* ======                                                    */
+/* ========                                                    */
 
 PASCAL f_filter (int f, int n)
 {
@@ -517,3 +534,8 @@ PASCAL f_filter (int f, int n)
     return Result;
 } /* f_filter */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

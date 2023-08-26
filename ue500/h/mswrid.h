@@ -1,11 +1,25 @@
-/* This file provides ID definitions for the resource scripts for support of
- * operation under the Microsoft Windows environment on an IBM-PC or compatible
- * computer.
+/*======================================================================
+ * This file provides ID definitions for the resource scripts
+ * for support of operation under the Microsoft Windows environment on
+ * an IBM-PC or compatible computer.
  *
- *  Must be compiled with the Resource Compiler or Borland C++ 2.0 or MSC 6.0 or
- * later versions
+ * Must be compiled with the Resource Compiler or Borland C++ 2.0
+ * or MSC 6.0 or later versions
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef MSWRID_H_
+#define MSWRID_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 /* system menus extra items */
 #define SC_OPTIMIZE     0x1000
 
@@ -51,3 +65,12 @@
 /* menu codes (the bulk of them is in mswmenu.h) */
 #define IDM_FIRSTCHILD  0xE000  /* for MDI window control list */
 
+
+
+/*====================================================================*/
+#endif/**#ifndef MSWRID_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,16 +1,27 @@
-/*
- * The routines in this file deal with the region, that magic space between "."
- * and mark. Some functions are commands. Some functions are just for internal
- * use.
- */
+/*======================================================================
+ * The routines in this file deal with the region, that magic space
+ * between "." and mark. Some functions are commands. Some functions are
+ * just for internal use.
+ *====================================================================*/
+
+/*====================================================================*/
+#define REGION_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
 
-/*  reglines:   how many lines in the current region used by the
- * trim/entab/detab-region commands
+/* reglines: How many lines in the current region used by the
+ *           trim/entab/detab-region commands
  */
 
 int PASCAL NEAR reglines()

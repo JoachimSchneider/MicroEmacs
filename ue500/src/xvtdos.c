@@ -1,7 +1,19 @@
-/*  XVTDOS.C:   Operating specific I/O and Spawning functions under the XVT
- * portability system for MicroEMACS 4.00 (C)Copyright 1995 by Daniel M.
- * Lawrence
- */
+/*======================================================================
+ *      XVTDOS.C:       Operating specific I/O and Spawning functions
+ *                      under the XVT portability system
+ *                      for MicroEMACS 4.00
+ *                      (C)Copyright 1995 by Daniel M. Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#define XVTDOS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"
@@ -32,9 +44,9 @@ struct find_t fileblock;        /* structure for directory searches */
 # endif
 
 # if     LATTICE | MSC | TURBO | IC | MWC | ZTC
-union REGS rg;          /* cpu REGISTER for use of DOS calls */
-struct SREGS segreg;    /* cpu segment registers         */
-int nxtchar = -1;       /* character held from type ahead    */
+union REGS rg;          /* cpu REGISTER for use of DOS calls  */
+struct SREGS segreg;    /* cpu segment registers              */
+int nxtchar = -1;       /* character held from type ahead     */
 # endif
 
 # if     MSC | TURBO
@@ -102,7 +114,7 @@ int in_get()    /* get an event from the input buffer */
 int PASCAL NEAR ttopen()
 {
 
-    /* on all screens we are not sure of the initial position of the cursor                 */
+    /* on all screens we are not sure of the initial position of the cursor */
     ttrow = 999;
     ttcol = 999;
     xstrcpy(os, "XVT");
@@ -157,7 +169,7 @@ int f, n;
     if ( restflag )
         return ( resterr() );
 
-    movecursor(term.t_nrow, 0);                 /* Seek to last line.   */
+    movecursor(term.t_nrow, 0);                 /* Seek to last line. */
     TTflush();
     TTkclose();
     shellprog("");
@@ -425,7 +437,8 @@ COMMON int errno;
 COMMON int _doserrno;
 # endif
 
-/*  SHELLPROG: Execute a command in a subshell      */
+/*  SHELLPROG: Execute a command in a subshell
+*/
 
 int PASCAL NEAR shellprog(cmd)
 
@@ -789,3 +802,8 @@ char *PASCAL NEAR getnfile()
 # endif
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

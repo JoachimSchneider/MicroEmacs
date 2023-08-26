@@ -1,8 +1,21 @@
-/*  SPANISH.H:  Spanish language text strings for MicroEMACS 4.00
+/*======================================================================
+ *      SPANISH.H:      Spanish language text strings for
+ *                       MicroEMACS 4.00
  *
- *                       (C)opyright 1995 by Daniel Lawrence Translated by Jose
- * Berrios
- */
+ *                      (C)opyright 1995 by Daniel Lawrence
+ *                      Translated by Jose Berrios
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef SPANISH_H_
+#define SPANISH_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define OQUOTE_CHAR     34
 #define CQUOTE_CHAR     34
@@ -96,8 +109,7 @@
 #define TEXT87  "Renplasa '"
 #define TEXT88  "' con '"
 #define TEXT89  "Aborted!"
-#define TEXT90  \
-    "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "
+#define TEXT90  "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "
 #define TEXT91  "Empty string replaced, stopping."
 #define TEXT92  "%D substituciones"
 #define TEXT93  "%%ERROR mientras borrando"
@@ -135,8 +147,7 @@
 #define TEXT125 "Out of memory while storing macro"
 #define TEXT126 "%%Internal While loop error"
 #define TEXT127 "%%No such label"
-#define TEXT128 \
-    "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
+#define TEXT128 "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
 #define TEXT129 "Ejecutar que archivo: "
 #define TEXT130 "Macro not defined"
 #define TEXT131 "Leer que archivo"
@@ -291,3 +302,12 @@
 #define TEXT336 "[Screen name already in use]"
 #define TEXT337 "cannot monitor external program"
 
+
+
+/*====================================================================*/
+#endif/**#ifndef SPANISH_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

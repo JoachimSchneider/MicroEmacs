@@ -1,12 +1,26 @@
-/*  WMCS.C: Operating specific I/O and Spawning functions for the WICAT
- * computer/operating system for MicroEMACS 4.00 (C)Copyright 1995 by Daniel M.
- * Lawrence
- */
+/*======================================================================
+ *      WMCS.C: Operating specific I/O and Spawning functions
+ *              for the WICAT computer/operating system
+ *              for MicroEMACS 4.00
+ *              (C)Copyright 1995 by Daniel M. Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#define WMCS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
+
 #if     WMCS
+
 # include        "edef.h"
 # include        "elang.h"
 
@@ -31,12 +45,11 @@ ttopen()
     /* set device status */
     _giodst(1, &dtable, sizeof (dtable), &dstat);
     xmdsave = dstat.class.tty.dstyflags1;
-    dstat.class.tty.dstyflags1 &= xmdmask;      /* clear the bits we need to use
-                                                 */
-    dstat.class.tty.dstyflags1 |= xmdstat;      /* set our status bits */
+    dstat.class.tty.dstyflags1 &= xmdmask;  /* clear the bits we need to use  */
+    dstat.class.tty.dstyflags1 |= xmdstat;  /* set our status bits            */
     _siodst(1, &dstat);         /* set device status */
 
-    /* on all screens we are not sure of the initial position of the cursor                 */
+    /* on all screens we are not sure of the initial position of the cursor   */
     ttrow = 999;
     ttcol = 999;
 }
@@ -102,23 +115,25 @@ mttgetc()
 # endif
 
 # if     TYPEAH
-/* typahead:    Check to see if any characters are already in the keyboard
- * buffer
+
+/* typahead:  Check to see if any characters are already in the keyboard
+ *            buffer
  */
 
 typahead()
 {
-/*  This doesnt seem to work even though it should So I leave it commented
- * out...
- *
- *       devicetable    xdtable;
- *       devicestatus   xdstat;
- *
- *       _giodst(1,&xdtable,sizeof(xdtable),&xdstat);
- *       return(dstat.class.tty.dstyinputcnt);
- */
+/*  This doesnt seem to work even though it should
+    So I leave it commented out...
+
+    devicetable   xdtable;
+    devicestatus  xdstat;
+
+    _giodst(1,&xdtable,sizeof(xdtable),&xdstat);
+    return(dstat.class.tty.dstyinputcnt);
+*/
     return (FALSE);
 }
+
 # endif
 
 /*
@@ -167,12 +182,12 @@ spawn(f, n)
     if ( ( s=mlreply("!", line, NLINE) ) != TRUE )
         return (s);
 
-    TTputc('\n');                    /* Already have '\r'    */
+    TTputc('\n');                               /* Already have '\r'  */
     TTflush();
-    TTclose();                                  /* stty to old modes    */
+    TTclose();                                  /* stty to old modes  */
     system(line);
     TTopen();
-    mlputs(TEXT188);                            /* Pause.               */
+    mlputs(TEXT188);                            /* Pause.             */
 /*             "[End]" */
     TTflush();
     while ( ( s = tgetc() ) != '\r' && s != ' ' )
@@ -200,12 +215,12 @@ execprg(f, n)
     if ( ( s=mlreply("!", line, NLINE) ) != TRUE )
         return (s);
 
-    TTputc('\n');                    /* Already have '\r'    */
+    TTputc('\n');                               /* Already have '\r'  */
     TTflush();
-    TTclose();                                  /* stty to old modes    */
+    TTclose();                                  /* stty to old modes  */
     system(line);
     TTopen();
-    mlputs(TEXT188);                            /* Pause.               */
+    mlputs(TEXT188);                            /* Pause.             */
 /*             "[End]" */
     TTflush();
     while ( ( s = tgetc() ) != '\r' && s != ' ' )
@@ -252,9 +267,9 @@ pipecmd(f, n)
             return (FALSE);
     }
 
-    TTputc('\n');                    /* Already have '\r'    */
+    TTputc('\n');                               /* Already have '\r'  */
     TTflush();
-    TTclose();                                  /* stty to old modes    */
+    TTclose();                                  /* stty to old modes  */
     xstrcat(line, ">");
     xstrcat(line, filnam);
     system(line);
@@ -307,7 +322,7 @@ f_filter(f, n)
         return ( resterr() );
 
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
-        return ( rdonly() );            /* we are in read only mode */
+        return ( rdonly() );            /* we are in read only mode     */
 
     /* get the filter name and its args */
     if ( ( s=mlreply("#", line, NLINE) ) != TRUE )
@@ -327,9 +342,9 @@ f_filter(f, n)
         return (FALSE);
     }
 
-    TTputc('\n');                    /* Already have '\r'    */
+    TTputc('\n');                               /* Already have '\r'  */
     TTflush();
-    TTclose();                                  /* stty to old modes    */
+    TTclose();                                  /* stty to old modes  */
     xstrcat(line, " <fltinp >fltout");
     system(line);
     TTopen();
@@ -373,9 +388,17 @@ char *PASCAL NEAR timeset()
 
     return (sp);
 }
+
 #else
+
 wmcshello()
 {
 }
+
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

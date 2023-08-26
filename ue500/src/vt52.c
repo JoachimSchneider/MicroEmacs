@@ -1,10 +1,21 @@
-/*
- * The routines in this file provide support for VT52 style terminals over a
- * serial line. The serial I/O services are provided by routines in "termio.c".
- * It compiles into nothing if not a VT52 style device. The bell on the VT52 is
- * terrible, so the "beep"
- * routine is conditionalized on defining BEL.
- */
+/*======================================================================
+ * The routines in this file provide support for VT52 style terminals
+ * over a serial line. The serial I/O services are provided by routines
+ * in "termio.c". It compiles into nothing if not a VT52 style device.
+ * The bell on the VT52 is terrible, so the "beep" routine is
+ * conditionalized on defining BEL.
+ *====================================================================*/
+
+/*====================================================================*/
+#define VT52_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 #define termdef 1                       /* don't define "term" external */
 
 #include        <stdio.h>
@@ -45,16 +56,36 @@ EXTERN int     vt52bcol();
 # endif
 
 /*
- * Dispatch table. All the hard fields just point into the terminal I/O code.
+ * Dispatch table. All the hard fields just point into the terminal
+ * I/O code.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, &vt52open,
-    &ttclose, &vt52kopen, &vt52kclose, &ttgetc, &ttputc, &ttflush, &vt52move,
-    &vt52eeol, &vt52eeop, &vt52eeop, &vt52beep, &vt52rev, &vt52cres
-# if     COLOR
-    , &vt52fcol, &vt52bcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    &vt52open,
+    &ttclose,
+    &vt52kopen,
+    &vt52kclose,
+    &ttgetc,
+    &ttputc,
+    &ttflush,
+    &vt52move,
+    &vt52eeol,
+    &vt52eeop,
+    &vt52eeop,
+    &vt52beep,
+    &vt52rev,
+    &vt52cres
+#if     COLOR
+    , &vt52fcol,
+    &vt52bcol
+#endif
 };
 
 vt52move(row, col)
@@ -159,3 +190,8 @@ vt52hello()
 
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,4 +1,5 @@
-/* Input:  Various input routines for MicroEMACS
+/*======================================================================
+ * Input:  Various input routines for MicroEMACS
  *         written by Daniel Lawrence
  *         (C)Copyright 1995 by Daniel M. Lawrence
  *
@@ -39,7 +40,17 @@
  * unix systems.  These values are then interpreted by get_key()
  * to construct the proper extended character sequences to pass
  * to the MicroEMACS kernel.
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define INPUT_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"

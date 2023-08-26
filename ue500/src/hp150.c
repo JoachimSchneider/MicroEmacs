@@ -1,9 +1,19 @@
-/*
- * The routines in this file provide support for HP150 screens and routines to
- * access the Keyboard through KEYCODE mode. It compiles into nothing if not an
- * HP150 screen device.
+/*======================================================================
+ * The routines in this file provide support for HP150 screens
+ * and routines to access the Keyboard through KEYCODE mode.
+ * It compiles into nothing if not an HP150 screen device.
  * added by Daniel Lawrence
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define HP150_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define "term" external */
 
@@ -62,14 +72,33 @@ int break_flag;         /* state of MSDOS control break processing */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, MARGIN, SCRSIZ, 0, 0, NPAUSE, openhp, closehp,
-    hp15kopen, hp15kclose, gethpkey, ttputc, hpflush, hp15move, hp15eeol,
-    hp15eeop, hp15eeop, hp15beep, hp15rev, hp15cres
-# if     COLOR
-    , hp15fcol, hp15bcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    MARGIN,
+    SCRSIZ,
+    0, 0,
+    NPAUSE,
+    openhp,
+    closehp,
+    hp15kopen,
+    hp15kclose,
+    gethpkey,
+    ttputc,
+    hpflush,
+    hp15move,
+    hp15eeol,
+    hp15eeop,
+    hp15eeop,
+    hp15beep,
+    hp15rev,
+    hp15cres
+#if     COLOR
+    , hp15fcol,
+    hp15bcol
+#endif
 };
 
 PASCAL NEAR hp15move(row, col)
@@ -201,8 +230,9 @@ next:   shiftb = ttgetc();
     return (0);                 /* extended escape sequence */
 }
 
-/*  extcode:    resolve MSDOS extended character codes encoding the proper
- * sequences into emacs printable character specifications
+/*      extcode:        resolve MSDOS extended character codes
+ *                      encoding the proper sequences into emacs
+ *                      printable character specifications
  */
 
 int extcode(shiftb, c)
@@ -244,153 +274,76 @@ unsigned c;             /* byte following a zero extended char byte */
         return (sstate | SPEC | 'T');
 
     /* some others as well */
-    switch ( c ) {
+    switch (c) {
+        case 36:        return(sstate | 9);     /* tab */
+        case 37:        return(sstate | 13);    /* ret */
+        case 39:        return(sstate | 8);     /* backspace */
+        case 48:        return(sstate | 48);    /* zero */
+        case 49:        return(sstate | 49);    /* one */
+        case 50:        return(sstate | 50);    /* two */
+        case 51:        return(sstate | 51);    /* three */
+        case 52:        return(sstate | 52);    /* four */
+        case 53:        return(sstate | 53);    /* five */
+        case 54:        return(sstate | 54);    /* six */
+        case 55:        return(sstate | 55);    /* seven */
+        case 56:        return(sstate | 56);    /* eight */
+        case 57:        return(sstate | 57);    /* nine */
+        case 80:        return(sstate | 13);    /* enter */
+        case 84:        return(sstate | 27);    /* break -> ESC */
+        case 85:        return(sstate | 27);    /* esc */
+        case 88:        return(sstate | 24);    /* stop -> ^X */
+        case 112:       return(sstate | 45);    /* N-minus */
+        case 113:       return(sstate | 42);    /* N-asterisk */
+        case 114:       return(sstate | 43);    /* N-plus */
+        case 115:       return(sstate | 47);    /* N-slash */
+        case 116:       return(sstate | 44);    /* N-comma */
+        case 117:       return(sstate | 13);    /* N-enter */
+        case 118:       return(sstate | 9);     /* N-tab */
+        case 119:       return(sstate | 46);    /* N-period */
 
-    case 36:
-        return (sstate | 9);                            /* tab */
+        case 44:
+        case 45:
+        case 110:       return(sstate | SPEC | '<');    /* HOME */
 
-    case 37:
-        return (sstate | 13);                           /* ret */
+        case 32:
+        case 41:
+        case 101:       return(sstate | SPEC | 'P');    /* cursor up */
 
-    case 39:
-        return (sstate | 8);                            /* backspace */
+        case 47:        return(sstate | SPEC | 'Z');    /* page up */
 
-    case 48:
-        return (sstate | 48);                           /* zero */
+        case 35:
+        case 42:
+        case 97:        return(sstate | SPEC | 'B');    /* cursor left */
 
-    case 49:
-        return (sstate | 49);                           /* one */
+        case 34:
+        case 43:
+        case 99:        return(sstate | SPEC | 'F');    /* cursor right */
 
-    case 50:
-        return (sstate | 50);                           /* two */
+        case 82:        return(sstate | SPEC | '>');    /* end */
 
-    case 51:
-        return (sstate | 51);                           /* three */
+        case 33:
+        case 40:
+        case 98:        return(sstate | SPEC | 'N');    /* cursor down */
 
-    case 52:
-        return (sstate | 52);                           /* four */
+        case 46:
+        case 108:       return(sstate | SPEC | 'V');    /* page down */
 
-    case 53:
-        return (sstate | 53);                           /* five */
+        case 64:
+        case 70:
+        case 107:       return(sstate | SPEC | 'C');    /* insert */
 
-    case 54:
-        return (sstate | 54);                           /* six */
+        case 65:
+        case 71:
+        case 109:       return(sstate | SPEC | 'D');    /* delete */
 
-    case 55:
-        return (sstate | 55);                           /* seven */
+        /* the HP has some extra keys we need to map */
 
-    case 56:
-        return (sstate | 56);                           /* eight */
-
-    case 57:
-        return (sstate | 57);                           /* nine */
-
-    case 80:
-        return (sstate | 13);                           /* enter */
-
-    case 84:
-        return (sstate | 27);                           /* break -> ESC */
-
-    case 85:
-        return (sstate | 27);                           /* esc */
-
-    case 88:
-        return (sstate | 24);                           /* stop -> ^X */
-
-    case 112:
-        return (sstate | 45);                           /* N-minus */
-
-    case 113:
-        return (sstate | 42);                           /* N-asterisk */
-
-    case 114:
-        return (sstate | 43);                           /* N-plus */
-
-    case 115:
-        return (sstate | 47);                           /* N-slash */
-
-    case 116:
-        return (sstate | 44);                           /* N-comma */
-
-    case 117:
-        return (sstate | 13);                           /* N-enter */
-
-    case 118:
-        return (sstate | 9);                            /* N-tab */
-
-    case 119:
-        return (sstate | 46);                           /* N-period */
-
-    case 44:
-    case 45:
-    case 110:
-        return (sstate | SPEC | '<');                           /* HOME */
-
-    case 32:
-    case 41:
-    case 101:
-        return (sstate | SPEC | 'P');                           /* cursor up */
-
-    case 47:
-        return (sstate | SPEC | 'Z');                           /* page up */
-
-    case 35:
-    case 42:
-    case 97:
-        return (sstate | SPEC | 'B');                           /* cursor left
-                                                                 */
-
-    case 34:
-    case 43:
-    case 99:
-        return (sstate | SPEC | 'F');                           /* cursor right
-                                                                 */
-
-    case 82:
-        return (sstate | SPEC | '>');                           /* end */
-
-    case 33:
-    case 40:
-    case 98:
-        return (sstate | SPEC | 'N');                           /* cursor down
-                                                                 */
-
-    case 46:
-    case 108:
-        return (sstate | SPEC | 'V');                           /* page down */
-
-    case 64:
-    case 70:
-    case 107:
-        return (sstate | SPEC | 'C');                           /* insert */
-
-    case 65:
-    case 71:
-    case 109:
-        return (sstate | SPEC | 'D');                           /* delete */
-
-    /* the HP has some extra keys we need to map */
-
-    case 83:
-    case 89:
-        return (sstate | SPEC | 'Q');                           /* reformat
-                                                                 * paragraph */
-
-    case 81:
-        return (sstate | CTLX | 'C');                           /* shell up to
-                                                                 * system */
-
-    case 67:
-        return (sstate | SPEC | CTRL | 'L');                        /* center
-                                                                     * display
-                                                                     */
-
-    case 68:
-        return (sstate | CTRL | 'O');                           /* open line */
-
-    case 69:
-        return (sstate | CTRL | 'K');                           /* Kill to end
-                                                                 * of line */
+        case 83:
+        case 89:        return(sstate | SPEC | 'Q');    /* reformat paragraph */
+        case 81:        return(sstate | CTLX | 'C');    /* shell up to system */
+        case 67:        return(sstate | SPEC | CTRL | 'L'); /* center display */
+        case 68:        return(sstate | CTRL | 'O');    /* open line */
+        case 69:        return(sstate | CTRL | 'K');    /* Kill to end of line */
     }
 
     return (sstate | c);
@@ -627,3 +580,8 @@ PASCAL NEAR h15hello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

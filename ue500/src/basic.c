@@ -1,4 +1,5 @@
-/*      basic.c:        Basic movement functions for
+/*======================================================================
+ *      basic.c:        Basic movement functions for
  *                      MicroEMACS
  *                      (C)Copyright 1995 by Daniel Lawrence
  *
@@ -7,7 +8,17 @@
  * always updates the cursor location, so only moves between lines, or
  * functions that adjust the top line in the window and invalidate the
  * framing, are hard.
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define BASIC_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"

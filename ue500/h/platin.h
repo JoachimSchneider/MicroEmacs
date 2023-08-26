@@ -1,8 +1,22 @@
-/*  PLATIN.H    Pig Latin Text strings for MicroEMACS 4.00
+/*======================================================================
+ *      PLATIN.H        Pig Latin Text strings for
+ *                       MicroEMACS 4.00
  *
- *                       (C)opyright 1995 by Daniel Lawrence translated by
- * Daniel Lawrence (using a complex but neat MicroEMACS macro)
- */
+ *                      (C)opyright 1995 by Daniel Lawrence
+ *                      translated by Daniel Lawrence
+ *                      (using a complex but neat MicroEMACS macro)
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef PLATIN_H_
+#define PLATIN_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define OQUOTE_CHAR     34
 #define CQUOTE_CHAR     34
@@ -96,8 +110,7 @@
 #define TEXT87  "Eplaceray '"
 #define TEXT88  "' ithway '"
 #define TEXT89  "Abortedway!"
-#define TEXT90  \
-    "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "
+#define TEXT90  "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "
 #define TEXT91  "Emptyway tringsay eplacedray, toppingsay."
 #define TEXT92  "%D ubstitutionssay"
 #define TEXT93  "%%ERRORWAY hileway eletingday"
@@ -108,8 +121,7 @@
 #define TEXT98  "Onay illfay olumncay etsay"
 #define TEXT99  "[OUTWAY OFWAY EMORYMAY]"
 #define TEXT100 "Ordsway %D Harscay %D Ineslay %d Avgway harscay/ordway %f"
-#define TEXT101 \
-    "[Ancay otnay earchsay andway otogay atway hetay amesay imetay!]"
+#define TEXT101 "[Ancay otnay earchsay andway otogay atway hetay amesay imetay!]"
 #define TEXT102 "[Ogusbay otogay argumentway]"
 #define TEXT103 "[Avingsay %s]"
 #define TEXT104 "Odifiedmay uffersbay existway. Eavelay anywayway"
@@ -136,8 +148,7 @@
 #define TEXT125 "Outway ofway emorymay hileway toringsay acromay"
 #define TEXT126 "%%Internalway Hileway ooplay errorway"
 #define TEXT127 "%%Onay uchsay abellay"
-#define TEXT128 \
-    "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
+#define TEXT128 "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
 #define TEXT129 "Ilefay otay executeway: "
 #define TEXT130 "Acromay otnay efinedday"
 #define TEXT131 "Eadray ilefay"
@@ -201,10 +212,8 @@
 #define TEXT189 "Annotcay indfay entryway orfay erminaltay ypetay.\n"
 #define TEXT190 "Heckcay erminaltay ypetay ithway \"SHOW TERMINAL\" orway\n"
 #define TEXT191 "rytay ettingsay ithway \"SET TERMINAL/INQUIRE\"\n"
-#define TEXT192 \
-    "Hetay erminaltay ypetay oesday otnay avehay enoughway owerpay otay unray\n"
-#define TEXT193 \
-    "IcroEMACSMAY.  Rytay away ifferentday erminaltay orway heckcay\n"
+#define TEXT192 "Hetay erminaltay ypetay oesday otnay avehay enoughway owerpay otay unray\n"
+#define TEXT193 "IcroEMACSMAY.  Rytay away ifferentday erminaltay orway heckcay\n"
 #define TEXT194 "ypetay ithway \"SHOW TERMINAL\".\n"
 #define TEXT195 "Annotcay openway hannelcay otay erminaltay.\n"
 #define TEXT196 "Annotcay obtainway erminaltay ettingssay.\n"
@@ -299,3 +308,12 @@
 #define TEXT336 "[Eenscray amenay alreadyway inway useway]"
 #define TEXT337 "annotcay onitormay externalway ogrampray"
 
+
+
+/*====================================================================*/
+#endif/**#ifndef PLATIN_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

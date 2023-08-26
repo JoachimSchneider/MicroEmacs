@@ -1,10 +1,24 @@
-/* This file provides ID definitions for the menu resource used under the
- * Microsoft Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * This file provides ID definitions for the menu resource
+ *  used under the Microsoft Windows environment on
+ * an IBM-PC or compatible computer.
  *
- *  Must be compiled with the Resource Compiler or Borland C++ 2.0 or MSC 6.0 or
- * later versions
+ * Must be compiled with the Resource Compiler or Borland C++ 2.0
+ * or MSC 6.0 or later versions
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef MSWMENU_H_
+#define MSWMENU_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define IDM_POPUP       0x1000      /* popup level increment */
 #define IDM_DYNAMIC     0x0800      /* IDs above that are dynamic entries */
@@ -195,3 +209,12 @@
 # define IDM_DEBUG       0x200
 #endif
 
+
+
+/*====================================================================*/
+#endif/**#ifndef MSWMENU_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,9 +1,22 @@
-/* The routines in this file provide font control functions under the Microsoft
- * Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide font control functions under
+ * the Microsoft Windows environment on an IBM-PC or compatible
+ * computer.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWFONT_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    <stdio.h>
@@ -679,3 +692,8 @@ VOID FAR PASCAL FontInit (void)
     BuildCellMetrics (&EmacsCM, hEmacsFont);
 } /* FontInit */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

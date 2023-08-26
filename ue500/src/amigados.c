@@ -1,6 +1,18 @@
-/*  AMIGADOS.C: Operating specific I/O and Spawning functions for MicroEMACS
- * 4.00 (C)Copyright 1995 by Daniel M. Lawrence
- */
+/*======================================================================
+ *      AMIGADOS.C:     Operating specific I/O and Spawning functions
+ *                      for MicroEMACS 4.00
+ *                      (C)Copyright 1995 by Daniel M. Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#define AMIGADOS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"
@@ -36,107 +48,107 @@ typedef struct {
 
 /* raw keycode scan code to emacs keycode translation table */
 
-RKEY keytrans[0x60] =
-{
+/* raw keycode scan code to emacs keycode translation table */
 
-/*  CODE    NORM    SHIFT   CTRL */
-/*  0x00,*/
-    '`', '~', 0,
-/*  0x01,*/'1', '!', 0,
-/*  0x02,*/'2', '@', 0,
-/*  0x03,*/'3', '#', 0,
-/*  0x04,*/'4', '$', 0,
-/*  0x05,*/'5', '%', 0,
-/*  0x06,*/'6', '^', 0,
-/*  0x07,*/'7', '&', 0,
-/*  0x08,*/'8', '*', 0,
-/*  0x09,*/'9', '(', 0,
-/*  0x0a,*/'0', ')', 0,
-/*  0x0b,*/'-', '_', 0,
-/*  0x0c,*/'=', '+', 0,
-/*  0x0d,*/'\\', '|', 0,
-/*  0x0e,*/0, 0, 0,
-/*  0x0f,*/0, 0, 0,
-/*  0x10,*/'q', 'Q', CTRL|'Q',
-/*  0x11,*/'w', 'W', CTRL|'W',
-/*  0x12,*/'e', 'E', CTRL|'E',
-/*  0x13,*/'r', 'R', CTRL|'R',
-/*  0x14,*/'t', 'T', CTRL|'T',
-/*  0x15,*/'y', 'Y', CTRL|'Y',
-/*  0x16,*/'u', 'U', CTRL|'U',
-/*  0x17,*/'i', 'I', CTRL|'I',
-/*  0x18,*/'o', 'O', CTRL|'O',
-/*  0x19,*/'p', 'P', CTRL|'P',
-/*  0x1a,*/'[', '{', 0,
-/*  0x1b,*/']', '}', 0,
-/*  0x1c,*/0, 0, 0,
-/*  0x1d,*/'1', SPEC|'>', 0,
-/*  0x1e,*/'2', SPEC|'N', 0,
-/*  0x1f,*/'3', SPEC|'V', 0,
-/*  0x20,*/'a', 'A', CTRL|'A',
-/*  0x21,*/'s', 'S', CTRL|'S',
-/*  0x22,*/'d', 'D', CTRL|'D',
-/*  0x23,*/'f', 'F', CTRL|'F',
-/*  0x24,*/'g', 'G', CTRL|'G', /*   0x25,*/'h', 'H', CTRL|'H',
-/*  0x26,*/'j', 'J', CTRL|'J',
-/*  0x27,*/'k', 'K', CTRL|'K',
-/*  0x28,*/'l', 'L', CTRL|'L',
-/*  0x29,*/';', ':', 0,
-/*  0x2a,*/39, 34, 0,
-/*  0x2b,*/0, 0, 0,
-/*  0x2c,*/0, 0, 0,
-/*  0x2d,*/'4', SPEC|'B', 0,
-/*  0x2e,*/'5', 0, 0,
-/*  0x2f,*/'6', SPEC|'F', 0,
-    /* this key is probably mapped on forign AIMIGA keyboards */
-/*  0x30,*/0, 0, 0,
-/*  0x31,*/'z', 'Z', CTRL|'Z',
-/*  0x32,*/'x', 'X', CTRL|'X',
-/*  0x33,*/'c', 'C', CTRL|'C',
-/*  0x34,*/'v', 'V', CTRL|'V',
-/*  0x35,*/'b', 'B', CTRL|'B',
-/*  0x36,*/'n', 'N', CTRL|'N',
-/*  0x37,*/'m', 'M', CTRL|'M',
-/*  0x38,*/',', '<', 0,
-/*  0x39,*/'.', '>', 0,
-/*  0x3a,*/'/', '?', 0,
-/*  0x3b,*/0, 0, 0,
-/*  0x3c,*/'.', SPEC|'D', 0,
-/*  0x3d,*/'7', SPEC|'<', 0,
-/*  0x3e,*/'8', SPEC|'P', 0,
-/*  0x3f,*/'9', SPEC|'Z', 0,
-/*  0x40,*/' ', SHFT|' ', 0,
-/*  0x41,*/CTRL|'H', SHFT|'D', 0,
-/*  0x42,*/CTRL|'I', SHFT|'I', 0,
-/*  0x43,*/CTRL|'M', CTRL|'M', CTRL|'M',
-/*  0x44,*/CTRL|'M', CTRL|'M', CTRL|'M',
-/*  0x45,*/CTRL|'[', 0, 0,
-/*  0x46,*/SPEC|'D', 0, 0,
-/*  0x47,*/0, 0, 0,
-/*  0x48,*/0, 0, 0,
-/*  0x49,*/0, 0, 0,
-/*  0x4a,*/'-', 0, 0,
-/*  0x4b,*/0, 0, 0,
-/*  0x4c,*/SPEC|'P', SHFT|SPEC|'P', CTRL|SPEC|'P',
-/*  0x4d,*/SPEC|'N', SHFT|SPEC|'N', CTRL|SPEC|'N',
-/*  0x4e,*/SPEC|'F', SHFT|SPEC|'F', CTRL|SPEC|'F',
-/*  0x4f,*/SPEC|'B', SHFT|SPEC|'B', CTRL|SPEC|'B',
-/*  0x50,*/SPEC|'1', SHFT|SPEC|'1', CTRL|SPEC|'1',
-/*  0x51,*/SPEC|'2', SHFT|SPEC|'2', CTRL|SPEC|'2',
-/*  0x52,*/SPEC|'3', SHFT|SPEC|'3', CTRL|SPEC|'3',
-/*  0x53,*/SPEC|'4', SHFT|SPEC|'4', CTRL|SPEC|'4',
-/*  0x54,*/SPEC|'5', SHFT|SPEC|'5', CTRL|SPEC|'5',
-/*  0x55,*/SPEC|'6', SHFT|SPEC|'6', CTRL|SPEC|'6',
-/*  0x56,*/SPEC|'7', SHFT|SPEC|'7', CTRL|SPEC|'7',
-/*  0x57,*/SPEC|'8', SHFT|SPEC|'8', CTRL|SPEC|'8',
-/*  0x58,*/SPEC|'9', SHFT|SPEC|'9', CTRL|SPEC|'9',
-/*  0x59,*/SPEC|'0', SHFT|SPEC|'0', CTRL|SPEC|'0',
-/*  0x5a,*/'(', 0, 0,
-/*  0x5b,*/')', 0, 0,
-/*  0x5c,*/'/', 0, 0,
-/*  0x5d,*/'*', 0, 0,
-/*  0x5e,*/0, 0, 0,
-/*  0x5f,*/SPEC|'?', 0, 0,
+RKEY keytrans[0x60] = {
+
+/*      CODE    NORM    SHIFT   CTRL */
+/*      0x00,*/ '`',    '~',    0,
+/*      0x01,*/ '1',    '!',    0,
+/*      0x02,*/ '2',    '@',    0,
+/*      0x03,*/ '3',    '#',    0,
+/*      0x04,*/ '4',    '$',    0,
+/*      0x05,*/ '5',    '%',    0,
+/*      0x06,*/ '6',    '^',    0,
+/*      0x07,*/ '7',    '&',    0,
+/*      0x08,*/ '8',    '*',    0,
+/*      0x09,*/ '9',    '(',    0,
+/*      0x0a,*/ '0',    ')',    0,
+/*      0x0b,*/ '-',    '_',    0,
+/*      0x0c,*/ '=',    '+',    0,
+/*      0x0d,*/ '\\',   '|',    0,
+/*      0x0e,*/ 0,      0,      0,
+/*      0x0f,*/ 0,      0,      0,
+/*      0x10,*/ 'q',    'Q',    CTRL|'Q',
+/*      0x11,*/ 'w',    'W',    CTRL|'W',
+/*      0x12,*/ 'e',    'E',    CTRL|'E',
+/*      0x13,*/ 'r',    'R',    CTRL|'R',
+/*      0x14,*/ 't',    'T',    CTRL|'T',
+/*      0x15,*/ 'y',    'Y',    CTRL|'Y',
+/*      0x16,*/ 'u',    'U',    CTRL|'U',
+/*      0x17,*/ 'i',    'I',    CTRL|'I',
+/*      0x18,*/ 'o',    'O',    CTRL|'O',
+/*      0x19,*/ 'p',    'P',    CTRL|'P',
+/*      0x1a,*/ '[',    '{',    0,
+/*      0x1b,*/ ']',    '}',    0,
+/*      0x1c,*/ 0,      0,      0,
+/*      0x1d,*/ '1',    SPEC|'>',       0,
+/*      0x1e,*/ '2',    SPEC|'N',       0,
+/*      0x1f,*/ '3',    SPEC|'V',       0,
+/*      0x20,*/ 'a',    'A',    CTRL|'A',
+/*      0x21,*/ 's',    'S',    CTRL|'S',
+/*      0x22,*/ 'd',    'D',    CTRL|'D',
+/*      0x23,*/ 'f',    'F',    CTRL|'F',
+/*      0x24,*/ 'g',    'G',    CTRL|'G',/*     0x25,*/ 'h',    'H',    CTRL|'H',
+/*      0x26,*/ 'j',    'J',    CTRL|'J',
+/*      0x27,*/ 'k',    'K',    CTRL|'K',
+/*      0x28,*/ 'l',    'L',    CTRL|'L',
+/*      0x29,*/ ';',    ':',    0,
+/*      0x2a,*/ 39,     34,     0,
+/*      0x2b,*/ 0,      0,      0,
+/*      0x2c,*/ 0,      0,      0,
+/*      0x2d,*/ '4',    SPEC|'B',       0,
+/*      0x2e,*/ '5',    0,              0,
+/*      0x2f,*/ '6',    SPEC|'F',       0,
+        /* this key is probably mapped on forign AIMIGA keyboards */
+/*      0x30,*/ 0,      0,      0,
+/*      0x31,*/ 'z',    'Z',    CTRL|'Z',
+/*      0x32,*/ 'x',    'X',    CTRL|'X',
+/*      0x33,*/ 'c',    'C',    CTRL|'C',
+/*      0x34,*/ 'v',    'V',    CTRL|'V',
+/*      0x35,*/ 'b',    'B',    CTRL|'B',
+/*      0x36,*/ 'n',    'N',    CTRL|'N',
+/*      0x37,*/ 'm',    'M',    CTRL|'M',
+/*      0x38,*/ ',',    '<',    0,
+/*      0x39,*/ '.',    '>',    0,
+/*      0x3a,*/ '/',    '?',    0,
+/*      0x3b,*/ 0,      0,      0,
+/*      0x3c,*/ '.',    SPEC|'D',       0,
+/*      0x3d,*/ '7',    SPEC|'<',       0,
+/*      0x3e,*/ '8',    SPEC|'P',       0,
+/*      0x3f,*/ '9',    SPEC|'Z',       0,
+/*      0x40,*/ ' ',    SHFT|' ',       0,
+/*      0x41,*/ CTRL|'H',       SHFT|'D',       0,
+/*      0x42,*/ CTRL|'I',       SHFT|'I',       0,
+/*      0x43,*/ CTRL|'M', CTRL|'M', CTRL|'M',
+/*      0x44,*/ CTRL|'M', CTRL|'M', CTRL|'M',
+/*      0x45,*/ CTRL|'[',       0,      0,
+/*      0x46,*/ SPEC|'D',       0,      0,
+/*      0x47,*/ 0,      0,      0,
+/*      0x48,*/ 0,      0,      0,
+/*      0x49,*/ 0,      0,      0,
+/*      0x4a,*/ '-',    0,      0,
+/*      0x4b,*/ 0,      0,      0,
+/*      0x4c,*/ SPEC|'P',       SHFT|SPEC|'P',  CTRL|SPEC|'P',
+/*      0x4d,*/ SPEC|'N',       SHFT|SPEC|'N',  CTRL|SPEC|'N',
+/*      0x4e,*/ SPEC|'F',       SHFT|SPEC|'F',  CTRL|SPEC|'F',
+/*      0x4f,*/ SPEC|'B',       SHFT|SPEC|'B',  CTRL|SPEC|'B',
+/*      0x50,*/ SPEC|'1',       SHFT|SPEC|'1',  CTRL|SPEC|'1',
+/*      0x51,*/ SPEC|'2',       SHFT|SPEC|'2',  CTRL|SPEC|'2',
+/*      0x52,*/ SPEC|'3',       SHFT|SPEC|'3',  CTRL|SPEC|'3',
+/*      0x53,*/ SPEC|'4',       SHFT|SPEC|'4',  CTRL|SPEC|'4',
+/*      0x54,*/ SPEC|'5',       SHFT|SPEC|'5',  CTRL|SPEC|'5',
+/*      0x55,*/ SPEC|'6',       SHFT|SPEC|'6',  CTRL|SPEC|'6',
+/*      0x56,*/ SPEC|'7',       SHFT|SPEC|'7',  CTRL|SPEC|'7',
+/*      0x57,*/ SPEC|'8',       SHFT|SPEC|'8',  CTRL|SPEC|'8',
+/*      0x58,*/ SPEC|'9',       SHFT|SPEC|'9',  CTRL|SPEC|'9',
+/*      0x59,*/ SPEC|'0',       SHFT|SPEC|'0',  CTRL|SPEC|'0',
+/*      0x5a,*/ '(',    0,      0,
+/*      0x5b,*/ ')',    0,      0,
+/*      0x5c,*/ '/',    0,      0,
+/*      0x5d,*/ '*',    0,      0,
+/*      0x5e,*/ 0,      0,      0,
+/*      0x5f,*/ SPEC|'?',       0,      0,
 };
 
 /* some keyboard keys current states */
@@ -927,3 +939,8 @@ adoshello()
 # endif
 #endif  /* AMIGA */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

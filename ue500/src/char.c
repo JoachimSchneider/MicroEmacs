@@ -1,9 +1,21 @@
-/*      CHAR.C: Character handling functions for MicroEMACS 4.00 (C)Copyright
- * 1995 by Daniel Lawrence
+/*======================================================================
+ *      CHAR.C: Character handling functions for
+ *              MicroEMACS 4.00
+ *              (C)Copyright 1995 by Daniel Lawrence
  *
- *               ALL THE CODE HERE IS FOR VARIOUS FORMS OF ASCII AND WILL HAVE
- * TO BE MODIFIED FOR EBCDIC
- */
+ *              ALL THE CODE HERE IS FOR VARIOUS FORMS OF ASCII AND
+ *              WILL HAVE TO BE MODIFIED FOR EBCDIC
+ *====================================================================*/
+
+/*====================================================================*/
+#define CHAR_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        <stdlib.h>
@@ -13,7 +25,7 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/*      is_letter() Is the character a letter?  We presume a letter must be
+/* is_letter() Is the character a letter?  We presume a letter must be
  * either in the upper or lower case tables (even if it gets translated to
  * itself).
  */
@@ -32,7 +44,7 @@ int PASCAL NEAR is_lower P1_(char, ch)
     return (lowcase[C2I(ch)] != 0);
 }
 
-/*      is_upper() Is the character a upper case letter?  This looks in the
+/* is_upper() Is the character a upper case letter?  This looks in the
  * upper to lowercase translation table.
  */
 
@@ -43,8 +55,8 @@ int PASCAL NEAR is_upper P1_(char, ch)
 
 /*      chcase()
  *
- *               Change the case of the current character. First check lower and
- * then upper.  If it is not a letter, it gets returned unchanged.
+ * Change the case of the current character. First check lower and
+ * then upper. If it is not a letter, it gets returned unchanged.
  */
 
 unsigned int PASCAL NEAR chcase P1_(unsigned int, ch)
@@ -231,7 +243,7 @@ VOID PASCAL NEAR initchars()    /* initialize the character upper/lower case
 #endif
 }
 
-/*      Set a character in the lowercase map */
+/* Set a character in the lowercase map */
 
 int PASCAL NEAR setlower(ch, val)
 
@@ -242,7 +254,7 @@ char *val;      /* value to set it to */
     return (lowcase[C2I(*ch)] = C2I(*val));
 }
 
-/*      Set a character in the uppercase map */
+/* Set a character in the uppercase map */
 
 int PASCAL NEAR setupper(ch, val)
 

@@ -1,12 +1,25 @@
-/* The routines in this file provide memory allocation under the Microsoft
- * Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide memory allocation under the
+ * Microsoft Windows environment on an IBM-PC or compatible computer.
  *
- *  Must be compiled with Borland C++ 2.0 or later version.
+ * Must be compiled with Borland C++ 2.0 or later version.
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
-/* this module allocates memory by performing subsegment allocation from a list
- * of global segments. This technique is inspired by an article by Paul Yao in
- * Microsoft Systems Journal (January 1991) */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ *--------------------------------------------------------------------*
+ * this module allocates memory by performing subsegment allocation from
+ * a list of global segments. This technique is inspired by an article
+ * by Paul Yao in Microsoft Systems Journal (January 1991)
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWMEM_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    <stdio.h>
@@ -207,7 +220,7 @@ VOIDP CDECL malloc(size_t size)
 } /* malloc */
 
 /* free:    frees an allocated block */
-/* =====                              */
+/* ====                              */
 
 VOID CDECL free (VOIDP block)
 {
@@ -289,7 +302,7 @@ VOID CDECL free (VOIDP block)
 } /* free */
 
 /* realloc: reallocates a chunk of memory (shrink or expand) */
-/* ========                                                   */
+/* =======                                                   */
 
 VOIDP CDECL realloc(VOIDP oldblock, size_t size);
 {
@@ -381,3 +394,8 @@ VOID FAR PASCAL JettisonFarStorage (void)
 
 #endif  /* WINDOW_MSWIN */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

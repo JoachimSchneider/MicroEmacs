@@ -1,4 +1,4 @@
-/*
+/*======================================================================
  * The functions in this file implement commands that perform incremental
  * searches in the forward and backward directions.  This "ISearch" command is
  * intended to emulate the same command from the original EMACS implementation
@@ -25,7 +25,18 @@
  *    benefits of the * first change above.)
  *
  * (Further comments are in history.c)
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define ISEARCH_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 #include <stdio.h>
 #include "estruct.h"
 #include "eproto.h"

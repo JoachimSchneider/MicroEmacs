@@ -1,13 +1,24 @@
-/*	CMDFIX.C:	Translate pre 3.10 command and startup
- *			files to 3.10 and above files
- *			(C)Copyright 1993 by Daniel Lawrence
- *			All Rights reserved
+/*======================================================================
+ *      CMDFIX.C:       Translate pre 3.10 command and startup
+ *                      files to 3.10 and above files
+ *                      (C)Copyright 1993 by Daniel Lawrence
+ *                      All Rights reserved
  *
- *	The names of function key command strings have been changed to
- *	help make these names machine independant.  This program translates
- *	old files to new.
+ *      The names of function key command strings have been changed to
+ *      help make these names machine independant.  This program translates
+ *      old files to new.
  *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define CMDFIX_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -18,32 +29,96 @@
 static int PASCAL fix DCL((char *));
 
 /*  Table of command key name changes */
-static char *trans[][2] =
-{
-    "FN ", "A-D", "FN!", "A-F", "FN#", "A-H", "FN$", "A-J", "FN%", "A-K", "FN&",
-    "A-L", "FN,", "A-Z", "FN-", "A-X", "FN.", "A-C", "FN/", "A-V", "FN0", "A-B",
-    "FN1", "A-N", "FN2", "A-M", "FN;", "FN1", "FN<", "FN2", "FN=", "FN3", "FN>",
-    "FN4", "FN?", "FN5", "FN@", "FN6", "FNA", "FN7", "FNB", "FN8", "FNC", "FN9",
-    "FND", "FN0", "FNG", "FN<", "FNH", "FNP", "FNI", "FNZ", "FNK", "FNB", "FNM",
-    "FNF", "FNO", "FN>", "FNP", "FNN", "FNQ", "FNV", "FNR", "FNC", "FNS", "FND",
-    "FNT", "S-FN1", "FNU", "S-FN2", "FNV", "S-FN3", "FNW", "S-FN4", "FNX",
-    "S-FN5", "FNY", "S-FN6", "FNZ", "S-FN7", "FN[", "S-FN8", "FN\"", "A-G",
-    "FN\\", "S-FN9", "FN]", "S-FN0", "FN^", "FN^1", "FN_", "FN^2", "FN`",
-    "FN^3", "FNa", "FN^4", "FNb", "FN^5", "FNc", "FN^6", "FNd", "FN^7", "FNe",
-    "FN^8", "FNf", "FN^9", "FNg", "FN^0", "FNh", "A-FN1", "FNi", "A-FN2", "FNj",
-    "A-FN3", "FNk", "A-FN4", "FNl", "A-FN5", "FNm", "A-FN6", "FNn", "A-FN7",
-    "FNo", "A-FN8", "FNp", "A-FN9", "FNq", "A-FN0", "FNs", "FN^B", "FNt",
-    "FN^F", "FNu", "FN^>", "FNv", "FN^V", "FNw", "FN^<", "FN„", "FN^Z",
+
+char *trans[][2] = {
+    "FN ",      "A-D",
+    "FN!",      "A-F",
+    "FN#",      "A-H",
+    "FN$",      "A-J",
+    "FN%",      "A-K",
+    "FN&",      "A-L",
+    "FN,",      "A-Z",
+    "FN-",      "A-X",
+    "FN.",      "A-C",
+    "FN/",      "A-V",
+    "FN0",      "A-B",
+    "FN1",      "A-N",
+    "FN2",      "A-M",
+    "FN;",      "FN1",
+    "FN<",      "FN2",
+    "FN=",      "FN3",
+    "FN>",      "FN4",
+    "FN?",      "FN5",
+    "FN@",      "FN6",
+    "FNA",      "FN7",
+    "FNB",      "FN8",
+    "FNC",      "FN9",
+    "FND",      "FN0",
+    "FNG",      "FN<",
+    "FNH",      "FNP",
+    "FNI",      "FNZ",
+    "FNK",      "FNB",
+    "FNM",      "FNF",
+    "FNO",      "FN>",
+    "FNP",      "FNN",
+    "FNQ",      "FNV",
+    "FNR",      "FNC",
+    "FNS",      "FND",
+    "FNT",      "S-FN1",
+    "FNU",      "S-FN2",
+    "FNV",      "S-FN3",
+    "FNW",      "S-FN4",
+    "FNX",      "S-FN5",
+    "FNY",      "S-FN6",
+    "FNZ",      "S-FN7",
+    "FN[",      "S-FN8",
+    "FN\"",     "A-G",
+    "FN\\",     "S-FN9",
+    "FN]",      "S-FN0",
+    "FN^",      "FN^1",
+    "FN_",      "FN^2",
+    "FN`",      "FN^3",
+    "FNa",      "FN^4",
+    "FNb",      "FN^5",
+    "FNc",      "FN^6",
+    "FNd",      "FN^7",
+    "FNe",      "FN^8",
+    "FNf",      "FN^9",
+    "FNg",      "FN^0",
+    "FNh",      "A-FN1",
+    "FNi",      "A-FN2",
+    "FNj",      "A-FN3",
+    "FNk",      "A-FN4",
+    "FNl",      "A-FN5",
+    "FNm",      "A-FN6",
+    "FNn",      "A-FN7",
+    "FNo",      "A-FN8",
+    "FNp",      "A-FN9",
+    "FNq",      "A-FN0",
+    "FNs",      "FN^B",
+    "FNt",      "FN^F",
+    "FNu",      "FN^>",
+    "FNv",      "FN^V",
+    "FNw",      "FN^<",
+    "FN„",      "FN^Z",
     "set-fill-column", "set $fillcol",
 };
 
 #define NUMTRAN 71
 
-static char *trans1[][2] =
-{
-    "FN^P", "A-Q", "FN^Q", "A-W", "FN^R", "A-E", "FN^S", "A-R", "FN^T", "A-T",
-    "FN^U", "A-Y", "FN^V", "A-U", "FN^W", "A-I", "FN^X", "A-O", "FN^Y", "A-P",
-    "FN^^", "A-A", "FN^_", "A-S",
+char *trans1[][2] = {
+    "FN^P",     "A-Q",
+    "FN^Q",     "A-W",
+    "FN^R",     "A-E",
+    "FN^S",     "A-R",
+    "FN^T",     "A-T",
+    "FN^U",     "A-Y",
+    "FN^V",     "A-U",
+    "FN^W",     "A-I",
+    "FN^X",     "A-O",
+    "FN^Y",     "A-P",
+    "FN^^",     "A-A",
+    "FN^_",     "A-S",
 };
 
 #define NUMTRAN1        13
@@ -61,14 +136,14 @@ char *argv[];   /* text of command line arguments */
 {
     REGISTER int carg;  /* current command line argument */
 
-    puts("CMDFIX:	Startup and Command file updater");
-    printf("		for MicroEMACS version %s\n", VERSION);
+    puts("CMDFIX:       Startup and Command file updater");
+    printf("            for MicroEMACS version %s\n", VERSION);
 
     /* help people out! */
     if ( argc < 2 ) {
         puts("Converts MicroEMACS 3.9n and earlier keybindings to");
         puts("version 4.00 keybindings.");
-        puts("\nUsage:	cmdfix <file list>");
+        puts("\nUsage:  cmdfix <file list>");
         exit(-1);
     }
 
@@ -202,3 +277,8 @@ int PASCAL fix P1_(char *, fname)
     return 0;
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,5 +1,21 @@
-/*  EBIND:      Initial default key to function bindings for MicroEMACS 4.00
- */
+/*======================================================================
+ *      EBIND:          Initial default key to function bindings for
+ *                      MicroEMACS 4.00
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef EBIND_H_
+#define EBIND_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+#ifdef MAIN_C_
+
 /*
  * Command table. This table  is *roughly* in ASCII order, left to right across
  * the characters of the command. It is being searched sequentially for
@@ -163,8 +179,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { META|'X',           BINDFNC, { namedcmd } },
     { META|'Y',           BINDFNC, { yank_pop } },
     { META|'Z',           BINDFNC, { quickexit } },
-/*  {META|CTRL|'?',         BINDFNC,    {delbword}}, ??? */
-
+ /**{ META|CTRL|'?',      BINDFNC, { delbword} } },**/  /*???*/
     { ALTD|'B',           BINDFNC, { list_screens } },
     { ALTD|'C',           BINDFNC, { cycle_screens } },
     { ALTD|'D',           BINDFNC, { delete_screen } },
@@ -343,7 +358,13 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { 0,                  BINDNUL, { NULL } }
 };
 
+#endif  /* MAIN_C_  */
 
+
+
+/*====================================================================*/
+#endif/**#ifndef EBIND_H_**/
+/*====================================================================*/
 
 /**********************************************************************/
 /* EOF                                                                */

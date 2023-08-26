@@ -344,7 +344,6 @@
 
 # undef NEAR
 # define NEAR
-# define DNEAR
 # if     MSC || IC
 #  undef CDECL
 #  define CDECL   __cdecl
@@ -389,18 +388,15 @@
 
 # if MSDOS & (TURBO | MSC | TIPC)
 #  define NEAR
-#  define DNEAR
 #  define PASCAL pascal
 #  define CDECL cdecl
 # else
 #  if MSDOS & ZTC
 #   define NEAR
-#   define DNEAR
 #   define PASCAL _pascal
 #   define CDECL _cdecl
 #  else
 #   define NEAR
-#   define DNEAR
 #   define PASCAL
 #   define CDECL
 #  endif

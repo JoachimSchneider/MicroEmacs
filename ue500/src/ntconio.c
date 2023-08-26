@@ -1,13 +1,25 @@
-/*      NTCONIO.C       Operating specific video & keyboard functions for the
- * Window NT operating system (console mode) for MicroEMACS 4.00 (C)Copyright
- * 1995 by Daniel M. Lawrence Windows NT version by Walter Warniaha
+/*======================================================================
+ *      NTCONIO.C       Operating specific video & keyboard functions
+ *                      for the Window NT operating system (console mode)
+ *                      for MicroEMACS 4.00
+ *                      (C)Copyright 1995 by Daniel M. Lawrence
+ *                      Windows NT version by Walter Warniaha
  *
  * The routines in this file provide video and keyboard support using the
  * Windows NT console functions.
- *
- */
+ *====================================================================*/
 
-#define termdef 1                       /* don't define "term" external */
+/*====================================================================*/
+#define NTCONIO_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+#define termdef 1                     /* don't define "term" external */
 
 #undef  PASCAL
 #undef  NEAR
@@ -19,7 +31,7 @@
 #include        "elang.h"
 
 #if     NTCON
-# define NROW    80            /* Screen size.                 */
+# define NROW    80             /* Screen size.                 */
 # define NCOL    132            /* Edit if you want to.         */
 # define MARGIN  8              /* size of minimim margin and   */
 # define SCRSIZ  64             /* scroll size for extended lines */
@@ -62,13 +74,13 @@ static WORD ntMin = (WORD)-1;
 static WORD ntColMax = 0;
 static WORD ntColMin = (WORD)-1;
 
-int revflag = FALSE;                    /* are we currently in rev video? */
+int revflag = FALSE;              /* are we currently in rev video? */
 
 /* Windows NT Console screen buffer handle.  All I/O is done through this
  * handle.
  */
 static HANDLE hInput, hOutput;
-static char chConsoleTitle[256];    // Preserve the title of the console.
+static char chConsoleTitle[256];  /* Preserve the title of the console. */
 static long ConsoleMode, OldConsoleMode;
 
 static INPUT_RECORD ir;
@@ -77,14 +89,33 @@ static WORD wKeyEvent;
 /*
  * Standard terminal interface dispatch table.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, ntopen, ntclose,
-    ntkopen, ntkclose, ntgetc, ntputc, ntflush, ntmove, nteeol, nteeop, nteeop,
-    ntbeep, ntrev, ntcres
-# if     COLOR
-    , ntfcol, ntbcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    ntopen,
+    ntclose,
+    ntkopen,
+    ntkclose,
+    ntgetc,
+    ntputc,
+    ntflush,
+    ntmove,
+    nteeol,
+    nteeop,
+    nteeop,
+    ntbeep,
+    ntrev,
+    ntcres
+#if     COLOR
+    , ntfcol,
+    ntbcol
+#endif
 };
 
 /*  Mousing global variable */
@@ -136,8 +167,8 @@ int in_get()    /* get an event from the input buffer */
 
 # if COLOR
 /*----------------------------------------------------------------------*/
-/*  ntfcol()                            */
-/* Set the current foreground color.                    */
+/*      ntfcol()                                                        */
+/* Set the current foreground color.                                    */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntfcol(int color)                      /* color to set */
@@ -146,8 +177,8 @@ PASCAL NEAR ntfcol(int color)                      /* color to set */
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntbcol()                            */
-/* Set the current background color.                    */
+/*      ntbcol()                                                        */
+/* Set the current background color.                                    */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntbcol(int color)              /* color to set */
@@ -171,8 +202,8 @@ static VOID near ntSetUpdateValues(void)
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntmove()                            */
-/* Move the cursor.                         */
+/*      ntmove()                                                        */
+/* Move the cursor.                                                     */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntmove(int row, int col)
@@ -186,8 +217,8 @@ PASCAL NEAR ntmove(int row, int col)
 
 
 /*----------------------------------------------------------------------*/
-/*  ntflush()                           */
-/* Update the physical video buffer from the logical video buffer.  */
+/*      ntflush()                                                       */
+/* Update the physical video buffer from the logical video buffer.      */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntflush(void)
@@ -234,14 +265,14 @@ PASCAL NEAR ntflush(void)
 
 static VOID near MouseEvent(void)
 {
-    MOUSE_EVENT_RECORD *m_event;        /* mouse event to decode */
-    REGISTER int k;             /* current bit/button of mouse */
-    REGISTER int event;         /* encoded mouse event */
-    REGISTER int etype;         /* event type byte */
-    int mousecol;               /* current mouse column */
-    int mouserow;               /* current mouse row */
-    int sstate;                 /* current shift key status */
-    int newbut;                 /* new state of the mouse buttons */
+    MOUSE_EVENT_RECORD *m_event;  /* mouse event to decode */
+    REGISTER int k;               /* current bit/button of mouse */
+    REGISTER int event;           /* encoded mouse event */
+    REGISTER int etype;           /* event type byte */
+    int mousecol;                 /* current mouse column */
+    int mouserow;                 /* current mouse row */
+    int sstate;                   /* current shift key status */
+    int newbut;                   /* new state of the mouse buttons */
 
     m_event = &(ir.Event.MouseEvent);
 
@@ -268,11 +299,10 @@ static VOID near MouseEvent(void)
     /* get the shift key status as well */
     etype = MOUS >> 8;
     sstate = m_event->dwControlKeyState;
-    if ( sstate & SHIFT_PRESSED )               /* shifted? */
+    if ( sstate & SHIFT_PRESSED )             /* shifted? */
         etype |= (SHFT >> 8);
-    if ( (sstate & RIGHT_CTRL_PRESSED) ||(sstate & LEFT_CTRL_PRESSED) ) /*
-                                                                         * controled?
-                                                                         */
+    if ( (sstate & RIGHT_CTRL_PRESSED)
+          || (sstate & LEFT_CTRL_PRESSED) )   /* controled? */
         etype |= (CTRL >> 8);
 
     /* no buttons changes */
@@ -303,10 +333,10 @@ static VOID near MouseEvent(void)
             in_put(mousecol);
             in_put(mouserow);
 
-            event = ( (newbut&k) ? 0 : 1 );             /* up or down? */
-            if ( k == 2 )                               /* center button? */
+            event = ( (newbut&k) ? 0 : 1 );     /* up or down? */
+            if ( k == 2 )                       /* center button? */
                 event += 4;
-            if ( k == 4 )                               /* right button? */
+            if ( k == 4 )                       /* right button? */
                 event += 2;
             event += 'a';
             in_put(event);
@@ -348,7 +378,6 @@ static VOID near KeyboardEvent()
     prefix = 0;
 
     if ( c == 0 ) {
-
         /* grab the virtual scan code */
         vscan = ir.Event.KeyEvent.wVirtualScanCode;
 
@@ -361,102 +390,101 @@ static VOID near KeyboardEvent()
 
         /* interpret code by keyscan */
         switch ( vscan ) {
+            /* ignore these key down events */
+            case 29:                        /* control */
+            case 42:                        /* left shift */
+            case 54:                        /* left shift */
+            case 56:                        /* ALT key */
+                return;
 
-        /* ignore these key down events */
-        case 29:                        /* control */
-        case 42:                        /* left shift */
-        case 54:                        /* left shift */
-        case 56:                        /* ALT key */
-            return;
+            case 68:                        /* F10 */
+                prefix = SPEC;
+                c = '0';
+                break;
 
-        case 68:                        /* F10 */
-            prefix = SPEC;
-            c = '0';
-            break;
+            case 69:                        /* PAUSE */
+                prefix = SPEC;
+                c = ':';
+                break;
 
-        case 69:                        /* PAUSE */
-            prefix = SPEC;
-            c = ':';
-            break;
+            case 70:                        /* SCROLL LOCK */
+                return;
 
-        case 70:                        /* SCROLL LOCK */
-            return;
+            case 71:                        /* HOME */
+                prefix = SPEC;
+                c = '<';
+                break;
 
-        case 71:                        /* HOME */
-            prefix = SPEC;
-            c = '<';
-            break;
+            case 72:                        /* Cursor Up */
+                prefix = SPEC;
+                c = 'P';
+                break;
 
-        case 72:                        /* Cursor Up */
-            prefix = SPEC;
-            c = 'P';
-            break;
+            case 73:                        /* Page Up */
+                prefix = SPEC;
+                c = 'Z';
+                break;
 
-        case 73:                        /* Page Up */
-            prefix = SPEC;
-            c = 'Z';
-            break;
+            case 75:                        /* Cursor left */
+                prefix = SPEC;
+                c = 'B';
+                break;
 
-        case 75:                        /* Cursor left */
-            prefix = SPEC;
-            c = 'B';
-            break;
+            case 76:                        /* keypad 5 */
+                prefix = SPEC;
+                c = 'L';
+                break;
 
-        case 76:                        /* keypad 5 */
-            prefix = SPEC;
-            c = 'L';
-            break;
+            case 77:                        /* Cursor Right */
+                prefix = SPEC;
+                c = 'F';
+                break;
 
-        case 77:                        /* Cursor Right */
-            prefix = SPEC;
-            c = 'F';
-            break;
+            case 79:                        /* END */
+                prefix = SPEC;
+                c = '>';
+                break;
 
-        case 79:                        /* END */
-            prefix = SPEC;
-            c = '>';
-            break;
+            case 80:                        /* Cursor Down */
+                prefix = SPEC;
+                c = 'N';
+                break;
 
-        case 80:                        /* Cursor Down */
-            prefix = SPEC;
-            c = 'N';
-            break;
+            case 81:                        /* Page Down */
+                prefix = SPEC;
+                c = 'V';
+                break;
 
-        case 81:                        /* Page Down */
-            prefix = SPEC;
-            c = 'V';
-            break;
+            case 82:                        /* insert key */
+                prefix = SPEC;
+                c = 'C';
+                break;
 
-        case 82:                        /* insert key */
-            prefix = SPEC;
-            c = 'C';
-            break;
+            case 83:                        /* delete key */
+                prefix = SPEC;
+                c = 'D';
+                break;
 
-        case 83:                        /* delete key */
-            prefix = SPEC;
-            c = 'D';
-            break;
+            case 87:                        /* F11 */
+                prefix = SPEC;
+                c = '-';
+                break;
 
-        case 87:                        /* F11 */
-            prefix = SPEC;
-            c = '-';
-            break;
+            case 88:                        /* F12 */
+                prefix = SPEC;
+                c = '=';
+                break;
 
-        case 88:                        /* F12 */
-            prefix = SPEC;
-            c = '=';
-            break;
-
-        default:
+            default:
 # if     0
-            /* tell us about a key we do net yet map! */
-            printf("<%d:%d/%d> ",
-                   ir.EventType,
-                   ir.Event.KeyEvent.uChar.AsciiChar,
-                   ir.Event.KeyEvent.wVirtualScanCode);
+                /* tell us about a key we do net yet map! */
+                printf("<%d:%d/%d> ",
+                       ir.EventType,
+                       ir.Event.KeyEvent.uChar.AsciiChar,
+                       ir.Event.KeyEvent.wVirtualScanCode);
 # endif
 
-            return;
+                return;
         }
 
 pastothers:     /* shifted special key? */
@@ -487,8 +515,8 @@ pastothers:     /* shifted special key? */
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntgetc()                            */
-/* Get a character from the keyboard.                   */
+/*      ntgetc()                                                        */
+/* Get a character from the keyboard.                                   */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntgetc()
@@ -527,8 +555,8 @@ ttc:    ntflush();
 
 # if TYPEAH
 /*----------------------------------------------------------------------*/
-/*  typahead()                          */
-/* Returns true if a key has been pressed.              */
+/*      typahead()                                                      */
+/* Returns true if a key has been pressed.                              */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR typahead()
@@ -585,15 +613,15 @@ static WORD near ntAttribute(void)
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntputc()                            */
-/* Put a character at the current position in the current colors.   */
+/*      ntputc()                                                        */
+/* Put a character at the current position in the current colors.       */
 /* Note that this does not behave the same as putc() or VioWrtTTy().    */
 /* This routine does nothing with returns and linefeeds.  For backspace */
 /* it puts a space in the previous column and moves the cursor to the   */
-/* previous column.  For all other characters, it will display the  */
+/* previous column.  For all other characters, it will display the      */
 /* graphic representation of the character and put the cursor in the    */
 /* next column (even if that is off the screen.  In practice this isn't */
-/* a problem.                               */
+/* a problem.                                                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntputc(int c)
@@ -627,8 +655,8 @@ PASCAL NEAR ntputc(int c)
 
 
 /*----------------------------------------------------------------------*/
-/*  nteeol()                            */
-/* Erase to end of line.                        */
+/*      nteeol()                                                        */
+/* Erase to end of line.                                                */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR nteeol()
@@ -654,8 +682,8 @@ PASCAL NEAR nteeol()
 
 
 /*----------------------------------------------------------------------*/
-/*  nteeop()                            */
-/* Erase to end of page.                        */
+/*      nteeop()                                                        */
+/* Erase to end of page.                                                */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR nteeop()
@@ -681,8 +709,8 @@ PASCAL NEAR nteeop()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntrev()                         */
-/* Change reverse video state.                      */
+/*      ntrev()                                                         */
+/* Change reverse video state.                                          */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntrev(state)
@@ -694,8 +722,8 @@ int state;      /* TRUE = reverse, FALSE = normal */
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntcres()                            */
-/* Change the screen resolution.                    */
+/*      ntcres()                                                        */
+/* Change the screen resolution.                                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntcres(char *res)           /* name of desired video mode   */
@@ -705,8 +733,8 @@ PASCAL NEAR ntcres(char *res)           /* name of desired video mode   */
 
 
 /*----------------------------------------------------------------------*/
-/*  spal()                              */
-/* Change pallette settings.  (Does nothing.)               */
+/*      spal()                                                          */
+/* Change pallette settings.  (Does nothing.)                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR spal(char *dummy)
@@ -716,7 +744,7 @@ PASCAL NEAR spal(char *dummy)
 
 
 /*----------------------------------------------------------------------*/
-/*  ntbeep()                            */
+/*      ntbeep()                                                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntbeep()
@@ -726,7 +754,7 @@ PASCAL NEAR ntbeep()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntopen()                            */
+/*  ntopen()                                                            */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntopen()
@@ -788,8 +816,8 @@ PASCAL NEAR ntopen()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntclose()                           */
-/* Restore the original video settings.                 */
+/*      ntclose()                                                       */
+/* Restore the original video settings.                                 */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntclose()
@@ -803,8 +831,8 @@ PASCAL NEAR ntclose()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntkopen()                           */
-/* Open the keyboard.                           */
+/*      ntkopen()                                                       */
+/* Open the keyboard.                                                   */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntkopen()
@@ -825,8 +853,8 @@ PASCAL NEAR ntkopen()
 
 
 /*----------------------------------------------------------------------*/
-/*  ntkclose()                          */
-/* Close the keyboard.                          */
+/*    ntkclose()                                                        */
+/* Close the keyboard.                                                  */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntkclose()
@@ -849,3 +877,8 @@ int f, n;        /* default flag, numeric argument [unused] */
 # endif
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

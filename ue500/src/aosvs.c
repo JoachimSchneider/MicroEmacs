@@ -1,108 +1,122 @@
-/*
+/*======================================================================
  * aosvs.c  -  AOS/VS & MV/UX version of the termio.c module
  *
- * The functions in this module deal with the O/S in reading/writing characters
- * from/to the screen.  We also deal with various wiedness things in dealing
- * with the AOS/VS file system such as ACL's and elementsizes. This has been
- * written primarily for AOS/VS but should work for MV/UX as well.  No promises
- * though.
+ * The functions in this module deal with the O/S in reading/writing
+ * characters from/to the screen.  We also deal with various wiedness things
+ * in dealing with the AOS/VS file system such as ACL's and elementsizes.
+ * This has been written primarily for AOS/VS but should work for MV/UX as
+ * well.  No promises though.
  *
  * AOS/VS and MV/UX are products of Data General Corporation, Westboro MA.
  *
  * Authors:
  *          Daniel Lawrence --- doing MicroEmacs... stuff copied into here...
- * Douglas Rady ------ most of the rest of the stuff here Credits:
+ *          Douglas Rady ------ most of the rest of the stuff here
+ * Credits:
  *          Michael Meissner -- beating Doug over the head with advice and info.
  *                              on AOS/VS "C" compiler.     THANK YOU!!!!!!!!!!
  *          Bill Benedetto
- *          & friends      ---- beta victims, bug finders/fixers GNU
- * --------------- inspiration, software tools, clean readable BSD and USG code
- * examples and interesting comments.
+ *          & friends      ---- beta victims, bug finders/fixers
+ *          GNU --------------- inspiration, software tools, clean readable BSD
+ *                              and USG code examples and interesting comments.
  *
  * Definition: uka = Unixly Known As
  *
- * Revision/Hack History MicroEMACS v3.<9p,10> AOS/VS History
+ * Revision/Hack History
+ *  MicroEMACS v3.<9p,10> AOS/VS History
  *
- *  3.09.16.00 - 3.09.16.09         ??-???-??           dcr Before written
- * history.  Suffice to say that .00 - .04 was just the AOS/VS port from 3.8z,
- * 3.9e, 3.9i and 3.9n with major cleaning up and rewriting of the AOS/VS stuff.
- *  Sub-revisions 3.09.16.05 - 3.09.16.09 being optimizations and various fixes.
- * Yawn...
+ *  3.09.16.00 - 3.09.16.09         ??-???-??           dcr
+ *      Before written history.  Suffice to say that .00 - .04 was just the
+ *      AOS/VS port from 3.8z, 3.9e, 3.9i and 3.9n with major cleaning up and
+ *      rewriting of the AOS/VS stuff.  Sub-revisions 3.09.16.05 - 3.09.16.09
+ *      being optimizations and various fixes.
+ *      Yawn...
  *
- *  3.09.16.10                      25-Aug-88           dcr Changed
- *  do_system_end()  in  aosvs.c  to check for execution of a
- *  macro as basis for not executing an  mlreply("Continue")  call. Also fixed
- *  stime()  in  aosvs.c  so it just plain worked.
+ *  3.09.16.10                      25-Aug-88           dcr
+ *      Changed  do_system_end()  in  aosvs.c  to check for execution of a
+ *      macro as basis for not executing an  mlreply("Continue")  call.
+ *      Also fixed  stime()  in  aosvs.c  so it just plain worked.
  *      #$&^@*&(+$#!!!!
  *      Also added  REPLYNL  in  estruct.h  and made use of CR or NL in the
- * mlreply()  routine in  input.c  compile time conditional.
+ *      mlreply()  routine in  input.c  compile time conditional.
  *
- *  3.09.16.11                      13-Sep-88           dcr Start of written
- * hisory.  This is a momentous event in the course of AOS/VS MicroEMACS
- * history: doug writes some change doc.!!! Yeah!!!
+ *  3.09.16.11                      13-Sep-88           dcr
+ *      Start of written hisory.  This is a momentous event in the course of
+ *      AOS/VS MicroEMACS history: doug writes some change doc.!!! Yeah!!!
  *      Changed several functions to force the  $builtin  version as a trade of
- * more code size for more speed (usually defaulted to $builtin anyway...).
+ *      more code size for more speed (usually defaulted to $builtin anyway...).
  *
- *  3.09.16.12                      14-Sep-88           dcr Recompiled with
- * revision 4.00 of AOS/VS C.  A miracle...
+ *  3.09.16.12                      14-Sep-88           dcr
+ *      Recompiled with revision 4.00 of AOS/VS C.  A miracle...
  *
- *  3.09.16.13                      12-Oct-88           dcr Changed to have the
- * temporary file for pipecmd() be created in a system wide temporary file
- * directory known as :TMP, uka /tmp.  You paranoids can create :TMP as a CPD
- * with max. size of 2048 blocks and an ACL of
- *      +,WE and you should be able to relax a nibble. Creates temp. file with
- * ACL of  username,OWAR
+ *  3.09.16.13                      12-Oct-88           dcr
+ *      Changed to have the temporary file for pipecmd() be created in a system
+ *      wide temporary file directory known as :TMP, uka /tmp.  You paranoids
+ *      can create :TMP as a CPD with max. size of 2048 blocks and an ACL of
+ *      +,WE and you should be able to relax a nibble.
+ *      Creates temp. file with ACL of  username,OWAR
  *
- *  3.09.16.14                      13-Oct-88           dcr Put in MCA's hack to
- * reduce memory consumption when VIEWing a file. Modified  lalloc()  in line.c
- *  Test case of paru.h saved 27 2Kb pages.
+ *  3.09.16.14                      13-Oct-88           dcr
+ *      Put in MCA's hack to reduce memory consumption when VIEWing a file.
+ *      Modified  lalloc()  in line.c  Test case of paru.h saved 27 2Kb pages.
  *
- *  3.10.00.00                      09-Nov-88           dcr Begin code porting
- * for 3.10 BETA.
+ *  3.10.00.00                      09-Nov-88           dcr
+ *      Begin code porting for 3.10 BETA.
  *
- *  3.10.00.01                      20-Dec-88           dcr Implemented
- * multi-language messages in  aosvs.c  per 3.10 BETA.
+ *  3.10.00.01                      20-Dec-88           dcr
+ *      Implemented multi-language messages in  aosvs.c  per 3.10 BETA.
  *
- *  3.10.00.02                      26-Dec-88           dcr Tracked down some
- * un-documented runtime optimizations and got a working version. Also resolved
- * timeset() references.
+ *  3.10.00.02                      26-Dec-88           dcr
+ *      Tracked down some un-documented runtime optimizations and got
+ *      a working version. Also resolved timeset() references.
  *
- *  3.10.00.03                      17-Jan-89           dcr Cleaned up for
- * shipping to Dan.  Put in some missing code for input.c
+ *  3.10.00.03                      17-Jan-89           dcr
+ *      Cleaned up for shipping to Dan.  Put in some missing code for input.c
  *
- *  3.10.00.04                      17-Jan-89           dcr Put in some
- * optimizations regarding TTflush() and ostring() in the bind.c, input.c and
- * aosvs.c files.  This freed 2Kb... but not for long.
+ *  3.10.00.04                      17-Jan-89           dcr
+ *      Put in some optimizations regarding TTflush() and ostring() in the
+ *      bind.c, input.c and aosvs.c files.  This freed 2Kb... but not for long.
  *
- *  3.10.00.05                      17-Jan-89           dcr Some memory
- * optimization in  exec.c  and  input.c for small regain.
+ *  3.10.00.05                      17-Jan-89           dcr
+ *      Some memory optimization in  exec.c  and  input.c for small regain.
  *
- *  3.10.00.06 - 3.10.00.27     02-Mar-89 - 10-Mar-89   dcr Various changes.
- * Cleaned up the AOS/VS changes in other modules so
- *      we actually work right.  Added conditionals for using either BSD or USG
- * console i/o (BSD doesn't seem to work).  Reclaimed about 4Kb of
+ *  3.10.00.06 - 3.10.00.27     02-Mar-89 - 10-Mar-89   dcr
+ *      Various changes. Cleaned up the AOS/VS changes in other modules so
+ *      we actually work right.  Added conditionals for using either BSD or
+ *      USG console i/o (BSD doesn't seem to work).  Reclaimed about 4Kb of
  *      memory in various places and made some of these optimizations compile
- * time conditional. We are still using .890+ ms to start up intead of the
- *      .520+ ms that we took with 3.9p. Not much hope there... but... Various
- * tweaks here and there.  Added the skip of nulls when reading in a file (most
- * unpleasant results if we don't).  Lost some memory to the USG console i/o
- * stuff.  Threw out the BSD console i/o stuff, sigh....
+ *      time conditional. We are still using .890+ ms to start up intead of the
+ *      .520+ ms that we took with 3.9p. Not much hope there... but...
+ *      Various tweaks here and there.  Added the skip of nulls when reading in
+ *      a file (most unpleasant results if we don't).  Lost some memory to the
+ *      USG console i/o stuff.  Threw out the BSD console i/o stuff, sigh....
  *
- *  3.10.00.28                      10-Mar-89           dcr Stuck in the
- *  aosvs$unix_to_aosvs_path()  routine to replace the code in
- * resolve_pathname().  The new routine does a fairly complete job of converting
- * Unix(tm) pathnames to AOS/VS format. It also handles the
+ *  3.10.00.28                      10-Mar-89           dcr
+ *      Stuck in the  aosvs$unix_to_aosvs_path()  routine to replace the code
+ *      in resolve_pathname().  The new routine does a fairly complete job of
+ *      converting Unix(tm) pathnames to AOS/VS format. It also handles the
  *      Ms-Dog '\' path seperator.
  *
- *  3.10.00.29                      16-Mar-89           dcr Changed pathname
- * expansion to be invisible to user.  Required changes to  fileio.c  to #if
- * AOSVS  replace the fopen() calls with our xxfopen() call which does the
- * pathname expansion.  Allowed removal of all the related to the EXPPATH
- * define.  Also changed several routines here. Allows user to reference buffer
- * & file names w/o "unexpanding" the
- *      orginal pathname. Diff'd & sent to Dan.
+ *  3.10.00.29                      16-Mar-89           dcr
+ *      Changed pathname expansion to be invisible to user.  Required changes
+ *      to  fileio.c  to #if AOSVS  replace the fopen() calls with our xxfopen()
+ *      call which does the pathname expansion.  Allowed removal of all the
+ *      related to the EXPPATH define.  Also changed several routines here.
+ *      Allows user to reference buffer & file names w/o "unexpanding" the
+ *      orginal pathname.
+ *      Diff'd & sent to Dan.
  *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define AOSVS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #nolist
 #include        <stdio.h>           /* get the usual */
@@ -114,7 +128,7 @@
 # define dashertermdef   1          /* might not be used any more */
 
 # nolist
-# include        "edef.h"           /* get the MicroEMACS EXTERN's */
+# include        "edef.h"           /* get the MicroEMACS extern's */
 # include        "elang.h"
 # list
 
@@ -145,16 +159,16 @@ int kbdqp;                      /* there is a char in kbdq      */
 char kbdq;                      /* char we've already read      */
 
 /*
- *   some D.G. supplied AOS/VS & MV/UX specific functions
+ *  some D.G. supplied AOS/VS & MV/UX specific functions
  *
- *   _toaos_fid() - changes UNIX(tm)  pathname to AOS/VS pathname (Thank you!)
- * traceback() - calls the ?SNAP LANG_RT routine for error traceback
+ *  _toaos_fid() - changes UNIX(tm)  pathname to AOS/VS pathname (Thank you!)
+ *  traceback() - calls the ?SNAP LANG_RT routine for error traceback
  */
 /*EXTERN int  _toaos_fid(char*, char* );*/
 EXTERN VOID traceback(int);
 
 /*
- *   This is how we make an MV/Eclipse accumulator in C with almost all options.
+ *  This is how we make an MV/Eclipse accumulator in C with almost all options.
  */
 union accumulator {                 /* dearly beloved, we are gathered here...*/
     unsigned long * ptr;            /* pointer to unsigned long (generic) */
@@ -203,8 +217,8 @@ static int oldbut;      /* Previous state of mouse buttons */
 
 /*------------------------------------------------------------------------------
  *  resolve_full_pathname(char*, char*) - resolves a filename or pathname to
- * full AOS/VS pathname via the ?GRNAME system call.  If the file does not
- * exsist then the current working directory is assumed by  AOS/VS.
+ *  full AOS/VS pathname via the ?GRNAME system call.  If the file does not
+ *  exsist then the current working directory is assumed by  AOS/VS.
  *
  *  Returns  FIOSUC  if  from_path  is found or  FIOFNF  if it isn't found.
  */
@@ -220,13 +234,13 @@ char *from_path, *to_path;      /* resolve "from" pathname "to" pathname */
 
 /*
  *  ffwopen() - AOS/VS specific version of the ffwopen() routine found in the
- * fileio.c source.  This version will attempt to recreate the edit file (if it
- * exists) with the existing edit file ACL, elementsize, filetype and recordsize
- * parameters as determined via a ?FSTAT filestatus system call.
+ *  fileio.c source.  This version will attempt to recreate the edit file
+ *  (if it exists) with the existing edit file ACL, elementsize, filetype and
+ *  recordsize parameters as determined via a ?FSTAT filestatus system call.
  *
  *  Returns  FIOSUC  if file is opened or  FIOERR  if not opened.
  *
- *  DOUG, we need to make the mode param work here, or ignore it....
+ *      DOUG, we need to make the mode param work here, or ignore it....
  */
 int ffwopen(bfilnam, mode, sfilnam)
 
@@ -283,7 +297,7 @@ char *sfilnam;    /* save file name or NULL */
             goto fubar;
 
         /*
-         *   Get ACL of bfnam.  If we can't get that then we get the default ACL
+         * Get ACL of bfnam.  If we can't get that then we get the default ACL
          * and use that.
          */
         ac0.cptr = bfnam;
@@ -298,7 +312,7 @@ char *sfilnam;    /* save file name or NULL */
         }
 
         /*
-         *   Delete  sfnam  file.  We don't care about any errors on this.
+         * Delete  sfnam  file.  We don't care about any errors on this.
          */
         ac0.cptr = tptr;
         ac1.lng = 0L;
@@ -316,7 +330,7 @@ char *sfilnam;    /* save file name or NULL */
         create_pkt.cmil = fstat_pkt.smil;   /* max. index level */
 
         /*
-         *   Make system call to create a file with supplied specs.
+         * Make system call to create a file with supplied specs.
          */
         ac2.ptr  = &create_pkt;
         ac0.cptr = tptr;
@@ -330,11 +344,11 @@ char *sfilnam;    /* save file name or NULL */
         goto fubar;
 
 # if     ISADIR
-    if ( isadirectory(ffp) ) {   /* check to see if file is a directory */
-        mlwrite(TEXT216);       /* bitch... */
-        ffclose(ffp);           /* yes, close it and get out!!! */
+    if ( isadirectory(ffp) ) {    /* check to see if file is a directory */
+        mlwrite(TEXT216);         /* bitch... */
+        ffclose(ffp);             /* yes, close it and get out!!! */
 
-        return (FIOERR);         /* actual checking code in O/S modules */
+        return (FIOERR);          /* actual checking code in O/S modules */
     }
 # endif
 
@@ -350,11 +364,10 @@ fubar: mlwrite(TEXT155);
 }
 
 /*
- *  unlink() - delete a file - called from  writeout()  in  file.c
+ * unlink() - delete a file - called from  writeout()  in  file.c
  *
- *  This routine replaces the DG supplied  unlink()  since we don't use the
+ * This routine replaces the DG supplied  unlink()  since we don't use the
  * link() unlink() combination to rename files.  Saves some memory.
- *
  */
 int unlink(del_fnam)
 
@@ -367,14 +380,14 @@ char *del_fnam;        /* name of file to delete */
     ac0.cptr = dtmp;
     ac1.lng = 0L;
     ac2.lng = 0L;
-    if ( sys($DELETE, &ac0, &ac1, &ac2) )  /* attempt to delete it */
-        return (-1);                          /* normal error return */
+    if ( sys($DELETE, &ac0, &ac1, &ac2) ) /* attempt to delete it */
+        return (-1);                      /* normal error return */
 
-    return (0);                                /* normal okay return */
+    return (0);                           /* normal okay return */
 }
 
 /*
- *  rename() - rename a file - called from  writeout()  in  file.c
+ * rename() - rename a file - called from  writeout()  in  file.c
  */
 int rename(from_nam, to_nam)
 
@@ -384,7 +397,7 @@ char *to_nam;       /* rename to name */
     char ftmp[NFILEN], ttmp[NFILEN];
 
     /*
-     *   First we convert Unix(tm) or Ms-dog paths to Aos/Vs paths. Second we
+     * First we convert Unix(tm) or Ms-dog paths to Aos/Vs paths. Second we
      * strip the actual filename from the "to" path by going to the end of the
      * string and working our way backward until we find a pathname seperator
      * which under AOS/VS is a colon (:).
@@ -557,7 +570,7 @@ int doschar()
         kbdpoll = FALSE;
         read(STDIN->_file, &kbdq, 1);   /* wait and get a char */
     }
-    if ( kbdq == '\036' ) {   /* D.G. Dasher CRT function key lead-in? */
+    if ( kbdq == '\036' ) { /* D.G. Dasher CRT function key lead-in? */
         in_put(SPEC >> 8);  /* ??? stash in the keyboard buffer stuff ??? */
 
         return (0);
@@ -624,7 +637,9 @@ int typahead()
 
 # endif /* TYPEAH */
 
-/*      Spawn:  various DOS access commands for MicroEMACS ver 3.9e
+
+/*      Spawn:  various DOS access commands
+ *              for MicroEMACS ver 3.9e
  */
 
 
@@ -851,7 +866,7 @@ int f_filter(f, n)
 
 
 /*
- *   return a system dependant string with the current time original version
+ * return a system dependant string with the current time original version
  * didn't work.  modified idea of bill benedetto by doug rady.  note the use of
  * sys($ITIME, ...)  instead of sys_itime()
  */
@@ -912,10 +927,11 @@ VOID do_system_end()
 }
 
 /*
- *   Data General AOS/VS terminal handling routines
+ * Data General AOS/VS terminal handling routines
  *
- *   Known types are:
- *     DASHER D2xx/4xx series - support primarily for D2xx series written by
+ * Known types are:
+ *   DASHER D2xx/4xx series - support primarily for D2xx series written by
+ *
  * Doug Rady (based on ANSI.C and VMSVT.C)
  */
 EXTERN VOID    ttopen();
@@ -950,25 +966,44 @@ EXTERN VOID    spal();
 /*
  * Dispatch table. All the hard fields just point into the terminal I/O code.
  */
-noshare TERM term    =
+noshare TERM term =
 {
-    MXROWS -1, NROWS -1, MXCOLS, NCOLS, 0, 0, MARGIN, SCRSIZ, NPAUSE, &ttopen,
-    &ttclose, &ttkopen, &ttkclose, &ttgetc,
+    MXROWS -1,
+    NROWS -1,
+    MXCOLS,
+    NCOLS,
+    0,
+    0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    &ttopen,
+    &ttclose,
+    &ttkopen,
+    &ttkclose,
+    &ttgetc,
 # if TTPUTC == 0
     &ttputc,
 # endif
 # if TTFLUSH == 0
     &ttflush,
 # endif
-    &dashermove, &tteeol, &tteeop, &tteeop, &ttbeep, &dasherrev, &ttcres,
+    &dashermove,
+    &tteeol,
+    &tteeop,
+    &tteeop,
+    &ttbeep,
+    &dasherrev,
+    &ttcres,
     &dasherdim,
 # if     COLOR
-    &ttfcol, &ttbcol
+    &ttfcol,
+    &ttbcol
 # endif
 };
 
 /*
- *   dashermove - Move the cursor for DG Dasher
+ * dashermove - Move the cursor for DG Dasher
  */
 VOID dashermove(row, col)
 {
@@ -1076,7 +1111,7 @@ int status;
 }
 
 /*
- *   ttcres - Change screen resolution (what resolution?)
+ * ttcres - Change screen resolution (what resolution?)
  */
 int ttcres()
 {
@@ -1090,14 +1125,14 @@ VOID spal()          /* change palette string */
 
 # if     COLOR
 /*
- *   ttfcol - Set the forground color (not implimented)
+ * ttfcol - Set the forground color (not implimented)
  */
 VOID ttfcol()
 {
 }
 
 /*
- *   ttbcol - Set the background color (not implimented)
+ * ttbcol - Set the background color (not implimented)
  */
 
 VOID ttbcol()
@@ -1106,7 +1141,7 @@ VOID ttbcol()
 # endif /* COLOR */
 
 /*
- *   tteeol - Erase to end of line
+ * tteeol - Erase to end of line
  */
 VOID tteeol()
 {
@@ -1115,7 +1150,7 @@ VOID tteeol()
 
 
 /*
- *   tteeop - Erase to end of page (clear screen)
+ * tteeop - Erase to end of page (clear screen)
  */
 VOID tteeop()
 {
@@ -1124,7 +1159,7 @@ VOID tteeop()
 
 
 /*
- *   ttbeep - Ring the bell
+ * ttbeep - Ring the bell
  */
 VOID ttbeep()
 {
@@ -1141,7 +1176,7 @@ char *str;
 }
 
 /*
- *   ttopen() - open the terminal and change characteristics for our use
+ * ttopen() - open the terminal and change characteristics for our use
  */
 
 VOID ttopen()
@@ -1180,7 +1215,7 @@ VOID ttopen()
     STDOUT  = stdout;
 
     /*
-     *   set LPP & CPL in case they aren't == defaults - idea from bill
+     * set LPP & CPL in case they aren't == defaults - idea from bill
      * benedetto resetting the max. row value is condtional because some of us
      * can display more than LPP lines on a screen.
      */
@@ -1230,7 +1265,7 @@ VOID ttopen()
         term.t_dim  = &ansidim;
         crt_func = (INS_CHAR | INS_LINE | DEL_CHAR | DEL_LINE);
 /*
- *           term.t_getkey = &vt100getkey;
+ *      term.t_getkey = &vt100getkey;
  */
         break;
 
@@ -1243,7 +1278,7 @@ VOID ttopen()
         term.t_rev  = &ansirev;
         term.t_dim  = &ansidim;
 /*
- *           term.t_getkey = &vt220getkey;
+ *      term.t_getkey = &vt220getkey;
  */
         break;
 
@@ -1270,7 +1305,7 @@ VOID ttopen()
 # endif /* XXCRT */
 
     /*
-     *   change terminal charactersitcs to Unix(tm) raw mode
+     * change terminal charactersitcs to Unix(tm) raw mode
      */
     ioctl(STDIN->_file, TCGETA, &old_in_termio);    /* save old settings */
     new_in_termio.c_iflag = 0;            /* setup new settings */
@@ -1293,7 +1328,7 @@ VOID ttopen()
     oldbut = 0;
 
     /*
-     *   on all screens we are not sure of the initial position of the cursor
+     * on all screens we are not sure of the initial position of the cursor
      */
     ttrow = 999;
     ttcol = 999;
@@ -1304,7 +1339,7 @@ VOID ttopen()
     xstrcpy(sres, "NORMAL");
 
     /*
-     *   here we lower the priority of this task so that the console reader task
+     * here we lower the priority of this task so that the console reader task
      * will always get control when we get a char.
      */
     ac0.ulng = 0L;                      /* will get TID of this task */
@@ -1318,12 +1353,12 @@ VOID ttopen()
 }
 
 /*
- *   open the keyboard
+ * open the keyboard
  */
 VOID ttkopen()
 {
     /*
-     *   activate the MircoEmacs console characteristics
+     * activate the MircoEmacs console characteristics
      */
     ioctl(STDIN->_file, TCSETA, &new_in_termio);
     fcntl(STDIN->_file, F_SETFL, kbdflgs);
@@ -1349,7 +1384,7 @@ int f, n;        /* default flag, numeric argument [unused] */
 # endif
 
 /*
- *    Change the current working directory
+ * Change the current working directory
  */
 PASCAL NEAR int chdirectory()
 {
@@ -1365,7 +1400,7 @@ PASCAL NEAR int chdirectory()
     ac0.in = chdir(tline);    /* change the current working directory */
 
     /*
-     *  tell the story... success or failure
+     * tell the story... success or failure
      */
     if ( ac0.in ) {
         mlwrite("Error- directory not changed.");
@@ -1383,9 +1418,9 @@ PASCAL NEAR int chdirectory()
 # if ORMDNI
 
 /*
- *   superuser on/off toggle routines to override those annoying ACLs
+ * superuser on/off toggle routines to override those annoying ACLs
  *
- *   usage:  superuser_on();  or  superuser_off();
+ * usage:  superuser_on();  or  superuser_off();
  *
  */
 int superuser_on()
@@ -1442,21 +1477,17 @@ FILE *fstream;
 
 
 /****************************************************************************/
-/*                                                                          */
-/*                                                                          */
 /*  All aosvs$ library routines Copyright (c) 1989 by Douglas C. Rady       */
-/*                                                                          */
-/*                                                                          */
 /****************************************************************************/
 
 /*
- *   aosvs$bsd_dir.h -- a replacement inlcude file under AOS/VS for:
- *       <dir.h> -- definitions for 4.2BSD-compatible directory access
+ * aosvs$bsd_dir.h -- a replacement inlcude file under AOS/VS for:
+ *     <dir.h> -- definitions for 4.2BSD-compatible directory access
  *
- *       Taken from GNU's emacs/etc/ndir.h for porting GNU stuff to AOS/VS.
+ *     Taken from GNU's emacs/etc/ndir.h for porting GNU stuff to AOS/VS.
  *
- *       All of the usual fields are defined but dd_buf is defined as a char*
- *       so we can pass a poniter to a template under AOS/VS.
+ *     All of the usual fields are defined but dd_buf is defined as a char*
+ *     so we can pass a poniter to a template under AOS/VS.
  */
 
 # ifndef DIRSIZ
@@ -1476,7 +1507,7 @@ typedef struct {
 }   DIR;                                /* stream data from opendir() */
 
 /*
- *   set up the MV/Eclipse accumulators used by the  aosvs$  routines
+ * set up the MV/Eclipse accumulators used by the  aosvs$  routines
  */
 $ align (1) $low32k union aosvs$accumulator { /* dearly beloved, we are gathered
                                                * here...*/
@@ -1495,16 +1526,16 @@ $ align (1) $low32k union aosvs$accumulator { /* dearly beloved, we are gathered
 
 
 /*
- *   aosvs$bsd_dir.c -- fake 4.2BSD directory access routines for AOS/VS
+ * aosvs$bsd_dir.c -- fake 4.2BSD directory access routines for AOS/VS
  *
- *   System call city...
+ * System call city...
  *
  */
 
 P_GNFN aosvs$bsd_gnfn_pkt;
 
 /*
- *   aosvs$bsd_closedir
+ * aosvs$bsd_closedir
  */
 VOID closedir(dir_stream)  /* $name("aosvs$bsd_closedir") */
 
@@ -1519,7 +1550,7 @@ DIR *dir_stream;
 
 
 /*
- *   aosvs$bsd_opendir
+ * aosvs$bsd_opendir
  */
 
 DIR *opendir(dir_name) /* name$("aosvs$bsd_opendir") */
@@ -1570,7 +1601,7 @@ char *dir_name;
 
 
 /*
- *   aosvs$bsd_readdir
+ * aosvs$bsd_readdir
  */
 
 struct direct *readdir(dir_stream)   /* name$("aosvs$bsd_readdir") */
@@ -1619,7 +1650,7 @@ DIR *dir_stream;
 
 
 /*
- *   aosvs$bsd_seekdir
+ * aosvs$bsd_seekdir
  */
 
 VOID seekdir(dir_stream, pos)  /* name$("aosvs$bsd_seekdir") */
@@ -1646,38 +1677,34 @@ DIR *dir_stream;
 
 
 /*
- *  aosvs$unix_to_aosvs_path.c -- convert a Unix(tm) pathname to a Aos/Vs
- * pathname We also accept the Ms-Dos '\' seperator and convert it to the
- * Unix(tm) '/' seperator.  We do not deal with Ms-Dos device specifiers. The
- * '\'
- *                             is handled since most current Ms-Dos C compilers
- * can deal with either '\' or '/'.
+ * aosvs$unix_to_aosvs_path.c -- convert a Unix(tm) pathname to a Aos/Vs pathname
+ *                               We also accept the Ms-Dos '\' seperator and
+ *                               convert it to the Unix(tm) '/' seperator.  We do
+ *                               not deal with Ms-Dos device specifiers. The '\'
+ *                               is handled since most current Ms-Dos C compilers
+ *                               can deal with either '\' or '/'.
  *
- *  usage:
- *   aosvs$unix_to_aosvs(u_path, a_path);
+ * usage:
+ *     aosvs$unix_to_aosvs(u_path, a_path);
  *
- *  where:
- *  data item name          data type           description
- *  ----------------------- ------------------
- *  -----------------------------------
- *  u_path                  char *              char * of Unix(tm) pathname, end
- * with null.
- *  a_path                  char *              char * for Aos/Vs pathname, MUST
- * be
- *                                           $MXPL in length.
+ * where:
+ * data item name          data type           description
+ * ----------------------- ------------------  -----------------------------------
+ * u_path                  char *              char * of Unix(tm) pathname,
+ *                                             end with null.
+ * a_path                  char *              char * for Aos/Vs pathname, MUST be
+ *                                             $MXPL in length.
  *
- *  -------------------------------------------------------------------------------
- *  edit history
+ * -------------------------------------------------------------------------------
+ * edit history
  *
- *  who  mm/dd/yy  rev #
- *  what.....................................................
- *  ---  --------  -----
- *  ---------------------------------------------------------
- *  dcr  01/27/89  01.00  birth, new life, creation...
- *  dcr  03/02/89  01.01  cleaned up, added internal temp. storage for path.
- *  dcr  03/02/89  01.02  added code to deal with Ms-Dog '\' seperator.
- *  dcr  03/02/89  01.03  added code to skip out if first char is legal Aos/Vs
- * char. This makes us "just like" _toaos_fid().
+ * who  mm/dd/yy  rev #  what.....................................................
+ * ---  --------  -----  ---------------------------------------------------------
+ * dcr  01/27/89  01.00  birth, new life, creation...
+ * dcr  03/02/89  01.01  cleaned up, added internal temp. storage for path.
+ * dcr  03/02/89  01.02  added code to deal with Ms-Dog '\' seperator.
+ * dcr  03/02/89  01.03  added code to skip out if first char is legal Aos/Vs char.
+ *                       This makes us "just like" _toaos_fid().
  */
 VOID aosvs$unix_to_aosvs_path(u_path, a_path)
 
@@ -1687,27 +1714,27 @@ char *u_path, *a_path;
     EXTERN int _toaos_fid();        /* Data General library routine */
 
     /*
-     *  local variables
+     * local variables
      */
     REGISTER char *up, *ap;
     REGISTER int dec1;
     char t_path[$MXPL], octal[4];
 
     /*
-     *  check for null ptrs... no tricks here please...
+     * check for null ptrs... no tricks here please...
      */
     if ( (u_path == NULL) || (a_path == NULL) )
         return;
 
     /*
-     *  copy to REGISTER vars.
+     * copy to REGISTER vars.
      */
     up = u_path;            /* load ptr to Unix(tm) path */
     ap = t_path;            /* load ptr to temp. storage area */
     zero(t_path, $MXPL);    /* zero the temp. storage area */
 
     /*
-     *  to be "just like" DG's _toaos_fid()  we skip out if the first char. is a
+     * to be "just like" DG's _toaos_fid()  we skip out if the first char. is a
      * legal Aos/Vs seperator.  This is from page 2-1 of the "Using Specialized
      * C Functions" manual, DG part number 093-000585-00.
      */
@@ -1761,57 +1788,27 @@ char *u_path, *a_path;
 }
 
 /*
- *  aosvs$expand_pathname.c
+ * aosvs$expand_pathname.c
  *
- *  usage:
- *   err = aosvs$expand_pathname(c_path, x_path);
+ * usage:
+ *     err = aosvs$expand_pathname(c_path, x_path);
  *
- *  where:
- *  data item name          data type           description
- *  ----------------------- ------------------
- *  -----------------------------------
- *  err                     int                 Error return, if any.
- *  c_path                  char *              Current pathname.
- *  x_path                  char *              Expanded pathname returned here.
- * This must be at least $MXPL bytes.
+ * where:
+ * data item name          data type           description
+ * ----------------------- ------------------  -----------------------------------
+ * err                     int                 Error return, if any.
+ * c_path                  char *              Current pathname.
+ * x_path                  char *              Expanded pathname returned here.
+ *                                             This must be at least $MXPL bytes.
  *
- *  -------------------------------------------------------------------------------
- *  edit history
+ * -------------------------------------------------------------------------------
+ * edit history
  *
- *  who  mm/dd/yy  rev #
- *  what.....................................................
- *  ---  --------  -----
- *  ---------------------------------------------------------
- *  dcr  03/02/89  01.00  birth, new life, creation...
+ * who  mm/dd/yy  rev #  what.....................................................
+ * ---  --------  -----  ---------------------------------------------------------
+ * dcr  03/02/89  01.00  birth, new life, creation...
  *
  */
-
-/*
- *  aosvs$expand_pathname.c
- *
- *  usage:
- *   err = aosvs$expand_pathname(c_path, x_path);
- *
- *  where:
- *  data item name          data type           description
- *  ----------------------- ------------------
- *  -----------------------------------
- *  err                     int                 Error return, if any.
- *  c_path                  char *              Current pathname.
- *  x_path                  char *              Expanded pathname returned here.
- * This must be at least $MXPL bytes.
- *
- *  -------------------------------------------------------------------------------
- *  edit history
- *
- *  who  mm/dd/yy  rev #
- *  what.....................................................
- *  ---  --------  -----
- *  ---------------------------------------------------------
- *  dcr  03/02/89  01.00  birth, new life, creation...
- *
- */
-
 int aosvs$expand_pathname(c_path, x_path)
 
 char *c_path, *x_path;
@@ -1948,3 +1945,8 @@ char *fn, *mode;
 
 #endif  /* AOSVS | MV_UX */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

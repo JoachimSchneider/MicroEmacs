@@ -1,11 +1,24 @@
-/* The routines in this file provide menu-related functions under the Microsoft
- * Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide menu-related functions under the
+ * Microsoft Windows environment on an IBM-PC or compatible computer.
  *
- *  This module also contains the code for the About and Modes dialog boxes.
+ * This module also contains the code for the About and Modes dialog
+ * boxes.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWMENU_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    "elang.h"
@@ -74,7 +87,6 @@ static MENUTAB MenuStaticBind [] =
      * processed as a special */
     { IDM_CUTREGION, cutregion },
     { IDM_CLIPREGION, clipregion },
-    /**HERE**/
     { IDM_INSERTCLIP, insertclip },
     { IDM_SETMARK, setmark },
     { IDM_REMMARK, remmark },

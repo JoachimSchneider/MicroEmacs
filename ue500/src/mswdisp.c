@@ -1,11 +1,25 @@
-/* The routines in this file provide display support under the Microsoft Windows
- * environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide display support under
+ * the Microsoft Windows environment on an IBM-PC or compatible
+ * computer.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
-/* The functions in this module are mostly concerned with the mapping between
- * character cells and client coordinates. */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ *
+ * The functions in this module are mostly concerned with the mapping
+ * between character cells and client coordinates.
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWDISP_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    "elang.h"
@@ -44,34 +58,34 @@ static HWND hCaretWnd = 0;          /* window where the caret belongs */
 static int CaretVisible = 0;        /* the caret should be visible if not 0 */
 static int CaretCol, CaretRow;      /* caret position */
 /* Text Metrics values (from the CellMetrics structure) are used as follows:
- *
- *   -------------------------------- Client area upper boundary
- |          ^
- |       OffsetY
- |          v
- |          ^
- |      HalfLeadingY
- |          v
- |       ---------- ----------
- |<---->|          |          |  ^
- |  OffsetX  |   cell   |   cell   |  |    . . .
- |      |    0,0   |    1,0   | SizeY
- |      |          |          |  |
- |      |          |          |  v
- |       ---------- ----------
- |                         ^
- |       <- SizeX->     LeadingY = 2 * HalfLeadingY
- |                         v
- |       ---------- ----------
- |      |          |          |
- |      |   cell   |   cell   |
- |      |    0,1   |    1,1   |
- |      |          |          |
- |
- |                ...
- |
- |  Client area left boundary
- */
+
+    -------------------------------- Client area upper boundary
+    |          ^
+    |       OffsetY
+    |          v
+    |          ^
+    |      HalfLeadingY
+    |          v
+    |       ---------- ----------
+    |<---->|          |          |  ^
+  OffsetX  |   cell   |   cell   |  |    . . .
+    |      |    0,0   |    1,0   | SizeY
+    |      |          |          |  |
+    |      |          |          |  v
+    |       ---------- ----------
+    |                         ^
+    |       <- SizeX->     LeadingY = 2 * HalfLeadingY
+    |                         v
+    |       ---------- ----------
+    |      |          |          |
+    |      |   cell   |   cell   |
+    |      |    0,1   |    1,1   |
+    |      |          |          |
+    |
+    |                ...
+    |
+   Client area left boundary
+*/
 
 /* BuildCellMetrics:   fills a CellMetrics structure from a font description */
 /* ================                                                          */
@@ -315,10 +329,8 @@ BOOL FAR PASCAL InMessageLine (void)
     return (hCaretWnd == hFrameWnd);
 } /* InMessageLine */
 
-/* CellToClient:    converts character cell coordinates into client coordinates
- */
-/* ============
- *                                                                 */
+/* CellToClient:    converts character cell coordinates into client coordinates */
+/* ============                                                                 */
 
 VOID FAR PASCAL CellToClient (HWND hWnd, POINT Cell, LPPOINT Client)
 /* The resulting Client coordinates indicate the upper left pixel one
@@ -335,10 +347,8 @@ VOID FAR PASCAL CellToClient (HWND hWnd, POINT Cell, LPPOINT Client)
                        EmacsCM.OffsetY;
 } /* CellToClient */
 
-/* ClientToCell:    converts client coordinates into character cell coordinates
- */
-/* ============
- *                                                                 */
+/* ClientToCell:    converts client coordinates into character cell coordinates */
+/* ============                                                                 */
 
 VOID FAR PASCAL ClientToCell (HWND hWnd, POINT Client, LPPOINT Cell)
 /* The area associated with a Cell is the character cell itself, plus the
@@ -639,3 +649,8 @@ PASCAL spal (char *pstr)
     return 0;
 } /* spal */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

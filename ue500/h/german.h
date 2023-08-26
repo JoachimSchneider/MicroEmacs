@@ -1,8 +1,22 @@
-/*  GERMAN.H:   German language text strings for MicroEMACS 4.00
+/*======================================================================
+ *      GERMAN.H:       German language text strings for
+ *                      MicroEMACS 4.00
  *
- *                       translated by Martin Neitzel
- * unido!sigserv!neitzel@uunet.uu.net (C)opyright 1995 by Daniel Lawrence
- */
+ *                      translated by Martin Neitzel
+ *                      unido!sigserv!neitzel@uunet.uu.net
+ *                      (C)opyright 1995 by Daniel Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef GERMAN_H_
+#define GERMAN_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define OQUOTE_CHAR     34
 #define CQUOTE_CHAR     34
@@ -156,12 +170,10 @@
 #define TEXT125 "freier Speicher beim Abspeichern eines Makros aufgebraucht"
 #define TEXT126 "%%interner Fehler bei While-Schleife"
 #define TEXT127 "%%Kein solches Label"
-#define TEXT128 \
-    "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
-/* > ^^^ No longer than 72 chars again And, again too, no translation because of
- * expected input characters
+#define TEXT128 "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
+/* > ^^^ No longer than 72 chars again
+ * And, again too, no translation because of expected input characters
  */
-
 #define TEXT129 "Auszufuehrende Datei: "
 #define TEXT130 "Makro nicht definiert"
 #define TEXT131 "Einzulesende Datei"
@@ -174,7 +186,6 @@
 #define TEXT138 "[neue Datei]"
 #define TEXT139 "[Einlesen von Datei]"
 
-
 #define TEXT140 "Lese "
 /* probably a bad choice, has to be checked against its context. */
 
@@ -184,10 +195,10 @@
 #define TEXT144 "Abspeichern in Datei: "
 #define TEXT145 "Kein Dateiname"
 /*
- * I wonder how the next two msgs are meant... I guess the user is encouraged to
- * do a write-file instead of a save-file.
- * #define  TEXT146 "Truncated file..write it out"
- * #define  TEXT147 "Narrowed Buffer..write it out"
+ * I wonder how the next two msgs are meant... I guess the user is encouraged
+ * to do a write-file instead of a save-file.
+ * #define      TEXT146 "Truncated file..write it out"
+ * #define      TEXT147 "Narrowed Buffer..write it out"
  */
 #define TEXT146 "Unvollstaendige Datei; [`write-file' benutzen]"
 #define TEXT147 "Buffer auf Bereich eingeschraenkt; [`write-file' benutzen]"
@@ -221,8 +232,7 @@
 #define TEXT171 "Ersetzt"
 #define TEXT172 "%%freier Speicherplatz beim Ueberschreiben verbraucht"
 #define TEXT173 "LOCK FEHLER: Lock-Tabelle voll"
-#define TEXT174 \
-    "Kann kein `LOCK' auf Datei legen, freier Speicherplatz verbraucht"
+#define TEXT174 "Kann kein `LOCK' auf Datei legen, freier Speicherplatz verbraucht"
 #define TEXT175 "LOCK (Dateizugriff reserviert)"
 
 /* If ", override?" in TEXT177 refers to a lock and not to a file, better use
@@ -339,3 +349,12 @@
 #define TEXT336 "[Screen name already in use]"
 #define TEXT337 "cannot monitor external program"
 
+
+
+/*====================================================================*/
+#endif/**#ifndef GERMAN_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

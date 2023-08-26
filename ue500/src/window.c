@@ -1,7 +1,17 @@
-/*
- * Window management. Some of the functions are internal, and some are attached
- * to keys that the user actually types.
- */
+/*======================================================================
+ * Window management. Some of the functions are internal, and some are
+ * attached to keys that the user actually types.
+ *====================================================================*/
+
+/*====================================================================*/
+#define WINDOW_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"
@@ -11,9 +21,10 @@
 
 /*
  * Reposition dot in the current window to line "n". If the argument is
- * positive, it is that line. If it is negative it is that line from the bottom.
- * If it is 0 the window is centered (this is what the standard redisplay code
- * does). With no argument it defaults to 0. Bound to M-!.
+ * positive, it is that line. If it is negative it is that line from
+ * the bottom. If it is 0 the window is centered (this is what the
+ * standard redisplay code does). With no argument it defaults to 0.
+ * Bound to M-!.
  */
 int PASCAL NEAR reposition(f, n)
 
@@ -29,8 +40,8 @@ int f, n;       /* prefix flag and argument */
 }
 
 /*
- * Refresh the screen. With no argument, it just does the refresh. With an
- * argument it recenters "." in the current window. Bound to "C-L".
+ * Refresh the screen. With no argument, it just does the refresh. With
+ * an argument it recenters "." in the current window. Bound to "C-L".
  */
 int PASCAL NEAR refresh(f, n)
 
@@ -48,12 +59,11 @@ int f, n;       /* prefix flag and argument */
 }
 
 /*
- * The command make the next window (next => down the screen) the current
- * window. There are no real errors, although the command does nothing if there
- * is only 1 window on the screen. Bound to "C-X C-N".
+ * The command make the next window (next => down the screen) the
+ * current window. There are no real errors, although the command does
+ * nothing if there is only 1 window on the screen. Bound to "C-X C-N".
  *
  * with an argument this command finds the <n>th window from the top
- *
  */
 int PASCAL NEAR nextwind(f, n)
 
@@ -99,9 +109,9 @@ int f, n;       /* default flag and numeric argument */
 }
 
 /*
- * This command makes the previous window (previous => up the screen) the
- * current window. There arn't any errors, although the command does not do a
- * lot if there is 1 window.
+ * This command makes the previous window (previous => up the screen)
+ * the current window. There arn't any errors, although the command
+ * does not do a lot if there is 1 window.
  */
 int PASCAL NEAR prevwind(f, n)
 
@@ -132,11 +142,11 @@ int f, n;        /* prefix flag and argument */
 }
 
 /*
- * This command moves the current window down by "arg" lines. Recompute the top
- * line in the window. The move up and move down code is almost completely the
- * same; most of the work has to do with reframing the window, and picking a new
- * dot. We share the code by having "move down" just be an interface to
- * "move up". Magic. Bound to "C-X C-N".
+ * This command moves the current window down by "arg" lines. Recompute
+ * the top line in the window. The move up and move down code is almost
+ * completely the same; most of the work has to do with reframing the
+ * window, and picking a new dot. We share the code by having "move
+ * down" just be an interface to "move up". Magic. Bound to "C-X C-N".
  */
 int PASCAL NEAR mvdnwind(f, n)
 
@@ -147,11 +157,11 @@ int f, n;       /* prefix flag and argument */
 }
 
 /*
- * Move the current window up by "arg" lines. Recompute the new top line of the
- * window. Look to see if "." is still on the screen. If it is, you win. If it
- * isn't, then move "." to center it in the new framing of the window (this
- * command does not really move "."; it moves the frame). Bound to
- * "C-X C-P".
+ * Move the current window up by "arg" lines. Recompute the new top
+ * line of the window. Look to see if "." is still on the screen. If it
+ * is, you win. If it isn't, then move "." to center it in the new
+ * framing of the window (this command does not really move "."; it
+ * moves the frame). Bound to "C-X C-P".
  */
 int PASCAL NEAR mvupwind(f, n)
 
@@ -196,11 +206,11 @@ int f, n;       /* prefix flag and argument */
 }
 
 /*
- * This command makes the current window the only window on the screen. Bound to
- * "C-X 1". Try to set the framing so that "." does not have to move on the
- * display. Some care has to be taken to keep the values of dot and mark in the
- * buffer structures right if the distruction of a window makes a buffer become
- * undisplayed.
+ * This command makes the current window the only window on the screen.
+ * Bound to "C-X 1". Try to set the framing so that "." does not have
+ * to move on the display. Some care has to be taken to keep the values
+ * of dot and mark in the buffer structures right if the distruction of
+ * a window makes a buffer become undisplayed.
  */
 int PASCAL NEAR onlywind(f, n)
 
@@ -255,8 +265,8 @@ int f, n;        /* prefix flag and argument */
 }
 
 /*
- * Delete the current window, placing its space in the window above, or, if it
- * is the top window, the window below. Bound to C-X 0.
+ * Delete the current window, placing its space in the window above,
+ * or, if it is the top window, the window below. Bound to C-X 0.
  */
 
 int PASCAL NEAR delwind(f, n)
@@ -340,13 +350,12 @@ int f, n;       /* arguments are ignored for this command */
 }
 
 /*
- *
- *  Split the current window.  A window smaller than 3 lines cannot be split.   (Two
- * line windows can be split when mode lines are disabled) An argument of 1
- * forces the cursor into the upper window, an argument of two forces the cursor
- * to the lower window.  The only other error that is possible is a "room"
- * failure allocating the structure for the new window.  Bound to "C-X 2".
- *
+ * Split the current window. A window smaller than 3 lines cannot be
+ * split. (Two line windows can be split when mode lines are disabled)
+ * An argument of 1 forces the cursor into the upper window, an
+ * argument of two forces the cursor to the lower window. The only
+ * other error that is possible is a "room" failure allocating the
+ * structure for the new window. Bound to "C-X 2".
  */
 
 int PASCAL NEAR splitwind(f, n)
@@ -439,10 +448,10 @@ int f, n;       /* default flag and numeric argument */
 }
 
 /*
- * Enlarge the current window. Find the window that loses space. Make sure it is
- * big enough. If so, hack the window descriptions, and ask redisplay to do all
- * the hard work. You don't just set "force reframe" because dot would move.
- * Bound to "C-X Z".
+ * Enlarge the current window. Find the window that loses space. Make
+ * sure it is big enough. If so, hack the window descriptions, and ask
+ * redisplay to do all the hard work. You don't just set "force
+ * reframe" because dot would move. Bound to "C-X Z".
  */
 int PASCAL NEAR enlargewind(f, n)
 
@@ -495,9 +504,9 @@ int f, n;        /* prefix flag and argument */
 }
 
 /*
- * Shrink the current window. Find the window that gains space. Hack at the
- * window descriptions. Ask the redisplay to do all the hard work. Bound to
- * "C-X C-Z".
+ * Shrink the current window. Find the window that gains space. Hack at
+ * the window descriptions. Ask the redisplay to do all the hard work.
+ * Bound to "C-X C-Z".
  */
 int PASCAL NEAR shrinkwind(f, n)
 
@@ -572,8 +581,7 @@ int f, n;       /* default flag and numeric argument */
     return ( enlargewind(TRUE, n - clines) );
 }
 
-/*  pop up the indicated buffer
- */
+/* pop up the indicated buffer  */
 
 int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
 {
@@ -962,4 +970,10 @@ int PASCAL NEAR gettwnum()              /* get total window count */
 
     return (ctr);
 }
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
 

@@ -1,8 +1,20 @@
-/***
- *       POSIX driver/Microemacs 3.11a, Copyright 1989-1995 D. Lawrence, C.
- * Smith Copyright 1992 H. Becker
+/*======================================================================
+ *      POSIX driver/Microemacs 3.11a,
+ *      Copyright 1989-1995 D. Lawrence, C. Smith
+ *      Copyright 1992 H. Becker
  *
- ***/
+ *====================================================================*/
+
+/*====================================================================*/
+#define POSIX_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 /**
  *       1. FIONREAD is not defined in POSIX. TYPEAH should be 0.
  *
@@ -49,7 +61,7 @@ int scnothing()
 #define NKEYENT         300             /* Number of keymap entries */
 #define NINCHAR         64              /* Input buffer size        */
 #define NOUTCHAR        256             /* Output buffer size       */
-#define MARGIN          8               /* Margin size          */
+#define MARGIN          8               /* Margin size              */
 #define SCRSIZ          64              /* Scroll for margin        */
 #define NPAUSE          10              /* # times thru update to pause */
 #define MAXVTIME        1               /* x/10s max time for i/o delay */
@@ -61,22 +73,20 @@ int scnothing()
 struct keyent {                         /* Key mapping entry        */
     struct keyent * samlvl;             /* Character on same level  */
     struct keyent * nxtlvl;             /* Character on next level  */
-    unsigned char ch;                   /* Character            */
+    unsigned char ch;                   /* Character                */
     int code;                           /* Resulting keycode        */
 };
 
 char *reset = (char*) NULL;             /* reset string kjc */
 
 /** Local variables **/
-static struct termios curterm;          /* Current modes        */
-static struct termios oldterm;          /* Original modes       */
-static int inbuf[NINCHAR];              /* Input buffer         */
-static int * inbufh =                   /* Head of input buffer     */
-                      inbuf;
-static int * inbuft =                   /* Tail of input buffer     */
-                      inbuf;
+static struct termios curterm;          /* Current modes            */
+static struct termios oldterm;          /* Original modes           */
+static int inbuf[NINCHAR];              /* Input buffer             */
+static int * inbufh = inbuf;            /* Head of input buffer     */
+static int * inbuft = inbuf;            /* Tail of input buffer     */
 static unsigned char keyseq[256];       /* Prefix escape sequence table */
-static struct keyent keymap[NKEYENT];   /* Key map          */
+static struct keyent keymap[NKEYENT];   /* Key map                  */
 static struct keyent * nxtkey =         /* Next free key entry      */
                                 keymap;
 static DIR *dirptr = NULL;              /* Current directory stream */
@@ -185,7 +195,7 @@ int ttflush()
 
 /** Put character onto display **/
 int ttputc(ch)
-char ch;                                /* Character to display     */
+char ch;                                /* Character to display */
 {
 /*
  *       return(write(STDOUT_FILENO, &ch, 1) != 1);
@@ -195,8 +205,8 @@ char ch;                                /* Character to display     */
 
 /** Add character sequence to keycode entry **/
 VOID addkey(seq, fn)
-unsigned char * seq;                    /* Character sequence       */
-int fn;                                 /* Resulting keycode        */
+unsigned char * seq;                    /* Character sequence */
+int fn;                                 /* Resulting keycode  */
 {
     int first;
     struct keyent * cur, * nxtcur;
@@ -320,7 +330,7 @@ unsigned char grabnowait()
 
 /** Queue input character **/
 VOID qin(ch)
-int ch;                                 /* Character to add     */
+int ch;                                 /* Character to add */
 {
     /* Check for overflow */
     if ( inbuft == &inbuf[sizeof (inbuf)] ) {
@@ -478,7 +488,7 @@ char * timeset()
 
 /** Callout to system to perform command **/
 int callout(cmd)
-char * cmd;                             /* Command to execute       */
+char * cmd;                             /* Command to execute */
 {
     int status;
 
@@ -503,8 +513,8 @@ char * cmd;                             /* Command to execute       */
 
 /** Create subshell **/
 int spawncli(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int f;                                  /* Flags          */
+int n;                                  /* Argument count */
 {
     char * sh;
 
@@ -523,8 +533,8 @@ int n;                                  /* Argument count       */
 
 /** Spawn a command **/
 int spawn(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int f;                                  /* Flags          */
+int n;                                  /* Argument count */
 {
     char line[NLINE];
     int s;
@@ -553,8 +563,8 @@ int n;                                  /* Argument count       */
 
 /** Execute program **/
 int execprg(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int f;                                  /* Flags          */
+int n;                                  /* Argument count */
 {
     /* Same as spawn */
     return ( spawn(f, n) );
@@ -562,8 +572,8 @@ int n;                                  /* Argument count       */
 
 /** Pipe output of program to buffer **/
 int pipecmd(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int f;                                  /* Flags          */
+int n;                                  /* Argument count */
 {
     char line[NLINE];
     int s;
@@ -629,8 +639,8 @@ int n;                                  /* Argument count       */
 
 /** Filter buffer through command **/
 int f_filter(f, n)
-int f;                                  /* Flags            */
-int n;                                  /* Argument count       */
+int f;                                  /* Flags          */
+int n;                                  /* Argument count */
 {
     char line[NLINE], tmpnam[NFILEN];
     int s;
@@ -655,7 +665,7 @@ int n;                                  /* Argument count       */
     /* Setup the proper file names */
     bp = curbp;
     xstrcpy(tmpnam, bp->b_fname);       /* Save the original name */
-    xstrcpy(bp->b_fname, bname1);       /* Set it to our new one */
+    xstrcpy(bp->b_fname, bname1);       /* Set it to our new one  */
 
     /* Write it out, checking for errors */
     if ( !writeout(filnam1, "w") ) {
@@ -696,7 +706,7 @@ int n;                                  /* Argument count       */
 
 /** Get first filename from pattern **/
 char *getffile(fspec)
-char *fspec;                            /* Filename specification   */
+char *fspec;                            /* Filename specification */
 {
     int index, point, extflag;
 
@@ -766,3 +776,8 @@ char *getnfile()
     return (rbuf);
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

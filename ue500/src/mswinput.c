@@ -1,9 +1,22 @@
-/* The routines in this file provide keyboard and mouse input support under the
- * Microsoft Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide keyboard and mouse input support
+ * under the Microsoft Windows environment on an IBM-PC or compatible
+ * computer.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWINPUT_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include    "estruct.h"
 #include    "elang.h"
@@ -17,8 +30,8 @@
 #define IBUFSIZE    64      /* this must be a power of 2 */
 
 static unsigned char in_buf[IBUFSIZE];  /* input character buffer */
-static int in_next = 0;                 /* pos to retrieve next input character
-                                         */
+static int in_next = 0;                 /* pos to retrieve next input
+                                           character */
 static int in_last = 0;                 /* pos to place most recent input
                                          * character */
 static int in_free = 0;                 /* number of unused char entries */
@@ -414,3 +427,8 @@ VOID FAR PASCAL DropMessage (HWND hWnd, HDROP hDrop)
     DragFinish (hDrop);
 } /* DropMessage */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

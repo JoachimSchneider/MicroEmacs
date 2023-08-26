@@ -497,7 +497,7 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 
 /**********************************************************************/
 EXTERN char *PASCAL NEAR  uitostr_memacs DCL((unsigned int i));
-#ifdef maindef
+#ifdef MAIN_C_
 char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 {
     unsigned int  base  = 10;
@@ -568,7 +568,7 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 /**********************************************************************/
 EXTERN VOID PASCAL NEAR ASRT_Catch DCL((CONST char *file, int line,
                                         CONST char *cond));
-#ifdef maindef
+#ifdef MAIN_C_
 VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
                                 CONST char *, cond)
 {
@@ -593,7 +593,7 @@ EXTERN VOID PASCAL NEAR ASRTM_Catch DCL((CONST char *file,
                                          int line,
                                          CONST char *cond,
                                          CONST char *msg));
-#ifdef maindef
+#ifdef MAIN_C_
 VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                                   CONST char *, cond, CONST char *, msg)
 {

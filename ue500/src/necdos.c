@@ -1,7 +1,20 @@
-/*  NECDOS.C:   Operating specific I/O and Spawning functions under the MSDOS
- * operating system on the NEC PC-9801 series computer for MicroEMACS 4.00
- * (C)Copyright 1995 by Daniel M. Lawrence
- */
+/*======================================================================
+ *      NECDOS.C:       Operating specific I/O and Spawning functions
+ *                      under the MSDOS operating system
+ *                      on the NEC PC-9801 series computer
+ *                      for MicroEMACS 4.00
+ *                      (C)Copyright 1995 by Daniel M. Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#define NECDOS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"
@@ -108,7 +121,8 @@ PASCAL NEAR ttopen()
     rg.h.dl = 0;                /* set it OFF */
     intdos(&rg, &rg);           /* go for it! */
 # endif
-    /* on all screens we are not sure of the initial position of the cursor                 */
+    /* on all screens we are not sure of the initial position of the
+     * cursor */
     ttrow = 999;
     ttcol = 999;
 
@@ -225,7 +239,7 @@ PASCAL NEAR ttflush()
 int doschar()   /* call the dos to get a char */
 {
 
-    REGISTER unsigned int c;            /* extended character to return */
+    REGISTER unsigned int c;    /* extended character to return */
 
     rg.h.ah = 7;                /* dos Direct Console Input call */
     intdos(&rg, &rg);
@@ -233,10 +247,10 @@ int doschar()   /* call the dos to get a char */
         rg.h.ah = 7;            /* get the next character */
         intdos(&rg, &rg);
         c = extcode(rg.h.al);
-        in_put(c >> 8);                 /* prefix byte */
-        in_put(c & 255);                /* event code byte */
+        in_put(c >> 8);         /* prefix byte */
+        in_put(c & 255);        /* event code byte */
 
-        return (0);                     /* extended escape sequence */
+        return (0);             /* extended escape sequence */
     }
 
     return (rg.h.al & 255);
@@ -323,7 +337,7 @@ checkmouse()
         in_put(mousecol);
         in_put(mouserow);
 
-        event = ( (rightbutton != 0) ? 0 : 1 );         /* up or down? */
+        event = ( (rightbutton != 0) ? 0 : 1 ); /* up or down? */
         event += 4;                             /* right button */
         if ( sstate & 1 )                       /* shifted */
             event += 'A';
@@ -344,7 +358,7 @@ checkmouse()
         in_put(mousecol);
         in_put(mouserow);
 
-        event = ( (leftbutton != 0) ? 0 : 1 );          /* up or down? */
+        event = ( (leftbutton != 0) ? 0 : 1 );  /* up or down? */
         if ( sstate & 1 )                       /* shifted */
             event += 'A';
         else if ( sstate & 16 )                 /* controled? */
@@ -368,7 +382,7 @@ checkmouse()
 
 PASCAL NEAR typahead()
 {
-    int flags;          /* cpu flags from dos call */
+    int flags;                  /* cpu flags from dos call */
 
     rg.x.ax = 0x4406;           /* IOCTL input status */
     rg.x.bx = 0;                /* File handle = stdin */
@@ -405,7 +419,7 @@ int f, n;
     if ( restflag )
         return ( resterr() );
 
-    movecursor(term.t_nrow, 0);                 /* Seek to last line.   */
+    movecursor(term.t_nrow, 0);   /* Seek to last line. */
     TTflush();
     TTkclose();
     shellprog("");
@@ -663,23 +677,23 @@ char *cmd;      /*  Incoming command line to execute  */
 
 {
     char *shell;                /* Name of system command processor */
-    char swchar;                /* switch character to use */
-    union REGS regs;            /* parameters for dos call */
-    char comline[NSTRING];      /* constructed command line */
+    char swchar;                /* switch character to use          */
+    union REGS regs;            /* parameters for dos call          */
+    char comline[NSTRING];      /* constructed command line         */
 
     /*  detect current switch character and set us up to use it */
-    regs.h.ah = 0x37;           /*  get setting data  */
+    regs.h.ah = 0x37;           /*  get setting data      */
     regs.h.al = 0x00;           /*  get switch character  */
     intdos(&regs, &regs);
     swchar = (char)regs.h.dl;
 
     /*  get name of system shell  */
     if ( ( shell = getenv("COMSPEC") ) == NULL ) {
-        return (FALSE);                 /*  No shell located  */
+        return (FALSE);         /*  No shell located  */
     }
 
     /* trim leading whitespace off the command */
-    while ( *cmd == ' ' || *cmd == '\t' )       /*  find out if null command */
+    while ( *cmd == ' ' || *cmd == '\t' ) /* find out if null command */
         cmd++;
 
     /**  If the command line is not empty, bring up the shell  **/
@@ -758,25 +772,25 @@ char *cmd;      /*  Incoming command line to execute  */
 
     /* set up the EXEC parameter block */
     pblock.envptr = 0;          /* make the child inherit the parents env */
-    pblock.fcb1 = f1;                   /* point to a blank FCB */
-    pblock.fcb2 = f2;                   /* point to a blank FCB */
-    pblock.cline = tail;                /* parameter line pointer */
+    pblock.fcb1 = f1;           /* point to a blank FCB */
+    pblock.fcb2 = f2;           /* point to a blank FCB */
+    pblock.cline = tail;        /* parameter line pointer */
 
     /* and make the call */
     regs.h.ah = 0x4b;           /* EXEC Load or Execute a Program */
     regs.h.al = 0x00;           /* load end execute function subcode */
 # if     MWC
-    regs.x.ds = ( (unsigned long)(prog) >> 16 );        /* program name ptr */
+    regs.x.ds = ( (unsigned long)(prog) >> 16 );      /* program name ptr */
     regs.x.dx = (unsigned int)(prog);
     regs.x.es = regs.x.ds;
     /*regs.x.es = ((unsigned long)(&pblock) >> 16); * set up param block ptr */
     regs.x.bx = (unsigned int)(&pblock);
 # endif
 # if     LATTICE | MSC | TURBO | IC
-    segreg.ds = ( (unsigned long)(prog) >> 16 );        /* program name ptr */
+    segreg.ds = ( (unsigned long)(prog) >> 16 );      /* program name ptr */
     regs.x.dx = (unsigned int)(prog);
-    segreg.es = ( (unsigned long)(&pblock) >> 16 );     /* set up param block
-                                                         * ptr */
+    segreg.es = ( (unsigned long)(&pblock) >> 16 );   /* set up param block
+                                                       * ptr  */
     regs.x.bx = (unsigned int)(&pblock);
 # endif
 
@@ -796,7 +810,7 @@ char *cmd;      /*  Incoming command line to execute  */
     intcall(&regs, &regs, DOSINT);
     if ( (regs.x.flags & CFLAG) == 0 ) {
         regs.h.ah = 0x4d;               /* get child process return code */
-        intcall(&regs, &regs, DOSINT);          /* go do it */
+        intcall(&regs, &regs, DOSINT);  /* go do it */
         rv = regs.x.ax;                 /* save child's return code */
     } else
         rv = -errno;                    /* failed child call */
@@ -884,144 +898,55 @@ unsigned c;     /* byte following a zero extended char byte */
         return (ALTD | '0');
 
     /* some others as well */
-    switch ( c ) {
-    case 3:
-        return (0);                                     /* null */
+    switch (c) {
+        case 3:         return(0);                      /* null */
+        case 15:        return(SHFT | CTRL | 'I');      /* backtab */
 
-    case 15:
-        return (SHFT | CTRL | 'I');                             /* backtab */
+        case 16:        return(ALTD | 'Q');
+        case 17:        return(ALTD | 'W');
+        case 18:        return(ALTD | 'E');
+        case 19:        return(ALTD | 'R');
+        case 20:        return(ALTD | 'T');
+        case 21:        return(ALTD | 'Y');
+        case 22:        return(ALTD | 'U');
+        case 23:        return(ALTD | 'I');
+        case 24:        return(ALTD | 'O');
+        case 25:        return(ALTD | 'P');
 
-    case 16:
-        return (ALTD | 'Q');
+        case 30:        return(ALTD | 'A');
+        case 31:        return(ALTD | 'S');
+        case 32:        return(ALTD | 'D');
+        case 33:        return(ALTD | 'F');
+        case 34:        return(ALTD | 'G');
+        case 35:        return(ALTD | 'H');
+        case 36:        return(ALTD | 'J');
+        case 37:        return(ALTD | 'K');
+        case 38:        return(ALTD | 'L');
 
-    case 17:
-        return (ALTD | 'W');
+        case 44:        return(ALTD | 'Z');
+        case 45:        return(ALTD | 'X');
+        case 46:        return(ALTD | 'C');
+        case 47:        return(ALTD | 'V');
+        case 48:        return(ALTD | 'B');
+        case 49:        return(ALTD | 'N');
+        case 50:        return(ALTD | 'M');
 
-    case 18:
-        return (ALTD | 'E');
-
-    case 19:
-        return (ALTD | 'R');
-
-    case 20:
-        return (ALTD | 'T');
-
-    case 21:
-        return (ALTD | 'Y');
-
-    case 22:
-        return (ALTD | 'U');
-
-    case 23:
-        return (ALTD | 'I');
-
-    case 24:
-        return (ALTD | 'O');
-
-    case 25:
-        return (ALTD | 'P');
-
-    case 30:
-        return (ALTD | 'A');
-
-    case 31:
-        return (ALTD | 'S');
-
-    case 32:
-        return (ALTD | 'D');
-
-    case 33:
-        return (ALTD | 'F');
-
-    case 34:
-        return (ALTD | 'G');
-
-    case 35:
-        return (ALTD | 'H');
-
-    case 36:
-        return (ALTD | 'J');
-
-    case 37:
-        return (ALTD | 'K');
-
-    case 38:
-        return (ALTD | 'L');
-
-    case 44:
-        return (ALTD | 'Z');
-
-    case 45:
-        return (ALTD | 'X');
-
-    case 46:
-        return (ALTD | 'C');
-
-    case 47:
-        return (ALTD | 'V');
-
-    case 48:
-        return (ALTD | 'B');
-
-    case 49:
-        return (ALTD | 'N');
-
-    case 50:
-        return (ALTD | 'M');
-
-    case 71:
-        return (SPEC | '<');                            /* HOME */
-
-    case 72:
-        return (SPEC | 'P');                            /* cursor up */
-
-    case 73:
-        return (SPEC | 'Z');                            /* page up */
-
-    case 75:
-        return (SPEC | 'B');                            /* cursor left */
-
-    case 77:
-        return (SPEC | 'F');                            /* cursor right */
-
-    case 79:
-        return (SPEC | '>');                            /* end */
-
-    case 80:
-        return (SPEC | 'N');                            /* cursor down */
-
-    case 81:
-        return (SPEC | 'V');                            /* page down */
-
-    case 82:
-        return (SPEC | 'C');                            /* insert */
-
-    case 83:
-        return (SPEC | 'D');                            /* delete */
-
-    case 115:
-        return (SPEC | CTRL | 'B');                             /* control left
-                                                                 */
-
-    case 116:
-        return (SPEC | CTRL | 'F');                             /* control right
-                                                                 */
-
-    case 117:
-        return (SPEC | CTRL | '>');                             /* control END
-                                                                 */
-
-    case 118:
-        return (SPEC | CTRL | 'V');                             /* control page
-                                                                 * down */
-
-    case 119:
-        return (SPEC | CTRL | '<');                             /* control HOME
-                                                                 */
-
-    case 132:
-        return (SPEC | CTRL | 'Z');                             /* control page
-                                                                 * up */
+        case 71:        return(SPEC | '<');             /* HOME */
+        case 72:        return(SPEC | 'P');             /* cursor up */
+        case 73:        return(SPEC | 'Z');             /* page up */
+        case 75:        return(SPEC | 'B');             /* cursor left */
+        case 77:        return(SPEC | 'F');             /* cursor right */
+        case 79:        return(SPEC | '>');             /* end */
+        case 80:        return(SPEC | 'N');             /* cursor down */
+        case 81:        return(SPEC | 'V');             /* page down */
+        case 82:        return(SPEC | 'C');             /* insert */
+        case 83:        return(SPEC | 'D');             /* delete */
+        case 115:       return(SPEC | CTRL | 'B');      /* control left */
+        case 116:       return(SPEC | CTRL | 'F');      /* control right */
+        case 117:       return(SPEC | CTRL | '>');      /* control END */
+        case 118:       return(SPEC | CTRL | 'V');      /* control page down */
+        case 119:       return(SPEC | CTRL | '<');      /* control HOME */
+        case 132:       return(SPEC | CTRL | 'Z');      /* control page up */
     }
 
     return (ALTD | c);
@@ -1202,3 +1127,8 @@ char *PASCAL NEAR getnfile()
 # endif
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

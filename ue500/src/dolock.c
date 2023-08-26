@@ -1,6 +1,18 @@
-/*      DOLOCK.C:       Machine specific code for File Locking for MicroEMACS
- * (C)Copyright 1995 by Daniel M Lawrence
- */
+/*======================================================================
+ *      DOLOCK.C:       Machine specific code for File Locking
+ *                      for MicroEMACS
+ *                      (C)Copyright 1995 by Daniel M Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#define DOLOCK_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include <stdio.h>
 #include "estruct.h"
@@ -100,11 +112,12 @@ COMMON int errno;
  *
  * dolock -- lock the file fname
  *
- * if successful, returns NULL if file locked, returns username of person
- * locking the file if other error, returns "LOCK ERROR: explanation"
+ * if successful, returns NULL
+ * if file locked, returns username of person locking the file
+ * if other error, returns "LOCK ERROR: explanation"
  *
  *********************/
- 
+
 /* get name component of filespec:  */
 static CONST char *parse_name P1_(CONST char *, filespec)
 {
@@ -414,7 +427,8 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
  *
  * undolock -- unlock the file fname
  *
- * if successful, returns NULL if other error, returns "LOCK ERROR: explanation"
+ * if successful, returns NULL
+ * if other error, returns "LOCK ERROR: explanation"
  *
  *********************/
 
@@ -479,7 +493,6 @@ VOID dohello P0_()
 
 
 
-/**
- * EOF
- **/
-
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

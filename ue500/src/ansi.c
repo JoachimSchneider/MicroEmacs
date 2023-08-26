@@ -1,8 +1,18 @@
-/*
+/*======================================================================
  * The routines in this file provide support for ANSI style terminals over a
  * serial line. The serial I/O services are provided by routines in termio.c. It
  * compiles into nothing if not an ANSI device.
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define ANSI_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define term external */
 /* don't define term external */
@@ -86,17 +96,36 @@ int coltran[16] =
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-NOSHARE TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, ansiopen,
-    ansiclose, ansikopen, ansikclose, ansigetc, ttputc, ttflush, ansimove,
-    ansieeol, ansieeop, ansieeop, ansibeep, ansirev, ansicres
-# if     COLOR
-    , ansifcol, ansibcol
-# endif
+NOSHARE TERM term = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    ansiopen,
+    ansiclose,
+    ansikopen,
+    ansikclose,
+    ansigetc,
+    ttputc,
+    ttflush,
+    ansimove,
+    ansieeol,
+    ansieeop,
+    ansieeop,
+    ansibeep,
+    ansirev,
+    ansicres
+# if    COLOR
+    , ansifcol,
+    ansibcol
+#endif
 };
 
-# if     COLOR
+# if    COLOR
 PASCAL NEAR ansifcol(color)             /* set the current output color */
 
 int color;      /* color to set */
@@ -255,14 +284,14 @@ PASCAL NEAR ansiopen()
     }
 # endif
 # if     MOUSE & (USG | AIX | AUX | HPUX8 | HPUX9 | BSD | SUN | XENIX | VMS)
-/*
- *       If this is an ansi terminal of at least DEC level 2 capability, some
- * terminals of this level, such as the "Whack"
- *       emulator, the VWS terminal emulator, and some versions of XTERM,
- * support access to the workstation mouse via escape sequences.  In addition,
- * any terminal that conforms to level 2 will, at very least, IGNORE the escape
- * sequences for the mouse.
- */
+   /*
+    *   If this is an ansi terminal of at least DEC level
+    *   2 capability, some terminals of this level, such as the "Whack"
+    *   emulator, the VWS terminal emulator, and some versions of XTERM,
+    *   support access to the workstation mouse via escape sequences.  In
+    *   addition, any terminal that conforms to level 2 will, at very least,
+    *   IGNORE the escape sequences for the mouse.
+    */
     {
         char *s;
 
@@ -334,9 +363,10 @@ char * string;                          /* String to write      */
 }
 
 /*
- *       On the "real" ansi terminals, used on "mainframe" type terminal/CPU
- * connections of the above operating systems, we do conversion from VT100/VT200
- * style function keys into the Emacs standard key sequence form.
+ * On the "real" ansi terminals, used on "mainframe" type
+ * terminal/CPU connections of the above operating systems, we do
+ * conversion from VT100/VT200 style function keys into the Emacs
+ * standard key sequence form.
  */
 static unsigned char inbuffer[ 10];
 static int inpos=0;
@@ -541,3 +571,8 @@ ansihello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

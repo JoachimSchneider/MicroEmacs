@@ -1,8 +1,20 @@
-/*  EPATH:  This file contains certain info needed to locate the MicroEMACS
- * files on a system dependant basis.
+/*======================================================================
+ *      EPATH:  This file contains certain info needed to locate the
+ *              MicroEMACS files on a system dependant basis.
  *
- */
-/*  possible names and paths of help files under different OSs  */
+ *      possible names and paths of help files under different OSs
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef EPATH_H_
+#define EPATH_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 NOSHARE CONST char *pathname[] =
 
@@ -69,3 +81,12 @@ NOSHARE CONST char *pathname[] =
 
 #define NPNAMES ( sizeof (pathname)/sizeof (char *) )
 
+
+
+/*====================================================================*/
+#endif/**#ifndef EPATH_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

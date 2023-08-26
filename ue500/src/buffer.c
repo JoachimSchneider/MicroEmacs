@@ -1,9 +1,24 @@
-/*  BUFFER.C:   buffer mgmt. routines MicroEMACS 4.00
+/*======================================================================
+ *  BUFFER.C:   buffer mgmt. routines
+ *              MicroEMACS 4.00
  *
- * Buffer management. Some of the functions are internal, and some are actually
- * attached to user keys. Like everyone else, they set hints for the display
- * system.
- */
+ * Buffer management.
+ * Some of the functions are internal,
+ * and some are actually attached to user
+ * keys. Like everyone else, they set hints
+ * for the display system.
+ *====================================================================*/
+
+/*====================================================================*/
+#define BUFFER_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
@@ -301,7 +316,7 @@ ask:    if ( mlreply(TEXT29, bufn, NBUFN) != TRUE )
     return (TRUE);
 }
 
-/*  Build and popup a buffer containing the list of all buffers. Bound to "C-X
+/* Build and popup a buffer containing the list of all buffers. Bound to "C-X
  * C-B". A numeric argument forces it to list invisible buffers as well.
  */
 
@@ -668,3 +683,8 @@ BUFFER *PASCAL NEAR getoldb()   /* get the most ancient visited buffer */
     return (old_bp);
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,8 +1,19 @@
-/*
- * The routines in this file implement commands that work word or a paragraph at
- * a time.  There are all sorts of word mode commands.  If I do any sentence
- * mode commands, they are likely to be put in this file.
- */
+/*======================================================================
+ * The routines in this file implement commands that work word or a
+ * paragraph at a time. There are all sorts of word mode commands. If I
+ * do any sentence mode commands, they are likely to be put in this
+ * file.
+ *====================================================================*/
+
+/*====================================================================*/
+#define WORD_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"

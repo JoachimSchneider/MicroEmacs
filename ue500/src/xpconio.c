@@ -1,11 +1,22 @@
-/*      XPCONIO.C       Operating specific video & keyboard functions for the
- * Window XP operating system (console mode) for MicroEMACS 5.00 (C)Copyright
- * 2008 by Daniel M. Lawrence
+/*======================================================================
+ *      XPCONIO.C       Operating specific video & keyboard functions
+ *                      for the Window XP operating system (console mode)
+ *                      for MicroEMACS 5.00
+ *                      (C)Copyright 2008 by Daniel M. Lawrence
  *
  * The routines in this file provide video and keyboard support using the
  * Windows XP/Visual Studio 2008 console functions.
- *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define XPCONIO_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define "term" external */
 
@@ -22,7 +33,7 @@
 #include        "elang.h"
 
 #if     XPCON
-# define NROW    256             /* Max Screen size.         */
+# define NROW    256            /* Max Screen size.         */
 # define NCOL    256            /* Edit if you want to.         */
 # define MARGIN  8              /* size of minimim margin and   */
 # define SCRSIZ  64             /* scroll size for extended lines */
@@ -74,7 +85,7 @@ int revflag = FALSE;                    /* are we currently in rev video? */
  * handle.
  */
 static HANDLE hInput, hOutput;
-static char chConsoleTitle[256];    // Preserve the title of the console.
+static char chConsoleTitle[256];    /* Preserve the title of the console. */
 static long ConsoleMode, OldConsoleMode;
 
 static INPUT_RECORD ir;
@@ -83,14 +94,33 @@ static WORD wKeyEvent;
 /*
  * Standard terminal interface dispatch table.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, ntopen, ntclose,
-    ntkopen, ntkclose, ntgetc, ntputc, ntflush, ntmove, nteeol, nteeop, nteeop,
-    ntbeep, ntrev, ntcres
-# if     COLOR
-    , ntfcol, ntbcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    ntopen,
+    ntclose,
+    ntkopen,
+    ntkclose,
+    ntgetc,
+    ntputc,
+    ntflush,
+    ntmove,
+    nteeol,
+    nteeop,
+    nteeop,
+    ntbeep,
+    ntrev,
+    ntcres
+#if     COLOR
+    , ntfcol,
+    ntbcol
+#endif
 };
 
 /*  Mousing global variable */
@@ -141,9 +171,10 @@ int in_get()    /* get an event from the input buffer */
 }
 
 # if COLOR
+
 /*----------------------------------------------------------------------*/
-/*  ntfcol()                            */
-/* Set the current foreground color.                    */
+/*      ntfcol()                                                        */
+/* Set the current foreground color.                                    */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntfcol(int color)                      /* color to set */
@@ -152,14 +183,15 @@ PASCAL NEAR ntfcol(int color)                      /* color to set */
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntbcol()                            */
-/* Set the current background color.                    */
+/*      ntbcol()                                                        */
+/* Set the current background color.                                    */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntbcol(int color)              /* color to set */
 {
     cbcolor = ctrans[color];
 }
+
 # endif
 
 static VOID near ntSetUpdateValues(void)
@@ -177,8 +209,8 @@ static VOID near ntSetUpdateValues(void)
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntmove()                            */
-/* Move the cursor.                         */
+/*      ntmove()                                                        */
+/* Move the cursor.                                                     */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntmove(int row, int col)
@@ -192,8 +224,8 @@ PASCAL NEAR ntmove(int row, int col)
 
 
 /*----------------------------------------------------------------------*/
-/*  ntflush()                           */
-/* Update the physical video buffer from the logical video buffer.  */
+/*      ntflush()                                                       */
+/* Update the physical video buffer from the logical video buffer.      */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntflush(void)
@@ -204,12 +236,11 @@ PASCAL NEAR ntflush(void)
     if ( ntMin <= ntMax ) {
 
         if ( ntMin == ntMax ) {
-
             /* Fri Feb 14 1992 WaltW - Same line bud. */
             srWriteRegion.Right = term.t_ncol - 1 /*ntColMax*/;
-            srWriteRegion.Left = 0;             //ntColMin;
+            srWriteRegion.Left = 0;             /* ntColMin;  */
 
-            coordUpdateBegin.X = 0;             //ntColMin;
+            coordUpdateBegin.X = 0;             /* ntColMin;  */
             coordUpdateBegin.Y = ntMin;
         } else {
             srWriteRegion.Right = term.t_ncol - 1;
@@ -276,9 +307,8 @@ static VOID near MouseEvent(void)
     sstate = m_event->dwControlKeyState;
     if ( sstate & SHIFT_PRESSED )               /* shifted? */
         etype |= (SHFT >> 8);
-    if ( (sstate & RIGHT_CTRL_PRESSED) ||(sstate & LEFT_CTRL_PRESSED) ) /*
-                                                                         * controled?
-                                                                         */
+    if ( (sstate & RIGHT_CTRL_PRESSED) ||(sstate & LEFT_CTRL_PRESSED) )
+        /* controled? */
         etype |= (CTRL >> 8);
 
     /* no buttons changes */
@@ -515,8 +545,8 @@ int PendingScreenResize()
     }
 }
 /*----------------------------------------------------------------------*/
-/*  ntgetc()                            */
-/* Get a character from the keyboard.                   */
+/*      ntgetc()                                                        */
+/* Get a character from the keyboard.                                   */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntgetc()
@@ -568,9 +598,10 @@ ttc:    ntflush();
 }
 
 # if TYPEAH
+
 /*----------------------------------------------------------------------*/
-/*  typahead()                          */
-/* Returns true if a key has been pressed.              */
+/*      typahead()                                                      */
+/* Returns true if a key has been pressed.                              */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR typahead()
@@ -581,24 +612,25 @@ PASCAL NEAR typahead()
 
     return (FALSE);
 }
+
 # endif
 
 static WORD near ntAttribute(void)
 {
-    return ( revflag ? ( cbcolor |
-                         (cfcolor << 4) ) : ( (cbcolor << 4) | cfcolor ) );
+    return ( revflag ? ( cbcolor | (cfcolor << 4) )
+                     : ( (cbcolor << 4) | cfcolor ) );
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntputc()                            */
-/* Put a character at the current position in the current colors.   */
+/*      ntputc()                                                        */
+/* Put a character at the current position in the current colors.       */
 /* Note that this does not behave the same as putc() or VioWrtTTy().    */
 /* This routine does nothing with returns and linefeeds.  For backspace */
 /* it puts a space in the previous column and moves the cursor to the   */
-/* previous column.  For all other characters, it will display the  */
+/* previous column.  For all other characters, it will display the      */
 /* graphic representation of the character and put the cursor in the    */
 /* next column (even if that is off the screen.  In practice this isn't */
-/* a problem.                               */
+/* a problem.                                                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntputc(int c)
@@ -632,8 +664,8 @@ PASCAL NEAR ntputc(int c)
 
 
 /*----------------------------------------------------------------------*/
-/*  nteeol()                            */
-/* Erase to end of line.                        */
+/*      nteeol()                                                        */
+/* Erase to end of line.                                                */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR nteeol()
@@ -659,8 +691,8 @@ PASCAL NEAR nteeol()
 
 
 /*----------------------------------------------------------------------*/
-/*  nteeop()                            */
-/* Erase to end of page.                        */
+/*      nteeop()                                                        */
+/* Erase to end of page.                                                */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR nteeop()
@@ -686,8 +718,8 @@ PASCAL NEAR nteeop()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntrev()                         */
-/* Change reverse video state.                      */
+/*      ntrev()                                                         */
+/* Change reverse video state.                                          */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntrev(state)
@@ -699,8 +731,8 @@ int state;      /* TRUE = reverse, FALSE = normal */
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntcres()                            */
-/* Change the screen resolution.                    */
+/*      ntcres()                                                        */
+/* Change the screen resolution.                                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntcres(char *res)           /* name of desired video mode   */
@@ -710,8 +742,8 @@ PASCAL NEAR ntcres(char *res)           /* name of desired video mode   */
 
 
 /*----------------------------------------------------------------------*/
-/*  spal()                              */
-/* Change pallette settings.  (Does nothing.)               */
+/*      spal()                                                          */
+/* Change pallette settings.  (Does nothing.)                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR spal(char *dummy)
@@ -721,7 +753,7 @@ PASCAL NEAR spal(char *dummy)
 
 
 /*----------------------------------------------------------------------*/
-/*  ntbeep()                            */
+/*      ntbeep()                                                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntbeep()
@@ -732,7 +764,7 @@ PASCAL NEAR ntbeep()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntopen()                            */
+/*      ntopen()                                                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntopen()
@@ -788,20 +820,20 @@ PASCAL NEAR ntopen()
     revexist = TRUE;
     revflag = FALSE;
     eolexist = TRUE;
-/*  gfcolor = 15;
- *       gbcolor = 0;*/
+/** gfcolor = 15; **/
+/** gbcolor = 0;  **/
     cfcolor = 7;
     cbcolor = 0;
 
-    SetConsoleOutputCP(437);            /* this does not seem to give me the old
-                                         * IBMPC character set.... */
+    SetConsoleOutputCP(437);    /* this does not seem to give me the old
+                                 * IBMPC character set....  */
 
     return (TRUE);
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntclose()                           */
-/* Restore the original video settings.                 */
+/*      ntclose()                                                       */
+/* Restore the original video settings.                                 */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntclose()
@@ -815,8 +847,8 @@ PASCAL NEAR ntclose()
 }
 
 /*----------------------------------------------------------------------*/
-/*  ntkopen()                           */
-/* Open the keyboard.                           */
+/*      ntkopen()                                                       */
+/* Open the keyboard.                                                   */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntkopen()
@@ -837,8 +869,8 @@ PASCAL NEAR ntkopen()
 
 
 /*----------------------------------------------------------------------*/
-/*  ntkclose()                          */
-/* Close the keyboard.                          */
+/*      ntkclose()                                                      */
+/* Close the keyboard.                                                  */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR ntkclose()
@@ -859,5 +891,11 @@ int f, n;        /* default flag, numeric argument [unused] */
     return (TRUE);
 }
 # endif
+
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

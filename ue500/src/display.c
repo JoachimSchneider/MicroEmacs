@@ -1,10 +1,19 @@
-/*
+/*======================================================================
  * The functions in this file handle redisplay. There are two halves, the ones
  * that update the virtual display screen, and the ones that make the physical
  * display screen the same as the virtual display screen. These functions use
  * hints that are left in the windows by the commands.
- *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define DISPLAY_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        "estruct.h"

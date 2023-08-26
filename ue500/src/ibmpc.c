@@ -1,11 +1,21 @@
-/*
- * The routines in this file provide support for the IBM-PC and other compatible
- * terminals. It goes directly to the graphics RAM to do screen output. It
- * compiles into nothing if not an IBM-PC driver Supported monitor cards include
- * CGA, MONO and EGA.
- */
+/*======================================================================
+ * The routines in this file provide support for the IBM-PC and other
+ * compatible terminals. It goes directly to the graphics RAM to do
+ * screen output. It compiles into nothing if not an IBM-PC driver
+ * Supported monitor cards include CGA, MONO and EGA.
+ *====================================================================*/
 
-#define termdef 1                       /* don't define "term" external */
+/*====================================================================*/
+#define IBMPC_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+#define termdef 1                     /* don't define "term" external */
 
 #include        <stdio.h>
 #include        "estruct.h"

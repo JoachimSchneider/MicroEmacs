@@ -1,13 +1,26 @@
-/* UNDO.C:     Undo commands and functionality for MicroEMACS (C)Copyright 1995
- * by Daniel Lawrence
+/*======================================================================
+ *      UNDO.C:         Undo commands and functionality for
+ *                      MicroEMACS
+ *                      (C)Copyright 1995 by Daniel Lawrence
  *
- * The functions in this file record and allow the playback of basic editing
- * changes. For each buffer, a stack of these changes is maintained. The
- * beginning of each command which can change the buffer is flaged with a
- * command entry. The undo command then can back out of these changes one
- * command at a time. The UNDO stack is flushed by any command that writes the
- * buffer to disk, or clears the buffer.
- */
+ *      The functions in this file record and allow the playback
+ *      of basic editing changes. For each buffer, a stack of these
+ *      changes is maintained. The beginning of each command which
+ *      can change the buffer is flaged with a command entry. The
+ *      undo command then can back out of these changes one command
+ *      at a time. The UNDO stack is flushed by any command that
+ *      writes the buffer to disk, or clears the buffer.
+ *====================================================================*/
+
+/*====================================================================*/
+#define UNDO_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include        <stdio.h>
 #include        <string.h>
@@ -384,8 +397,8 @@ VOID undo_dump P0_()
     }
 }
 
-/* ROOM:   Allocate memory using malloc() on failure, discard oldest undo
- * information and retry
+/* ROOM:  Allocate memory using malloc() on failure, discard oldest undo
+ *        information and retry
  */
 char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 {
@@ -439,7 +452,7 @@ nextbuf:        bp = getoldb();
 }
 
 /* RE-ROOM: Allocate memory using realloc() on failure, discard oldest undo
- * information and retry
+ *          information and retry
  */
 char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
 {

@@ -1,9 +1,22 @@
-/* The routines in this file provide support for various OS-related functions
- * under the Microsoft Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide support for various OS-related
+ * functions under the Microsoft Windows environment on an IBM-PC or
+ * compatible computer.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWSYS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define     OEMRESOURCE 1   /* to have access to OBM_CLOSE from windows.h */
 #include    "estruct.h"
@@ -273,15 +286,15 @@ BOOL FAR PASCAL WinInit (LPSTR lpCmdLine, int nCmdShow)
     RegisterClass (&wc);
 
     /*-Create the frame window */
-    hFrameWnd = CreateWindow (FrameClassName,       /* class */
-                              PROGNAME " " VERSION, /* title */
-                              WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN, InitPos.x,            /*
-                                                                                            * positions
-                                                                                            */
-                              InitPos.y, CW_USEDEFAULT,        /* dimensions */
-                              CW_USEDEFAULT, NULL,                 /* parent
-                                                                    * handle */
-                              NULL,                 /* menu */
+    hFrameWnd = CreateWindow (FrameClassName,       /* class          */
+                              PROGNAME " " VERSION, /* title          */
+                              WS_OVERLAPPEDWINDOW | WS_CLIPCHILDREN,
+                              InitPos.x,            /* positions      */
+                              InitPos.y,
+                              CW_USEDEFAULT,        /* dimensions     */
+                              CW_USEDEFAULT,
+                              NULL,                 /* parent handle  */
+                              NULL,                 /* menu           */
                               hEmacsInstance, NULL);
 
     if ( hFrameWnd == 0 ) return FALSE;
@@ -493,22 +506,17 @@ VOID FAR PASCAL FrameInit (CREATESTRUCT *cs)
     ccs.hWindowMenu = GetScreenMenuHandle ();
     ccs.idFirstChild = IDM_FIRSTCHILD;
     GetClientRect (hFrameWnd, &Rect);
-    hMDIClientWnd = CreateWindow ("MDICLIENT",
-                                  /* class */
-                                  NULL,
-                                  /* title */
-                                  WS_CHILD | WS_CLIPCHILDREN | WS_VSCROLL |WS_HSCROLL | WS_VISIBLE,
-                                  /* style */
+    hMDIClientWnd = CreateWindow ("MDICLIENT",    /* class          */
+                                  NULL,           /* title          */
+                                  WS_CHILD | WS_CLIPCHILDREN
+                                    | WS_VSCROLL | WS_HSCROLL
+                                    | WS_VISIBLE, /* style          */
+                                  0,              /* positions      */
                                   0,
-                                  /* positions */
-                                  0,
-                                  Rect.right,
-                                  /* dimensions */
+                                  Rect.right,     /* dimensions     */
                                   Rect.bottom - EmacsCM.MLHeight,
-                                  hFrameWnd,
-                                  /* parent handle */
-                                  NULL,
-                                  /* menu */
+                                  hFrameWnd,      /* parent handle  */
+                                  NULL,           /* menu           */
                                   hEmacsInstance,
                                   (LPSTR) (LPCLIENTCREATESTRUCT) &ccs);
     if ( hMDIClientWnd ) {
@@ -1226,3 +1234,8 @@ static VOID PASCAL SetHourglass (BOOL hg)
     }
 } /* SetHourglass */
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

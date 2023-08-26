@@ -1,13 +1,13 @@
-/*
+/*======================================================================
  * The routines in this file provides support for  vi-like tagging
  * of defined identifiers.  We presuppose the "tags" file in the
  * current directory (constructed by 'ctags' or 'etags'), with each
  * entry on the following format:
  *
- *	 identifier<tab>file<tab>vi-search-pattern
+ *       identifier<tab>file<tab>vi-search-pattern
  *
  * Code will be generated if both  MAGIC and CTAGS  is wanted.
- *							880826mhs
+ * 880826mhs
  *
  * 890622mhs
  * Changed code so as to take advantage of the new FAST search routine
@@ -21,19 +21,30 @@
  * 890627mhs
  * Added possibility to be prompted for word to tag.  You will be prompted
  * if you execute the tag-word function whenever dot is not within a word.
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define TAGS_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #include <stdio.h>
 #include "estruct.h"
 
 #if CTAGS
+
 # include "eproto.h"
 # include "edef.h"
 # include "elang.h"
 
-# define INDEX(c)        ( is_lower(c) ? c-'a'+ \
-                           27 : ( is_letter(c) ? c-'A'+ \
-                                  1: ( (c == '_') ? 0 : -1 ) ) )
+# define INDEX(c)        ( is_lower((c)) ? (c) - 'a' +  27      \
+                            : ( is_letter((c)) ? (c) - 'A' + 1  \
+                                : ( ((c) == '_') ? 0 : -1 ) ) )
 # define NINDEXES        26+26+1
 # define TAGWIDTH        30
 
@@ -41,12 +52,12 @@ typedef struct  TAG {
     struct  TAG *t_tagp;        /* Link to the next 'tags' file */
     char t_path[NFILEN];        /* Path of 'tags' file      */
     FILE    *t_fp;              /* File pointer to 'tags' file  */
-    char t_wd[TAGWIDTH + 1];            /* Word last tagged (this file) */
-    char t_fname[NFILEN];               /* Holds name of file from where*/
-                                        /* we tagged.           */
-    int t_indexed;                      /* Flag:  1=file is indexed */
-    long t_dotos[NINDEXES];             /* Offsets of first chars (used */
-                                        /* for speed-up purposes only). */
+    char t_wd[TAGWIDTH + 1];    /* Word last tagged (this file) */
+    char t_fname[NFILEN];       /* Holds name of file from where*/
+                                /* we tagged.           */
+    int t_indexed;              /* Flag:  1=file is indexed */
+    long t_dotos[NINDEXES];     /* Offsets of first chars (used */
+                                /* for speed-up purposes only). */
 }       TAG;
 
 static TAG *theadp = NULL;      /* Pointer to the head of the   */
@@ -216,9 +227,9 @@ static int backupword(int f, int n)
  */
 static int alterpattern P1_(REGISTER char *, pattern)
 {
-    REGISTER int i = 0;         /* EMACS pattern index  */
-    REGISTER int j = 1;         /* VI pattern -skip /or?*/
-    int len = strlen(pattern) - 1;                      /* pattern length - 1   */
+    REGISTER int i = 0;               /* EMACS pattern index  */
+    REGISTER int j = 1;               /* VI pattern -skip /or?*/
+    int len = strlen(pattern) - 1;    /* pattern length - 1   */
     /* i.e. drop '/' or '?' */
 
     if ( pattern[len - 1] == '$' )
@@ -241,9 +252,9 @@ static int alterpattern P1_(REGISTER char *, pattern)
  * Some locally shared variables
  */
 
-static int thisfile = FALSE;    /* TRUE if curtp->t_fname equals*/
+static int thisfile = FALSE;    /* TRUE if curtp->t_fname equals  */
 /* curbp->fname when tagging    */
-static int tagvalid = FALSE;    /* TRUE if last tag was a succes*/
+static int tagvalid = FALSE;    /* TRUE if last tag was a succes  */
 
 /*
  * Prefix filename with path in curtp->t_path (if any) if filename doesn't
@@ -332,10 +343,10 @@ int tagger P2_(char *, errmsg, int, retag)
         curbp->b_mode &= ~MDMAGIC;
         setjtable();
 # if MAGIC
-        /*
-         * Clear out any magic mode patterns... Search restores them
-         * automatically.
-         */
+       /*
+        * Clear out any magic mode patterns... Search restores them
+        * automatically.
+        */
         mcclear();
         rmcclear();
         if ( mcscanner(&mcdeltapat[0], FORWARD, PTBEG, 1) == FALSE )
@@ -426,7 +437,7 @@ int f, n;
 /*
  * Sometimes the 'tags' file will contain multiple entries for the same
  * identifier.  This occures whenever an identifier is multiple defined.
- *  retagword  asks  tagger  to tag for the same  tagw  again but after the
+ * retagword  asks  tagger  to tag for the same  tagw  again but after the
  * position where the last tag entry for tagw was found. Note, retagword  do not
  * mess up the return information (tagf).
  */
@@ -471,9 +482,11 @@ int f, n;
 }
 
 #else
+
 tagshello()
 {
 }
+
 #endif
 
 

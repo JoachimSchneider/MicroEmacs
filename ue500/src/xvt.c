@@ -1,17 +1,28 @@
-/*
- *  MicroEMACS 4.00     XVT.C written by Daniel M. Lawrence
+/*======================================================================
+ *      MicroEMACS 4.00         XVT.C
+ *              written by Daniel M. Lawrence
  *
- *  (C)Copyright 1995 by Daniel M. Lawrence MicroEMACS 4.00 can be copied and
- * distributed freely for any non-commercial purposes. MicroEMACS 4.00 can only
- * be incorporated into commercial software with the permission of the current
- * author.
+ *      (C)Copyright 1995 by Daniel M. Lawrence
+ *      MicroEMACS 4.00 can be copied and distributed freely for any
+ *      non-commercial purposes. MicroEMACS 4.00 can only be incorporated
+ *      into commercial software with the permission of the current author.
  *
- *  The routines in this file provide support for the XVT windowing system
+ *      The routines in this file provide support for the XVT windowing system
  *
- *  Notice that the xvt header files force stdlib.h into the compile even though
- * it conflicts with some of our declarations...... This forced us to use the
- * standard definitions and ditch ours.
- */
+ *      Notice that the xvt header files force stdlib.h into the compile
+ *      even though it conflicts with some of our declarations......
+ *      This forced us to use the standard definitions and ditch ours.
+ *====================================================================*/
+
+/*====================================================================*/
+#define XVT_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define term external */
 #define XVTDRIVER       1               /* this is the XVT driver */
@@ -93,11 +104,31 @@ char *xvt_end = &xvt_obuf[MAXOBUF-1];   /* end of the buffer */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-NOSHARE TERM term =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, xvtopen, xvtclose,
-    xvtkopen, xvtkclose, xvtgetc, xvtputc, xvtflush, xvtmove, xvteeol, xvteeop,
-    xvteeop, xvtbeep, xvtrev, xvtcres, xvtfcol, xvtbcol
+NOSHARE TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    xvtopen,
+    xvtclose,
+    xvtkopen,
+    xvtkclose,
+    xvtgetc,
+    xvtputc,
+    xvtflush,
+    xvtmove,
+    xvteeol,
+    xvteeop,
+    xvteeop,
+    xvtbeep,
+    xvtrev,
+    xvtcres,
+    xvtfcol,
+    xvtbcol
 };
 
 /*  Some XVT specific globals   */
@@ -149,8 +180,7 @@ dump_event(char *typ, EVENT *ep)
         break;
 
     case E_MOUSE_DOWN:
-        sprintf(m,
-                "E_MOUSE_DOWN: [%d] %d/%d S%d C%d",
+        sprintf(m, "E_MOUSE_DOWN: [%d] %d/%d S%d C%d",
                 ep->v.mouse.button,
                 ep->v.mouse.where.v,
                 ep->v.mouse.where.h,
@@ -160,8 +190,7 @@ dump_event(char *typ, EVENT *ep)
         break;
 
     case E_MOUSE_UP:
-        sprintf(m,
-                "E_MOUSE_UP: [%d] %d/%d S%d C%d",
+        sprintf(m, "E_MOUSE_UP: [%d] %d/%d S%d C%d",
                 ep->v.mouse.button,
                 ep->v.mouse.where.v,
                 ep->v.mouse.where.h,
@@ -171,8 +200,7 @@ dump_event(char *typ, EVENT *ep)
         break;
 
     case E_MOUSE_MOVE:
-        sprintf(m,
-                "E_MOUSE_MOVE: [%d] %d/%d S%d C%d",
+        sprintf(m, "E_MOUSE_MOVE: [%d] %d/%d S%d C%d",
                 ep->v.mouse.button,
                 ep->v.mouse.where.v,
                 ep->v.mouse.where.h,
@@ -790,3 +818,8 @@ xvthello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

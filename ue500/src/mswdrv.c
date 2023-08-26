@@ -1,9 +1,22 @@
-/* The routines in this file provide drivers for display and input under the
- * Microsoft Windows environment on an IBM-PC or compatible computer.
+/*======================================================================
+ * The routines in this file provide drivers for display and input under
+ * the Microsoft Windows environment on an IBM-PC or compatible
+ * computer.
  *
- *  Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
+ * Must be compiled with Borland C++ 2.0 or MSC 6.0 or later versions.
  *
- *  It should not be compiled if the WINDOW_MSWIN symbol is not set */
+ * It should not be compiled if the WINDOW_MSWIN symbol is not set
+ *====================================================================*/
+
+/*====================================================================*/
+#define MSWDRV_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1           /* don't define term external */
 
@@ -45,40 +58,43 @@ static int PASCAL mswselscr();
 static int PASCAL mswsizscr();
 static int PASCAL mswtopscr();
 
-/* Standard terminal interface dispatch table.
+/*
+ * Standard terminal interface dispatch table.
  */
-NOSHARE TERM term    =
-{
-    128, 128, HUGENUM, HUGENUM, 0, 0, MARGIN, SCRSIZ, NPAUSE, mswopen, /*
-                                                                        * t_open:
-                                                                        * Open
-                                                                        * terminal
-                                                                        * at the
-                                                                        * start
-                                                                        */
-    mswnop,         /* t_close: Close terminal at end */
-    mswnop,         /* t_kopen: Open keyboard */
-    mswnop,         /* t_kclose: close keyboard */
-    mswgetc,        /* t_getchar: Get character from keyboard */
-    mswputc,        /* t_putchar: Put character to display */
-    mswflush,       /* t_flush: Flush output buffers */
-    mswmove,        /* t_move: Move the cursor, origin 0 */
-    msweeol,        /* t_eeol: Erase to end of line */
-    msweeop,        /* t_eeop: Erase to end of page */
-    mswnop,         /* t_clrdesk: Clear the page totally */
-    mswbeep,        /* t_beep: Sound beep */
-    mswrev,         /* t_rev: set reverse video state */
-    mswrez,         /* t_rez: change screen resolution */
+NOSHARE TERM  term  = {
+    128,
+    128,
+    HUGENUM,
+    HUGENUM,
+    0,
+    0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    mswopen,    /* t_open: Open terminal at the start */
+    mswnop,     /* t_close: Close terminal at end */
+    mswnop,     /* t_kopen: Open keyboard */
+    mswnop,     /* t_kclose: close keyboard */
+    mswgetc,    /* t_getchar: Get character from keyboard */
+    mswputc,    /* t_putchar: Put character to display */
+    mswflush,   /* t_flush: Flush output buffers */
+    mswmove,    /* t_move: Move the cursor, origin 0 */
+    msweeol,    /* t_eeol: Erase to end of line */
+    msweeop,    /* t_eeop: Erase to end of page */
+    mswnop,     /* t_clrdesk: Clear the page totally */
+    mswbeep,    /* t_beep: Sound beep */
+    mswrev,     /* t_rev: set reverse video state */
+    mswrez,     /* t_rez: change screen resolution */
 #if     COLOR
-    mswsetfor,      /* t_setfor: set forground color */
-    mswsetback,     /* t_setback: set background color */
+    mswsetfor,  /* t_setfor: set forground color */
+    mswsetback, /* t_setback: set background color */
 #endif
-    mswsleep,       /* t_sleep: wait a while */
-    mswnewscr,      /* t_newscr: create new "screen" display */
-    mswdelscr,      /* t_delscr: destroy "screen" display */
-    mswselscr,      /* t_selscr: select "screen" display for IO */
-    mswsizscr,      /* t_sizscr: resize "screen" display */
-    mswtopscr       /* t_topscr: bring "screen" to top */
+    mswsleep,   /* t_sleep: wait a while */
+    mswnewscr,  /* t_newscr: create new "screen" display */
+    mswdelscr,  /* t_delscr: destroy "screen" display */
+    mswselscr,  /* t_selscr: select "screen" display for IO */
+    mswsizscr,  /* t_sizscr: resize "screen" display */
+    mswtopscr   /* t_topscr: bring "screen" to top */
 };
 
 #define MAXMLHIST   8       /* must be a power of 2 */
@@ -705,3 +721,8 @@ static int PASCAL mswnop ()
     return 0;
 }
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

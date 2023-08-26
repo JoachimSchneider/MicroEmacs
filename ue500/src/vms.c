@@ -1,18 +1,30 @@
-/*	VMS.C	Operating system specific I/O and spawning functions
-		For VAX/VMS operating system
-		for MicroEMACS 4.00
-		Copyright 1995 by Jeffrey A. Lomicka and Daniel M. Lawrence
+/*======================================================================
+ *      VMS.C   Operating system specific I/O and spawning functions
+ *              For VAX/VMS operating system
+ *              for MicroEMACS 4.00
+ *              Copyright 1995 by Jeffrey A. Lomicka and Daniel M. Lawrence
+ *
+ *      All-new code replaces the previous VMS/SMG implementation which
+ *      prevented using non-SMG terminal drivers (ansi, termcap).  New
+ *      approach to terminal I/O, new (and more) subprocess control
+ *      functions, Kept emacs support, mail/notes interface.
+ *
+ *      Some of the above may still be wishlist.
+ *
+ *      12-Dec-89       Kevin A. Mitchell
+ *                      Start work on RMSIO code.
+ *====================================================================*/
 
-	All-new code replaces the previous VMS/SMG implementation which
-	prevented using non-SMG terminal drivers (ansi, termcap).  New
-	approach to terminal I/O, new (and more) subprocess control
-	functions, Kept emacs support, mail/notes interface.
+/*====================================================================*/
+#define VMS_C_
+/*====================================================================*/
 
-	Some of the above may still be wishlist.
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
 
-	12-Dec-89	Kevin A. Mitchell
-			Start work on RMSIO code.
-*/
+
 #include	<stdio.h>
 #include	"estruct.h"
 #if	VMS
@@ -1406,3 +1418,10 @@ PASCAL NEAR vms_hello()
 {
 }
 #endif
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
+

@@ -1,20 +1,30 @@
-/*
+/*======================================================================
  * OS2NONPM.C
  *
- * The routines in this file provide video and keyboard support using the OS/2
- * Vio and Kbd functions (not the presentation manager).
+ * The routines in this file provide video and keyboard support using the
+ * OS/2 Vio and Kbd functions (not the presentation manager).
  *
- * The os2putc, os2eeol and os2eeop routines modify the logical video buffer.
- *  Os2flush calls VioShowBuf to update the physical video buffer. An earlier
- * version used VioWrtTTy with ANSI processing (easy to do, but sloooow).  A
- * later version using VioWrtNCell was better, but not as good as manipulating
- * the logical buffer.
- */
+ * The os2putc, os2eeol and os2eeop routines modify the logical video
+ * buffer.  Os2flush calls VioShowBuf to update the physical video buffer.
+ * An earlier version used VioWrtTTy with ANSI processing (easy to do, but
+ * sloooow).  A later version using VioWrtNCell was better, but not as
+ * good as manipulating the logical buffer.
+ *====================================================================*/
+
+/*====================================================================*/
+#define OS2NPM_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define INCL_BASE
 #include        <os2.h>
 
-#define termdef 1                       /* don't define "term" external */
+#define termdef 1                     /* don't define "term" external */
 
 #include        <stdio.h>
 
@@ -40,12 +50,12 @@
 # define SCRSIZ  64             /* scroll size for extended lines */
 # define NPAUSE  100            /* # times thru update to pause */
 
-# define CDCGA   0              /* color graphics adapter   */
+# define CDCGA   0              /* color graphics adapter       */
 # define CDMONO  1              /* monochrome display adapter   */
-# define CDEGA   2              /* EGA              */
-# define CDVGA   3              /* VGA              */
+# define CDEGA   2              /* EGA                          */
+# define CDVGA   3              /* VGA                          */
 
-# define NDRIVE  4              /* number of video modes    */
+# define NDRIVE  4              /* number of video modes        */
 
 int dtype = -1;                         /* current video mode   */
 char drvname[][8] =                     /* names of video modes */
@@ -74,8 +84,8 @@ PASCAL NEAR os2fcol();
 PASCAL NEAR os2bcol();
 # endif
 
-struct {                        /* Current screen attribute for ORing   */
-    BYTE filler;                /* with character to be displayed.  */
+struct {                        /* Current screen attribute for ORing */
+    BYTE filler;                /* with character to be displayed.    */
     BYTE attr;
 }
 os2cell = { 0, 0x07 };
@@ -88,7 +98,7 @@ os2rcell = { 0, 0x07 };
 
 static struct {                         /* initial states       */
     USHORT ansiState;                   /* ANSI translation     */
-    VIOCONFIGINFO vioConfigInfo;        /* video configuration      */
+    VIOCONFIGINFO vioConfigInfo;        /* video configuration  */
     VIOMODEINFO vioModeInfo;            /* video mode           */
     KBDINFO kbdInfo;                    /* keyboard info        */
 }
@@ -119,14 +129,33 @@ static USHORT lvbMax;                   /* max index of modified byte   */
 /*
  * Standard terminal interface dispatch table.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, os2open, os2close,
-    os2kopen, os2kclose, os2getc, os2putc, os2flush, os2move, os2eeol, os2eeop,
-    os2eeop, os2beep, os2rev, os2cres
-# if     COLOR
-    , os2fcol, os2bcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    os2open,
+    os2close,
+    os2kopen,
+    os2kclose,
+    os2getc,
+    os2putc,
+    os2flush,
+    os2move,
+    os2eeol,
+    os2eeop,
+    os2eeop,
+    os2beep,
+    os2rev,
+    os2cres
+#if     COLOR
+    , os2fcol,
+    os2bcol
+#endif
 };
 
 # if     MOUSE
@@ -181,8 +210,8 @@ int in_get()    /* get an event from the input buffer */
 
 # if     COLOR
 /*----------------------------------------------------------------------*/
-/*  os2fcol()                           */
-/* Set the current foreground color.                    */
+/*      os2fcol()                                                       */
+/* Set the current foreground color.                                    */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2fcol(int color)                      /* color to set */
@@ -202,8 +231,8 @@ PASCAL NEAR os2fcol(int color)                      /* color to set */
 }
 
 /*----------------------------------------------------------------------*/
-/*  os2bcol()                           */
-/* Set the current background color.                    */
+/*      os2bcol()                                                       */
+/* Set the current background color.                                    */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2bcol(int color)              /* color to set */
@@ -225,8 +254,8 @@ PASCAL NEAR os2bcol(int color)              /* color to set */
 
 
 /*----------------------------------------------------------------------*/
-/*  os2move()                           */
-/* Move the cursor.                         */
+/*      os2move()                                                       */
+/* Move the cursor.                                                     */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2move(int row, int col)
@@ -238,8 +267,8 @@ PASCAL NEAR os2move(int row, int col)
 
 
 /*----------------------------------------------------------------------*/
-/*  os2flush()                          */
-/* Update the physical video buffer from the logical video buffer.  */
+/*      os2flush()                                                      */
+/* Update the physical video buffer from the logical video buffer.      */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2flush(void)
@@ -254,11 +283,11 @@ PASCAL NEAR os2flush(void)
 
 
 /*----------------------------------------------------------------------*/
-/*  os2char()                           */
-/* Get a character from the keyboard.                   */
+/*      os2char()                                                       */
+/* Get a character from the keyboard.                                   */
 /* Function keys, editing keys and alt- keys queue extra bytes into     */
-/* input queue.
- *  /*----------------------------------------------------------------------*/
+/* input queue.                                                         */
+/*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2char()
 {
@@ -343,7 +372,7 @@ checkmouse()
     int mouserow;               /* current mouse row */
     int sstate;                 /* current shift key status */
     int newbut;                 /* new state of the mouse buttons */
-    MOUEVENTINFO mouse_event;           /* info about a mouse event */
+    MOUEVENTINFO mouse_event;   /* info about a mouse event */
     MOUQUEINFO mouse_queue;     /* holds info about the mouse queue */
     USHORT wait_flag;           /* wait flag for read mouse queue call */
     KBDINFO kbd_info;           /* keyboard information */
@@ -423,10 +452,10 @@ checkmouse()
             in_put(mousecol);
             in_put(mouserow);
 
-            event = ( (newbut&k) ? 0 : 1 );             /* up or down? */
-            if ( k == 2 )                               /* center button? */
+            event = ( (newbut&k) ? 0 : 1 );     /* up or down? */
+            if ( k == 2 )                       /* center button? */
                 event += 4;
-            if ( k == 4 )                               /* right button? */
+            if ( k == 4 )                       /* right button? */
                 event += 2;
             event += 'a';                       /* plain */
             in_put(event);
@@ -444,8 +473,8 @@ checkmouse()
 
 # if     TYPEAH
 /*----------------------------------------------------------------------*/
-/*  typahead()                          */
-/* Returns true if a key has been pressed.              */
+/*      typahead()                                                      */
+/* Returns true if a key has been pressed.                              */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR typahead()
@@ -460,15 +489,15 @@ PASCAL NEAR typahead()
 
 
 /*----------------------------------------------------------------------*/
-/*  os2putc()                           */
-/* Put a character at the current position in the current colors.   */
+/*      os2putc()                                                       */
+/* Put a character at the current position in the current colors.       */
 /* Note that this does not behave the same as putc() or VioWrtTTy().    */
 /* This routine does nothing with returns and linefeeds.  For backspace */
 /* it puts a space in the previous column and moves the cursor to the   */
-/* previous column.  For all other characters, it will display the  */
+/* previous column.  For all other characters, it will display the      */
 /* graphic representation of the character and put the cursor in the    */
 /* next column (even if that is off the screen.  In practice this isn't */
-/* a problem.                               */
+/* a problem.                                                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2putc(int c)
@@ -498,8 +527,8 @@ PASCAL NEAR os2putc(int c)
 
 
 /*----------------------------------------------------------------------*/
-/*  os2eeol()                           */
-/* Erase to end of line.                        */
+/*      os2eeol()                                                       */
+/* Erase to end of line.                                                */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2eeol()
@@ -520,8 +549,8 @@ PASCAL NEAR os2eeol()
 
 
 /*----------------------------------------------------------------------*/
-/*  os2eeop()                           */
-/* Erase to end of page.                        */
+/*      os2eeop()                                                       */
+/* Erase to end of page.                                                */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2eeop()
@@ -548,8 +577,8 @@ PASCAL NEAR os2eeop()
 }
 
 /*----------------------------------------------------------------------*/
-/*  os2rev()                            */
-/* Change reverse video state.                      */
+/*      os2rev()                                                        */
+/* Change reverse video state.                                          */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2rev(state)
@@ -561,8 +590,8 @@ int state;      /* TRUE = reverse, FALSE = normal */
 }
 
 /*----------------------------------------------------------------------*/
-/*  os2cres()                           */
-/* Change the screen resolution.                    */
+/*      os2cres()                                                       */
+/* Change the screen resolution.                                        */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2cres(char *res)          /* name of desired video mode   */
@@ -611,8 +640,8 @@ PASCAL NEAR os2cres(char *res)          /* name of desired video mode   */
 
 
 /*----------------------------------------------------------------------*/
-/*  spal()                              */
-/* Change pallette settings.  (Does nothing.)               */
+/*      spal()                                                          */
+/* Change pallette settings.  (Does nothing.)                           */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR spal(char *dummy)
@@ -621,7 +650,7 @@ PASCAL NEAR spal(char *dummy)
 
 
 /*----------------------------------------------------------------------*/
-/*  os2beep()                           */
+/*      os2beep()                                                       */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2beep()
@@ -631,10 +660,10 @@ PASCAL NEAR os2beep()
 
 
 /*----------------------------------------------------------------------*/
-/*  os2open()                           */
+/*      os2open()                                                       */
 /* Find out what kind of video adapter we have and the current video    */
 /* mode.  Even if the adapter supports a higher resolution mode than is */
-/* in use, we still use the current mode.               */
+/* in use, we still use the current mode.                               */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2open()
@@ -695,7 +724,7 @@ PASCAL NEAR os2open()
     MouGetNumButtons(&nbuttons, mouse_handle);
 
     /* tell it what events were interested in */
-/*  event_mask = MOUSE_BN1_DOWN | MOUSE_BN2_DOWN | MOUSE_BN3_DOWN;*/
+ /**event_mask = MOUSE_BN1_DOWN | MOUSE_BN2_DOWN | MOUSE_BN3_DOWN;**/
     event_mask = 0xff;
     MouSetEventMask(&event_mask, mouse_handle);
 
@@ -709,8 +738,8 @@ PASCAL NEAR os2open()
 }
 
 /*----------------------------------------------------------------------*/
-/*  os2close()                          */
-/* Restore the original video settings.                 */
+/*      os2close()                                                      */
+/* Restore the original video settings.                                 */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2close()
@@ -727,8 +756,8 @@ PASCAL NEAR os2close()
 }
 
 /*----------------------------------------------------------------------*/
-/*  os2kopen()                          */
-/* Open the keyboard.                           */
+/*      os2kopen()                                                      */
+/* Open the keyboard.                                                   */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2kopen()
@@ -739,17 +768,17 @@ PASCAL NEAR os2kopen()
     KbdGetStatus(&initial.kbdInfo, 0);
     kbdInfo = initial.kbdInfo;
     kbdInfo.fsMask &= ~0x0001;                  /* not echo on      */
-    kbdInfo.fsMask |= 0x0002;                   /* echo off     */
+    kbdInfo.fsMask |= 0x0002;                   /* echo off         */
     kbdInfo.fsMask &= ~0x0008;                  /* cooked mode off  */
-    kbdInfo.fsMask |= 0x0004;                   /* raw mode     */
+    kbdInfo.fsMask |= 0x0004;                   /* raw mode         */
     kbdInfo.fsMask &= ~0x0100;                  /* shift report off */
     KbdSetStatus(&kbdInfo, 0);
 }
 
 
 /*----------------------------------------------------------------------*/
-/*  os2kclose()                         */
-/* Close the keyboard.                          */
+/*      os2kclose()                                                     */
+/* Close the keyboard.                                                  */
 /*----------------------------------------------------------------------*/
 
 PASCAL NEAR os2kclose()
@@ -770,10 +799,10 @@ int f, n;        /* default flag, numeric argument [unused] */
 
 # if 0
 /*----------------------------------------------------------------------*/
-/*  scwrite()                           */
-/* Write a line to the screen.
- *  /* I tried using this routine with MEMMAP = 1, but there were too many  */
-/* problems with the cursor and flushing the buffer.            */
+/*      scwrite()                                                       */
+/* Write a line to the screen.                                          */
+/* I tried using this routine with MEMMAP = 1, but there were too many  */
+/* problems with the cursor and flushing the buffer.                    */
 /*----------------------------------------------------------------------*/
 
 scwrite (int row,       /* row of screen to place outstr on */
@@ -797,3 +826,8 @@ scwrite (int row,       /* row of screen to place outstr on */
 # endif
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

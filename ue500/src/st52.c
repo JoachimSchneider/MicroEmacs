@@ -1,26 +1,42 @@
-/*  ST52.C: Atari ST1040/520 screen support functions written by lots of people
- * (see below)
+/*======================================================================
+ *      ST52.C: Atari ST1040/520 screen support functions
+ *              written by lots of people (see below)
  *
- *               Daniel Lawrence James Turner Jeff Lomicka J. C. Benoist
+ *              Daniel Lawrence
+ *              James Turner
+ *              Jeff Lomicka
+ *              J. C. Benoist
  *
- *       Modification History:
- *       31-dec-87  Jeff Lomicka
- *       - massive changes/additions for accessories and mouse 20-jan-87    Daniel
- * Lawrence
- *       - changed code in domousekey() to pass five bytes, two zeros (to tell
- * input.c that this is a mouse event), x/ypos and the mouse event type.
- *       may 88     Jeff Lomicka and Dan Lawrence
- *       - a lot of changes.  Through out aline.h, use the MWC and ATARI names
- * for things now.
- *       - moving the mouse to the extreme upper left brings up the desk
- * accessory menu.  EMACS won't replot on the way out yet.
- *       - cleaned up behavior of the mouse and the cursor on exit 26-feb-89    Daniel
- * Lawrence
- *       - rewote input layer to conform to new specs in input.c 01-may-91  Daniel
- * Lawrence/Suggested by Allan Pratt
- *       - renamed atari source files to TOS.C and ST52.c
- *       - changed symbols ATARI => ST52 and ST520 => TOS
- */
+ *      Modification History:
+ *      31-dec-87       Jeff Lomicka
+ *      - massive changes/additions for accessories and mouse
+ *      20-jan-87       Daniel Lawrence
+ *      - changed code in domousekey() to pass five bytes, two zeros
+ *        (to tell input.c that this is a mouse event), x/ypos
+ *        and the mouse event type.
+ *      may 88          Jeff Lomicka and Dan Lawrence
+ *      - a lot of changes.  Through out aline.h, use the MWC and
+ *        ATARI names for things now.
+ *      - moving the mouse to the extreme upper left brings up
+ *        the desk accessory menu.  EMACS won't replot on the
+ *        way out yet.
+ *      - cleaned up behavior of the mouse and the cursor on exit
+ *      26-feb-89       Daniel Lawrence
+ *      - rewote input layer to conform to new specs in input.c
+ *      01-may-91       Daniel Lawrence/Suggested by Allan Pratt
+ *      - renamed atari source files to TOS.C and ST52.c
+ *      - changed symbols ATARI => ST52 and ST520 => TOS
+ *====================================================================*/
+
+/*====================================================================*/
+#define ST52_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1               /* don't define "term" external */
 
@@ -33,9 +49,8 @@
 #if     ST52
 
 /*
- *       These routines provide support for the ATARI 1040ST and 520ST using the
- * virtual VT52 Emulator
- *
+ * These routines provide support for the ATARI 1040ST and 520ST using
+ * the virtual VT52 Emulator
  */
 
 # include        <aesbind.h>
@@ -110,13 +125,13 @@ struct la_font *system_font;    /* pointer to default system font */
 struct la_font *small_font;     /* pointer to small font */
 
 /*
- *       These are needed to make GEM happy
+ * These are needed to make GEM happy
  */
 int contrl[ 11], intin[ 128], intout[ 128], ptsin[ 256], ptsout[ 12];
 static int worki[ 11] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2 }, worko[ 57];
 
 /*
- *       Some useful information about our environment
+ * Some useful information about our environment
  */
 static int g_wchar, g_hchar,       /* VDI's idea of current font size */
            junk, gid, wkid;     /* Graphics ID, workstation ID */
@@ -125,30 +140,32 @@ static int oldbut = 0;          /* Previous state of mouse buttons */
 static int mctrl;               /* current BEG_MOUSE state */
 static struct {
     char *norm, *shift, *caps;
-}
-*kt;                                                    /* Keyboard mapping */
+} *kt;                          /* Keyboard mapping */
 
 /*
- *       This object tree is for displaying the desk accessory menu. Actual
- * positions are written into this structure when the screen size is known.
+ * This object tree is for displaying the desk accessory menu.
+ * Actual positions are written into this structure when the
+ * screen size is known.
  */
 OBJECT menu[] =
-{
-    -1, 1, 4, G_IBOX, NONE, NORMAL, 0x0L, 0, 0, 0, 0,               /* Root */
-    4, 2, 2, G_BOX, NONE, NORMAL, 0x10F0L, 0, 0, 1, 1,              /* BAR */
-    1, 3, 3, G_IBOX, NONE, NORMAL, 0x0L, 0, 0, 1, 1,                /* Active */
-    2, -1, -1, G_TITLE, NONE, NORMAL, "", 0, 0, 1, 1,               /* title */
-    0, 5, 5, G_IBOX, NONE, NORMAL, 0x0L, 0, 0, 0, 0,                /* screen */
-    4, 6, 13, G_BOX, NONE, NORMAL, 0xFF1100L, 0, 0, 0, 0,           /* box */
-    7, -1, -1, G_STRING, NONE, NORMAL, TEXT179, 0, 0, 168, 16,
+    {
+    -1, 1, 4,   G_IBOX,   NONE,  NORMAL, 0x0L,      0 , 0,   0,   0,/* Root */
+     4, 2, 2,    G_BOX,   NONE,  NORMAL, 0x10F0L,   0,  0,   1,   1,/* BAR */
+     1, 3, 3,   G_IBOX,   NONE,  NORMAL, 0x0L,      0,  0,   1,   1,/* Active */
+     2,-1,-1,  G_TITLE,   NONE,  NORMAL,  "",       0,  0,   1,   1,/* title */
+     0, 5, 5,   G_IBOX,   NONE,  NORMAL, 0x0L,      0,  0,   0,   0,/* screen */
+     4, 6,13,    G_BOX,   NONE,  NORMAL, 0xFF1100L, 0,  0,   0,   0,/* box */
+     7,-1,-1, G_STRING,   NONE,  NORMAL, TEXT179,0,0,168,       16,
 /*                                       "  About MicroEmacs" */
-    8, -1, -1, G_STRING, NONE, DISABLED, "---------------------", 0, 16, 168,
-    16, 9, -1, -1, G_STRING, NONE, NORMAL, "", 0, 32, 168, 16, 10, -1, -1,
-    G_STRING, NONE, NORMAL, "", 0, 48, 168, 16, 11, -1, -1, G_STRING, NONE,
-    NORMAL, "", 0, 64, 168, 16, 12, -1, -1, G_STRING, NONE, NORMAL, "", 0, 80,
-    168, 16, 13, -1, -1, G_STRING, NONE, NORMAL, "", 0, 96, 168, 16, 5, -1, -1,
-    G_STRING, LASTOB, NORMAL, "", 0, 112, 168, 16
-};
+     8,-1,-1, G_STRING,   NONE,DISABLED, "---------------------",
+                                                    0, 16, 168,  16,
+     9,-1,-1, G_STRING,   NONE,  NORMAL, "",        0, 32, 168,  16,
+    10,-1,-1, G_STRING,   NONE,  NORMAL, "",        0, 48, 168,  16,
+    11,-1,-1, G_STRING,   NONE,  NORMAL, "",        0, 64, 168,  16,
+    12,-1,-1, G_STRING,   NONE,  NORMAL, "",        0, 80, 168,  16,
+    13,-1,-1, G_STRING,   NONE,  NORMAL, "",        0, 96, 168,  16,
+     5,-1,-1, G_STRING, LASTOB,  NORMAL, "",        0,112, 168,  16
+    };
 
 EXTERN mymouse();               /* .s file for calling two mouse handlers */
 int (*first_mhandler)();        /* Address of first handler */
@@ -186,16 +203,36 @@ EXTERN int     stbcol();
 # endif
 
 /*
- * Dispatch table. All the hard fields just point into the terminal I/O code.
+ * Dispatch table. All the hard fields just point into the terminal
+ * I/O code.
  */
-TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, &stopen, &stclose,
-    &stkopen, &stkclose, &stgetc, &stputc, &ttflush, &stmove, &steeol, &steeop,
-    &steeop, &stbeep, &strev, &strez
-# if     COLOR
-    , &stfcol, &stbcol
-# endif
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    &stopen,
+    &stclose,
+    &stkopen,
+    &stkclose,
+    &stgetc,
+    &stputc,
+    &ttflush,
+    &stmove,
+    &steeol,
+    &steeop,
+    &steeop,
+    &stbeep,
+    &strev,
+    &strez
+#if     COLOR
+    , &stfcol,
+    &stbcol
+#endif
 };
 
 /*  input buffers and pointers  */
@@ -358,11 +395,24 @@ int color;      /* color to set background to */
 }
 # endif
 
-static char beep[] =
-{
-    0x00, 0x00, 0x01, 0x01, 0x02, 0x01, 0x03, 0x01, 0x04, 0x02, 0x05, 0x01,
-    0x07, 0x38, 0x08, 0x10, 0x09, 0x10, 0x0A, 0x10, 0x0B, 0x00, 0x0C, 0x30,
-    0x0D, 0x03, 0xFF, 100, 0x09, 0x00, 0x0A, 0x00, 0xFF, 0x00
+static char beep[]  = {
+    0x00, 0x00,
+    0x01, 0x01,
+    0x02, 0x01,
+    0x03, 0x01,
+    0x04, 0x02,
+    0x05, 0x01,
+    0x07, 0x38,
+    0x08, 0x10,
+    0x09, 0x10,
+    0x0A, 0x10,
+    0x0B, 0x00,
+    0x0C, 0x30,
+    0x0D, 0x03,
+    0xFF, 100,
+    0x09, 0x00,
+    0x0A, 0x00,
+    0xFF, 0x00
 };
 
 stbeep()
@@ -389,19 +439,19 @@ mouse_off()     /* turn the gem mouse OFF */
 }
 
 /*
- *       me_mh - MicroEmacs Mouse interrupt Handler.  This handler is called, in
- * addition to the regular mouse handler, in order for microemacs to have access
- * to some more information about the mouse events.
+ * me_mh - MicroEmacs Mouse interrupt Handler.  This handler is called,
+ * in addition to the regular mouse handler, in order for microemacs
+ * to have access to some more information about the mouse events.
  *
- *       What it does is:
+ * What it does is:
  *
- *       - Queue a copy of the mouse button state at the actual moment of the
- * event, rather than after GEM is finished playing with timers.
+ * - Queue a copy of the mouse button state at the actual moment of
+ * the event, rather than after GEM is finished playing with timers.
  *
- *       - Convert all right-mouse-button events into left-mouse-button events
- * BEFORE GEM's mouse interrupt handler, so that GEM will generate a
- * left-mouse-button event.
- */
+ * - Convert all right-mouse-button events into left-mouse-button
+ * events BEFORE GEM's mouse interrupt handler, so that GEM will generate
+ * a left-mouse-button event.
+*/
 me_mh(a)
 
 char *a;
@@ -437,27 +487,27 @@ stopen()        /* open the screen */
     init();
     xstrcpy(os, "TOS");
 
-/*
- *       Set up an interrupt handler for the mouse that performs both me_mh()
- * and the default mouse handling.  The .s file "stmouse.s"
- *       contains some special code for this purpose.
- */
+   /*
+    * Set up an interrupt handler for the mouse that performs both
+    * me_mh() and the default mouse handling.  The .s file "stmouse.s"
+    * contains some special code for this purpose.
+    */
     first_mhandler = me_mh;
     kv = Kbdvbase();
     second_mhandler = kv->kb_mousevec;
     kv->kb_mousevec = mymouse;
-/*
- *       In order to have both the mouse cursor and the text cursor on the
- * screen at the same time, we have to flash it ourselves, turning the mouse
- * cursor on and off for each flash.
- *
- *       The cursors are both off whenever we are not in an input wait.
- */
+   /*
+    * In order to have both the mouse cursor and the text cursor on the
+    * screen at the same time, we have to flash it ourselves, turning
+    * the mouse cursor on and off for each flash.
+    *
+    * The cursors are both off whenever we are not in an input wait.
+    */
     Cursconf(3, 0);     /* Stop text cursor from flashing */
     Cursconf(0, 0);     /* Turn text cursor off */
-/*
- *       Wake up GEM and the VDI
- */
+   /*
+    * Wake up GEM and the VDI
+    */
     appl_init();
     gid = graf_handle(&g_wchar, &g_hchar, &junk, &junk);
 # if     0
@@ -466,10 +516,10 @@ stopen()        /* open the screen */
 # endif
     graf_mouse(M_OFF, 0L);
     mouseon = 0;
-/*
- *       Set up the menu bar's coordinates to match the font and screen size for
- * this screen resolution
- */
+   /*
+    * Set up the menu bar's coordinates to match the font and screen
+    * size for this screen resolution
+    */
     wind_get(0, WF_CURRXYWH,            /* Fetch actual screen size for menu */
              &menu[0].ob_x, &menu[0].ob_y, &menu[0].ob_width,
              &menu[0].ob_height);
@@ -486,14 +536,14 @@ stopen()        /* open the screen */
         menu[i].ob_height = g_hchar;
     }
     menu_bar(menu, 1);
-/*
- *       Shut off GEM's user interface until we enter an input wait. Note that
- * unless we claim the mouse with BEG_MCTRL, we will not get scheduled to run
- * any time the left mouse button goes down while the mouse is on the top 16
- * pixels of the screen.  We keep Emacs
- *       "hung" whenever MCTRL is given to desk accessories or GEM, and keep GEM
- * hung whenever we have control.
- */
+   /*
+    * Shut off GEM's user interface until we enter an input wait. Note
+    * that unless we claim the mouse with BEG_MCTRL, we will not get
+    * scheduled to run any time the left mouse button goes down while
+    * the mouse is on the top 16 pixels of the screen. We keep Emacs
+    * "hung" whenever MCTRL is given to desk accessories or GEM, and
+    * keep GEM hung whenever we have control.
+    */
     wind_update(BEG_UPDATE);            /* Shuts off GEM drawing */
     wind_update(BEG_MCTRL);             /* Shuts off GEM use of mouse */
 
@@ -582,12 +632,12 @@ stclose()
     appl_exit();
 }
 
-/*  spal(pstr): reset the current palette according to a
- *                       "palette string" of the form
+/* spal(pstr):  reset the current palette according to a
+ *              "palette string" of the form
  *
- *       000111222333444555666777
+ * 000111222333444555666777
  *
- *       which contains the octal values for the palette registers
+ * which contains the octal values for the palette registers
  */
 
 spal(pstr)
@@ -611,7 +661,6 @@ char *pstr;     /* palette string */
 
         palette[pal] = clr;
     }
-    ;
 
     /* and now set it */
     xbios(SETPALETTE, palette);
@@ -677,39 +726,21 @@ stgetc()        /* get a char from the keyboard */
 
         /* do the event-multi thing */
         ev_which = evnt_multi(
-            MU_TIMER | MU_MESAG | MU_KEYBD | MU_BUTTON | MU_M1,
-            1,
-            /* Maximum clicks to wait for */
-            1,
-            /* Buttons that generate events */
-            bexpected,
-            /* Button states that generate events */
-            0,
-            menu[1].ob_x,
-            menu[1].ob_y,
-            menu[1].ob_width,
-            menu[1].ob_height,
-            0,
-            0,
-            0,
-            0,
-            0,
-            /* enter/exit, x, y, w, h for rect 2 */
-            mes,
-            /* Buffer to receive mesasge */
-            /* Low and high order miliseconds of counter */
-            100,
-            0,
-            &mx,
-            &my,
-            /* Mouse location */
-            &bstate,
-            /* State of the mouse buttons */
-            &sk,
-            /* State of the shift keys */
-            &key,
-            /* Key pressed */
-            &mc);                       /* Actual number of clicks */
+                      MU_TIMER | MU_MESAG | MU_KEYBD | MU_BUTTON | MU_M1,
+                      1,                /* Maximum clicks to wait for */
+                      1,                /* Buttons that generate events */
+                      bexpected,        /* Button states that generate events */
+                      0, menu[1].ob_x, menu[1].ob_y,
+                      menu[1].ob_width, menu[1].ob_height,
+                      0, 0, 0, 0, 0,    /* enter/exit, x, y, w, h for rect 2 */
+                      mes,              /* Buffer to receive mesasge */
+                      /* Low and high order miliseconds of counter */
+                      100, 0,
+                      &mx, &my,         /* Mouse location */
+                      &bstate,          /* State of the mouse buttons */
+                      &sk,              /* State of the shift keys */
+                      &key,             /* Key pressed */
+                      &mc);             /* Actual number of clicks */
 
         if ( ev_which & MU_KEYBD ) {
             /* Keyboard events cause keystrokes, add SPC prefix to fn keys */
@@ -792,16 +823,16 @@ char *newrez;   /* requested resolution */
 
     if ( nrez == 4 ) {
         mlwrite(TEXT180);
-
 /*                      "%%No such resolution" */
+
         return (FALSE);
     }
 
     /* next, make sure this resolution is legal for this monitor */
     if ( (currez < 2 && nrez > 1) || (currez > 1 && nrez < 2) ) {
         mlwrite(TEXT181);
-
 /*                      "%%Resolution illegal for this monitor" */
+
         return (FALSE);
     }
 
@@ -851,8 +882,8 @@ char *newrez;   /* requested resolution */
     return (TRUE);
 }
 
-/*  extcode:    resolve Atari-ST extended character codes encoding the proper
- * sequences into emacs printable character specifications
+/* extcode: resolve Atari-ST extended character codes encoding the proper
+ *          sequences into emacs printable character specifications
  */
 
 int extcode(sk, sc, key)
@@ -862,53 +893,58 @@ unsigned key;   /* GEMDOS translation of the key */
 {
     int shift;  /* CAPS LOCK flag doesn't come from EVENT_MULTI */
     unsigned code;      /* Build up special function code */
-/*
- *       Identify any shit-key codes associated with this keystorke
- */
+   /*
+    * Identify any shit-key codes associated with this keystorke
+    */
     code = 0;
-/*
- *       I don't know why, but for some reason the codes for ALT of top row and
- * for CTRL of left, right and HOME come up wrong, and this fixes them.
- */
-    if ( sc == 0x77 ) sc = 0x47;
+   /*
+    * I don't know why, but for some reason the codes for ALT of top
+    * row and for CTRL of left, right and HOME come up wrong, and this
+    * fixes them.
+    */
+    if      ( sc == 0x77 ) sc = 0x47;
     else if ( sc == 0x73 ) sc = 0x4b;
     else if ( sc == 0x74 ) sc = 0x4d;
-    else if ( sc > 0x76 ) sc -= 0x76;
-/*
- *       Bring the shifted function key scan codes back into regular range
- */
+    else if ( sc >  0x76 ) sc -= 0x76;
+   /*
+    * Bring the shifted function key scan codes back into regular range
+    */
     if ( sc >= 0x54 && sc <= 0x5d ) sc -= (0x54-0x3B);
     if ( sk & K_ALT ) { /* ALT shift requires special handling */
         code |= ALTD;
-/*
- *       ALT of ordinary keys always returns '0' for the key.  Look up the
- * actual key as if ALT weren't there.
- */
+       /*
+        * ALT of ordinary keys always returns '0' for the key.  Look up the
+        * actual key as if ALT weren't there.
+        */
         shift = Getshift(-1);   /* Get state of shift keys (CAPS lock) */
-/*
- *       Map the key to a normal keystroke.  Keypad keys are treated special,
- * everyone else is mapped using the installed keytables.  This means it will
- * work right on German and other keyboards.
- */
-        if ( sk & K_CTRL ) {
+       /*
+        * Map the key to a normal keystroke. Keypad keys are treated
+        * special, everyone else is mapped using the installed
+        * keytables. This means it will work right on German and other
+        * keyboards.
+        */
+        if        ( sk & K_CTRL ) {
             code |= CTRL;
             key = kt->caps[ sc];
-        } else if ( sk & 3 ) key = kt->shift[ sc]; /* shift */
-        else if ( shift & 16 ) key = kt->caps[ sc];     /* Caps lock */
-        else key = kt->norm[ sc];
+        } else if ( sk & 3 )      {
+            key = kt->shift[ sc];   /* shift */
+        } else if ( shift & 16 )  {
+            key = kt->caps[ sc];    /* Caps lock */
+        } else                    {
+            key = kt->norm[ sc];
+        }
     }
-/*
- *       Peel of the numeric keypad keys
- */
+   /*
+    * Peel of the numeric keypad keys
+    */
     if ( sc == 0x72 ) key = 'E';
-    if ( sc >= 0x63 || sc == 0x4A || sc == 0x4E ) { /* Keypad keys are SPEC or
-                                                     * CTRL of what's on the key
-                                                     */
+    if ( sc >= 0x63 || sc == 0x4A || sc == 0x4E ) {
+        /* Keypad keys are SPEC or CTRL of what's on the key  */
         code |= SPEC | CTRL;
     }
-/*
- *       translate function keys into digits
- */
+   /*
+    * translate function keys into digits
+    */
     if ( sc >= 0x3b && sc <= 0x5d ) { /* This is a F1 thry F9 */
         code |= SPEC;
         key = sc - 0x3b + '1';
@@ -922,23 +958,22 @@ unsigned key;   /* GEMDOS translation of the key */
     if ( sc == 0x4b ) { code |= SPEC; key = 'B'; }
     if ( sc == 0x50 ) { code |= SPEC; key = 'N'; }
     if ( sc == 0x4d ) { code |= SPEC; key = 'F'; }
-/*
- *       translate CTRL-shifted of keys that don't usually CTRL
- */
-    if ( (sk & K_CTRL) && (sc <= 0x0D || key == 0) ) { /* Control of a
-                                                        * non-usually-control
-                                                        * key */
+   /*
+    * translate CTRL-shifted of keys that don't usually CTRL
+    */
+    if ( (sk & K_CTRL) && (sc <= 0x0D || key == 0) ) {
+        /* Control of a non-usually-control key */
         shift = Getshift(-1);   /* Get state of CAPS lock */
         code |= CTRL;
-        if ( sk & 3 ) key = kt->shift[ sc];             /* shift */
-        else if ( shift & 16 ) key = kt->caps[ sc];     /* Caps lock */
-        else key = kt->norm[ sc];
+        if      ( sk & 3 )      key = kt->shift[ sc];   /* shift */
+        else if ( shift & 16 )  key = kt->caps[ sc];    /* Caps lock */
+        else                    key = kt->norm[ sc];
     }
-    if ( key == 0 ) key = '@';                          /* Catch junk */
+    if ( key == 0 ) key = '@';    /* Catch junk */
     if ( code != 0 ) { /* This is a special key */
         if ( code & SPEC ) { /* Get shift and ctrl of function keys */
-            if ( sk & 3 ) code |= SHFT;
-            if ( sk & K_CTRL ) code |= CTRL;
+            if ( sk & 3 )       code |= SHFT;
+            if ( sk & K_CTRL )  code |= CTRL;
         }
         in_put(0);
         in_put(code>>8);
@@ -962,3 +997,8 @@ sthello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

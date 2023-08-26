@@ -1,14 +1,25 @@
-/*      NT.C:           Operating specific I/O and Spawning functions for the
- * Window NT operating system (console mode) for MicroEMACS 4.00 (C)Copyright
- * 1995 by Daniel M. Lawrence Windows NT version by Walter Warniaha
+/*======================================================================
+ *      NT.C:           Operating specific I/O and Spawning functions
+ *                      for the Window NT operating system (console mode)
+ *                      for MicroEMACS 4.00
+ *                      (C)Copyright 1995 by Daniel M. Lawrence
+ *                      Windows NT version by Walter Warniaha
  *
  * Note:  don't try to compile this on non Windows NT systems....  The header
- * files won't exist.
+ *        files won't exist.
  *
  * Modifications needed: check that we don't construct command lines and
  * temporary filenames which are too large for their buffers.
- *
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define NT_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
 
 
 #undef  PASCAL
@@ -121,7 +132,7 @@ PASCAL NEAR execprg(f, n)
  */
 PASCAL NEAR pipecmd(f, n)
 {
-    REGISTER EWINDOW *wp;        /* pointer to new window */
+    REGISTER EWINDOW *wp;       /* pointer to new window */
     REGISTER BUFFER *bp;        /* pointer to buffer to zot */
     REGISTER char *tmp;         /* ptr to TMP DOS environment variable */
     char line[NLINE];           /* command line send to shell */
@@ -247,8 +258,8 @@ PASCAL NEAR f_filter(f, n)
 
     /* setup the proper file names */
     bp = curbp;
-    xstrcpy(tmpnam, bp->b_fname);        /* save the original name */
-    xstrcpy(bp->b_fname, filnam1);       /* set it to our new one */
+    xstrcpy(tmpnam, bp->b_fname);     /* save the original name */
+    xstrcpy(bp->b_fname, filnam1);    /* set it to our new one */
 
     /* write it out, checking for errors */
     if ( writeout(filnam1, "w") != TRUE ) {
@@ -260,7 +271,7 @@ PASCAL NEAR f_filter(f, n)
     }
 
     mktemp(filnam2);
-    xstrcat(line, " <");                /* construct the command line */
+    xstrcat(line, " <");              /* construct the command line */
     xstrcat(line, filnam1);
     xstrcat(line, " >");
     xstrcat(line, filnam2);
@@ -284,8 +295,8 @@ PASCAL NEAR f_filter(f, n)
     }
 
     /* reset file name */
-    xstrcpy(bp->b_fname, tmpnam);        /* restore name */
-    bp->b_flag |= BFCHG;                /* flag it as changed */
+    xstrcpy(bp->b_fname, tmpnam);     /* restore name */
+    bp->b_flag |= BFCHG;              /* flag it as changed */
 
     /* and get rid of the temporary file */
     unlink(filnam1);
@@ -300,7 +311,7 @@ PASCAL NEAR f_filter(f, n)
 
 shell(void)
 {
-    char *shell;                /* Name of system command processor */
+    char *shell;                  /* Name of system command processor */
 
 
     /*  get name of system shell  */
@@ -315,9 +326,9 @@ shell(void)
 
 execprog(char *cmd)
 {
-    char args[NSTRING];                         /* args passed to program */
+    char args[NSTRING];               /* args passed to program */
     char            *sp;
-    char prog[NSTRING];                         /* name of program */
+    char prog[NSTRING];               /* name of program */
     USHORT i;
 
     /*
@@ -493,144 +504,56 @@ int extcode(unsigned c      /* byte following a zero extended char byte */
         return (ALTD | '0');
 
     /* some others as well */
-    switch ( c ) {
-    case 3:
-        return (0);                                     /* null */
+    /* some others as well */
+    switch (c) {
+        case 3:         return(0);                      /* null */
+        case 15:        return(SHFT | CTRL | 'I');      /* backtab */
 
-    case 15:
-        return (SHFT | CTRL | 'I');                             /* backtab */
+        case 16:        return(ALTD | 'Q');
+        case 17:        return(ALTD | 'W');
+        case 18:        return(ALTD | 'E');
+        case 19:        return(ALTD | 'R');
+        case 20:        return(ALTD | 'T');
+        case 21:        return(ALTD | 'Y');
+        case 22:        return(ALTD | 'U');
+        case 23:        return(ALTD | 'I');
+        case 24:        return(ALTD | 'O');
+        case 25:        return(ALTD | 'P');
 
-    case 16:
-        return (ALTD | 'Q');
+        case 30:        return(ALTD | 'A');
+        case 31:        return(ALTD | 'S');
+        case 32:        return(ALTD | 'D');
+        case 33:        return(ALTD | 'F');
+        case 34:        return(ALTD | 'G');
+        case 35:        return(ALTD | 'H');
+        case 36:        return(ALTD | 'J');
+        case 37:        return(ALTD | 'K');
+        case 38:        return(ALTD | 'L');
 
-    case 17:
-        return (ALTD | 'W');
+        case 44:        return(ALTD | 'Z');
+        case 45:        return(ALTD | 'X');
+        case 46:        return(ALTD | 'C');
+        case 47:        return(ALTD | 'V');
+        case 48:        return(ALTD | 'B');
+        case 49:        return(ALTD | 'N');
+        case 50:        return(ALTD | 'M');
 
-    case 18:
-        return (ALTD | 'E');
-
-    case 19:
-        return (ALTD | 'R');
-
-    case 20:
-        return (ALTD | 'T');
-
-    case 21:
-        return (ALTD | 'Y');
-
-    case 22:
-        return (ALTD | 'U');
-
-    case 23:
-        return (ALTD | 'I');
-
-    case 24:
-        return (ALTD | 'O');
-
-    case 25:
-        return (ALTD | 'P');
-
-    case 30:
-        return (ALTD | 'A');
-
-    case 31:
-        return (ALTD | 'S');
-
-    case 32:
-        return (ALTD | 'D');
-
-    case 33:
-        return (ALTD | 'F');
-
-    case 34:
-        return (ALTD | 'G');
-
-    case 35:
-        return (ALTD | 'H');
-
-    case 36:
-        return (ALTD | 'J');
-
-    case 37:
-        return (ALTD | 'K');
-
-    case 38:
-        return (ALTD | 'L');
-
-    case 44:
-        return (ALTD | 'Z');
-
-    case 45:
-        return (ALTD | 'X');
-
-    case 46:
-        return (ALTD | 'C');
-
-    case 47:
-        return (ALTD | 'V');
-
-    case 48:
-        return (ALTD | 'B');
-
-    case 49:
-        return (ALTD | 'N');
-
-    case 50:
-        return (ALTD | 'M');
-
-    case 71:
-        return (SPEC | '<');                            /* HOME */
-
-    case 72:
-        return (SPEC | 'P');                            /* cursor up */
-
-    case 73:
-        return (SPEC | 'Z');                            /* page up */
-
-    case 75:
-        return (SPEC | 'B');                            /* cursor left */
-
-    case 77:
-        return (SPEC | 'F');                            /* cursor right */
-
-    case 79:
-        return (SPEC | '>');                            /* end */
-
-    case 80:
-        return (SPEC | 'N');                            /* cursor down */
-
-    case 81:
-        return (SPEC | 'V');                            /* page down */
-
-    case 82:
-        return (SPEC | 'C');                            /* insert */
-
-    case 83:
-        return (SPEC | 'D');                            /* delete */
-
-    case 115:
-        return (SPEC | CTRL | 'B');                             /* control left
-                                                                 */
-
-    case 116:
-        return (SPEC | CTRL | 'F');                             /* control right
-                                                                 */
-
-    case 117:
-        return (SPEC | CTRL | '>');                             /* control END
-                                                                 */
-
-    case 118:
-        return (SPEC | CTRL | 'V');                             /* control page
-                                                                 * down */
-
-    case 119:
-        return (SPEC | CTRL | '<');                             /* control HOME
-                                                                 */
-
-    case 132:
-        return (SPEC | CTRL | 'Z');                             /* control page
-                                                                 * up */
+        case 71:        return(SPEC | '<');             /* HOME */
+        case 72:        return(SPEC | 'P');             /* cursor up */
+        case 73:        return(SPEC | 'Z');             /* page up */
+        case 75:        return(SPEC | 'B');             /* cursor left */
+        case 77:        return(SPEC | 'F');             /* cursor right */
+        case 79:        return(SPEC | '>');             /* end */
+        case 80:        return(SPEC | 'N');             /* cursor down */
+        case 81:        return(SPEC | 'V');             /* page down */
+        case 82:        return(SPEC | 'C');             /* insert */
+        case 83:        return(SPEC | 'D');             /* delete */
+        case 115:       return(SPEC | CTRL | 'B');      /* control left */
+        case 116:       return(SPEC | CTRL | 'F');      /* control right */
+        case 117:       return(SPEC | CTRL | '>');      /* control END */
+        case 118:       return(SPEC | CTRL | 'V');      /* control page down */
+        case 119:       return(SPEC | CTRL | '<');      /* control HOME */
+        case 132:       return(SPEC | CTRL | 'Z');      /* control page up */
     }
 
     return (ALTD | c);
@@ -638,3 +561,8 @@ int extcode(unsigned c      /* byte following a zero extended char byte */
 # endif /* obsolete */
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

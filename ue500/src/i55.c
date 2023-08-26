@@ -1,8 +1,18 @@
-/*
- * The routines in this file provide support for ANSI style terminals over a
- * serial line. The serial I/O services are provided by routines in termio.c. It
- * compiles into nothing if not an ANSI device.
- */
+/*======================================================================
+ * The routines in this file provide support for ANSI style terminals
+ * over a serial line. The serial I/O services are provided by routines
+ *  in termio.c. It compiles into nothing if not an ANSI device.
+ *====================================================================*/
+
+/*====================================================================*/
+#define I55_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define term external */
 
@@ -54,14 +64,33 @@ static int cbcolor = -1;        /* current background color */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-NOSHARE TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, i55open, i55close,
-    i55kopen, i55kclose, i55getc, ttputc, ttflush, i55move, i55eeol, i55eeop,
-    i55eeop, i55beep, i55rev, i55cres
-# if     COLOR
-    , i55fcol, i55bcol
-# endif
+NOSHARE TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    i55open,
+    i55close,
+    i55kopen,
+    i55kclose,
+    i55getc,
+    ttputc,
+    ttflush,
+    i55move,
+    i55eeol,
+    i55eeop,
+    i55eeop,
+    i55beep,
+    i55rev,
+    i55cres
+#if     COLOR
+    , i55fcol,
+    i55bcol
+#endif
 };
 
 # if     COLOR
@@ -237,3 +266,8 @@ i55hello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

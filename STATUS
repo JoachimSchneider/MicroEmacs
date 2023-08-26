@@ -71,13 +71,31 @@ comments in the original code: This has to be recreated!
 These files have been reviewed:
 
 File Name     Formated Comments   Func. Proto.    Init.   Warnings  EOF
-============================================================================
+========================================================================
 src/abbrev.c    X                   X                       X         X
+src/aix.c       X                                                     X
+src/amigados.c  X                                                     X
+src/aosvs.c     X                                                     X
+src/ansi.c      X                                                     X
+src/basic.c     X                                                     X
 src/bind.c      X                   X                       X         X
-src/exec.c      X                   X               X       X         X
+src/buffer.c    X                                                     X
+src/char.c      X                                                     X
+src/cmdfix.c    X                                                     X
+src/crypt.c     X                                                     X
+src/dg10.c      X                                                     X
 src/display.c   X                   X                       X         X
+src/dolock.c    X                                                     X
 src/eval.c      X                   X                       X         X
+src/exec.c      X                   X               X       X         X
 src/file.c      X                   X                       X         X
+src/fileio.c    X                                                     X
+src/fmr.c       X                                                     X
+src/fmrdos.c    X                                                     X
+src/history.c   X                   X               X       X         X
+src/hp110.c     X                                                     X
+src/hp150.c     X                                                     X
+src/i55.c       X                                                     X
 src/ibmpc.c     X                   X               X       X         X
 src/input.c     X                   X               X       X         X
 src/isearch.c   X                   X               X       X         X
@@ -86,29 +104,72 @@ src/line.c      X                   X               X       X         X
 src/lock.c      X                   X               X       X         X
 src/main.c      X                   X                       X         X
 src/mouse.c     X                   X                       X         X
+src/mpe.c       X                                                     X
 src/msdos.c     X                   X               X       X         X
+src/mswdisp.c   X                                                     X
+src/mswdrv.c    X                                                     X
+src/mswemacs.c  X                                                     X
+src/mswexec.c   X                                                     X
+src/mswfile.c   X                                                     X
+src/mswfont.c   X                                                     X
+src/mswinput.c  X                                                     X
+src/mswmem.c    X                                                     X
+src/mswmenu.c   X                                                     X
+src/mswsys.c    X                                                     X
+src/nec.c       X                                                     X
+src/necdos.c    X                                                     X
+src/nt.c        X                                                     X
+src/ntconio.c   X                                                     X
+src/os2.c       X                                                     X
+src/os2npm.c    X                                                     X
+src/posix.c     X                                                     X
 src/random.c    X                   X                       X         X
+src/region.c    X                                                     X
 src/replace.c   X                   X                       X         X
 src/screen.c    X                   X                       X         X
 src/search.c    X                   X                       X         X
+src/smg.c       X                                                     X /* REFORMAT!  */
+src/st52.c      X                                                     X
+src/tags.c      X                                                     X
+src/tcap.c      X                                                     X
+src/tipc.c      X                                                     X
+src/tos.c       X                                                     X
+src/undo.c      X                                                     X
 src/unix.c      X                   X                       X         X
+src/vms.c       X                                                     X /* REFORMAT!  */
+src/vt52.c      X                                                     X
+src/window.c    X                                                     X
+src/wmcs.c      X                                                     X
+src/word.c      X                                                     X
+src/xp.c        X                                                     X
+src/xpconio.c   X                                                     X
+src/xvt.c       X                                                     X
+src/xvtdos.c    X                                                     X
+src/z309c       X                                                     X
+........................................................................
+h/dutch.h       X                                                     X
+h/ebind.h       X                                                     X
 h/edef.h        X                                                     X
+h/efunc.h       X                                                     X
+h/elang.h       X                                                     X
+h/english.h     X                                                     X
+h/epath.h       X                                                     X
 h/eproto.h      X                                                     X
 h/estruct.h     X                                                     X
+h/evar.h        X                                                     X
+h/french.h      X                                                     X
+h/frenchis.h    X                                                     X
+h/german.h      X                                                     X
+h/japan.h       X                                                     X
+h/latin.h       X                                                     X
+h/mswhelp.h     X                                                     X
 h/mswin.h       X                                                     X
+h/mswmenu.h     X                                                     X
+h/mswrid.h      X                                                     X
+h/platin.h      X                                                     X
+h/resource.h    X                                                     X
+h/spanish.h     X                                                     X
 ............................................................................
-src/basic.c
-src/buffer.c
-src/char.c
-src/crypt.c
-src/dolock.c
-src/exec.c
-src/fileio.c
-src/region.c
-src/tags.c
-src/undo.c
-src/window.c
-src/word.c
 
 
 [2023-07-13.00]
@@ -585,5 +646,6 @@ Next Steps
       ue500/src/xvtdos.c:int PASCAL NEAR execprog(cmd)
 
     - Re-Check the int/char case with VMS
+    - NFUNCS defined in incompatible ways.
 
 # EOF

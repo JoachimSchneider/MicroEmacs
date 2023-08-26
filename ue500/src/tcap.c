@@ -1,72 +1,87 @@
-/*  tcap:   Unix V5, SUN OS, SCO XENIX, and BS4.2 Termcap video driver for
- * MicroEMACS 4.00
+/*======================================================================
+ * tcap:  Unix V5, SUN OS, SCO XENIX, and BS4.2 Termcap video driver
+ *        for MicroEMACS 4.00
  *
- *        12-10-88 - Modifications made by Guy Turcotte to accomodate SunOS V4.0
- * and Xenix V2.2.1 :
+ *  12-10-88 - Modifications made by Guy Turcotte to accomodate
+ *             SunOS V4.0 and Xenix V2.2.1 :
  *
- *                 SunOS mods:
+ *           SunOS mods:
  *
- *                 o p_seq field of TBIND struct augmented to 10 chars to take
- * into account longer definitions for keys (some Sun's keys definitions need at
- * least 7 chars...) as such, the code in get1key has been modified to take care
- * of the longer p_seq string.
+ *           o p_seq field of TBIND struct augmented to 10 chars
+ *             to take into account longer definitions for keys
+ *             (some Sun's keys definitions need at least 7 chars...)
+ *             as such, the code in get1key has been modified to take
+ *             care of the longer p_seq string.
  *
- *                 o tcapopen modified to take care of the tgetstr problem
- * (returns NULL on undefined keys instead of a valid string pointer...)
+ *           o tcapopen modified to take care of the tgetstr problem
+ *             (returns NULL on undefined keys instead of a valid
+ *             string pointer...)
  *
- *                 o The timout algorithm of get1key has been modified to take
- * care of the following select() function problem:
- *                   if some chars are already in the terminal buffer before
- * select is called and no others char appears on the terminal, it will timeout
- * anyway... (maybe a feature of SunOs V4.0)
+ *           o The timout algorithm of get1key has been modified to
+ *             take care of the following select() function problem:
+ *             if some chars are already in the terminal buffer before
+ *             select is called and no others char appears on the terminal,
+ *             it will timeout anyway... (maybe a feature of SunOs V4.0)
  *
- *                 Xenix mods:
+ *           Xenix mods:
  *
- *                 o The first two points indicated above are applicable for the
- * Xenix OS
+ *           o The first two points indicated above are applicable for
+ *             the Xenix OS
  *
- *                 o With my current knowledge, I can't find a clean solution to
- * the timeout problem of the get1key function under Xenix. I modified the code
- * to get rid of the BSD code
- *                   (via the #if directive) and use the Xenix nap() and rdchk()
- * functions to
- *                   make a 1/30 second wait. Seems to work as long as there is
- * not to much of activity from other processes on the system.
- *                   (The link command of the makefile must be modified to link
- * with the x library... you must add the option -lx)
+ *           o With my current knowledge, I can't find a clean solution
+ *             to the timeout problem of the get1key function
+ *             under Xenix. I modified the code to get rid of the BSD code
+ *             (via the #if directive) and use the Xenix nap() and rdchk()
+ *             functions to
+ *             make a 1/30 second wait. Seems to work as long as there is
+ *             not to much of activity from other processes on the system.
+ *             (The link command of the makefile must be modified to
+ *             link with the x library... you must add the option -lx)
  *
- *                 o The input.c file has been modified to not include the
- * get1key function defined there in the case of USG. The
- #if directive preceeding the get1key definition has been modified from:
+ *           o The input.c file has been modified to not include the
+ *             get1key function defined there in the case of USG. The
+ *             #if directive preceeding the get1key definition has been
+ *             modified from:
  *
- #if BSD == 0
+ *              #if BSD == 0
  *
- *                   to:
+ *             to:
  *
- #if (BSD == 0) && (USG == 0)
+ *              #if (BSD == 0) && (USG == 0)
  *
- *                 o The following lines define the new termcap entry for the
- * ansi kind of terminal: it permits the use of functions keys F1 .. F10 and
- * keys HOME,END,PgUp,PgDn on the IBM PC keyboard (the last 3 lines of the
- * definition have been added):
+ *           o The following lines define the new termcap entry for
+ *             the ansi kind of terminal: it permits the use of functions
+ *             keys F1 .. F10 and keys HOME,END,PgUp,PgDn on the IBM PC
+ *             keyboard (the last 3 lines of the definition have been
+ *             added):
  *
- *  li|ansi|Ansi standard crt:\
- *       :al=\E[L:am:bs:cd=\E[J:ce=\E[K:cl=\E[2J\E[H:cm=\E[%i%d;%dH:co#80:\
- *       :dc=\E[P:dl=\E[M:do=\E[B:bt=\E[Z:ei=:ho=\E[H:ic=\E[@:im=:li#25:\
- *       :nd=\E[C:pt:so=\E[7m:se=\E[m:us=\E[4m:ue=\E[m:up=\E[A:\
- *       :kb=^h:ku=\E[A:kd=\E[B:kl=\E[D:kr=\E[C:eo:sf=\E[S:sr=\E[T:\
- *       :GS=\E[12m:GE=\E[10m:GV=\63:GH=D:\
- *       :GC=E:GL=\64:GR=C:RT=^J:G1=?:G2=Z:G3=@:G4=Y:GU=A:GD=B:\
- *       :CW=\E[M:NU=\E[N:RF=\E[O:RC=\E[P:\
- *       :WL=\E[S:WR=\E[T:CL=\E[U:CR=\E[V:\
- *       :HM=\E[H:EN=\E[F:PU=\E[I:PD=\E[G:\
- *       :k1=\E[M:k2=\E[N:k3=\E[O:k4=\E[P:k5=\E[Q:\
- *       :k6=\E[R:k7=\E[S:k8=\E[T:k9=\E[U:k0=\E[V:\
- *       :kh=\E[H:kH=\E[F:kA=\E[L:kN=\E[G:kP=\E[I:
+ *             li|ansi|Ansi standard crt:\
+ *              :al=\E[L:am:bs:cd=\E[J:ce=\E[K:cl=\E[2J\E[H:cm=\E[%i%d;%dH:co#80:\
+ *              :dc=\E[P:dl=\E[M:do=\E[B:bt=\E[Z:ei=:ho=\E[H:ic=\E[@:im=:li#25:\
+ *              :nd=\E[C:pt:so=\E[7m:se=\E[m:us=\E[4m:ue=\E[m:up=\E[A:\
+ *              :kb=^h:ku=\E[A:kd=\E[B:kl=\E[D:kr=\E[C:eo:sf=\E[S:sr=\E[T:\
+ *              :GS=\E[12m:GE=\E[10m:GV=\63:GH=D:\
+ *              :GC=E:GL=\64:GR=C:RT=^J:G1=?:G2=Z:G3=@:G4=Y:GU=A:GD=B:\
+ *              :CW=\E[M:NU=\E[N:RF=\E[O:RC=\E[P:\
+ *              :WL=\E[S:WR=\E[T:CL=\E[U:CR=\E[V:\
+ *              :HM=\E[H:EN=\E[F:PU=\E[I:PD=\E[G:\
+ *              :k1=\E[M:k2=\E[N:k3=\E[O:k4=\E[P:k5=\E[Q:\
+ *              :k6=\E[R:k7=\E[S:k8=\E[T:k9=\E[U:k0=\E[V:\
+ *              :kh=\E[H:kH=\E[F:kA=\E[L:kN=\E[G:kP=\E[I:
  *
- */
+ *====================================================================*/
 
-#define termdef 1                       /* don't define "term" external */
+/*====================================================================*/
+#define TCAP_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+#define termdef 1                   /* don't define "term" external */
 
 #include <stdio.h>
 #include        "estruct.h"
@@ -86,7 +101,7 @@
 
 # define MARGIN  8
 # define SCRSIZ  64
-# define NPAUSE  10                     /* # times thru update to pause */
+# define NPAUSE  10                 /* # times thru update to pause */
 # define BEL     0x07
 # define ESC     0x1B
 
@@ -184,15 +199,30 @@ EXTERN int     tcapbcol();
 char tcapbuf[TCAPSLEN];
 char *UP, PC, *CM, *CE, *CL, *SO, *SE, *IS, *KS, *KE;
 
-TERM term =
-{
-    0, 0, 0, 0,         /* these four values are set dynamically at open time */
-    0, 0, MARGIN, SCRSIZ, NPAUSE, tcapopen, tcapclose, tcapkopen, tcapkclose,
-    tcapgetc, ttputc, ttflush, tcapmove, tcapeeol, tcapeeop, tcapclrd, tcapbeep,
-    tcaprev, tcapcres
-# if     COLOR
-    , tcapfcol, tcapbcol
-# endif
+TERM  term  = {
+    0, 0, 0, 0, /* these four values are set dynamically at open time */
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    tcapopen,
+    tcapclose,
+    tcapkopen,
+    tcapkclose,
+    tcapgetc,
+    ttputc,
+    ttflush,
+    tcapmove,
+    tcapeeol,
+    tcapeeop,
+    tcapclrd,
+    tcapbeep,
+    tcaprev,
+    tcapcres
+#if     COLOR
+    , tcapfcol,
+    tcapbcol
+#endif
 };
 
 /*  input buffers and pointers  */
@@ -235,7 +265,7 @@ int in_get()    /* get an event from the input buffer */
     return (event);
 }
 
-/*  Open the terminal put it in RA mode learn about the screen size read TERMCAP
+/* Open the terminal put it in RA mode learn about the screen size read TERMCAP
  * strings for function keys
  */
 
@@ -356,8 +386,9 @@ unsigned int c;
     return (c);
 }
 
-/*  TCAPGETC:   Get on character.  Resolve and setup all the appropriate
- * keystroke escapes as defined in the comments at the beginning of input.c
+/* TCAPGETC:  Get on character.  Resolve and setup all the appropriate
+ *            keystroke escapes as defined in the comments at the
+ *            beginning of input.c
  */
 
 int tcapgetc()
@@ -387,23 +418,23 @@ int tcapgetc()
     return (c);
 }
 
-/*  GET1KEY:    Get one keystroke. The only prefixs legal here are the SPEC and
- * CTRL prefixes.
+/* GET1KEY: Get one keystroke. The only prefixs legal here
+ *          are the SPEC and CTRL prefixes.
  *
- *       Note:
+ * Note:
  *
- *               Escape sequences that are generated by terminal function and
- * cursor keys could be confused with the user typing the default META prefix
- * followed by other chars... ie
+ *      Escape sequences that are generated by terminal function
+ *      and cursor keys could be confused with the user typing
+ *      the default META prefix followed by other chars... ie
  *
- *               UPARROW  =  <ESC>A   on some terminals...
- *               apropos  =  M-A
+ *      UPARROW  =  <ESC>A   on some terminals...
+ *      apropos  =  M-A
  *
- *               The difference is determined by measuring the time between the
- * input of the first and second character... if an <ESC>
- *               is types, and is not followed by another char in 1/30 of a
- * second (think 300 baud) then it is a user input, otherwise it was generated
- * by an escape sequence and should be SPECed.
+ *      The difference is determined by measuring the time between
+ *      the input of the first and second character... if an <ESC>
+ *      is types, and is not followed by another char in 1/30 of
+ *      a second (think 300 baud) then it is a user input, otherwise
+ *      it was generated by an escape sequence and should be SPECed.
  */
 
 int PASCAL NEAR get1key()
@@ -562,3 +593,8 @@ hello()
 
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,6 +1,18 @@
-/*  NEC:    NEC PC-9801vm driver for MicroEMACS 4.00 (C)Copyright 1995 by Daniel
- * M. Lawrence
- */
+/*======================================================================
+ *      NEC:    NEC PC-9801vm driver for
+ *              MicroEMACS 4.00
+ *              (C)Copyright 1995 by Daniel M. Lawrence
+ *====================================================================*/
+
+/*====================================================================*/
+#define NEC_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define term external */
 
@@ -58,29 +70,33 @@ static int cbcolor = -1;        /* current background color */
 #  define FSIZE   392           /* save of function key save buffer */
 
 static unsigned char oldkeys[FSIZE];    /* original key save buffer */
-static unsigned char curkeys[FSIZE] =   /* current key save buffer */
-                                      /* function keys F1 - F10 */
-{
-    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 59, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ',
-    ' ', ' ', ' ', ' ', 0x1d, 60, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ',
-    ' ', ' ', 0x1d, 61, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ',
-    0x1d, 62, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 63,
-    0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 64, 0, 0, 0, 0,
-    0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 65, 0, 0, 0, 0, 0, 0, 0, 0,
-    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 66, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ',
-    ' ', ' ', ' ', ' ', 0x1d, 67, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ',
-    ' ', ' ', 0x1d, 68, 0, 0, 0, 0, 0, 0, 0, 0,
+static unsigned char curkeys[FSIZE] = { /* current key save buffer */
+    /* function keys F1 - F10 */
+
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 59, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 60, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 61, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 62, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 63, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 64, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 65, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 66, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 67, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 68, 0, 0, 0, 0, 0, 0, 0, 0,
+
     /* function keys F11 - F20 */
 
-    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 84, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ',
-    ' ', ' ', ' ', ' ', 0x1d, 85, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ',
-    ' ', ' ', 0x1d, 86, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ',
-    0x1d, 87, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 88,
-    0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 89, 0, 0, 0, 0,
-    0, 0, 0, 0, 0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 90, 0, 0, 0, 0, 0, 0, 0, 0,
-    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 91, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ',
-    ' ', ' ', ' ', ' ', 0x1d, 92, 0, 0, 0, 0, 0, 0, 0, 0, 0xfe, ' ', ' ', ' ',
-    ' ', ' ', 0x1d, 93, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 84, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 85, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 86, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 87, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 88, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 89, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 90, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 91, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 92, 0, 0, 0, 0, 0, 0, 0, 0,
+    0xfe, ' ', ' ', ' ', ' ', ' ', 0x1d, 93, 0, 0, 0, 0, 0, 0, 0, 0,
+
     /* other unlabeled keys */
 
     0x1d, 73, 0, 0, 0, 0,       /* roll up */
@@ -92,7 +108,7 @@ static unsigned char curkeys[FSIZE] =   /* current key save buffer */
     0x1d, 77, 0, 0, 0, 0,       /* right */
     0x1d, 80, 0, 0, 0, 0,       /* down */
     0x1d, 78, 0, 0, 0, 0,       /* clear */
-    12, 0, 0, 0, 0, 0,          /* help */
+    12, 0, 0, 0, 0, 0,  /* help */
     0x1d, 71, 0, 0, 0, 0,       /* home */
     0x1d, 0, 0, 0, 0, 0,        /* end */
 };
@@ -104,17 +120,37 @@ COMMON union REGS rg;           /* cpu REGISTER for use of DOS calls */
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-NOSHARE TERM term    =
-{
-    NROW-1, NROW-1, NCOL, NCOL, 0, 0, MARGIN, SCRSIZ, NPAUSE, necopen, necclose,
-    neckopen, neckclose, necgetc, ttputc, ttflush, necmove, neceeol, neceeop,
-    neceeop, necbeep, necrev, neccres
-# if     COLOR
-    , necfcol, necbcol
-# endif
-# if     INSDEL
-    , necins, necdel
-# endif
+NOSHARE TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0, 0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    necopen,
+    necclose,
+    neckopen,
+    neckclose,
+    necgetc,
+    ttputc,
+    ttflush,
+    necmove,
+    neceeol,
+    neceeop,
+    neceeop,
+    necbeep,
+    necrev,
+    neccres
+#if     COLOR
+    , necfcol,
+    necbcol
+#endif
+#if     INSDEL
+    , necins,
+    necdel
+#endif
 };
 
 # if     COLOR
@@ -385,3 +421,8 @@ nechello()
 }
 #endif
 
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/
