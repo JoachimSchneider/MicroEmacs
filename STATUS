@@ -456,7 +456,7 @@ Next Steps:
 - msdos.c and ibmpc.c: Check comments.                            (\/)
 - Check if `PASCAL NEAR' reduces pcdos/turbo code size            (\/)
   ===> Yes, but only about 2500 bytes.
-- Check *all* well formatted special comments.
+- Check *all* well formatted special comments.                    (\/)
 - Build on AIX
 - Build on Windows XP.
 - Substitute `free' with `FREE'
@@ -630,7 +630,9 @@ Next Steps
 
     Use this program to check all comments of the files processed in (A).
 
-    Repair the comments in all remaining files.
+    ===> Has been done manually.
+
+    Repair the comments in all remaining files. (\/)
 
 
 (C) Additionally:
@@ -646,6 +648,128 @@ Next Steps
       ue500/src/xvtdos.c:int PASCAL NEAR execprog(cmd)
 
     - Re-Check the int/char case with VMS
-    - NFUNCS defined in incompatible ways.
+    - NFUNCS defined in incompatible ways.    (\/)
+
+
+[2023-08-27.00]
+- All messed up comments in *.c *.h have been repaired!
+- Reformatted smg.c and vms.c using FreeBSD's indent with this config file
+
+  $ cat ~/.indent.pro
+  -nfc1 -nfcb -sc -nut -i4 -br -npsl -di10
+
+  o This leaves Box Comments `/*=, /*-, /**' and Block-Comments `/*\n' untouched!
+  o It does not remove existing `\t'-characters everywhere!
+
+
+[2023-08-27.01]
+NFUNCS:
+
+europa:@/ue500/h> grep NFUNCS *
+edef.h:DCLDEF NOSHARE int            numfunc             INIT_(NFUNCS);        /* number of bindable functions     */
+efunc.h:#define NFUNCS  ( sizeof (names) / sizeof (names[0]) - 1 )
+evar.h:# define NFUNCS ( sizeof (funcs) / sizeof (funcs[0]) )
+
+* efunc.h may be included everywhere:
+  NFUNCS is correctly declared there as the last entry of names is a `NULL'
+
+* evar.h is *only* included in eval.c
+  NFUNCS is correctly declared there as the last entry of funcs is a valid name.
+
+  These are the user functions to be used in macros like `&and'
+
+* The functions in efunc.h are the callable C-Functions:
+
+  europa:@/ue500/h> grep upperregion *
+  ebind.h:    { CTLX|CTRL|'U',      BINDFNC, { upperregion } },
+  efunc.h:    { "case-region-upper", upperregion },
+  eproto.h:EXTERN int PASCAL NEAR upperregion DCL((int f, int n));
+
+* efunc.c is *NOT* included in eval.c
+
+===> There is no conflict
+===> It is correct, that the *.h don't include mutually.
+
+
+[2023-08-27.02]
+TODO-List
+
+- Allow to compile with C++ for improved compiler checks:
+
+  + foreach file needed to compile on UNIX, MSDOS, VMS do
+      - Convert all K&R definitions to the P#_-Format (which
+        expands to ANSI-C definitions with PROTO set.).
+      - While reviewing the files repair broken comments
+      - Current File is: src/basic.c
+    done
+
+  + #define SIZEOF(x) ( (int)sizeof((x)) )
+    Substitute sizeof ---> SIZEOF in *all* files
+
+  + Remove all other C++ Warnings
+
+- Rework `room'
+
+- Substitute malloc/realloc/calloc with the corresponding `room'-calls
+
+- Substitute `free' with `FREE'
+
+- Introduce the array-checks proposed by DDL for the windows port:
+  See the introductory comments in the source files for Windows XP.
+
+- Re-Check the int/char case with VMS
+
+- Build on Windows XP.
+
+- Build on AIX
+
+- Sort Variables in edef.h
+
+- Remove literal sizes in edef.h
+
+- Document installation in README.md
+
+- Document improvements in README.md
+
+- In smg.c and vms.c change block comments from
+    /*
+        <something>
+    */
+  to
+    /*
+     *  <something>
+     */
+
+- Change all Block comments from
+    /* Start of thest
+     * more text
+     */
+  to
+    /**
+     * Start of thest
+     * more text
+     */
+  Then they are box comments for indent which aren't touched.
+
+- Check the execprog definitions:
+
+  ue500/src/fmrdos.c:PASCAL NEAR execprog(cmd)
+  ue500/src/msdos.c:static int PASCAL NEAR execprog P1_(CONST char *, cmd)
+  ue500/src/necdos.c:PASCAL NEAR execprog(cmd)
+  ue500/src/nt.c:execprog(char *cmd)
+  ue500/src/os2.c:execprog(char *cmd)
+  ue500/src/xp.c:execprog(char *cmd)
+  ue500/src/xvtdos.c:int PASCAL NEAR execprog(cmd)
+
+- Replace --- if possible --- `strncat' by `strlcat'.
+
+- *Manually* analyze the remaining `sprintf', `xstrcpy' and `xstrcat'
+  occurances.
+
+- Identify functions which could be declared module local (`static')
+
+- Sort eproto.h declarations and add platform specific sections therein.
+
+
 
 # EOF
