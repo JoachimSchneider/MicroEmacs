@@ -81,25 +81,25 @@
 
 
 /** Standard include files **/
-#include <stdio.h>                      /* Standard I/O package         */
-#include "estruct.h"                    /* Emacs' structures            */
+#include <stdio.h>              /* Standard I/O package         */
+#include "estruct.h"            /* Emacs' structures            */
 
 /*
         Empty routine make some compilers happy when SMG is not defined,
         and is also used as a noop routine in the terminal dispatch table.
 */
-smg_noop()
+VOID smg_noop()
 {
 }
 
-smg_noop1(int param)
+VOID smg_noop1(int param)
 {
 }
 
 #if     SMG
 
 #include "eproto.h"
-#include "edef.h"                       /* Emacs' definitions           */
+#include "edef.h"               /* Emacs' definitions           */
 #include "elang.h"
 #include smgdef
 #include ssdef
@@ -411,15 +411,15 @@ EXTERN struct dsc$descriptor_s *descrp();
         These two structures, along with ttdef.h, are good for manipulating
         terminal characteristics.
 */
-typedef struct
-    {/* Terminal characteristics buffer */
+typedef struct {
+    /* Terminal characteristics buffer */
     unsigned char class, type;
     unsigned short width;
-    unsigned tt1 : 24;
+    unsigned  tt1:24;
     unsigned char page;
     unsigned long tt2;
-    } TTCHAR;
-COMMON NOSHARE TTCHAR orgchar;                  /* Original characteristics */
+} TTCHAR;
+COMMON    NOSHARE TTCHAR orgchar;       /* Original characteristics */
 /*
         test macro is used to signal errors from system services
 */
@@ -435,24 +435,24 @@ COMMON NOSHARE TTCHAR orgchar;                  /* Original characteristics */
 #endif
 
 /** Values to manage the screen **/
-static int termtype;                    /* Handle to pass to SMG        */
+static int termtype;            /* Handle to pass to SMG        */
 #if     KEYPAD
-static char * applic_keypad;            /* Put keypad in application mode.*/
-static char * numeric_keypad;           /* Put keypad in numeric mode.  */
+static char *applic_keypad;     /* Put keypad in application mode. */
+static char *numeric_keypad;    /* Put keypad in numeric mode.  */
 #endif
-static char * begin_reverse;            /* Begin reverse video          */
-static char * end_reverse;              /* End reverse video            */
-static char * begin_mouse;              /* Begin using mouse            */
-static char * end_mouse;                /* End using mouse              */
-static char * erase_to_end_line;        /* Erase to end of line         */
-static char * erase_whole_display;      /* Erase whole display          */
-static char * width_narrow;             /* Set narrow size screen       */
-static char * width_wide;               /* Set wide size screen         */
-static int narrow_char;                 /* Number of characters narrow  */
-static int wide_char;                   /* Number of characters wide    */
-static int inbuf[64];                   /* Input buffer                 */
-static int * inbufh = inbuf;            /* Head of input buffer         */
-static int * inbuft = inbuf;            /* Tail of input buffer         */
+static char *begin_reverse;     /* Begin reverse video          */
+static char *end_reverse;       /* End reverse video            */
+static char *begin_mouse;       /* Begin using mouse            */
+static char *end_mouse;         /* End using mouse              */
+static char *erase_to_end_line; /* Erase to end of line         */
+static char *erase_whole_display;       /* Erase whole display          */
+static char *width_narrow;      /* Set narrow size screen       */
+static char *width_wide;        /* Set wide size screen         */
+static int narrow_char;         /* Number of characters narrow  */
+static int wide_char;           /* Number of characters wide    */
+static int inbuf[64];           /* Input buffer                 */
+static int *inbufh = inbuf;     /* Head of input buffer         */
+static int *inbuft = inbuf;     /* Tail of input buffer         */
 
 
 /* Forward references.          */
@@ -469,34 +469,34 @@ EXTERN int PASCAL NEAR smgputs();
 EXTERN int PASCAL NEAR smgclose();
 
 /** Terminal dispatch table **/
-NOSHARE TERM term = {
-        72-1,                           /* Max number of rows allowable */
-        0,                              /* Current number of rows used  */
-        256,                            /* Max number of columns        */
-        0,                              /* Current number of columns    */
-        0, 0,                           /* x/y origin of screen         */
-        64,                             /* Min margin for extended lines*/
-        8,                              /* Size of scroll region        */
-        100,                            /* # times thru update to pause */
-        smgopen,                        /* Open terminal at the start   */
-        smgclose,                       /* Close terminal at end        */
-        smg_noop,                       /* Open keyboard                */
-        smg_noop,                       /* Close keyboard               */
-        smggetc,                        /* Get character from keyboard  */
-        ttputc,                         /* Put character to display     */
-        ttflush,                        /* Flush output buffers         */
-        smgmove,                        /* Move cursor, origin 0        */
-        smgeeol,                        /* Erase to end of line         */
-        smgeeop,                        /* Erase to end of page         */
-        smgeeop,                        /* Erase to end of screen       */
-        smgbeep,                        /* Beep                         */
-        smgrev,                         /* Set reverse video state      */
-        smgcres                         /* Change screen resolution     */
+NOSHARE   TERM term = {
+    72 - 1,                     /* Max number of rows allowable */
+    0,                          /* Current number of rows used  */
+    256,                        /* Max number of columns        */
+    0,                          /* Current number of columns    */
+    0, 0,                       /* x/y origin of screen         */
+    64,                         /* Min margin for extended lines */
+    8,                          /* Size of scroll region        */
+    100,                        /* # times thru update to pause */
+    smgopen,                    /* Open terminal at the start   */
+    smgclose,                   /* Close terminal at end        */
+    smg_noop,                   /* Open keyboard                */
+    smg_noop,                   /* Close keyboard               */
+    smggetc,                    /* Get character from keyboard  */
+    ttputc,                     /* Put character to display     */
+    ttflush,                    /* Flush output buffers         */
+    smgmove,                    /* Move cursor, origin 0        */
+    smgeeol,                    /* Erase to end of line         */
+    smgeeop,                    /* Erase to end of page         */
+    smgeeop,                    /* Erase to end of screen       */
+    smgbeep,                    /* Beep                         */
+    smgrev,                     /* Set reverse video state      */
+    smgcres                     /* Change screen resolution     */
 #if COLOR
-        ,
-        smg_noop1,                      /* Set forground color          */
-        smg_noop1                       /* Set background color         */
-#endif /* COLOR */
+    ,
+    smg_noop1,                  /* Set forground color          */
+    smg_noop1                   /* Set background color         */
+#endif                          /* COLOR */
 };
 
 /***
@@ -510,26 +510,26 @@ NOSHARE TERM term = {
  *
  *  Nothing returned.
  ***/
-smgmove(int row, int column)
+VOID smgmove(int row, int column)
 {
-        char buffer[32];
-        int rlen, status;
+    char      buffer[32];
+    int       rlen, status;
 
-        static int code = SMG$K_SET_CURSOR_ABS;
-        static int len = sizeof(buffer);
-        static int arg[3] = { 2 };
+    static int code = SMG$K_SET_CURSOR_ABS;
+    static int len = sizeof(buffer);
+    static int arg[3] = {2};
 
-        /* SMG assumes the row/column positions are 1 based. */
-        arg[1] = row + 1;
-        arg[2] = column + 1;
+    /* SMG assumes the row/column positions are 1 based. */
+    arg[1] = row + 1;
+    arg[2] = column + 1;
 
-        /* Call to SMG for the sequence */
-        status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
-        if (SUCCESS(status)) {
-                buffer[rlen] = '\0';
-                smgputs(buffer);
-        } else
-                smgputs("OOPS");
+    /* Call to SMG for the sequence */
+    status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
+    if (SUCCESS(status)) {
+        buffer[rlen] = '\0';
+        smgputs(buffer);
+    } else
+        smgputs("OOPS");
 }
 
 /***
@@ -540,29 +540,29 @@ smgmove(int row, int column)
  *
  *  Nothing returned
  ***/
-smgcres(char *value)
+VOID smgcres(char *value)
 {
-        int width;
+    int       width;
 
-        /* Skip if not supported */
-        if (width_wide == NULL || width_narrow == NULL)
-                return;
+    /* Skip if not supported */
+    if (width_wide == NULL || width_narrow == NULL)
+        return;
 
-        /* Check value */
-        if (strcmp(value, "WIDE") == 0) {
-                width = wide_char;
-                smgputs(width_wide);
-        } else if (strcmp(value, "NORMAL") == 0) {
-                width = narrow_char;
-                smgputs(width_narrow);
-        }
+    /* Check value */
+    if (strcmp(value, "WIDE") == 0) {
+        width = wide_char;
+        smgputs(width_wide);
+    } else if (strcmp(value, "NORMAL") == 0) {
+        width = narrow_char;
+        smgputs(width_narrow);
+    }
 
-        /* Change width */
-        orgchar.width = width;
-        newwidth(TRUE, width);
+    /* Change width */
+    orgchar.width = width;
+    newwidth(TRUE, width);
 
-        /* Set resolution variable */
-        xstrcpy(sres, value);
+    /* Set resolution variable */
+    xstrcpy(sres, value);
 }
 
 /***
@@ -575,9 +575,9 @@ smgcres(char *value)
  *
  *  Nothing returned.
  ***/
-smgrev(int status)
+VOID smgrev(int status)
 {
-        smgputs(status ? begin_reverse : end_reverse);
+    smgputs(status ? begin_reverse : end_reverse);
 }
 
 /***
@@ -590,9 +590,9 @@ smgrev(int status)
  *
  *  Nothing returned.
  ***/
-smgeeol()
+VOID smgeeol()
 {
-        smgputs(erase_to_end_line);
+    smgputs(erase_to_end_line);
 }
 
 /***
@@ -604,9 +604,9 @@ smgeeol()
  *
  *  Nothing returned.
  ***/
-smgeeop()
+VOID smgeeop()
 {
-        smgputs(erase_whole_display);
+    smgputs(erase_whole_display);
 }
 
 /***
@@ -618,9 +618,9 @@ smgeeop()
  *
  *  Nothing returned.
  ***/
-smgbeep()
+VOID smgbeep()
 {
-        ttputc('\007');
+    ttputc('\007');
 }
 
 /***
@@ -639,36 +639,36 @@ smgbeep()
  *  Returns:    Escape sequence
  *              NULL    No escape sequence available
  ***/
-char * smggetstr(int code)      /* Request code                 */
-{
-        char * result;
-        int rlen, status;
+char *smggetstr(int code)
+{                               /* Request code                 */
+    char     *result;
+    int       rlen, status;
 
-        static char seq[1024];
-        static char * buffer = seq;
-        static int len = sizeof(seq);
-        static int arg[2] = { 1, 1 };
+    static char seq[1024];
+    static char *buffer = seq;
+    static int len = sizeof(seq);
+    static int arg[2] = {1, 1};
 
-        /* Get sequence with one parameter */
-        status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
-        if (FAILURE(status)) {
-                /* Try again with zero parameters */
-                status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer);
-                if (FAILURE(status))
-                        return NULL;
-        }
+    /* Get sequence with one parameter */
+    status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
+    if (FAILURE(status)) {
+        /* Try again with zero parameters */
+        status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer);
+        if (FAILURE(status))
+            return NULL;
+    }
 
-        /* Check for empty result */
-        if (rlen == 0)
-                return NULL;
+    /* Check for empty result */
+    if (rlen == 0)
+        return NULL;
 
-        /* Save current position so we can return it to caller */
-        result = buffer;
-        buffer[rlen++] = '\0';
-        buffer += rlen;
+    /* Save current position so we can return it to caller */
+    result = buffer;
+    buffer[rlen++] = '\0';
+    buffer += rlen;
 
-        /* Return capability to user */
-        return result;
+    /* Return capability to user */
+    return result;
 }
 
 /***
@@ -681,11 +681,11 @@ char * smggetstr(int code)      /* Request code                 */
  ***/
 int smggetnum(int code)
 {
-        int status, result;
+    int       status, result;
 
-        /* Call SMG for code translation */
-        status = SMG$GET_NUMERIC_DATA(&termtype, &code, &result);
-        return FAILURE(status) ? -1 : result;
+    /* Call SMG for code translation */
+    status = SMG$GET_NUMERIC_DATA(&termtype, &code, &result);
+    return FAILURE(status) ? -1 : result;
 }
 
 /***
@@ -694,7 +694,7 @@ int smggetnum(int code)
  ***/
 int smgaddkey(int code, int fn)
 {
-        return (addkey((unsigned char *)smggetstr(code), fn));
+    return (addkey((unsigned char *)smggetstr(code), fn));
 }
 
 /***
@@ -709,127 +709,127 @@ int smgaddkey(int code, int fn)
  ***/
 int smgcap()
 {
-        char * set_cursor_abs;
-        int status;
+    char     *set_cursor_abs;
+    int       status;
 
-        /* Start SMG package */
-        status = SMG$INIT_TERM_TABLE_BY_TYPE( &orgchar.type, &termtype);
-        if (FAILURE(status)) {
-                printf(TEXT189);
+    /* Start SMG package */
+    status = SMG$INIT_TERM_TABLE_BY_TYPE(&orgchar.type, &termtype);
+    if (FAILURE(status)) {
+        printf(TEXT189);
 /*                     "Cannot find entry for terminal type.\n" */
-                printf(TEXT190);
+        printf(TEXT190);
 /*                     "Check terminal type with \"SHOW TERMINAL\" or\n" */
-                printf(TEXT191);
+        printf(TEXT191);
 /*                     "try setting with \"SET TERMINAL/INQUIRE\"\n" */
-                return 1;
-        }
+        return 1;
+    }
 
-        /* Get reverse video */
-        begin_reverse = smggetstr(SMG$K_BEGIN_REVERSE);
-        end_reverse = smggetstr(SMG$K_END_REVERSE);
+    /* Get reverse video */
+    begin_reverse = smggetstr(SMG$K_BEGIN_REVERSE);
+    end_reverse = smggetstr(SMG$K_END_REVERSE);
 #if     KEYPAD
-        applic_keypad = smggetstr(SMG$K_SET_APPLICATION_KEYPAD);
-        numeric_keypad = smggetstr(SMG$K_SET_NUMERIC_KEYPAD);
+    applic_keypad = smggetstr(SMG$K_SET_APPLICATION_KEYPAD);
+    numeric_keypad = smggetstr(SMG$K_SET_NUMERIC_KEYPAD);
 #endif
-        begin_mouse = smggetstr(SMG$K_BEGIN_LOCATOR);
-        end_mouse = smggetstr(SMG$K_END_LOCATOR);
-        revexist = begin_reverse != NULL && end_reverse != NULL;
+    begin_mouse = smggetstr(SMG$K_BEGIN_LOCATOR);
+    end_mouse = smggetstr(SMG$K_END_LOCATOR);
+    revexist = begin_reverse != NULL && end_reverse != NULL;
 
-        /* Get erase to end of line */
-        erase_to_end_line = smggetstr(SMG$K_ERASE_TO_END_LINE);
-        eolexist = erase_to_end_line != NULL;
+    /* Get erase to end of line */
+    erase_to_end_line = smggetstr(SMG$K_ERASE_TO_END_LINE);
+    eolexist = erase_to_end_line != NULL;
 
-        /* Get more neat stuff */
-        erase_whole_display = smggetstr(SMG$K_ERASE_WHOLE_DISPLAY);
-        width_wide = smggetstr(SMG$K_WIDTH_WIDE);
-        width_narrow = smggetstr(SMG$K_WIDTH_NARROW);
-        narrow_char = smggetnum(SMG$K_COLUMNS);
-        wide_char = smggetnum(SMG$K_WIDE_SCREEN_COLUMNS);
-        set_cursor_abs = smggetstr(SMG$K_SET_CURSOR_ABS);
+    /* Get more neat stuff */
+    erase_whole_display = smggetstr(SMG$K_ERASE_WHOLE_DISPLAY);
+    width_wide = smggetstr(SMG$K_WIDTH_WIDE);
+    width_narrow = smggetstr(SMG$K_WIDTH_NARROW);
+    narrow_char = smggetnum(SMG$K_COLUMNS);
+    wide_char = smggetnum(SMG$K_WIDE_SCREEN_COLUMNS);
+    set_cursor_abs = smggetstr(SMG$K_SET_CURSOR_ABS);
 
-        /* Disable resolution if unreasonable */
-        if (narrow_char < 10 || wide_char < 10) {
-                width_wide = width_narrow = NULL;
-                xstrcpy(sres, "NORMAL");
-        } else
-                /* Kludge resolution */
-                xstrcpy(sres, orgchar.width == wide_char ? "WIDE" : "NORMAL");
+    /* Disable resolution if unreasonable */
+    if (narrow_char < 10 || wide_char < 10) {
+        width_wide = width_narrow = NULL;
+        xstrcpy(sres, "NORMAL");
+    } else
+        /* Kludge resolution */
+        xstrcpy(sres, orgchar.width == wide_char ? "WIDE" : "NORMAL");
 
-        /* Check for minimal operations */
-        if (set_cursor_abs == NULL || erase_whole_display == NULL) {
-                printf(TEXT192);
+    /* Check for minimal operations */
+    if (set_cursor_abs == NULL || erase_whole_display == NULL) {
+        printf(TEXT192);
 /*                     "The terminal type does not have enough power to run\n" */
-                printf(TEXT193);
+        printf(TEXT193);
 /*                     "MicroEMACS.  Try a different terminal or check\n" */
-                printf(TEXT194);
+        printf(TEXT194);
 /*                     "type with \"SHOW TERMINAL\".\n" */
-                return 1;
-        }
+        return 1;
+    }
 
-        /* Add function keys to keymapping table */
-        smgaddkey(SMG$K_KEY_DOWN_ARROW,         SPEC | 'N');
-        smgaddkey(SMG$K_KEY_LEFT_ARROW,         SPEC | 'B');
-        smgaddkey(SMG$K_KEY_RIGHT_ARROW,        SPEC | 'F');
-        smgaddkey(SMG$K_KEY_UP_ARROW,           SPEC | 'P');
+    /* Add function keys to keymapping table */
+    smgaddkey(SMG$K_KEY_DOWN_ARROW, SPEC | 'N');
+    smgaddkey(SMG$K_KEY_LEFT_ARROW, SPEC | 'B');
+    smgaddkey(SMG$K_KEY_RIGHT_ARROW, SPEC | 'F');
+    smgaddkey(SMG$K_KEY_UP_ARROW, SPEC | 'P');
 
-        smgaddkey(SMG$K_KEY_PF1,        CTRL | SPEC | '1');
-        smgaddkey(SMG$K_KEY_PF2,        CTRL | SPEC | '2');
-        smgaddkey(SMG$K_KEY_PF3,        CTRL | SPEC | '3');
-        smgaddkey(SMG$K_KEY_PF4,        CTRL | SPEC | '4');
+    smgaddkey(SMG$K_KEY_PF1, CTRL | SPEC | '1');
+    smgaddkey(SMG$K_KEY_PF2, CTRL | SPEC | '2');
+    smgaddkey(SMG$K_KEY_PF3, CTRL | SPEC | '3');
+    smgaddkey(SMG$K_KEY_PF4, CTRL | SPEC | '4');
 
-        smgaddkey(SMG$K_KEY_0,          ALTD | '0');
-        smgaddkey(SMG$K_KEY_1,          ALTD | '1');
-        smgaddkey(SMG$K_KEY_2,          ALTD | '2');
-        smgaddkey(SMG$K_KEY_3,          ALTD | '3');
-        smgaddkey(SMG$K_KEY_4,          ALTD | '4');
-        smgaddkey(SMG$K_KEY_5,          ALTD | '5');
-        smgaddkey(SMG$K_KEY_6,          ALTD | '6');
-        smgaddkey(SMG$K_KEY_7,          ALTD | '7');
-        smgaddkey(SMG$K_KEY_8,          ALTD | '8');
-        smgaddkey(SMG$K_KEY_9,          ALTD | '9');
-        smgaddkey(SMG$K_KEY_PERIOD,     ALTD | '.');
-        smgaddkey(SMG$K_KEY_ENTER,      ALTD | 'E');
-        smgaddkey(SMG$K_KEY_COMMA,      ALTD | ',');
-        smgaddkey(SMG$K_KEY_MINUS,      ALTD | '-');
+    smgaddkey(SMG$K_KEY_0, ALTD | '0');
+    smgaddkey(SMG$K_KEY_1, ALTD | '1');
+    smgaddkey(SMG$K_KEY_2, ALTD | '2');
+    smgaddkey(SMG$K_KEY_3, ALTD | '3');
+    smgaddkey(SMG$K_KEY_4, ALTD | '4');
+    smgaddkey(SMG$K_KEY_5, ALTD | '5');
+    smgaddkey(SMG$K_KEY_6, ALTD | '6');
+    smgaddkey(SMG$K_KEY_7, ALTD | '7');
+    smgaddkey(SMG$K_KEY_8, ALTD | '8');
+    smgaddkey(SMG$K_KEY_9, ALTD | '9');
+    smgaddkey(SMG$K_KEY_PERIOD, ALTD | '.');
+    smgaddkey(SMG$K_KEY_ENTER, ALTD | 'E');
+    smgaddkey(SMG$K_KEY_COMMA, ALTD | ',');
+    smgaddkey(SMG$K_KEY_MINUS, ALTD | '-');
 
-        smgaddkey(SMG$K_KEY_F1,         SPEC | '1');
-        smgaddkey(SMG$K_KEY_F2,         SPEC | '2');
-        smgaddkey(SMG$K_KEY_F3,         SPEC | '3');
-        smgaddkey(SMG$K_KEY_F4,         SPEC | '4');
-        smgaddkey(SMG$K_KEY_F5,         SPEC | '5');
-        smgaddkey(SMG$K_KEY_F6,         SPEC | '6');
-        smgaddkey(SMG$K_KEY_F7,         SPEC | '7');
-        smgaddkey(SMG$K_KEY_F8,         SPEC | '8');
-        smgaddkey(SMG$K_KEY_F9,         SPEC | '9');
-        smgaddkey(SMG$K_KEY_F10,        SPEC | '0');
-        smgaddkey(SMG$K_KEY_F11,        SHFT | SPEC | '1');
-        smgaddkey(SMG$K_KEY_F12,        SHFT | SPEC | '2');
-        smgaddkey(SMG$K_KEY_F13,        SHFT | SPEC | '3');
-        smgaddkey(SMG$K_KEY_F14,        SHFT | SPEC | '4');
-        smgaddkey(SMG$K_KEY_F15,        SHFT | SPEC | '5');
-        smgaddkey(SMG$K_KEY_F16,        SHFT | SPEC | '6');
-        smgaddkey(SMG$K_KEY_F17,        SHFT | SPEC | '7');
-        smgaddkey(SMG$K_KEY_F18,        SHFT | SPEC | '8');
-        smgaddkey(SMG$K_KEY_F19,        SHFT | SPEC | '9');
-        smgaddkey(SMG$K_KEY_F20,        SHFT | SPEC | '0');
+    smgaddkey(SMG$K_KEY_F1, SPEC | '1');
+    smgaddkey(SMG$K_KEY_F2, SPEC | '2');
+    smgaddkey(SMG$K_KEY_F3, SPEC | '3');
+    smgaddkey(SMG$K_KEY_F4, SPEC | '4');
+    smgaddkey(SMG$K_KEY_F5, SPEC | '5');
+    smgaddkey(SMG$K_KEY_F6, SPEC | '6');
+    smgaddkey(SMG$K_KEY_F7, SPEC | '7');
+    smgaddkey(SMG$K_KEY_F8, SPEC | '8');
+    smgaddkey(SMG$K_KEY_F9, SPEC | '9');
+    smgaddkey(SMG$K_KEY_F10, SPEC | '0');
+    smgaddkey(SMG$K_KEY_F11, SHFT | SPEC | '1');
+    smgaddkey(SMG$K_KEY_F12, SHFT | SPEC | '2');
+    smgaddkey(SMG$K_KEY_F13, SHFT | SPEC | '3');
+    smgaddkey(SMG$K_KEY_F14, SHFT | SPEC | '4');
+    smgaddkey(SMG$K_KEY_F15, SHFT | SPEC | '5');
+    smgaddkey(SMG$K_KEY_F16, SHFT | SPEC | '6');
+    smgaddkey(SMG$K_KEY_F17, SHFT | SPEC | '7');
+    smgaddkey(SMG$K_KEY_F18, SHFT | SPEC | '8');
+    smgaddkey(SMG$K_KEY_F19, SHFT | SPEC | '9');
+    smgaddkey(SMG$K_KEY_F20, SHFT | SPEC | '0');
 
-        smgaddkey(SMG$K_KEY_E1,         SPEC | 'S');
-        smgaddkey(SMG$K_KEY_E2,         SPEC | 'C');
-        smgaddkey(SMG$K_KEY_E3,         SPEC | 'D');
-        smgaddkey(SMG$K_KEY_E4,         SPEC | '@');
-        smgaddkey(SMG$K_KEY_E5,         SPEC | 'Z');
-        smgaddkey(SMG$K_KEY_E6,         SPEC | 'V');
+    smgaddkey(SMG$K_KEY_E1, SPEC | 'S');
+    smgaddkey(SMG$K_KEY_E2, SPEC | 'C');
+    smgaddkey(SMG$K_KEY_E3, SPEC | 'D');
+    smgaddkey(SMG$K_KEY_E4, SPEC | '@');
+    smgaddkey(SMG$K_KEY_E5, SPEC | 'Z');
+    smgaddkey(SMG$K_KEY_E6, SPEC | 'V');
 
-        smgaddkey(SMG$K_KEY_FIRST_DOWN,         MOUS | 'a');
-        smgaddkey(SMG$K_KEY_FIRST_UP,           MOUS | 'b');
-        smgaddkey(SMG$K_KEY_SECOND_DOWN,        MOUS | 'c');
-        smgaddkey(SMG$K_KEY_SECOND_UP,          MOUS | 'd');
-        smgaddkey(SMG$K_KEY_THIRD_DOWN,         MOUS | 'e');
-        smgaddkey(SMG$K_KEY_THIRD_UP,           MOUS | 'f');
-        smgaddkey(SMG$K_KEY_FOURTH_DOWN,        MOUS | 'g');
-        smgaddkey(SMG$K_KEY_FOURTH_UP,          MOUS | 'h');
-        /* Everything okay */
-        return 0;
+    smgaddkey(SMG$K_KEY_FIRST_DOWN, MOUS | 'a');
+    smgaddkey(SMG$K_KEY_FIRST_UP, MOUS | 'b');
+    smgaddkey(SMG$K_KEY_SECOND_DOWN, MOUS | 'c');
+    smgaddkey(SMG$K_KEY_SECOND_UP, MOUS | 'd');
+    smgaddkey(SMG$K_KEY_THIRD_DOWN, MOUS | 'e');
+    smgaddkey(SMG$K_KEY_THIRD_UP, MOUS | 'f');
+    smgaddkey(SMG$K_KEY_FOURTH_DOWN, MOUS | 'g');
+    smgaddkey(SMG$K_KEY_FOURTH_UP, MOUS | 'h');
+    /* Everything okay */
+    return 0;
 }
 
 /***
@@ -837,39 +837,38 @@ int smgcap()
  *
  *  Nothing returned
  ***/
-smgopen()
+VOID smgopen()
 {
-        static int first_time = 1;
+    static int first_time = 1;
 
-        /* Open channel to terminal (also sets sizes in TERM structure) */
-        ttopen();
+    /* Open channel to terminal (also sets sizes in TERM structure) */
+    ttopen();
 
-        /* Get SMG */
-        if (first_time)
-        {
-                first_time = 0;
-                if (smgcap())
-                        meexit( 1);
-        }
+    /* Get SMG */
+    if (first_time) {
+        first_time = 0;
+        if (smgcap())
+            meexit(1);
+    }
 
 #if     KEYPAD
-        smgputs(applic_keypad);
+    smgputs(applic_keypad);
 #endif
 #ifdef NEVER
-        smgputs( begin_mouse);
+    smgputs(begin_mouse);
 #endif
 }
 
-smgclose()
+VOID smgclose()
 {
 #ifdef NEVER
-        smgputs( end_mouse);
+    smgputs(end_mouse);
 #endif
 #if     KEYPAD
-        if ((orgchar.tt2 & TT2$M_APP_KEYPAD)==0)
-            smgputs(numeric_keypad);
+    if ((orgchar.tt2 & TT2$M_APP_KEYPAD) == 0)
+        smgputs(numeric_keypad);
 #endif
-        ttclose();
+    ttclose();
 }
 
 /***
@@ -881,12 +880,12 @@ smgclose()
  *
  *  Nothing returned.
  ***/
-smgputs(string)
-char * string;                          /* String to write              */
+VOID smgputs(string)
+    char     *string;           /* String to write              */
 {
-        if (string)
-                while (*string)
-                        ttputc(*string++);
+    if (string)
+        while (*string)
+            ttputc(*string++);
 }
 
 /***
@@ -902,16 +901,16 @@ char * string;                          /* String to write              */
  ***/
 VOID qin(int ch)
 {
-        /* Check for overflow */
-        if (inbuft - inbuf >= sizeof(inbuf)) {
+    /* Check for overflow */
+    if (inbuft - inbuf >= sizeof(inbuf)) {
 
-                /* Annoy user */
-                smgbeep();
-                return;
-        }
+        /* Annoy user */
+        smgbeep();
+        return;
+    }
 
-        /* Add character */
-        *inbuft++ = ch;
+    /* Add character */
+    *inbuft++ = ch;
 }
 
 /*
@@ -920,12 +919,12 @@ VOID qin(int ch)
 #if PROTO
 VOID qrep(int ch)
 #else
-VOID qrep( ch)
-int ch;
+VOID qrep(ch)
+    int       ch;
 #endif
 {
-        inbuft = inbuf;
-        qin(ch);
+    inbuft = inbuf;
+    qin(ch);
 }
 
 /***
@@ -938,25 +937,25 @@ int ch;
  ***/
 int smggetc()
 {
-        int ch;
+    int       ch;
 
-        /* Loop until character found */
-        while (1) {
+    /* Loop until character found */
+    while (1) {
 
-                /* Get input from buffer, if available */
-                if (inbufh != inbuft) {
-                        ch = *inbufh++;
-                        if (inbufh == inbuft)
-                                inbufh = inbuft = inbuf;
-                        break;
-                } else
+        /* Get input from buffer, if available */
+        if (inbufh != inbuft) {
+            ch = *inbufh++;
+            if (inbufh == inbuft)
+                inbufh = inbuft = inbuf;
+            break;
+        } else
 
-                        /* Fill input buffer */
-                        cook();
-        }
+            /* Fill input buffer */
+            cook();
+    }
 
-        /* Return next character */
-        return (int) ch;
+    /* Return next character */
+    return (int)ch;
 }
 
 /***
@@ -969,10 +968,10 @@ int smggetc()
  *
  *  Nothing returned
  ***/
-int PASCAL NEAR spal(char *pstr)
+int       PASCAL NEAR spal(char *pstr)
 {
-        /* Nothing */
-        return 1;
+    /* Nothing */
+    return 1;
 }
 
 #if FLABEL
@@ -988,12 +987,12 @@ int PASCAL NEAR spal(char *pstr)
  ***/
 int fnclabel(int flag, int n)
 {
-        /* On machines with no function keys...don't bother */
-        return TRUE;
+    /* On machines with no function keys...don't bother */
+    return TRUE;
 }
-#endif /* FLABEL */
+#endif                          /* FLABEL */
 
-#endif  /* End of SMG terminal type */
+#endif                          /* End of SMG terminal type */
 
 
 
