@@ -25,12 +25,12 @@
 /*====================================================================*/
 
 
-#include	<stdio.h>
-#include	"estruct.h"
-#if	VMS
-#include	"eproto.h"
-#include	"edef.h"
-#include	"elang.h"
+#include        <stdio.h>
+#include        "estruct.h"
+#if     VMS
+#include        "eproto.h"
+#include        "edef.h"
+#include        "elang.h"
 
 #include ssdef
 #include descrip
@@ -85,9 +85,9 @@ static next_read(int flag);
 
         There are three forms:
 
-                descrp( s, l)	String descriptor for buffer s, length l
-                descptr( s)	String descriptor for asciz buffer s
-                DESCPTR( s)	String descriptor for buffer s, using sizeof()
+                descrp( s, l)   String descriptor for buffer s, length l
+                descptr( s)     String descriptor for asciz buffer s
+                DESCPTR( s)     String descriptor for buffer s, using sizeof()
 */
 #define NUM_DESCRIPTORS 10
 struct dsc$descriptor_s *descrp(char *s, int l)
@@ -112,7 +112,7 @@ struct dsc$descriptor_s *descptr(char *s)
     return (descrp(s, strlen(s)));
 }
 
-#define DESCPTR(s)	descrp( s, sizeof(s)-1)
+#define DESCPTR(s)      descrp( s, sizeof(s)-1)
 
 /*
         These two structures, along with ttdef.h, are good for manipulating
@@ -160,7 +160,7 @@ typedef struct {
 static readonly int noterm[] = {0, 0};  /* Terminator list of NONE */
 static int newbrdcst = FALSE;   /* Flag - is message in Emacs buffer yet. */
 
-#define	MINREAD	128             /* Smallest read to queue */
+#define MINREAD 128             /* Smallest read to queue */
 #define TYPSIZE 1024            /* Typeahead buffer size, must be several
                                  * times MINREAD */
 
@@ -663,7 +663,7 @@ int       PASCAL NEAR spawn(int f, int n)
     /* if we are interactive, pause here */
     if (clexec == FALSE) {
         mlputs(TEXT6);
-/*		       "\r\n\n[End]" */
+/*                     "\r\n\n[End]" */
         tgetc();
     }
     sgarbf = TRUE;
@@ -734,7 +734,7 @@ int       PASCAL NEAR pipecmd(int f, int n)
             return (FALSE);
     }
 
-    TTputc('\n');               /* Already have '\r'	 */
+    TTputc('\n');               /* Already have '\r'     */
     TTflush();
     TTclose();                  /* stty to old modes    */
 
@@ -784,8 +784,8 @@ int       PASCAL NEAR f_filter(int f, int n)
     if (restflag)
         return (resterr());
 
-    if (curbp->b_mode & MDVIEW) /* don't allow this command if	*/
-        return (rdonly());      /* we are in read only mode	*/
+    if (curbp->b_mode & MDVIEW) /* don't allow this command if  */
+        return (rdonly());      /* we are in read only mode     */
 
     /* get the filter name and its args */
     if ((s = mlreply("#", line, NLINE)) != TRUE)
@@ -852,7 +852,7 @@ char *    PASCAL NEAR timeset()
     return (sp);
 }
 
-/*	FILE Directory routines		*/
+/*      FILE Directory routines         */
 
 static char fname[NFILEN];      /* path of file to find */
 static char path[NFILEN];       /* path of file to find */
@@ -1122,7 +1122,7 @@ PASCAL    NEAR bktoshell(int f, int n)
  * Here are the much faster I/O routines.  Skip the C stuff, use
  * the VMS I/O calls.  Puts the files in standard VMS format, too.
  */
-#define successful(s)	((s) & 1)
+#define successful(s)   ((s) & 1)
 #define unsuccessful(s) (!((s) & 1))
 
 static struct FAB fab;          /* a file access block */
@@ -1259,7 +1259,7 @@ PASCAL    NEAR ffputline(char buf[], int nbuf)
 {
     REGISTER char *obuf = buf;
 
-#if	CRYPT
+#if     CRYPT
     if (cryptflag) {
         /* get a reasonable buffer */
         if (fline && flen < nbuf) {
@@ -1332,7 +1332,7 @@ PASCAL    NEAR ffgetline(nbytes)
 
     /* terminate and decrypt the string */
     fline[rab.rab$w_rsz] = 0;
-#if	CRYPT
+#if     CRYPT
     if (cryptflag)
         ecrypt(fline, *nbytes);
 #endif
