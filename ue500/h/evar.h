@@ -122,8 +122,6 @@ static NOSHARE char *envars[] =
     "ypos"                      /* current mouse Y position */
 };
 
-# define NEVARS ( sizeof (envars) / sizeof (envars[0]) )
-
 /*  and its preprocesor definitions     */
 
 # define EVABBELL        (0)
@@ -287,8 +285,6 @@ static NOSHARE UFUNC  funcs[] =
     { "upper",    MONAMIC   },  /* uppercase string */
     { "xlate",    TRINAMIC  }   /* XLATE character string translation */
 };
-
-# define NFUNCS ( sizeof (funcs) / sizeof (funcs[0]) )
 
 /*  and its preprocesor definitions     */
 

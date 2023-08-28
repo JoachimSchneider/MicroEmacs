@@ -122,7 +122,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     mklower(fnameL); /* and let it be upper or lower case */
 
     /* look the function up in the function table */
-    fnum = binary(fnameL, funval, NFUNCS, MINFLEN);
+    fnum = binary(fnameL, funval, NELEM(funcs), MINFLEN);
 
     /* return errorm on a bad reference */
     if ( fnum == -1 ) {
@@ -512,7 +512,7 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
     ASRT(NULL != vname);
 
     /* scan the list, looking for the referenced name */
-    vnum = binary(vname, envval, NEVARS, NVSIZE);
+    vnum = binary(vname, envval, NELEM(envars), NVSIZE);
 
     /* return errorm on a bad reference */
     if ( vnum == -1 )
@@ -1153,7 +1153,7 @@ fvar:   vtype = -1;
     switch ( var[0] ) {
 
     case '$':             /* check for legal enviromnent var */
-        if ( ( vnum = binary(&var[1], envval, NEVARS, NVSIZE) ) != -1 )
+        if ( ( vnum = binary(&var[1], envval, NELEM(envars), NVSIZE) ) != -1 )
             vtype = TKENV;
         break;
 
@@ -2327,7 +2327,7 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
 /*      "[Building variable list]" */
 
     /* build the environment variable list */
-    for ( uindex = 0; uindex < NEVARS; uindex++ ) {
+    for ( uindex = 0; uindex < NELEM(envars); uindex++ ) {
 
         /* add in the environment variable name */
         XSTRCPY(outseq, "$");
@@ -2429,7 +2429,7 @@ int PASCAL NEAR desfunc P2_(int, f, int, n)
 /*      "[Building function list]" */
 
     /* build the function list */
-    for ( uindex = 0; uindex < NFUNCS; uindex++ ) {
+    for ( uindex = 0; uindex < NELEM(funcs); uindex++ ) {
 
         /* add in the environment variable name */
         XSTRCPY(outseq, "&");
