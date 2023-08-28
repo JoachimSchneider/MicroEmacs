@@ -770,6 +770,16 @@ TODO-List
 
 - Sort eproto.h declarations and add platform specific sections therein.
 
+- Create unduable versions of
+  + filter-buffer
+  + filter-region
+  by these steps:
+  + filter into a temporary buffer
+  + kill-region in original buffer
+  + copy-region in temporary buffer
+  + yank-region in original buffer
+  + kill temporary buffer.
+
 
 
 # EOF
