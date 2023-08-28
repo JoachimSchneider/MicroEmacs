@@ -20,6 +20,13 @@ HDIR = ../h
 #CFLAGS = -g -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
 CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
 
+# Where to find the termcap/cureses library:
+LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
+#LIB_TERMCAP = -L/usr/lib64/termcap -ltermcap    # SLES 15
+#LIB_TERMCAP = -ltermcap
+#LIB_TERMCAP = -lncurses
+#LIB_TERMCAP = -lcurses
+
 # list of header files
 
 HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.h $(HDIR)/eproto.h
@@ -41,8 +48,7 @@ all:	emacs
 OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
 
 emacs:	$(OFILES)
-	#$(CC) $(CFLAGS) $(OFILES) -lncurses -lc -o emacs
-	$(CC) $(CFLAGS) $(OFILES) -ltermcap -lc -o emacs
+	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c
