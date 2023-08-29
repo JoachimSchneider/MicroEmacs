@@ -778,8 +778,9 @@ int scopen P0_()
 #  define TGETSTR(a, b)   tgetstr( (a), *(b) )
 # endif
 
-# if ( HPUX8 || HPUX9 || VAT || AUX )
-    /* HP-UX and AUX doesn't seem to have these in the termcap library */
+# if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
+    /* HP-UX, AUX and AIX5 doesn't seem to have these in the
+     * termcap library  */
     char PC, * UP;
     short ospeed;
 # else /* not HPUX8 || HPUX9 || VAT || AUX */

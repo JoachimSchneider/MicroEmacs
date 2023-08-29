@@ -15,6 +15,9 @@ operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
 
 ## Change Log
 
+[2023-08-29.00]
+* It compiles and runs on AIX 5.
+
 [2023-08-01.00]
 * MSDOS with Borland C (pcdos/turbo): Fixed a regression introduced with
   UE500: NSTRING was increased from 128 to 512 leading to `stack overflow'

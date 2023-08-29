@@ -12,14 +12,20 @@ SRCD = ../src
 HDIR = ../h
 
 
+# C compiler
+#CC = xlc
+CC = xlc++
+
 # options and arguments to the C compiler
 #
 # - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
 # - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
 #
-#CFLAGS = -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
-CFLAGS = -Wall -I. -I$(HDIR)
+#CFLAGS = -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
+CFLAGS = -I. -I$(HDIR)
 
+# Where to find the termcap/cureses library:
+LIB_TERMCAP = -lcurses
 
 # list of header files
 
@@ -42,7 +48,7 @@ all:	emacs
 OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
 
 emacs:	$(OFILES)
-		$(CC) $(CFLAGS) $(OFILES) -ltermcap -lc -o emacs
+	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c

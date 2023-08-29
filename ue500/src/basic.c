@@ -26,19 +26,21 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/* GOTOBOL:
+/*
+ * GOTOBOL:
  *
  * Move the cursor to the beginning of the current line. Trivial.
  */
 int PASCAL NEAR gotobol P2_(int, f, int, n)
-/* f, n:  argument flag and num */
+/* f, n:  Argument flag and num */
 {
     set_w_doto(curwp, 0);
 
     return (TRUE);
 }
 
-/* BACKCHAR:
+/*
+ * BACKCHAR:
  *
  * Move the cursor backwards by "n" characters. If "n" is less than zero call
  * "forwchar" to actually do the move. Otherwise compute the new cursor
@@ -75,19 +77,21 @@ int PASCAL NEAR backchar P2_(int, f, int, n)
 #endif
 }
 
-/* GOTOEOL:
+/*
+ * GOTOEOL:
  *
  * Move the cursor to the end of the current line. Trivial. No errors.
  */
 int PASCAL NEAR gotoeol P2_(int, f, int, n)
-/* f, n:  argument flag and num */
+/* f, n:  Argument flag and num */
 {
     set_w_doto(curwp, get_lused(curwp->w_dotp));
 
     return (TRUE);
 }
 
-/* FORWCHAR:
+/*
+ * FORWCHAR:
  *
  * Move the cursor forwards by "n" characters. If "n" is less than zero call
  * "backchar" to actually do the move. Otherwise compute the new cursor
@@ -122,7 +126,8 @@ int PASCAL NEAR forwchar P2_(int, f, int, n)
 #endif
 }
 
-/* GOTOLINE:
+/*
+ * GOTOLINE:
  *
  * Move to a particular line.
  * argument (n) must be a positive integer for
@@ -156,14 +161,15 @@ int PASCAL NEAR gotoline P2_(int, f, int, n)
     return ( forwline(f, n-1) );
 }
 
-/* GOTOBOB:
+/*
+ * GOTOBOB:
  *
  * Goto the beginning of the buffer. Massive adjustment of dot. This is
  * considered to be hard motion; it really isn't if the original value of dot is
  * the same as the new value of dot. Normally bound to "M-<".
  */
 int PASCAL NEAR gotobob P2_(int, f, int, n)
-/* f, n:  argument flag and num */
+/* f, n:  Argument flag and num */
 {
     curwp->w_dotp  = lforw(curbp->b_linep);
     set_w_doto(curwp, 0);
@@ -172,14 +178,15 @@ int PASCAL NEAR gotobob P2_(int, f, int, n)
     return (TRUE);
 }
 
-/* GOTOEOB:
+/*
+ * GOTOEOB:
  *
  * Move to the end of the buffer. Dot is always put at the end of the file (ZJ).
  * The standard screen code does most of the hard parts of update. Bound to
  * "M->".
  */
 int PASCAL NEAR gotoeob P2_(int, f, int, n)
-/* f, n: argument flag and num  */
+/* f, n:  Argument flag and num */
 {
     curwp->w_dotp  = curbp->b_linep;
     set_w_doto(curwp, 0);
@@ -188,16 +195,15 @@ int PASCAL NEAR gotoeob P2_(int, f, int, n)
     return (TRUE);
 }
 
-/***HEREHERE***/
 /*
+ * FORWLINE:
+ *
  * Move forward by full lines. If the number of lines to move is less than zero,
  * call the backward line function to actually do it. The last command controls
  * how the goal column is set. Bound to "C-N". No errors are possible.
  */
-int PASCAL NEAR forwline(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR forwline P2_(int, f, int, n)
+/* f, n:  Argument flag and argument  */
 {
     REGISTER LINE   *dlp;
 
@@ -236,15 +242,15 @@ int f, n;        /* argument flag and num */
 }
 
 /*
+ * BACKLINE:
+ *
  * This function is like "forwline", but goes backwards. The scheme is exactly
  * the same. Check for arguments that are less than zero and call your
  * alternate. Figure out the new line and call "movedot" to perform the motion.
  * No errors are possible. Bound to "C-P".
  */
-int PASCAL NEAR backline(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR backline P2_(int, f, int, n)
+/* f, n:  Argument flag and num */
 {
     REGISTER LINE   *dlp;
 
@@ -283,16 +289,15 @@ int f, n;        /* argument flag and num */
 #endif
 }
 
-int PASCAL NEAR gotobop(f, n) /* go back to the beginning of the current
-                               * paragraph here we look for a blank line or a
-                               * character from
-                               *  $paralead to delimit the beginning of a
-                               * paragraph or
-                               *  $fmtlead to delimit a line before the
-                               * paragraph */
-
-int f, n;       /* default Flag & Numeric argument */
-
+/*
+ * GOTOBOP:
+ *
+ * go back to the beginning of the current paragraph here we look for a
+ * blank line or a character from $paralead to delimit the beginning of
+ * a paragraph or $fmtlead to delimit a line before the paragraph
+ */
+int PASCAL NEAR gotobop P2_(int, f, int, n)
+/* f, n:  Default Flag & Numeric argument */
 {
     REGISTER int suc;           /* success of last backchar */
     REGISTER int c;             /* current character in scan */
@@ -353,14 +358,15 @@ int f, n;       /* default Flag & Numeric argument */
     return (TRUE);
 }
 
-int PASCAL NEAR gotoeop(f, n) /* go forword to the end of the current paragraph
-                               * looking for a member of $paralead or $fmtlead
-                               * or a blank line to delimit the start of the
-                               * next paragraph
-                               */
-
-int f, n;       /* default Flag & Numeric argument */
-
+/*
+ * GOTOEOP:
+ *
+ * go forword to the end of the current paragraph looking for a member
+ * of $paralead or $fmtlead or a blank line to delimit the start of the
+ * next paragraph
+ */
+int PASCAL NEAR gotoeop P2_(int, f, int, n)
+/* f, n:  Default Flag & Numeric argument */
 {
     REGISTER int suc;           /* success of last backchar */
     REGISTER int c;             /* current character in scan */
@@ -429,15 +435,13 @@ int f, n;       /* default Flag & Numeric argument */
 }
 
 /*
+ * GETGOAL:
+ *
  * This routine, given a pointer to a LINE, and the current cursor goal column,
  * return the best choice for the offset. The offset is returned. Used by "C-N"
  * and "C-P".
  */
-
-int PASCAL NEAR getgoal(dlp)
-
-REGISTER LINE   *dlp;
-
+int PASCAL NEAR getgoal P1_(LINE *, dlp)
 {
     REGISTER int c;
     REGISTER int col;
@@ -464,15 +468,15 @@ REGISTER LINE   *dlp;
 }
 
 /*
+ * FORWPAGE:
+ *
  * Scroll forward by a specified number of lines, or by a full page if no
  * argument. Bound to "C-V". The overlap in the arithmetic on the window size is
  * overlap between screens. This defaults to overlap value in ITS EMACS. Because
  * this zaps the top line in the window, we have to do a hard update.
  */
-int PASCAL NEAR forwpage(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR forwpage P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE   *lp;
 
@@ -501,6 +505,8 @@ int f, n;        /* prefix flag and argument */
 }
 
 /*
+ * BACKPAGE:
+ *
  * This command is like "forwpage", but it goes backwards. overlap, like above,
  * is the overlap between the two windows. The value is from the ITS EMACS
  * manual. Bound to "M-V". We do a hard update for exactly the same reason.
@@ -534,13 +540,13 @@ int PASCAL NEAR backpage P2_(int, f, int, n)
 }
 
 /*
+ * SETMARK:
+ *
  * Set the mark in the current window to the value of "." in the window. No
  * errors are possible. Bound to "M-.".
  */
-int PASCAL NEAR setmark(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR setmark P2_(int, f, int, n)
+/* f, n:  Argument flag and num */
 {
     /* make sure it is in range */
     if ( f == FALSE )
@@ -556,12 +562,12 @@ int f, n;        /* argument flag and num */
 }
 
 /*
+ * REMMARK:
+ *
  * Remove the mark in the current window. Bound to ^X <space>
  */
-int PASCAL NEAR remmark(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR remmark P2_(int, f, int, n)
+/* f, n:  Argument flag and num */
 {
     /* make sure it is in range */
     if ( f == FALSE )
@@ -577,15 +583,15 @@ int f, n;        /* argument flag and num */
 }
 
 /*
+ * SWAPMARK:
+ *
  * Swap the values of "." and "mark" in the current window. This is pretty easy,
  * bacause all of the hard work gets done by the standard routine that moves the
  * mark about. The only possible error is "no mark". Bound to
  * "C-X C-X".
  */
-int PASCAL NEAR swapmark(f, n)
-
-int f, n;        /* argument flag and num */
-
+int PASCAL NEAR swapmark P2_(int, f, int, n)
+/* f, n:  Argument flag and num */
 {
     REGISTER LINE   *odotp;
     REGISTER int odoto;
@@ -613,14 +619,14 @@ int f, n;        /* argument flag and num */
 }
 
 /*
+ * GOTOMARK:
+ *
  * Goto a mark in the current window. This is pretty easy, bacause all of the
  * hard work gets done by the standard routine that moves the mark about. The
  * only possible error is "no mark". Bound to "M-^G".
  */
-int PASCAL NEAR gotomark(f, n)
-
-int f, n;       /* default and numeric args */
-
+int PASCAL NEAR gotomark P2_(int, f, int, n)
+/* f, n:  Default and numeric args  */
 {
     /* make sure it is in range */
     if ( f == FALSE )
@@ -641,6 +647,8 @@ int f, n;       /* default and numeric args */
 }
 
 #if     DBCS
+
+/***HEREHERE***/
 /* advance a char if we are on the second byte of a DBCS character */
 
 int PASCAL NEAR stopforw()
