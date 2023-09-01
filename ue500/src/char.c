@@ -25,40 +25,42 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/* is_letter() Is the character a letter?  We presume a letter must be
- * either in the upper or lower case tables (even if it gets translated to
- * itself).
+/* IS_LETTER:
+ *
+ * Is the character a letter?  We presume a letter must be either
+ * in the upper or lower case tables (even if it gets translated
+ * to itself).
  */
-
 int PASCAL NEAR is_letter P1_(char, ch)
 {
     return ( is_upper(ch) || is_lower(ch) );
 }
 
-/*      is_lower() Is the character a lower case letter?  This looks in the
+/* IS_LOWER:
+ *
+ * Is the character a lower case letter?  This looks in the
  * lower to uppercase translation table.
  */
-
 int PASCAL NEAR is_lower P1_(char, ch)
 {
     return (lowcase[C2I(ch)] != 0);
 }
 
-/* is_upper() Is the character a upper case letter?  This looks in the
+/* IS_UPPER:
+ *
+ * Is the character a upper case letter?  This looks in the
  * upper to lowercase translation table.
  */
-
 int PASCAL NEAR is_upper P1_(char, ch)
 {
     return (upcase[C2I(ch)] != 0);
 }
 
-/*      chcase()
+/* CHCASE:
  *
  * Change the case of the current character. First check lower and
  * then upper. If it is not a letter, it gets returned unchanged.
  */
-
 unsigned int PASCAL NEAR chcase P1_(unsigned int, ch)
 {
     /* translate lowercase */
@@ -73,32 +75,35 @@ unsigned int PASCAL NEAR chcase P1_(unsigned int, ch)
     return (ch);
 }
 
-/* change *cp to an upper case character */
-
-VOID PASCAL NEAR uppercase(cp)
-
-unsigned char *cp;      /* ptr to character to uppercase */
-
+/* UPPERCASE:
+ *
+ * Change *cp to an upper case character
+ */
+VOID PASCAL NEAR uppercase P1_(unsigned char *, cp)
+/* cp:  Ptr to character to uppercase */
 {
     /* translate uppercase */
     if ( is_lower(*cp) )
         *cp = lowcase[C2I(*cp)];
 }
 
-/* change *cp to an lower case character */
-
-VOID PASCAL NEAR lowercase(cp)
-
-unsigned char *cp;      /* ptr to character to lowercase */
-
+/* LOWERCASE:
+ *
+ * Change *cp to an lower case character
+ */
+VOID PASCAL NEAR lowercase P1_(unsigned char *, cp)
+/* cp:  Ptr to character to lowercase */
 {
     /* translate lowercase */
     if ( is_upper(*cp) )
         *cp = upcase[C2I(*cp)];
 }
 
-int PASCAL NEAR upperc P1_(char, ch)  /* return the upper case equivalant of
-                                       * character ch */
+/* UPPERC:
+ *
+ * Return the upper case equivalant of character ch
+ */
+int PASCAL NEAR upperc P1_(char, ch)
 {
     if ( is_lower(ch) )
         return (lowcase[C2I(ch)]);
@@ -106,8 +111,11 @@ int PASCAL NEAR upperc P1_(char, ch)  /* return the upper case equivalant of
         return (ch);
 }
 
-int PASCAL NEAR lowerc P1_(char, ch)  /* return the lower case equivalant of
-                                       * character ch */
+/* LOWERC:
+ *
+ * Return the lower case equivalant of character ch
+ */
+int PASCAL NEAR lowerc P1_(char, ch)
 {
     if ( is_upper(ch) )
         return (upcase[C2I(ch)]);
@@ -115,8 +123,11 @@ int PASCAL NEAR lowerc P1_(char, ch)  /* return the lower case equivalant of
         return (ch);
 }
 
-VOID PASCAL NEAR initchars()    /* initialize the character upper/lower case
-                                 * tables */
+/* INITCHARS:
+ *
+ * Initialize the character upper/lower case tables
+ */
+VOID PASCAL NEAR initchars P0_()
 {
     REGISTER int index;         /* index into tables */
 
@@ -243,35 +254,36 @@ VOID PASCAL NEAR initchars()    /* initialize the character upper/lower case
 #endif
 }
 
-/* Set a character in the lowercase map */
-
-int PASCAL NEAR setlower(ch, val)
-
-char *ch;       /* ptr to character to set */
-char *val;      /* value to set it to */
-
+/* SETLOWER:
+ *
+ * Set a character in the lowercase map
+ */
+int PASCAL NEAR setlower P2_(char *, ch, char *, val)
+/* ch:  Ptr to character to set */
+/* val: Value to set it to      */
 {
     return (lowcase[C2I(*ch)] = C2I(*val));
 }
 
-/* Set a character in the uppercase map */
-
-int PASCAL NEAR setupper(ch, val)
-
-char *ch;       /* ptr to character to set */
-char *val;      /* value to set it to */
-
+/* SETUPPER:
+ *
+ * Set a character in the uppercase map
+ */
+int PASCAL NEAR setupper P2_(char *, ch, char *, val)
+/* ch:  Ptr to character to set */
+/* val: Value to set it to      */
 {
     return (upcase[C2I(*ch)] = C2I(*val));
 }
 
 #if (WINXP | ZTC | TURBO | MSC) == 0
-/*
- * strrev -- Reverse string in place.  Code here for those compilers that do not
+
+/* STRREV:
+ *
+ * Reverse string in place.  Code here for those compilers that do not
  * have the function in their own library.
  */
-char *strrev(our_str)
-char *our_str;
+char *strrev P1_(char *, our_str)
 {
     REGISTER char   *beg_str, *end_str;
     REGISTER char the_char;
@@ -287,16 +299,18 @@ char *our_str;
 
     return (our_str);
 }
+
 #endif
 
 #if     DBCS
-/* is this character a 2 byte character prefix code? */
 
-int PASCAL NEAR is2byte(sp, cp)
-
-char *sp;       /* ptr to beginning of string containing character to test */
-char *cp;       /* ptr to character to test */
-
+/* IS2BYTE:
+ *
+ * is this character a 2 byte character prefix code?
+ */
+int PASCAL NEAR is2byte P2_(char *, sp, char *, cp)
+/* sp:  Ptr to beginning of string containing character to test */
+/* cp:  Ptr to character to test                                */
 {
     REGISTER char *cc;          /* pointer to current character */
 

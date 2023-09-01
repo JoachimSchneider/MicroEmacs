@@ -2031,7 +2031,7 @@ EXTERN VOID PASCAL NEAR comp_file DCL((char *name, int *cpos));
 #endif
 EXTERN VOID PASCAL NEAR ecrypt DCL((char *bptr, unsigned len));
 EXTERN VOID PASCAL NEAR errormesg DCL((char *mesg, BUFFER *bp, LINE *lp));
-EXTERN VOID PASCAL NEAR flong_asc DCL((char buf[], int width, long num));
+EXTERN VOID PASCAL NEAR flong_asc DCL((char *buf, int width, long num));
 EXTERN VOID PASCAL NEAR freewhile DCL((WHBLOCK *wp));
 EXTERN VOID PASCAL NEAR getdtime DCL((char *ts));
 EXTERN VOID PASCAL NEAR initchars DCL((void));

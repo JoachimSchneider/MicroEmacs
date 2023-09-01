@@ -26,8 +26,7 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/*
- * GOTOBOL:
+/* GOTOBOL:
  *
  * Move the cursor to the beginning of the current line. Trivial.
  */
@@ -39,8 +38,7 @@ int PASCAL NEAR gotobol P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * BACKCHAR:
+/* BACKCHAR:
  *
  * Move the cursor backwards by "n" characters. If "n" is less than zero call
  * "forwchar" to actually do the move. Otherwise compute the new cursor
@@ -77,8 +75,7 @@ int PASCAL NEAR backchar P2_(int, f, int, n)
 #endif
 }
 
-/*
- * GOTOEOL:
+/* GOTOEOL:
  *
  * Move the cursor to the end of the current line. Trivial. No errors.
  */
@@ -90,8 +87,7 @@ int PASCAL NEAR gotoeol P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * FORWCHAR:
+/* FORWCHAR:
  *
  * Move the cursor forwards by "n" characters. If "n" is less than zero call
  * "backchar" to actually do the move. Otherwise compute the new cursor
@@ -126,8 +122,7 @@ int PASCAL NEAR forwchar P2_(int, f, int, n)
 #endif
 }
 
-/*
- * GOTOLINE:
+/* GOTOLINE:
  *
  * Move to a particular line.
  * argument (n) must be a positive integer for
@@ -161,8 +156,7 @@ int PASCAL NEAR gotoline P2_(int, f, int, n)
     return ( forwline(f, n-1) );
 }
 
-/*
- * GOTOBOB:
+/* GOTOBOB:
  *
  * Goto the beginning of the buffer. Massive adjustment of dot. This is
  * considered to be hard motion; it really isn't if the original value of dot is
@@ -178,8 +172,7 @@ int PASCAL NEAR gotobob P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * GOTOEOB:
+/* GOTOEOB:
  *
  * Move to the end of the buffer. Dot is always put at the end of the file (ZJ).
  * The standard screen code does most of the hard parts of update. Bound to
@@ -195,8 +188,7 @@ int PASCAL NEAR gotoeob P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * FORWLINE:
+/* FORWLINE:
  *
  * Move forward by full lines. If the number of lines to move is less than zero,
  * call the backward line function to actually do it. The last command controls
@@ -241,8 +233,7 @@ int PASCAL NEAR forwline P2_(int, f, int, n)
 #endif
 }
 
-/*
- * BACKLINE:
+/* BACKLINE:
  *
  * This function is like "forwline", but goes backwards. The scheme is exactly
  * the same. Check for arguments that are less than zero and call your
@@ -289,8 +280,7 @@ int PASCAL NEAR backline P2_(int, f, int, n)
 #endif
 }
 
-/*
- * GOTOBOP:
+/* GOTOBOP:
  *
  * go back to the beginning of the current paragraph here we look for a
  * blank line or a character from $paralead to delimit the beginning of
@@ -358,8 +348,7 @@ int PASCAL NEAR gotobop P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * GOTOEOP:
+/* GOTOEOP:
  *
  * go forword to the end of the current paragraph looking for a member
  * of $paralead or $fmtlead or a blank line to delimit the start of the
@@ -434,8 +423,7 @@ int PASCAL NEAR gotoeop P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * GETGOAL:
+/* GETGOAL:
  *
  * This routine, given a pointer to a LINE, and the current cursor goal column,
  * return the best choice for the offset. The offset is returned. Used by "C-N"
@@ -467,8 +455,7 @@ int PASCAL NEAR getgoal P1_(LINE *, dlp)
     return (dbo);
 }
 
-/*
- * FORWPAGE:
+/* FORWPAGE:
  *
  * Scroll forward by a specified number of lines, or by a full page if no
  * argument. Bound to "C-V". The overlap in the arithmetic on the window size is
@@ -504,8 +491,7 @@ int PASCAL NEAR forwpage P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * BACKPAGE:
+/* BACKPAGE:
  *
  * This command is like "forwpage", but it goes backwards. overlap, like above,
  * is the overlap between the two windows. The value is from the ITS EMACS
@@ -539,8 +525,7 @@ int PASCAL NEAR backpage P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * SETMARK:
+/* SETMARK:
  *
  * Set the mark in the current window to the value of "." in the window. No
  * errors are possible. Bound to "M-.".
@@ -561,8 +546,7 @@ int PASCAL NEAR setmark P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * REMMARK:
+/* REMMARK:
  *
  * Remove the mark in the current window. Bound to ^X <space>
  */
@@ -582,8 +566,7 @@ int PASCAL NEAR remmark P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * SWAPMARK:
+/* SWAPMARK:
  *
  * Swap the values of "." and "mark" in the current window. This is pretty easy,
  * bacause all of the hard work gets done by the standard routine that moves the
@@ -618,8 +601,7 @@ int PASCAL NEAR swapmark P2_(int, f, int, n)
     return (TRUE);
 }
 
-/*
- * GOTOMARK:
+/* GOTOMARK:
  *
  * Goto a mark in the current window. This is pretty easy, bacause all of the
  * hard work gets done by the standard routine that moves the mark about. The
@@ -648,10 +630,11 @@ int PASCAL NEAR gotomark P2_(int, f, int, n)
 
 #if     DBCS
 
-/***HEREHERE***/
-/* advance a char if we are on the second byte of a DBCS character */
-
-int PASCAL NEAR stopforw()
+/* STOPFORW:
+ *
+ * Advance a char if we are on the second byte of a DBCS character
+ */
+int PASCAL NEAR stopforw P0_()
 {
     /* don't stop on the second byte of a 2 byte character */
     if ( get_w_doto(curwp) > 0 &&
@@ -662,9 +645,11 @@ int PASCAL NEAR stopforw()
     return (TRUE);
 }
 
-/* retreat a char if we are on the second byte of a DBCS character */
-
-int PASCAL NEAR stopback()
+/* STOPBACK:
+ *
+ * Retreat a char if we are on the second byte of a DBCS character
+ */
+int PASCAL NEAR stopback P0_()
 {
     /* don't stop on the second byte of a 2 byte character */
     if ( get_w_doto(curwp) > 0 &&
@@ -674,7 +659,8 @@ int PASCAL NEAR stopback()
 
     return (TRUE);
 }
-#endif
+
+#endif  /* DBCS */
 
 
 

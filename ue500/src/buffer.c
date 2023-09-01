@@ -25,14 +25,13 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/*
+/* USEBUFFER:
+ *
  * Attach a buffer to a window. The values of dot and mark come from the buffer
  * if the use count is 0. Otherwise, they come from some other window.
  */
-int PASCAL NEAR usebuffer(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR usebuffer P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER BUFFER *bp;        /* temporary buffer pointer */
 
@@ -51,10 +50,12 @@ int f, n;        /* prefix flag and argument */
     return ( swbuffer(bp) );
 }
 
-int PASCAL NEAR nextbuffer(f, n)        /* switch to the next buffer in the
-                                         * buffer list */
-
-int f, n;       /* default flag, numeric argument */
+/* NEXTBUFFER:
+ *
+ * Switch to the next buffer in the buffer list
+ */
+int PASCAL NEAR nextbuffer P2_(int, f, int, n)
+/* f, n:  Default flag, numeric argument  */
 {
     REGISTER BUFFER *bp;        /* current eligable buffer */
     REGISTER int status;
@@ -79,10 +80,11 @@ int f, n;       /* default flag, numeric argument */
     return (status);
 }
 
-int PASCAL NEAR swbuffer(bp)    /* make buffer BP current */
-
-BUFFER *bp;
-
+/* SWBUFFER:
+ *
+ * Make buffer BP current
+ */
+int PASCAL NEAR swbuffer P1_(BUFFER *, bp)
 {
     REGISTER EWINDOW *wp;
     SCREEN_T *scrp;             /* screen to fix pointers in */
@@ -156,16 +158,15 @@ BUFFER *bp;
     return (TRUE);
 }
 
-/*
+/* KILLBUFFER:
+ *
  * Dispose of a buffer, by name. Ask for the name. Look it up (don't get too
  * upset if it isn't there at all!). Get quite upset if the buffer is being
  * displayed. Clear the buffer (ask if the buffer has been changed). Then free
  * the header line and the buffer header. Bound to "C-X K".
  */
-int PASCAL NEAR killbuffer(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR killbuffer P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER BUFFER *bp;        /* ptr to buffer to dump */
 
@@ -179,12 +180,12 @@ int f, n;        /* prefix flag and argument */
     return ( zotbuf(bp) );
 }
 
-/*  Allow the user to pop up a buffer, like we do.... */
-
-int PASCAL NEAR popbuffer(f, n)
-
-int f, n;       /* default and numeric arguments */
-
+/* POPBUFFER:
+ *
+ * Allow the user to pop up a buffer, like we do....
+ */
+int PASCAL NEAR popbuffer P2_(int, f, int, n)
+/* f, n:  Default and numeric arguments */
 {
     REGISTER BUFFER *bp;        /* ptr to buffer to dump */
 
@@ -202,7 +203,11 @@ int f, n;       /* default and numeric arguments */
     return ( pop(bp) );
 }
 
-BUFFER *PASCAL NEAR getdefb()   /* get the default buffer for a use or kill */
+/* GETDEFB:
+ *
+ * Get the default buffer for a use or kill
+ */
+BUFFER *PASCAL NEAR getdefb P0_()
 {
     BUFFER *bp;         /* default buffer */
 
@@ -226,10 +231,11 @@ BUFFER *PASCAL NEAR getdefb()   /* get the default buffer for a use or kill */
     return (bp);
 }
 
-int PASCAL NEAR zotbuf(bp)      /* kill the buffer pointed to by bp */
-
-REGISTER BUFFER *bp;
-
+/* ZOTBUF:
+ *
+ * Kill the buffer pointed to by bp
+ */
+int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
 {
     REGISTER BUFFER *bp1;
     REGISTER BUFFER *bp2;
@@ -285,10 +291,12 @@ REGISTER BUFFER *bp;
     return (TRUE);
 }
 
-int PASCAL NEAR namebuffer(f, n) /* Rename the current buffer   */
-
-int f, n;               /* default Flag & Numeric arg */
-
+/* NAMEBUFFER:
+ *
+ * Rename the current buffer
+ */
+int PASCAL NEAR namebuffer P2_(int, f, int, n)
+/* f, n:  Default Flag & Numeric arg  */
 {
     REGISTER BUFFER *bp;        /* pointer to scan through all buffers */
     char bufn[NBUFN];           /* buffer to hold buffer name */
@@ -316,14 +324,13 @@ ask:    if ( mlreply(TEXT29, bufn, NBUFN) != TRUE )
     return (TRUE);
 }
 
-/* Build and popup a buffer containing the list of all buffers. Bound to "C-X
+/* LISTBUFFERS:
+ *
+ * Build and popup a buffer containing the list of all buffers. Bound to "C-X
  * C-B". A numeric argument forces it to list invisible buffers as well.
  */
-
-int PASCAL NEAR listbuffers(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR listbuffers P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* stutus return */
 
@@ -333,16 +340,15 @@ int f, n;        /* prefix flag and argument */
     return ( wpopup(blistp) );
 }
 
-/*
+/* MAKELIST:
+ *
  * This routine rebuilds the text in the special secret buffer that holds the
  * buffer list. It is called by the list buffers command. Return TRUE if
  * everything works. Return FALSE if there is an error (if there is no memory).
  * Iflag indicates whether to list hidden buffers.
  */
-int PASCAL NEAR makelist(iflag)
-
-int iflag;      /* list hidden buffer flag */
-
+int PASCAL NEAR makelist P1_(int, iflag)
+/* iflag: List hidden buffer flag */
 {
     REGISTER char   *cp1;
     REGISTER char   *cp2;
@@ -397,7 +403,7 @@ int iflag;      /* list hidden buffer flag */
         cp1 = &line[0];                         /* Start at left edge   */
 
         /* output status of ACTIVE flag (has the file been read in? */
-        if ( bp->b_active == TRUE )          /* "@" if activated       */
+        if ( bp->b_active == TRUE )             /* "@" if activated       */
             *cp1++ = '@';
         else
             *cp1++ = ' ';
@@ -436,7 +442,7 @@ int iflag;      /* list hidden buffer flag */
             nbytes += (long)get_lused(lp)+1L;
             lp = lforw(lp);
         }
-        flong_asc(b, 7, nbytes);                    /* 7 digit buffer size. */
+        flong_asc(b, 7, nbytes);                /* 7 digit buffer size. */
         cp2 = &b[0];
         while ( *cp2 )
             *cp1++ = *cp2++;
@@ -466,25 +472,22 @@ int iflag;      /* list hidden buffer flag */
                 *cp1++ = *cp2++;
         }
 
-        *cp1 = 0;                     /* Add to the buffer.   */
+        *cp1 = 0;                               /* Add to the buffer.   */
         if ( addline(blistp, line) == FALSE )
             return (FALSE);
 
         bp = bp->b_bufp;
     }
 
-    return (TRUE);                             /* All done         */
+    return (TRUE);                              /* All done         */
 }
 
-/* Translate a long to ascii form. Don't trust various systems ltoa() routines..
- * they aren't consistant               */
-
-VOID PASCAL NEAR flong_asc(buf, width, num)
-
-char buf[];
-int width;
-long num;
-
+/* FLONG_ASC:
+ *
+ * Translate a long to ascii form. Don't trust various systems ltoa() routines..
+ * they aren't consistant
+ */
+VOID PASCAL NEAR flong_asc P3_(char *, buf, int, width, long, num)
 {
     buf[width] = 0;                             /* End of string.   */
     while ( num >= 10 ) {                       /* Conditional digits.  */
@@ -496,13 +499,14 @@ long num;
         buf[--width] = ' ';
 }
 
-/*
+/* ANYCB:
+ *
  * Look through the list of buffers. Return TRUE if there are any changed
  * buffers. Buffers that hold magic internal stuff are not considered; who cares
  * if the list of buffer names is hacked. Return FALSE if no buffers have been
  * changed.
  */
-int PASCAL NEAR anycb()
+int PASCAL NEAR anycb P0_()
 {
     REGISTER BUFFER *bp;
 
@@ -517,14 +521,15 @@ int PASCAL NEAR anycb()
     return (FALSE);
 }
 
-/*
+/* BFIND:
+ *
  * Find a buffer, by name. Return a pointer to the BUFFER structure associated
  * with it. If the buffer is not found and the "cflag" is TRUE, create it. The
  * "bflag" is the settings for the flags in in buffer.
  */
 BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
-/* bname: Name of buffer to find */
-/* cflag: Create it if not found? */
+/* bname: Name of buffer to find        */
+/* cflag: Create it if not found?       */
 /* bflag: Bit settings for a new buffer */
 {
     REGISTER BUFFER *bp;
@@ -604,15 +609,15 @@ BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
     return (bp);
 }
 
-/*
+/* BCLEAR:
+ *
  * This routine blows away all of the text in a buffer. If the buffer is marked
  * as changed then we ask if it is ok to blow it away; this is to save the user
  * the grief of losing text. The window chain is nearly always wrong if this
  * gets called; the caller must arrange for the updates that are required.
  * Return TRUE if everything looks good.
  */
-int PASCAL NEAR bclear(bp)
-REGISTER BUFFER *bp;
+int PASCAL NEAR bclear P1_(BUFFER *, bp)
 {
     REGISTER LINE   *lp;
     REGISTER int s;
@@ -639,10 +644,12 @@ REGISTER BUFFER *bp;
     return (TRUE);
 }
 
-int PASCAL NEAR unmark(f, n)    /* unmark the current buffers change flag */
-
-int f, n;       /* unused command arguments */
-
+/* UNMARK:
+ *
+ * Unmark the current buffers change flag
+ */
+int PASCAL NEAR unmark P2_(int, f, int, n)
+/* f, n:  Unused command arguments  */
 {
     /* unmark the buffer */
     curbp->b_flag &= ~BFCHG;
@@ -653,7 +660,11 @@ int f, n;       /* unused command arguments */
     return (TRUE);
 }
 
-BUFFER *PASCAL NEAR getoldb()   /* get the most ancient visited buffer */
+/* GETOLDB:
+ *
+ * Get the most ancient visited buffer
+ */
+BUFFER *PASCAL NEAR getoldb P0_()
 {
     BUFFER *bp;         /* current buffer */
     BUFFER *old_bp;     /* ptr to oldest buffer */
