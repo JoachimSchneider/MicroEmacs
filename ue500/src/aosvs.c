@@ -123,7 +123,7 @@
 #list
 #include        "estruct.h"         /* get the MicroEMACS stuff */
 
-#ifdef  AOSVS | MV_UX               /* should this be done? */
+#if     AOSVS | MV_UX               /* should this be done? */
 
 # define dashertermdef   1          /* might not be used any more */
 

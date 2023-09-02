@@ -65,6 +65,7 @@
 #define HPUX9   0                     /* HPUX HP 9000 ver 9           */
 #define MPE     0                     /* HP MPE/XL                    */
 #define MSDOS   0                     /* MS-DOS                       */
+#define MV_UX   0                     /* Data General MV/UX (Eclipse) */
 #define OPENBSD 1                     /* OPENBSD 386                  */
 #define OS2     0                     /* Microsoft or IBM OS/2        */
 #define SMOS    0                     /* Supermax UNIX System V       */

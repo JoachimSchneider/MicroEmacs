@@ -1826,7 +1826,7 @@ EXTERN int PASCAL NEAR execproc DCL((int f, int n));
 EXTERN int PASCAL NEAR execute DCL((int c, int f, int n));
 EXTERN int PASCAL NEAR ffclose DCL((void));
 EXTERN int PASCAL NEAR ffgetline DCL((int *nbytes));
-EXTERN int PASCAL NEAR ffputline DCL((char buf[], int nbuf));
+EXTERN int PASCAL NEAR ffputline DCL((char *buf, int nbuf));
 EXTERN int PASCAL NEAR ffropen DCL((CONST char *fn));
 EXTERN int PASCAL NEAR ffwopen DCL((char *fn, char *mode));
 EXTERN int PASCAL NEAR fileapp DCL((int f, int n));

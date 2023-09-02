@@ -22,23 +22,28 @@
 #include        "edef.h"
 #include        "elang.h"
 
-#if     AOSVS
+#if     AOSVS | MV_UX
 # define fopen   xxfopen
 #endif
 
+#if !(AOSVS | MV_UX)
+static
+#endif
 NOSHARE FILE *ffp;              /* File pointer, all functions. */
 static int eofflag;             /* end-of-file flag */
 
 #if     (MSC || TURBO || IC) && MSDOS
 # define FILE_BUFSIZE    4096
-char file_buffer[FILE_BUFSIZE];
+static char file_buffer[FILE_BUFSIZE];
 #endif
 
-/*
+#if !(VMS & RMSIO)
+/* If using RMS under VMS, the code following is in VMS.C */
+
+/* FFROPEN:
+ *
  * Open a file for reading.
  */
-#if !(VMS & RMSIO)      /* if using RMS under VMS, the code */
-                        /* is in VMS.C */
 int PASCAL NEAR ffropen P1_(CONST char *, fn)
 {
     if ( ( ffp=fopen(fn, "r") ) == NULL )
@@ -61,22 +66,20 @@ int PASCAL NEAR ffropen P1_(CONST char *, fn)
  * Open a file for writing. Return TRUE if all is well, and FALSE on error
  * (cannot create).
  */
-# if     AOSVS == 0
-int PASCAL NEAR ffwopen(fn, mode)
-char    *fn;
-char *mode;     /* mode to open file for */
+# if  !(AOSVS | MV_UX)
+int PASCAL NEAR ffwopen P2_(char *, fn, char *, mode)
+/* fn:    File name             */
+/* mode:  Mode to open file for */
 {
     char xmode[6];              /* extended file open mode */
 
     /* nonstandard line terminators? */
     if ( *lterm ) {
-
         /* open in binary mode */
         XSTRCPY(xmode, mode);
         XSTRCAT(xmode, "b");
         ffp = fopen(fn, xmode);
     } else {
-
         /* open in ascii(text) mode */
         ffp = fopen(fn, mode);
     }
@@ -101,10 +104,11 @@ char *mode;     /* mode to open file for */
 }
 # endif
 
-/*
+/* FFCLOSE:
+ *
  * Close a file. Should look at the status in all systems.
  */
-int PASCAL NEAR ffclose()
+int PASCAL NEAR ffclose P0_()
 {
     /* free this since we do not need it anymore */
     if ( fline ) {
@@ -139,16 +143,13 @@ int PASCAL NEAR ffclose()
 # endif
 }
 
-/*
+/* FFPUTLINE:
+ *
  * Write a line to the already opened file. The "buf" points to the buffer, and
  * the "nbuf" is its length, less the free newline. Return the status. Check
  * only at the newline.
  */
-int PASCAL NEAR ffputline(buf, nbuf)
-
-char buf[];
-int nbuf;
-
+int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
 {
     REGISTER int i;             /* index into line to write */
     REGISTER char *lptr;        /* ptr into the line terminator */
@@ -200,16 +201,14 @@ int nbuf;
     return (FIOSUC);
 }
 
-/*
+/* FFGETLINE:
+ *
  * Read a line from a file, and store the bytes in the supplied buffer. The
  * "nbuf" is the length of the buffer. Complain about long lines and lines at
  * the end of the file that don't have a newline present. Check for I/O errors
  * too. Return status.
  */
-int PASCAL NEAR ffgetline(nbytes)
-
-int *nbytes;
-
+int PASCAL NEAR ffgetline P1_(int *, nbytes)
 {
     REGISTER int c;             /* current character read */
     REGISTER int i;             /* current index into fline */
@@ -282,12 +281,15 @@ int *nbytes;
 
     return (FIOSUC);
 }
-#endif
 
-int PASCAL NEAR fexist(fname)   /* does <fname> exist on disk? */
+#endif  /* !(VMS & RMSIO) */
 
-char *fname;            /* file to check for existance */
-
+/* FEXIST:
+ *
+ * does <fname> exist on disk?
+ */
+int PASCAL NEAR fexist P1_(char *, fname)
+/* fname: File to check for existance */
 {
     FILE *fp;
 

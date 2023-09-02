@@ -23,11 +23,12 @@
 
 static int PASCAL NEAR mod95 DCL((int));
 
-int PASCAL NEAR setekey(f, n)   /* reset encryption key of current buffer */
-
-int f;          /* default flag */
-int n;          /* numeric argument */
-
+/* SETEKEY:
+ *
+ * Reset encryption key of current buffer
+ */
+int PASCAL NEAR setekey P2_(int, f, int, n)
+/* f, n:  Default flag and argument */
 {
     REGISTER int status;        /* return status */
     int odisinp;                /* original vlaue of disinp */
@@ -148,9 +149,11 @@ int n;          /* numeric argument */
  *
  **********/
 
-VOID PASCAL NEAR ecrypt(bptr, len)
-REGISTER char *bptr;    /* buffer of characters to be encrypted */
-REGISTER unsigned len;  /* number of characters in the buffer */
+/* ECRYPT:
+ */
+VOID PASCAL NEAR ecrypt P2_(char *, bptr, unsigned int, len)
+/* bptr:  Buffer of characters to be encrypted  */
+/* len:   Number of characters in the buffer    */
 {
     REGISTER int cc;            /* current character being considered */
 
@@ -217,10 +220,7 @@ REGISTER unsigned len;  /* number of characters in the buffer */
     return;
 }
 
-static int PASCAL NEAR mod95(val)
-
-REGISTER int val;
-
+static int PASCAL NEAR mod95 P1_(int, val)
 {
     /*  The mathematical MOD does not match the computer MOD  */
 
@@ -238,10 +238,13 @@ REGISTER int val;
 
     return (val);
 }
+
 #else
-nocrypt()
+
+VOID nocrypt P0_()
 {
 }
+
 #endif
 
 

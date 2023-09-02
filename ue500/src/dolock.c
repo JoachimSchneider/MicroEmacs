@@ -29,9 +29,11 @@
 # include <stdio.h>
 # include <ctype.h>
 
-char msg[] = TEXT35;
+static CONST char mg[]  = TEXT35;
 /*           "another user" */
 
+/* DOLOCK:
+ */
 char *dolock P1_(CONST char *, fname)
 {
     int lun, status;
@@ -41,6 +43,8 @@ char *dolock P1_(CONST char *, fname)
     return (msg);
 }
 
+/* UNDOLOCK:
+ */
 char *undolock P1_(CONST char *, fname)
 {
     int i, j, k, lun, status;
@@ -106,19 +110,11 @@ COMMON int errno;
 # define LOCKDEBUG  FALSE
 /**# define LOCKDEBUG TRUE**/
 
-/* dolock: Generic non-UNIX file locking mechanism */
 
-/**********************
+/* PARSE_NAME:
  *
- * dolock -- lock the file fname
- *
- * if successful, returns NULL
- * if file locked, returns username of person locking the file
- * if other error, returns "LOCK ERROR: explanation"
- *
- *********************/
-
-/* get name component of filespec:  */
+ * Get name component of filespec:
+ */
 static CONST char *parse_name P1_(CONST char *, filespec)
 {
     CONST char  *rname  = &filespec[strlen(filespec) - 1];
@@ -139,6 +135,8 @@ static CONST char *parse_name P1_(CONST char *, filespec)
         return (filespec);
 }
 
+/* PARSE_PATH:
+ */
 static char *parse_path P1_(CONST char *, filespec)
 {
     static char rbuff[NFILEN];
@@ -182,6 +180,8 @@ static char *parse_path P1_(CONST char *, filespec)
     return (rbuff);
 }
 
+/* PARSE_DRIVE:
+ */
 static CONST char *parse_drive P1_(CONST char *, filespec)
 {
     static char rbuff[NFILEN];
@@ -203,7 +203,10 @@ static CONST char *parse_drive P1_(CONST char *, filespec)
     return ("");
 }
 
-/* trim line terminators and whitespace from end of string  */
+/* TERM_TRIM:
+ *
+ * Trim line terminators and whitespace from end of string
+ */
 static VOID term_trim P1_(char *, buf)
 {
     char *c;  /* ptr to current character to examine */
@@ -218,7 +221,21 @@ static VOID term_trim P1_(char *, buf)
     return;
 }
 
-char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
+/* DOLOCK:
+ *
+ * Generic non-UNIX file locking mechanism
+ *
+ **********************
+ *
+ * dolock -- lock the file fname
+ *
+ * if successful, returns NULL
+ * if file locked, returns username of person locking the file
+ * if other error, returns "LOCK ERROR: explanation"
+ *
+ *********************/
+char *dolock P1_(CONST char *, filespec)
+/* filespec:  Full file spec of file to lock  */
 {
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
@@ -423,7 +440,9 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
     }
 }
 
-/**********************
+/* UNDOLOCK:
+ *
+ **********************
  *
  * undolock -- unlock the file fname
  *
@@ -431,8 +450,8 @@ char *dolock P1_(CONST char *, filespec /* full file spec of file to lock */)
  * if other error, returns "LOCK ERROR: explanation"
  *
  *********************/
-
-char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
+char *undolock P1_(CONST char *, filespec)
+/* filespec:  Filespec to unlock  */
 {
     char filename[NFILEN];          /* name of file to lock */
     char pathname[NFILEN];          /* path leading to file to lock */
@@ -486,9 +505,11 @@ char *undolock P1_(CONST char *, filespec /* filespec to unlock */)
 
 
 #else
+
 VOID dohello P0_()
 {
 }
+
 #endif
 
 
