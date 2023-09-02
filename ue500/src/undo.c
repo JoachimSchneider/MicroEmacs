@@ -29,12 +29,15 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/* insert an editing operation at the top of the current buffer's undo stack. */
-
-VOID undo_insert P3_(OPTYPE,  op_type,  /* type of operation being recorded */
-                     long,    count,    /* operand count                    */
-                     OBJECT,  op_erand  /* the operand of the operation     */
-                  )
+/* UNDO_INSERT:
+ *
+ * Insert an editing operation at the top of the current buffer's
+ * undo stack.
+ */
+VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
+/* op_type:   Type of operation being recorded  */
+/* count:     Operand count                     */
+/* op_erand:  The operand of the operation      */
 {
     int undo_size;      /* size of the undo object */
     UNDO_OBJ *up;       /* ptr to a newly allocated undo object */
@@ -110,9 +113,11 @@ VOID undo_insert P3_(OPTYPE,  op_type,  /* type of operation being recorded */
     return;
 }
 
-/* reverse the editing operation at the top of the current buffer's undo stack.
+/* UNDO_OP:
+ *
+ * Reverse the editing operation at the top of the current buffer's
+ * undo stack.
  */
-
 int undo_op P0_()
 {
     OPTYPE op_type;             /* type of operation being recorded */
@@ -178,12 +183,11 @@ int undo_op P0_()
     return (status);
 }
 
-/* clear and deallocate the contents of a buffer's undo stack */
-
-VOID undo_zot(bp)
-
-BUFFER *bp;
-
+/* UNDO_ZOT:
+ *
+ * Clear and deallocate the contents of a buffer's undo stack
+ */
+VOID undo_zot P1_(BUFFER *, bp)
 {
     UNDO_OBJ *up;       /* current undo object being cleared */
     UNDO_OBJ *np;       /* next undo object to be cleared */
@@ -204,12 +208,12 @@ BUFFER *bp;
     bp->undo_head = (UNDO_OBJ *)NULL;
 }
 
-/* Undo last done command */
-
-int PASCAL NEAR undo(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+/* UNDO:
+ *
+ * Undo last done command
+ */
+int PASCAL NEAR undo P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     int status;         /* status return from undone operations */
     UNDO_OBJ *up;       /* ptr to the undo object */
@@ -241,12 +245,12 @@ int f, n;        /* prefix flag and argument */
     return (status);
 }
 
-/* delete current buffer's undo stack */
-
-int PASCAL NEAR undo_delete(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+/* UNDO_DELETE:
+ *
+ * Delete current buffer's undo stack
+ */
+int PASCAL NEAR undo_delete P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     /* well, do that..... and we know it will work.... */
     undo_zot(curbp);
@@ -254,12 +258,12 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/* pop up a list of the current buffer's undo stack */
-
-int PASCAL NEAR undo_list(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+/* UNDO_LIST:
+ *
+ * Pop up a list of the current buffer's undo stack
+ */
+int PASCAL NEAR undo_list P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* stutus return */
 
@@ -269,6 +273,8 @@ int f, n;        /* prefix flag and argument */
     return ( wpopup(ulistp) );
 }
 
+/* UNDOLIST:
+ */
 int PASCAL NEAR undolist P0_()
 {
     REGISTER char *cp1;         /* scanning pointer into line to build */
@@ -383,8 +389,10 @@ int PASCAL NEAR undolist P0_()
     return (TRUE);
 }
 
-/* clear ALL the undo stacks */
-
+/* UNDO_DUMP:
+ *
+ * Clear ALL the undo stacks
+ */
 VOID undo_dump P0_()
 {
     BUFFER *bp;
@@ -397,8 +405,10 @@ VOID undo_dump P0_()
     }
 }
 
-/* ROOM:  Allocate memory using malloc() on failure, discard oldest undo
- *        information and retry
+/* ROOM:
+ *
+ * Allocate memory using malloc() on failure, discard oldest undo
+ * information and retry
  */
 char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 {
@@ -408,7 +418,7 @@ char *room P1_(int, nbytes  /* number of bytes to malloc() */)
     UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
 
     ASRT(0 <= nbytes);
-    if ( 0 >= nbytes ) return (VOIDP)0;
+    if ( 0 >= nbytes ) return (char *)0;
 
     ptr = (char *)NULL;
     while ( ptr == (char *)NULL ) {
@@ -451,8 +461,10 @@ nextbuf:        bp = getoldb();
     return NULL;  /**AVOID_WARNING**/
 }
 
-/* RE-ROOM: Allocate memory using realloc() on failure, discard oldest undo
- *          information and retry
+/* RE-ROOM:
+ *
+ * Allocate memory using realloc() on failure, discard oldest undo
+ * information and retry
  */
 char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
 {
@@ -462,7 +474,7 @@ char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */
     UNDO_OBJ *lp;       /* last undo struct before up */
 
     ASRT(0 <= nbytes);
-    if ( 0 >= nbytes ) return (VOIDP)0;
+    if ( 0 >= nbytes ) return (char *)0;
 
     /*
      * Avoid the whole problem of non-ANSI realloc() functions that don't handle

@@ -89,7 +89,7 @@ src/dolock.c    X                   X                                 X
 src/eval.c      X                   X                       X         X
 src/exec.c      X                   X               X       X         X
 src/file.c      X                   X                       X         X
-src/fileio.c    X                                                     X
+src/fileio.c    X                   X                                 X
 src/fmr.c       X                                                     X
 src/fmrdos.c    X                                                     X
 src/history.c   X                   X               X       X         X
@@ -124,7 +124,7 @@ src/os2.c       X                                                     X
 src/os2npm.c    X                                                     X
 src/posix.c     X                                                     X
 src/random.c    X                   X                       X         X
-src/region.c    X                                                     X
+src/region.c    X                   X                                 X
 src/replace.c   X                   X                       X         X
 src/screen.c    X                   X                       X         X
 src/search.c    X                   X                       X         X
@@ -134,13 +134,13 @@ src/tags.c      X                                                     X
 src/tcap.c      X                                                     X
 src/tipc.c      X                                                     X
 src/tos.c       X                                                     X
-src/undo.c      X                                                     X
+src/undo.c      X                   X                                 X
 src/unix.c      X                   X                       X         X
 src/vms.c       X                                                     X /* REFORMAT!  */
 src/vt52.c      X                                                     X
 src/window.c    X                                                     X
 src/wmcs.c      X                                                     X
-src/word.c      X                                                     X
+src/word.c      X                   X                                 X
 src/xp.c        X                                                     X
 src/xpconio.c   X                                                     X
 src/xvt.c       X                                                     X
@@ -610,7 +610,7 @@ Next Steps
         - Convert all K&R definitions to the P#_-Format (which
           expands to ANSI-C definitions with PROTO set.).
         - While reviewing the files repair broken comments
-        - Current File is: src/fileio.c
+        - Current File is: src/window.c
       done
 
     + #define SIZEOF(x) ( (int)sizeof((x)) )

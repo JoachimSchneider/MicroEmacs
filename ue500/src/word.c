@@ -21,18 +21,18 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/* Word wrap on n-spaces. Back-over whatever precedes the point on the current
- * line and stop on the first word-break or the beginning of the line. If we
- * reach the beginning of the line, jump back to the end of the word and start a
- * new line.    Otherwise, break the line at the word-break, eat it, and jump
- * back to the end of the word. Make sure we force the display back to the left
- * edge of the current window Returns TRUE on success, FALSE on errors.
+/* WRAPWORD:
+ *
+ * Word wrap on n-spaces. Back-over whatever precedes the point on the
+ * current line and stop on the first word-break or the beginning of
+ * the line. If we reach the beginning of the line, jump back to the
+ * end of the word and start a new line. Otherwise, break the line at
+ * the word-break, eat it, and jump back to the end of the word. Make
+ * sure we force the display back to the left edge of the current
+ * window Returns TRUE on success, FALSE on errors.
  */
-int PASCAL NEAR wrapword(f, n)
-
-int f;          /* default flag */
-int n;          /* numeric argument */
-
+int PASCAL NEAR wrapword P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
     REGISTER int cnt;           /* size of word wrapped to next line */
     REGISTER int c;             /* charector temporary */
@@ -44,8 +44,7 @@ int n;          /* numeric argument */
     /* back up until we aren't in a word, make sure there is a break in the line
      */
     cnt = 0;
-    while ( ( ( c =
-                    lgetc(curwp->w_dotp,
+    while ( ( ( c = lgetc(curwp->w_dotp,
                           get_w_doto(curwp)) ) != ' ' )&& (c != '\t') ) {
         cnt++;
         if ( !backchar(FALSE, 1) )
@@ -82,15 +81,14 @@ int n;          /* numeric argument */
     return (TRUE);
 }
 
-/*
- * Move the cursor backward by "n" words. All of the details of motion are
- * performed by the "backchar" and "forwchar" routines. Error if you try to move
- * beyond the buffers.
+/* BACKWORD:
+ *
+ * Move the cursor backward by "n" words. All of the details of motion
+ * are performed by the "backchar" and "forwchar" routines. Error if
+ * you try to move beyond the buffers.
  */
-int PASCAL NEAR backword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR backword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( n < 0 )
         return ( forwword(f, -n) );
@@ -112,14 +110,14 @@ int f, n;        /* prefix flag and argument */
     return ( forwchar(FALSE, 1) );
 }
 
-/*
- * Move the cursor forward by the specified number of words. All of the motion
- * is done by "forwchar". Error if you try and move beyond the buffer's end.
+/* FORWWORD:
+ *
+ * Move the cursor forward by the specified number of words. All of the
+ * motion is done by "forwchar". Error if you try and move beyond the
+ * buffer's end.
  */
-int PASCAL NEAR forwword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR forwword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( n < 0 )
         return ( backword(f, -n) );
@@ -141,14 +139,13 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Move forward to the end of the nth next word. Error if you move past the end
- * of the buffer.
+/* ENDWORD:
+ *
+ * Move forward to the end of the nth next word. Error if you move past
+ * the end of the buffer.
  */
-int PASCAL NEAR endword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR endword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( n < 0 )
         return ( backword(f, -n) );
@@ -170,15 +167,16 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Move the cursor forward by the specified number of words. As you move,
- * convert any characters to upper case. Error if you try and move beyond the
- * end of the buffer. Bound to "M-U".
+/* UPPERWORD:
+ *
+ * Move the cursor forward by the specified number of words. As you
+ * move, convert any characters to upper case. Error if you try and
+ * move beyond the end of the buffer.
+ *
+ * Bound to "M-U".
  */
-int PASCAL NEAR upperword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR upperword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     int c;
 
@@ -210,15 +208,16 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Move the cursor forward by the specified number of words. As you move convert
- * characters to lower case. Error if you try and move over the end of the
- * buffer. Bound to "M-L".
+/* LOWERWORD:
+ *
+ * Move the cursor forward by the specified number of words. As you
+ * move convert characters to lower case. Error if you try and move
+ * over the end of the buffer.
+ *
+ * Bound to "M-L".
  */
-int PASCAL NEAR lowerword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR lowerword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     int c;
 
@@ -250,16 +249,17 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Move the cursor forward by the specified number of words. As you move convert
- * the first character of the word to upper case, and subsequent characters to
- * lower case. Error if you try and move past the end of the buffer. Bound to
- * "M-C".
+/* CAPWORD:
+ *
+ * Move the cursor forward by the specified number of words. As you
+ * move convert the first character of the word to upper case, and
+ * subsequent characters to lower case. Error if you try and move past
+ * the end of the buffer.
+ *
+ * Bound to "M-C".
  */
-int PASCAL NEAR capword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR capword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     int c;
 
@@ -304,16 +304,17 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Kill forward by "n" words. Remember the location of dot. Move forward by the
- * right number of words. Put dot back where it was and issue the kill command
- * for the right number of characters. With a zero argument, just kill one word
- * and no whitespace. Bound to "M-D".
+/* DELFWORD:
+ *
+ * Kill forward by "n" words. Remember the location of dot. Move
+ * forward by the right number of words. Put dot back where it was and
+ * issue the kill command for the right number of characters. With a
+ * zero argument, just kill one word and no whitespace.
+ *
+ * Bound to "M-D".
  */
-int PASCAL NEAR delfword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR delfword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE   *dotp;      /* original cursor line */
     REGISTER int doto;          /*  and row */
@@ -404,15 +405,16 @@ int f, n;        /* prefix flag and argument */
     return ( ldelete(size, TRUE) );
 }
 
-/*
- * Kill backwards by "n" words. Move backwards by the desired number of words,
- * counting the characters. When dot is finally moved to its resting place, fire
- * off the kill command. Bound to "M-Rubout" and to "M-Backspace".
+/* DELBWORD:
+ *
+ * Kill backwards by "n" words. Move backwards by the desired number of
+ * words, counting the characters. When dot is finally moved to its
+ * resting place, fire off the kill command.
+ *
+ * Bound to "M-Rubout" and to "M-Backspace".
  */
-int PASCAL NEAR delbword(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR delbword P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     long size;
 
@@ -459,13 +461,13 @@ bckdel: if ( forwchar(FALSE, size) == FALSE )
     return ( ldelete(-size, TRUE) );
 }
 
-/*
- * Return TRUE if the character at dot is a character that is considered to be
- * part of a word. The default word character list is hard coded. If $wchars has
- * been set by the user, use that instead
+/* INWORD:
+ *
+ * Return TRUE if the character at dot is a character that is
+ * considered to be part of a word. The default word character list is
+ * hard coded. If $wchars has been set by the user, use that instead
  */
-
-int PASCAL NEAR inword()
+int PASCAL NEAR inword P0_()
 {
     /* the end of a line is never in a word */
     if ( get_w_doto(curwp) == get_lused(curwp->w_dotp) )
@@ -475,6 +477,8 @@ int PASCAL NEAR inword()
     return ( isinword( lgetc(curwp->w_dotp, get_w_doto(curwp)) ) );
 }
 
+/* ISINWORD:
+ */
 int PASCAL NEAR isinword P1_(char, c)
 {
 #define c_  C2I(c)
@@ -652,18 +656,17 @@ char *para;     /* string buffer containing paragraph */
 
 #endif/***==========HISTORICAL_CODE_FOR_DOCUMENTATION_ONLY==========***/
 
-
-int PASCAL NEAR killpara(f, n)  /* delete n paragraphs starting with the current
-                                 * one */
-
-int f;  /* default flag */
-int n;  /* # of paras to delete */
-
+/* KILLPARA:
+ *
+ * Delete n paragraphs starting with the current one
+ */
+int PASCAL NEAR killpara P2_(int, f, int, n)
+/* f: Default flag          */
+/* n: # of paras to delete  */
 {
     REGISTER int status;        /* returned status of functions */
 
     while ( n-- ) {             /* for each paragraph to delete */
-
         /* mark out the end and beginning of the para to delete */
         gotoeop(FALSE, 1);
 
@@ -686,13 +689,13 @@ int n;  /* # of paras to delete */
     return (TRUE);
 }
 
-/*  wordcount:  count the # of words in the marked region, along with average
- * word sizes, # of chars, etc, and report on them.         */
-
-int PASCAL NEAR wordcount(f, n)
-
-int f, n;       /* ignored numeric arguments */
-
+/* WORDCOUNT:
+ *
+ * Count the # of words in the marked region, along with average word
+ * sizes, # of chars, etc, and report on them.
+ */
+int PASCAL NEAR wordcount P2_(int, f, int, n)
+/* f, n:  Ignored numeric arguments */
 {
     REGISTER LINE *lp;          /* current line to scan */
     REGISTER int offset;        /* current char to scan */

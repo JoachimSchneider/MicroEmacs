@@ -20,11 +20,12 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/* reglines: How many lines in the current region used by the
- *           trim/entab/detab-region commands
+/* REGLINES:
+ *
+ * How many lines in the current region used by the
+ * trim/entab/detab-region commands
  */
-
-int PASCAL NEAR reglines()
+int PASCAL NEAR reglines P0_()
 {
     REGISTER LINE *linep;       /* position while scanning */
     REGISTER int n;             /* number of lines in this current region */
@@ -53,15 +54,15 @@ int PASCAL NEAR reglines()
     return (n);
 }
 
-/*
- * Kill the region. Ask "getregion"
- * to figure out the bounds of the region. Move "." to the start, and kill the
- * characters. Bound to "C-W".
+/* KILLREGION:
+ *
+ * Kill the region. Ask "getregion" to figure out the bounds of the
+ * region. Move "." to the start, and kill the characters.
+ *
+ * Bound to "C-W".
  */
-int PASCAL NEAR killregion(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR killregion P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int s;
     REGION region;
@@ -89,14 +90,16 @@ int f, n;        /* prefix flag and argument */
     return ( ldelete(region.r_size, TRUE) );
 }
 
-/*
- * Copy all of the characters in the region to the kill buffer. Don't move dot
- * at all. This is a bit like a kill region followed by a yank. Bound to "M-W".
+/* COPYREGION:
+ *
+ * Copy all of the characters in the region to the kill buffer. Don't
+ * move dot at all. This is a bit like a kill region followed by a
+ * yank.
+ *
+ * Bound to "M-W".
  */
-int PASCAL NEAR copyregion(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR copyregion P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE   *linep;
     REGISTER int loffs;
@@ -131,17 +134,17 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Lower case region. Zap all of the upper case characters in the region to
- * lower case. Use the region code to set the limits. Scan the buffer, doing the
- * changes. Call "lchange" to ensure that redisplay is done in all buffers.
- * Bound to
- * "C-X C-L".
+/* LOWERREGION:
+ *
+ * Lower case region. Zap all of the upper case characters in the
+ * region to lower case. Use the region code to set the limits. Scan
+ * the buffer, doing the changes. Call "lchange" to ensure that
+ * redisplay is done in all buffers.
+ *
+ * Bound to "C-X C-L".
  */
-int PASCAL NEAR lowerregion(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR lowerregion P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *save_dotp;    /* pointer and offset to position to preserve
                                   */
@@ -197,17 +200,17 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * Upper case region. Zap all of the lower case characters in the region to
- * upper case. Use the region code to set the limits. Scan the buffer, doing the
- * changes. Call "lchange" to ensure that redisplay is done in all buffers.
- * Bound to
- * "C-X C-L".
+/* UPPERREGION:
+ *
+ * Upper case region. Zap all of the lower case characters in the
+ * region to upper case. Use the region code to set the limits. Scan
+ * the buffer, doing the changes. Call "lchange" to ensure that
+ * redisplay is done in all buffers.
+ *
+ * Bound to "C-X C-L".
  */
-int PASCAL NEAR upperregion(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR upperregion P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *save_dotp;    /* pointer and offset to position to preserve
                                   */
@@ -263,14 +266,13 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*  Narrow-to-region (^X-<) makes all but the current region in the current
- * buffer invisable and unchangable
+/* NARROW:
+ *
+ * Narrow-to-region (^X-<) makes all but the current region in the
+ * current buffer invisable and unchangable
  */
-
-int PASCAL NEAR narrow(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR narrow P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER int status;        /* return status */
     BUFFER *bp;                 /* buffer being narrowed */
@@ -359,12 +361,12 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*  widen-from-region (^X->) restores a narrowed region */
-
-int PASCAL NEAR widen(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+/* WIDEN:
+ *
+ * Widen-from-region (^X->) restores a narrowed region
+ */
+int PASCAL NEAR widen P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     LINE *lp;           /* temp line pointer */
     BUFFER *bp;         /* buffer being narrowed */
@@ -447,19 +449,17 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
- * This routine figures out the bounds of the region in the current window, and
- * fills in the fields of the "REGION" structure pointed to by
- * "rp". Because the dot and mark are usually very close together, we scan
- * outward from dot looking for mark. This should save time. Return a standard
- * code. Callers of this routine should be prepared to get an
- * "ABORT" status; we might make this have the confirm thing later.
+/* GETREGION:
+ *
+ * This routine figures out the bounds of the region in the current
+ * window, and fills in the fields of the "REGION" structure pointed to
+ * by "rp". Because the dot and mark are usually very close together,
+ * we scan outward from dot looking for mark. This should save time.
+ * Return a standard code. Callers of this routine should be prepared
+ * to get an "ABORT" status; we might make this have the confirm thing
+ * later.
  */
-
-int PASCAL NEAR getregion(rp)
-
-REGISTER REGION *rp;
-
+int PASCAL NEAR getregion P1_(REGION *, rp)
 {
     REGISTER LINE   *flp;
     REGISTER LINE   *blp;
@@ -518,15 +518,12 @@ REGISTER REGION *rp;
     return (FALSE);
 }
 
-/*
- * Copy all of the characters in the region to the string buffer. It is assumed
- * that the buffer size is at least one plus the region size.
+/* REGTOSTR:
+ *
+ * Copy all of the characters in the region to the string buffer. It is
+ * assumed that the buffer size is at least one plus the region size.
  */
-char *PASCAL NEAR regtostr(buf, region)
-
-char *buf;
-REGION *region;
-
+char *PASCAL NEAR regtostr P2_(char *, buf, REGION *, region)
 {
     REGISTER LINE   *linep;
     REGISTER int loffs;
@@ -553,11 +550,11 @@ REGION *region;
     return buf;
 }
 
-CONST char *PASCAL NEAR getreg(value)   /* return some of the contents of the
-                                         * current region */
-
-char *value;
-
+/* GETREG:
+ *
+ * Return some of the contents of the current region
+ */
+CONST char *PASCAL NEAR getreg P1_(char *, value)
 {
     REGION region;
 
