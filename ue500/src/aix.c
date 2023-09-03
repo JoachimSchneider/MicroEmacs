@@ -777,7 +777,7 @@ int typahead()
     return (count);
 
 #  else /* not FIONREAD */
-#   ifdef VAT
+#   if VAT
 
     return (0);
 
@@ -820,10 +820,10 @@ int scopen()
 
     char  * tgetstr();
 
-#  ifndef VAT
-#   define TGETSTR(a, b)    tgetstr( (a), (b) )
-#  else
+#  if VAT
 #   define TGETSTR(a, b)    tgetstr( (a), *(b) )
+#  else
+#   define TGETSTR(a, b)    tgetstr( (a), (b) )
 #  endif
 
 #  if HPUX8 || HPUX9 || VAT || AUX || (AVVION || TERMIOS) || AIX

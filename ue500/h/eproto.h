@@ -1310,8 +1310,8 @@ typedef struct  {
 /*      structure for the name binding table            */
 
 typedef struct {
-    char *n_name;                               /* name of function key */
-    int (PASCAL NEAR *n_func) DCL((int, int));  /* function name is bound to */
+    CONST char  *n_name;                                /* name of function key */
+    int         (PASCAL NEAR *n_func) DCL((int, int));  /* function name is bound to */
 }       NBIND;
 
 
@@ -1591,7 +1591,7 @@ EXTERN CONST char *PASCAL NEAR flook DCL((CONST char *fname, int hflag));
 EXTERN CONST char *PASCAL NEAR funval DCL((int i));
 EXTERN char *PASCAL NEAR getctext DCL((char *rline));
 EXTERN char *PASCAL NEAR getffile DCL((char *fspec));
-EXTERN char *PASCAL NEAR getfname DCL((KEYTAB *key));
+EXTERN CONST char *PASCAL NEAR getfname DCL((KEYTAB *key));
 EXTERN char *PASCAL NEAR getkill DCL((void));
 EXTERN char *PASCAL NEAR getnfile DCL((void));
 EXTERN CONST char *PASCAL NEAR getreg DCL((char *value));
@@ -1963,7 +1963,7 @@ EXTERN int PASCAL NEAR spal DCL((char *pstr));
 EXTERN int PASCAL NEAR spawn DCL((int f, int n));
 EXTERN int PASCAL NEAR spawncli DCL((int f, int n));
 EXTERN int PASCAL NEAR splitwind DCL((int f, int n));
-EXTERN int PASCAL NEAR startup DCL((char *sfname));
+EXTERN int PASCAL NEAR startup DCL((CONST char *sfname));
 EXTERN int PASCAL NEAR storeproc DCL((int f, int n));
 EXTERN int PASCAL NEAR strinc DCL((CONST char *source, CONST char *sub));
 EXTERN int PASCAL NEAR swapmark DCL((int f, int n));

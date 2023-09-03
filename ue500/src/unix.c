@@ -110,6 +110,14 @@
 /*==============================================================*/
 
 
+#define   TGETFLAG(x)     tgetflag((char *)(x))
+#define   TGETNUM(x)      tgetnum((char *)(x))
+#if VAT
+# define  TGETSTR(a, b)   tgetstr( (char *)(a), *(b) )
+#else
+# define  TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
+#endif
+	
 /** Do nothing routine **/
 #if PROTO
 int scnothing(char *s)
@@ -194,12 +202,12 @@ EXTERN char *tgoto    DCL((CONST char *cap, int col, int row));
 # define MLWAIT          3
 
 struct capbind {                        /* Capability binding entry   */
-    char * name;                        /* Termcap name               */
-    char * store;                       /* Storage variable           */
+    CONST char  *name;                  /* Termcap name               */
+    char        *store;                 /* Storage variable           */
 };
 struct keybind {                        /* Keybinding entry           */
-    char * name;                        /* Termcap name               */
-    int value;                          /* Binding value              */
+    CONST char  *name;                  /* Termcap name               */
+    int         value;                  /* Binding value              */
 };
 # if ( !AIX )
 char *reset = (char*) NULL;             /* reset string kjc           */
@@ -726,7 +734,7 @@ int typahead P0_()
     return (count);
 
 #  else /* not FIONREAD */
-#   ifdef VAT
+#   if VAT
 
     return (0);
 
@@ -772,12 +780,6 @@ int scopen P0_()
     struct keybind * kp;
     char err_str[NSTRING];
 
-# ifndef VAT
-#  define TGETSTR(a, b)   tgetstr( (a), (b) )
-# else
-#  define TGETSTR(a, b)   tgetstr( (a), *(b) )
-# endif
-
 # if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
     /* HP-UX, AUX and AIX5 doesn't seem to have these in the
      * termcap library  */
@@ -811,8 +813,8 @@ int scopen P0_()
     }
 
     /* Get size from termcap */
-    term.t_nrow = tgetnum("li") - 1;
-    term.t_ncol = tgetnum("co");
+    term.t_nrow = TGETNUM("li") - 1;
+    term.t_ncol = TGETNUM("co");
     if ( term.t_nrow < 3 || term.t_ncol < 3 ) {
         puts("Screen size is too small!");
         exit(1);
@@ -829,7 +831,7 @@ int scopen P0_()
     reset = TGETSTR("is", &cp);
 
     /* Get the pad character */
-    if ( tgetstr("pc", &cp) )
+    if ( TGETSTR("pc", &cp) )
         PC = tcapbuf[0];
 
     /* Get up line capability */
@@ -862,7 +864,7 @@ int scopen P0_()
     }
 
     /* check for HP-Terminal (so we can label its function keys) */
-    hpterm = tgetflag("xs");
+    hpterm = TGETFLAG("xs");
 
     /* Open terminal device */
     if ( ttopen() ) {
@@ -1274,7 +1276,7 @@ int rename P2_(char *, file1, char *, file2)
 /*====================================================================*/
 
 /** Callout to system to perform command **/
-int callout P1_(char *, cmd)
+int callout P1_(CONST char *, cmd)
 /* cmd: Command to execute  */
 {
     int status;
@@ -1305,7 +1307,7 @@ int spawncli P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    char * sh;
+    CONST char  *sh;
 
     /* Don't allow this command if restricted */
     if ( restflag )
@@ -1375,7 +1377,7 @@ int execprg P2_(int, f, int, n)
  * Return in a static buffer the name of a temporary currently not
  * existing file name containing ident in its name.
  */
-char *gettmpfname P1_(char *, ident)
+char *gettmpfname P1_(CONST char *, ident)
 {
     char str[NFILEN];
     int i;

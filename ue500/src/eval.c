@@ -1228,12 +1228,12 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 
     valueL  = xstrdup(value);
     /* simplify the vd structure (we are gonna look at it a lot) */
-    vnum = var->v_num;
+    vnum  = var->v_num;
     vtype = var->v_type;
-    vut = var->v_ut;
+    vut   = var->v_ut;
 
     /* and set the appropriate value */
-    status = TRUE;
+    status  = TRUE;
     switch ( vtype ) {
     case TKVAR:     /* set a user variable */
         FREE(vut->uv[vnum].u_value);
@@ -1246,8 +1246,6 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
         break;
 
     case TKENV:     /* set an environment variable */
-        status = TRUE;          /* by default */
-
         switch ( vnum ) {
         case EVABBELL:
             ab_bell = stol(valueL);
@@ -1308,7 +1306,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
             break;
 
         case EVCURCHAR:
-            ldelete(1L, FALSE);                         /* delete 1 char */
+            ldelete(1L, FALSE);       /* delete 1 char */
             c = asc_int(valueL);
             if ( c == '\r' )
                 lnewline();
@@ -1678,7 +1676,6 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
     }
 
 
-end_of_func:
     FREE(valueL);
 
     return (status);

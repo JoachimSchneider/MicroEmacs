@@ -614,7 +614,7 @@ unsigned int PASCAL NEAR getckey P1_(int, mflag)
  *
  * Execute the startup file
  */
-int PASCAL NEAR startup P1_(char *, sfname)
+int PASCAL NEAR startup P1_(CONST char *, sfname)
 /* sfname:  Name of startup file (null if default)  */
 {
     CONST char  *fname;             /* resulting file name to execute */
@@ -873,7 +873,7 @@ KEYTAB *getbind P1_(int, c)
  * This function takes a ptr to KEYTAB entry and gets the name
  * associated with it
  */
-char *PASCAL NEAR getfname P1_(KEYTAB *, key)
+CONST char *PASCAL NEAR getfname P1_(KEYTAB *, key)
 /* key: Key binding to return a name of */
 {
     REGISTER ue_fnc_T func;     /* ptr to the requested function */

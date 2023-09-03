@@ -73,6 +73,7 @@
 #define SUN     0                     /* SUN v4.0                     */
 #define TOS     0                     /* ST520, TOS                   */
 #define USG     0                     /* UNIX system V                */
+#define VAT     0                     /* Related to XENIX (???)       */
 #define VMS     0                     /* VAX/VMS                      */
 #define WINNT   0                     /* MS-Win NT                    */
 #define WINXP   0                     /* Windows XP/Visual studio 2008*/

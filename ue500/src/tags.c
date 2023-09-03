@@ -295,7 +295,7 @@ VOID add_path P1_(char *, filename)
  * mark '.', goes to line 1 of file and searches for the pattern. We do
  * this so as to prevent loosing the return information.
  */
-int tagger P2_(char *, errmsg, int, retag)
+int tagger P2_(CONST char *, errmsg, int, retag)
 {
     char tagf[NFILEN];          /* File of tagged word  */
     char pretagpat[NPAT];               /* Search pattern prior */
