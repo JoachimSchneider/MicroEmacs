@@ -33,17 +33,19 @@
 /**********************************************************************/
 
 /**********************************************************************/
-/* Use                                                                */
-/* - COMMON for variables                                             */
-/* - EXTERN for functions                                             */
+/* Declaration of shared items:                                       */
 /**********************************************************************/
-#define  COMMON   extern
+/* Use                                                                */
+/* - COMMON       for variables                                       */
+/* - EXTERN       for functions                                       */
+/**********************************************************************/
+#define  COMMON       extern
 #ifdef __cplusplus
-# define EXTERN   extern "C"
+# define EXTERN       extern "C"
 # define REGISTER
 #else
-# define EXTERN   extern
-# define REGISTER register
+# define EXTERN       extern
+# define REGISTER     register
 #endif
 /**********************************************************************/
 
@@ -53,14 +55,14 @@
 # include <stdlib.h>
 # include <string.h>
 #else
-EXTERN char *getenv DCL((char *));
-EXTERN char *strcat DCL((char *, char *));
-EXTERN char *strcpy DCL((char *, char *));
-EXTERN int  strncmp DCL((char *, char *, int));
-EXTERN char *strchr DCL((char *, int));
-EXTERN int  strcmp DCL((char *, char *));
+EXTERN char *getenv DCL((CONST char *));
+EXTERN char *strcat DCL((char *, CONST char *));
+EXTERN char *strcpy DCL((char *, CONST char *));
+EXTERN int  strncmp DCL((CONST char *, CONST char *, int));
+EXTERN char *strchr DCL((CONST char *, int));
+EXTERN int  strcmp  DCL((CONST char *, CONST char *));
 # if     XVT == 0 || XVTDRIVER == 0
-EXTERN int  strlen DCL((char *));
+EXTERN int  strlen DCL((CONST char *));
 #  if RAMSIZE == 0
 EXTERN char *malloc DCL((int));
 EXTERN VOID free DCL((char *));

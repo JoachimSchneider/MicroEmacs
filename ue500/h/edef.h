@@ -37,19 +37,27 @@ COMMON NOSHARE TERM term; /* Terminal information.    */
 /**********************************************************************/
 
 
+#define _K_               ,     /* We need to marshall the `,'  */
+
 /* for MAIN.C:  */
 #ifdef  MAIN_C_
+# define CSTDEF           CONST
+# define INIT_CST_(x)     = x
 # define DCLDEF
-# define INIT_(x) = x
-# define _K_        ,     /* We need to marshall the `,'  */
+# define INIT_(x)         = x
 # define NOSZ_
 #else
-# define DCLDEF COMMON
+# ifdef __cplusplus
+#   define CSTDEF         CONST
+#   define INIT_CST_(x)   = x
+# else
+#   define CSTDEF         extern CONST
+#   define INIT_CST_(x)
+# endif
+# define DCLDEF           COMMON
 # define INIT_(x)
-# define NOSZ_  DUMMYSZ /* GRRR */
+# define NOSZ_            DUMMYSZ /* GRRR */
 #endif
-
-
 
 
 /* initialized global definitions */
@@ -78,7 +86,7 @@ DCLDEF NOSHARE CONST char     *modename[NOSZ_]                          /* name 
       "WRAP" _K_ "CMODE" _K_ "SPELL" _K_ "EXACT" _K_ "VIEW" _K_ "OVER" _K_ "MAGIC" _K_ "CRYPT" _K_
       "ASAVE" _K_ "REP" _K_ "ABBREV"
       });
-DCLDEF NOSHARE CONST char     modecode[NOSZ_]     INIT_("WCSEVOMYARB"); /* letters to represent modes       */
+CSTDEF NOSHARE char           modecode[NOSZ_]     INIT_CST_("WCSEVOMYARB"); /* letters to represent modes   */
 DCLDEF NOSHARE int            numfunc             INIT_(NFUNCS);        /* number of bindable functions     */
 DCLDEF NOSHARE int            gmode               INIT_(0);             /* global editor mode               */
 DCLDEF NOSHARE int            gflags              INIT_(GFREAD);        /* global control flag              */
@@ -148,9 +156,9 @@ DCLDEF NOSHARE long           access_time         INIT_(0L);            /* count
 DCLDEF NOSHARE int            macbug              INIT_(FALSE);         /* macro debugging flag             */
 DCLDEF NOSHARE int            mouseflag           INIT_(TRUE);          /* use the mouse?                   */
 DCLDEF NOSHARE int            diagflag            INIT_(FALSE);         /* diagonal mouse movements?        */
-DCLDEF NOSHARE CONST char     errorm[NOSZ_]       INIT_("ERROR");       /* error literal                    */
-DCLDEF NOSHARE CONST char     truem[NOSZ_]        INIT_("TRUE");        /* true literal                     */
-DCLDEF NOSHARE CONST char     falsem[NOSZ_]       INIT_("FALSE");       /* false litereal                   */
+CSTDEF NOSHARE char           errorm[NOSZ_]       INIT_CST_("ERROR");   /* error literal                    */
+CSTDEF NOSHARE char           truem[NOSZ_]        INIT_CST_("TRUE");    /* true literal                     */
+CSTDEF NOSHARE char           falsem[NOSZ_]       INIT_CST_("FALSE");   /* false litereal                   */
 DCLDEF NOSHARE int            cmdstatus           INIT_(TRUE);          /* last command status              */
 DCLDEF NOSHARE char           palstr[palstr_LEN]  INIT_("");            /* palette string                   */
 DCLDEF NOSHARE char           lastmesg[NSTRING]   INIT_("");            /* last message posted              */
@@ -269,7 +277,7 @@ DCLDEF NOSHARE CONST char     *dname[NOSZ_]
         "break" _K_ "force"
     });
 /* directive lengths                                                    */
-DCLDEF NOSHARE CONST short int  dname_len[NUMDIRS]  INIT_({ 2 _K_ 4 _K_ 5 _K_ 4 _K_ 6 _K_ 4 _K_ 5 _K_ 7 _K_ 5 _K_ 5 });
+CSTDEF NOSHARE short int  dname_len[NUMDIRS]  INIT_CST_({ 2 _K_ 4 _K_ 5 _K_ 4 _K_ 6 _K_ 4 _K_ 5 _K_ 7 _K_ 5 _K_ 5 });
 
 /*  var needed for macro debugging output */
 DCLDEF NOSHARE char           outline[NSTRING];   /* global string to hold debug line text  */

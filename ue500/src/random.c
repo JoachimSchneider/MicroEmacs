@@ -2608,7 +2608,7 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
     }
     col = slen;
 
-    if ( NULL == (cp = strchr(ip, ' ')) ) {
+    if ( NULL == (cp = (char *)strchr(ip, ' ')) ) {
         for ( i = 0; i < parindent; i++ ) {
             res = astrcatc(res, ' ');
         }
@@ -2630,7 +2630,7 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
     for ( ;; )  {
         int ncol  = col;  /* Column of character before next space  */
 
-        if ( NULL != (cp  = strchr(ip, ' ')) )  {
+        if ( NULL != (cp  = (char *)strchr(ip, ' ')) )  {
             ncol  += ((CONST char *)cp - ip) + 1;
         } else {
             ncol  += strlen(ip) + 1;

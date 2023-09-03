@@ -21,9 +21,9 @@ HDIR = ../h
 CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
 
 # Where to find the termcap/cureses library:
-LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
+#LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
 #LIB_TERMCAP = -L/usr/lib64/termcap -ltermcap    # SLES 15
-#LIB_TERMCAP = -ltermcap
+LIB_TERMCAP = -ltermcap
 #LIB_TERMCAP = -lncurses
 #LIB_TERMCAP = -lcurses
 
