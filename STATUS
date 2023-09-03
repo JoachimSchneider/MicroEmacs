@@ -130,7 +130,7 @@ src/screen.c    X                   X                       X         X
 src/search.c    X                   X                       X         X
 src/smg.c       X                                                     X /* REFORMAT!  */
 src/st52.c      X                                                     X
-src/tags.c      X                                                     X
+src/tags.c      X                   X                                 X
 src/tcap.c      X                                                     X
 src/tipc.c      X                                                     X
 src/tos.c       X                                                     X
@@ -610,8 +610,9 @@ Next Steps
         - Convert all K&R definitions to the P#_-Format (which
           expands to ANSI-C definitions with PROTO set.).
         - While reviewing the files repair broken comments
-        - Current File is: src/window.c
+        - Current File is: src/...
       done
+      ===> DONE
 
     + #define SIZEOF(x) ( (int)sizeof((x)) )
       Substitute sizeof ---> SIZEOF in *all* files

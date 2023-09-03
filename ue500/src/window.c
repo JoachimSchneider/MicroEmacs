@@ -19,17 +19,17 @@
 #include        "edef.h"
 #include        "elang.h"
 
-/*
+/* REPOSITION:
+ *
  * Reposition dot in the current window to line "n". If the argument is
  * positive, it is that line. If it is negative it is that line from
  * the bottom. If it is 0 the window is centered (this is what the
  * standard redisplay code does). With no argument it defaults to 0.
+ *
  * Bound to M-!.
  */
-int PASCAL NEAR reposition(f, n)
-
-int f, n;       /* prefix flag and argument */
-
+int PASCAL NEAR reposition P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( f == FALSE )   /* default to 0 to center screen */
         n = 0;
@@ -39,14 +39,15 @@ int f, n;       /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* REFRESH:
+ *
  * Refresh the screen. With no argument, it just does the refresh. With
- * an argument it recenters "." in the current window. Bound to "C-L".
+ * an argument it recenters "." in the current window.
+ *
+ * Bound to "C-L".
  */
-int PASCAL NEAR refresh(f, n)
-
-int f, n;       /* prefix flag and argument */
-
+int PASCAL NEAR refresh P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     if ( f == FALSE )
         sgarbf = TRUE;
@@ -58,17 +59,18 @@ int f, n;       /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* NEXTWIND:
+ *
  * The command make the next window (next => down the screen) the
  * current window. There are no real errors, although the command does
- * nothing if there is only 1 window on the screen. Bound to "C-X C-N".
+ * nothing if there is only 1 window on the screen.
  *
- * with an argument this command finds the <n>th window from the top
+ * With an argument this command finds the <n>th window from the top
+ *
+ * Bound to "C-X C-N".
  */
-int PASCAL NEAR nextwind(f, n)
-
-int f, n;       /* default flag and numeric argument */
-
+int PASCAL NEAR nextwind P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
     REGISTER EWINDOW *wp;
     REGISTER int nwindows;              /* total number of windows */
@@ -108,15 +110,14 @@ int f, n;       /* default flag and numeric argument */
     return (TRUE);
 }
 
-/*
+/* PREVWIND:
+ *
  * This command makes the previous window (previous => up the screen)
  * the current window. There arn't any errors, although the command
  * does not do a lot if there is 1 window.
  */
-int PASCAL NEAR prevwind(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR prevwind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp1;
     REGISTER EWINDOW *wp2;
@@ -141,32 +142,34 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* MVDNWIND:
+ *
  * This command moves the current window down by "arg" lines. Recompute
  * the top line in the window. The move up and move down code is almost
  * completely the same; most of the work has to do with reframing the
  * window, and picking a new dot. We share the code by having "move
- * down" just be an interface to "move up". Magic. Bound to "C-X C-N".
+ * down" just be an interface to "move up". Magic.
+ *
+ * Bound to "C-X C-N".
  */
-int PASCAL NEAR mvdnwind(f, n)
-
-int f, n;       /* prefix flag and argument */
-
+int PASCAL NEAR mvdnwind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     return ( mvupwind(f, -n) );
 }
 
-/*
+/* MVUPWIND:
+ *
  * Move the current window up by "arg" lines. Recompute the new top
  * line of the window. Look to see if "." is still on the screen. If it
  * is, you win. If it isn't, then move "." to center it in the new
  * framing of the window (this command does not really move "."; it
- * moves the frame). Bound to "C-X C-P".
+ * moves the frame).
+ *
+ * Bound to "C-X C-P".
  */
-int PASCAL NEAR mvupwind(f, n)
-
-int f, n;       /* prefix flag and argument */
-
+int PASCAL NEAR mvupwind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER LINE *lp;
     REGISTER int i;
@@ -205,17 +208,16 @@ int f, n;       /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* ONLYWIND:
+ *
  * This command makes the current window the only window on the screen.
  * Bound to "C-X 1". Try to set the framing so that "." does not have
  * to move on the display. Some care has to be taken to keep the values
  * of dot and mark in the buffer structures right if the distruction of
  * a window makes a buffer become undisplayed.
  */
-int PASCAL NEAR onlywind(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR onlywind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp;
     REGISTER LINE   *lp;
@@ -264,15 +266,15 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* DELWIND:
+ *
  * Delete the current window, placing its space in the window above,
- * or, if it is the top window, the window below. Bound to C-X 0.
+ * or, if it is the top window, the window below.
+ *
+ * Bound to C-X 0.
  */
-
-int PASCAL NEAR delwind(f, n)
-
-int f, n;       /* arguments are ignored for this command */
-
+int PASCAL NEAR delwind P2_(int, f, int, n)
+/* f, n:  Arguments are ignored for this command  */
 {
     REGISTER EWINDOW *wp;       /* window to recieve deleted space */
     REGISTER EWINDOW *lwp;      /* ptr window before curwp */
@@ -349,19 +351,19 @@ int f, n;       /* arguments are ignored for this command */
     return (TRUE);
 }
 
-/*
+/* SPLITWIND:
+ *
  * Split the current window. A window smaller than 3 lines cannot be
  * split. (Two line windows can be split when mode lines are disabled)
  * An argument of 1 forces the cursor into the upper window, an
  * argument of two forces the cursor to the lower window. The only
  * other error that is possible is a "room" failure allocating the
- * structure for the new window. Bound to "C-X 2".
+ * structure for the new window.
+ *
+ * Bound to "C-X 2".
  */
-
-int PASCAL NEAR splitwind(f, n)
-
-int f, n;       /* default flag and numeric argument */
-
+int PASCAL NEAR splitwind P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
     REGISTER EWINDOW *wp;
     REGISTER LINE   *lp;
@@ -447,16 +449,17 @@ int f, n;       /* default flag and numeric argument */
     return (TRUE);
 }
 
-/*
+/* ENLARGEWIND:
+ *
  * Enlarge the current window. Find the window that loses space. Make
  * sure it is big enough. If so, hack the window descriptions, and ask
  * redisplay to do all the hard work. You don't just set "force
- * reframe" because dot would move. Bound to "C-X Z".
+ * reframe" because dot would move.
+ *
+ * Bound to "C-X Z".
  */
-int PASCAL NEAR enlargewind(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR enlargewind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *adjwp;
     REGISTER LINE   *lp;
@@ -503,15 +506,15 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*
+/* SHRINKWIND:
+ *
  * Shrink the current window. Find the window that gains space. Hack at
  * the window descriptions. Ask the redisplay to do all the hard work.
+ *
  * Bound to "C-X C-Z".
  */
-int PASCAL NEAR shrinkwind(f, n)
-
-int f, n;        /* prefix flag and argument */
-
+int PASCAL NEAR shrinkwind P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *adjwp;
     REGISTER LINE   *lp;
@@ -558,12 +561,12 @@ int f, n;        /* prefix flag and argument */
     return (TRUE);
 }
 
-/*  Resize the current window to the requested size */
-
-int PASCAL NEAR resize(f, n)
-
-int f, n;       /* default flag and numeric argument */
-
+/* RESIZE:
+ *
+ * Resize the current window to the requested size
+ */
+int PASCAL NEAR resize P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
     int clines;         /* current # of lines in window */
 
@@ -581,8 +584,10 @@ int f, n;       /* default flag and numeric argument */
     return ( enlargewind(TRUE, n - clines) );
 }
 
-/* pop up the indicated buffer  */
-
+/* WPOPUP:
+ *
+ * Pop up the indicated buffer
+ */
 int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
 {
     REGISTER EWINDOW *wp;
@@ -642,8 +647,12 @@ setwin: wp = wheadp;
     return (TRUE);
 }
 
-/* scroll the next window up (back) a page */
-int PASCAL NEAR nextup P2_(int, f, int, n)  /* prefix flag and argument */
+/* NEXTUP:
+ *
+ * Scroll the next window up (back) a page
+ */
+int PASCAL NEAR nextup P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     nextwind(FALSE, 1);
     backpage(f, n);
@@ -652,8 +661,12 @@ int PASCAL NEAR nextup P2_(int, f, int, n)  /* prefix flag and argument */
     return TRUE;
 }
 
-/* scroll the next window down (forward) a page */
-int PASCAL NEAR nextdown P2_(int, f, int, n)  /* prefix flag and argument */
+/* NEXTDOWN:
+ *
+ * Scroll the next window down (forward) a page
+ */
+int PASCAL NEAR nextdown P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     nextwind(FALSE, 1);
     forwpage(f, n);
@@ -662,20 +675,24 @@ int PASCAL NEAR nextdown P2_(int, f, int, n)  /* prefix flag and argument */
     return TRUE;
 }
 
-int PASCAL NEAR savewnd(f, n)   /* save ptr to current window */
-
-int f, n;       /* prefix flag and argument */
-
+/* SAVEWND:
+ *
+ * Save ptr to current window
+ */
+int PASCAL NEAR savewnd P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     swindow = curwp;
 
     return (TRUE);
 }
 
-int PASCAL NEAR restwnd(f, n)   /* restore the saved screen */
-
-int f, n;       /* prefix flag and argument */
-
+/* RESTWND:
+ *
+ * Restore the saved screen
+ */
+int PASCAL NEAR restwnd P2_(int, f, int, n)
+/* f, n:  Prefix flag and argument  */
 {
     REGISTER EWINDOW *wp;
 
@@ -698,11 +715,12 @@ int f, n;       /* prefix flag and argument */
     return (FALSE);
 }
 
-int PASCAL NEAR newsize(f, n)   /* resize the screen, re-writing the screen */
-
-int f;  /* default flag */
-int n;  /* numeric argument */
-
+/* NEWSIZE:
+ *
+ * Resize the screen, re-writing the screen
+ */
+int PASCAL NEAR newsize P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
     EWINDOW *wp;        /* current window being examined */
     EWINDOW *nextwp;     /* next window to scan */
@@ -811,11 +829,12 @@ int n;  /* numeric argument */
     return (TRUE);
 }
 
-int PASCAL NEAR newwidth(f, n)  /* resize the screen, re-writing the screen */
-
-int f;  /* default flag */
-int n;  /* numeric argument */
-
+/* NEWWIDTH:
+ *
+ * Resize the screen, re-writing the screen
+ */
+int PASCAL NEAR newwidth P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
     REGISTER EWINDOW *wp;
 #if     LOGFLG
@@ -861,12 +880,12 @@ int n;  /* numeric argument */
     return (TRUE);
 }
 
-int PASCAL NEAR new_col_org(f, n)       /* reposition the screen, re-writing the
-                                         * screen */
-
-int f;  /* default flag */
-int n;  /* numeric argument */
-
+/* NEW_COL_ORG:
+ *
+ * Reposition the screen, re-writing the screen
+ */
+int PASCAL NEAR new_col_org P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
 #if     WINDOW_MSWIN
     term.t_colorg = 0;      /* screen positions are not managed by EMACS */
@@ -891,12 +910,12 @@ int n;  /* numeric argument */
     return (TRUE);
 }
 
-int PASCAL NEAR new_row_org(f, n)       /* reposition the screen, re-writing the
-                                         * screen */
-
-int f;  /* default flag */
-int n;  /* numeric argument */
-
+/* NEW_ROW_ORG:
+ *
+ * Reposition the screen, re-writing the screen
+ */
+int PASCAL NEAR new_row_org P2_(int, f, int, n)
+/* f, n:  Default flag and numeric argument */
 {
 #if     WINDOW_MSWIN
     term.t_roworg = 0;      /* screen positions are not managed by EMACS */
@@ -922,8 +941,11 @@ int n;  /* numeric argument */
     return (TRUE);
 }
 
-int PASCAL NEAR getwpos()       /* get screen offset of current line in current
-                                 * window */
+/* GETWPOS:
+ *
+ * Get screen offset of current line in current window
+ */
+int PASCAL NEAR getwpos P0_()
 {
     REGISTER int sline;         /* screen line from top of window */
     REGISTER LINE *lp;          /* scannile line pointer */
@@ -940,7 +962,11 @@ int PASCAL NEAR getwpos()       /* get screen offset of current line in current
     return (sline);
 }
 
-int PASCAL NEAR getcwnum()              /* get current window number */
+/* GETCWNUM:
+ *
+ * Get current window number
+ */
+int PASCAL NEAR getcwnum P0_()
 {
     REGISTER EWINDOW *wp;
     REGISTER int num;
@@ -955,8 +981,11 @@ int PASCAL NEAR getcwnum()              /* get current window number */
     return (num);
 }
 
-
-int PASCAL NEAR gettwnum()              /* get total window count */
+/* GETTWNUM:
+ *
+ * Get total window count
+ */
+int PASCAL NEAR gettwnum P0_()
 {
     REGISTER EWINDOW *wp;
     REGISTER int ctr;
@@ -976,4 +1005,3 @@ int PASCAL NEAR gettwnum()              /* get total window count */
 /**********************************************************************/
 /* EOF                                                                */
 /**********************************************************************/
-

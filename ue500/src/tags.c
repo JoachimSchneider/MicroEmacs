@@ -65,14 +65,14 @@ static TAG *theadp = NULL;      /* Pointer to the head of the   */
 static TAG *curtp = NULL;       /* Currently in-use 'tags'. */
 
 
-/*
- * Look-up a 'tags' file in the directory given by
- * 'path'.  If such a file exists and we are allowed to read it, we'll read it
- * and construct an index of file positions of the first occurence of each
- * starting character ('_', 'a'-'z', 'A'-'Z').  We return with TRUE only if we
- * are succesfull.
+/* NEWTAGS:
+ *
+ * Look-up a 'tags' file in the directory given by 'path'. If such a
+ * file exists and we are allowed to read it, we'll read it and
+ * construct an index of file positions of the first occurence of each
+ * starting character ('_', 'a'-'z', 'A'-'Z'). We return with TRUE only
+ * if we are succesfull.
  */
-
 static int newtags P1_(char *, path)
 {
     REGISTER TAG    *tnewp;
@@ -105,9 +105,10 @@ static int newtags P1_(char *, path)
 }
 
 
-/*
- * Look-up 'tags' file; first in our list and if it isn't there try it the hard
- * way.  If we find the file we return TRUE.
+/* LOOKUP:
+ *
+ * Look-up 'tags' file; first in our list and if it isn't there try it
+ * the hard way. If we find the file we return TRUE.
  */
 static int lookup P0_()
 {
@@ -151,12 +152,12 @@ static int lookup P0_()
 }
 
 
-/*
- * Create an index of offsets into the 'tags' file at curtp->t_path.  We use the
- * first character of the tagged words as our index index.
+/* FIX_INDEX:
+ *
+ * Create an index of offsets into the 'tags' file at curtp->t_path. We
+ * use the first character of the tagged words as our index index.
  */
-
-VOID fix_index()
+VOID fix_index P0_()
 {
     REGISTER int i = -1;
     REGISTER long lastpos = 0L;
@@ -176,9 +177,10 @@ VOID fix_index()
 }
 
 
-/*
- * Put the rest of the characters of the current word at '.' in str (but maximum
- * lmax characters).  '.' is preserved.
+/* RESTWORD:
+ *
+ * Put the rest of the characters of the current word at '.' in str
+ * (but maximum lmax characters). '.' is preserved.
  */
 static int restword P2_(char *, str, int, lmax)
 {
@@ -200,12 +202,14 @@ static int restword P2_(char *, str, int, lmax)
 }
 
 
-/*
- * Move '.' backwards until start of current word. NOTE, we rely on inword(),
- * which normally don't consider '_' part of a word.  You might want to change
- * inword() in order to obtain satisfactory results from this code (I did).
+/* BACKUPWORD:
+ *
+ * Move '.' backwards until start of current word. NOTE, we rely on
+ * inword(), which normally don't consider '_' part of a word. You
+ * might want to change inword() in order to obtain satisfactory
+ * results from this code (I did).
  */
-static int backupword(int f, int n)
+static int backupword P2_(int, f, int, n)
 {
     while ( inword() )
         if ( backchar(FALSE, 1) == FALSE )
@@ -218,12 +222,14 @@ static int backupword(int f, int n)
 }
 
 
-/*
- * Alter the vi-search-pattern in pattern inorder to use it as a search pattern
- * for uEMACS' search routines. The vi-pattern contains \-escaped
- * characters...we have to get rid of the \'es. Moreover, as we want to make use
- * of the new FAST search routine, we have to remove the pattern anchoring (^
- * and $) and search direction characters (? or /)
+/* ALTERPATTERN:
+ *
+ * Alter the vi-search-pattern in pattern inorder to use it as a search
+ * pattern for uEMACS' search routines. The vi-pattern contains
+ * \-escaped characters...we have to get rid of the \'es. Moreover, as
+ * we want to make use of the new FAST search routine, we have to
+ * remove the pattern anchoring (^ and $) and search direction
+ * characters (? or /)
  */
 static int alterpattern P1_(REGISTER char *, pattern)
 {
@@ -252,17 +258,16 @@ static int alterpattern P1_(REGISTER char *, pattern)
  * Some locally shared variables
  */
 
-static int thisfile = FALSE;    /* TRUE if curtp->t_fname equals  */
-/* curbp->fname when tagging    */
+static int thisfile = FALSE;    /* TRUE if curtp->t_fname equals
+                                 * curbp->fname when tagging      */
 static int tagvalid = FALSE;    /* TRUE if last tag was a succes  */
 
-/*
- * Prefix filename with path in curtp->t_path (if any) if filename doesn't
- * include a full path.  This routine allways succeeds.
+/* ADD_PATH:
+ *
+ * Prefix filename with path in curtp->t_path (if any) if filename
+ * doesn't include a full path. This routine allways succeeds.
  */
-
-VOID add_path(filename)
-char *filename;
+VOID add_path P1_(char *, filename)
 {
     char temp[NFILEN];
     char *tp;
@@ -282,14 +287,14 @@ char *filename;
     XSTRCPY(filename, temp);
 }
 
-/*
- * Does the actual work.  Presumes that  tagw  containes the correct word to
- * tag.  Note that we do not rewind the file pointer as to allow you to do a
- * re-tag. If the tagged word is defined in the current file we mark '.',
- * goes to line 1 of file and searches for the pattern.  We do this so as to
- * prevent loosing the return information.
+/* TAGGER:
+ *
+ * Does the actual work. Presumes that tagw containes the correct word
+ * to tag. Note that we do not rewind the file pointer as to allow you
+ * to do a re-tag. If the tagged word is defined in the current file we
+ * mark '.', goes to line 1 of file and searches for the pattern. We do
+ * this so as to prevent loosing the return information.
  */
-
 int tagger P2_(char *, errmsg, int, retag)
 {
     char tagf[NFILEN];          /* File of tagged word  */
@@ -384,15 +389,13 @@ int tagger P2_(char *, errmsg, int, retag)
 
 
 
-/*
+/* TAGWORD:
+ *
  * Tag current word if '.' is within a word, otherwise tag next word.
- * '.' is preserved, and return information (= current filename) is saved.
+ * '.' is preserved, and return information (= current filename)
+ * is saved.
  */
-
-EXTERN int PASCAL NEAR tagword(f, n)
-
-int f, n;
-
+EXTERN int PASCAL NEAR tagword P2_(int, f, int, n)
 {
     LINE    *pretagdotp = curwp->w_dotp;        /* Preserve '.' info    */
     int pretagdoto = get_w_doto(curwp);
@@ -434,18 +437,15 @@ int f, n;
     return ( tagvalid = tagger("[No tag entry for '%s' found]", FALSE) );
 }
 
-/*
+/* RETAGWORD:
+ *
  * Sometimes the 'tags' file will contain multiple entries for the same
- * identifier.  This occures whenever an identifier is multiple defined.
- * retagword  asks  tagger  to tag for the same  tagw  again but after the
- * position where the last tag entry for tagw was found. Note, retagword  do not
- * mess up the return information (tagf).
+ * identifier. This occures whenever an identifier is multiple defined.
+ * retagword asks tagger to tag for the same tagw again but after the
+ * position where the last tag entry for tagw was found. Note,
+ * retagword do not mess up the return information (tagf).
  */
-
-EXTERN int PASCAL NEAR retagword(f, n)
-
-int f, n;
-
+EXTERN int PASCAL NEAR retagword P2_(int, f, int, n)
 {
     if ( restflag == TRUE )     /* Don't allow when in restricted mode  */
         return ( resterr() );
@@ -457,15 +457,13 @@ int f, n;
 }
 
 
-/*
- * Return to the file from where we tagged the  tagw  identifier. You can only
- * return once for each tag.  If it's the same file we just swap mark with '.' .
+/* BACKTAGWORD:
+ *
+ * Return to the file from where we tagged the tagw identifier. You can
+ * only return once for each tag. If it's the same file we just swap
+ * mark with '.' .
  */
-
-EXTERN int PASCAL NEAR backtagword(f, n)
-
-int f, n;
-
+EXTERN int PASCAL NEAR backtagword P2_(int, f, int, n)
 {
     if ( restflag == TRUE )     /* Don't allow when in restricted mode  */
         return ( resterr() );
@@ -483,7 +481,7 @@ int f, n;
 
 #else
 
-tagshello()
+VOID tagshello P0_()
 {
 }
 

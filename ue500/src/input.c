@@ -60,7 +60,14 @@
 
 #if ( IS_UNIX() )
 # include       <pwd.h>
-EXTERN struct passwd *getpwnam();
+/*
+ * Defined in <pwd.h>:
+ *
+ * struct passwd
+ ***********************************************************************
+ * EXTERN struct passwd *getpwnam DCL((CONST char *login));
+ ***********************************************************************
+ */
 #endif
 /* mlyesno: Ask a yes or no question in the message line. Return either
  *          TRUE, FALSE, or ABORT. The ABORT status is returned if
