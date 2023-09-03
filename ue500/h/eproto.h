@@ -1561,16 +1561,16 @@ EXTERN int PASCAL NEAR undo_list DCL((int f, int n));
 EXTERN char *room DCL((int));
 EXTERN char *reroom DCL((VOIDP, int));
 
-EXTERN int PASCAL NEAR ab_insert DCL((char *sym, char *expansion));
-EXTERN char *PASCAL NEAR ab_lookup DCL((char *sym));
-EXTERN int PASCAL NEAR ab_delete DCL((char *sym));
+EXTERN int PASCAL NEAR ab_insert DCL((char *sym, CONST char *expansion));
+EXTERN char *PASCAL NEAR ab_lookup DCL((CONST char *sym));
+EXTERN int PASCAL NEAR ab_delete DCL((CONST char *sym));
 EXTERN int PASCAL NEAR ab_clean DCL((void));
 EXTERN BUFFER *PASCAL NEAR bfind DCL((CONST char *bname, int cflag, int bflag));
-EXTERN BUFFER *PASCAL NEAR getcbuf DCL((CONST char *prompt, char *defval, int createflag));
+EXTERN BUFFER *PASCAL NEAR getcbuf DCL((CONST char *prompt, CONST char *defval, int createflag));
 EXTERN BUFFER *PASCAL NEAR getdefb DCL((void));
 EXTERN BUFFER *PASCAL NEAR getoldb DCL((void));
-EXTERN SCREEN_T *PASCAL NEAR init_screen DCL((char *, BUFFER *));
-EXTERN SCREEN_T *PASCAL NEAR lookup_screen DCL((char *scr_name));
+EXTERN SCREEN_T *PASCAL NEAR init_screen DCL((CONST char *, BUFFER *));
+EXTERN SCREEN_T *PASCAL NEAR lookup_screen DCL((CONST char *scr_name));
 EXTERN SCREEN_T *PASCAL NEAR index_screen DCL((int scr_num));
 EXTERN int PASCAL NEAR screen_index DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR insert_screen DCL((SCREEN_T *sp));
@@ -1578,15 +1578,13 @@ EXTERN int PASCAL NEAR select_screen DCL((SCREEN_T *sp, int announce));
 EXTERN VOID PASCAL NEAR free_screen DCL((SCREEN_T *sp));
 EXTERN char *Eallocate DCL((unsigned nbytes));
 EXTERN char *dolock DCL((CONST char *fname));
-EXTERN char *getpath DCL((char *filespec));
-EXTERN char *gtname DCL((char *filespec));
 EXTERN char *PASCAL NEAR bytecopy DCL((char *dst, CONST char *src, int maxlen));
 EXTERN char *PASCAL NEAR cmdstr DCL((int c, char *seq));
 EXTERN char *PASCAL NEAR copystr DCL((CONST char *));
 EXTERN char *PASCAL NEAR complete DCL((CONST char *prompt,
-                                  char *defval,
-                                  int  type,
-                                  int  maxlen));
+                                       CONST char *defval,
+                                       int        type,
+                                       int        maxlen));
 EXTERN CONST char *PASCAL NEAR envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR fixnull DCL((CONST char *s));
 EXTERN CONST char *PASCAL NEAR flook DCL((CONST char *fname, int hflag));
@@ -1600,7 +1598,7 @@ EXTERN CONST char *PASCAL NEAR getreg DCL((char *value));
 EXTERN CONST char *PASCAL NEAR getval DCL((char *token));
 EXTERN CONST char *PASCAL NEAR getwlist DCL((char *buf));
 EXTERN CONST char *PASCAL NEAR gtenv DCL((CONST char *vname));
-EXTERN char *PASCAL NEAR gtfilename DCL((char *prompt));
+EXTERN CONST char *PASCAL NEAR gtfilename DCL((CONST char *prompt));
 EXTERN CONST char *PASCAL NEAR gtfun DCL((CONST char *fname));
 EXTERN CONST char *PASCAL NEAR gtusr DCL((CONST char *vname));
 EXTERN char *PASCAL NEAR int_asc DCL((int i));
@@ -1676,7 +1674,7 @@ EXTERN int PASCAL NEAR fbound DCL((DELTA *tbl,
                               LINE  **pcurline,
                               int   *pcuroff,
                               int   dir));
-EXTERN int PASCAL NEAR fexist DCL((char *fname));
+EXTERN int PASCAL NEAR fexist DCL((CONST char *fname));
 EXTERN int PASCAL NEAR findcol DCL((LINE *lp, int pos));
 EXTERN int PASCAL NEAR fisearch DCL((int f, int n));
 #if     FLABEL
@@ -1724,7 +1722,7 @@ EXTERN int PASCAL NEAR mcscanner DCL((MC  *mcpatrn,
                                  int beg_or_end,
                                  int repeats));
 EXTERN int PASCAL NEAR mcstr DCL((void));
-EXTERN int PASCAL NEAR mlprompt DCL((CONST char *, char *, int));
+EXTERN int PASCAL NEAR mlprompt DCL((CONST char *, CONST char *, int));
 EXTERN int PASCAL NEAR movelocalpoint DCL((int n, int *pcuroff, LINE **pcurline));
 EXTERN int PASCAL NEAR nextch DCL((LINE **pcurline, int *pcuroff, int dir));
 EXTERN int PASCAL NEAR pop DCL((BUFFER *popbuffer));
@@ -1830,7 +1828,7 @@ EXTERN int PASCAL NEAR ffclose DCL((void));
 EXTERN int PASCAL NEAR ffgetline DCL((int *nbytes));
 EXTERN int PASCAL NEAR ffputline DCL((char *buf, int nbuf));
 EXTERN int PASCAL NEAR ffropen DCL((CONST char *fn));
-EXTERN int PASCAL NEAR ffwopen DCL((char *fn, char *mode));
+EXTERN int PASCAL NEAR ffwopen DCL((CONST char *fn, CONST char *mode));
 EXTERN int PASCAL NEAR fileapp DCL((int f, int n));
 EXTERN int PASCAL NEAR find_screen DCL((int f, int n));
 EXTERN int PASCAL NEAR filefind DCL((int f, int n));
@@ -1861,7 +1859,7 @@ EXTERN int PASCAL NEAR gotoeop DCL((int f, int n));
 EXTERN int PASCAL NEAR gotoline DCL((int f, int n));
 EXTERN int PASCAL NEAR gotomark DCL((int f, int n));
 EXTERN int PASCAL NEAR help DCL((int f, int n));
-EXTERN int PASCAL NEAR ifile DCL((char *fname));
+EXTERN int PASCAL NEAR ifile DCL((CONST char *fname));
 EXTERN int PASCAL NEAR indent DCL((int f, int n));
 EXTERN int PASCAL NEAR insbrace DCL((int n, int c));
 EXTERN int PASCAL NEAR insfile DCL((int f, int n));
@@ -1921,7 +1919,7 @@ EXTERN int PASCAL NEAR nullproc DCL((int f, int n));
 EXTERN int PASCAL NEAR onlywind DCL((int f, int n));
 EXTERN int PASCAL NEAR openline DCL((int f, int n));
 EXTERN int PASCAL NEAR ostring DCL((CONST char *s));
-EXTERN int PASCAL NEAR outstring DCL((char *s));
+EXTERN int PASCAL NEAR outstring DCL((CONST char *s));
 EXTERN int PASCAL NEAR ovstring DCL((int f, int n));
 EXTERN int PASCAL NEAR pipecmd DCL((int f, int n));
 EXTERN int PASCAL NEAR popbuffer DCL((int f, int n));
@@ -2006,7 +2004,7 @@ EXTERN int PASCAL NEAR widen DCL((int f, int n));
 EXTERN int PASCAL NEAR wordcount DCL((int f, int n));
 EXTERN int PASCAL NEAR wrapword DCL((int f, int n));
 EXTERN int PASCAL NEAR writemsg DCL((int f, int n));
-EXTERN int PASCAL NEAR writeout DCL((char *fn, char *mode));
+EXTERN int PASCAL NEAR writeout DCL((CONST char *fn, CONST char *mode));
 EXTERN int PASCAL NEAR zotbuf DCL((BUFFER *bp));
 EXTERN unsigned int PASCAL NEAR chcase DCL((unsigned int ch));
 EXTERN unsigned int PASCAL NEAR getckey DCL((int mflag));
@@ -2023,8 +2021,8 @@ EXTERN VOID CDECL NEAR mlwrite(CONST char *fmt, ...);
 EXTERN VOID PASCAL NEAR ab_init DCL((void));
 EXTERN VOID PASCAL NEAR ab_save DCL((char c));
 EXTERN VOID PASCAL NEAR ab_expand DCL((void));
-EXTERN VOID PASCAL NEAR clist_buffer DCL((char *name, int *cpos));
-EXTERN VOID PASCAL NEAR clist_command DCL((char *name, int *cpos));
+EXTERN VOID PASCAL NEAR clist_buffer DCL((CONST char *name, int *cpos));
+EXTERN VOID PASCAL NEAR clist_command DCL((CONST char *name, int *cpos));
 EXTERN VOID PASCAL NEAR clist_file DCL((char *name, int *cpos));
 EXTERN VOID PASCAL NEAR comp_buffer DCL((char *name, int *cpos));
 EXTERN VOID PASCAL NEAR comp_command DCL((char *name, int *cpos));
@@ -2032,7 +2030,7 @@ EXTERN VOID PASCAL NEAR comp_command DCL((char *name, int *cpos));
 EXTERN VOID PASCAL NEAR comp_file DCL((char *name, int *cpos));
 #endif
 EXTERN VOID PASCAL NEAR ecrypt DCL((char *bptr, unsigned len));
-EXTERN VOID PASCAL NEAR errormesg DCL((char *mesg, BUFFER *bp, LINE *lp));
+EXTERN VOID PASCAL NEAR errormesg DCL((CONST char *mesg, BUFFER *bp, LINE *lp));
 EXTERN VOID PASCAL NEAR flong_asc DCL((char *buf, int width, long num));
 EXTERN VOID PASCAL NEAR freewhile DCL((WHBLOCK *wp));
 EXTERN VOID PASCAL NEAR getdtime DCL((char *ts));

@@ -227,8 +227,8 @@ int PASCAL NEAR delete_screen P2_(int, f, int, n)
  *
  * This function initializes a new screen....
  */
-SCREEN_T *PASCAL NEAR init_screen P2_(char *, scr_name,
-                                      BUFFER *, scr_buf)
+SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
+                                      BUFFER *,     scr_buf)
 /* scr_name:  screen name                               */
 /* scr_buf:   buffer to place in first window of screen */
 {
@@ -323,7 +323,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(char *, scr_name,
 
 /* LOOKUP_SCREEN:
  */
-SCREEN_T *PASCAL NEAR lookup_screen P1_(char *, scr_name)
+SCREEN_T *PASCAL NEAR lookup_screen P1_(CONST char *, scr_name)
 /* scr_name:  Named screen to find  */
 {
     SCREEN_T *result;

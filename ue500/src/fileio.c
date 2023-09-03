@@ -67,7 +67,7 @@ int PASCAL NEAR ffropen P1_(CONST char *, fn)
  * (cannot create).
  */
 # if  !(AOSVS | MV_UX)
-int PASCAL NEAR ffwopen P2_(char *, fn, char *, mode)
+int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
 /* fn:    File name             */
 /* mode:  Mode to open file for */
 {
@@ -288,7 +288,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
  *
  * does <fname> exist on disk?
  */
-int PASCAL NEAR fexist P1_(char *, fname)
+int PASCAL NEAR fexist P1_(CONST char *, fname)
 /* fname: File to check for existance */
 {
     FILE *fp;

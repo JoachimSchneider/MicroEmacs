@@ -293,7 +293,7 @@ VOID PASCAL NEAR ab_init P0_()
  *
  * Insert a <sym> in the abbreviation list defined as <expansion>
  */
-int PASCAL NEAR ab_insert P2_(char *, sym, char *, expansion)
+int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
 /* sym:       Symbol to expand    */
 /* expansion: String to expand to */
 {
@@ -366,7 +366,7 @@ int PASCAL NEAR ab_insert P2_(char *, sym, char *, expansion)
  * Look up and return the expansion of <sym>. Return a NULL if it is
  * not in the list
  */
-char *PASCAL NEAR ab_lookup P1_(char *, sym)
+char *PASCAL NEAR ab_lookup P1_(CONST char *, sym)
 /* sym: Name of the symbol to look up */
 {
 
@@ -391,7 +391,7 @@ char *PASCAL NEAR ab_lookup P1_(char *, sym)
  *
  * Delete <sym> from the abbreviation list
  */
-int PASCAL NEAR ab_delete P1_(char *, sym)
+int PASCAL NEAR ab_delete P1_(CONST char *, sym)
 {
 
     ABBREV *cur_node, *previous;        /* ptr to look through list */

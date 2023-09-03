@@ -1020,11 +1020,10 @@ freeut: uv_head = ut->next;
  * Display a macro execution error along with the buffer and line
  * currently being executed.
  */
-VOID PASCAL NEAR errormesg P3_(
-        char *,   mesg, /* error message to display */
-        BUFFER *, bp,   /* buffer error occured in */
-        LINE *,   lp    /* line " */
-    )
+VOID PASCAL NEAR errormesg P3_(CONST char *, mesg, BUFFER *, bp, LINE *, lp)
+/* mesg:  Error message to display  */
+/* bp:    Buffer error occured in   AAAA*/
+/* lp:    Line                      */
 {
     char buf[NSTRING];
 

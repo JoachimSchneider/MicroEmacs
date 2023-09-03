@@ -69,12 +69,16 @@
  ***********************************************************************
  */
 #endif
-/* mlyesno: Ask a yes or no question in the message line. Return either
- *          TRUE, FALSE, or ABORT. The ABORT status is returned if
- *          the user bumps out of the question with a ^G. Used any
- *          time a confirmation is required.
- */
+
+
 #if     !WINDOW_MSWIN   /* for MS Windows, mlyesno is defined in mswsys.c */
+
+/* MLYESNO:
+ *
+ * Ask a yes or no question in the message line. Return either TRUE,
+ * FALSE, or ABORT. The ABORT status is returned if the user bumps out
+ * of the question with a ^G. Used any time a confirmation is required.
+ */
 int PASCAL NEAR mlyesno P1_(CONST char *, prompt)
 {
     int   c = 0;      /* input character */
@@ -111,24 +115,28 @@ int PASCAL NEAR mlyesno P1_(CONST char *, prompt)
         return (FALSE);
     }
 }
-#endif
+
+#endif  /* !WINDOW_MSWIN  */
 
 
-/* mlreply: Write a prompt into the message line, then read back a
- *          response. Keep track of the physical position of the
- *          cursor. If we are in a keyboard macro throw the prompt
- *          away, and return the remembered response. This lets
- *          macros run at full speed. The reply is always
- *          terminated by a carriage return. Handle erase, kill, and
- *          abort keys.
+/* MLREPLY:
+ *
+ * Write a prompt into the message line, then read back a response.
+ * Keep track of the physical position of the cursor. If we are in a
+ * keyboard macro throw the prompt away, and return the remembered
+ * response. This lets macros run at full speed. The reply is always
+ * terminated by a carriage return. Handle erase, kill, and abort keys.
  */
 int PASCAL NEAR mlreply P3_(CONST char *, prompt, char *, buf, int, nbuf)
 {
     return ( nextarg( prompt, buf, nbuf, ctoec( (int) '\r' ) ) );
 }
 
-/* ectoc: expanded character to character collapse the CTRL and SPEC flags
- *        back into an ascii code
+
+/* ECTOC:
+ *
+ * Expanded character to character collapse the CTRL and SPEC flags
+ * back into an ascii code
  */
 int PASCAL NEAR ectoc P1_(int, c)
 {
@@ -142,8 +150,11 @@ int PASCAL NEAR ectoc P1_(int, c)
     return (c);
 }
 
-/* ctoec: character to extended character pull out the CTRL and SPEC prefixes
- *        (if possible)
+
+/* CTOEC:
+ *
+ * Character to extended character pull out the CTRL and SPEC prefixes
+ * (if possible)
  */
 int PASCAL NEAR ctoec P1_(int, c)
 {
@@ -155,14 +166,16 @@ int PASCAL NEAR ctoec P1_(int, c)
     return (c);
 }
 
-/* getname: get a command name from the command line. Command
- *          completion means that pressing a <SPACE> will attempt to
- *          complete an unfinished command name if it is unique.
+/* GETNAME:
+ *
+ * Get a command name from the command line. Command completion means
+ * that pressing a <SPACE> will attempt to complete an unfinished
+ * command name if it is unique.
  */
 ue_fnc_T getname P1_(CONST char *, prompt)
 {
     /* ptr to the returned string:  */
-    char  *sp = complete(prompt, NULL, CMP_COMMAND, NSTRING);
+    CONST char  *sp = complete(prompt, NULL, CMP_COMMAND, NSTRING);
 
     if ( sp == NULL ) {
         return (NULL);
@@ -171,19 +184,21 @@ ue_fnc_T getname P1_(CONST char *, prompt)
     return ( fncmatch(sp) );
 }
 
-/* getcbuf: Get a completion from the user for a buffer name.
+/* GETCBUF:
  *
- *          I was goaded into this by lots of other people's
- *          completion code.
+ * Get a completion from the user for a buffer name.
+ *
+ * I was goaded into this by lots of other people's completion code.
  */
-BUFFER *PASCAL NEAR getcbuf P3_(
-                        CONST char *, prompt, /* prompt to user on command line   */
-                        char *, defval,       /* default value to display to user */
-                        int,    createflag    /* should this create a new buffer? */
-                      )
+BUFFER *PASCAL NEAR getcbuf P3_(CONST char *, prompt,
+                                CONST char *, defval,
+                                int,          createflag)
+/* prompt:      Prompt to user on command line    */
+/* defval:      Default value to display to user  */
+/* createflag:  Should this create a new buffer?  */
 {
     /* ptr to the returned string:  */
-    char  *sp = complete(prompt, defval, CMP_BUFFER, NBUFN);
+    CONST char  *sp = complete(prompt, defval, CMP_BUFFER, NBUFN);
 
     if ( sp == NULL ) {
         return (NULL);
@@ -192,9 +207,9 @@ BUFFER *PASCAL NEAR getcbuf P3_(
     return ( bfind(sp, createflag, 0) );
 }
 
-char *PASCAL NEAR gtfilename P1_(
-        char *, prompt  /* prompt to user on command line */
-    )
+
+CONST char *PASCAL NEAR gtfilename P1_(CONST char *, prompt)
+/* prompt:  Prompt to user on command line  */
 {
 #if     MSDOS | OS2
     char  *scan = NULL;
@@ -204,9 +219,8 @@ char *PASCAL NEAR gtfilename P1_(
 
     if ( !FILENAMEREPLY(prompt, sp, NFILEN) )
         return NULL;
-
 #else
-    char  *sp = NULL;   /* ptr to the returned string */
+    CONST char  *sp = NULL;   /* ptr to the returned string */
 
     /* get a file name, default to current buffer's */
     if ( curbp && strcmp(curbp->b_fname, "") != 0 )
@@ -229,12 +243,15 @@ char *PASCAL NEAR gtfilename P1_(
     return (sp);
 }
 
-char *PASCAL NEAR complete P4_(
-        CONST char *, prompt, /* prompt to user on command line */
-        char *,       defval, /* default value to display to user */
-        int,          type,   /* type of what we are completing */
-        int,          maxlen  /* maximum length of input field */
-    )
+
+char *PASCAL NEAR complete P4_(CONST char *,  prompt,
+                               CONST char *,  defval,
+                               int,           type,
+                               int,           maxlen)
+/* prompt:  Prompt to user on command line    */
+/* defval:  Default value to display to user  */
+/* type:    Type of what we are completing    */
+/* maxlen:  Maximum length of input field     */
 {
     REGISTER int  c         = 0;        /* current input character */
     REGISTER int  ec        = 0;        /* extended input character */
@@ -248,6 +265,7 @@ char *PASCAL NEAR complete P4_(
 #endif
 
     ZEROMEM(user_name);
+    ZEROMEM(buf);
 
     /* if we are executing a command line get the next arg and match it */
     if ( clexec ) {
@@ -272,7 +290,6 @@ char *PASCAL NEAR complete P4_(
 
     /* build a name string from the keyboard */
     while ( TRUE ) {
-
         /* get the keystroke and decode it */
         ec = get_key();
         c = ectoc(ec);
@@ -283,20 +300,20 @@ char *PASCAL NEAR complete P4_(
 
         /* if we are at the end, just match it */
         if ( c == '\n'  ||  c == '\r' ) {
-            if ( defval && cpos==0 )
-                return (defval);
-            else {
+            if ( defval && cpos == 0 )  {
+                XSTRCPY(buf, defval);
+
+                return (buf);
+            } else                      {
                 buf[cpos] = 0;
 
                 return (buf);
             }
-
         } else if ( ec == abortc ) {            /* Bell, abort */
             ctrlg(FALSE, 0);
             TTflush();
 
             return (NULL);
-
         } else if ( c == 0x7F || c == 0x08 ) {          /* rubout/erase */
             if ( cpos != 0 ) {
                 mlout('\b');
@@ -306,7 +323,6 @@ char *PASCAL NEAR complete P4_(
                 --cpos;
                 TTflush();
             }
-
         } else if ( c == 0x15 ) {       /* C-U, kill */
             while ( cpos != 0 ) {
                 mlout('\b');
@@ -316,7 +332,6 @@ char *PASCAL NEAR complete P4_(
                 --ttcol;
             }
             TTflush();
-
         } else if ( (c == ' ') || (ec == sterm) || (c == '\t') ) {
             /* attempt a completion */
             switch ( type ) {
@@ -345,7 +360,6 @@ char *PASCAL NEAR complete P4_(
         } else if ( (cpos > 0) &&( (char)c == DIRSEPCHAR ) &&
                     (type == CMP_FILENAME) &&(buf[0] == '~') &&
                     ( ( home_ptr = getenv("HOME") ) != (char *)NULL ) ) {
-
             /* save the user name! */
             buf[cpos] = 0;
             XSTRCPY(user_name, &buf[1]);
@@ -374,7 +388,6 @@ char *PASCAL NEAR complete P4_(
             }
 # endif
             if ( cpos == 0 ) {
-
                 /* output the home directory */
                 ptr = home_ptr;
                 while ( *ptr ) {
@@ -403,7 +416,6 @@ char *PASCAL NEAR complete P4_(
                         ++ttcol;
                     }
                 }
-
             }
 
             /* and the last directory seperator */
@@ -416,7 +428,6 @@ char *PASCAL NEAR complete P4_(
 
         } else if ( (cpos > 1) &&( (char)c == DIRSEPCHAR ) &&
                     (type == CMP_FILENAME) &&(buf[0] == '$') ) {
-
             /* expand an environment variable reference */
             /* save the variable name! */
             buf[cpos] = 0;
@@ -454,7 +465,6 @@ char *PASCAL NEAR complete P4_(
 #endif  /* ENVFUNC */
 
         } else if ( c == '?' ) {
-
 clist:      /* make a completion list! */
             switch ( type ) {
             case CMP_BUFFER:
@@ -483,7 +493,6 @@ clist:      /* make a completion list! */
                 else
                     mlwrite("%s: %s", prompt, buf);
             }
-
         } else {
             if ( cpos < maxlen && c > ' ' ) {
                 buf[cpos++] = c;
@@ -495,7 +504,10 @@ clist:      /* make a completion list! */
     }
 }
 
-/* comp_command:  Attempt a completion on a command name
+
+/* COMP_COMMAND:
+ *
+ * Attempt a completion on a command name
  */
 VOID PASCAL NEAR comp_command P2_(
         char *, name, /* command containing the current name to complete */
@@ -577,12 +589,14 @@ VOID PASCAL NEAR comp_command P2_(
     return;
 }
 
-/* clist_command: Make a completion list based on a partial name
+
+/* CLIST_COMMAND:
+ *
+ * Make a completion list based on a partial name
  */
-VOID PASCAL NEAR clist_command P2_(
-        char *, name, /* command containing the current name to complete */
-        int *,  cpos  /* ptr to position of next character to insert */
-    )
+VOID PASCAL NEAR clist_command P2_(CONST char *, name, int *, cpos)
+/* name:  Command containing the current name to complete */
+/* cpos:  Ptr to position of next character to insert     */
 {
     REGISTER NBIND  *bp       = NULL;   /* trial command to complete */
     REGISTER int    curbind   = 0;      /* index into the names[] array */
@@ -614,12 +628,13 @@ VOID PASCAL NEAR clist_command P2_(
     return;
 }
 
-/* comp_buffer: Attempt a completion on a buffer name
+/* COMP_BUFFER:
+ *
+ * Attempt a completion on a buffer name
  */
-VOID PASCAL NEAR comp_buffer P2_(
-        char *, name, /* buffer containing the current name to complete */
-        int *,  cpos  /* ptr to position of next character to insert    */
-    )
+VOID PASCAL NEAR comp_buffer P2_(char *, name, int *, cpos)
+/* name:  Buffer containing the current name to complete  */
+/* cpos:  Ptr to position of next character to insert     */
 {
     REGISTER BUFFER *bp       = NULL; /* trial buffer to complete         */
     REGISTER int    index     = 0;    /* index into strings to compare    */
@@ -639,7 +654,6 @@ VOID PASCAL NEAR comp_buffer P2_(
         match = NULL;
         bp = bheadp;
         while ( bp ) {
-
             /* is this a match? */
             matchflag = TRUE;
             for ( index = 0; index < *cpos; index++ )
@@ -693,12 +707,14 @@ VOID PASCAL NEAR comp_buffer P2_(
     return;
 }
 
-/* clist_buffer:  Make a completion list based on a partial buffer name
+
+/* CLIST_BUFFER:
+ *
+ * Make a completion list based on a partial buffer name
  */
-VOID PASCAL NEAR clist_buffer P2_(
-        char *, name, /* command containing the current name to complete  */
-        int *,  cpos  /* ptr to position of next character to insert      */
-    )
+VOID PASCAL NEAR clist_buffer P2_(CONST char *, name, int *, cpos)
+/* name:  Command containing the current name to complete */
+/* cpos:  Ptr to position of next character to insert     */
 {
     REGISTER int    name_len  = 0;      /* current length of input string     */
     REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
@@ -718,7 +734,6 @@ VOID PASCAL NEAR clist_buffer P2_(
     bp = bheadp;
 
     while ( bp ) {
-
         /* is this a match? */
         if ( strncmp(name, bp->b_bname, name_len) == 0 )
             addline(listbuf, bp->b_bname);
@@ -733,12 +748,14 @@ VOID PASCAL NEAR clist_buffer P2_(
 }
 
 #if     !WINDOW_MSWIN
-/* comp_file: Attempt a completion on a file name
+
+/* COMP_FILE:
+ *
+ * Attempt a completion on a file name
  */
-VOID PASCAL NEAR comp_file P2_(
-        char *, name, /* file containing the current name to complete */
-        int *,  cpos  /* ptr to position of next character to insert  */
-    )
+VOID PASCAL NEAR comp_file P2_(char *, name, int *,  cpos)
+/* name:  File containing the current name to complete  */
+/* cpos:  Ptr to position of next character to insert   */
 {
     REGISTER char *fname      = NULL;     /* trial file to complete         */
     REGISTER int  index       = 0;        /* index into strings to compare  */
@@ -814,12 +831,14 @@ VOID PASCAL NEAR comp_file P2_(
     return;
 }
 
-/* clist_file:  Make a completion list based on a partial file name
+
+/* CLIST_FILE:
+ *
+ * Make a completion list based on a partial file name
  */
-VOID PASCAL NEAR clist_file P2_(
-        char *, name, /* command containing the current name to complete  */
-        int *,  cpos  /* ptr to position of next character to insert      */
-    )
+VOID PASCAL NEAR clist_file P2_(char *, name, int *, cpos )
+/* name:  Command containing the current name to complete */
+/* cpos:  Ptr to position of next character to insert     */
 {
     REGISTER int    name_len  = 0;      /* current length of input string     */
     REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
@@ -854,10 +873,12 @@ VOID PASCAL NEAR clist_file P2_(
 
     return;
 }
-#endif
 
-/* tgetc: Get a key from the terminal driver, resolve any keyboard
- *        macro action
+#endif /* !WINDOW_MSWIN */
+
+/* TGETC:
+ *
+ * Get a key from the terminal driver, resolve any keyboard macro action
  */
 int PASCAL NEAR tgetc P0_()
 {
@@ -917,8 +938,11 @@ int PASCAL NEAR tgetc P0_()
     return (c);
 }
 
-/* get_key: Get one keystroke. The legal prefixs here are the SPEC,
- *          MOUS and CTRL prefixes.
+
+/* GET_KEY:
+ *
+ * Get one keystroke. The legal prefixs here are the SPEC, MOUS and
+ * CTRL prefixes.
  */
 int PASCAL NEAR get_key P0_()
 {
@@ -956,8 +980,10 @@ int PASCAL NEAR get_key P0_()
     return (c);
 }
 
-/* GETCMD: Get a command from the keyboard. Process all applicable
- *         prefix keys
+
+/* GETCMD:
+ *
+ * Get a command from the keyboard. Process all applicable prefix keys
  */
 int PASCAL NEAR getcmd P0_()
 {
@@ -993,7 +1019,10 @@ int PASCAL NEAR getcmd P0_()
     return (c);
 }
 
-/* A more generalized prompt/reply function allowing the caller to
+
+/* GETSTRING:
+ *
+ * A more generalized prompt/reply function allowing the caller to
  * specify the proper terminator. If the terminator is not a
  * return('\r'), return will echo as "<NL>"
  */
@@ -1146,9 +1175,13 @@ int PASCAL NEAR getstring P3_(unsigned char *, buf, int, nbuf, int, eolchar)
     }
 }
 
-/* outstring: output a string of input characters
+
+/* OUTSTRING:
+ *
+ * Output a string of input characters
  */
-int PASCAL NEAR outstring P1_(char *, s /* string to output */)
+int PASCAL NEAR outstring P1_(CONST char *, s)
+/* s: String to output  */
 {
     if ( disinp )
         while ( *s )
@@ -1157,7 +1190,10 @@ int PASCAL NEAR outstring P1_(char *, s /* string to output */)
     return 0;
 }
 
-/* ostring: output a string of output characters
+
+/* OSTRING:
+ *
+ * Output a string of output characters
  */
 int PASCAL NEAR ostring P1_(CONST char *, s /* string to output */)
 {
@@ -1168,10 +1204,12 @@ int PASCAL NEAR ostring P1_(CONST char *, s /* string to output */)
     return 0;
 }
 
-/* mlprompt:  Display a prompt [with optional default] and the input
- *            terminator.
+
+/* MLPROMPT:
+ *
+ * Display a prompt [with optional default] and the input terminator.
  */
-int PASCAL NEAR mlprompt P3_(CONST char *, prompt, char *, dflt,
+int PASCAL NEAR mlprompt P3_(CONST char *, prompt, CONST char *, dflt,
                              int, iterm)
 {
     REGISTER int  tcol  = 0;
@@ -1218,7 +1256,10 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, char *, dflt,
     return (tcol);
 }
 
-/* echostring: Use echochar() to put out a string. Checks for NULL.
+
+/* ECHOSTRING:
+ *
+ * Use echochar() to put out a string. Checks for NULL.
  */
 int PASCAL NEAR echostring P3_(CONST char *, str, int, tcol, int, uptocol)
 /* str:     characters to be echoed     */
@@ -1241,7 +1282,10 @@ int PASCAL NEAR echostring P3_(CONST char *, str, int, tcol, int, uptocol)
     return (tcol);
 }
 
-/* echochar:  Routine to echo i-search and message-prompting characters.
+
+/* ECHOCHAR:
+ *
+ * Routine to echo i-search and message-prompting characters.
  */
 int PASCAL NEAR echochar P1_(unsigned char, c /* character to be echoed */)
 {

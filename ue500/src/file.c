@@ -36,7 +36,7 @@
 int PASCAL NEAR fileread P2_(int, f, int, n)
   /* default and numeric arguments (unused) */
 {
-    char *fname;        /* file name to read */
+    CONST char  *fname;         /* file name to read */
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -58,7 +58,7 @@ int PASCAL NEAR insfile P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
     REGISTER int  s         = 0;
-    char          *fname    = NULL; /* file name */
+    CONST char    *fname    = NULL; /* file name */
     LINE          *curline  = NULL;
 
     if ( restflag )             /* don't allow this command if restricted */
@@ -98,7 +98,7 @@ int PASCAL NEAR insfile P2_(int, f, int, n)
 int PASCAL NEAR filefind P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    char *fname;        /* file user wishes to find */  /* file name */
+    CONST char  *fname;         /* file user wishes to find */  /* file name */
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -117,8 +117,8 @@ int PASCAL NEAR filefind P2_(int, f, int, n)
 int PASCAL NEAR viewfile P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    char *fname;        /* file user wishes to find */  /* file name */
-    REGISTER int s;     /* status return */
+    CONST char    *fname;   /* file user wishes to find */  /* file name */
+    REGISTER int  s;        /* status return */
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -501,8 +501,8 @@ VOID PASCAL NEAR unqname P1_(char *, name)
 int PASCAL NEAR filewrite P2_(int, f, int, n)
 /* f, n:  Emacs arguments */
 {
-    REGISTER int s;
-    char *fname;
+    REGISTER int  s       = 0;
+    CONST char    *fname  = NULL;
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -528,8 +528,8 @@ int PASCAL NEAR filewrite P2_(int, f, int, n)
 int PASCAL NEAR fileapp P2_(int, f, int, n)
 /* f, n:  Emacs arguments */
 {
-    REGISTER int s;
-    char *fname;
+    REGISTER int  s       = 0;
+    CONST char    *fname  = NULL;
 
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
@@ -606,14 +606,16 @@ int PASCAL NEAR filesave P2_(int, f, int, n)
 /* WRITEOUT:
  *
  * This function performs the details of file writing. It uses the file
- * management routines in the "fileio.c" package. The number of lines written is
- * displayed. Several errors are posible, and cause writeout to return a FALSE
- * result. When
- * $ssave is TRUE,  the buffer is written out to a temporary file, and then the
- * old file is unlinked and the temporary renamed to the original name.  Before
- * the file is written, a user specifyable routine (in $writehook) can be run.
+ * management routines in the "fileio.c" package. The number of lines
+ * written is displayed. Several errors are posible, and cause writeout
+ * to return a FALSE result.
+ *
+ * When $ssave is TRUE, the buffer is written out to a temporary file,
+ * and then the old file is unlinked and the temporary renamed to the
+ * original name. Before the file is written, a user specifyable
+ * routine (in $writehook) can be run.
  */
-int PASCAL NEAR writeout P2_(char *, fn, char *, mode)
+int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
 /* fn:    Name of file to write current buffer to   */
 /* mode:  Mode to open file (w = write a = append)  */
 {
@@ -771,7 +773,7 @@ int PASCAL NEAR filename P2_(int, f, int, n)
  * Insert file "fname" into the current buffer, Called by insert file command.
  * Return the final status of the read.
  */
-int PASCAL NEAR ifile P1_(char *, fname)
+int PASCAL NEAR ifile P1_(CONST char *, fname)
 {
     REGISTER LINE *lp0;
     REGISTER LINE *lp1;
