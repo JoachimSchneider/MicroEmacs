@@ -1501,7 +1501,7 @@ typedef struct {
 typedef int PASCAL NEAR (*ue_fnc_T) DCL((int, int));
 
 /* MicroEmacs table value fetch function type:  */
-typedef char *PASCAL NEAR (*ue_tvfetch_T)DCL((int));
+typedef CONST char *PASCAL NEAR (*ue_tvfetch_T)DCL((int));
 
 /* Filter function used by TransformRegion():
  * Output string must be created by malloc(). */
@@ -1587,10 +1587,10 @@ EXTERN char *PASCAL NEAR complete DCL((CONST char *prompt,
                                   char *defval,
                                   int  type,
                                   int  maxlen));
-EXTERN char *PASCAL NEAR envval DCL((int i));
+EXTERN CONST char *PASCAL NEAR envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR fixnull DCL((CONST char *s));
 EXTERN CONST char *PASCAL NEAR flook DCL((CONST char *fname, int hflag));
-EXTERN char *PASCAL NEAR funval DCL((int i));
+EXTERN CONST char *PASCAL NEAR funval DCL((int i));
 EXTERN char *PASCAL NEAR getctext DCL((char *rline));
 EXTERN char *PASCAL NEAR getffile DCL((char *fspec));
 EXTERN char *PASCAL NEAR getfname DCL((KEYTAB *key));
@@ -1609,7 +1609,7 @@ EXTERN CONST char *PASCAL NEAR ltos DCL((int val));
 EXTERN CONST char *PASCAL NEAR makename DCL((char *bname, CONST char *fname));
 EXTERN char *PASCAL NEAR mklower DCL((char *str));
 EXTERN char *PASCAL NEAR mkupper DCL((char *str));
-EXTERN char *PASCAL NEAR namval DCL((int index));
+EXTERN CONST char *PASCAL NEAR namval DCL((int index));
 EXTERN char *PASCAL NEAR timeset DCL((void));
 EXTERN char *PASCAL NEAR token DCL((char *src, char *tok, int size));
 EXTERN CONST char *PASCAL NEAR transbind DCL((CONST char *skey));
@@ -1622,7 +1622,7 @@ EXTERN int PASCAL NEAR lowerc DCL((char ch));
 EXTERN int PASCAL NEAR cycle_ring DCL((int f, int n));
 EXTERN int PASCAL NEAR upperc DCL((char ch));
 EXTERN ue_fnc_T fncmatch DCL((char *fname));
-EXTERN ue_fnc_T getname  DCL((char *prompt));
+EXTERN ue_fnc_T getname  DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR asc_int DCL((char *st));
 EXTERN VOID dohello DCL((void));
 EXTERN int dspram DCL((void));
@@ -1659,7 +1659,7 @@ EXTERN int PASCAL NEAR delins DCL((int dlength, char *instr, int use_rmc));
 EXTERN int PASCAL NEAR desfunc DCL((int f, int n));
 EXTERN int PASCAL NEAR dispvar DCL((int f, int n));
 EXTERN int PASCAL NEAR echochar DCL((unsigned char c));
-EXTERN int PASCAL NEAR echostring DCL((char *, int, int));
+EXTERN int PASCAL NEAR echostring DCL((CONST char *, int, int));
 EXTERN int PASCAL NEAR eq DCL((unsigned char bc, unsigned char pc));
 EXTERN long PASCAL NEAR ernd DCL((void));
 EXTERN int PASCAL NEAR execkey DCL((KEYTAB *key, int f, int n));
@@ -1746,7 +1746,7 @@ EXTERN int PASCAL NEAR scanner DCL((int direct, int beg_or_end, int repeats));
 EXTERN int PASCAL NEAR setlower DCL((char *ch, char *val));
 EXTERN int PASCAL NEAR setupper DCL((char *ch, char *val));
 EXTERN int PASCAL NEAR setvar DCL((int f, int n));
-EXTERN int PASCAL NEAR sindex DCL((char *source, char *pattern));
+EXTERN int PASCAL NEAR sindex DCL((CONST char *source, CONST char *pattern));
 EXTERN int PASCAL NEAR sreplace DCL((int f, int n));
 EXTERN int PASCAL NEAR stol DCL((char *val));
 #if     DBCS
@@ -1780,11 +1780,11 @@ EXTERN int PASCAL NEAR backpage DCL((int f, int n));
 EXTERN int PASCAL NEAR backword DCL((int f, int n));
 EXTERN int PASCAL NEAR bclear DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR binary DCL((CONST char *key,
-                                   char *(PASCAL NEAR *tval)DCL((int)),
+                                   ue_tvfetch_T,
                                    int        tlength,
                                    int        klength));
 EXTERN int PASCAL NEAR bindtokey DCL((int f, int n));
-EXTERN int PASCAL NEAR buildlist DCL((int type, char *mstring));
+EXTERN int PASCAL NEAR buildlist DCL((int type, CONST char *mstring));
 EXTERN int PASCAL NEAR capword DCL((int f, int n));
 EXTERN int PASCAL NEAR cex DCL((int f, int n));
 EXTERN int PASCAL NEAR cinsert DCL((void));
@@ -1920,7 +1920,7 @@ EXTERN int PASCAL NEAR nextwind DCL((int f, int n));
 EXTERN int PASCAL NEAR nullproc DCL((int f, int n));
 EXTERN int PASCAL NEAR onlywind DCL((int f, int n));
 EXTERN int PASCAL NEAR openline DCL((int f, int n));
-EXTERN int PASCAL NEAR ostring DCL((char *s));
+EXTERN int PASCAL NEAR ostring DCL((CONST char *s));
 EXTERN int PASCAL NEAR outstring DCL((char *s));
 EXTERN int PASCAL NEAR ovstring DCL((int f, int n));
 EXTERN int PASCAL NEAR pipecmd DCL((int f, int n));
@@ -1967,7 +1967,7 @@ EXTERN int PASCAL NEAR spawncli DCL((int f, int n));
 EXTERN int PASCAL NEAR splitwind DCL((int f, int n));
 EXTERN int PASCAL NEAR startup DCL((char *sfname));
 EXTERN int PASCAL NEAR storeproc DCL((int f, int n));
-EXTERN int PASCAL NEAR strinc DCL((char *source, char *sub));
+EXTERN int PASCAL NEAR strinc DCL((CONST char *source, CONST char *sub));
 EXTERN int PASCAL NEAR swapmark DCL((int f, int n));
 EXTERN int PASCAL NEAR swbuffer DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR tab DCL((int f, int n));

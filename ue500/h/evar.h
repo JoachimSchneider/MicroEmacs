@@ -23,7 +23,7 @@
 
 /*  list of recognized environment variables    */
 
-static NOSHARE char *envars[] =
+static NOSHARE CONST char *envars[] =
 {
     "abbell",                   /* ring bell on abbreviation expansion? */
     "abcap",                    /* match capitolization in expansions */

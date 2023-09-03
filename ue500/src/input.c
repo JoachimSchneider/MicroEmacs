@@ -159,7 +159,7 @@ int PASCAL NEAR ctoec P1_(int, c)
  *          completion means that pressing a <SPACE> will attempt to
  *          complete an unfinished command name if it is unique.
  */
-ue_fnc_T getname P1_(char *, prompt)
+ue_fnc_T getname P1_(CONST char *, prompt)
 {
     /* ptr to the returned string:  */
     char  *sp = complete(prompt, NULL, CMP_COMMAND, NSTRING);
@@ -1159,7 +1159,7 @@ int PASCAL NEAR outstring P1_(char *, s /* string to output */)
 
 /* ostring: output a string of output characters
  */
-int PASCAL NEAR ostring P1_(char *, s /* string to output */)
+int PASCAL NEAR ostring P1_(CONST char *, s /* string to output */)
 {
     if ( discmd )
         while ( *s )
@@ -1220,7 +1220,7 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, char *, dflt,
 
 /* echostring: Use echochar() to put out a string. Checks for NULL.
  */
-int PASCAL NEAR echostring P3_(char *, str, int, tcol, int, uptocol)
+int PASCAL NEAR echostring P3_(CONST char *, str, int, tcol, int, uptocol)
 /* str:     characters to be echoed     */
 /* tcol:    column to be echoed in      */
 /* uptocol: last column to be echoed in */

@@ -72,9 +72,9 @@ int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 int PASCAL NEAR deskey P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER int c;             /* key to describe */
-    REGISTER char *ptr;         /* string pointer to scan output strings */
-    char outseq[NSTRING];       /* output buffer for command sequence */
+    REGISTER int        c;                /* key to describe                        */
+    REGISTER CONST char *ptr;             /* string pointer to scan output strings  */
+    char                outseq[NSTRING];  /* output buffer for command sequence     */
 
     /* prompt the user to type us a key to describe */
     mlwrite(TEXT13);
@@ -412,7 +412,7 @@ int PASCAL NEAR apro P2_(int, f, int, n)
  *
  * build a binding list (limited or full)
  */
-int PASCAL NEAR buildlist P2_(int, type, char *, mstring)
+int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
 /* type:    True = full list,   false = partial list  */
 /* mstring: Match string if a partial list            */
 {
@@ -551,13 +551,13 @@ bfail:  /* and on to the next buffer */
  *
  * Does source include sub?
  */
-int PASCAL NEAR strinc P2_(char *, source, char *, sub)
+int PASCAL NEAR strinc P2_(CONST char *, source, CONST char *, sub)
 /* source:  String to search in   */
 /* sub:     Substring to look for */
 {
-    char *sp;           /* ptr into source */
-    char *nxtsp;        /* next ptr into source */
-    char *tp;           /* ptr into substring */
+    CONST char *sp;       /* ptr into source */
+    CONST char *nxtsp;    /* next ptr into source */
+    CONST char *tp;       /* ptr into substring */
 
     /* for each character in the source string */
     sp = source;
@@ -933,7 +933,7 @@ ue_fnc_T fncmatch P1_(char *, fname)
 
 /* NAMVAL:
  */
-char *PASCAL NEAR namval P1_(int, index)
+CONST char *PASCAL NEAR namval P1_(int, index)
 /* index: Index of name to fetch out of the name table  */
 {
     return (names[index].n_name);

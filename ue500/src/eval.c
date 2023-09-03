@@ -446,14 +446,14 @@ next_ut:        ut = ut->next;
 
 /* FUNVAL:
  */
-char *PASCAL NEAR funval P1_(int, i)
+CONST char *PASCAL NEAR funval P1_(int, i)
 {
     return (funcs[i].f_name);
 }
 
 /* ENVVAL:
  */
-char *PASCAL NEAR envval P1_(int, i)
+CONST char *PASCAL NEAR envval P1_(int, i)
 {
     return (envars[i]);
 }
@@ -2074,13 +2074,13 @@ long PASCAL NEAR ernd P0_()
  *
  * Find pattern within source
  */
-int PASCAL NEAR sindex P2_(char *, source, char *, pattern)
+int PASCAL NEAR sindex P2_(CONST char *, source, CONST char *, pattern)
 /* source:  Source string to search */
 /* pattern: String to look for      */
 {
-    char *sp;           /* ptr to current position to scan */
-    char *csp;          /* ptr to source string during comparison */
-    char *cp;           /* ptr to place to check for equality */
+    CONST char *sp;     /* ptr to current position to scan */
+    CONST char *csp;    /* ptr to source string during comparison */
+    CONST char *cp;     /* ptr to place to check for equality */
 
     /* scanning through the source string */
     sp = source;
