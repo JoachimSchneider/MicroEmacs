@@ -921,7 +921,7 @@ char *PASCAL NEAR getfname P1_(KEYTAB *, key)
  * match fname to a function in the names table and return any match
  * or NULL if none
  */
-ue_fnc_T fncmatch P1_(char *, fname)
+ue_fnc_T fncmatch P1_(CONST char *, fname)
 {
     int nval;
 
@@ -1102,7 +1102,7 @@ int PASCAL NEAR execkey P3_(KEYTAB *, key, int , f, int, n)
  *
  * Set a KEYTAB to the given name of the given type
  */
-int set_key P2_(KEYTAB *, key, char *, name)
+int set_key P2_(KEYTAB *, key, CONST char *, name)
 /* key:   Ptr to key to set           */
 /* name:  Name of function or buffer  */
 {

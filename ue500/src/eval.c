@@ -401,11 +401,12 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 /* vname: Name of user variable to fetch  */
 {
-    char            *vnameA = xstrdup(vname);
-    REGISTER int vnum;          /* ordinal number of user var */
-    REGISTER char   *vptr;      /* temp pointer to function value */
-    REGISTER UTABLE *ut;        /* ptr to the current variable table */
+    char            *vnameA =  NULL;
+    REGISTER int    vnum    = 0;      /* ordinal number of user var */
+    REGISTER char   *vptr   = NULL;   /* temp pointer to function value */
+    REGISTER UTABLE *ut     = NULL;   /* ptr to the current variable table */
 
+    vnameA  = xstrdup(vname);
     /* limit comparisons to significant length */
     if ( strlen(vnameA) >= NVSIZE )     /* "%" counts, but is not passed */
         vnameA[NVSIZE] = '\0';
@@ -414,18 +415,15 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
      * going to the global table */
     ut = uv_head;
     while ( ut ) {
-
         /* scan this table looking for the user var name */
         for ( vnum = 0; vnum < ut->size; vnum++ ) {
-
             /* out of entries? */
             if ( ut->uv[vnum].u_name[0] == 0 )
                 goto next_ut;
 
             /* is this the one? */
             if ( strcmp(vnameA, ut->uv[vnum].u_name) == 0 ) {
-
-                free(vnameA);
+                FREE(vnameA);
                 /* return its value..... */
                 vptr = ut->uv[vnum].u_value;
                 if ( vptr )
@@ -435,11 +433,12 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
             }
         }
 
-next_ut:        ut = ut->next;
+next_ut:
+        ut = ut->next;
     }
 
     /* return errorm if we run off the end */
-    free(vnameA);
+    FREE(vnameA);
 
     return (errorm);
 }
@@ -1216,17 +1215,18 @@ retvar: vd->v_num = vnum;
  *
  * Set a variable
  */
-int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
+int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 /* var:   Variable to set */
 /* value: Value to set to */
 {
-    REGISTER int vnum;          /* ordinal number of var refrenced */
-    REGISTER int vtype;         /* type of variable to set */
-    REGISTER UTABLE *vut;       /* user table pointer */
-    REGISTER int status;        /* status return */
-    REGISTER int c;             /* translated character */
-    REGISTER char *sp;          /* scratch string pointer */
+    REGISTER char   *valueL = NULL;
+    REGISTER int    vnum    = 0;      /* ordinal number of var refrenced */
+    REGISTER int    vtype   = 0;      /* type of variable to set */
+    REGISTER UTABLE *vut    = NULL;   /* user table pointer */
+    REGISTER int    status  = 0;      /* status return */
+    REGISTER int    c       = 0;      /* translated character */
 
+    valueL  = xstrdup(value);
     /* simplify the vd structure (we are gonna look at it a lot) */
     vnum = var->v_num;
     vtype = var->v_type;
@@ -1236,17 +1236,11 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
     status = TRUE;
     switch ( vtype ) {
     case TKVAR:     /* set a user variable */
-        if ( vut->uv[vnum].u_value != NULL )
-            free(vut->uv[vnum].u_value);
-        sp = room(strlen(value) + 1);
-        if ( sp == NULL )
-            return (FALSE);
-
-        xstrcpy(sp, value);
-        vut->uv[vnum].u_value = sp;
+        FREE(vut->uv[vnum].u_value);
+        vut->uv[vnum].u_value = xstrdup(valueL);
 
         /* setting a variable to error stops macro execution */
-        if ( strcmp(value, errorm) == 0 )
+        if ( strcmp(valueL, errorm) == 0 )
             status = FALSE;
 
         break;
@@ -1256,31 +1250,31 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
 
         switch ( vnum ) {
         case EVABBELL:
-            ab_bell = stol(value);
+            ab_bell = stol(valueL);
             break;
 
         case EVABCAP:
-            ab_cap = stol(value);
+            ab_cap = stol(valueL);
             break;
 
         case EVABQUICK:
-            ab_quick = stol(value);
+            ab_quick = stol(valueL);
             break;
 
         case EVACOUNT:
-            gacount = asc_int(value);
+            gacount = asc_int(valueL);
             break;
 
         case EVASAVE:
-            gasave = asc_int(value);
+            gasave = asc_int(valueL);
             break;
 
         case EVBUFHOOK:
-            set_key(&bufhook, value);
+            set_key(&bufhook, valueL);
             break;
 
         case EVCBFLAGS:
-            c = asc_int(value);
+            c = asc_int(valueL);
             curbp->b_flag = ( curbp->b_flag & ~(BFCHG|BFINVS) )|
                             ( c & (BFCHG|BFINVS) );
             if ( (c & BFCHG) == BFCHG )
@@ -1288,12 +1282,12 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVCBUFNAME:
-            XSTRCPY(curbp->b_bname, value);
+            XSTRCPY(curbp->b_bname, valueL);
             curwp->w_flag |= WFMODE;
             break;
 
         case EVCFNAME:
-            XSTRCPY(curbp->b_fname, value);
+            XSTRCPY(curbp->b_fname, valueL);
 #if     WINDOW_MSWIN
             fullpathname(curbp->b_fname, NFILEN);
 #endif
@@ -1301,21 +1295,21 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVCMDHK:
-            set_key(&cmdhook, value);
+            set_key(&cmdhook, valueL);
             break;
 
         case EVCMODE:
-            curbp->b_mode = asc_int(value);
+            curbp->b_mode = asc_int(valueL);
             curwp->w_flag |= WFMODE;
             break;
 
         case EVCQUOTE:
-            cquote = asc_int(value);
+            cquote = asc_int(valueL);
             break;
 
         case EVCURCHAR:
             ldelete(1L, FALSE);                         /* delete 1 char */
-            c = asc_int(value);
+            c = asc_int(valueL);
             if ( c == '\r' )
                 lnewline();
             else
@@ -1324,31 +1318,31 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVCURCOL:
-            status = setccol( asc_int(value) );
+            status = setccol( asc_int(valueL) );
             break;
 
         case EVCURLINE:
-            status = gotoline( TRUE, asc_int(value) );
+            status = gotoline( TRUE, asc_int(valueL) );
             break;
 
         case EVCURWIDTH:
-            status = newwidth( TRUE, asc_int(value) );
+            status = newwidth( TRUE, asc_int(valueL) );
             break;
 
         case EVCURWIND:
-            nextwind( TRUE, asc_int(value) );
+            nextwind( TRUE, asc_int(valueL) );
             break;
 
         case EVCWLINE:
-            status = forwline( TRUE, asc_int(value) - getwpos() );
+            status = forwline( TRUE, asc_int(valueL) - getwpos() );
             break;
 
         case EVDEBUG:
-            macbug = stol(value);
+            macbug = stol(valueL);
             break;
 
         case EVDESKCLR:
-            c = lookup_color( mkupper(value) );
+            c = lookup_color( mkupper(valueL) );
             if ( c != -1 ) {
                 deskcolor = c;
 #if     WINDOW_TEXT
@@ -1358,78 +1352,78 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVDIAGFLAG:
-            diagflag = stol(value);
+            diagflag = stol(valueL);
             break;
 
         case EVDISCMD:
-            discmd = stol(value);
+            discmd = stol(valueL);
             break;
 
         case EVDISINP:
-            disinp = stol(value);
+            disinp = stol(valueL);
             break;
 
         case EVDISPHIGH:
             c = disphigh;
-            disphigh = stol(value);
+            disphigh = stol(valueL);
             if ( c != disphigh )
                 upwind();
             break;
 
         case EVDISPUNDO:
-            dispundo = stol(value);
+            dispundo = stol(valueL);
             break;
 
         case EVEXBHOOK:
-            set_key(&exbhook, value);
+            set_key(&exbhook, valueL);
             break;
 
         case EVEXITHOOK:
-            set_key(&exithook, value);
+            set_key(&exithook, valueL);
             break;
 
         case EVFCOL:
-            curwp->w_fcol = asc_int(value);
+            curwp->w_fcol = asc_int(valueL);
             if ( curwp->w_fcol < 0 )
                 curwp->w_fcol = 0;
             curwp->w_flag |= WFHARD | WFMODE;
             break;
 
         case EVFILLCOL:
-            fillcol = asc_int(value);
+            fillcol = asc_int(valueL);
             break;
 
         case EVFLICKER:
-            flickcode = stol(value);
+            flickcode = stol(valueL);
             break;
 
         case EVFMTLEAD:
-            xstrlcpy(fmtlead, value, NSTRING);
+            xstrlcpy(fmtlead, valueL, NSTRING);
             break;
 
         case EVGFLAGS:
-            gflags = asc_int(value);
+            gflags = asc_int(valueL);
             break;
 
         case EVGMODE:
-            gmode = asc_int(value);
+            gmode = asc_int(valueL);
             break;
 
         case EVHARDTAB:
-            if ( ( c = asc_int(value) ) >= 0 ) {
+            if ( ( c = asc_int(valueL) ) >= 0 ) {
                 tabsize = c;
                 upwind();
             }
             break;
 
         case EVHILITE:
-            hilite = asc_int(value);
+            hilite = asc_int(valueL);
             if ( hilite > NMARKS )
                 hilite = 255;
             break;
 
         case EVHJUMP:
-            hjump = asc_int(value);
+            hjump = asc_int(valueL);
             if ( hjump < 1 )
                 hjump = 1;
             if ( hjump > term.t_ncol - 1 )
@@ -1437,16 +1431,16 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVHSCRLBAR:
-            hscrollbar = stol(value);
+            hscrollbar = stol(valueL);
             break;
 
         case EVHSCROLL:
-            hscroll = stol(value);
+            hscroll = stol(valueL);
             lbound = 0;
             break;
 
         case EVISTERM:
-            isterm = stock(value);
+            isterm = stock(valueL);
             break;
 
         case EVKILL:
@@ -1456,19 +1450,19 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVLASTKEY:
-            lastkey = asc_int(value);
+            lastkey = asc_int(valueL);
             break;
 
         case EVLASTMESG:
-            xstrcpy(lastmesg, value);
+            xstrcpy(lastmesg, valueL);
             break;
 
         case EVLINE:
-            putctext(value);
+            putctext(valueL);
             break;
 
         case EVLTERM:
-            xstrlcpy(lterm, value, NSTRING);
+            xstrlcpy(lterm, valueL, NSTRING);
             break;
 
         case EVLWIDTH:
@@ -1478,76 +1472,76 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVMMOVE:
-            mouse_move = asc_int(value);
+            mouse_move = asc_int(valueL);
             if ( mouse_move < 0 ) mouse_move = 0;
             if ( mouse_move > 2 ) mouse_move = 2;
             break;
 
         case EVMODEFLAG:
-            modeflag = stol(value);
+            modeflag = stol(valueL);
             upwind();
             break;
 
         case EVMSFLAG:
-            mouseflag = stol(value);
+            mouseflag = stol(valueL);
             break;
 
         case EVNEWSCRN:
-            newscreenflag = stol(value);
+            newscreenflag = stol(valueL);
             break;
 
         case EVNUMWIND:
             break;
 
         case EVOQUOTE:
-            oquote = asc_int(value);
+            oquote = asc_int(valueL);
             break;
 
         case EVORGCOL:
-            status = new_col_org( TRUE, asc_int(value) );
+            status = new_col_org( TRUE, asc_int(valueL) );
             break;
 
         case EVORGROW:
-            status = new_row_org( TRUE, asc_int(value) );
+            status = new_row_org( TRUE, asc_int(valueL) );
             break;
 
         case EVOS:
             break;
 
         case EVOVERLAP:
-            overlap = asc_int(value);
+            overlap = asc_int(valueL);
             break;
 
         case EVPARINDENT:
-            parindent = asc_int(value);
+            parindent = asc_int(valueL);
             break;
 
         case EVPAGELEN:
-            status = newsize( TRUE, asc_int(value) );
+            status = newsize( TRUE, asc_int(valueL) );
             break;
 
         case EVPALETTE:
-            xstrlcpy(palstr, value, palstr_LEN);
+            xstrlcpy(palstr, valueL, palstr_LEN);
             spal(palstr);
             break;
 
         case EVPARALEAD:
-            xstrlcpy(paralead, value, NSTRING);
+            xstrlcpy(paralead, valueL, NSTRING);
             break;
 
         case EVPENDING:
             break;
 
         case EVPOPFLAG:
-            popflag = stol(value);
+            popflag = stol(valueL);
             break;
 
         case EVPOPWAIT:
-            popwait = stol(value);
+            popwait = stol(valueL);
             break;
 
         case EVPOSFLAG:
-            posflag = stol(value);
+            posflag = stol(valueL);
             upmode();
             break;
 
@@ -1558,29 +1552,29 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVREADHK:
-            set_key(&readhook, value);
+            set_key(&readhook, valueL);
             break;
 
         case EVREGION:
             break;
 
         case EVREPLACE:
-            xstrcpy( (char *)rpat, value );
+            xstrcpy( (char *)rpat, valueL );
 #if     MAGIC
             rmcclear();
 #endif
             break;
 
         case EVRVAL:
-            xstrcpy(rval, value);
+            xstrcpy(rval, valueL);
             break;
 
         case EVSCRNAME:
-            select_screen(lookup_screen(value), TRUE);
+            select_screen(lookup_screen(valueL), TRUE);
             break;
 
         case EVSEARCH:
-            xstrcpy( (char *)pat, value );
+            xstrcpy( (char *)pat, valueL );
             setjtable();                     /* Set up fast search arrays  */
 #if     MAGIC
             mcclear();
@@ -1588,42 +1582,42 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVSEARCHPNT:
-            searchtype = asc_int(value);
+            searchtype = asc_int(valueL);
             if ( searchtype < SRNORM  || searchtype > SREND )
                 searchtype = SRNORM;
             break;
 
         case EVSEED:
-            seed = (long)abs( asc_int(value) );
+            seed = (long)abs( asc_int(valueL) );
             break;
 
         case EVSOFTTAB:
-            stabsize = asc_int(value);
+            stabsize = asc_int(valueL);
             upwind();
             break;
 
         case EVSRES:
-            status = TTrez(value);
+            status = TTrez(valueL);
             break;
 
         case EVSSAVE:
-            ssave = stol(value);
+            ssave = stol(valueL);
             break;
 
         case EVSSCROLL:
-            sscroll = stol(value);
+            sscroll = stol(valueL);
             break;
 
         case EVSTATUS:
-            cmdstatus = stol(value);
+            cmdstatus = stol(valueL);
             break;
 
         case EVSTERM:
-            sterm = stock(value);
+            sterm = stock(valueL);
             break;
 
         case EVTARGET:
-            curgoal = asc_int(value);
+            curgoal = asc_int(valueL);
             thisflag = saveflag;
             break;
 
@@ -1631,57 +1625,61 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
             break;
 
         case EVTIMEFLAG:
-            timeflag = stol(value);
+            timeflag = stol(valueL);
             upmode();
             break;
 
         case EVTPAUSE:
-            term.t_pause = asc_int(value);
+            term.t_pause = asc_int(valueL);
             break;
 
         case EVUNDOFLAG:
-            if ( undoflag != stol(value) )
+            if ( undoflag != stol(valueL) )
                 undo_dump();
-            undoflag = stol(value);
+            undoflag = stol(valueL);
             break;
 
         case EVVERSION:
             break;
 
         case EVVSCRLBAR:
-            vscrollbar = stol(value);
+            vscrollbar = stol(valueL);
             break;
 
         case EVWCHARS:
-            setwlist(value);
+            setwlist(valueL);
             break;
 
         case EVWLINE:
-            status = resize( TRUE, asc_int(value) );
+            status = resize( TRUE, asc_int(valueL) );
             break;
 
         case EVWRAPHK:
-            set_key(&wraphook, value);
+            set_key(&wraphook, valueL);
             break;
 
         case EVWRITEHK:
-            set_key(&writehook, value);
+            set_key(&writehook, valueL);
             break;
 
         case EVXPOS:
-            xpos = asc_int(value);
+            xpos = asc_int(valueL);
             break;
 
         case EVYANKFLAG:
-            yankflag = stol(value);
+            yankflag = stol(valueL);
             break;
 
         case EVYPOS:
-            ypos = asc_int(value);
+            ypos = asc_int(valueL);
             break;
         }
         break;
     }
+
+
+end_of_func:
+    FREE(valueL);
 
     return (status);
 }
@@ -1691,7 +1689,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, char *, value)
  * ASCII string to integer......This is too inconsistant to use the
  * system's
  */
-int PASCAL NEAR asc_int P1_(char *, st)
+int PASCAL NEAR asc_int P1_(CONST char *, st)
 {
     int result;         /* resulting number */
     int sign;           /* sign of resulting number */
@@ -1981,7 +1979,7 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
  *
  * Convert a string to a numeric logical
  */
-int PASCAL NEAR stol P1_(char *, val)
+int PASCAL NEAR stol P1_(CONST char *, val)
 /* val: Value to check for stol */
 {
     /* check for logical values */
@@ -2191,7 +2189,7 @@ int PASCAL NEAR setwlist P1_(char *, wclist)
  * Place in a buffer a list of characters considered "in a word"
  */
  /***TODO: Missing size info***/
-char *PASCAL NEAR getwlist P1_(char *, buf)
+CONST char *PASCAL NEAR getwlist P1_(char *, buf)
 /* buf: Buffer to place list of characters  */
 {
     REGISTER int index;

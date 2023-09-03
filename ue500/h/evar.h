@@ -223,8 +223,8 @@ static NOSHARE CONST char *envars[] =
 /*  list of recognized user functions   */
 
 typedef struct UFUNC {
-    char *f_name;   /* name of function         */
-    int f_type;     /* 1 = monamic, 2 = dynamic */
+    CONST char  *f_name;  /* name of function         */
+    int         f_type;   /* 1 = monamic, 2 = dynamic */
 } UFUNC;
 
 # define NILNAMIC       (0)
