@@ -82,7 +82,7 @@ static NOSHARE CONST char *pathname[] =
 };
 # endif
 
-# define NPNAMES ( sizeof (pathname)/sizeof (char *) )
+# define NPNAMES ( SIZEOF (pathname)/SIZEOF (char *) )
 
 
 #endif  /* BIND_C_  */

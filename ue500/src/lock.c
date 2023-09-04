@@ -78,7 +78,7 @@ int lockchk P1_(CONST char *, fname /* file to check for a lock */)
     }
 
     /* everthing is cool, add it to the table */
-    xstrlcpy(lname[numlocks - 1], fname, sizeof(lname) - (numlocks - 1));
+    xstrlcpy(lname[numlocks - 1], fname, SIZEOF(lname) - (numlocks - 1));
 
     return (TRUE);
 }
@@ -123,7 +123,7 @@ int xlock P1_(CONST char *, fname /* file name to lock */)
         return (TRUE);
 
     /* file failed...abort */
-    if ( strncmp(locker, "LOCK", sizeof ("LOCK") - 1) == 0 ) {
+    if ( strncmp(locker, "LOCK", SIZEOF ("LOCK") - 1) == 0 ) {
         lckerror(locker);
 
         return (ABORT);

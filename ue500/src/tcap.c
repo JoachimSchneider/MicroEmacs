@@ -169,7 +169,7 @@ TBIND ttable[] =
 # endif
 };
 
-# define NTBINDS sizeof (ttable)/sizeof (TBIND)
+# define NTBINDS SIZEOF (ttable)/SIZEOF (TBIND)
 
 EXTERN int      ttopen();
 EXTERN int      ttgetc();

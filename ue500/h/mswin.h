@@ -80,16 +80,16 @@
 /* offsets for the screen windows extra bytes */
 #define GWL_SCRPTR  0   /* SCREEN_T structure pointer */
 #if WINXP
-# define GWW_SCRCX  ( GWL_SCRPTR+sizeof (LONG_PTR) ) /* client area width   */
+# define GWW_SCRCX  ( GWL_SCRPTR+SIZEOF (LONG_PTR) ) /* client area width   */
 #else
-# define GWW_SCRCX  ( GWL_SCRPTR+sizeof (LONG) )     /* client area width   */
+# define GWW_SCRCX  ( GWL_SCRPTR+SIZEOF (LONG) )     /* client area width   */
 #endif
-#define GWW_SCRCY   ( GWW_SCRCX+sizeof (WORD) )      /* client area height  */
-#define SCRWNDEXTRA ( GWW_SCRCY+sizeof (WORD) )
+#define GWW_SCRCY   ( GWW_SCRCX+SIZEOF (WORD) )      /* client area height  */
+#define SCRWNDEXTRA ( GWW_SCRCY+SIZEOF (WORD) )
 
 /* offsets for the frame window extra bytes */
 #define GWW_FRMID 0   /* Id seen by other emacs apps */
-#define FRMWNDEXTRA ( GWW_FRMID+sizeof (WORD) )
+#define FRMWNDEXTRA ( GWW_FRMID+SIZEOF (WORD) )
 
 /* structures */
 typedef struct  CellMetrics { /* coordinate-related parameters of a font */

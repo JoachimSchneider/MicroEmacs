@@ -406,7 +406,7 @@ VOID smg_noop1(int param)
 */
 EXTERN struct dsc$descriptor_s *descptr();
 EXTERN struct dsc$descriptor_s *descrp();
-#define DESCPTR( s)     descrp( s, sizeof(s)-1)
+#define DESCPTR( s)     descrp( s, SIZEOF(s)-1)
 /*
         These two structures, along with ttdef.h, are good for manipulating
         terminal characteristics.
@@ -516,7 +516,7 @@ VOID smgmove(int row, int column)
     int       rlen, status;
 
     static int code = SMG$K_SET_CURSOR_ABS;
-    static int len = sizeof(buffer);
+    static int len = SIZEOF(buffer);
     static int arg[3] = {2};
 
     /* SMG assumes the row/column positions are 1 based. */
@@ -646,7 +646,7 @@ char *smggetstr(int code)
 
     static char seq[1024];
     static char *buffer = seq;
-    static int len = sizeof(seq);
+    static int len = SIZEOF(seq);
     static int arg[2] = {1, 1};
 
     /* Get sequence with one parameter */
@@ -902,7 +902,7 @@ VOID smgputs(string)
 VOID qin(int ch)
 {
     /* Check for overflow */
-    if (inbuft - inbuf >= sizeof(inbuf)) {
+    if (inbuft - inbuf >= SIZEOF(inbuf)) {
 
         /* Annoy user */
         smgbeep();

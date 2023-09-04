@@ -1539,7 +1539,7 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    ASRT(NULL != (s = (char *)calloc(strlen(s2) + 1, sizeof (char))));
+    ASRT(NULL != (s = (char *)calloc(strlen(s2) + 1, SIZEOF (char))));
     strcpy(s, s2);
     strcpy(s1, s);
     FREE(s);
@@ -1603,7 +1603,7 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 
     l2  = strlen(s2);
     l2  = MAX2(l2, n);
-    ASRT(NULL !=(s  = (char *)calloc( l2 + 1, sizeof (char) )));
+    ASRT(NULL !=(s  = (char *)calloc( l2 + 1, SIZEOF (char) )));
     strncpy(s, s2, n);  /* This will always succedd and result in
                          * a '\0'-terminated s. */
 
@@ -1755,7 +1755,7 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
 
 /* SFSTRCPY_:
  *
- *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, sizeof(dst))
+ *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, SIZEOF(dst))
  *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
  */
@@ -1778,7 +1778,7 @@ char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
 
 /* SFSTRCAT_:
  *
- *  if size .GE. 0 append src to dst using xstrlcat(dst, src, sizeof(dst))
+ *  if size .GE. 0 append src to dst using xstrlcat(dst, src, SIZEOF(dst))
  *  else           append src to dst using xstrcat(dst, src) and log a
  *                 warning message.
  */
@@ -1912,7 +1912,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
         return len;
     }
     len += 1;
-    ASRT(NULL != (cp = (char *)calloc(len, sizeof(char))));
+    ASRT(NULL != (cp = (char *)calloc(len, SIZEOF(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
         FREE(cp);
@@ -1998,10 +1998,10 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 
     if ( NULL == str ) {
         len = 1 + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, sizeof(char))));
+        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
     } else {
         len = strlen(str) + 1 + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * sizeof(char))));
+        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
     }
     nstr[len - 2]  = c;
     nstr[len - 1]  = '\0';
@@ -2023,11 +2023,11 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 
     if ( NULL == str ) {
         len = slen + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, sizeof(char))));
+        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
         strcpy(nstr, xs);
     } else {
         len = strlen(str) + slen + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * sizeof(char))));
+        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
         strcat(nstr, xs);
     }
 
@@ -2066,7 +2066,7 @@ VOIDP  NewStack P2_(int, stacksize, int, len)
     ASRT(0 < stacksize);
     ASRT(0 < len);
 
-    ASRT(NULL != (stack = (STACK_T_ *)calloc(1, sizeof(*stack))));
+    ASRT(NULL != (stack = (STACK_T_ *)calloc(1, SIZEOF(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
     stack->sp        = (-1);

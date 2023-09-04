@@ -370,7 +370,7 @@ char *dolock P1_(CONST char *, filespec)
         else {
 # if  ( IS_UNIX() )
             ZEROMEM(buf);
-            gethostname(buf, sizeof(buf) - 1);
+            gethostname(buf, SIZEOF(buf) - 1);
             fprintf(fp, "%s\n", buf);
 # else
             fprintf(fp, "<unknown>\n");
@@ -410,7 +410,7 @@ char *dolock P1_(CONST char *, filespec)
 # if  ( IS_UNIX() )
         /* is it the current host? */
         ZEROMEM(host);
-        gethostname(host, sizeof(host) - 1);
+        gethostname(host, SIZEOF(host) - 1);
         if ( strcmp(buf, host) == 0 ) {
 
             /* see if the process is dead already */

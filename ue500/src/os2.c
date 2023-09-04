@@ -433,7 +433,7 @@ char *fspec;    /* pattern to match */
     num_found = 1;
     hDir = HDIR_CREATE;
     if ( DosFindFirst(fname, &hDir, FILE_NORMAL|FILE_DIRECTORY, &pBuf,
-                      sizeof (pBuf), &num_found, 0L) != 0 )
+                      SIZEOF (pBuf), &num_found, 0L) != 0 )
         return (NULL);
 
     /* return the first file name! */
@@ -454,7 +454,7 @@ char *PASCAL NEAR getnfile()
     char fname[NFILEN];                 /* file/path for DOS call */
 
     /* and call for the next file */
-    if ( DosFindNext(hDir, (VOIDP)&pBuf, sizeof (pBuf), &num_found) != 0 )
+    if ( DosFindNext(hDir, (VOIDP)&pBuf, SIZEOF (pBuf), &num_found) != 0 )
         return (NULL);
 
     /* return the first file name! */

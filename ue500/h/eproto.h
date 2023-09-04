@@ -174,8 +174,8 @@ EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
 EXTERN int PASCAL NEAR  xstrlcat DCL((char * s1, CONST char * s2, int n));
 
 /* SFSTRCPY:
- *  if size .GE. 0 copy src to dst usling xstrlcpy(dst, src, sizeof(dst))
- *  else           copy src to dst usling xstrcpy(dst, src) and log
+ *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, SIZEOF(dst))
+ *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
  */
 EXTERN char *PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
@@ -187,10 +187,10 @@ EXTERN char *PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
  * s_T *var = (s_T *)malloc(42);
  * XSTRCPY(var->txt, .);
  */
-#define XSTRCPY(dst, src) sfstrcpy_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+#define XSTRCPY(dst, src) sfstrcpy_((dst), IS_ARRAY((dst)) ? SIZEOF((dst)) : (-1), (src), __FILE__, __LINE__)
 
 /* SFSTRCAT:
- *  if size .GE. 0 append src to dst usling xstrlcat(dst, src, sizeof(dst))
+ *  if size .GE. 0 append src to dst usling xstrlcat(dst, src, SIZEOF(dst))
  *  else           append src to dst usling xstrcat(dst, src) and log a
  *                 warning message.
  */
@@ -199,7 +199,7 @@ EXTERN char *PASCAL NEAR  sfstrcat_ DCL((char       *dst,
                                          const char *src,
                                          const char *file,
                                          int        line));
-#define XSTRCAT(dst, src) sfstrcat_((dst), IS_ARRAY((dst)) ? sizeof((dst)) : (-1), (src), __FILE__, __LINE__)
+#define XSTRCAT(dst, src) sfstrcat_((dst), IS_ARRAY((dst)) ? SIZEOF((dst)) : (-1), (src), __FILE__, __LINE__)
 
 /* Like the C99 vsnprintf():                                            */
 /* May be called with NULL == s .AND. 0 == n to get the size that would */
@@ -266,7 +266,7 @@ char *HelloFunc(int n)
     CONST char    MSG[] = "Hello World";
     static VOIDP  s     = NULL;
     char          *msg  = NULL;
-    CONST int     len   = 3 * ((sizeof(MSG) - 1) + 4) + 1;
+    CONST int     len   = 3 * ((SIZEOF(MSG) - 1) + 4) + 1;
 
     BEGIN_DO_ONCE {
         s = NewStack(3, len);
@@ -312,10 +312,10 @@ RETURN_L:
             ZEROMEM(STATIC_STR_RET_ARR_);                             \
                                                                       \
             rc_ = xstrlcpy(STATIC_STR_RET_ARR_, STATIC_STR_RET_VAL_,  \
-                           sizeof(STATIC_STR_RET_ARR_));              \
-            if ( sizeof(STATIC_STR_RET_ARR_) <= rc_ ) {               \
-                TRC(("%s(): RVl truncated: sizeof(RVl) = %d <= rc"    \
-                    " = %d", #func, sizeof(STATIC_STR_RET_ARR_),      \
+                           SIZEOF(STATIC_STR_RET_ARR_));              \
+            if ( SIZEOF(STATIC_STR_RET_ARR_) <= rc_ ) {               \
+                TRC(("%s(): RVl truncated: SIZEOF(RVl) = %d <= rc"    \
+                    " = %d", #func, SIZEOF(STATIC_STR_RET_ARR_),      \
                     rc_));                                            \
             }                                                         \
                                                                       \
@@ -377,9 +377,9 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 /**********************************************************************/
 #define STR(s)        ( ( NULL == (s) )?                                        \
                         ( (CONST char *)"@NIL@" ) : ( (CONST char *)(s) ) )
-#define NELEM(A)      ( sizeof ( (A) )/sizeof ( (A)[0] ) )
-#define SIZEOF(e)     ( (int)sizeof((e)) )
-#define ZEROMEM(x)    ( memset(&(x), 0, sizeof((x))) )
+#define NELEM(A)      ( SIZEOF ( (A) )/SIZEOF ( (A)[0] ) )
+#define SIZEOF(e)     ( (int)sizeof(e) )
+#define ZEROMEM(x)    ( memset(&(x), 0, SIZEOF((x))) )
 #define MAXIMUM(x, y) ( ((x) < (y))? (y) : (x) )
 #define MINIMUM(x, y) ( ((x) > (y))? (y) : (x) )
 #define MIN2(x, y)    ( MINIMUM((x), (y)) )
@@ -452,16 +452,16 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 #if ( MSDOS && TURBO )
 /* Something like `typedef void * <spec> va_list' */
 # define MY_VA_COPY(d, s)     (               \
-      memcpy(&(d), &(s), sizeof((d)))         \
+      memcpy(&(d), &(s), SIZEOF((d)))         \
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #endif
 #ifndef MY_VA_COPY
 # define MY_VA_COPY(d, s)     (               \
     IS_ARRAY((d))?                            \
-      memcpy((d), (s), sizeof((d)))           \
+      memcpy((d), (s), SIZEOF((d)))           \
         :                                     \
-      memcpy(&(d), &(s), sizeof((d)))         \
+      memcpy(&(d), &(s), SIZEOF((d)))         \
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #endif
@@ -512,20 +512,20 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
      * a hat m (> 0) Stellen im 256-er System
      *                              <==> 256^(m-1) <= a < 256^n
      *                              <==> m -1 <= log_256(a) < m
-     * Ausserdem m <= sizeof(a), also log_256(a) < sizeof(a)
+     * Ausserdem m <= SIZEOF(a), also log_256(a) < SIZEOF(a)
      *
      * Umrechnung der Logarithmen:
      *  y = log_b x <==> b^y = x
      *  ==> y*log_a(b) = log_a(x)
      *  ==> log_a(x) = log_a(b)*log_b(x)
      *
-     * log_10(a) = log_10(256)*log_256(a) < log_10(256)*sizeof(a)
+     * log_10(a) = log_10(256)*log_256(a) < log_10(256)*SIZEOF(a)
      *
-     * Damit n <= 1 + 3*sizeof(a)
+     * Damit n <= 1 + 3*SIZEOF(a)
      *
      ******************************************************************/
-    static char buf[1 + 3*sizeof(i) + 1];
-    int           pos   = sizeof(buf) - 2;
+    static char buf[1 + 3*SIZEOF(i) + 1];
+    int           pos   = SIZEOF(buf) - 2;
     unsigned int  rest  = 0;
 
     ZEROMEM(buf);
@@ -556,8 +556,8 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
  * Use this macro to test a condition at compile time instead of
  * runtime.  If condition is false, the compiler will abort with an
  * error.  This is really useful, if you want to check e.g. sizes of
- * structures against given needs.  Example: CASRT( sizeof(int) ==
- * sizeof(long) );
+ * structures against given needs.  Example: CASRT( SIZEOF(int) ==
+ * SIZEOF(long) );
  */
 #define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
 

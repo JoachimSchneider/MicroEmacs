@@ -268,7 +268,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
     }
 #if WINDOW_MSWIN32
     /* set the startup window size */
-    suInfo.cb = sizeof (STARTUPINFO);
+    suInfo.cb = SIZEOF (STARTUPINFO);
     if ( DOSApp && Cmd ) suInfo.lpTitle = suTitle;
     suInfo.wShowWindow =
         (DOSApp && Synchronize) ? SW_SHOWMINIMIZED :SW_SHOWNORMAL;

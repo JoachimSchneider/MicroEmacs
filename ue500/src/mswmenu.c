@@ -495,8 +495,8 @@ int PASCAL GetKeyText (int Key, char *Text, int TextLength)
         i = 0;
     }
 
-#define APPENDTEXT(s)   { if ( TextLength - i < sizeof (s) ) return 0; \
-                          xstrcpy (&Text[i], s); i += sizeof (s) - 1; }
+#define APPENDTEXT(s)   { if ( TextLength - i < SIZEOF (s) ) return 0; \
+                          xstrcpy (&Text[i], s); i += SIZEOF (s) - 1; }
 
     c = (char)Key;
 

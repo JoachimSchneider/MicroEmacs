@@ -252,8 +252,8 @@ char *sfilnam;    /* save file name or NULL */
     char *tptr;
 
     /* some initializations */
-    zero( (char *) &create_pkt, sizeof (create_pkt) );
-    zero( (char *) &fstat_pkt, sizeof (fstat_pkt) );
+    zero( (char *) &create_pkt, SIZEOF (create_pkt) );
+    zero( (char *) &fstat_pkt, SIZEOF (fstat_pkt) );
     zero(acl_buf, $MXACL);
 
     xstrcpy(bfnam, bfilnam);
@@ -407,7 +407,7 @@ char *to_nam;       /* rename to name */
     resolve_full_pathname(ftmp, ftmp);
     resolve_full_pathname(ttmp, ttmp);
 
-    ac1.cptr = ttmp + ( sizeof (char) * strlen(ttmp) );
+    ac1.cptr = ttmp + ( SIZEOF (char) * strlen(ttmp) );
     while ( (ac1.cptr >= ttmp) && (*ac1.cptr != ':') && (*ac1.cptr != '=') )
         --ac1.cptr;
 
@@ -765,7 +765,7 @@ int pipecmd(f, n)
     xstrcat(pipecmd_filnam, line);    /* build temp. filename */
     xstrcat(pipecmd_filnam, ".micro_emacs_command");
 
-    zero( (char *) &create_pkt, sizeof (create_pkt) );
+    zero( (char *) &create_pkt, SIZEOF (create_pkt) );
     zero(acl_buf, $MXACL);
     ac2.cptr = &acl_buf;
     ac0.ulng = -1L;
@@ -1203,7 +1203,7 @@ VOID ttopen()
     xstrcpy(os, "AOS");           /* tell us what OS we run */
     ac0.in = fchannel(stdout);    /* make sure it is opened */
     ac0.in = fchannel(stdin);     /* make sure it is opened */
-    ac1.ulng = ( BIT0 | (sizeof (crt_info)/2) ); /* get characteristics flag */
+    ac1.ulng = ( BIT0 | (SIZEOF (crt_info)/2) ); /* get characteristics flag */
     ac2.ptr = (unsigned long*) &crt_info;
 
     sys_err = sys($GECHR, &ac0, &ac1, &ac2);    /* ?GECHR system call */
@@ -1567,10 +1567,10 @@ char *dir_name;
     char t_name[$MXPL];
 
     err = 0;
-    dir_stream = (DIR *) malloc( sizeof (DIR) );
-    zero( (char *) dir_stream, sizeof (DIR) );
-    zero( (char *) &aosvs$bsd_gnfn_pkt, sizeof (aosvs$bsd_gnfn_pkt) );
-    zero( (char *) &gopen_pkt, sizeof (gopen_pkt) );
+    dir_stream = (DIR *) malloc( SIZEOF (DIR) );
+    zero( (char *) dir_stream, SIZEOF (DIR) );
+    zero( (char *) &aosvs$bsd_gnfn_pkt, SIZEOF (aosvs$bsd_gnfn_pkt) );
+    zero( (char *) &gopen_pkt, SIZEOF (gopen_pkt) );
 
     err = aosvs$expand_pathname(dir_name, t_name);
     aosvs$ac0.cptr = t_name;
@@ -1615,8 +1615,8 @@ DIR *dir_stream;
     aosvs$ac0.in = 0;
     aosvs$ac1.in = dir_stream->dd_fd;   /* load channel number */
 
-    dptr = (struct direct *) malloc( sizeof (struct direct) );
-    zero( (char *)dptr, sizeof (struct direct) );
+    dptr = (struct direct *) malloc( SIZEOF (struct direct) );
+    zero( (char *)dptr, SIZEOF (struct direct) );
 
     if ( dir_stream->dd_loc )
         aosvs$bsd_gnfn_pkt.nfky     = (short)dir_stream->dd_loc;
@@ -1637,7 +1637,7 @@ DIR *dir_stream;
 
         /* load the direct struct values */
         dptr->d_ino = (long) aosvs$bsd_gnfn_pkt.nfky;   /* fake an inode */
-        dptr->d_reclen = sizeof (struct direct);         /* why? why not? */
+        dptr->d_reclen = SIZEOF (struct direct);         /* why? why not? */
         dptr->d_namlen = strlen(dptr->d_name);          /* handy to have */
 
         return (dptr);

@@ -770,7 +770,7 @@ PASCAL NEAR ntopen()
     AllocConsole();
 
     /* Save the titlebar of the window so we can restore it when we leave. */
-    GetConsoleTitle( chConsoleTitle, sizeof (chConsoleTitle) );
+    GetConsoleTitle( chConsoleTitle, SIZEOF (chConsoleTitle) );
 
     /* Set Window Title to MicroEMACS */
     SetConsoleTitle(PROGNAME);

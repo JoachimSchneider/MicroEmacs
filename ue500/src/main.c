@@ -403,7 +403,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
                 bp->b_mode |= MDCRYPT;
                 ecrypt( (char *) NULL, 0 );
                 ecrypt( ekey, strlen(ekey) );
-                xstrlcpy(bp->b_key, ekey, sizeof(bp->b_key));
+                xstrlcpy(bp->b_key, ekey, SIZEOF(bp->b_key));
             }
 #endif
         }

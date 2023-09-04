@@ -43,7 +43,7 @@ ttopen()
     xstrcpy(os, "WMCS");
 
     /* set device status */
-    _giodst(1, &dtable, sizeof (dtable), &dstat);
+    _giodst(1, &dtable, SIZEOF (dtable), &dstat);
     xmdsave = dstat.class.tty.dstyflags1;
     dstat.class.tty.dstyflags1 &= xmdmask;  /* clear the bits we need to use  */
     dstat.class.tty.dstyflags1 |= xmdstat;  /* set our status bits            */
@@ -128,7 +128,7 @@ typahead()
     devicetable   xdtable;
     devicestatus  xdstat;
 
-    _giodst(1,&xdtable,sizeof(xdtable),&xdstat);
+    _giodst(1,&xdtable,SIZEOF(xdtable),&xdstat);
     return(dstat.class.tty.dstyinputcnt);
 */
     return (FALSE);

@@ -254,7 +254,7 @@ int ttputc(ch)
 char ch;                                /* Character to display     */
 {
     /* Check for buffer full */
-    if ( outbuft == &outbuf[sizeof (outbuf)] )
+    if ( outbuft == &outbuf[SIZEOF (outbuf)] )
         ttflush();
 
     /* Add to buffer */
@@ -334,7 +334,7 @@ VOID qin(ch)
 int ch;                                 /* Character to add     */
 {
     /* Check for overflow */
-    if ( inbuft == &inbuf[sizeof (inbuf)] ) {
+    if ( inbuft == &inbuf[SIZEOF (inbuf)] ) {
 
         /* Annoy user */
         scbeep();

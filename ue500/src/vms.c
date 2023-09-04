@@ -87,7 +87,7 @@ static next_read(int flag);
 
                 descrp( s, l)   String descriptor for buffer s, length l
                 descptr( s)     String descriptor for asciz buffer s
-                DESCPTR( s)     String descriptor for buffer s, using sizeof()
+                DESCPTR( s)     String descriptor for buffer s, using SIZEOF()
 */
 #define NUM_DESCRIPTORS 10
 struct dsc$descriptor_s *descrp(char *s, int l)
@@ -112,7 +112,7 @@ struct dsc$descriptor_s *descptr(char *s)
     return (descrp(s, strlen(s)));
 }
 
-#define DESCPTR(s)      descrp( s, sizeof(s)-1)
+#define DESCPTR(s)      descrp( s, SIZEOF(s)-1)
 
 /*
         These two structures, along with ttdef.h, are good for manipulating
@@ -233,15 +233,15 @@ static next_read(int flag){
          * Wrap the input pointer if out of room.
          */
         waiting = 0;
-        if (sizeof(tybuf) - tyin < MINREAD) {
+        if (SIZEOF(tybuf) - tyin < MINREAD) {
             tymax = tyin;
             tyin = 0;
         }
 
         size = tymax - tylen;
 
-        if (tyin + size > sizeof(tybuf))
-            size = sizeof(tybuf) - tyin;
+        if (tyin + size > SIZEOF(tybuf))
+            size = SIZEOF(tybuf) - tyin;
 
         if (size >= MINREAD) {
             /* Only read if there is enough room */
@@ -383,7 +383,7 @@ static mbreadast() {
         }
         test(SYS$QIO(           /* Post a new read to the associated mailbox */
                      0, mbchan, IO$_READVBLK, &mbiosb,
-                     mbreadast, 0, &mbmsg, sizeof(mbmsg),
+                     mbreadast, 0, &mbmsg, SIZEOF(mbmsg),
                      0, 0, 0, 0
                      ));
     } else if (mbiosb.status != SS$_ABORT)
@@ -400,11 +400,11 @@ PASCAL    NEAR ttopen()
     tyin = 0;
     tyout = 0;
     tylen = 0;
-    tymax = sizeof(tybuf);
+    tymax = SIZEOF(tybuf);
     status = LIB$ASN_WTH_MBX(   /* Create a new PY/TW pair */
                              descptr("SYS$OUTPUT:"),
-                             &sizeof(mbmsg),
-                             &sizeof(mbmsg),
+                             &SIZEOF(mbmsg),
+                             &SIZEOF(mbmsg),
                              &vms_iochan,
                              &mbchan);
     if ((status & 1) == 0) {
@@ -421,7 +421,7 @@ PASCAL    NEAR ttopen()
     if (mbchan)
         test(SYS$QIO(           /* Post a read to the associated mailbox */
                      0, mbchan, IO$_READVBLK, &mbiosb,
-                     mbreadast, 0, &mbmsg, sizeof(mbmsg),
+                     mbreadast, 0, &mbmsg, SIZEOF(mbmsg),
                      0, 0, 0, 0
                      ));
 /*
@@ -429,7 +429,7 @@ PASCAL    NEAR ttopen()
 */
     test(SYS$QIOW(
                   0, vms_iochan, IO$_SENSEMODE, &orgttiosb,
-                  0, 0, &orgchar, sizeof(orgchar), 0, 0, 0, 0));
+                  0, 0, &orgchar, SIZEOF(orgchar), 0, 0, 0, 0));
     newchar = orgchar;
     newchar.tt2 |= TT2$M_PASTHRU;       /* Gives us back ^U, ^X, ^C, and ^Y. */
     newchar.tt2 |= TT2$M_BRDCSTMBX;     /* Get broadcast messages */
@@ -484,7 +484,7 @@ PASCAL    NEAR ttopen()
 */
     test(SYS$QIOW(
                   0, vms_iochan, IO$_SETMODE, 0,
-                  0, 0, &newchar, sizeof(newchar), 0, 0, 0, 0));
+                  0, 0, &newchar, SIZEOF(newchar), 0, 0, 0, 0));
 /*
         For some unknown reason, if I don't post this read (which will
         likely return right away) then I don't get started properly.
@@ -494,7 +494,7 @@ PASCAL    NEAR ttopen()
                  0, vms_iochan,
                  IO$_READVBLK | IO$M_NOECHO | IO$M_TRMNOECHO |
                  IO$M_NOFILTR | IO$M_TIMED,
-                 &ttiosb, readast, 0, tybuf, sizeof(tybuf),
+                 &ttiosb, readast, 0, tybuf, SIZEOF(tybuf),
                  0, noterm, 0, 0
                  ));
 /*
@@ -518,7 +518,7 @@ PASCAL    NEAR ttclose()
     test(SYS$CANCEL(vms_iochan));       /* Cancel any pending read */
     test(SYS$QIOW(
                   0, vms_iochan, IO$_SETMODE, 0,
-                  0, 0, &orgchar, sizeof(orgchar), 0, 0, 0, 0));
+                  0, 0, &orgchar, SIZEOF(orgchar), 0, 0, 0, 0));
     if (mbchan)
         test(SYS$DASSGN(mbchan));
     test(SYS$DASSGN(vms_iochan));
@@ -527,7 +527,7 @@ PASCAL    NEAR ttclose()
 PASCAL    NEAR ttputc(int c)
 {
     tobuf[tolen++] = c;
-    if (tolen >= sizeof(tobuf)) {
+    if (tolen >= SIZEOF(tobuf)) {
         /* Buffer is full, send it out */
         test(SYS$QIOW(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
                       0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
@@ -597,7 +597,7 @@ int       PASCAL NEAR ttgetc()
 
     if (tyout >= tymax) {
         tyout = 0;
-        tymax = sizeof(tybuf);
+        tymax = SIZEOF(tybuf);
     }
 
     tylen--;                    /* Should be ADD_INTERLOCKED */
@@ -1352,7 +1352,7 @@ static void PASCAL NEAR addspec(struct dsc$descriptor dsc, int *pargc,
 
     /* reallocate the argument array if necessary */
     if (*pargc == *pargcapacity)
-        *pargv = realloc(*pargv, sizeof(**pargv) * (*pargcapacity += ADDSPEC_INCREMENT));
+        *pargv = realloc(*pargv, SIZEOF(**pargv) * (*pargcapacity += ADDSPEC_INCREMENT));
 
     /* allocate new argument */
     s = xstrncpy(malloc(dsc.dsc$w_length + 1), dsc.dsc$a_pointer, dsc.dsc$w_length);

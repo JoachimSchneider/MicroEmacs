@@ -238,7 +238,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
     EWINDOW *wp;                /* ptr to first window of new screen */
 
     /* allocate memory for this screen */
-    sp = (SCREEN_T *)room( sizeof (SCREEN_T) );
+    sp = (SCREEN_T *)room( SIZEOF (SCREEN_T) );
     if ( sp == (SCREEN_T *)NULL )
         return (sp);
 
@@ -266,7 +266,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
 #endif
 
     /* allocate its first window */
-    wp = (EWINDOW *)room( sizeof (EWINDOW) );
+    wp = (EWINDOW *)room( SIZEOF (EWINDOW) );
     if ( wp == (EWINDOW *)NULL ) {
         free( (char *)sp );
 

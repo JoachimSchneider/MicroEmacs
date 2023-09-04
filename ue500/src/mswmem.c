@@ -44,7 +44,7 @@
 
 #  define SEGHEADOFFSET 16  /* offset of the segment header (the first 16 bytes
                              * of a heap segment are reserved for windows) */
-#  define HEAPOFFSET  ( SEGHEADOFFSET +  sizeof (SEGHEADER) )
+#  define HEAPOFFSET  ( SEGHEADOFFSET +  SIZEOF (SEGHEADER) )
 #  define HEAPOVH     0x400    /* estimated heap overhead */
 #  define MINSEGSIZE  0x1000L/* minimum segment allocation: 4K */
 
@@ -170,7 +170,7 @@ VOIDP CDECL malloc(size_t size)
 
             SegSize =
                 max (MINSEGSIZE,
-                     HEAPOVH + SEGHEADOFFSET +sizeof (SEGHEADER) + (DWORD)size);
+                     HEAPOVH + SEGHEADOFFSET +SIZEOF (SEGHEADER) + (DWORD)size);
             hSeg = GlobalAlloc (GMEM_MOVEABLE, SegSize);
             if ( hSeg == NULL ) return (char*)NULL; /* segment allocation
                                                      * failure */

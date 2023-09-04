@@ -274,7 +274,7 @@ NOSHARE NBIND names[] =
 };
 
 
-#define NFUNCS  ( sizeof (names) / sizeof (names[0]) - 1 )
+#define NFUNCS  ( SIZEOF (names) / SIZEOF (names[0]) - 1 )
 
 
 

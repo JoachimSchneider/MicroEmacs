@@ -66,7 +66,7 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
     }
 
     /* get the correct size for this entry */
-    undo_size = sizeof (UNDO_OBJ);
+    undo_size = SIZEOF (UNDO_OBJ);
     if ( op_type == OP_DSTR )
         undo_size += (int)count;
 

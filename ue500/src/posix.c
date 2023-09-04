@@ -333,7 +333,7 @@ VOID qin(ch)
 int ch;                                 /* Character to add */
 {
     /* Check for overflow */
-    if ( inbuft == &inbuf[sizeof (inbuf)] ) {
+    if ( inbuft == &inbuf[SIZEOF (inbuf)] ) {
 
         /* Annoy user */
         ttbeep();

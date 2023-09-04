@@ -69,7 +69,7 @@ KEYDEF  functab[] = {
 
 };
 
-#define NUMFKEYS        sizeof(functab)/sizeof(KEYDEF)
+#define NUMFKEYS        SIZEOF(functab)/SIZEOF(KEYDEF)
 
 /* EMACS internal key sequences mapped from FMR keys  */
 

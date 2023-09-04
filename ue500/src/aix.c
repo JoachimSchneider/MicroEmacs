@@ -581,7 +581,7 @@ char ch;                                /* Character to display     */
 {
 # if TERMCAP
     /* Check for buffer full */
-    if ( outbuft == &outbuf[sizeof (outbuf)] )
+    if ( outbuft == &outbuf[SIZEOF (outbuf)] )
         ttflush();
 
     /* Add to buffer */
@@ -717,7 +717,7 @@ unsigned char grabnowait()
 VOID qin P1_(int, ch)
 {
     /* Check for overflow */
-    if ( inbuft == &inbuf[sizeof (inbuf)] ) {
+    if ( inbuft == &inbuf[SIZEOF (inbuf)] ) {
         /* Annoy user */
         scbeep();
 
@@ -884,7 +884,7 @@ int scopen()
 
     /* Get other capabilities */
     cb = capbind;
-    while ( cb < &capbind[sizeof (capbind)/sizeof (*capbind)] ) {
+    while ( cb < &capbind[SIZEOF (capbind)/SIZEOF (*capbind)] ) {
         cb->store = TGETSTR(cb->name, &cp);
         cb++;
     }
@@ -904,7 +904,7 @@ int scopen()
 #  if     0
     /* Get keybindings */
     kp = keybind;
-    while ( kp < &keybind[sizeof (keybind)/sizeof (*keybind)] ) {
+    while ( kp < &keybind[SIZEOF (keybind)/SIZEOF (*keybind)] ) {
         addkey(TGETSTR(kp->name, &cp), kp->value);
         kp++;
     }

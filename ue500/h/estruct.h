@@ -350,10 +350,10 @@
 #  undef CDECL
 #  define CDECL   __cdecl
 /* dummy size for unsized extern arrays to avoid silly DGROUP fixup:  */
-/* I don't like this hack --- JES, 2023-08-13 --- TODO                */
-/*  sizeof(.) would be wrong, but compilation on other platforms      */
-/*  shows, that this does not happen as sizeof gives a compile error  */
-/*  with incomplete array types.                                      */
+/* I don't like this hack --- JES, 2023-08-13 --- TODO:               */
+/* - DUMMYSZ '1': sizeof(.) will be wrong!                            */
+/* - DUMMYSZ '':  sizeof() gives a compile time error with incomplete */
+/*                array types.                                        */
 #  define DUMMYSZ 1
 # else
 #  if     TURBO
@@ -784,8 +784,8 @@ execl(va_alist)
 # endif
 #endif
 
-#define INTWIDTH        sizeof (int) * 3
-#define LONGWIDTH       sizeof (long) * 3
+#define INTWIDTH        SIZEOF (int) * 3
+#define LONGWIDTH       SIZEOF (long) * 3
 
 /*===== Macro argument token types ===================================*/
 

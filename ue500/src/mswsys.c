@@ -352,7 +352,7 @@ ParsingDone: return TRUE;
 
 static VOID PASCAL  SetFrameCaption (void)
 {
-    char text[sizeof (PROGNAME) + sizeof (VERSION)+20];
+    char text[SIZEOF (PROGNAME) + SIZEOF (VERSION)+20];
     char    *t;
     int Id;
 
@@ -373,12 +373,12 @@ static VOID PASCAL  SetFrameCaption (void)
 /* =================                           */
 BOOL EXPORT FAR PASCAL BroadcastEnumProc (HWND hWnd, LPARAM lParam)
 {
-    char ClassName[sizeof (FrameClassName)+1];
+    char ClassName[SIZEOF (FrameClassName)+1];
     UINT RetVal;
 
     if ( hWnd != hFrameWnd ) {
         ClassName[0] = '\0';
-        GetClassName (hWnd, (LPSTR)&ClassName[0], sizeof (FrameClassName)+1);
+        GetClassName (hWnd, (LPSTR)&ClassName[0], SIZEOF (FrameClassName)+1);
         if ( strcmp (ClassName, FrameClassName) == 0 ) {
             /* The enumerated window is a MicroEMACS frame */
             if ( lParam != 0 ) {
@@ -896,7 +896,7 @@ LONG EXPORT FAR PASCAL FrameWndProc (HWND   hWnd,
                 SM_CYFRAME);
             Rect.left += GetSystemMetrics(SM_CXFRAME);
             hBmp = LoadBitmap ( NULL, MAKEINTRESOURCE(OBM_CLOSE) );
-            GetObject (hBmp, sizeof (BITMAP), (LPSTR)(LPBITMAP)&Bmp);
+            GetObject (hBmp, SIZEOF (BITMAP), (LPSTR)(LPBITMAP)&Bmp);
             Rect.bottom = Rect.top + Bmp.bmHeight;
             Rect.right = Rect.left + Bmp.bmWidth / 2;
             if ( !PtInRect( &Rect, MAKEPOINT(lParam) ) ) goto DefaultProc;

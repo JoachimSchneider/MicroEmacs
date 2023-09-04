@@ -62,7 +62,7 @@ int PASCAL NEAR vtinit P0_()
     TTrev(FALSE);
 
     /* allocate the virtual screen pointer array */
-    vscreen = (VIDEO **)room( term.t_mrow*sizeof (VIDEO *) );
+    vscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
 
     if ( vscreen == NULL )
 #if     WINDOW_MSWIN
@@ -75,7 +75,7 @@ int PASCAL NEAR vtinit P0_()
 
 #if     MEMMAP == 0
     /* allocate the physical shadow screen array */
-    pscreen = (VIDEO **)room( term.t_mrow*sizeof (VIDEO *) );
+    pscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
     if ( pscreen == NULL )
 # if     WINDOW_MSWIN
         return (FALSE);
@@ -89,7 +89,7 @@ int PASCAL NEAR vtinit P0_()
     for ( i = 0; i < term.t_mrow; ++i ) {
 
         /* allocate a virtual screen line */
-        vp = (VIDEO *)room(sizeof (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
         if ( vp == NULL )
 #if     WINDOW_MSWIN
             return (FALSE);
@@ -110,7 +110,7 @@ int PASCAL NEAR vtinit P0_()
 
 #if     MEMMAP == 0
         /* allocate and initialize physical shadow screen line */
-        vp = (VIDEO *)room(sizeof (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
         if ( vp == NULL )
 # if     WINDOW_MSWIN
             return (FALSE);
@@ -1996,9 +1996,9 @@ VOID CDECL NEAR mlwrite (CONST char *fmt, ...)  /***TODO***/
 #else
 
 # if     STACK_GROWS_UP
-#  define ADJUST(ptr, dtype)      ptr -= sizeof (dtype)
+#  define ADJUST(ptr, dtype)      ptr -= SIZEOF (dtype)
 # else
-#  define ADJUST(ptr, dtype)      ptr += sizeof (dtype)
+#  define ADJUST(ptr, dtype)      ptr += SIZEOF (dtype)
 # endif
 
 VOID CDECL NEAR mlwrite P1_(CONST char *, fmt)
@@ -2220,18 +2220,18 @@ VOID winch_vtresize P2_(int, rows, int, cols)
     term.t_mrow=term.t_nrow=rows-1;
     term.t_mcol=term.t_ncol=cols;
 
-    vscreen = (VIDEO **)room( term.t_mrow*sizeof (VIDEO *) );
+    vscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
 
     if ( vscreen == NULL )
         meexit(1);
 
-    pscreen = (VIDEO **)room( term.t_mrow*sizeof (VIDEO *) );
+    pscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
 
     if ( pscreen == NULL )
         meexit(1);
 
     for ( i = 0; i < term.t_mrow; ++i ) {
-        vp = (VIDEO *)room(sizeof (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
 
         if ( vp == NULL )
             meexit(1);
@@ -2248,7 +2248,7 @@ VOID winch_vtresize P2_(int, rows, int, cols)
         vp->v_rline = i;
 # endif
         vscreen[i] = vp;
-        vp = (VIDEO *)room(sizeof (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
 
         if ( vp == NULL )
             meexit(1);

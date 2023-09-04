@@ -575,7 +575,7 @@ int ttputc P1_(int, ch)
 {
 # if ( !USE_CURSES )
     /* Check for buffer full */
-    if ( outbuft == &outbuf[sizeof(outbuf)] )
+    if ( outbuft == &outbuf[SIZEOF(outbuf)] )
         ttflush();
 
     /* Add to buffer */
@@ -839,7 +839,7 @@ int scopen P0_()
 
     /* Get other capabilities */
     cb = capbind;
-    while ( cb < &capbind[sizeof (capbind)/sizeof (*capbind)] ) {
+    while ( cb < &capbind[SIZEOF (capbind)/SIZEOF (*capbind)] ) {
         cb->store = TGETSTR(cb->name, &cp);
         cb++;
     }
@@ -858,7 +858,7 @@ int scopen P0_()
 
     /* Get keybindings */
     kp = keybind;
-    while ( kp < &keybind[sizeof (keybind)/sizeof (*keybind)] ) {
+    while ( kp < &keybind[SIZEOF (keybind)/SIZEOF (*keybind)] ) {
         addkey((unsigned char *)TGETSTR(kp->name, &cp), kp->value);
         kp++;
     }
@@ -1384,12 +1384,12 @@ char *gettmpfname P1_(CONST char *, ident)
     static int seed = 0;
     static char res[NFILEN];
 
-    xsnprintf( str, sizeof (str), "/tmp/me-%s-%02x", ident,
+    xsnprintf( str, SIZEOF (str), "/tmp/me-%s-%02x", ident,
                ( (int)getpid() % 0x100 ) );
     for ( i = 0; i < 0x100; i++ ) {
         struct stat sb;
 
-        xsnprintf(res, sizeof (res), "%s-%02x", str, (seed + i) % 0x100);
+        xsnprintf(res, SIZEOF (res), "%s-%02x", str, (seed + i) % 0x100);
         if ( 0 > stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
                 seed = (seed + i + 1) % 0x100;
@@ -1442,7 +1442,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     }
 
     xsnprintf(FullCmd,
-              sizeof (FullCmd),
+              SIZEOF (FullCmd),
               "( %s ) < %s > %s 2>%s",
               Cmd,
               InFile,
@@ -1480,11 +1480,11 @@ static int IsIn P3_(const char, c, const char *, set, int, len)
 # define SPACES_         " \t\r\n\v\f"
 # define UNDERSQS_       "_"
 
-# define IsUpper(c)      ( IsIn( (c), UPPERS_, sizeof (UPPERS_) - 1 ) )
-# define IsLower(c)      ( IsIn( (c), LOWERS_, sizeof (LOWERS_) - 1 ) )
-# define IsDigit(c)      ( IsIn( (c), DIGITS_, sizeof (DIGITS_) - 1 ) )
-# define IsSpace(c)      ( IsIn( (c), SPACES_, sizeof (SPACES_) - 1 ) )
-# define IsUndersqr(c)   ( IsIn( (c), UNDERSQS_, sizeof (UNDERSQS_) - 1 ) )
+# define IsUpper(c)      ( IsIn( (c), UPPERS_, SIZEOF (UPPERS_) - 1 ) )
+# define IsLower(c)      ( IsIn( (c), LOWERS_, SIZEOF (LOWERS_) - 1 ) )
+# define IsDigit(c)      ( IsIn( (c), DIGITS_, SIZEOF (DIGITS_) - 1 ) )
+# define IsSpace(c)      ( IsIn( (c), SPACES_, SIZEOF (SPACES_) - 1 ) )
+# define IsUndersqr(c)   ( IsIn( (c), UNDERSQS_, SIZEOF (UNDERSQS_) - 1 ) )
 
 # define IsLetter(c)     ( IsUpper( (c) ) || IsLower( (c) ) )
 
@@ -1493,7 +1493,7 @@ static char ToUpper P1_(const char, c)
 {
     int i   = 0;
 
-    for ( i = 0; i < sizeof (LOWERS_) - 1; i++ ) {
+    for ( i = 0; i < SIZEOF (LOWERS_) - 1; i++ ) {
         if ( c == LOWERS_[i] ) {
             return UPPERS_[i];
         }
@@ -1506,7 +1506,7 @@ static char ToLower P1_(const char, c)
 {
     int i   = 0;
 
-    for ( i = 0; i < sizeof (UPPERS_) - 1; i++ ) {
+    for ( i = 0; i < SIZEOF (UPPERS_) - 1; i++ ) {
         if ( c == UPPERS_[i] ) {
             return LOWERS_[i];
         }
@@ -1682,7 +1682,7 @@ int pipecmd P2_(int, f, int, n)
 # if   ( 0 )    /* Activate multiple "command" buffers  */
     makename(bname, OutFile);           /* New buffer name. */
 # elif ( !0 )
-    if ( !makecmdbname(bname, sizeof (bname), Command, "@Cmd") ) {
+    if ( !makecmdbname(bname, SIZEOF (bname), Command, "@Cmd") ) {
         unlink(InFile);
 
         return FALSE;

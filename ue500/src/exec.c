@@ -385,7 +385,7 @@ int PASCAL NEAR storeproc P2_(
     while ( *bname && *bname != ';' ) {
 
         /* allocate an argument */
-        cur_arg = (PARG *)room( sizeof (PARG) );
+        cur_arg = (PARG *)room( SIZEOF (PARG) );
         if ( cur_arg == (PARG *)NULL ) {
             mlwrite(TEXT113);
             /* "Can not create macro" */
@@ -586,7 +586,7 @@ int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
 
         /* if is a while directive, make a block... */
         if ( eline[0] == '!' && eline[1] == 'w' && eline[2] == 'h' ) {
-            whtemp = (WHBLOCK *)room( sizeof (WHBLOCK) );
+            whtemp = (WHBLOCK *)room( SIZEOF (WHBLOCK) );
             if ( whtemp == NULL ) {
 noram:          errormesg(TEXT119, bp, lp);
 /*                                        "%%Out of memory during while scan" */
@@ -607,7 +607,7 @@ failexit:       freewhile(scanner);
  */
                 goto failexit;
             }
-            whtemp = (WHBLOCK *)room( sizeof (WHBLOCK) );
+            whtemp = (WHBLOCK *)room( SIZEOF (WHBLOCK) );
             if ( whtemp == NULL )
                 goto noram;
             whtemp->w_begin = lp;
@@ -655,7 +655,7 @@ nxtscan:        /* on to the next line */
     num_locals += bp->b_numargs;
 
     /* allocate a local user variable table */
-    ut = (UTABLE *)room( sizeof (UTABLE) + num_locals * sizeof (UVAR) );
+    ut = (UTABLE *)room( SIZEOF (UTABLE) + num_locals * SIZEOF (UVAR) );
     if ( ut == (UTABLE *)NULL ) {
         errormesg("%%Out of memory allocating locals", bp, lp);
         execlevel = 0;

@@ -315,7 +315,7 @@ int EXPORT FAR PASCAL  FileDlgProc (HWND   hDlg,
 
     case WM_INITDIALOG:
     {       /* let's build the caption */
-        char DlgTitle[sizeof (PROGNAME) + 3 + 30];
+        char DlgTitle[SIZEOF (PROGNAME) + 3 + 30];
 
         xstrcpy (DlgTitle, ProgName);
         xstrcat (DlgTitle, " - ");

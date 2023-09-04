@@ -239,7 +239,7 @@ int PASCAL helpengine (int f, int n)
             HtmlHelp (hFrameWnd, HelpEngineFile, HH_HELP_FINDER, NULL);
         } else {
             HH_AKLINK link;
-            link.cbStruct = sizeof (HH_AKLINK);
+            link.cbStruct = SIZEOF (HH_AKLINK);
             link.fReserved = FALSE;
             link.pszKeywords = (LPCTSTR)HelpKey;
             link.pszUrl = NULL;

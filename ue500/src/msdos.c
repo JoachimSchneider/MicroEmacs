@@ -65,7 +65,7 @@ static int          nxtchar = -1; /* character held from type ahead */
 #   define TIME_BUF_SIZE  16
 # else
 #   if IC | TURBO
-#     define TIME_BUF_SIZE ( sizeof(time_t) )
+#     define TIME_BUF_SIZE ( SIZEOF(time_t) )
 #   else
 #     define TIME_BUF_SIZE ( 32 )
 #   endif
@@ -900,8 +900,8 @@ static int PASCAL NEAR execprog P1_(CONST char *, cmd)
     while ( *cmd && ( (*cmd == ' ') || (*cmd == '\t') ) )
         ++cmd;
     *tail = (char)( strlen(cmd) );   /* record the byte length */
-    xstrlcpy(&tail[1], cmd, sizeof(tail) - 1);
-    xstrlcat(&tail[1], "\r", sizeof(tail) - 1);
+    xstrlcpy(&tail[1], cmd, SIZEOF(tail) - 1);
+    xstrlcat(&tail[1], "\r", SIZEOF(tail) - 1);
 
     /* look up the program on the path trying various extentions */
     if ( ( csp = flook(prog, TRUE) ) == NULL )

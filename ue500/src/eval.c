@@ -49,7 +49,7 @@ VOID PASCAL NEAR varinit P0_()
 {
     /* allocate the global user variable table */
     uv_global = uv_head =
-        (UTABLE *)room( sizeof (UTABLE) + MAXVARS * sizeof (UVAR) );
+        (UTABLE *)room( SIZEOF (UTABLE) + MAXVARS * SIZEOF (UVAR) );
 
     /* and set up its fields */
     uv_head->next = (UTABLE *)NULL;
@@ -186,7 +186,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFCALL:                /* construct buffer name to execute */
         result[0] = '[';
-        xstrlcpy(&result[1], arg1, sizeof(result) - 2);
+        xstrlcpy(&result[1], arg1, SIZEOF(result) - 2);
         /* `-2' instead `-1' above to have room for ']' in any case */
         XSTRCAT(result, "]");
 
@@ -1755,7 +1755,7 @@ char *PASCAL NEAR int_asc P1_(int, i)
     }
 
     /* and build the string (backwards!) */
-    sp = result + sizeof(result) - 1;
+    sp = result + SIZEOF(result) - 1;
     *sp = 0;
     do {
         digit = i % 10;
@@ -1801,7 +1801,7 @@ char *PASCAL NEAR long_asc P1_(long int, num)
     }
 
     /* and build the string (backwards!) */
-    sp = result + sizeof(result) - 1;
+    sp = result + SIZEOF(result) - 1;
     *sp = 0;
     do {
         digit = num % 10;
