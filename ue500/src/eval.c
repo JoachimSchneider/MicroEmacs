@@ -401,15 +401,15 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 /* vname: Name of user variable to fetch  */
 {
-    char            *vnameA =  NULL;
+    char            *vnameL =  NULL;
     REGISTER int    vnum    = 0;      /* ordinal number of user var */
     REGISTER char   *vptr   = NULL;   /* temp pointer to function value */
     REGISTER UTABLE *ut     = NULL;   /* ptr to the current variable table */
 
-    vnameA  = xstrdup(vname);
+    vnameL  = xstrdup(vname);
     /* limit comparisons to significant length */
-    if ( strlen(vnameA) >= NVSIZE )     /* "%" counts, but is not passed */
-        vnameA[NVSIZE] = '\0';
+    if ( strlen(vnameL) >= NVSIZE )     /* "%" counts, but is not passed */
+        vnameL[NVSIZE] = '\0';
 
     /* scan through each user variable table starting with the most local and
      * going to the global table */
@@ -422,8 +422,8 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
                 goto next_ut;
 
             /* is this the one? */
-            if ( strcmp(vnameA, ut->uv[vnum].u_name) == 0 ) {
-                FREE(vnameA);
+            if ( strcmp(vnameL, ut->uv[vnum].u_name) == 0 ) {
+                FREE(vnameL);
                 /* return its value..... */
                 vptr = ut->uv[vnum].u_value;
                 if ( vptr )
@@ -438,7 +438,7 @@ next_ut:
     }
 
     /* return errorm if we run off the end */
-    FREE(vnameA);
+    FREE(vnameL);
 
     return (errorm);
 }

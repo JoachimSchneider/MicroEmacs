@@ -71,6 +71,16 @@
 #endif
 
 
+/*====================================================================*/
+/* Static functions declared here:                                    */
+/*====================================================================*/
+static CONST char *PASCAL NEAR complete DCL((CONST char *prompt,
+                                             CONST char *defval,
+                                             int        type,
+                                             int        maxlen));
+/*====================================================================*/
+
+
 #if     !WINDOW_MSWIN   /* for MS Windows, mlyesno is defined in mswsys.c */
 
 /* MLYESNO:
@@ -241,267 +251,6 @@ CONST char *PASCAL NEAR gtfilename P1_(CONST char *, prompt)
 #endif
 
     return (sp);
-}
-
-
-CONST char *PASCAL NEAR complete P4_(CONST char *,  prompt,
-                                     CONST char *,  defval,
-                                     int,           type,
-                                     int,           maxlen)
-/* prompt:  Prompt to user on command line    */
-/* defval:  Default value to display to user  */
-/* type:    Type of what we are completing    */
-/* maxlen:  Maximum length of input field     */
-{
-    REGISTER int  c         = 0;        /* current input character */
-    REGISTER int  ec        = 0;        /* extended input character */
-    int           cpos      = 0;        /* current column on screen output */
-    char          *home_ptr = NULL;     /* pointer to home directory string */
-    char          *ptr      = NULL;     /* string pointer */
-    char          user_name[NSTRING];   /* user name for directory */
-    static char   buf[NSTRING];         /* buffer to hold tentative name */
-#if ( IS_UNIX() )
-    struct passwd *pwd      = NULL;     /* password structure */
-#endif
-
-    ZEROMEM(user_name);
-    ZEROMEM(buf);
-
-    /* if we are executing a command line get the next arg and match it */
-    if ( clexec ) {
-        if ( macarg(buf) != TRUE )
-            return (NULL);
-
-        return (buf);
-    }
-
-    /* starting at the beginning of the string buffer */
-    cpos = 0;
-
-    /* if it exists, prompt the user for a buffer name */
-    if ( prompt ) {
-        if ( type == CMP_COMMAND )
-            mlwrite("%s", prompt);
-        else if ( defval )
-            mlwrite("%s[%s]: ", prompt, defval);
-        else
-            mlwrite("%s: ", prompt);
-    }
-
-    /* build a name string from the keyboard */
-    while ( TRUE ) {
-        /* get the keystroke and decode it */
-        ec = get_key();
-        c = ectoc(ec);
-
-        /* if it is from the mouse, or is a function key, blow it off */
-        if ( (ec & MOUS) || (ec & SPEC) )
-            continue;
-
-        /* if we are at the end, just match it */
-        if ( c == '\n'  ||  c == '\r' ) {
-            if ( defval && cpos == 0 )  {
-                XSTRCPY(buf, defval);
-
-                return (buf);
-            } else                      {
-                buf[cpos] = 0;
-
-                return (buf);
-            }
-        } else if ( ec == abortc ) {            /* Bell, abort */
-            ctrlg(FALSE, 0);
-            TTflush();
-
-            return (NULL);
-        } else if ( c == 0x7F || c == 0x08 ) {          /* rubout/erase */
-            if ( cpos != 0 ) {
-                mlout('\b');
-                mlout(' ');
-                mlout('\b');
-                --ttcol;
-                --cpos;
-                TTflush();
-            }
-        } else if ( c == 0x15 ) {       /* C-U, kill */
-            while ( cpos != 0 ) {
-                mlout('\b');
-                mlout(' ');
-                mlout('\b');
-                --cpos;
-                --ttcol;
-            }
-            TTflush();
-        } else if ( (c == ' ') || (ec == sterm) || (c == '\t') ) {
-            /* attempt a completion */
-            switch ( type ) {
-            case CMP_BUFFER:
-                comp_buffer(buf, &cpos);
-                break;
-
-            case CMP_COMMAND:
-                comp_command(buf, &cpos);
-                break;
-
-#if     !WINDOW_MSWIN
-            case CMP_FILENAME:
-                comp_file(buf, &cpos);
-                break;
-#endif
-            }
-
-            TTflush();
-            if ( cpos > 0 && buf[cpos - 1] == 0 )
-                return (buf);
-
-            goto clist;
-
-#if     ENVFUNC
-        } else if ( (cpos > 0) &&( (char)c == DIRSEPCHAR ) &&
-                    (type == CMP_FILENAME) &&(buf[0] == '~') &&
-                    ( ( home_ptr = getenv("HOME") ) != (char *)NULL ) ) {
-            /* save the user name! */
-            buf[cpos] = 0;
-            XSTRCPY(user_name, &buf[1]);
-
-            /* erase the chars on-screen */
-            while ( cpos > 0 ) {
-                mlout('\b');
-                mlout(' ');
-                mlout('\b');
-                --cpos;
-                --ttcol;
-            }
-
-# if ( IS_UNIX() )
-            /* lookup someone else's home directory! */
-            if ( user_name[0] != 0 ) {
-                pwd = getpwnam(user_name);
-                if ( pwd != (struct passwd *)NULL ) {
-                    ptr = pwd->pw_dir;
-                    while ( *ptr ) {
-                        mlout(*ptr);
-                        buf[cpos++] = *ptr++;
-                        ++ttcol;
-                    }
-                }
-            }
-# endif
-            if ( cpos == 0 ) {
-                /* output the home directory */
-                ptr = home_ptr;
-                while ( *ptr ) {
-                    mlout(*ptr);
-                    buf[cpos++] = *ptr++;
-                    ++ttcol;
-                }
-
-                /* is this someone else's home directory */
-                if ( user_name[0] != 0 ) {
-
-                    /* backup to the last directory sep */
-                    while ( (cpos > 0) &&(buf[cpos-1] != DIRSEPCHAR) ) {
-                        mlout('\b');
-                        mlout(' ');
-                        mlout('\b');
-                        --cpos;
-                        --ttcol;
-                    }
-
-                    /* and add the user's name */
-                    ptr = user_name;
-                    while ( *ptr ) {
-                        mlout(*ptr);
-                        buf[cpos++] = *ptr++;
-                        ++ttcol;
-                    }
-                }
-            }
-
-            /* and the last directory seperator */
-            if ( buf[cpos-1] != DIRSEPCHAR ) {
-                mlout(DIRSEPCHAR);
-                buf[cpos++] = DIRSEPCHAR;
-                ++ttcol;
-            }
-            TTflush();
-
-        } else if ( (cpos > 1) &&( (char)c == DIRSEPCHAR ) &&
-                    (type == CMP_FILENAME) &&(buf[0] == '$') ) {
-            /* expand an environment variable reference */
-            /* save the variable name! */
-            buf[cpos] = 0;
-            XSTRCPY(user_name, &buf[1]);
-# if     MSDOS | OS2 | VMS
-            mkupper(user_name);
-# endif
-
-            /* erase the chars on-screen */
-            while ( cpos > 0 ) {
-                mlout('\b');
-                mlout(' ');
-                mlout('\b');
-                --cpos;
-                --ttcol;
-            }
-
-            ptr = getenv(user_name);
-            if ( ptr != (char *)NULL ) {
-                while ( *ptr ) {
-                    mlout(*ptr);
-                    buf[cpos++] = *ptr++;
-                    ++ttcol;
-                }
-            }
-
-            /* and the last directory seperator */
-            if ( buf[cpos-1] != DIRSEPCHAR ) {
-                mlout(DIRSEPCHAR);
-                buf[cpos++] = DIRSEPCHAR;
-                ++ttcol;
-            }
-            TTflush();
-
-#endif  /* ENVFUNC */
-
-        } else if ( c == '?' ) {
-clist:      /* make a completion list! */
-            switch ( type ) {
-            case CMP_BUFFER:
-                clist_buffer(buf, &cpos);
-                break;
-
-            case CMP_COMMAND:
-                clist_command(buf, &cpos);
-                break;
-
-#if     !WINDOW_MSWIN
-            case CMP_FILENAME:
-                clist_file(buf, &cpos);
-                break;
-#endif
-            }
-            update(TRUE);
-
-            /* if it exists, reprompt the user */
-            if ( prompt ) {
-                buf[cpos] = 0;
-                if ( type == CMP_COMMAND )
-                    mlwrite("%s%s", prompt, buf);
-                else if ( defval )
-                    mlwrite("%s[%s]: %s", prompt, defval, buf);
-                else
-                    mlwrite("%s: %s", prompt, buf);
-            }
-        } else {
-            if ( cpos < maxlen && c > ' ' ) {
-                buf[cpos++] = c;
-                mlout(c);
-                ++ttcol;
-                TTflush();
-            }
-        }
-    }
 }
 
 
@@ -1323,6 +1072,271 @@ int PASCAL NEAR echochar P1_(unsigned char, c /* character to be echoed */)
 
     return (++col); /* return the new column number */
 }
+
+
+/*====================================================================*/
+/* Static functions defined here:                                     */
+/*====================================================================*/
+static CONST char *PASCAL NEAR complete P4_(CONST char *,  prompt,
+                                            CONST char *,  defval,
+                                            int,           type,
+                                            int,           maxlen)
+/* prompt:  Prompt to user on command line    */
+/* defval:  Default value to display to user  */
+/* type:    Type of what we are completing    */
+/* maxlen:  Maximum length of input field     */
+{
+    REGISTER int  c         = 0;        /* current input character          */
+    REGISTER int  ec        = 0;        /* extended input character         */
+    int           cpos      = 0;        /* current column on screen output  */
+    char          *home_ptr = NULL;     /* pointer to home directory string */
+    char          *ptr      = NULL;     /* string pointer                   */
+    char          user_name[NSTRING];   /* user name for directory          */
+    static char   buf[NSTRING];         /* buffer to hold tentative name:
+                                         * Its addr (or NULL) is returned   */
+#if ( IS_UNIX() )
+    struct passwd *pwd      = NULL;             /* password structure */
+#endif
+
+    ZEROMEM(user_name);
+    ZEROMEM(buf);
+
+    /* if we are executing a command line get the next arg and match it */
+    if ( clexec ) {
+        if ( macarg(buf) != TRUE )
+            return (NULL);
+
+        return (buf);
+    }
+
+    /* starting at the beginning of the string buffer */
+    cpos = 0;
+
+    /* if it exists, prompt the user for a buffer name */
+    if ( prompt ) {
+        if ( type == CMP_COMMAND )
+            mlwrite("%s", prompt);
+        else if ( defval )
+            mlwrite("%s[%s]: ", prompt, defval);
+        else
+            mlwrite("%s: ", prompt);
+    }
+
+    /* build a name string from the keyboard */
+    while ( TRUE ) {
+        /* get the keystroke and decode it */
+        ec = get_key();
+        c = ectoc(ec);
+
+        /* if it is from the mouse, or is a function key, blow it off */
+        if ( (ec & MOUS) || (ec & SPEC) )
+            continue;
+
+        /* if we are at the end, just match it */
+        if ( c == '\n'  ||  c == '\r' ) {
+            if ( defval && cpos == 0 )  {
+                XSTRCPY(buf, defval);
+
+                return (buf);
+            } else                      {
+                buf[cpos] = 0;
+
+                return (buf);
+            }
+        } else if ( ec == abortc ) {            /* Bell, abort */
+            ctrlg(FALSE, 0);
+            TTflush();
+
+            return (NULL);
+        } else if ( c == 0x7F || c == 0x08 ) {  /* rubout/erase */
+            if ( cpos != 0 ) {
+                mlout('\b');
+                mlout(' ');
+                mlout('\b');
+                --ttcol;
+                --cpos;
+                TTflush();
+            }
+        } else if ( c == 0x15 ) {               /* C-U, kill */
+            while ( cpos != 0 ) {
+                mlout('\b');
+                mlout(' ');
+                mlout('\b');
+                --cpos;
+                --ttcol;
+            }
+            TTflush();
+        } else if ( (c == ' ') || (ec == sterm) || (c == '\t') ) {
+            /* attempt a completion */
+            switch ( type ) {
+            case CMP_BUFFER:
+                comp_buffer(buf, &cpos);
+                break;
+
+            case CMP_COMMAND:
+                comp_command(buf, &cpos);
+                break;
+
+#if     !WINDOW_MSWIN
+            case CMP_FILENAME:
+                comp_file(buf, &cpos);
+                break;
+#endif
+            }
+
+            TTflush();
+            if ( cpos > 0 && buf[cpos - 1] == 0 )
+                return (buf);
+
+            goto clist;
+
+#if     ENVFUNC
+        } else if ( (cpos > 0) &&( (char)c == DIRSEPCHAR ) &&
+                    (type == CMP_FILENAME) &&(buf[0] == '~') &&
+                    ( ( home_ptr = getenv("HOME") ) != (char *)NULL ) ) {
+            /* save the user name! */
+            buf[cpos] = 0;
+            XSTRCPY(user_name, &buf[1]);
+
+            /* erase the chars on-screen */
+            while ( cpos > 0 ) {
+                mlout('\b');
+                mlout(' ');
+                mlout('\b');
+                --cpos;
+                --ttcol;
+            }
+
+# if ( IS_UNIX() )
+            /* lookup someone else's home directory! */
+            if ( user_name[0] != 0 ) {
+                pwd = getpwnam(user_name);
+                if ( pwd != (struct passwd *)NULL ) {
+                    ptr = pwd->pw_dir;
+                    while ( *ptr ) {
+                        mlout(*ptr);
+                        buf[cpos++] = *ptr++;
+                        ++ttcol;
+                    }
+                }
+            }
+# endif
+
+            if ( cpos == 0 ) {
+                /* output the home directory */
+                ptr = home_ptr;
+                while ( *ptr ) {
+                    mlout(*ptr);
+                    buf[cpos++] = *ptr++;
+                    ++ttcol;
+                }
+
+                /* is this someone else's home directory */
+                if ( user_name[0] != 0 ) {
+                    /* backup to the last directory sep */
+                    while ( (cpos > 0) &&(buf[cpos-1] != DIRSEPCHAR) ) {
+                        mlout('\b');
+                        mlout(' ');
+                        mlout('\b');
+                        --cpos;
+                        --ttcol;
+                    }
+
+                    /* and add the user's name */
+                    ptr = user_name;
+                    while ( *ptr ) {
+                        mlout(*ptr);
+                        buf[cpos++] = *ptr++;
+                        ++ttcol;
+                    }
+                }
+            }
+
+            /* and the last directory seperator */
+            if ( buf[cpos-1] != DIRSEPCHAR ) {
+                mlout(DIRSEPCHAR);
+                buf[cpos++] = DIRSEPCHAR;
+                ++ttcol;
+            }
+            TTflush();
+        } else if ( (cpos > 1) &&( (char)c == DIRSEPCHAR ) &&
+                    (type == CMP_FILENAME) &&(buf[0] == '$') ) {
+            /* expand an environment variable reference */
+            /* save the variable name! */
+            buf[cpos] = 0;
+            XSTRCPY(user_name, &buf[1]);
+# if     MSDOS | OS2 | VMS
+            mkupper(user_name);
+# endif
+
+            /* erase the chars on-screen */
+            while ( cpos > 0 ) {
+                mlout('\b');
+                mlout(' ');
+                mlout('\b');
+                --cpos;
+                --ttcol;
+            }
+
+            ptr = getenv(user_name);
+            if ( ptr != (char *)NULL ) {
+                while ( *ptr ) {
+                    mlout(*ptr);
+                    buf[cpos++] = *ptr++;
+                    ++ttcol;
+                }
+            }
+
+            /* and the last directory seperator */
+            if ( buf[cpos-1] != DIRSEPCHAR ) {
+                mlout(DIRSEPCHAR);
+                buf[cpos++] = DIRSEPCHAR;
+                ++ttcol;
+            }
+            TTflush();
+#endif  /* ENVFUNC */
+
+        } else if ( c == '?' ) {
+clist:      /* make a completion list! */
+            switch ( type ) {
+            case CMP_BUFFER:
+                clist_buffer(buf, &cpos);
+                break;
+
+            case CMP_COMMAND:
+                clist_command(buf, &cpos);
+                break;
+
+#if     !WINDOW_MSWIN
+            case CMP_FILENAME:
+                clist_file(buf, &cpos);
+                break;
+#endif
+
+            }
+            update(TRUE);
+
+            /* if it exists, reprompt the user */
+            if ( prompt ) {
+                buf[cpos] = 0;
+                if ( type == CMP_COMMAND )
+                    mlwrite("%s%s", prompt, buf);
+                else if ( defval )
+                    mlwrite("%s[%s]: %s", prompt, defval, buf);
+                else
+                    mlwrite("%s: %s", prompt, buf);
+            }
+        } else {
+            if ( cpos < maxlen && c > ' ' ) {
+                buf[cpos++] = c;
+                mlout(c);
+                ++ttcol;
+                TTflush();
+            }
+        }
+    }
+}
+/*====================================================================*/
 
 
 
