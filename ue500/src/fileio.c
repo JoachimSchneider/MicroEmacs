@@ -276,7 +276,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
     fline[i] = 0;
 # if     CRYPT
     if ( cryptflag )
-        ecrypt( fline, strlen(fline) );
+        ecrypt( fline, STRLEN(fline) );
 # endif
 
     return (FIOSUC);

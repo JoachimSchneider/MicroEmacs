@@ -109,7 +109,7 @@ struct dsc$descriptor_s *descrp(char *s, int l)
  */
 struct dsc$descriptor_s *descptr(char *s)
 {
-    return (descrp(s, strlen(s)));
+    return (descrp(s, STRLEN(s)));
 }
 
 #define DESCPTR(s)      descrp( s, SIZEOF(s)-1)
@@ -848,7 +848,7 @@ char *    PASCAL NEAR timeset()
 
     time(&buf);
     sp = ctime(&buf);
-    sp[strlen(sp) - 1] = 0;
+    sp[STRLEN(sp) - 1] = 0;
     return (sp);
 }
 
@@ -876,14 +876,14 @@ char *    PASCAL NEAR getffile(char *fspec)
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while (index >= 0 && (path[index] != ']' && path[index] != ':'))
         --index;
 
     path[index + 1] = 0;
 
     /* check for a version number */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     verflag = FALSE;
     while (point >= 0) {
         if ((c = fspec[point]) == ';') {
@@ -895,7 +895,7 @@ char *    PASCAL NEAR getffile(char *fspec)
     }
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while (point >= 0) {
         if ((c = fspec[point]) == '.') {
@@ -916,7 +916,7 @@ char *    PASCAL NEAR getffile(char *fspec)
         xstrcat(fname, ";*");
 
     pat_desc.dsc$a_pointer = fname;
-    pat_desc.dsc$w_length = strlen(fname);
+    pat_desc.dsc$w_length = STRLEN(fname);
     pat_desc.dsc$b_dtype = DSC$K_DTYPE_T;
     pat_desc.dsc$b_class = DSC$K_CLASS_S;
 
@@ -964,7 +964,7 @@ char *    PASCAL NEAR getnfile()
      * isolate the filename and extension,
      * and append filename/extension on to the original path
      */
-    for (cp = path + strlen(path) - 1; *cp != ']' && cp >= path; cp--)
+    for (cp = path + STRLEN(path) - 1; *cp != ']' && cp >= path; cp--)
         ;
 
     *++cp = 0;
@@ -1140,7 +1140,7 @@ PASCAL    NEAR ffropen(CONST char *fn)
     rab = cc$rms_rab;
 
     fab.fab$l_fna = (char *)fn;
-    fab.fab$b_fns = strlen(fn);
+    fab.fab$b_fns = STRLEN(fn);
     fab.fab$b_fac = FAB$M_GET;
     fab.fab$b_shr = FAB$M_SHRGET;
     fab.fab$l_fop = FAB$M_SQO;
@@ -1187,7 +1187,7 @@ PASCAL    NEAR ffwopen(char *fn, char *mode)
     rab = cc$rms_rab;
 
     fab.fab$l_fna = fn;
-    fab.fab$b_fns = strlen(fn);
+    fab.fab$b_fns = STRLEN(fn);
     fab.fab$b_fac = FAB$M_PUT;  /* writing this file */
     fab.fab$b_shr = FAB$M_NIL;  /* no other writers */
     fab.fab$l_fop = FAB$M_SQO;  /* sequential ops only */
@@ -1379,7 +1379,7 @@ void      PASCAL NEAR expandargs(int *pargc, char ***pargv)
 
     /* loop over all arguments */
     while (argc--) {
-        struct dsc$descriptor filespec = {strlen(*argv), DSC$K_DTYPE_T, DSC$K_CLASS_S, *argv};
+        struct dsc$descriptor filespec = {STRLEN(*argv), DSC$K_DTYPE_T, DSC$K_CLASS_S, *argv};
         unsigned long context = 0;
 
         /* should check for wildcards: %, *, and "..." */

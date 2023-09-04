@@ -379,6 +379,7 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
                         ( (CONST char *)"@NIL@" ) : ( (CONST char *)(s) ) )
 #define NELEM(A)      ( SIZEOF ( (A) )/SIZEOF ( (A)[0] ) )
 #define SIZEOF(e)     ( (int)sizeof(e) )
+#define STRLEN(x)     ( (int)strlen((x)) )
 #define ZEROMEM(x)    ( memset(&(x), 0, SIZEOF((x))) )
 #define MAXIMUM(x, y) ( ((x) < (y))? (y) : (x) )
 #define MINIMUM(x, y) ( ((x) > (y))? (y) : (x) )

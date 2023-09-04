@@ -514,7 +514,7 @@ int ttclose()
 # if ( (AIX == 0 ) && ( TERMIOS == 0) ) || (FREEBSD == 1) || (LINUX == 1)
     /* Restore original terminal modes */
     if ( reset != (char*)NULL )
-        write( 1, reset, strlen(reset) );
+        write( 1, reset, STRLEN(reset) );
 # endif
 
 # if (BSD && !TERMIOS)
@@ -1241,7 +1241,7 @@ char * cmd;                             /* Palette command      */
             return (1);
 
         /* Move color code to capability structure */
-        capbind[CAP_C0 + code].store = malloc(strlen(cp) + 1);
+        capbind[CAP_C0 + code].store = malloc(STRLEN(cp) + 1);
         if ( capbind[CAP_C0 + code].store )
             xstrcpy(capbind[CAP_C0 + code].store, cp);
     }
@@ -1570,14 +1570,14 @@ char *fspec;                            /* Filename specification   */
 
     /* First parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 && (path[index] != '/') )
         --index;
     path[index+1] = '\0';
 
 
     /* Check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point >= 0 ) {
         if ( fspec[point] == '.' ) {
@@ -1599,7 +1599,7 @@ char *fspec;                            /* Filename specification   */
         return (NULL);
 
     xstrcpy(rbuf, path);
-    nameptr = &rbuf[strlen(rbuf)];
+    nameptr = &rbuf[STRLEN(rbuf)];
 
     /* ...and call for the first file */
     return ( getnfile() );
@@ -1687,7 +1687,7 @@ int n;          /* function key number 1...8 on hp-terminals */
         return (status);
 
     lbl[16] = '\0';
-    i = strlen(lbl);
+    i = STRLEN(lbl);
 
     /* set up escape sequence to send to terminal */
     xmit[0] = 0x1b;
@@ -1695,11 +1695,11 @@ int n;          /* function key number 1...8 on hp-terminals */
     xmit[2] = '\0';
 
     sprintf(flabstor[n-1], "%c&f0a%dk%dd2L%s%s", (char)0x1b, n, i, lbl, xmit);
-    write( 1, flabstor[n-1], strlen(flabstor[n-1]) );
+    write( 1, flabstor[n-1], STRLEN(flabstor[n-1]) );
     flabstof[n-1] = 1;
 
     sprintf(buf, "%c&jB", (char)0x1b);
-    write( 1, buf, strlen(buf) );
+    write( 1, buf, STRLEN(buf) );
 
     return (TRUE);
 }
@@ -1715,10 +1715,10 @@ static VOID dis_ufk()
 
     for ( label_num = 0; label_num < 8; label_num++ )
         if ( flabstof[label_num] )
-            write( 1, flabstor[label_num], strlen(flabstor[label_num]) );
+            write( 1, flabstor[label_num], STRLEN(flabstor[label_num]) );
 
     sprintf(buf, "%c&jB", (char)0x1b);
-    write( 1, buf, strlen(buf) );
+    write( 1, buf, STRLEN(buf) );
 }
 
 /* display system function key labels */
@@ -1730,7 +1730,7 @@ static VOID dis_sfk()
         return;
 
     sprintf(buf, "%c&jA", (char)0x1b);
-    write( 1, buf, strlen(buf) );
+    write( 1, buf, STRLEN(buf) );
 }
 # endif /* FLABEL */
 

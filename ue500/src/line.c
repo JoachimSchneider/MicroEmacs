@@ -204,7 +204,7 @@ int PASCAL NEAR linstr P1_(CONST char *, instr)
     status = TRUE;
     if ( instr != NULL && *instr != '\0' ) {
         /* record the insertion for the undo stack.... */
-        undo_insert(OP_ISTR, (long)strlen(instr), obj);
+        undo_insert(OP_ISTR, (long)STRLEN(instr), obj);
 
         /* insert the string one character at a time */
         saved_undo = undoing;
@@ -893,7 +893,7 @@ int PASCAL NEAR addline P2_(BUFFER *,     bp,   /* buffer to add text to  */
     REGISTER int  ntext = 0;
 
     /* allocate the memory to hold the line */
-    ntext = strlen(text);
+    ntext = STRLEN(text);
     if ( ( lp=lalloc(ntext) ) == NULL )
         return (FALSE);
 

@@ -647,7 +647,7 @@ int PASCAL NEAR pipecmd P2_(int, f, int, n)
         filnam[0] = 0;
     else {
         XSTRCPY(filnam, tmp);
-        if ( filnam[strlen(filnam) - 1] != '\\' )
+        if ( filnam[STRLEN(filnam) - 1] != '\\' )
             XSTRCAT(filnam, "\\");
     }
     XSTRCAT(filnam, "command");
@@ -839,8 +839,8 @@ int PASCAL NEAR shellprog P1_(char *, cmd)
     if ( *cmd ) {
         XSTRCPY(comline, shell);
         XSTRCAT(comline, " ");
-        comline[strlen(comline) + 1] = 0;
-        comline[strlen(comline)] = swchar;
+        comline[STRLEN(comline) + 1] = 0;
+        comline[STRLEN(comline)] = swchar;
         XSTRCAT(comline, "c ");
         XSTRCAT(comline, cmd);
 
@@ -899,14 +899,14 @@ static int PASCAL NEAR execprog P1_(CONST char *, cmd)
     /* and parse out the command tail */
     while ( *cmd && ( (*cmd == ' ') || (*cmd == '\t') ) )
         ++cmd;
-    *tail = (char)( strlen(cmd) );   /* record the byte length */
+    *tail = (char)( STRLEN(cmd) );   /* record the byte length */
     xstrlcpy(&tail[1], cmd, SIZEOF(tail) - 1);
     xstrlcat(&tail[1], "\r", SIZEOF(tail) - 1);
 
     /* look up the program on the path trying various extentions */
     if ( ( csp = flook(prog, TRUE) ) == NULL )
         if ( ( csp = flook(XSTRCAT(prog, ".exe"), TRUE) ) == NULL ) {
-            xstrcpy(&prog[strlen(prog)-4], ".com"); /**UNSAFE_OK**/
+            xstrcpy(&prog[STRLEN(prog)-4], ".com"); /**UNSAFE_OK**/
             if ( ( csp = flook(prog, TRUE) ) == NULL )
                 return (FALSE);
         }
@@ -998,7 +998,7 @@ char *PASCAL NEAR timeset P0_()
     time(buf);
     sp = ctime(buf);
 #  endif
-    sp[strlen(sp)-1] = 0;
+    sp[STRLEN(sp)-1] = 0;
 
     return (sp);
 
@@ -1031,14 +1031,14 @@ char *PASCAL NEAR getffile P1_(char *, fspec)
 
     /* first parse the file path off the file spec */
     XSTRCPY(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {
@@ -1114,14 +1114,14 @@ char *PASCAL NEAR getffile P1_(char *, fspec)
 
     /* first parse the file path off the file spec */
     XSTRCPY(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {

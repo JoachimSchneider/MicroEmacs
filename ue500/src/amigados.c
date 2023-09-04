@@ -474,7 +474,7 @@ char *buf;      /* buffer to write out */
 {
     /* initialize the IO request */
     con.io_Data = (APTR)buf;
-    con.io_Length = strlen(buf);
+    con.io_Length = STRLEN(buf);
     con.io_Command = CMD_WRITE;
 
     /* and perform the I/O */
@@ -851,7 +851,7 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;

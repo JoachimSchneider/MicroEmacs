@@ -119,7 +119,7 @@ static int lookup P0_()
 
     ZEROMEM(cpath);
 
-    cp = curbp->b_fname + strlen(curbp->b_fname) - 1;
+    cp = curbp->b_fname + STRLEN(curbp->b_fname) - 1;
 # if     MSDOS
     while ( cp >= curbp->b_fname && *cp != DIRSEPCHAR && *cp != ':' )
 # else
@@ -133,8 +133,8 @@ static int lookup P0_()
     else
         XSTRCPY(cpath, ".");
     /* Append a DIRSEPCHAR character to the path... */
-    if ( strlen(cpath) < NFILEN - 1 )
-        cpath[strlen(cpath)] = DIRSEPCHAR;
+    if ( STRLEN(cpath) < NFILEN - 1 )
+        cpath[STRLEN(cpath)] = DIRSEPCHAR;
 
     while ( curtp != NULL && ( nope = strcmp(curtp->t_path, cpath) ) != 0 )
         curtp = curtp->t_tagp;
@@ -235,7 +235,7 @@ static int alterpattern P1_(REGISTER char *, pattern)
 {
     REGISTER int i = 0;               /* EMACS pattern index  */
     REGISTER int j = 1;               /* VI pattern -skip /or?*/
-    int len = strlen(pattern) - 1;    /* pattern length - 1   */
+    int len = STRLEN(pattern) - 1;    /* pattern length - 1   */
     /* i.e. drop '/' or '?' */
 
     if ( pattern[len - 1] == '$' )
@@ -304,7 +304,7 @@ int tagger P2_(CONST char *, errmsg, int, retag)
     int ok = 1;                         /* Tag search flag  */
     int result = FALSE;         /* Default return value */
     int oldbmode;                       /* For preserving bmode */
-    int taglen = strlen(curtp->t_wd);
+    int taglen = STRLEN(curtp->t_wd);
     int file_ok;                        /* TRUE if file found   */
 
     /* Tell user what we are doing      */

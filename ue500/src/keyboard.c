@@ -500,7 +500,7 @@ int PASCAL NEAR addkeymap P2_(int, f, int, n)
     } else {
         /* get the key sequence */
         mlwrite(": add-keymap ");
-        col = strlen(": add-keymap ");
+        col = STRLEN(": add-keymap ");
         idx = 0;
         for (;; ) {
             c = tgetc();
@@ -611,7 +611,7 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
     KEYENT  *nxtcur = NULL;
 
     /* Skip on null sequences or single character sequences. */
-    if ( seq == NULL || strlen( (char *)seq ) < 2 )
+    if ( seq == NULL || STRLEN( (char *)seq ) < 2 )
         return FALSE;
 
     /* If no keys defined, go directly to insert mode */
@@ -642,7 +642,7 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
     }
 
     /* Check for room in keymap */
-    if ( strlen( (char *)seq ) > NKEYSEQ - (nxtkey - keymap) ) {
+    if ( STRLEN( (char *)seq ) > NKEYSEQ - (nxtkey - keymap) ) {
         mlwrite("No more room for key entries.");
 
         return FALSE;

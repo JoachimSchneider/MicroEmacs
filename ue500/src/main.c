@@ -402,7 +402,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
             if ( cryptflag ) {
                 bp->b_mode |= MDCRYPT;
                 ecrypt( (char *) NULL, 0 );
-                ecrypt( ekey, strlen(ekey) );
+                ecrypt( ekey, STRLEN(ekey) );
                 xstrlcpy(bp->b_key, ekey, SIZEOF(bp->b_key));
             }
 #endif
@@ -1185,7 +1185,7 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
     /* make room!
      * Bail out on error: Old version returned NULL.
      */
-    ASRT(NULL !=(dp = room(strlen(sp) + 1)));
+    ASRT(NULL !=(dp = room(STRLEN(sp) + 1)));
     strcpy(dp, sp);   /**UNSAFE_OK**/
 
     return (dp);

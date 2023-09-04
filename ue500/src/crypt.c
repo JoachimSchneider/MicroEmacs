@@ -47,7 +47,7 @@ int PASCAL NEAR setekey P2_(int, f, int, n)
 
     /* and encrypt it */
     ecrypt( (char *)NULL, (unsigned int) 0 );
-    ecrypt( key, (unsigned int) strlen(key) );
+    ecrypt( key, (unsigned int) STRLEN(key) );
 
     /* and save it off */
     XSTRCPY(curbp->b_key, key);
@@ -109,7 +109,7 @@ int PASCAL NEAR setekey P2_(int, f, int, n)
  *
  *      Then, you "encrypt" your password by calling
  *
- *              ecrypt(pass, strlen(pass))
+ *              ecrypt(pass, STRLEN(pass))
  *
  *      where "pass" is your password string.  Ecrypt() will destroy
  *      the original copy of the password (it becomes encrypted),

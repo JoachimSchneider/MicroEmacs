@@ -699,7 +699,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
 
     XSTRCPY(tbl->patrn, pstring);
 
-    jump_by = strlen(pstring);
+    jump_by = STRLEN(pstring);
 
     for ( j = 0; j < HICHAR; j++ )
         tbl->delta[j] = jump_by;

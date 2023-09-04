@@ -51,16 +51,16 @@ char *undolock P1_(CONST char *, fname)
     char xname[95], c;
 
     for ( lun=4; _getfnam(lun, xname) == 0; lun++ ) {
-        for ( i=0; i<strlen(xname); i++ ) {
+        for ( i=0; i<STRLEN(xname); i++ ) {
             k = i;
-            for ( j=0; j<strlen(fname); j++ ) {
+            for ( j=0; j<STRLEN(fname); j++ ) {
                 c = fname[j];
                 if ( is_lower(c) ) c = toupper(c);
                 if ( c == xname[k] ) { ++k; continue; }
                 if ( c == '\0' ) break;
                 break;
             }
-            if ( j == strlen(fname) ) {
+            if ( j == STRLEN(fname) ) {
                 _close(lun, 0);
 
                 return (NULL);
@@ -117,7 +117,7 @@ COMMON int errno;
  */
 static CONST char *parse_name P1_(CONST char *, filespec)
 {
-    CONST char  *rname  = &filespec[strlen(filespec) - 1];
+    CONST char  *rname  = &filespec[STRLEN(filespec) - 1];
 
     while ( rname >= filespec ) {
         if ( *rname == DIRSEPCHAR || *rname == DRIVESEPCHAR ) {
@@ -146,7 +146,7 @@ static char *parse_path P1_(CONST char *, filespec)
     XSTRCPY(rbuff, filespec);
 
     /* starting from the end */
-    rname = &rbuff[strlen(rbuff)-1];
+    rname = &rbuff[STRLEN(rbuff)-1];
 
     /* scan for a directory separator */
     while ( rname >= rbuff ) {
@@ -211,7 +211,7 @@ static VOID term_trim P1_(char *, buf)
 {
     char *c;  /* ptr to current character to examine */
 
-    c = buf + strlen(buf) - 1;
+    c = buf + STRLEN(buf) - 1;
     while ( (c >= buf) &&
             ( (*c == '\r') || (*c == '\n') || (*c == ' ') || (*c == '\t') ) ) {
         *c = 0;

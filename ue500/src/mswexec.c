@@ -200,7 +200,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
                                      10,
                                      IniFile);
 
-            if ( ( strlen (FullCmd) + strlen (ExecOption) + strlen (Cmd) ) >=
+            if ( ( STRLEN (FullCmd) + STRLEN (ExecOption) + STRLEN (Cmd) ) >=
                  CMDLENGTH ) return FALSE;
 
             xstrcat (FullCmd, ExecOption);
@@ -244,7 +244,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
          * DOSExec should be similar but specify "Close window on exit" so that
          * synchronization can work */
         if ( Cmd ) {
-            if ( (strlen (FullCmd) + strlen (Cmd) + 4) >=
+            if ( (STRLEN (FullCmd) + STRLEN (Cmd) + 4) >=
                  CMDLENGTH ) return FALSE;
 
             xstrcat (FullCmd, " /c ");
@@ -252,14 +252,14 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
         }
 #endif
         if ( InFile ) {
-            if ( (strlen (FullCmd) + strlen (InFile) + 2) >=
+            if ( (STRLEN (FullCmd) + STRLEN (InFile) + 2) >=
                  CMDLENGTH ) return FALSE;
 
             xstrcat (FullCmd, " <");
             xstrcat (FullCmd, InFile);
         }
         if ( OutFile ) {
-            if ( (strlen (FullCmd) + strlen (OutFile) + 2) >=
+            if ( (STRLEN (FullCmd) + STRLEN (OutFile) + 2) >=
                  CMDLENGTH ) return FALSE;
 
             xstrcat (FullCmd, " >");

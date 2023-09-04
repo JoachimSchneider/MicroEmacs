@@ -1539,7 +1539,7 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    ASRT(NULL != (s = (char *)calloc(strlen(s2) + 1, SIZEOF (char))));
+    ASRT(NULL != (s = (char *)calloc(STRLEN(s2) + 1, SIZEOF (char))));
     strcpy(s, s2);
     strcpy(s1, s);
     FREE(s);
@@ -1562,7 +1562,7 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
         } else if ( s1 >  s2 )  {
             int i = 0;
 
-            for ( i = strlen(s2); i >= 0; i-- ) {
+            for ( i = STRLEN(s2); i >= 0; i-- ) {
                 s1[i] = s2[i];
             }
         } else                  { /* Possible on e.g. OS/400 */
@@ -1601,7 +1601,7 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    l2  = strlen(s2);
+    l2  = STRLEN(s2);
     l2  = MAX2(l2, n);
     ASRT(NULL !=(s  = (char *)calloc( l2 + 1, SIZEOF (char) )));
     strncpy(s, s2, n);  /* This will always succedd and result in
@@ -1618,7 +1618,7 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
     if ( NULL != s1 && NULL != s2 ) {
         int l2  = 0;
 
-        l2  = strlen(s2) + 1;
+        l2  = STRLEN(s2) + 1;
         if        ( s1 <  s2 )  {
             int ncpy  = MIN2(l2, n);
             int i     = 0;
@@ -1667,7 +1667,7 @@ char *PASCAL NEAR xstrcat P2_(char *, s1, CONST char *, s2)
 {
     int l = 0;
 
-    l = (NULL == s1)? 0 : strlen(s1);
+    l = (NULL == s1)? 0 : STRLEN(s1);
 
     return xstrcpy(s1 + l, s2);
 }
@@ -1687,7 +1687,7 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
         /* Characters (not counting the terminating '\0') to copy:  */
         int ncpy  = 0;
 
-        l2    = strlen(s2);
+        l2    = STRLEN(s2);
         ncpy  = MIN2(l2, n - 1);
 
         if ( 0 > ncpy ) {
@@ -1748,7 +1748,7 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
 {
     int l   = 0;
 
-    l = (NULL == s1)? 0 : strlen(s1);
+    l = (NULL == s1)? 0 : STRLEN(s1);
 
     return xstrlcpy(s1 + l, s2, n - l) + l;
 }
@@ -2000,7 +2000,7 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
         len = 1 + 1;
         ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
     } else {
-        len = strlen(str) + 1 + 1;
+        len = STRLEN(str) + 1 + 1;
         ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
     }
     nstr[len - 2]  = c;
@@ -2019,14 +2019,14 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
     char  *nstr     = NULL;
     int   len       = 0;
     CONST char  *xs = (NULL == s)? "" : s;
-    int   slen      = strlen(xs);
+    int   slen      = STRLEN(xs);
 
     if ( NULL == str ) {
         len = slen + 1;
         ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
         strcpy(nstr, xs);
     } else {
-        len = strlen(str) + slen + 1;
+        len = STRLEN(str) + slen + 1;
         ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
         strcat(nstr, xs);
     }
@@ -2633,7 +2633,7 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
         if ( NULL != (cp  = (char *)strchr(ip, ' ')) )  {
             ncol  += ((CONST char *)cp - ip) + 1;
         } else {
-            ncol  += strlen(ip) + 1;
+            ncol  += STRLEN(ip) + 1;
         }
 
         if ( fcol <= ncol ) {
@@ -2713,7 +2713,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
 
         nsp = 0;
         ncr = 0;
-        if ( 0 < (l = strlen(text)) ) {
+        if ( 0 < (l = STRLEN(text)) ) {
             char  *cp = &text[l - 1];
 
             while ( 0 < l && ISSPACE(*cp) ) {
@@ -2732,7 +2732,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
         naft  = ncr;
     }
 
-    sflag = ( rstart && 0 < strlen(rstart) );
+    sflag = ( rstart && 0 < STRLEN(rstart) );
 
     /* start: It contains the string wich will be prepended to every
      *        line:
@@ -2812,7 +2812,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
         res = astrcat(res, "\r\r");
 
         if ( NULL == (lptr  = xstrtok_r(NULL, "\r", &context)) )  {
-            int l = strlen(res) - 1;
+            int l = STRLEN(res) - 1;
 
             for ( ; 0 <= l && ISSPACE(res[l]); l-- )  {
                 res[l]  = '\0';

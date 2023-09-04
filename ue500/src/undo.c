@@ -321,7 +321,7 @@ int PASCAL NEAR undolist P0_()
 
         /* and the offset into the line */
         XSTRCPY( b, int_asc(up->offset) );
-        while ( strlen(b) < 6 )
+        while ( STRLEN(b) < 6 )
             XSTRCAT(b, " ");
         cp2 = &b[0];
         while ( *cp2 )
@@ -330,7 +330,7 @@ int PASCAL NEAR undolist P0_()
 
         /* and the count */
         XSTRCPY( b, int_asc(up->count) );
-        while ( strlen(b) < 3 )
+        while ( STRLEN(b) < 3 )
             XSTRCAT(b, " ");
         cp2 = &b[0];
         while ( *cp2 )

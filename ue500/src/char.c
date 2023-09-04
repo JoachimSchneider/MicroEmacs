@@ -289,7 +289,7 @@ char *strrev P1_(char *, our_str)
     REGISTER char the_char;
 
     end_str = beg_str = our_str;
-    end_str += strlen(beg_str);
+    end_str += STRLEN(beg_str);
 
     do {
         the_char = *--end_str;

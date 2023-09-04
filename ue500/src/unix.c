@@ -515,7 +515,7 @@ int ttclose P0_()
 # if ( !AIX  )
     /* Restore original terminal modes */
     if ( reset != (char*)NULL )
-        write( 1, reset, strlen(reset) );
+        write( 1, reset, STRLEN(reset) );
 # endif
 
 # if ( USE_TERMIO_IOCTL )
@@ -1180,7 +1180,7 @@ int spal P1_(char *, cmd)
             return (1);
 
         /* Move color code to capability structure */
-        capbind[CAP_C0 + code].store = (char *)malloc(strlen(cp) + 1);
+        capbind[CAP_C0 + code].store = (char *)malloc(STRLEN(cp) + 1);
         if ( capbind[CAP_C0 + code].store ) {
             XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
@@ -1603,7 +1603,7 @@ static int makecmdbname P4_(char *,       bname,
         }
     }
     xcmd = xstrdup(&cmd[i0]);
-    i = strlen(xcmd);
+    i = STRLEN(xcmd);
     while ( 0 < i ) {
         if ( IsSpace(xcmd[i - 1]) ) {
             xcmd[i - 1] = '\0';
@@ -1851,14 +1851,14 @@ char *getffile P1_(char *, fspec)
 
     /* First parse the file path off the file spec */
     XSTRCPY(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 && (path[index] != '/') )
         --index;
     path[index+1] = '\0';
 
 
     /* Check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     while ( point >= 0 ) {
         if ( fspec[point] == '.' ) {
             break;
@@ -1878,7 +1878,7 @@ char *getffile P1_(char *, fspec)
         return (NULL);
 
     XSTRCPY(rbuf, path);
-    nameptr = &rbuf[strlen(rbuf)];
+    nameptr = &rbuf[STRLEN(rbuf)];
 
     /* ...and call for the first file */
     return ( getnfile() );
@@ -1969,7 +1969,7 @@ int fnclabel P2_(int, f, int, n)
         return (status);
 
     lbl[16] = '\0';
-    i = strlen(lbl);
+    i = STRLEN(lbl);
 
     /* set up escape sequence to send to terminal */
     xmit[0] = 0x1b;
@@ -1977,11 +1977,11 @@ int fnclabel P2_(int, f, int, n)
     xmit[2] = '\0';
 
     sprintf(flabstor[n-1], "%c&f0a%dk%dd2L%s%s", (char)0x1b, n, i, lbl, xmit);
-    write( 1, flabstor[n-1], strlen(flabstor[n-1]) );
+    write( 1, flabstor[n-1], STRLEN(flabstor[n-1]) );
     flabstof[n-1] = 1;
 
     sprintf(buf, "%c&jB", (char)0x1b);
-    write( 1, buf, strlen(buf) );
+    write( 1, buf, STRLEN(buf) );
 
     return (TRUE);
 }
@@ -1997,10 +1997,10 @@ static VOID dis_ufk P0_()
 
     for ( label_num = 0; label_num < 8; label_num++ )
         if ( flabstof[label_num] )
-            write( 1, flabstor[label_num], strlen(flabstor[label_num]) );
+            write( 1, flabstor[label_num], STRLEN(flabstor[label_num]) );
 
     sprintf(buf, "%c&jB", (char)0x1b);
-    write( 1, buf, strlen(buf) );
+    write( 1, buf, STRLEN(buf) );
 }
 
 /* display system function key labels */
@@ -2012,7 +2012,7 @@ static VOID dis_sfk P0_()
         return;
 
     sprintf(buf, "%c&jA", (char)0x1b);
-    write( 1, buf, strlen(buf) );
+    write( 1, buf, STRLEN(buf) );
 }
 
 # endif /* FLABEL */

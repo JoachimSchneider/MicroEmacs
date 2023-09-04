@@ -282,7 +282,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( bytecopy( result, arg1, asc_int(arg2) ) );
 
     case UFLENGTH:
-        RETURN ( int_asc( strlen(arg1) ) );
+        RETURN ( int_asc( STRLEN(arg1) ) );
 
     case UFLESS:
         RETURN ( ltos( asc_int(arg1) < asc_int(arg2) ) );
@@ -292,7 +292,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFMID:
         arg = asc_int(arg2);
-        if ( arg > strlen(arg1) )
+        if ( arg > STRLEN(arg1) )
             RETURN ( XSTRCPY(result, "") );
 
         /***TODO: OVERWRITE POSSIBLE***/
@@ -342,10 +342,10 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     case UFRIGHT:
         arg = asc_int(arg2);
-        if ( arg > strlen(arg1) )
-            arg = strlen(arg1);
+        if ( arg > STRLEN(arg1) )
+            arg = STRLEN(arg1);
 
-        RETURN ( XSTRCPY(result, &arg1[strlen(arg1) - arg]) );
+        RETURN ( XSTRCPY(result, &arg1[STRLEN(arg1) - arg]) );
 
     case UFRND:
         RETURN ( int_asc( (int)( ernd() % (long)absv( asc_int(arg1) ) ) +
@@ -408,7 +408,7 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 
     vnameL  = xstrdup(vname);
     /* limit comparisons to significant length */
-    if ( strlen(vnameL) >= NVSIZE )     /* "%" counts, but is not passed */
+    if ( STRLEN(vnameL) >= NVSIZE )     /* "%" counts, but is not passed */
         vnameL[NVSIZE] = '\0';
 
     /* scan through each user variable table starting with the most local and
@@ -922,7 +922,7 @@ char *PASCAL NEAR trimstr P1_(char *, s)
 {
     char *sp;           /* backward index */
 
-    sp = s + strlen(s) - 1;
+    sp = s + STRLEN(s) - 1;
     while ( (sp >= s) && (*sp == ' ' || *sp == '\t') )
         --sp;
     *(sp+1) = 0;
@@ -2453,7 +2453,7 @@ VOID PASCAL NEAR pad P2_(char *, s, int, len)
 /* s:   String to add spaces to */
 /* len: Wanted length of string */
 {
-    while ( strlen(s) < len ) {
+    while ( STRLEN(s) < len ) {
         XSTRCAT(s, "          ");
         s[len] = 0;
     }

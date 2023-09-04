@@ -177,7 +177,7 @@ PASCAL NEAR pipecmd(f, n)
         filnam[0] = 0;
     else {
         xstrcpy(filnam, tmp);
-        if ( filnam[strlen(filnam) - 1] != '\\' )
+        if ( filnam[STRLEN(filnam) - 1] != '\\' )
             xstrcat(filnam, "\\");
     }
     xstrcat(filnam, "eXXXXXX");
@@ -259,7 +259,7 @@ PASCAL NEAR f_filter(f, n)
     else {
         xstrcpy(filnam1, tmp);
         xstrcpy(filnam2, tmp);
-        if ( filnam1[strlen(filnam1) - 1] != '\\' ) {
+        if ( filnam1[STRLEN(filnam1) - 1] != '\\' ) {
             xstrcat(filnam1, "\\");
             xstrcat(filnam2, "\\");
         }
@@ -408,14 +408,14 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {
@@ -473,7 +473,7 @@ char *PASCAL NEAR timeset()
 
     time(buf);
     sp = ctime(buf);
-    sp[strlen(sp)-1] = 0;
+    sp[STRLEN(sp)-1] = 0;
 
     return (sp);
 }

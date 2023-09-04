@@ -385,7 +385,7 @@ char *PASCAL NEAR timeset()
 
     time(buf);
     sp = ctime(buf);
-    sp[strlen(sp)-1] = 0;
+    sp[STRLEN(sp)-1] = 0;
 
     return (sp);
 }
@@ -410,7 +410,7 @@ char *fspec;    /* file to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(xpath, fspec);
-    index = strlen(xpath) - 1;
+    index = STRLEN(xpath) - 1;
     while ( index >= 0 &&
             (xpath[index] != '/' &&xpath[index] != '\\' &&
              xpath[index] != ':') )
@@ -418,7 +418,7 @@ char *fspec;    /* file to match */
     xpath[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point >= index ) {
         if ( fspec[point] == '.' ) {
@@ -484,7 +484,7 @@ char *cmd;      /* command to execute */
     *pptr = 0;
 
     /* create program name length/string */
-    tail[0] = strlen(cmd);
+    tail[0] = STRLEN(cmd);
     xstrcpy(&tail[1], cmd);
 
     /* go do it! */

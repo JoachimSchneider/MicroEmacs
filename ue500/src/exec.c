@@ -763,7 +763,7 @@ nxtscan:        /* on to the next line */
         /* if macro store is on, just salt this away */
         if ( mstore ) {
             /* allocate the space for the line */
-            linlen = strlen(eline);
+            linlen = STRLEN(eline);
             if ( ( mp=lalloc(linlen) ) == NULL ) {
                 errormesg(TEXT125, bp, lp);
 /*                                      "Out of memory while storing macro" */
@@ -870,7 +870,7 @@ nxtscan:        /* on to the next line */
 #endif
                     /* grab label to jump to */
                     eline = token(eline, golabel, NPAT);
-                    linlen = strlen(golabel);
+                    linlen = STRLEN(golabel);
                     glp = lforw(hlp);
                     while ( glp != hlp ) {
                         if ( (get_lused(glp) >= linlen) &&

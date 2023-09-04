@@ -74,10 +74,11 @@
 /*====================================================================*/
 /* Static functions declared here:                                    */
 /*====================================================================*/
-static CONST char *PASCAL NEAR complete DCL((CONST char *prompt,
-                                             CONST char *defval,
-                                             int        type,
-                                             int        maxlen));
+/* MSDOS and OS/2 change '/' to '\' in returned (static) buffer */
+static char *PASCAL NEAR  complete DCL((CONST char *prompt,
+                                        CONST char *defval,
+                                        int        type,
+                                        int        maxlen));
 /*====================================================================*/
 
 
@@ -230,7 +231,7 @@ CONST char *PASCAL NEAR gtfilename P1_(CONST char *, prompt)
     if ( !FILENAMEREPLY(prompt, sp, NFILEN) )
         return NULL;
 #else
-    CONST char  *sp = NULL;   /* ptr to the returned string */
+    char  *sp = NULL;   /* ptr to the returned string */
 
     /* get a file name, default to current buffer's */
     if ( curbp && strcmp(curbp->b_fname, "") != 0 )
@@ -533,7 +534,7 @@ VOID PASCAL NEAR comp_file P2_(char *, name, int *,  cpos)
             /* if this is the first match, simply record it */
             if ( matches == 1 ) {
                 XSTRCPY(longestmatch, fname);
-                longestlen = strlen(longestmatch);
+                longestlen = STRLEN(longestmatch);
             } else {
 
                 /* if there's a difference, stop here */
@@ -972,7 +973,7 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, CONST char *, dflt,
 
     /* show the passed in prompt */
     mlwrite(prompt);
-    tcol = strlen(prompt);
+    tcol = STRLEN(prompt);
 
     /* If there's a default, put it in brackets and show it. */
     if ( dflt != NULL && *dflt != '\0' ) {
@@ -996,7 +997,7 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, CONST char *, dflt,
 
     default:
         mlputs( cmdstr(iterm, buf) );
-        tcol += strlen(buf) + 4;
+        tcol += STRLEN(buf) + 4;
     }
     mlputs(">: ");
     movecursor(term.t_nrow, tcol);      /* Position the cursor  */
@@ -1077,10 +1078,11 @@ int PASCAL NEAR echochar P1_(unsigned char, c /* character to be echoed */)
 /*====================================================================*/
 /* Static functions defined here:                                     */
 /*====================================================================*/
-static CONST char *PASCAL NEAR complete P4_(CONST char *,  prompt,
-                                            CONST char *,  defval,
-                                            int,           type,
-                                            int,           maxlen)
+/* MSDOS and OS/2 change '/' to '\' in returned (static) buffer */
+static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
+                                       CONST char *,  defval,
+                                       int,           type,
+                                       int,           maxlen)
 /* prompt:  Prompt to user on command line    */
 /* defval:  Default value to display to user  */
 /* type:    Type of what we are completing    */

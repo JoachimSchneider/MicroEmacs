@@ -128,11 +128,9 @@ char *trans1[][2] = {
 FILE *infile;   /* current input file handle */
 FILE *outfile;  /* current output file handle */
 
-int main(argc, argv)
-
-int argc;       /* number of command line arguments */
-char *argv[];   /* text of command line arguments */
-
+int main P2_(int, argc, char **, argv)
+/* argc:  Number of command line arguments  */
+/* argv:  Text of command line arguments    */
 {
     REGISTER int carg;  /* current command line argument */
 

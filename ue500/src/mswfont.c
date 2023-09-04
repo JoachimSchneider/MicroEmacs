@@ -95,17 +95,17 @@ static VOID PASCAL UpdateSample (HWND       hDlg,
     char c;
 
     xstrcpy (SampleText, FaceName);
-    i = strlen (SampleText);
+    i = STRLEN (SampleText);
     xstrcpy (&SampleText[i], " (Height=");
-    i += strlen (&SampleText[i]);
+    i += STRLEN (&SampleText[i]);
     itoa (m->tmHeight, &SampleText[i], 10);
-    i += strlen (&SampleText[i]);
+    i += STRLEN (&SampleText[i]);
     xstrcpy (&SampleText[i], ", Width=");
-    i += strlen (&SampleText[i]);
+    i += STRLEN (&SampleText[i]);
     itoa (m->tmAveCharWidth, &SampleText[i], 10);
-    i += strlen (&SampleText[i]);
+    i += STRLEN (&SampleText[i]);
     xstrcpy (&SampleText[i], ") sample:");
-    i += strlen (&SampleText[i]);
+    i += STRLEN (&SampleText[i]);
     for ( c = 'A'; c <= 'Z'; c++ ) {
         SampleText[i++] = ' ';
         SampleText[i++] = c;
@@ -362,7 +362,7 @@ static VOID PASCAL AddFace (HWND hDlg, char *CandidateFace)
                                  (LPARAM)CandidateFace);
         if ( At == LB_ERR ) break;  /* no match, implies not duplicate */
         if ( SendDlgItemMessage (hDlg, ID_FONT, LB_GETTEXTLEN, At,
-                                 0L) ==strlen(CandidateFace) ) {
+                                 0L) ==STRLEN(CandidateFace) ) {
             /* the lengths match, that means the strings match so it is indeed a
              * duplicate */
             return;

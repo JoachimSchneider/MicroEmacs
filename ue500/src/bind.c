@@ -116,8 +116,8 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
 /*          ": bind-to-key " */
     if ( kfunc == NULL ) {
         mlwrite(TEXT16);
-
 /*          "[No such function]" */
+
         return (FALSE);
     }
     if ( clexec == FALSE ) {
@@ -126,12 +126,10 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
     }
 
     /* get the command sequence to bind */
-    c =
-        getckey( (kfunc == f_meta) || (kfunc == cex) ||(kfunc == unarg) ||
-                 (kfunc == ctrlg) );
+    c = getckey( (kfunc == f_meta) || (kfunc == cex) || (kfunc == unarg)
+                                   || (kfunc == ctrlg) );
 
     if ( clexec == FALSE ) {
-
         /* change it to something we can print as well */
         /* and dump it out */
         ostring( cmdstr(c, &outseq[0]) );
@@ -139,7 +137,6 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
 
     /* if the function is a unique prefix key */
     if ( kfunc == unarg || kfunc == ctrlg || kfunc == quote ) {
-
         /* search for an existing binding for the prefix key */
         ktp = &keytab[0];
         while ( ktp->k_type != BINDNUL ) {
@@ -160,8 +157,8 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
     /* search the table to see if it exists */
     ktp = &keytab[0];
     found = FALSE;
-    while ( ktp->k_type != BINDNUL ) {
-        if ( ktp->k_code == c ) {
+    while ( ktp->k_type != BINDNUL )  {
+        if ( ktp->k_code == (int)c )  {
             found = TRUE;
             break;
         }
@@ -246,8 +243,8 @@ int PASCAL NEAR macrotokey P2_(int, f, int, n)
     /* search the table to see if it exists */
     ktp = &keytab[0];
     found = FALSE;
-    while ( ktp->k_type != BINDNUL ) {
-        if ( ktp->k_code == c ) {
+    while ( ktp->k_type != BINDNUL )  {
+        if ( ktp->k_code == (int)c )  {
             found = TRUE;
             break;
         }
@@ -444,7 +441,7 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
 
         /* add in the command name */
         XSTRCPY(outseq, nptr->n_name);
-        cpos = strlen(outseq);
+        cpos = STRLEN(outseq);
 
         /* if we are executing an apropos command..... */
         if ( type == FALSE &&
@@ -494,7 +491,7 @@ fail:   /* and on to the next name */
 
         /* add in the command name */
         XSTRCPY(outseq, bp->b_bname);
-        cpos = strlen(outseq);
+        cpos = STRLEN(outseq);
 
         /* if we are executing an apropos command..... */
         if ( type == FALSE &&

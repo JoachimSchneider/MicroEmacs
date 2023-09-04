@@ -407,7 +407,7 @@ char *to_nam;       /* rename to name */
     resolve_full_pathname(ftmp, ftmp);
     resolve_full_pathname(ttmp, ttmp);
 
-    ac1.cptr = ttmp + ( SIZEOF (char) * strlen(ttmp) );
+    ac1.cptr = ttmp + ( SIZEOF (char) * STRLEN(ttmp) );
     while ( (ac1.cptr >= ttmp) && (*ac1.cptr != ':') && (*ac1.cptr != '=') )
         --ac1.cptr;
 
@@ -771,7 +771,7 @@ int pipecmd(f, n)
     ac0.ulng = -1L;
     ac1.ulng = -1L;
     sys($GUNM, &ac0, &ac1, &ac2);     /* get our user name */
-    ac0.cptr = &acl_buf[strlen(acl_buf)];
+    ac0.cptr = &acl_buf[STRLEN(acl_buf)];
     ac0.cptr++;
     *ac0.cptr = ($FACO | $FACW | $FACA | $FACR);  /* specify the ACL */
     ac0.cptr++;
@@ -884,7 +884,7 @@ char *PASCAL NEAR timeset()
     ac1.lng /= 32768L;
     tvec[1] = (int)(ac1.lng/2L);
     sp = dg_ctime(tvec);
-    sp[ strlen(sp)-1 ] = NULL;
+    sp[ STRLEN(sp)-1 ] = NULL;
 
     return (sp);
 }
@@ -1638,7 +1638,7 @@ DIR *dir_stream;
         /* load the direct struct values */
         dptr->d_ino = (long) aosvs$bsd_gnfn_pkt.nfky;   /* fake an inode */
         dptr->d_reclen = SIZEOF (struct direct);         /* why? why not? */
-        dptr->d_namlen = strlen(dptr->d_name);          /* handy to have */
+        dptr->d_namlen = STRLEN(dptr->d_name);          /* handy to have */
 
         return (dptr);
     }
@@ -1885,7 +1885,7 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(gnfnpath, fspec);
-    index = strlen(gnfnpath) - 1;
+    index = STRLEN(gnfnpath) - 1;
     while ( index >= 0 &&
             (gnfnpath[index] != '/' &&gnfnpath[index] != '\\' &&
              gnfnpath[index] != ':') )

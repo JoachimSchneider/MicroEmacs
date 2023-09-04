@@ -283,7 +283,7 @@ int f, n;
         filnam[0] = 0;
     else {
         xstrcpy(filnam, tmp);
-        if ( filnam[strlen(filnam) - 1] != '\\' )
+        if ( filnam[STRLEN(filnam) - 1] != '\\' )
             xstrcat(filnam, "\\");
     }
     xstrcat(filnam, "command");
@@ -472,8 +472,8 @@ char *cmd;      /*  Incoming command line to execute  */
     if ( *cmd ) {
         xstrcpy(comline, shell);
         xstrcat(comline, " ");
-        comline[strlen(comline) + 1] = 0;
-        comline[strlen(comline)] = swchar;
+        comline[STRLEN(comline) + 1] = 0;
+        comline[STRLEN(comline)] = swchar;
         xstrcat(comline, "c ");
         xstrcat(comline, cmd);
 
@@ -521,14 +521,14 @@ char *cmd;      /*  Incoming command line to execute  */
     /* and parse out the command tail */
     while ( *cmd && ( (*cmd == ' ') || (*cmd == '\t') ) )
         ++cmd;
-    *tail = (char)( strlen(cmd) );   /* record the byte length */
+    *tail = (char)( STRLEN(cmd) );   /* record the byte length */
     xstrcpy(&tail[1], cmd);
     xstrcat(&tail[1], "\r");
 
     /* look up the program on the path trying various extentions */
     if ( ( sp = flook(prog, TRUE) ) == NULL )
         if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
-            xstrcpy(&prog[strlen(prog)-4], ".com");
+            xstrcpy(&prog[STRLEN(prog)-4], ".com");
             if ( ( sp = flook(prog, TRUE) ) == NULL )
                 return (FALSE);
         }
@@ -617,7 +617,7 @@ char *PASCAL NEAR timeset()
     time(buf);
     sp = ctime(buf);
 #  endif
-    sp[strlen(sp)-1] = 0;
+    sp[STRLEN(sp)-1] = 0;
 
     return (sp);
 
@@ -648,14 +648,14 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {
@@ -727,14 +727,14 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {

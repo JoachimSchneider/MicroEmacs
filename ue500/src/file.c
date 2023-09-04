@@ -163,11 +163,11 @@ int PASCAL NEAR resetkey P0_()
         /* and set up the key to be used! */
         /* de-encrypt it */
         ecrypt( (char *)NULL, 0 );
-        ecrypt( curbp->b_key, strlen(curbp->b_key) );
+        ecrypt( curbp->b_key, STRLEN(curbp->b_key) );
 
         /* re-encrypt it...seeding it to start */
         ecrypt( (char *)NULL, 0 );
-        ecrypt( curbp->b_key, strlen(curbp->b_key) );
+        ecrypt( curbp->b_key, STRLEN(curbp->b_key) );
     }
 
     return (TRUE);
@@ -221,7 +221,7 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
 
             XSTRCPY(prompt, TEXT136);
 /*                     "Buffer name: " */
-            xstrcpy(&prompt[strlen(prompt) - 2], "[");
+            xstrcpy(&prompt[STRLEN(prompt) - 2], "[");
             XSTRCAT(prompt, bname);
             XSTRCAT(prompt, "]: ");
             s = mlreply(prompt, bname, NBUFN);
@@ -453,7 +453,7 @@ CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
 #endif
     /* cp1 is pointing to the first real filename char in fnameA */
     /* Reset cp1 to the aquivalent position in fname: */
-    cp1 = fname + strlen(fname) - ((CONST char *)fnameA + strlen(fnameA) - cp1);
+    cp1 = fname + STRLEN(fname) - ((CONST char *)fnameA + STRLEN(fnameA) - cp1);
     pathp = cp1;
 
     cp2 = &bname[0];

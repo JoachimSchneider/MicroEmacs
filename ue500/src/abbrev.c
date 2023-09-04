@@ -59,7 +59,7 @@ VOID PASCAL NEAR ab_expand P0_()
     if ( ( exp = ab_lookup(ab_word) ) != NULL ) {
 
         /* backwards delete the symbol */
-        ldelete(-( (long)strlen(ab_word) ), FALSE);
+        ldelete(-( (long)STRLEN(ab_word) ), FALSE);
 
         /* and insert its expansion */
         while ( *exp ) {
@@ -301,7 +301,7 @@ int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
     ABBREV *cur_node;           /* pointer to travel down list */
 
     /* nothing longer than MAXSYM please */
-    if ( strlen(sym) > MAXSYM )
+    if ( STRLEN(sym) > MAXSYM )
         sym[MAXSYM + 1] = 0;
 
     /* is this already defined? */
@@ -309,7 +309,7 @@ int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
         ab_delete(sym);
 
     /* allocate a new node to hold abbreviation */
-    new_node = (ABBREV *)room(SIZEOF(ABBREV) + strlen(expansion) +1);
+    new_node = (ABBREV *)room(SIZEOF(ABBREV) + STRLEN(expansion) +1);
     if ( new_node == NULL )
         return (FALSE);
 

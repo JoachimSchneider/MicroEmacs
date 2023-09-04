@@ -491,7 +491,7 @@ int PASCAL NEAR screenlist P1_(int, iflag)
             XSTRCPY(bname, wp->w_bufp->b_bname);
 
             /* handle full lines */
-            if ( strlen(line) + strlen(bname) + 1 > 78 ) {
+            if ( STRLEN(line) + STRLEN(bname) + 1 > 78 ) {
                 if ( addline(slistp, line) == FALSE )
                     return (FALSE);
 
@@ -499,7 +499,7 @@ int PASCAL NEAR screenlist P1_(int, iflag)
             }
 
             /* append this buffer name */
-            if ( strlen(line) > 15 )
+            if ( STRLEN(line) > 15 )
                 XSTRCAT(line, " ");
             XSTRCAT(line, bname);
 

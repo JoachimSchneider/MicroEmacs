@@ -47,7 +47,7 @@ COMMON NOSHARE TERM term; /* Terminal information.    */
 # define INIT_(x)         = x
 # define NOSZ_
 #else
-# ifdef __cplusplus
+# if defined(__cplusplus) && !(TURBO && MSDOS)
 #   define CSTDEF         CONST
 #   define INIT_CST_(x)   = x
 # else

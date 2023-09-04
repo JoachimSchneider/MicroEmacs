@@ -172,7 +172,7 @@ int ttclose()
 {
     /* Restore original terminal modes */
     if ( reset != (char*)NULL )
-        write( STDOUT_FILENO, reset, strlen(reset) );
+        write( STDOUT_FILENO, reset, STRLEN(reset) );
 
     /* Set tty mode */
     if ( tcsetattr(STDIN_FILENO, TCSANOW, &oldterm) )
@@ -216,7 +216,7 @@ int fn;                                 /* Resulting keycode  */
         return;
 
     /* Skip single character sequences */
-    if ( strlen(seq) < 2 )
+    if ( STRLEN(seq) < 2 )
         return;
 
     /* If no keys defined, go directly to insert mode */
@@ -251,7 +251,7 @@ int fn;                                 /* Resulting keycode  */
     }
 
     /* Check for room in keymap */
-    if ( strlen(seq) > NKEYENT - (nxtkey - keymap) )
+    if ( STRLEN(seq) > NKEYENT - (nxtkey - keymap) )
         return;
 
     /* If first character in sequence is inserted, add to prefix table */
@@ -712,7 +712,7 @@ char *fspec;                            /* Filename specification */
 
     /* First parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
@@ -720,7 +720,7 @@ char *fspec;                            /* Filename specification */
 
 
     /* Check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point >= 0 ) {
         if ( fspec[point] == '.' ) {
@@ -742,7 +742,7 @@ char *fspec;                            /* Filename specification */
         return (NULL);
 
     xstrcpy(rbuf, path);
-    nameptr = &rbuf[strlen(rbuf)];
+    nameptr = &rbuf[STRLEN(rbuf)];
 
     /* ...and call for the first file */
     return ( getnfile() );

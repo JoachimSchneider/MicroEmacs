@@ -98,7 +98,7 @@ int PASCAL NEAR replaces P3_(int, kind, int, f, int, n)
     /* Set up flags so we can make sure not to do a recursive replace on the
      * last line.
      */
-    nlflag = (pat[strlen( (char *)pat ) - 1] == '\r');
+    nlflag = (pat[STRLEN( (char *)pat ) - 1] == '\r');
     nlrepl = FALSE;
 
     /* Save original . position, reset the number of matches and substitutions,
@@ -313,11 +313,11 @@ VOID PASCAL NEAR mlrquery P0_()
     mlwrite(TEXT87);
 /*      "Replace '" */
 
-    tcol = echostring(patmatch, strlen(TEXT87), NPAT / 2);
+    tcol = echostring(patmatch, STRLEN(TEXT87), NPAT / 2);
 
     mlputs(TEXT88);
 /*      "' with '" */
-    tcol += strlen(TEXT88);
+    tcol += STRLEN(TEXT88);
 
 #if     MAGIC
     if ( rmagical && (curwp->w_bufp->b_mode & MDMAGIC) ) {
@@ -370,14 +370,14 @@ int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
                 status = linstr(rstr = patmatch);
             else
                 status = linstr( rstr = fixnull(grpmatch[rmcptr->u.group_no]) );
-            replen += strlen(rstr);
+            replen += STRLEN(rstr);
             rmcptr++;
         }
     } else
 #endif
     {
         status = linstr(instr);
-        replen = strlen(instr);
+        replen = STRLEN(instr);
     }
 
     return (status);

@@ -197,11 +197,11 @@ static BOOL PASCAL FileDlgOK (HWND hDlg)
         int l;
         char    *n;
 
-        l = strlen (s);
+        l = STRLEN (s);
         n = &s[l - 1];
         if ( (*n == '\\') || (*n == ':') ) {
             /* it is a directory or drive */
-            if ( l < NFILEN - 1 - strlen(StarName) ) {
+            if ( l < NFILEN - 1 - STRLEN(StarName) ) {
                 xstrcat (s, StarName);
                 UpdateAll (hDlg, s);
             }
@@ -218,7 +218,7 @@ static BOOL PASCAL FileDlgOK (HWND hDlg)
             return FALSE;
 
 ExtractedOK: xstrcpy (Par->Name, ++n);
-            if ( n - &s[0] < NFILEN - 1 - strlen(StarName) ) {
+            if ( n - &s[0] < NFILEN - 1 - STRLEN(StarName) ) {
                 xstrcpy (n, StarName);
                 /* now, we use DlgDirList to generate the full directory path */
                 if ( DlgDirList (hDlg, s, NULL, ID_PATH, ATTR_FIL) ) {
@@ -321,7 +321,7 @@ int EXPORT FAR PASCAL  FileDlgProc (HWND   hDlg,
         xstrcat (DlgTitle, " - ");
         xstrcat (DlgTitle, Par->Prompt);  /* hopefully, the prompt is under 30
                                            * char! */
-        i = strlen (DlgTitle) - 1;
+        i = STRLEN (DlgTitle) - 1;
         while ( DlgTitle[i] == ' ' ) i--;
         if ( DlgTitle[i] == ':' ) DlgTitle[i] = 0;
         /* we remove the colon+spaces at the end of the prompt */
@@ -402,7 +402,7 @@ NoMoreTypeAhead: return FALSE;
 #if WINDOW_MSWIN32
                 DlgDirSelectEx (hDlg,
                                 s,
-                                NFILEN -1 - strlen (StarName),
+                                NFILEN -1 - STRLEN (StarName),
                                 ID_DIRECTORIES);
 #else
                 DlgDirSelect (hDlg, s, ID_DIRECTORIES);
@@ -424,7 +424,7 @@ NoMoreTypeAhead: return FALSE;
 #else
                 DlgDirSelect (hDlg, s, ID_FILES);
 #endif
-                i = strlen (s) - 1;
+                i = STRLEN (s) - 1;
                 if ( s[i] == '.' ) s[i] = 0; /* zap dot at end of file name */
                 SetDlgItemText (hDlg, ID_FILENAME, s);
                 break;
@@ -459,7 +459,7 @@ static VOID    CompletePath (char *s, char *FileName)
  *  the length of FileName must be < NFILEN */
 {
     xstrcpy (s, Path);
-    if ( (*s != 0) && (s[strlen (s) - 1] != '\\') ) xstrcat (s, "\\");
+    if ( (*s != 0) && (s[STRLEN (s) - 1] != '\\') ) xstrcat (s, "\\");
     xstrcat (s, FileName);
 } /* CompletePath */
 
@@ -503,14 +503,14 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {
@@ -582,14 +582,14 @@ char *fspec;    /* pattern to match */
 
     /* first parse the file path off the file spec */
     xstrcpy(path, fspec);
-    index = strlen(path) - 1;
+    index = STRLEN(path) - 1;
     while ( index >= 0 &&
             (path[index] != '/' &&path[index] != '\\' && path[index] != ':') )
         --index;
     path[index+1] = 0;
 
     /* check for an extension */
-    point = strlen(fspec) - 1;
+    point = STRLEN(fspec) - 1;
     extflag = FALSE;
     while ( point > index ) {
         if ( fspec[point] == '.' ) {

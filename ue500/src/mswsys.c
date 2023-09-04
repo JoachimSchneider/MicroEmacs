@@ -87,7 +87,7 @@ char *PASCAL timeset()
 
     time(&buf);
     sp = ctime(&buf);
-    sp[strlen(sp)-1] = 0;
+    sp[STRLEN(sp)-1] = 0;
 
     return (sp);
 }
