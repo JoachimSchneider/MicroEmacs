@@ -244,10 +244,10 @@ CONST char *PASCAL NEAR gtfilename P1_(CONST char *, prompt)
 }
 
 
-char *PASCAL NEAR complete P4_(CONST char *,  prompt,
-                               CONST char *,  defval,
-                               int,           type,
-                               int,           maxlen)
+CONST char *PASCAL NEAR complete P4_(CONST char *,  prompt,
+                                     CONST char *,  defval,
+                                     int,           type,
+                                     int,           maxlen)
 /* prompt:  Prompt to user on command line    */
 /* defval:  Default value to display to user  */
 /* type:    Type of what we are completing    */

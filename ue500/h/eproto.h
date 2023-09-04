@@ -1581,10 +1581,10 @@ EXTERN char *dolock DCL((CONST char *fname));
 EXTERN char *PASCAL NEAR bytecopy DCL((char *dst, CONST char *src, int maxlen));
 EXTERN char *PASCAL NEAR cmdstr DCL((int c, char *seq));
 EXTERN char *PASCAL NEAR copystr DCL((CONST char *));
-EXTERN char *PASCAL NEAR complete DCL((CONST char *prompt,
-                                       CONST char *defval,
-                                       int        type,
-                                       int        maxlen));
+EXTERN CONST char *PASCAL NEAR complete DCL((CONST char *prompt,
+                                             CONST char *defval,
+                                             int        type,
+                                             int        maxlen));
 EXTERN CONST char *PASCAL NEAR envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR fixnull DCL((CONST char *s));
 EXTERN CONST char *PASCAL NEAR flook DCL((CONST char *fname, int hflag));

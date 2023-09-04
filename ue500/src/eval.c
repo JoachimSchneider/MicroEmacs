@@ -1219,7 +1219,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 /* var:   Variable to set */
 /* value: Value to set to */
 {
-    REGISTER char   *valueL = NULL;
+    char            *valueL = NULL;
     REGISTER int    vnum    = 0;      /* ordinal number of var refrenced */
     REGISTER int    vtype   = 0;      /* type of variable to set */
     REGISTER UTABLE *vut    = NULL;   /* user table pointer */
