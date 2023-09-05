@@ -83,22 +83,22 @@
 /** Standard include files **/
 #include <stdio.h>              /* Standard I/O package         */
 #include "estruct.h"            /* Emacs' structures            */
+#include "eproto.h"
 
 /*
         Empty routine make some compilers happy when SMG is not defined,
         and is also used as a noop routine in the terminal dispatch table.
 */
-VOID smg_noop()
+VOID smg_noop P0_()
 {
 }
 
-VOID smg_noop1(int param)
+VOID smg_noop1 P1_(int, param)
 {
 }
 
 #if     SMG
 
-#include "eproto.h"
 #include "edef.h"               /* Emacs' definitions           */
 #include "elang.h"
 #include smgdef
@@ -404,9 +404,9 @@ VOID smg_noop1(int param)
 /*
         Parts of VMS.C that we'll want to access here
 */
-EXTERN struct dsc$descriptor_s *descptr();
-EXTERN struct dsc$descriptor_s *descrp();
-#define DESCPTR( s)     descrp( s, SIZEOF(s)-1)
+EXTERN struct dsc$descriptor_s *descptr DCL((char *));
+EXTERN struct dsc$descriptor_s *descrp  DCL((char *, int));
+#define DESCPTR( s)     descrp(s, SIZEOF(s) - 1)
 /*
         These two structures, along with ttdef.h, are good for manipulating
         terminal characteristics.
@@ -423,9 +423,9 @@ COMMON    NOSHARE TTCHAR orgchar;       /* Original characteristics */
 /*
         test macro is used to signal errors from system services
 */
-#define test( s) {int st; st = (s); if( (st&1)==0) LIB$SIGNAL( st);}
-#define FAILURE( s) (!(s&1))
-#define SUCCESS( s) (s&1)
+#define test(s)     { int st; st = (s); if( (st&1)==0) LIB$SIGNAL( st); }
+#define FAILURE(s)  (!(s&1))
+#define SUCCESS(s)  (s&1)
 
 /*
         Compaq C 6.4 on VMS/VAX wants system API routines in lowercase
@@ -435,38 +435,37 @@ COMMON    NOSHARE TTCHAR orgchar;       /* Original characteristics */
 #endif
 
 /** Values to manage the screen **/
-static int termtype;            /* Handle to pass to SMG        */
+static int termtype;              /* Handle to pass to SMG        */
 #if     KEYPAD
-static char *applic_keypad;     /* Put keypad in application mode. */
-static char *numeric_keypad;    /* Put keypad in numeric mode.  */
+static char *applic_keypad;       /* Put keypad in application mode. */
+static char *numeric_keypad;      /* Put keypad in numeric mode.  */
 #endif
-static char *begin_reverse;     /* Begin reverse video          */
-static char *end_reverse;       /* End reverse video            */
-static char *begin_mouse;       /* Begin using mouse            */
-static char *end_mouse;         /* End using mouse              */
-static char *erase_to_end_line; /* Erase to end of line         */
-static char *erase_whole_display;       /* Erase whole display          */
-static char *width_narrow;      /* Set narrow size screen       */
-static char *width_wide;        /* Set wide size screen         */
-static int narrow_char;         /* Number of characters narrow  */
-static int wide_char;           /* Number of characters wide    */
-static int inbuf[64];           /* Input buffer                 */
-static int *inbufh = inbuf;     /* Head of input buffer         */
-static int *inbuft = inbuf;     /* Tail of input buffer         */
+static char *begin_reverse;       /* Begin reverse video          */
+static char *end_reverse;         /* End reverse video            */
+static char *begin_mouse;         /* Begin using mouse            */
+static char *end_mouse;           /* End using mouse              */
+static char *erase_to_end_line;   /* Erase to end of line         */
+static char *erase_whole_display; /* Erase whole display          */
+static char *width_narrow;        /* Set narrow size screen       */
+static char *width_wide;          /* Set wide size screen         */
+static int narrow_char;           /* Number of characters narrow  */
+static int wide_char;             /* Number of characters wide    */
+static int inbuf[64];             /* Input buffer                 */
+static int *inbufh = inbuf;       /* Head of input buffer         */
+static int *inbuft = inbuf;       /* Tail of input buffer         */
 
 
 /* Forward references.          */
-EXTERN int PASCAL NEAR smgmove();
-EXTERN int PASCAL NEAR smgeeol();
-EXTERN int PASCAL NEAR smgeeop();
-EXTERN int PASCAL NEAR smgbeep();
-EXTERN int PASCAL NEAR smgopen();
-EXTERN int PASCAL NEAR smgrev();
-EXTERN int PASCAL NEAR smgcres();
-EXTERN int PASCAL NEAR smgparm();
-EXTERN int PASCAL NEAR smggetc();
-EXTERN int PASCAL NEAR smgputs();
-EXTERN int PASCAL NEAR smgclose();
+EXTERN int PASCAL NEAR smgmove  DCL((int, int));
+EXTERN int PASCAL NEAR smgeeol  DCL((void));
+EXTERN int PASCAL NEAR smgeeop  DCL((void));
+EXTERN int PASCAL NEAR smgbeep  DCL((void));
+EXTERN int PASCAL NEAR smgopen  DCL((void));
+EXTERN int PASCAL NEAR smgrev   DCL((int));
+EXTERN int PASCAL NEAR smgcres  DCL((char *));
+EXTERN int PASCAL NEAR smggetc  DCL((void));
+EXTERN int PASCAL NEAR smgputs  DCL((char *));
+EXTERN int PASCAL NEAR smgclose DCL((void));
 
 /** Terminal dispatch table **/
 NOSHARE   TERM term = {
@@ -510,7 +509,7 @@ NOSHARE   TERM term = {
  *
  *  Nothing returned.
  ***/
-VOID smgmove(int row, int column)
+VOID smgmove P2_(int, row, int, column)
 {
     char      buffer[32];
     int       rlen, status;
@@ -540,7 +539,7 @@ VOID smgmove(int row, int column)
  *
  *  Nothing returned
  ***/
-VOID smgcres(char *value)
+VOID smgcres P1_(char *, value)
 {
     int       width;
 
@@ -575,7 +574,7 @@ VOID smgcres(char *value)
  *
  *  Nothing returned.
  ***/
-VOID smgrev(int status)
+VOID smgrev P1_(int, status)
 {
     smgputs(status ? begin_reverse : end_reverse);
 }
@@ -590,7 +589,7 @@ VOID smgrev(int status)
  *
  *  Nothing returned.
  ***/
-VOID smgeeol()
+VOID smgeeol P0_()
 {
     smgputs(erase_to_end_line);
 }
@@ -604,7 +603,7 @@ VOID smgeeol()
  *
  *  Nothing returned.
  ***/
-VOID smgeeop()
+VOID smgeeop P0_()
 {
     smgputs(erase_whole_display);
 }
@@ -618,7 +617,7 @@ VOID smgeeop()
  *
  *  Nothing returned.
  ***/
-VOID smgbeep()
+VOID smgbeep P0_()
 {
     ttputc('\007');
 }
@@ -639,7 +638,7 @@ VOID smgbeep()
  *  Returns:    Escape sequence
  *              NULL    No escape sequence available
  ***/
-char *smggetstr(int code)
+char *smggetstr P1_(int, code)
 {                               /* Request code                 */
     char     *result;
     int       rlen, status;
@@ -679,7 +678,7 @@ char *smggetstr(int code)
  *
  *  code - SMG code
  ***/
-int smggetnum(int code)
+int smggetnum P1_(int, code)
 {
     int       status, result;
 
@@ -692,7 +691,7 @@ int smggetnum(int code)
  *  smgaddkey - translate the SMG code to the escape sequence, and
  *  add it to the list of keys.
  ***/
-int smgaddkey(int code, int fn)
+int smgaddkey P2_(int, code, int, fn)
 {
     return (addkey((unsigned char *)smggetstr(code), fn));
 }
@@ -707,7 +706,7 @@ int smgaddkey(int code, int fn)
  *
  *  Returns:    0 if okay, <>0 if error
  ***/
-int smgcap()
+int smgcap P0_()
 {
     char     *set_cursor_abs;
     int       status;
@@ -837,7 +836,7 @@ int smgcap()
  *
  *  Nothing returned
  ***/
-VOID smgopen()
+VOID smgopen P0_()
 {
     static int first_time = 1;
 
@@ -859,7 +858,7 @@ VOID smgopen()
 #endif
 }
 
-VOID smgclose()
+VOID smgclose P0_()
 {
 #ifdef NEVER
     smgputs(end_mouse);
@@ -880,8 +879,8 @@ VOID smgclose()
  *
  *  Nothing returned.
  ***/
-VOID smgputs(string)
-    char     *string;           /* String to write              */
+VOID smgputs P1_(char *, string)
+/* string:  String to write */
 {
     if (string)
         while (*string)
@@ -899,7 +898,7 @@ VOID smgputs(string)
  *
  *  ch  - (Extended) character to add
  ***/
-VOID qin(int ch)
+VOID qin P1_(int, ch)
 {
     /* Check for overflow */
     if (inbuft - inbuf >= SIZEOF(inbuf)) {
@@ -916,12 +915,7 @@ VOID qin(int ch)
 /*
  * qrep - replace a key sequence with a single character in the input buffer.
  */
-#if PROTO
-VOID qrep(int ch)
-#else
-VOID qrep(ch)
-    int       ch;
-#endif
+VOID qrep P1_(int, ch)
 {
     inbuft = inbuf;
     qin(ch);
@@ -935,7 +929,7 @@ VOID qrep(ch)
  *
  *  Returns:    character
  ***/
-int smggetc()
+int smggetc P0_()
 {
     int       ch;
 
@@ -968,7 +962,7 @@ int smggetc()
  *
  *  Nothing returned
  ***/
-int       PASCAL NEAR spal(char *pstr)
+int PASCAL NEAR spal P1_(char *, pstr)
 {
     /* Nothing */
     return 1;
@@ -985,7 +979,7 @@ int       PASCAL NEAR spal(char *pstr)
  *  flag - TRUE if default
  *  n    - Numerical argument
  ***/
-int fnclabel(int flag, int n)
+int fnclabel P2_(int, flag, int, n)
 {
     /* On machines with no function keys...don't bother */
     return TRUE;
