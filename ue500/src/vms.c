@@ -27,8 +27,8 @@
 
 #include        <stdio.h>
 #include        "estruct.h"
-#if     VMS
 #include        "eproto.h"
+#if     VMS
 #include        "edef.h"
 #include        "elang.h"
 
@@ -46,7 +46,7 @@
 #include lib$routines
 #include str$routines
 
-static next_read(int flag);
+static next_read P1_(int, flag);
 
 /*
         Compaq C 6.4 on VMS/VAX wants system API routines in lowercase
@@ -72,7 +72,7 @@ static next_read(int flag);
 /*
         test macro is used to signal errors from system services
 */
-#define test( s) {int st; st = (s); if ((st&1)==0) LIB$SIGNAL( st);}
+#define test(s) { int st; st = (s); if ((st&1)==0) LIB$SIGNAL( st); }
 
 /*
         This routine returns a pointer to a descriptor of the supplied
@@ -90,7 +90,7 @@ static next_read(int flag);
                 DESCPTR( s)     String descriptor for buffer s, using SIZEOF()
 */
 #define NUM_DESCRIPTORS 10
-struct dsc$descriptor_s *descrp(char *s, int l)
+struct dsc$descriptor_s *descrp P2_(char *, s, int, l)
 {
     static next_d = 0;
     static struct dsc$descriptor_s dsclist[NUM_DESCRIPTORS];
@@ -107,7 +107,7 @@ struct dsc$descriptor_s *descrp(char *s, int l)
 /*
  * Make pointer to descriptor from Asciz string.
  */
-struct dsc$descriptor_s *descptr(char *s)
+struct dsc$descriptor_s *descptr P1_(char *, s)
 {
     return (descrp(s, STRLEN(s)));
 }
@@ -199,7 +199,7 @@ static unsigned tolen;          /* Ammount used */
 NOSHARE   TTCHAR orgchar;       /* Original characteristics */
 static TTCHARIOSB orgttiosb;    /* Original IOSB characteristics */
 
-static readast() {
+static readast P0_() {
     /* Data arrived from the terminal */
     waiting = 1;
     if ((ttiosb.status == SS$_TIMEOUT) || (ttiosb.status & 1)) {
@@ -225,7 +225,7 @@ static readast() {
 /*
  * flag = TRUE to use timeout of 0.
  */
-static next_read(int flag){
+static next_read P1_(int, flag){
     /* No current read outstanding, submit one */
     if (waiting || stalled) {
         unsigned  size;
@@ -245,8 +245,7 @@ static next_read(int flag){
 
         if (size >= MINREAD) {
             /* Only read if there is enough room */
-            test(SYS$QIO(
-                         0, vms_iochan,
+            test(SYS$QIO(0, vms_iochan,
                          flag ?
                          IO$_READVBLK | IO$M_NOECHO | IO$M_TRMNOECHO |
                          IO$M_NOFILTR | IO$M_TIMED
@@ -266,7 +265,7 @@ static next_read(int flag){
 * FUNCTION - RemoveEscapes - remove ANSI escapes from string
 * (for broadcast messages that contain 'formatting')
 ***********************************************************/
-static void RemoveEscapes(char *str)
+static void RemoveEscapes P1_(char *, str)
 {
     char     *in = str, *out = str;
 
@@ -319,7 +318,7 @@ static void RemoveEscapes(char *str)
  * The argument msgbuf points to the buffer we want to
  * insert our broadcast message into.
  */
-static brdaddline(BUFFER * msgbuf) {
+static brdaddline P1_(BUFFER *, msgbuf) {
     REGISTER  EWINDOW *wp;
 
     if (addline(msgbuf, brdcstbuf) == FALSE)
@@ -340,7 +339,7 @@ static brdaddline(BUFFER * msgbuf) {
     return (TRUE);
 }
 
-static chkbrdcst() {
+static chkbrdcst P0_() {
     BUFFER   *msgbuf;           /* buffer containing messages */
 
     if (newbrdcst) {
@@ -362,7 +361,7 @@ static chkbrdcst() {
     }
 }
 
-static mbreadast() {
+static mbreadast P0_() {
     if (mbiosb.status & 1) {
         /* Read completed okay, check for hangup message */
         if (mbmsg.msgtype == MSG$_TRMHANGUP) {
@@ -390,7 +389,7 @@ static mbreadast() {
         LIB$SIGNAL(mbiosb.status);
 }
 
-PASCAL    NEAR ttopen()
+PASCAL    NEAR ttopen P0_()
 {
     TTCHAR    newchar;          /* Adjusted characteristics */
     int       status;
@@ -507,7 +506,7 @@ PASCAL    NEAR ttopen()
         short_time[0] = -asc_int(waitstr);
 }
 
-PASCAL    NEAR ttclose()
+PASCAL    NEAR ttclose P0_()
 {
     if (tolen > 0) {
         /* Buffer not empty, flush out last stuff */
@@ -524,7 +523,7 @@ PASCAL    NEAR ttclose()
     test(SYS$DASSGN(vms_iochan));
 }
 
-PASCAL    NEAR ttputc(int c)
+PASCAL    NEAR ttputc P1_(int, c)
 {
     tobuf[tolen++] = c;
     if (tolen >= SIZEOF(tobuf)) {
@@ -535,7 +534,7 @@ PASCAL    NEAR ttputc(int c)
     }
 }
 
-PASCAL    NEAR ttflush()
+PASCAL    NEAR ttflush P0_()
 {
     /*
             I choose to ignore any flush requests if there is typeahead
@@ -561,7 +560,7 @@ PASCAL    NEAR ttflush()
         Note that we also wake from hibernation if a character arrives, so
         this never causes an undue delay if the user it actually typing.
 */
-unsigned char PASCAL NEAR grabnowait(VOID)
+unsigned char PASCAL NEAR grabnowait P0_()
 {
     if (tylen == 0) {
         /* Nothing immediately available, hibernate for a short time */
@@ -572,12 +571,12 @@ unsigned char PASCAL NEAR grabnowait(VOID)
     return ((tylen == 0) ? -1 : ttgetc());
 }
 
-unsigned char PASCAL NEAR grabwait(VOID)
+unsigned char PASCAL NEAR grabwait P0_()
 {
     return (ttgetc());
 }
 
-int       PASCAL NEAR ttgetc()
+int       PASCAL NEAR ttgetc P0_()
 {
     REGISTER unsigned ret;
 
@@ -613,7 +612,7 @@ int       PASCAL NEAR ttgetc()
 /*
  * Typahead - any characters pending?
  */
-int       PASCAL NEAR typahead()
+int       PASCAL NEAR typahead P0_()
 {
     return (tylen != 0);
 }
@@ -621,7 +620,7 @@ int       PASCAL NEAR typahead()
 /*
  * Shell out to DCL.
  */
-int       PASCAL NEAR spawncli(int f, int n)
+int       PASCAL NEAR spawncli P2_(int, f, int, n)
 {
     REGISTER char *cp;
 
@@ -641,7 +640,7 @@ int       PASCAL NEAR spawncli(int f, int n)
 /*
  * Spawn a command.
  */
-int       PASCAL NEAR spawn(int f, int n)
+int       PASCAL NEAR spawn P2_(int, f, int, n)
 {
     REGISTER int s;
     char      line[NLINE];
@@ -675,7 +674,7 @@ int       PASCAL NEAR spawn(int f, int n)
  * character to be typed, then mark the screen as garbage so a full repaint is
  * done. Bound to "C-X $".
  */
-int       PASCAL NEAR execprg(int f, int n)
+int       PASCAL NEAR execprg P2_(int, f, int, n)
 {
     REGISTER int s;
     char      line[NLINE];
@@ -700,7 +699,7 @@ int       PASCAL NEAR execprg(int f, int n)
     return (TRUE);
 }
 
-int       PASCAL NEAR pipecmd(int f, int n)
+int       PASCAL NEAR pipecmd P2_(int, f, int, n)
 {
     REGISTER int s;             /* return status from CLI */
     REGISTER  EWINDOW *wp;      /* pointer to new window */
@@ -769,7 +768,7 @@ int       PASCAL NEAR pipecmd(int f, int n)
     return (TRUE);
 }
 
-int       PASCAL NEAR f_filter(int f, int n)
+int       PASCAL NEAR f_filter P2_(int, f, int, n)
 {
      /* REGISTER */ int s;      /* return status from CLI */
     REGISTER  BUFFER *bp;       /* pointer to buffer to zot */
@@ -841,7 +840,7 @@ int       PASCAL NEAR f_filter(int f, int n)
         duplicated here.
 */
 
-char *    PASCAL NEAR timeset()
+char *    PASCAL NEAR timeset P0_()
 {
     REGISTER char *sp;          /* temp string pointer */
     time_t    buf;              /* time data buffer */
@@ -865,7 +864,7 @@ static struct dsc$descriptor rbuf_desc; /* descriptor for returned file name */
  * Do a wild card directory search (for file name completion)
  * fspec is the pattern to match.
  */
-char *    PASCAL NEAR getffile(char *fspec)
+char *    PASCAL NEAR getffile P1_(char *, fspec)
 {
 
     REGISTER int index;         /* index into various strings */
@@ -945,7 +944,7 @@ char *    PASCAL NEAR getffile(char *fspec)
     return (path);
 }
 
-char *    PASCAL NEAR getnfile()
+char *    PASCAL NEAR getnfile P0_()
 {
     REGISTER int index;         /* index into various strings */
     REGISTER int point;         /* index into other strings */
@@ -988,7 +987,7 @@ char *    PASCAL NEAR getnfile()
 
         Mail/Notes entry point.  Should be declared UNIVERSAL in ME.OPT.
 */
-ME$EDIT(struct dsc$descriptor *infile, struct dsc$descriptor *outfile){
+ME$EDIT P2_(struct dsc$descriptor *, infile, struct dsc$descriptor *, outfile){
     static int first_time = 1;
     char     *instr, *outstr;
     REGISTER int status;
@@ -1036,7 +1035,7 @@ abortrun:
     return (status);
 }
 
-PASCAL    NEAR bktoshell(int f, int n)
+PASCAL    NEAR bktoshell P2_(int, f, int, n)
 {
     /*
             Pause this process and wait for it to be woken up
@@ -1131,7 +1130,7 @@ static struct RAB rab;          /* a record access block */
 /*
  * Open a file for reading.
  */
-PASCAL    NEAR ffropen(CONST char *fn)
+PASCAL    NEAR ffropen P1_(CONST char *, fn)
 {
     unsigned long status;
 
@@ -1178,7 +1177,7 @@ PASCAL    NEAR ffropen(CONST char *fn)
  *
  * fn = file name, mode = mode to open file.
  */
-PASCAL    NEAR ffwopen(char *fn, char *mode)
+PASCAL    NEAR ffwopen P2_(char *, fn, char *, mode)
 {
     unsigned long status;
 
@@ -1226,7 +1225,7 @@ PASCAL    NEAR ffwopen(char *fn, char *mode)
 /*
  * Close a file. Should look at the status in all systems.
  */
-PASCAL    NEAR ffclose()
+PASCAL    NEAR ffclose P0_()
 {
     unsigned long status;
 
@@ -1255,7 +1254,7 @@ PASCAL    NEAR ffclose()
  * and the "nbuf" is its length, less the free newline. Return the status.
  * Check only at the newline.
  */
-PASCAL    NEAR ffputline(char buf[], int nbuf)
+PASCAL    NEAR ffputline P2_(char *, buf, int, nbuf)
 {
     REGISTER char *obuf = buf;
 
@@ -1303,11 +1302,8 @@ PASCAL    NEAR ffputline(char buf[], int nbuf)
  * at the end of the file that don't have a newline present. Check for I/O
  * errors too. Return status.
  */
-PASCAL    NEAR ffgetline(nbytes)
-
-    int      *nbytes;           /* save our caller hassle, calc the line
-                                 * length */
-
+PASCAL    NEAR ffgetline P1_(int, nbytes)
+/* nbytes:  Save our caller hassle, calc the line length  */
 {
     unsigned long status;
 
@@ -1345,8 +1341,8 @@ PASCAL    NEAR ffgetline(nbytes)
 * FUNCTION - addspec - utility function for expandargs
 ***********************************************************/
 #define ADDSPEC_INCREMENT 10
-static void PASCAL NEAR addspec(struct dsc$descriptor dsc, int *pargc,
-                                char ***pargv, int *pargcapacity)
+static void PASCAL NEAR addspec P4_(struct dsc$descriptor, dsc, int *, pargc,
+                                char ***, pargv, int *, pargcapacity)
 {
     char     *s;
 
@@ -1366,7 +1362,7 @@ static void PASCAL NEAR addspec(struct dsc$descriptor dsc, int *pargc,
 * FUNCTION - expandargs - massage argc and argv to expand
 * wildcards by calling VMS.
 ***********************************************************/
-void      PASCAL NEAR expandargs(int *pargc, char ***pargv)
+void      PASCAL NEAR expandargs P2_(int *, pargc, char ***, pargv)
 {
     int       argc = *pargc;
     char    **argv = *pargv;
@@ -1411,9 +1407,11 @@ void      PASCAL NEAR expandargs(int *pargc, char ***pargv)
 }
 
 #else
-PASCAL    NEAR vms_hello()
+
+VOID PASCAL    NEAR vms_hello P0_()
 {
 }
+
 #endif
 
 
