@@ -90,9 +90,9 @@ static VOID next_read P1_(int, flag);
                 DESCPTR( s)     String descriptor for buffer s, using SIZEOF()
 */
 #define NUM_DESCRIPTORS 10
-struct dsc$descriptor_s *descrp P2_(char *, s, int, l)
+struct dsc$descriptor_s *descrp P2_(CONST char *, s, int, l)
 {
-    static next_d = 0;
+    static int  next_d  = 0;
     static struct dsc$descriptor_s dsclist[NUM_DESCRIPTORS];
 
     if (next_d >= NUM_DESCRIPTORS)
@@ -107,7 +107,7 @@ struct dsc$descriptor_s *descrp P2_(char *, s, int, l)
 /*
  * Make pointer to descriptor from Asciz string.
  */
-struct dsc$descriptor_s *descptr P1_(char *, s)
+struct dsc$descriptor_s *descptr P1_(CONST char *, s)
 {
     return (descrp(s, STRLEN(s)));
 }
@@ -120,7 +120,7 @@ struct dsc$descriptor_s *descptr P1_(char *, s)
 */
 typedef struct {
     /* Terminal characteristics buffer */
-    unsigned char class, type;
+    unsigned char catgy, type;
     unsigned short width;
     unsigned  tt1:24;
     unsigned char page;
@@ -269,7 +269,8 @@ static VOID next_read P1_(int, flag)
 ***********************************************************/
 static VOID RemoveEscapes P1_(char *, str)
 {
-    char     *in = str, *out = str;
+    unsigned char *in   = (unsigned char *)str;
+    char          *out  = str;
 
     while (*in) {
         switch (*in) {
@@ -409,8 +410,8 @@ int PASCAL NEAR ttopen P0_()
     tymax = SIZEOF(tybuf);
     status = LIB$ASN_WTH_MBX(   /* Create a new PY/TW pair */
                              descptr("SYS$OUTPUT:"),
-                             &SIZEOF(mbmsg),
-                             &SIZEOF(mbmsg),
+                             &sizeof(mbmsg),
+                             &sizeof(mbmsg),
                              &vms_iochan,
                              &mbchan);
     if ((status & 1) == 0) {
@@ -636,8 +637,6 @@ int PASCAL NEAR typahead P0_()
  */
 int PASCAL NEAR spawncli P2_(int, f, int, n)
 {
-    REGISTER char *cp;
-
     /*
      * Don't allow this command if restricted
      */
@@ -967,10 +966,6 @@ char * PASCAL NEAR  getffile P1_(char *, fspec)
 
 char * PASCAL NEAR  getnfile P0_()
 {
-    REGISTER int index;         /* index into various strings */
-    REGISTER int point;         /* index into other strings */
-    REGISTER int extflag;       /* does the file have an extention? */
-    char      fname[NFILEN];    /* file/path for DOS call */
     REGISTER char *cp;
 
     /* and call for the next file */
@@ -1065,7 +1060,7 @@ int PASCAL NEAR bktoshell P2_(int, f, int, n)
             Pause this process and wait for it to be woken up
     */
     unsigned  pid;
-    char     *env, *dir;
+    char     *env;
     int       argc;
     char     *argv[16];
 

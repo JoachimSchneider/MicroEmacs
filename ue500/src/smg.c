@@ -89,12 +89,14 @@
         Empty routine make some compilers happy when SMG is not defined,
         and is also used as a noop routine in the terminal dispatch table.
 */
-VOID smg_noop P0_()
+int smg_noop P0_()
 {
+    return 0;
 }
 
-VOID smg_noop1 P1_(int, param)
+int smg_noop1 P1_(int, param)
 {
+    return 0;
 }
 
 #if     SMG
@@ -413,7 +415,7 @@ EXTERN struct dsc$descriptor_s *descrp  DCL((char *, int));
 */
 typedef struct {
     /* Terminal characteristics buffer */
-    unsigned char class, type;
+    unsigned char catgy, type;
     unsigned short width;
     unsigned  tt1:24;
     unsigned char page;
@@ -464,7 +466,7 @@ EXTERN int PASCAL NEAR smgopen  DCL((void));
 EXTERN int PASCAL NEAR smgrev   DCL((int));
 EXTERN int PASCAL NEAR smgcres  DCL((char *));
 EXTERN int PASCAL NEAR smggetc  DCL((void));
-EXTERN int PASCAL NEAR smgputs  DCL((char *));
+EXTERN int PASCAL NEAR smgputs  DCL((CONST char *));
 EXTERN int PASCAL NEAR smgclose DCL((void));
 
 /** Terminal dispatch table **/
@@ -509,7 +511,7 @@ NOSHARE   TERM term = {
  *
  *  Nothing returned.
  ***/
-VOID smgmove P2_(int, row, int, column)
+int smgmove P2_(int, row, int, column)
 {
     char      buffer[32];
     int       rlen, status;
@@ -529,6 +531,8 @@ VOID smgmove P2_(int, row, int, column)
         smgputs(buffer);
     } else
         smgputs("OOPS");
+
+    return 0;
 }
 
 /***
@@ -539,13 +543,13 @@ VOID smgmove P2_(int, row, int, column)
  *
  *  Nothing returned
  ***/
-VOID smgcres P1_(char *, value)
+int smgcres P1_(char *, value)
 {
     int       width;
 
     /* Skip if not supported */
     if (width_wide == NULL || width_narrow == NULL)
-        return;
+        return 0;
 
     /* Check value */
     if (strcmp(value, "WIDE") == 0) {
@@ -562,6 +566,8 @@ VOID smgcres P1_(char *, value)
 
     /* Set resolution variable */
     xstrcpy(sres, value);
+
+    return 0;
 }
 
 /***
@@ -574,9 +580,11 @@ VOID smgcres P1_(char *, value)
  *
  *  Nothing returned.
  ***/
-VOID smgrev P1_(int, status)
+int smgrev P1_(int, status)
 {
     smgputs(status ? begin_reverse : end_reverse);
+
+    return 0;
 }
 
 /***
@@ -589,9 +597,11 @@ VOID smgrev P1_(int, status)
  *
  *  Nothing returned.
  ***/
-VOID smgeeol P0_()
+int smgeeol P0_()
 {
     smgputs(erase_to_end_line);
+
+    return 0;
 }
 
 /***
@@ -603,9 +613,11 @@ VOID smgeeol P0_()
  *
  *  Nothing returned.
  ***/
-VOID smgeeop P0_()
+int smgeeop P0_()
 {
     smgputs(erase_whole_display);
+
+    return 0;
 }
 
 /***
@@ -617,9 +629,11 @@ VOID smgeeop P0_()
  *
  *  Nothing returned.
  ***/
-VOID smgbeep P0_()
+int smgbeep P0_()
 {
     ttputc('\007');
+
+    return 0;
 }
 
 /***
@@ -833,10 +847,8 @@ int smgcap P0_()
 
 /***
  *  smgopen  -  Get terminal type and open terminal
- *
- *  Nothing returned
  ***/
-VOID smgopen P0_()
+int smgopen P0_()
 {
     static int first_time = 1;
 
@@ -856,9 +868,11 @@ VOID smgopen P0_()
 #ifdef NEVER
     smgputs(begin_mouse);
 #endif
+
+    return 0;
 }
 
-VOID smgclose P0_()
+int smgclose P0_()
 {
 #ifdef NEVER
     smgputs(end_mouse);
@@ -868,6 +882,8 @@ VOID smgclose P0_()
         smgputs(numeric_keypad);
 #endif
     ttclose();
+
+    return 0;
 }
 
 /***
@@ -876,15 +892,15 @@ VOID smgclose P0_()
  *  smgputs is a short-cut routine to handle sending a string of characters
  *  to the character output routine.  A check is made for a NULL string,
  *  while is considered valid.  A NULL string will produce no output.
- *
- *  Nothing returned.
  ***/
-VOID smgputs P1_(char *, string)
+int smgputs P1_(CONST char *, string)
 /* string:  String to write */
 {
     if (string)
         while (*string)
             ttputc(*string++);
+
+    return 0;
 }
 
 /***
