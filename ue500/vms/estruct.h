@@ -518,7 +518,11 @@ union REGS {
 /* this keeps VMS happy */
 #if     VMS
 # define getname xgetname
-# define unlink(a)       delete(a)  /* Won't compile with C++ */
+# ifdef __cplusplus
+#   define unlink(a)       remove(a)
+# else
+#   define unlink(a)       delete(a)  /* Won't compile with C++ */
+# endif
 #endif
 
 /* some options for AOS/VS */

@@ -1026,13 +1026,13 @@ int ME$EDIT P2_(struct dsc$descriptor *, infile, struct dsc$descriptor *, outfil
     } else
         TTopen();
 
-    outstr = xstrncpy(calloc(1, 1 + outfile->dsc$w_length),
+    outstr = xstrncpy((char *)calloc(1, 1 + outfile->dsc$w_length),
                       outfile->dsc$a_pointer, outfile->dsc$w_length);
 
     if (infile->dsc$w_length == 0)
         instr = outstr;
     else
-        instr = xstrncpy(calloc(1, 1 + infile->dsc$w_length),
+        instr = xstrncpy((char *)calloc(1, 1 + infile->dsc$w_length),
                          infile->dsc$a_pointer, infile->dsc$w_length);
 
     makename(bname, outstr);
@@ -1284,7 +1284,7 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
         }
 
         if (fline == NULL) {
-            if ((fline = malloc(flen = nbuf + NSTRING)) == NULL) {
+            if ((fline = (char *)malloc(flen = nbuf + NSTRING)) == NULL) {
                 return (FIOMEM);
             }
         }
@@ -1326,7 +1326,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
 
     /* if we don't have an fline, allocate one */
     if (fline == NULL)
-        if ((fline = malloc(flen = fab.fab$w_mrs ? fab.fab$w_mrs + 1 : 32768)) == NULL)
+        if ((fline = (char *)malloc(flen = fab.fab$w_mrs ? fab.fab$w_mrs + 1 : 32768)) == NULL)
             return (FIOMEM);
 
     /* read the line in */
@@ -1368,10 +1368,10 @@ static VOID PASCAL NEAR addspec P4_(struct dsc$descriptor,  dsc,
 
     /* reallocate the argument array if necessary */
     if (*pargc == *pargcapacity)
-        *pargv = realloc(*pargv, SIZEOF(**pargv) * (*pargcapacity += ADDSPEC_INCREMENT));
+        *pargv = (char **)realloc(*pargv, SIZEOF(**pargv) * (*pargcapacity += ADDSPEC_INCREMENT));
 
     /* allocate new argument */
-    s = xstrncpy(malloc(dsc.dsc$w_length + 1), dsc.dsc$a_pointer, dsc.dsc$w_length);
+    s = xstrncpy((char *)malloc(dsc.dsc$w_length + 1), dsc.dsc$a_pointer, dsc.dsc$w_length);
     s[dsc.dsc$w_length] = 0;
 
     /* put into array */
