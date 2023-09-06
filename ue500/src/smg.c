@@ -423,7 +423,7 @@ COMMON    NOSHARE TTCHAR orgchar;       /* Original characteristics */
 /*
         test macro is used to signal errors from system services
 */
-#define test(s)     { int st; st = (s); if( (st&1)==0) LIB$SIGNAL( st); }
+#define test(s)     do { int st; st = (s); if( (st&1)==0) LIB$SIGNAL( st); } while ( 0 )
 #define FAILURE(s)  (!(s&1))
 #define SUCCESS(s)  (s&1)
 

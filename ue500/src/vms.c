@@ -46,7 +46,7 @@
 #include lib$routines
 #include str$routines
 
-static next_read P1_(int, flag);
+static VOID next_read P1_(int, flag);
 
 /*
         Compaq C 6.4 on VMS/VAX wants system API routines in lowercase
@@ -72,7 +72,7 @@ static next_read P1_(int, flag);
 /*
         test macro is used to signal errors from system services
 */
-#define test(s) { int st; st = (s); if ((st&1)==0) LIB$SIGNAL( st); }
+#define test(s) do { int st; st = (s); if ((st&1)==0) LIB$SIGNAL( st); } while ( 0 )
 
 /*
         This routine returns a pointer to a descriptor of the supplied
@@ -199,7 +199,8 @@ static unsigned tolen;          /* Ammount used */
 NOSHARE   TTCHAR orgchar;       /* Original characteristics */
 static TTCHARIOSB orgttiosb;    /* Original IOSB characteristics */
 
-static readast P0_() {
+static VOID readast P0_()
+{
     /* Data arrived from the terminal */
     waiting = 1;
     if ((ttiosb.status == SS$_TIMEOUT) || (ttiosb.status & 1)) {
@@ -225,7 +226,8 @@ static readast P0_() {
 /*
  * flag = TRUE to use timeout of 0.
  */
-static next_read P1_(int, flag){
+static VOID next_read P1_(int, flag)
+{
     /* No current read outstanding, submit one */
     if (waiting || stalled) {
         unsigned  size;
@@ -265,7 +267,7 @@ static next_read P1_(int, flag){
 * FUNCTION - RemoveEscapes - remove ANSI escapes from string
 * (for broadcast messages that contain 'formatting')
 ***********************************************************/
-static void RemoveEscapes P1_(char *, str)
+static VOID RemoveEscapes P1_(char *, str)
 {
     char     *in = str, *out = str;
 
@@ -318,7 +320,8 @@ static void RemoveEscapes P1_(char *, str)
  * The argument msgbuf points to the buffer we want to
  * insert our broadcast message into.
  */
-static brdaddline P1_(BUFFER *, msgbuf) {
+static int  brdaddline P1_(BUFFER *, msgbuf)
+{
     REGISTER  EWINDOW *wp;
 
     if (addline(msgbuf, brdcstbuf) == FALSE)
@@ -336,10 +339,12 @@ static brdaddline P1_(BUFFER *, msgbuf) {
         wp = wp->w_wndp;
     }
     update(FALSE);
+
     return (TRUE);
 }
 
-static chkbrdcst P0_() {
+static VOID chkbrdcst P0_()
+{
     BUFFER   *msgbuf;           /* buffer containing messages */
 
     if (newbrdcst) {
@@ -361,7 +366,8 @@ static chkbrdcst P0_() {
     }
 }
 
-static mbreadast P0_() {
+static VOID mbreadast P0_()
+{
     if (mbiosb.status & 1) {
         /* Read completed okay, check for hangup message */
         if (mbmsg.msgtype == MSG$_TRMHANGUP) {
@@ -379,6 +385,7 @@ static mbreadast P0_() {
             RemoveEscapes(brdcstbuf);
             pending_msg = newbrdcst = TRUE;
         } else {
+          /**EMPTY**/
         }
         test(SYS$QIO(           /* Post a new read to the associated mailbox */
                      0, mbchan, IO$_READVBLK, &mbiosb,
@@ -389,7 +396,7 @@ static mbreadast P0_() {
         LIB$SIGNAL(mbiosb.status);
 }
 
-PASCAL    NEAR ttopen P0_()
+int PASCAL NEAR ttopen P0_()
 {
     TTCHAR    newchar;          /* Adjusted characteristics */
     int       status;
@@ -426,8 +433,7 @@ PASCAL    NEAR ttopen P0_()
 /*
         Fetch the characteristics and adjust ourself for proper operation.
 */
-    test(SYS$QIOW(
-                  0, vms_iochan, IO$_SENSEMODE, &orgttiosb,
+    test(SYS$QIOW(0, vms_iochan, IO$_SENSEMODE, &orgttiosb,
                   0, 0, &orgchar, SIZEOF(orgchar), 0, 0, 0, 0));
     newchar = orgchar;
     newchar.tt2 |= TT2$M_PASTHRU;       /* Gives us back ^U, ^X, ^C, and ^Y. */
@@ -481,16 +487,14 @@ PASCAL    NEAR ttopen P0_()
 /*
         Set these new characteristics
 */
-    test(SYS$QIOW(
-                  0, vms_iochan, IO$_SETMODE, 0,
+    test(SYS$QIOW(0, vms_iochan, IO$_SETMODE, 0,
                   0, 0, &newchar, SIZEOF(newchar), 0, 0, 0, 0));
 /*
         For some unknown reason, if I don't post this read (which will
         likely return right away) then I don't get started properly.
         It has something to do with priming the unsolicited input system.
 */
-    test(SYS$QIO(
-                 0, vms_iochan,
+    test(SYS$QIO(0, vms_iochan,
                  IO$_READVBLK | IO$M_NOECHO | IO$M_TRMNOECHO |
                  IO$M_NOFILTR | IO$M_TIMED,
                  &ttiosb, readast, 0, tybuf, SIZEOF(tybuf),
@@ -504,9 +508,11 @@ PASCAL    NEAR ttopen P0_()
     waitstr = getenv("MICROEMACS$SHORTWAIT");
     if (waitstr)
         short_time[0] = -asc_int(waitstr);
+
+    return 0;
 }
 
-PASCAL    NEAR ttclose P0_()
+int PASCAL NEAR ttclose P0_()
 {
     if (tolen > 0) {
         /* Buffer not empty, flush out last stuff */
@@ -515,15 +521,16 @@ PASCAL    NEAR ttclose P0_()
         tolen = 0;
     }
     test(SYS$CANCEL(vms_iochan));       /* Cancel any pending read */
-    test(SYS$QIOW(
-                  0, vms_iochan, IO$_SETMODE, 0,
+    test(SYS$QIOW(0, vms_iochan, IO$_SETMODE, 0,
                   0, 0, &orgchar, SIZEOF(orgchar), 0, 0, 0, 0));
     if (mbchan)
         test(SYS$DASSGN(mbchan));
     test(SYS$DASSGN(vms_iochan));
+
+    return 0;
 }
 
-PASCAL    NEAR ttputc P1_(int, c)
+int PASCAL NEAR ttputc P1_(int, c)
 {
     tobuf[tolen++] = c;
     if (tolen >= SIZEOF(tobuf)) {
@@ -532,23 +539,29 @@ PASCAL    NEAR ttputc P1_(int, c)
                       0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
         tolen = 0;
     }
+
+    return 0;
 }
 
-PASCAL    NEAR ttflush P0_()
+int PASCAL NEAR ttflush P0_()
 {
     /*
             I choose to ignore any flush requests if there is typeahead
             pending.  Speeds DECNet network operation by leaps and bounds
             (literally).
     */
-    if (tylen == 0)
+    if (tylen == 0) {
         if (tolen != 0) {
             /* No typeahead, send it out */
             test(SYS$QIOW(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
                           0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
             tolen = 0;
         }
+    }
+
+    return 0;
 }
+
 /*
         grabnowait is a routine that tries to read another
         character, and if one doesn't come in as fast as we expect
@@ -576,7 +589,7 @@ unsigned char PASCAL NEAR grabwait P0_()
     return (ttgetc());
 }
 
-int       PASCAL NEAR ttgetc P0_()
+int PASCAL NEAR ttgetc P0_()
 {
     REGISTER unsigned ret;
 
@@ -606,13 +619,14 @@ int       PASCAL NEAR ttgetc P0_()
     }
 
     SYS$SETAST(1);
+
     return (ret);
 }
 
 /*
  * Typahead - any characters pending?
  */
-int       PASCAL NEAR typahead P0_()
+int PASCAL NEAR typahead P0_()
 {
     return (tylen != 0);
 }
@@ -620,7 +634,7 @@ int       PASCAL NEAR typahead P0_()
 /*
  * Shell out to DCL.
  */
-int       PASCAL NEAR spawncli P2_(int, f, int, n)
+int PASCAL NEAR spawncli P2_(int, f, int, n)
 {
     REGISTER char *cp;
 
@@ -634,13 +648,14 @@ int       PASCAL NEAR spawncli P2_(int, f, int, n)
     test(LIB$SPAWN(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     sgarbf = TRUE;
     TTopen();
+
     return (TRUE);
 }
 
 /*
  * Spawn a command.
  */
-int       PASCAL NEAR spawn P2_(int, f, int, n)
+int PASCAL NEAR spawn P2_(int, f, int, n)
 {
     REGISTER int s;
     char      line[NLINE];
@@ -666,6 +681,7 @@ int       PASCAL NEAR spawn P2_(int, f, int, n)
         tgetc();
     }
     sgarbf = TRUE;
+
     return (TRUE);
 }
 
@@ -674,7 +690,7 @@ int       PASCAL NEAR spawn P2_(int, f, int, n)
  * character to be typed, then mark the screen as garbage so a full repaint is
  * done. Bound to "C-X $".
  */
-int       PASCAL NEAR execprg P2_(int, f, int, n)
+int PASCAL NEAR execprg P2_(int, f, int, n)
 {
     REGISTER int s;
     char      line[NLINE];
@@ -696,10 +712,11 @@ int       PASCAL NEAR execprg P2_(int, f, int, n)
     while ((s = tgetc()) != '\r' && s != ' ')
         ;
     sgarbf = TRUE;
+
     return (TRUE);
 }
 
-int       PASCAL NEAR pipecmd P2_(int, f, int, n)
+int PASCAL NEAR pipecmd P2_(int, f, int, n)
 {
     REGISTER int s;             /* return status from CLI */
     REGISTER  EWINDOW *wp;      /* pointer to new window */
@@ -765,10 +782,11 @@ int       PASCAL NEAR pipecmd P2_(int, f, int, n)
 
     /* and get rid of the temporary file */
     unlink(filnam);
+
     return (TRUE);
 }
 
-int       PASCAL NEAR f_filter P2_(int, f, int, n)
+int PASCAL NEAR f_filter P2_(int, f, int, n)
 {
      /* REGISTER */ int s;      /* return status from CLI */
     REGISTER  BUFFER *bp;       /* pointer to buffer to zot */
@@ -832,6 +850,7 @@ int       PASCAL NEAR f_filter P2_(int, f, int, n)
     /* and get rid of the temporary file */
     unlink(filnam1);
     unlink(filnam2);
+
     return (TRUE);
 }
 
@@ -840,7 +859,7 @@ int       PASCAL NEAR f_filter P2_(int, f, int, n)
         duplicated here.
 */
 
-char *    PASCAL NEAR timeset P0_()
+char * PASCAL NEAR  timeset P0_()
 {
     REGISTER char *sp;          /* temp string pointer */
     time_t    buf;              /* time data buffer */
@@ -848,6 +867,7 @@ char *    PASCAL NEAR timeset P0_()
     time(&buf);
     sp = ctime(&buf);
     sp[STRLEN(sp) - 1] = 0;
+
     return (sp);
 }
 
@@ -864,7 +884,7 @@ static struct dsc$descriptor rbuf_desc; /* descriptor for returned file name */
  * Do a wild card directory search (for file name completion)
  * fspec is the pattern to match.
  */
-char *    PASCAL NEAR getffile P1_(char *, fspec)
+char * PASCAL NEAR  getffile P1_(char *, fspec)
 {
 
     REGISTER int index;         /* index into various strings */
@@ -941,10 +961,11 @@ char *    PASCAL NEAR getffile P1_(char *, fspec)
     for (cp--; *cp != ']' && cp >= rbuf; cp--);
     xstrcat(path, ++cp);
     mklower(path);
+
     return (path);
 }
 
-char *    PASCAL NEAR getnfile P0_()
+char * PASCAL NEAR  getnfile P0_()
 {
     REGISTER int index;         /* index into various strings */
     REGISTER int point;         /* index into other strings */
@@ -977,6 +998,7 @@ char *    PASCAL NEAR getnfile P0_()
         ;
     xstrcat(path, ++cp);
     mklower(path);
+
     return (path);
 }
 
@@ -987,7 +1009,8 @@ char *    PASCAL NEAR getnfile P0_()
 
         Mail/Notes entry point.  Should be declared UNIVERSAL in ME.OPT.
 */
-ME$EDIT P2_(struct dsc$descriptor *, infile, struct dsc$descriptor *, outfile){
+int ME$EDIT P2_(struct dsc$descriptor *, infile, struct dsc$descriptor *, outfile)
+{
     static int first_time = 1;
     char     *instr, *outstr;
     REGISTER int status;
@@ -1032,10 +1055,11 @@ ME$EDIT P2_(struct dsc$descriptor *, infile, struct dsc$descriptor *, outfile){
 
 abortrun:
     TTclose();
+
     return (status);
 }
 
-PASCAL    NEAR bktoshell P2_(int, f, int, n)
+int PASCAL NEAR bktoshell P2_(int, f, int, n)
 {
     /*
             Pause this process and wait for it to be woken up
@@ -1059,12 +1083,10 @@ PASCAL    NEAR bktoshell P2_(int, f, int, n)
     movecursor(term.t_nrow, 0);
     TTclose();
 
-    test(LIB$DELETE_LOGICAL(
-                            DESCPTR("MICROEMACS$PARENT"),
+    test(LIB$DELETE_LOGICAL(DESCPTR("MICROEMACS$PARENT"),
                             DESCPTR("LNM$JOB")));
     test(LIB$GETJPI(&JPI$_PID, 0, 0, &pid, 0, 0));
-    test(LIB$SET_LOGICAL(
-                         DESCPTR("MICROEMACS$PROCESS"),
+    test(LIB$SET_LOGICAL(DESCPTR("MICROEMACS$PROCESS"),
                          descptr(int_asc(pid)),
                          DESCPTR("LNM$JOB")));
     pid = asc_int(env);
@@ -1078,8 +1100,7 @@ PASCAL    NEAR bktoshell P2_(int, f, int, n)
             break;              /* Winter is over */
     }
 
-    test(LIB$DELETE_LOGICAL(
-                            DESCPTR("MICROEMACS$COMMAND"),
+    test(LIB$DELETE_LOGICAL(DESCPTR("MICROEMACS$COMMAND"),
                             DESCPTR("LNM$JOB")));
 
     TTopen();
@@ -1100,8 +1121,7 @@ PASCAL    NEAR bktoshell P2_(int, f, int, n)
 /*
         First parameter is default device
 */
-    test(LIB$SET_LOGICAL(
-                         DESCPTR("SYS$DISK"),
+    test(LIB$SET_LOGICAL(DESCPTR("SYS$DISK"),
                          descptr(argv[0]),
                          0));
 /*
@@ -1113,6 +1133,7 @@ PASCAL    NEAR bktoshell P2_(int, f, int, n)
 */
     sgarbf = TRUE;
     dcline(argc - 2, &argv[2], FALSE);
+
     return (TRUE);
 }
 
@@ -1130,7 +1151,7 @@ static struct RAB rab;          /* a record access block */
 /*
  * Open a file for reading.
  */
-PASCAL    NEAR ffropen P1_(CONST char *, fn)
+int PASCAL NEAR ffropen P1_(CONST char *, fn)
 {
     unsigned long status;
 
@@ -1177,7 +1198,7 @@ PASCAL    NEAR ffropen P1_(CONST char *, fn)
  *
  * fn = file name, mode = mode to open file.
  */
-PASCAL    NEAR ffwopen P2_(char *, fn, char *, mode)
+int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
 {
     unsigned long status;
 
@@ -1219,13 +1240,14 @@ PASCAL    NEAR ffwopen P2_(char *, fn, char *, mode)
 /*                      "Cannot open file for writing" */
         return (FIOERR);
     }
+
     return (FIOSUC);
 }
 
 /*
  * Close a file. Should look at the status in all systems.
  */
-PASCAL    NEAR ffclose P0_()
+int PASCAL NEAR ffclose P0_()
 {
     unsigned long status;
 
@@ -1254,7 +1276,7 @@ PASCAL    NEAR ffclose P0_()
  * and the "nbuf" is its length, less the free newline. Return the status.
  * Check only at the newline.
  */
-PASCAL    NEAR ffputline P2_(char *, buf, int, nbuf)
+int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
 {
     REGISTER char *obuf = buf;
 
@@ -1302,7 +1324,7 @@ PASCAL    NEAR ffputline P2_(char *, buf, int, nbuf)
  * at the end of the file that don't have a newline present. Check for I/O
  * errors too. Return status.
  */
-PASCAL    NEAR ffgetline P1_(int, nbytes)
+int PASCAL NEAR ffgetline P1_(int *, nbytes)
 /* nbytes:  Save our caller hassle, calc the line length  */
 {
     unsigned long status;
@@ -1332,6 +1354,7 @@ PASCAL    NEAR ffgetline P1_(int, nbytes)
     if (cryptflag)
         ecrypt(fline, *nbytes);
 #endif
+
     return (FIOSUC);
 }
 
@@ -1341,8 +1364,10 @@ PASCAL    NEAR ffgetline P1_(int, nbytes)
 * FUNCTION - addspec - utility function for expandargs
 ***********************************************************/
 #define ADDSPEC_INCREMENT 10
-static void PASCAL NEAR addspec P4_(struct dsc$descriptor, dsc, int *, pargc,
-                                char ***, pargv, int *, pargcapacity)
+static VOID PASCAL NEAR addspec P4_(struct dsc$descriptor,  dsc,
+                                    int *,                  pargc,
+                                    char ***,               pargv,
+                                    int *,                  pargcapacity)
 {
     char     *s;
 
@@ -1362,7 +1387,7 @@ static void PASCAL NEAR addspec P4_(struct dsc$descriptor, dsc, int *, pargc,
 * FUNCTION - expandargs - massage argc and argv to expand
 * wildcards by calling VMS.
 ***********************************************************/
-void      PASCAL NEAR expandargs P2_(int *, pargc, char ***, pargv)
+VOID PASCAL NEAR  expandargs P2_(int *, pargc, char ***, pargv)
 {
     int       argc = *pargc;
     char    **argv = *pargv;
@@ -1408,7 +1433,7 @@ void      PASCAL NEAR expandargs P2_(int *, pargc, char ***, pargv)
 
 #else
 
-VOID PASCAL    NEAR vms_hello P0_()
+VOID PASCAL NEAR  vms_hello P0_()
 {
 }
 
