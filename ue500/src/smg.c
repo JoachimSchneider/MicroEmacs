@@ -415,11 +415,12 @@ EXTERN struct dsc$descriptor_s *descrp  DCL((char *, int));
 */
 typedef struct {
     /* Terminal characteristics buffer */
-    unsigned char catgy, type;
-    unsigned short width;
-    unsigned  tt1:24;
-    unsigned char page;
-    unsigned long tt2;
+    unsigned char   catgy;  /* Renamed from `class' to allow C++ compile  */
+    unsigned char   type;
+    unsigned short  width;
+    unsigned int    tt1:24;
+    unsigned char   page;
+    unsigned long   tt2;
 } TTCHAR;
 COMMON    NOSHARE TTCHAR orgchar;       /* Original characteristics */
 /*

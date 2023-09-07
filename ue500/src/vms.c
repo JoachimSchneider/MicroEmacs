@@ -118,13 +118,15 @@ struct dsc$descriptor_s *descptr P1_(CONST char *, s)
         These two structures, along with ttdef.h, are good for manipulating
         terminal characteristics.
 */
+
 typedef struct {
     /* Terminal characteristics buffer */
-    unsigned char catgy, type;
-    unsigned short width;
-    unsigned  tt1:24;
-    unsigned char page;
-    unsigned long tt2;
+    unsigned char   catgy;  /* Renamed from `class' to allow C++ compile  */
+    unsigned char   type;
+    unsigned short  width;
+    unsigned int    tt1:24;
+    unsigned char   page;
+    unsigned long   tt2;
 } TTCHAR;
 
 typedef struct {
