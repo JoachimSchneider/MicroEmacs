@@ -6,14 +6,20 @@ It started as a copy of Peter Chapman's repository
 time of the fork in the *archive* branch.
 
 Its purpose is to keep this wonderful editor usable and alive by doing
-necessary source code maintenance (currently only for some Unix
-operating systems, e.g. FreeBSD, OpenBSD, Linux and Solaris):
+necessary source code maintenance (currently for some Unix operating
+systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, for MSDOS and
+--- thanks to the contribution of Martin Vorlaender --- for OpenVMS):
+
 * Bug fixing,
 * porting to current operating systems and
 * some improvements.
 
 
 ## Change Log
+
+[2023-09-07.00]
+* On the UNIX platforms and on MSDOS it compiles *without warnings*
+  using the C++ compilers: Purpose: Improvement of code quality.
 
 [2023-08-29.00]
 * It compiles and runs on AIX 5.
@@ -95,7 +101,7 @@ modern Linux and FreeBSD systems:
 
 * Const-Correctness:
 
-    Functions modified to get const-correctnes:
+    Functions modified to get const-correctness:
 ```
     bind.c:stock()      /* Convert (function-)keyname intp internal Code.   */
     eval.c():gtfun()    /* Call internal function via name.                 */
