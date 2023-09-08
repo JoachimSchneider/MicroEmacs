@@ -404,6 +404,9 @@ int PASCAL NEAR ttopen P0_()
     TTCHAR    newchar;          /* Adjusted characteristics */
     int       status;
     char     *waitstr;
+#if ( 0 ) /* TODO: Don't use &sizeof(.) */
+    int       mbmsg_size  = SIZEOF(mbmsg);  /* longword integer signed  */
+#endif
 
     xstrcpy(os, "VMS");
     tyin = 0;
@@ -412,8 +415,13 @@ int PASCAL NEAR ttopen P0_()
     tymax = SIZEOF(tybuf);
     status = LIB$ASN_WTH_MBX(   /* Create a new PY/TW pair */
                              descptr("SYS$OUTPUT:"),
+#if ( 0 ) /* TODO: Don't use &sizeof(.) */
+                             &mbmsg_size,
+                             &mbmsg_size,
+#else
                              &sizeof(mbmsg),
                              &sizeof(mbmsg),
+#endif
                              &vms_iochan,
                              &mbchan);
     if ((status & 1) == 0) {
