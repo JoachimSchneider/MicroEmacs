@@ -11,19 +11,19 @@
 	To use microemacs in the normal way, just point the microemacs
 	command directly at tghe MESHR.EXE image.
 */
-#include stdio
-#include stdlib
-#include string
-#include unixlib
-#include starlet
-#include lib$routines
-#include clidef
-#include ssdef
-#include descrip
-#include jpidef
-#include iodef
-#include accdef
-#include clidef
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <unixlib.h>
+#include <starlet.h>
+#include <lib$routines.h>
+#include <clidef.h>
+#include <ssdef.h>
+#include <descrip.h>
+#include <jpidef.h>
+#include <iodef.h>
+#include <accdef.h>
+#include <clidef.h>
 
 /*                                                                          */
 /*  $SETDDIR                                                                */
@@ -62,11 +62,12 @@ int sys$setddir(__unknown_params);
 		DESCPTR( s)	String descriptor for buffer s, using sizeof()
 */
 #define NUM_DESCRIPTORS 10
-struct  dsc$descriptor_s *descrp( s, l)
-char *s;	/* String to make descriptor for */
-int l;		/* length of string */
+struct  dsc$descriptor_s *descrp(
+  char *s,     /* String to make descriptor for */
+  int l                /* length of string */
+)
     {
-    static next_d = 0;
+    static int next_d = 0;
     static struct dsc$descriptor_s dsclist[ NUM_DESCRIPTORS];
 
     if( next_d >= NUM_DESCRIPTORS) next_d = 0;
@@ -77,8 +78,9 @@ int l;		/* length of string */
     return( &dsclist[ next_d++]);
     }
 
-struct  dsc$descriptor_s *descptr( s)	/* Make pointer to descriptor */
-char *s;		/* Asciz string to make descriptor for */
+struct  dsc$descriptor_s *descptr(     /* Make pointer to descriptor */
+  char *s              /* Asciz string to make descriptor for */
+)
     {
     return( descrp( s, strlen( s)));
     }
@@ -91,19 +93,21 @@ struct acc$record msg;		 Message buffer */
 struct accdef msg;		/* Message buffer */
 static int good_reason = 0;	/* True if good reason to exit */
 
-me_exited()
+void me_exited(void)
    {
    test( lib$put_output( DESCPTR( "Microemacs has exited.")));
    good_reason = 1;
    test( sys$wake( 0, 0));
    }
 
-start_microemacs( argc, argv)
-int argc;
-char *argv[];
+void start_microemacs(
+  int argc,
+  char *argv[]
+)
     {
     char scrap[ 512], imagename[ 256], *i;
     int a;
+    unsigned spawn_flags = CLI$M_NOWAIT;
 
     test( lib$put_output( DESCPTR( "Starting a new Microemacs process.")));
 /*
@@ -133,13 +137,14 @@ char *argv[];
 	strcat( scrap, argv[ a]);
 	}
     test( lib$get_ef( &g_efn));
-    test( lib$spawn( descptr( scrap), DESCPTR( "NLA0:"), 0, &CLI$M_NOWAIT,
+    test( lib$spawn( descptr( scrap), DESCPTR( "NLA0:"), 0, &spawn_flags,
 	0, &g_pid, &g_status, &g_efn, me_exited, &g_pid, 0, 0));
     }
 
-main( argc, argv)
-int argc;
-char *argv[];
+int main(
+  int argc,
+  char *argv[]
+)
     {
     char *env;
     char scrap[ 512];
@@ -147,11 +152,13 @@ char *argv[];
     int a;
     unsigned long pid;
     short len;
+    unsigned jpi_pid = JPI$_PID,
+             jpi_tmbu = JPI$_TMBU;
 /*
 	Identify where we come from
 */
-    test( lib$getjpi( &JPI$_PID, 0, 0, &pid, 0, 0));
-    sprintf( scrap, "%d", pid);
+    test( lib$getjpi( &jpi_pid, 0, 0, &pid, 0, 0));
+    sprintf( scrap, "%ld", pid);
     test( lib$set_logical(
 	DESCPTR( "MICROEMACS$PARENT"),
 	descptr( scrap),
@@ -206,7 +213,7 @@ char *argv[];
 	else
 	    { /* Successful at waking up microemacs, set up for termination */
 	    test( a);
-	    test( lib$getjpi( &JPI$_TMBU, &pid, 0, &a, 0, 0));
+           test( lib$getjpi( &jpi_tmbu, &pid, 0, &a, 0, 0));
 	    sprintf( scrap, "MBA%d:", a);
 	    test( sys$assign( descptr( scrap), &a, 0, 0));
 	    test( sys$qio( 0, a, IO$_READVBLK, 0, me_exited, 0,
@@ -222,4 +229,6 @@ char *argv[];
 	env = getenv( "MICROEMACS$PROCESS");
 	if( env != NULL) break;
 	}
+
+    return 0;
     }

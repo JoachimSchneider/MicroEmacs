@@ -32,19 +32,19 @@
 #include        "edef.h"
 #include        "elang.h"
 
-#include ssdef
-#include descrip
-#include jpidef
-#include iodef
-#include ttdef
-#include tt2def
-#include msgdef
-#include rms
-#include ctype
-#include time
-#include starlet
-#include lib$routines
-#include str$routines
+#include <ssdef.h>
+#include <descrip.h>
+#include <jpidef.h>
+#include <iodef.h>
+#include <ttdef.h>
+#include <tt2def.h>
+#include <msgdef.h>
+#include <rms.h>
+#include <ctype.h>
+#include <time.h>
+#include <starlet.h>
+#include <lib$routines.h>
+#include <str$routines.h>
 
 static VOID next_read P1_(int, flag);
 
@@ -67,7 +67,7 @@ static VOID next_read P1_(int, flag);
 #define CLI$M_NOTIFY 16
 #define CLI$M_NOWAIT 1
 #else
-#include clidef
+#include <clidef.h>
 #endif
 /*
         test macro is used to signal errors from system services
@@ -100,7 +100,7 @@ struct dsc$descriptor_s *descrp P2_(CONST char *, s, int, l)
     dsclist[next_d].dsc$w_length = l;
     dsclist[next_d].dsc$b_dtype = DSC$K_DTYPE_T;
     dsclist[next_d].dsc$b_class = DSC$K_CLASS_S;
-    dsclist[next_d].dsc$a_pointer = s;
+    dsclist[next_d].dsc$a_pointer = (char *)s;
     return (&dsclist[next_d++]);
 }
 
@@ -159,7 +159,7 @@ typedef struct {
     char      message[514];     /* First two bytes of broadcast message */
 } TTMESSAGE;
 
-static readonly int noterm[] = {0, 0};  /* Terminator list of NONE */
+static CONST int noterm[] = {0, 0};  /* Terminator list of NONE */
 static int newbrdcst = FALSE;   /* Flag - is message in Emacs buffer yet. */
 
 #define MINREAD 128             /* Smallest read to queue */
@@ -404,9 +404,7 @@ int PASCAL NEAR ttopen P0_()
     TTCHAR    newchar;          /* Adjusted characteristics */
     int       status;
     char     *waitstr;
-#if ( 0 ) /* TODO: Don't use &sizeof(.) */
-    int       mbmsg_size  = SIZEOF(mbmsg);  /* longword integer signed  */
-#endif
+    size_t    mbmsg_size = sizeof(mbmsg);
 
     xstrcpy(os, "VMS");
     tyin = 0;
@@ -415,13 +413,8 @@ int PASCAL NEAR ttopen P0_()
     tymax = SIZEOF(tybuf);
     status = LIB$ASN_WTH_MBX(   /* Create a new PY/TW pair */
                              descptr("SYS$OUTPUT:"),
-#if ( 0 ) /* TODO: Don't use &sizeof(.) */
                              &mbmsg_size,
                              &mbmsg_size,
-#else
-                             &sizeof(mbmsg),
-                             &sizeof(mbmsg),
-#endif
                              &vms_iochan,
                              &mbchan);
     if ((status & 1) == 0) {
@@ -1007,6 +1000,9 @@ char * PASCAL NEAR  getnfile P0_()
     return (path);
 }
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 /*
         The following ME$EDIT entry point is used when MicroEmacs is
         called up from MAIL or NOTES.  Note that it may be called more than
@@ -1063,6 +1059,9 @@ abortrun:
 
     return (status);
 }
+#ifdef __cplusplus
+}
+#endif
 
 int PASCAL NEAR bktoshell P2_(int, f, int, n)
 {
@@ -1073,6 +1072,7 @@ int PASCAL NEAR bktoshell P2_(int, f, int, n)
     char     *env;
     int       argc;
     char     *argv[16];
+    unsigned  jpi_pid = JPI$_PID;
 
     if (called) {
         mlwrite("Called MicroEMACS can't be suspended.");
@@ -1090,7 +1090,7 @@ int PASCAL NEAR bktoshell P2_(int, f, int, n)
 
     test(LIB$DELETE_LOGICAL(DESCPTR("MICROEMACS$PARENT"),
                             DESCPTR("LNM$JOB")));
-    test(LIB$GETJPI(&JPI$_PID, 0, 0, &pid, 0, 0));
+    test(LIB$GETJPI(&jpi_pid, 0, 0, &pid, 0, 0));
     test(LIB$SET_LOGICAL(DESCPTR("MICROEMACS$PROCESS"),
                          descptr(int_asc(pid)),
                          DESCPTR("LNM$JOB")));
@@ -1114,7 +1114,7 @@ int PASCAL NEAR bktoshell P2_(int, f, int, n)
     argc = 1;
     for (;;) {
         /* Define each argument */
-        if (*env == 0x80) {
+        if ((unsigned char)*env == 0x80) {
             /* Seperator */
             argv[argc++] = env + 1;
             if (argc > 15)
@@ -1211,7 +1211,7 @@ int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
     fab = cc$rms_fab;
     rab = cc$rms_rab;
 
-    fab.fab$l_fna = fn;
+    fab.fab$l_fna = (char *)fn;
     fab.fab$b_fns = STRLEN(fn);
     fab.fab$b_fac = FAB$M_PUT;  /* writing this file */
     fab.fab$b_shr = FAB$M_NIL;  /* no other writers */

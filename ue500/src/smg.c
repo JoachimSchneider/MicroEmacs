@@ -103,13 +103,12 @@ int smg_noop1 P1_(int, param)
 
 #include "edef.h"               /* Emacs' definitions           */
 #include "elang.h"
-#include smgdef
-#include ssdef
-#include descrip
-#include ttdef
-#include tt2def
-#include smg$routines
-#include smgtrmptr
+#include <smgdef.h>
+#include <ssdef.h>
+#include <descrip.h>
+#include <ttdef.h>
+#include <tt2def.h>
+#include <smg$routines.h>
 
 #ifdef NEED_SMGTRMPTR
 /*
@@ -401,6 +400,8 @@ int smg_noop1 P1_(int, param)
 #define SMG$K_KEY_THIRD_UP              697
 #define SMG$K_KEY_FOURTH_UP             698
 #define SMG$K_MAX_STRING2_CODE          880
+#else
+#include <smgtrmptr.h>
 #endif
 
 /*
