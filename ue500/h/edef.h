@@ -219,8 +219,8 @@ DCLDEF NOSHARE BUFFER         *ulistp;            /* Buffer for C-X U           
 DCLDEF NOSHARE BUFFER         *slistp;            /* Buffer for A-B                         */
 DCLDEF NOSHARE char           sres[NBUFN];        /* current screen resolution              */
 DCLDEF NOSHARE char           os[NBUFN];          /* what OS are we running under           */
-DCLDEF NOSHARE char           lowcase[HICHAR];    /* lower casing map                       */
-DCLDEF NOSHARE char           upcase[HICHAR];     /* upper casing map                       */
+DCLDEF NOSHARE unsigned char  lowcase[HICHAR];    /* lower casing map                       */
+DCLDEF NOSHARE unsigned char  upcase[HICHAR];     /* upper casing map                       */
 DCLDEF NOSHARE unsigned char  pat[NPAT];          /* Search pattern                         */
 DCLDEF NOSHARE unsigned char  tap[NPAT];          /* Reversed pattern array.                */
 DCLDEF NOSHARE unsigned char  rpat[NPAT];         /* replacement pattern                    */
