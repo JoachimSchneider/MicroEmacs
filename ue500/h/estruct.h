@@ -88,6 +88,11 @@
 #define IS_POSIX_UNIX() ( IS_UNIX()                                 \
                           && !( USG || AIX || AUX || SMOS || HPUX8  \
                                 || HPUX9 || SUN || XENIX ) )
+#if defined (__STDC__) || defined(__cplusplus)
+# define IS_ANSI_C()  (1)
+#else
+# define IS_ANSI_C()  (0)
+#endif
 
 
 /*      Compiler definitions                                          */
@@ -239,8 +244,8 @@
   typedef char *    voidp_;
   /* attempt to optimize read/write vars. */
 # define NOSHARE    $low32k $align(1)
-#elif  __STDC__ || IS_UNIX() || MSC || TURBO || GCC   \
-  || (AMIGA && LATTICE)
+#elif  IS_ANSI_C() || IS_UNIX() || MSC || TURBO || GCC   \
+  || (AMIGA && LATTICE) || VMS
 # define CONST      const
 # define VOID       void
 # define VOIDCAST   (void)
@@ -298,7 +303,7 @@
  *      the following define allows me to initialize unions...
  *      otherwise we make them structures (like the keybinding table)
  */
-#if     __STDC__ || MSC || TURBO || IC || ZTC
+#if     IS_ANSI_C() || MSC || TURBO || IC || ZTC
 # define ETYPE   union
 #else
 # define ETYPE   struct

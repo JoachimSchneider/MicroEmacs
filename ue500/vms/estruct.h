@@ -73,6 +73,7 @@
 #define SUN     0                     /* SUN v4.0                     */
 #define TOS     0                     /* ST520, TOS                   */
 #define USG     0                     /* UNIX system V                */
+#define VAT     0                     /* Related to XENIX (???)       */
 #define VMS     1                     /* VAX/VMS                      */
 #define WINNT   0                     /* MS-Win NT                    */
 #define WINXP   0                     /* Windows XP/Visual studio 2008*/
@@ -87,6 +88,11 @@
 #define IS_POSIX_UNIX() ( IS_UNIX()                                 \
                           && !( USG || AIX || AUX || SMOS || HPUX8  \
                                 || HPUX9 || SUN || XENIX ) )
+#if defined (__STDC__) || defined(__cplusplus)
+# define IS_ANSI_C()  (1)
+#else
+# define IS_ANSI_C()  (0)
+#endif
 
 
 /*      Compiler definitions                                          */
@@ -213,7 +219,7 @@
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
 #define UEMACS_TRC            (!0)
-#define TRC_FILE_ENVVAR       "UEMACS_TRC_FILE"
+#define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
 
 
 /*=================================================================== */
@@ -238,8 +244,8 @@
   typedef char *    voidp_;
   /* attempt to optimize read/write vars. */
 # define NOSHARE    $low32k $align(1)
-#elif  __STDC__ || IS_UNIX() || MSC || TURBO || GCC   \
-  || (AMIGA && LATTICE)
+#elif  IS_ANSI_C() || IS_UNIX() || MSC || TURBO || GCC   \
+  || (AMIGA && LATTICE) || VMS
 # define CONST      const
 # define VOID       void
 # define VOIDCAST   (void)
@@ -297,7 +303,7 @@
  *      the following define allows me to initialize unions...
  *      otherwise we make them structures (like the keybinding table)
  */
-#if     __STDC__ || MSC || TURBO || IC || ZTC
+#if     IS_ANSI_C() || MSC || TURBO || IC || ZTC
 # define ETYPE   union
 #else
 # define ETYPE   struct
@@ -345,15 +351,14 @@
 
 # undef NEAR
 # define NEAR
-# define DNEAR
 # if     MSC || IC
 #  undef CDECL
 #  define CDECL   __cdecl
 /* dummy size for unsized extern arrays to avoid silly DGROUP fixup:  */
-/* I don't like this hack --- JES, 2023-08-13 --- TODO                */
-/*  sizeof(.) would be wrong, but compilation on other platforms      */
-/*  shows, that this does not happen as sizeof gives a compile error  */
-/*  with incomplete array types.                                      */
+/* I don't like this hack --- JES, 2023-08-13 --- TODO:               */
+/* - DUMMYSZ '1': sizeof(.) will be wrong!                            */
+/* - DUMMYSZ '':  sizeof() gives a compile time error with incomplete */
+/*                array types.                                        */
 #  define DUMMYSZ 1
 # else
 #  if     TURBO
@@ -390,18 +395,15 @@
 
 # if MSDOS & (TURBO | MSC | TIPC)
 #  define NEAR
-#  define DNEAR
 #  define PASCAL pascal
 #  define CDECL cdecl
 # else
 #  if MSDOS & ZTC
 #   define NEAR
-#   define DNEAR
 #   define PASCAL _pascal
 #   define CDECL _cdecl
 #  else
 #   define NEAR
-#   define DNEAR
 #   define PASCAL
 #   define CDECL
 #  endif
@@ -791,8 +793,8 @@ execl(va_alist)
 # endif
 #endif
 
-#define INTWIDTH        sizeof (int) * 3
-#define LONGWIDTH       sizeof (long) * 3
+#define INTWIDTH        SIZEOF (int) * 3
+#define LONGWIDTH       SIZEOF (long) * 3
 
 /*===== Macro argument token types ===================================*/
 
