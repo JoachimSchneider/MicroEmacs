@@ -939,20 +939,6 @@ VOID qrep P1_(int, ch)
     qin(ch);
 }
 
-/*
- * qrep - replace a key sequence with a single character in the input buffer.
- */
-#if PROTO
-VOID qrep(int ch)
-#else
-VOID qrep( ch)
-int ch;
-#endif
-{
-	inbuft = inbuf;
-	qin(ch);
-}
-
 /***
  *  smggetc  -  Get a character
  *
