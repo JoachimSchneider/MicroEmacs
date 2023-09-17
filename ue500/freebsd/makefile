@@ -1,10 +1,12 @@
-#		FreeBSD 2 makefile for
-#		MicroEMACS 4.00
-#		(C)Copyright 1995 by Daniel Lawrence
-#		all rights reserved
+#               FreeBSD 2 makefile for
+#               MicroEMACS 4.00
+#               (C)Copyright 1995 by Daniel Lawrence
+#               all rights reserved
 
 # modify the following lines with the proper relative directories
-
+# Be careful when using relative directories: FreeBSD make changes
+# directory to the target's directory --- HMM
+# ===> Only the setting `OBJD = .' semms to work in a *simple* way.
 # object file directory
 OBJD = .
 # source file directory
@@ -12,19 +14,17 @@ SRCD = ../src
 # header file directory
 HDIR = ../h
 
-# options and arguments to the C compiler
 
-#CFLAGS += -I. -I$(HDIR)
-#CFLAGS = -O -I. -I$(HDIR)
-#CFLAGS = -g -DEMACS_TRC -Wall -I. -I$(HDIR)
-#CFLAGS = -O2 -I. -I$(HDIR)
-CFLAGS = -g -Wall -I. -I$(HDIR)
+# options and arguments to the C compiler
+#CFLAGS = -g -Wall     -I. -I$(HDIR)
+CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
+
 
 # list of header files
 
 HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.h $(HDIR)/eproto.h
 
-#list of object files
+# list of object files
 
 F1 = $(OBJD)/abbrev.o $(OBJD)/basic.o $(OBJD)/bind.o $(OBJD)/buffer.o
 F2 = $(OBJD)/char.o $(OBJD)/crypt.o $(OBJD)/display.o $(OBJD)/dolock.o
@@ -106,7 +106,7 @@ $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
 
 
 clean:
-	rm -f *.o
+	rm -f $(OBJD)/*.o
 	rm -f emacs
 
 

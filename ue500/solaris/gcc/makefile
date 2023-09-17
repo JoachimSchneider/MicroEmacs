@@ -1,7 +1,7 @@
-#	Unix makefile for
-#		MicroEMACS 3.12
-#		(C)Copyright 1993 by Daniel Lawrence
-#		all rights reserved
+#               Unix makefile for
+#               MicroEMACS 3.12
+#               (C)Copyright 1993 by Daniel Lawrence
+#               all rights reserved
 
 # modify the following lines with the proper relative directories
 
@@ -9,10 +9,19 @@ OBJD = obj			# object file directory
 SRCD = ../../src		# source file directory
 HDIR = ../../h			# header file directory
 
-# options and arguments to the C compiler
 
+# C compiler
 CC = gcc
-CFLAGS=	-O -I. -I$(HDIR) -g
+
+
+# options and arguments to the C compiler
+#
+# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
+# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
+#
+#CFLAGS = -g -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
+CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
+
 
 # list of header files
 
@@ -98,6 +107,11 @@ $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/word.o $(SRCD)/word.c
+
+
+clean:
+	rm -f $(OBJD)/*.o
+	rm -f bin/emacs
 
 
 

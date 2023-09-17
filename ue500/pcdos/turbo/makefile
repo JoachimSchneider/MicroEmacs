@@ -1,32 +1,46 @@
-#	Turbo C 2.0 makefile for
-#		MicroEMACS 3.12
-#		(C)Copyright 1993 by Daniel Lawrence
-#		all rights reserved
+#       Turbo C 2.0 makefile for
+#               MicroEMACS 3.12
+#               (C)Copyright 1993 by Daniel Lawrence
+#               all rights reserved
 
 # modify the following lines with the proper relative directories
 
-OBJD = obj			# object file directory
-SRCD = ..\..\src		# source file directory
-HDIR = ..\..\h			# header file directory
-INCD = c:\tc\include	# system include directory
+OBJD = obj              # object file directory
+SRCD = ..\..\src        # source file directory
+HDIR = ..\..\h          # header file directory
+INCD = e:\bc\include    # system include directory
 
 # options and arguments to the C compiler
+#   `-g0': Allow any amount of warnings.
+#   REMARK: `bcc' needs 600KB free memory to compile Microemacs
+#           TODO: Split `random.c' into two pieces.
+CC = bcc -g0
 
-CC = tcc
 
-#These options or with debugging on!
-CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -v -w-par -y -Z
+# CFLAGS
+#
+# In *any* case use `-N' ("Check for Stack overflow") to avoid mysterious errors!
 
-#These options are production (no debugging)
-#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -w-par -Z 
+# These options are with debugging on.
+# `-2': Use 80286 instructions
+# `-P': C++ compile finds more errors.
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -v -w-par -y -Z
+CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -2 -P -O -r -v -w-par -y -Z
+
+# These options are production (no debugging)
+# `-2': Use 80286 instructions
+# `-P': C++ compile finds more errors.
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -O -r -w-par -Z
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N -n$(OBJD) -2 -P -O -r -w-par -Z
+
 
 # list of header files
 H1 = ..\..\h\estruct.h ..\..\h\edef.h ..\..\h\efunc.h
 H2 = ..\..\h\epath.h ..\..\h\ebind.h ..\..\h\eproto.h
-H3 = ..\..\h\english.h		# << REMEMBER to change this for other languages
+H3 = ..\..\h\english.h          # << REMEMBER to change this for other languages
 HFILES = $(H1) $(H2) $(H3)
 
-#list of source files
+# list of source files
 
 F1 = $(OBJD)\abbrev.obj $(OBJD)\basic.obj $(OBJD)\bind.obj $(OBJD)\buffer.obj
 F2 = $(OBJD)\char.obj $(OBJD)\crypt.obj $(OBJD)\display.obj
@@ -42,10 +56,10 @@ F8 = $(OBJD)\undo.obj $(OBJD)\window.obj $(OBJD)\word.obj  $(OBJD)\execpr.obj
 all:	bin\emacs.exe bin\cmdfix.exe
 
 bin\emacs.exe: $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
-	link @emacs.lnk
+	tlink @emacs.lnk
 
 bin\cmdfix.exe: $(OBJD)\cmdfix.obj
-	link @cmdfix.lnk
+	tlink @cmdfix.lnk
 
 # compilation rules
 
@@ -114,4 +128,16 @@ $(OBJD)\undo.obj: $(SRCD)\undo.c $(HFILES)
 $(OBJD)\word.obj: $(SRCD)\word.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\execpr.obj: $(SRCD)\execpr.asm
-	masm $(SRCD)\execpr.asm, $(OBJD)\execpr.obj, , ,
+	tasm $(SRCD)\execpr.asm,$(OBJD)\execpr.obj
+
+
+clean:
+	del obj\*.obj
+	del emacs.map
+	del cmdfix.map
+	del bin\emacs.exe
+	del bin\cmdfix.exe
+
+
+
+# EOF

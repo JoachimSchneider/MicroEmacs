@@ -1,7 +1,20 @@
-﻿//{{NO_DEPENDENCIES}}
-// Microsoft Visual C++ generated include file.
-// Used by mewin.rc
-//
+/*======================================================================
+ * {{NO_DEPENDENCIES}}
+ * Microsoft Visual C++ generated include file.
+ * Used by mewin.rc
+ *====================================================================*/
+
+/*====================================================================*/
+#ifndef RESOURCE_H_
+#define RESOURCE_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
 #define SW_HIDE                         0
 #define HIDE_WINDOW                     0
 #define WM_NULL                         0x0000
@@ -1761,12 +1774,22 @@
 #define HTTRANSPARENT                   -1
 
 // Next default values for new objects
-// 
+//
 #ifdef APSTUDIO_INVOKED
-#ifndef APSTUDIO_READONLY_SYMBOLS
-#define _APS_NEXT_RESOURCE_VALUE        101
-#define _APS_NEXT_COMMAND_VALUE         40001
-#define _APS_NEXT_CONTROL_VALUE         1000
-#define _APS_NEXT_SYMED_VALUE           101
+# ifndef APSTUDIO_READONLY_SYMBOLS
+#  define _APS_NEXT_RESOURCE_VALUE        101
+#  define _APS_NEXT_COMMAND_VALUE         40001
+#  define _APS_NEXT_CONTROL_VALUE         1000
+#  define _APS_NEXT_SYMED_VALUE           101
+# endif
 #endif
-#endif
+
+
+
+/*====================================================================*/
+#endif/**#ifndef RESOURCE_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

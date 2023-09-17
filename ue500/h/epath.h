@@ -1,119 +1,97 @@
-/*	EPATH:	This file contains certain info needed to locate the
-		MicroEMACS files on a system dependant basis.
+/*======================================================================
+ *      EPATH:  This file contains certain info needed to locate the
+ *              MicroEMACS files on a system dependant basis.
+ *
+ *      possible names and paths of help files under different OSs
+ *====================================================================*/
 
-									*/
+/*====================================================================*/
+#ifndef EPATH_H_
+#define EPATH_H_
+/*====================================================================*/
 
-/*	possible names and paths of help files under different OSs	*/
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
 
-NOSHARE CONST char *pathname[] =
 
-#if	AMIGA
+#ifdef BIND_C_
+
+
+static NOSHARE CONST char *pathname[] =
+
+# if     AMIGA
 {
-	".emacsrc",
-	"emacs.hlp",
-	"",
-	"c:",
-	":t/",
-	":s/"
+    ".emacsrc", "emacs.hlp", "", "c:", ":t/", ":s/"
 };
-#endif
 
-#if	TOS
+# elif   TOS
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"\\",
-	"\\bin\\",
-	"\\util\\",
-	""
+    "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\", ""
 };
-#endif
- 
-#if	FINDER
-{
-	"emacs.rc",
-	"emacs.hlp",
-	"/bin",
-	"/sys/public",
-	""
-};
-#endif
 
-#if	MSDOS || WINNT || WINXP
+# elif   FINDER
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"\\sys\\public\\",
-	"\\usr\\bin\\",
-	"\\bin\\",
-	"\\",
-	""
+    "emacs.rc", "emacs.hlp", "/bin", "/sys/public", ""
 };
-#endif
 
-#if	OS2
+# elif   MSDOS || WINNT || WINXP
 {
-        "emacs.rc",
-        "emacs.hlp",
-        "C:\\OS2\\SYSTEM\\",
-        "C:\\OS2\\DLL\\",
-        "C:\\OS2\\BIN\\",
-        "C:\\OS2\\",
-        "\\",
-        ""
+    "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\",
+    ""
 };
-#endif
 
-#if	IS_UNIX()
+# elif   OS2
 {
-	".emacsrc",
-	"emacs.hlp",
-	"/usr/local/",
-	"/usr/lib/",
-	""
+    "emacs.rc", "emacs.hlp", "C:\\OS2\\SYSTEM\\", "C:\\OS2\\DLL\\",
+    "C:\\OS2\\BIN\\", "C:\\OS2\\", "\\", ""
 };
-#endif
 
-#if	VMS
+# elif   IS_UNIX()
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"MICROEMACS$LIB:",
-	"SYS$LOGIN:",
-	""
+    ".emacsrc", "emacs.hlp", "/usr/local/", "/usr/lib/", ""
 };
-#endif
 
-#if	WMCS
+# elif   VMS
 {
-	"emacs.rc",
-	"emacs.hlp",
-	"",
-	"sys$disk/syslib.users/"
+    "emacs.rc", "emacs.hlp", "MICROEMACS$LIB:", "SYS$LOGIN:", ""
 };
-#endif
 
-#if	AOSVS
+# elif   WMCS
+{
+    "emacs.rc", "emacs.hlp", "", "sys$disk/syslib.users/"
+};
+
+# elif   AOSVS
 /*
-    NOTE: you must use the Unix style pathnames here!
-*/
+ *   NOTE: you must use the Unix style pathnames here!
+ */
 {
-    "emacs.rc",
-    "emacs.hlp",
-    "",
-    "/macros/",
-    "/help/"
+    "emacs.rc", "emacs.hlp", "", "/macros/", "/help/"
 };
-#endif
 
-#if	MPE
+# elif   MPE
 {
-	"emacsrc",
-	"emacshlp",
-	".pub",
-	".pub.sys",
-	""
+    "emacsrc", "emacshlp", ".pub", ".pub.sys", ""
 };
-#endif /* MPE */
 
-#define	NPNAMES	(sizeof(pathname)/sizeof(char *))
+# else
+{
+    "", "", "", "", ""
+};
+# endif
+
+# define NPNAMES ( SIZEOF (pathname)/SIZEOF (char *) )
+
+
+#endif  /* BIND_C_  */
+
+
+/*====================================================================*/
+#endif/**#ifndef EPATH_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

@@ -1,41 +1,63 @@
-/*	ELANG.H:	Language specific definitions for
-			MicroEMACS 4.00
-			(C)opyright 1995 by Daniel Lawrence
-*/
+/*======================================================================
+ *      ELANG.H:        Language specific definitions for
+ *                      MicroEMACS 4.00
+ *                      (C)opyright 1995 by Daniel Lawrence
+ *====================================================================*/
 
-#if	ENGLISH
-#include	"english.h"
-#define	LANGUAGE "english"
+/*====================================================================*/
+#ifndef ELANG_H_
+#define ELANG_H_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+#if     ENGLISH
+# include        "english.h"
+# define LANGUAGE "english"
 #endif
-#if	FRENCH
-#if ( WINDOW_MSWIN || IS_UNIX() )
-#include	"frenchis.h"	/* ISO version */
-#else
-#include	"french.h"	/* IBM-PC char set */
+#if     FRENCH
+# if ( WINDOW_MSWIN || IS_UNIX() )
+#  include        "frenchis.h"  /* ISO version */
+# else
+#  include        "french.h"    /* IBM-PC char set */
+# endif
+# define LANGUAGE "french"
 #endif
-#define	LANGUAGE "french"
+#if     SPANISH
+# include        "spanish.h"
+# define LANGUAGE "spanish"
 #endif
-#if	SPANISH
-#include	"spanish.h"
-#define	LANGUAGE "spanish"
+#if     GERMAN
+# include        "german.h"
+# define LANGUAGE "german"
 #endif
-#if	GERMAN
-#include	"german.h"
-#define	LANGUAGE "german"
+#if     DUTCH
+# include        "dutch.h"
+# define LANGUAGE "dutch"
 #endif
-#if	DUTCH
-#include	"dutch.h"
-#define	LANGUAGE "dutch"
+#if     PLATIN
+# include        "platin.h"
+# define LANGUAGE "pig latin"
 #endif
-#if	PLATIN
-#include	"platin.h"
-#define	LANGUAGE "pig latin"
+#if     JAPAN
+# include        "japan.h"
+# define LANGUAGE "japaneese"
 #endif
-#if	JAPAN
-#include	"japan.h"
-#define	LANGUAGE "japaneese"
+#if     LATIN
+# include        "latin.h"
+# define LANGUAGE "latin"
 #endif
-#if	LATIN
-#include	"latin.h"
-#define	LANGUAGE "latin"
-#endif
+
+
+
+/*====================================================================*/
+#endif/**#ifndef ELANG_H_**/
+/*====================================================================*/
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

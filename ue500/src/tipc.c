@@ -1,4 +1,4 @@
-/*
+/*======================================================================
  * TIPC.C - TI Professional and compatible terminal driver for MicroEmacs.
  *      This version by Ronald Lepine, Moderator - TI Conference
  *      Byte Information Exchange.
@@ -152,7 +152,17 @@
  * 6-04-91
  *   Added last eight needed values to ctrans[] so standard emacs.rc file
  *   now works.
- */
+ *====================================================================*/
+
+/*====================================================================*/
+#define TIPC_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
 
 #define termdef 1                       /* don't define "term" external */
 
@@ -164,30 +174,30 @@
 
 #if     TIPC
 
-#define NROW    25                      /* Screen height.               */
-#define NCOL    80                      /* Screen width                 */
-#define MARGIN  8                       /* size of minimim margin and   */
-#define SCRSIZ  64                      /* scroll size for extended lines */
-#define NPAUSE  200                     /* # times thru update to pause */
-#define BEL     0x07                    /* BEL character.               */
-#define ESC     0x1B                    /* ESC character.               */
-#define SPACE   32                      /* space character              */
-#define SCADD       0xDE000000L         /* address of screen RAM        */
-#define ATTRADD     0xDE001800L         /* Address for attribute latch  */
-#define BLUE_PLANE  0xC0000000L         /* Address Blue graphics plane  */
-#define RED_PLANE   0xC8000000L         /* Address Red graphics plane   */
-#define GREEN_PLANE 0xD0000000L         /* Address Green graphics plane */
-#define CRTC_REG    0xDF810000L         /* 6545 CRT Controller access addr */
-#define CHAR_ENABLE     0x08            /* TI attribute to show char    */
-#define TI_REVERSE      0x10            /* TI attribute to reverse char */
-#define BLACK   0+CHAR_ENABLE           /* TI attribute for Black       */
-#define BLUE    1+CHAR_ENABLE           /* TI attribute for Blue        */
-#define RED     2+CHAR_ENABLE           /* TI attribute for Red         */
-#define MAGENTA 3+CHAR_ENABLE           /* TI attribute for Magenta     */
-#define GREEN   4+CHAR_ENABLE           /* TI attribute for Green       */
-#define CYAN    5+CHAR_ENABLE           /* TI attribute for Cyan        */
-#define YELLOW  6+CHAR_ENABLE           /* TI attribute for Yellow      */
-#define WHITE   7+CHAR_ENABLE           /* TI attribute for White       */
+# define NROW    25                     /* Screen height.               */
+# define NCOL    80                     /* Screen width                 */
+# define MARGIN  8                      /* size of minimim margin and   */
+# define SCRSIZ  64                     /* scroll size for extended lines */
+# define NPAUSE  200                    /* # times thru update to pause */
+# define BEL     0x07                   /* BEL character.               */
+# define ESC     0x1B                   /* ESC character.               */
+# define SPACE   32                     /* space character              */
+# define SCADD       0xDE000000L        /* address of screen RAM        */
+# define ATTRADD     0xDE001800L        /* Address for attribute latch  */
+# define BLUE_PLANE  0xC0000000L        /* Address Blue graphics plane  */
+# define RED_PLANE   0xC8000000L        /* Address Red graphics plane   */
+# define GREEN_PLANE 0xD0000000L        /* Address Green graphics plane */
+# define CRTC_REG    0xDF810000L        /* 6545 CRT Controller access addr */
+# define CHAR_ENABLE     0x08           /* TI attribute to show char    */
+# define TI_REVERSE      0x10           /* TI attribute to reverse char */
+# define BLACK   0+CHAR_ENABLE          /* TI attribute for Black       */
+# define BLUE    1+CHAR_ENABLE          /* TI attribute for Blue        */
+# define RED     2+CHAR_ENABLE          /* TI attribute for Red         */
+# define MAGENTA 3+CHAR_ENABLE          /* TI attribute for Magenta     */
+# define GREEN   4+CHAR_ENABLE          /* TI attribute for Green       */
+# define CYAN    5+CHAR_ENABLE          /* TI attribute for Cyan        */
+# define YELLOW  6+CHAR_ENABLE          /* TI attribute for Yellow      */
+# define WHITE   7+CHAR_ENABLE          /* TI attribute for White       */
 
 
 PASCAL NEAR ttopen();               /* Forward references.          */
@@ -210,17 +220,21 @@ PASCAL NEAR tifcol();
 PASCAL NEAR tibcol();
 PASCAL NEAR scinit();
 
-int     revflag = FALSE;        /* are we currently in rev video?       */
-int     cfcolor = -1;           /* current forground color              */
-int     cbcolor = -1;           /* current background color             */
-int     ctrans[] =              /* ANSI to TI color translation table   */
-        {BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE,
-         BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE};
+int revflag = FALSE;            /* are we currently in rev video?       */
+int cfcolor = -1;               /* current forground color              */
+int cbcolor = -1;               /* current background color             */
+int ctrans[] =                  /* ANSI to TI color translation table   */
+{
+    BLACK, RED, GREEN, YELLOW, BLUE, MAGENTA, CYAN, WHITE, BLACK, RED, GREEN,
+    YELLOW, BLUE, MAGENTA, CYAN, WHITE
+};
 
 char *scptr[NROW];                      /* pointer to screen lines-8 bit on ti *
-char sline[NCOL];                       /* screen line image               */
+                                         *  char sline[NCOL];
+                                         *                       /* screen line
+                                         * image               */
 
-#if  __TURBOC__
+# if  __TURBOC__
 
 char far * scadd       = SCADD;        /* address of screen ram           */
 char far * attradd     = ATTRADD;      /* address of attribute latch      */
@@ -229,7 +243,7 @@ char far * red_plane   = RED_PLANE;    /* address of red graphics plane   */
 char far * green_plane = GREEN_PLANE;  /* address of green graphics plane */
 char far * crtc_reg    = CRTC_REG;     /* 6545 CRT controller address     */
 
-#else
+# else
 
 long scadd       = SCADD;               /* address of screen ram           */
 long attradd     = ATTRADD;             /* address of attribute latch      */
@@ -238,43 +252,43 @@ long red_plane   = RED_PLANE;           /* address of red graphics plane   */
 long green_plane = GREEN_PLANE;         /* address of green graphics plane */
 long crtc_reg    = CRTC_REG;            /* 6545 CRT controller address     */
 
-#endif
+# endif
 
 /*
  * Standard terminal interface dispatch table. Most of the fields point into
  * "termio" code.
  */
-TERM    term    = {
-        NROW-1,
-        NROW-1,
-        NCOL,
-        NCOL,
-        0,
-        0,
-        MARGIN,
-        SCRSIZ,
-        NPAUSE,
-        tiopen,
-        ticlose,
-        tikopen,
-        tikclose,
-        ttgetc,
-        tiputc,
-        ttflush,
-        timove,
-        tieeol,
-        tieeop,
-        tieeop,
-        tibeep,
-        tirev,
-        ticres
+TERM  term  = {
+    NROW-1,
+    NROW-1,
+    NCOL,
+    NCOL,
+    0,
+    0,
+    MARGIN,
+    SCRSIZ,
+    NPAUSE,
+    tiopen,
+    ticlose,
+    tikopen,
+    tikclose,
+    ttgetc,
+    tiputc,
+    ttflush,
+    timove,
+    tieeol,
+    tieeop,
+    tieeop,
+    tibeep,
+    tirev,
+    ticres
 #if COLOR
-        , tifcol,
-        tibcol
+    , tifcol,
+    tibcol
 #endif
 };
 
-extern union REGS rg;
+COMMON union REGS rg;
 
 
 PASCAL NEAR tifcol(color)           /* set the current output color */
@@ -306,7 +320,6 @@ int col;
 
 
 PASCAL NEAR tieeol()        /* erase to the end of the line */
-
 {
     int i;                  /* loop variable                    */
     char *lnptr;            /* pointer to the destination line  */
@@ -320,10 +333,11 @@ PASCAL NEAR tieeol()        /* erase to the end of the line */
     crow = rg.h.dl;         /* and row */
 
     lnptr = &sline[0];      /* set things up */
-    for (i=0; i < term.t_ncol; i++)
+    for ( i=0; i < term.t_ncol; i++ )
         *lnptr++ = SPACE;
 
-    _fmemset(attradd, cfcolor, 1);                /* write current attrs to latc
+    _fmemset(attradd, cfcolor, 1);                /* write current attrs to
+                                                   * latch */
     movmem(&sline[0], scptr[crow]+ccol, term.t_ncol-ccol);
 
 }
@@ -341,10 +355,9 @@ int ch;
 
 
 PASCAL NEAR tieeop()        /* Actually a clear screen */
-
 {
     rg.h.ah = 0x13;         /* Clear Text Screen, Home Cursor and */
-    int86(0x49, &rg, &rg);  /* Set screen start register to 0     */
+    int86(0x49, &rg, &rg);  /* Set screen start REGISTER to 0     */
 }
 
 
@@ -363,19 +376,17 @@ PASCAL NEAR ticres()    /* Change screen resolution. Should we add the  */
                         /* and the code works when started in that res. */
                         /* Let me (Ron Lepine) know what you think      */
 {
-    return(TRUE);
+    return (TRUE);
 }
 
 
 PASCAL NEAR tibeep()
-
 {
     bdos(6, BEL, 0);
 }
 
 
 PASCAL NEAR tiopen()
-
 {
     xstrcpy(sres, "NORMAL");
     revexist = TRUE;
@@ -386,33 +397,30 @@ PASCAL NEAR tiopen()
 
 
 PASCAL NEAR tikopen()
-
 {
     /* Does nothing */
 }
 
 
 PASCAL NEAR ticlose()
-
 {
-    _fmemset(attradd, WHITE, 1);  /* write normal attrbute to latch      */
-                    /* Makes sure we return with a normal color        */
-                    /* and not reverse video or such.  Attribute       */
-                    /* Latch will otherwise hold last color and        */
-                    /* attributes it wrote to the screen, which in     */
-                    /* some cases is reverse video.                    */
+    _fmemset(attradd, WHITE, 1);  /* write normal attrbute to latch */
+    /* Makes sure we return with a normal color        */
+    /* and not reverse video or such.  Attribute       */
+    /* Latch will otherwise hold last color and        */
+    /* attributes it wrote to the screen, which in     */
+    /* some cases is reverse video.                    */
 }
 
 
 PASCAL NEAR tikclose()
-
 {
-    _fmemset(attradd, WHITE, 1);  /* write normal attrbute to latch         */
-                    /* Dan doesn't close the the terminal when shelling   */
-                    /* This ensures the shell starts with a normal color  */
-                    /* the same way ticlose does without changing         */
-                    /* *any* other source file.  The only real reason we  */
-                    /* place it here is to change as few files as posible */
+    _fmemset(attradd, WHITE, 1);  /* write normal attrbute to latch */
+    /* Dan doesn't close the the terminal when shelling   */
+    /* This ensures the shell starts with a normal color  */
+    /* the same way ticlose does without changing         */
+    /* *any* other source file.  The only real reason we  */
+    /* place it here is to change as few files as posible */
 }
 
 
@@ -422,24 +430,30 @@ PASCAL NEAR scinit()    /* initialize the screen head pointers to */
     union {
         long laddr;     /* long form of address */
         char *paddr;    /* pointer form of address */
-    } addr;
+    }
+    addr;
 
     char i;
 
     tieeop();           /* set logical = physical start of screen   */
-        /* initialize The screen pointer array */
-    for (i = 0; i < NROW; i++) {
+    /* initialize The screen pointer array */
+    for ( i = 0; i < NROW; i++ ) {
         addr.laddr = scadd + (long)(NCOL * i);
         scptr[i] = addr.paddr;
     }
 }
 
 
-PASCAL NEAR scwrite(int row, char *outstr, int forg, int bacg, int revleft, int
+PASCAL NEAR scwrite(int  row,
+                    char *outstr,
+                    int  forg,
+                    int  bacg,
+                    int  revleft,
+                    int  revright)
 /* write a line out */
 {
     char    *lnptr;         /* Pointer to the destination line */
-    char    i;
+    char i;
 
     /* Write the attribute byte to latch and setup the screen pointer      */
     /* If forg == 0 then you can change the back ground to color.  TI      */
@@ -447,18 +461,18 @@ PASCAL NEAR scwrite(int row, char *outstr, int forg, int bacg, int revleft, int
     /* you have graphics and set the graphics color to your background     */
     /* This is enabled in this driver though the $palette variable         */
 
-    if ((forg != 0) & (!revflag)) {
+    if ( (forg != 0) && (!revflag) ) {
         forg = ctrans[forg];
         _fmemset(attradd, forg, 1);
-    }else if ((forg != 0) & (revflag)) {
+    } else if ( (forg != 0) && (revflag) ) {
         forg = ctrans[forg] + TI_REVERSE;
         _fmemset(attradd, forg, 1);
-    }else{
+    } else {
         bacg = ctrans[bacg] + TI_REVERSE;
         _fmemset(attradd, bacg, 1);
     }
     lnptr = &sline[0];
-    for (i=0; i<term.t_ncol; i++)
+    for ( i=0; i<term.t_ncol; i++ )
         *lnptr++ = outstr[i];
     /* and send the string out */
     movmem(&sline[0], scptr[row], term.t_ncol);
@@ -478,62 +492,69 @@ char *palette;
     /* so there is no reason to check for the number of     */
     /* graphics planes installed.                           */
 
-    switch ((atoi(palette) % 8)) {
-        case 0:
-            _fmemset(blue_plane,   0,  0x7fff);
-            _fmemset(red_plane,    0,  0x7fff);
-            _fmemset(green_plane,  0,  0x7fff);
-            break;
-        case 1:
-            _fmemset(blue_plane,   0xff,  0x7fff);
-            _fmemset(red_plane,    0,     0x7fff);
-            _fmemset(green_plane,  0,     0x7fff);
-            break;
-        case 2:
-            _fmemset(blue_plane,   0,    0x7fff);
-            _fmemset(red_plane,    0xff, 0x7fff);
-            _fmemset(green_plane,  0,    0x7fff);
-            break;
-        case 3:
-            _fmemset(blue_plane,   0xff, 0x7fff);
-            _fmemset(red_plane,    0xff, 0x7fff);
-            _fmemset(green_plane,  0,    0x7fff);
-            break;
-        case 4:
-            _fmemset(blue_plane,   0,    0x7fff);
-            _fmemset(red_plane,    0,    0x7fff);
-            _fmemset(green_plane,  0xff, 0x7fff);
-            break;
-        case 5:
-            _fmemset(blue_plane,   0xff, 0x7fff);
-            _fmemset(red_plane,    0,    0x7fff);
-            _fmemset(green_plane,  0xff, 0x7fff);
-            break;
-        case 6:
-            _fmemset(blue_plane,   0,    0x7fff);
-            _fmemset(red_plane,    0xff, 0x7fff);
-            _fmemset(green_plane,  0xff, 0x7fff);
-            break;
-        case 7:
-            _fmemset(blue_plane,   0xff, 0x7fff);
-            _fmemset(red_plane,    0xff, 0x7fff);
-            _fmemset(green_plane,  0xff, 0x7fff);
-            break;
+    switch ( (atoi(palette) % 8) ) {
+    case 0:
+        _fmemset(blue_plane, 0, 0x7fff);
+        _fmemset(red_plane, 0, 0x7fff);
+        _fmemset(green_plane, 0, 0x7fff);
+        break;
+
+    case 1:
+        _fmemset(blue_plane, 0xff, 0x7fff);
+        _fmemset(red_plane, 0, 0x7fff);
+        _fmemset(green_plane, 0, 0x7fff);
+        break;
+
+    case 2:
+        _fmemset(blue_plane, 0, 0x7fff);
+        _fmemset(red_plane, 0xff, 0x7fff);
+        _fmemset(green_plane, 0, 0x7fff);
+        break;
+
+    case 3:
+        _fmemset(blue_plane, 0xff, 0x7fff);
+        _fmemset(red_plane, 0xff, 0x7fff);
+        _fmemset(green_plane, 0, 0x7fff);
+        break;
+
+    case 4:
+        _fmemset(blue_plane, 0, 0x7fff);
+        _fmemset(red_plane, 0, 0x7fff);
+        _fmemset(green_plane, 0xff, 0x7fff);
+        break;
+
+    case 5:
+        _fmemset(blue_plane, 0xff, 0x7fff);
+        _fmemset(red_plane, 0, 0x7fff);
+        _fmemset(green_plane, 0xff, 0x7fff);
+        break;
+
+    case 6:
+        _fmemset(blue_plane, 0, 0x7fff);
+        _fmemset(red_plane, 0xff, 0x7fff);
+        _fmemset(green_plane, 0xff, 0x7fff);
+        break;
+
+    case 7:
+        _fmemset(blue_plane, 0xff, 0x7fff);
+        _fmemset(red_plane, 0xff, 0x7fff);
+        _fmemset(green_plane, 0xff, 0x7fff);
+        break;
     }
 }
 
 
-#if     FLABEL
+# if     FLABEL
 PASCAL NEAR fnclabel(f, n)      /* label a function key */
 
-int f,n;        /* default flag, numeric argument [unused] */
+int f, n;        /* default flag, numeric argument [unused] */
 
 {
-        /* on machines with no function keys...don't bother */
-        /* TI/IBM function keys are handled in other code   */
-        return(TRUE);
+    /* on machines with no function keys...don't bother */
+    /* TI/IBM function keys are handled in other code   */
+    return (TRUE);
 }
-#endif
+# endif
 
 
 #else
@@ -541,3 +562,9 @@ tihello()
 {
 }
 #endif
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

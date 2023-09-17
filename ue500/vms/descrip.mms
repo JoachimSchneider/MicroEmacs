@@ -99,6 +99,38 @@ ofiles=	$(BLD)abbrev.obj, -
 	$(BLD)window.obj, -
 	$(BLD)word.obj
 
+omodules= -
+       ABBREV=$(BLD)abbrev.obj, -
+       BASIC=$(BLD)basic.obj, -
+       BIND=$(BLD)bind.obj, -
+       BUFFER=$(BLD)buffer.obj, -
+       CHAR=$(BLD)char.obj, -
+       CRYPT=$(BLD)crypt.obj, -
+       DISPLAY=$(BLD)display.obj, -
+       DOLOCK=$(BLD)dolock.obj, -
+       EVAL=$(BLD)eval.obj, -
+       EXEC=$(BLD)exec.obj, -
+       FILE=$(BLD)file.obj, -
+       FILEIO=$(BLD)fileio.obj, -
+       INPUT=$(BLD)input.obj, -
+       ISEARCH=$(BLD)isearch.obj, -
+       KEYBOARD=$(BLD)keyboard.obj, -
+       LINE=$(BLD)line.obj, -
+       LOCK=$(BLD)lock.obj, -
+       MAIN=$(BLD)main.obj, -
+       MOUSE=$(BLD)mouse.obj, -
+       RANDOM=$(BLD)random.obj, -
+       REGION=$(BLD)region.obj, -
+       REPLACE=$(BLD)replace.obj, -
+       SCREEN=$(BLD)screen.obj, -
+       SEARCH=$(BLD)search.obj, -
+       SMG=$(BLD)smg.obj, -
+       TAGS=$(BLD)tags.obj, -
+       UNDO=$(BLD)undo.obj, -
+       VMS=$(BLD)vms.obj, -
+       WINDOW=$(BLD)window.obj, -
+       WORD=$(BLD)word.obj
+
 .first :
         @ IF F$SEARCH("BIN_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
                 CREATE/DIRECTORY [.BIN_$(MMS$ARCH_NAME)]
@@ -120,7 +152,7 @@ $(BLD)me.exe : $(BLD)me.obj
 	$(LINK) $(LINKFLAGS) /executable=$(MMS$TARGET) -
 	$(BLD)me.obj
 
-$(BLD)melib.olb : $(BLD)melib.olb( $(ofiles) )
+$(BLD)melib.olb : $(BLD)melib.olb( $(omodules) )
         ! $(LIBR) /compress $(MMS$TARGET) $(MMS$TARGET)
         @ continue
 
