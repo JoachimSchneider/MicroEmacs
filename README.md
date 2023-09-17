@@ -1,25 +1,55 @@
 # MicroEMACS
-This is an unofficial repository for the MicroEMACS Editor by Daniel Lawrence.
 
-It started as a copy of Peter Chapman's repository
-<https://github.com/pmachapman/memacs>. I've frozen the state at the
-time of the fork in the *archive* branch.
+This is an unofficial repository for the MicroEMACS Editor by Daniel M. Lawrence.
 
 Its purpose is to keep this wonderful editor usable and alive by doing
 necessary source code maintenance (currently for some Unix operating
 systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, for MSDOS and
---- thanks to the contribution of Martin Vorlaender --- for OpenVMS):
+--- thanks to the contribution of Martin --- for OpenVMS):
 
 * Bug fixing,
 * porting to current operating systems and
-* some improvements.
+* improving the source code quality (e.g. by using Valgrind and modern C++ compilers).
+
+It started as a *copy* of Peter Chapman's repository
+<https://github.com/pmachapman/memacs>. I've frozen the state at the
+time of the copy (Aug 6, 2021) in the *archive* branch.
+
+Documentation: See `ue500/doc/emacs.pdf`.
+
+
+## Some history:
+
+* I enjoyed MicroEMACS since the 1994 --- then version 3.12 for MS-DOS;
+  used it to type in the TeX code of my thesis.
+
+* Daniel Michael Lawrence worked on MicroEMACS until 2009. His version
+  5.00 was available on <https://www.aquest.com/emacs.htm> (Daniel M.
+  Lawrence's MicroEMACS site).
+
+* Daniel Michael Lawrence passed away on June 7, 2010.
+
+* Apr 12, 2017: Peter Chapman created the GitHub repository
+  <https://github.com/pmachapman/memacs> "to collect the source code and
+  binaries for MicroEMACS".
+
+  He did some changes/improvements to be able to build MicroEMACS on
+  Windows XP with recent Borland and Microsoft compilers.
+
+* Aug 6, 2021: Peter Chapman's repository was copied by me (Joachim
+  Schneider). First purpose was to get Daniels MicroEMACS running again
+  on Linux and OpenBSD.
 
 
 ## Change Log
 
 [2023-09-07.00]
 * On the UNIX platforms and on MSDOS it compiles *without warnings*
-  using the C++ compilers: Purpose: Improvement of code quality.
+  using the C++ compilers. On VMS the C++ compile works well and
+  produces only some informational messages (e.g. about unreachable
+  code).
+
+  Purpose: Improvement of code quality.
 
 [2023-08-29.00]
 * It compiles and runs on AIX 5.
@@ -29,7 +59,6 @@ systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, for MSDOS and
   UE500: NSTRING was increased from 128 to 512 leading to `stack overflow'
   which could only be detected (on MSDOS) by compliling with the `-N' switch!
 * Introduced Macros for safe string copy.
-
 
 [2023-08-14.00]
 * Fixed core dump when !endm was missing.
@@ -150,10 +179,6 @@ modern Linux and FreeBSD systems:
 
 
 ## TODO
-- Review all original comments so they aren't destryed by         (\/)
-  automatic reformatting.
-- Check Compilation on OpenVMS                                    (\/)
-- Fix help-arrow issue for PCDOS with Borland C++                 (\/)
 - Compile on Windows:
   + Borland C++
   + CygWin
@@ -162,9 +187,6 @@ modern Linux and FreeBSD systems:
 - Try to compile on *really old* compilers:
   + Provide a `stdarg.h' *and* `varargs.h` version for all functions
     whit variable argumebnt lists.
-- Check the `NOSHARE' in edef.h especially the `NOSHARE EXTERN':  (\/)
-  Should it be EXTERN?
-- add-abbrev is broken (adds only the first character of repl.)   (\/)
 
 
 

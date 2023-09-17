@@ -88,6 +88,7 @@
 #include <errno.h>              /* errno, ...               */
 #include <sys/stat.h>           /* stat(), ...              */
 #include "estruct.h"            /* Emacs definitions        */
+#include "eproto.h"             /* Function definitions     */
 
 
 /*==============================================================*/
@@ -119,11 +120,7 @@
 #endif
 	
 /** Do nothing routine **/
-#if PROTO
-int scnothing(char *s)
-#else
-int scnothing()
-#endif
+int scnothing P1_(char *, s)
 {
     return (0);
 }
@@ -132,7 +129,6 @@ int scnothing()
 #if ( IS_UNIX() )
 
 /** Include files **/
-# include "eproto.h"                    /* Function definitions     */
 # include "edef.h"                      /* Global variable definitions  */
 # include "elang.h"                     /* Language definitions     */
 

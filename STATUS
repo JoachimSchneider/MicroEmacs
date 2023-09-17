@@ -12,7 +12,7 @@ Reproducing the error:
 
 (2) Undo (Ctrl+Shift+_)
 
-This confuses the doto settings: Microemacs always assumes 0 <= doto <= l_used.
+This confuses the doto settings: MicroEMACS always assumes 0 <= doto <= l_used.
 
 With -DJES_UNSEC_CODE the errors could be reproduced.
 
@@ -194,7 +194,7 @@ h/spanish.h     X                                                     X
     - Call help
     - Use arrow key
     - You are catched in a macro-loop
-    - Does not occur on MicroEmacs 4.0
+    - Does not occur on MicroEMACS 4.0
     - We test these versions:
 
       (a) ue400dev.zip (2005)
@@ -796,6 +796,31 @@ VSI OpenVMS
 VSI C Run-Time Library
 Reference Manual for OpenVMS
 Systems
+
+
+[2023-09-17.00]
+
+Some history:
+
+* I enjoyed MicroEMACS since the 1994 --- then version 3.12 for MS-DOS;
+  used it to type in the TeX code of my thesis.
+
+* Daniel Michael Lawrence worked on MicroEMACS until 2009. His version
+  5.00 was available on <https://www.aquest.com/emacs.htm> [Daniel
+  Lawrence's MicroEMACS site].
+
+* Daniel M. Lawrence passed away on June 7, 2010.
+
+* Apr 12, 2017: Peter Chapman created the GitHub repository
+  <https://github.com/pmachapman/memacs> "to collect the source code and
+  binaries for MicroEMACS".
+
+  He did some changes/improvements to be able to build MicroEMACS on
+  Windows XP with recent Borland and Microsoft compilers.
+
+* Aug 6, 2021: Peter Chapman's repository was copied by me (Joachim
+  Schneider). First purpose was to get Daniels MicroEMACS running again
+  on Linux and OpenBSD.
 
 
 

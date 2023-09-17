@@ -1816,12 +1816,11 @@ VOID PASCAL NEAR mlout P1_(int, c)
 
 # if     VARG
 
-VOID CDECL NEAR mlwrite(va_alist) /***TODO***/
-
-/* variable argument list arg1 = format string arg2+ = arguments in */
-/* that string:                                                     */
+VOID CDECL NEAR mlwrite(va_alist)
+/* Variable argument list:                */
+/*  arg1  = format string                 */
+/*  arg2+ = arguments in that string:     */
 va_dcl
-
 {
     REGISTER int c;             /* current char in format string */
     REGISTER char *fmt;         /* ptr to format string */
@@ -1907,9 +1906,15 @@ va_dcl
 
 # else
 
-VOID CDECL NEAR mlwrite (CONST char *fmt, ...)  /***TODO***/
-/* variable argument list arg1 = format string arg2+ = arguments in */
-/* that string                                                      */
+#   if PROTO
+VOID CDECL NEAR mlwrite(CONST char *fmt, ...)
+#   else
+VOID CDECL NEAR mlwrite()
+    CONST char  *fmt;
+#   endif
+/* Variable argument list:                */
+/*  arg1  = format string                 */
+/*  arg2+ = arguments in that string:     */
 {
     REGISTER int c;             /* current char in format string */
     va_list ap;                 /* ptr to current data field */
