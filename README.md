@@ -41,6 +41,11 @@ Documentation: See `ue500/doc/emacs.pdf`.
   on Linux and OpenBSD.
 
 
+## Pull requests
+
+Please use the *fixes* branch for pull requests.
+
+
 ## Change Log
 
 [2023-09-07.00]
