@@ -823,5 +823,17 @@ Some history:
   on Linux and OpenBSD.
 
 
+[2023-09-18.00]
+With Compilation on AIX and the settings GCC = 0, UNIX = 1 we can
+simulate a PROTO == 0, VARG == 1 system!
+
+
+[2023-09-20.00]
+With Compilation on Solaris and the settings GCC = 0, UNIX = 1 we can
+simulate a PROTO == 0, VARG == 1 system!
+
+And it works!
+
+
 
 # EOF

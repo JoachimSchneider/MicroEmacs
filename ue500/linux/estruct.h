@@ -199,6 +199,7 @@
 #define CTAGS   1   /* include vi-like tagging?                       */
 #define SPEECH  0   /* spoken EMACS, for the sight impared [not ready]*/
 #define VARARG  1   /* use varargs.h/stdarg.h for mlwrite()           */
+                    /* JES: 0 == VARARG is not supported any more.    */
 
 #if     XVT
 # undef  COLOR
@@ -587,43 +588,45 @@ union REGS {
 #define MAXargs 31
 int execl (const char *path, ...)
 {
-   va_list Argp;
-   char *array [MAXargs];
-   int argno=0;
-   va_start (Argp, path);
-   while ((array[argno++] = va_arg(Argp, char*)) != (char*)0)
-           ;
-   va_end(Argp);
-   return(execv(path, array));
+    va_list ap;
+    char *args[MAXargs];
+    int argno=0;
+    va_start (ap, path);
+    while ((args[argno++] = va_arg(ap, char*)) != (char*)0)
+        ;
+    va_end(ap);
 
+    return(execv(path, args));
 }
 main()
 {
-   execl("/usr/bin/echo", "ArgV[0]", "This", "Is", "A", "Test",      "\0");
-   /* ArguementV[0] will be discarded by the execv in main(): */
-   /* by convention ArgV[0] should be a copy of path parameter */
+    execl("/usr/bin/echo", "ArgV[0]", "This", "Is", "A", "Test",      "\0");
+    /* ArguementV[0] will be discarded by the execv in main(): */
+    /* by convention ArgV[0] should be a copy of path parameter */
 }
 
 /*....................................................................*/
 
 #include <varargs.h>
-#define MAXargS 100
+#define MAXargs 100
 /*
 **  execl is called by
-**  execl(file, arg1, arg2, . . . , (char *) 0);
+**  execl(path, arg1, arg2, . . . , (char *) 0);
 */
 execl(va_alist)
-   va_dcl
-{  va_list ap;
-   char *file;
-   char *args[MAXargS];
-   int argno = 0;
-   va_start(ap);
-   file = va_arg(ap, char *);
-   while ((args[argno++] = va_arg(ap, char *)) != (char *) 0)
-      ;   /* Empty loop body */
-   va_end(ap);
-   return (execv(file, args));
+    va_dcl
+{
+    va_list ap;
+    char *path;
+    char *args[MAXargs];
+    int argno = 0;
+    va_start(ap);
+    path = va_arg(ap, char *);
+    while ((args[argno++] = va_arg(ap, char *)) != (char *) 0)
+        ;   /* Empty loop body */
+    va_end(ap);
+
+    return (execv(path, args));
 }
 
 /*....................................................................*/
@@ -634,11 +637,9 @@ execl(va_alist)
 #if     VARARG
 # if ( (GCC == 0 ) && ( IS_UNIX() || MPE) )
 #  define VARG    1
-#  define SARG    0
 #  include        <varargs.h>
 # else
 #  define VARG    0
-#  define SARG    1
 #  include        <stdarg.h>
 # endif
 #endif

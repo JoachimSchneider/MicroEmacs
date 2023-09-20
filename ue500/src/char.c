@@ -19,7 +19,6 @@
 
 #include        <stdio.h>
 #include        <stdlib.h>
-#include        <stdarg.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"

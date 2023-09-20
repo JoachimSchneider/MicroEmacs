@@ -48,6 +48,13 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2023-09-20.00]
+* Modified the source to compile in a pre-ANSI, and varargs.h
+  environment.
+
+* Checked the *old* (pre-ANSI, varargs.h) `PROTO == 0, VARG == 1`
+  settings on Solaris 5.7: It works.
+
 [2023-09-07.00]
 * On the UNIX platforms and on MSDOS it compiles *without warnings*
   using the C++ compilers. On VMS the C++ compile works well and

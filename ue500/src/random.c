@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <assert.h>
 #include "estruct.h"
 #include "eproto.h"
@@ -1873,15 +1872,32 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
  * Returns the number of characters (not including the trailing '\0')
  * that would have been written if n were large enough.
  */
+#if VARG
+int CDECL NEAR  xsnprintf (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
+#endif
 {
-    int     rc  = 0;
-    va_list ap;
+    int         rc    = 0;
+    va_list     ap;
+#if VARG
+    char        *s    = NULL;
+    size_t      n     = 0;
+    CONST char  *fmt  = NULL;
+#endif
 
     ZEROMEM(ap);
-    ASRT(NULL != fmt);
 
+#if VARG
+    va_start(ap);
+    s   = va_arg(ap, char *);
+    n   = va_arg(ap, size_t);
+    fmt = va_arg(ap, CONST char *);
+#else
     va_start(ap, fmt);
+#endif
+    ASRT(NULL != fmt);
     rc = xvsnprintf(s, n, fmt, ap);
     va_end(ap);
 
@@ -1929,16 +1945,33 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
  * Allocate (using malloc()) a string large enough to hold the
  * resulting string.
  */
+#if VARG
+int CDECL NEAR  xasprintf (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
+#endif
 {
     int     rc  = 0;
     va_list ap;
+#if VARG
+    char        **ret = NULL;
+    CONST char  *fmt  = NULL;
+#endif
 
     ZEROMEM(ap);
+
+#if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+#else
+    va_start(ap, fmt);
+#endif
+
     ASRT(NULL != ret);
     ASRT(NULL != fmt);
 
-    va_start(ap, fmt);
     rc = xvasprintf(ret, fmt, ap);
     va_end(ap);
 
@@ -2124,44 +2157,57 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
 FILE *PASCAL NEAR GetTrcFP P0_()
 {
-  static int  FirstCall = !0;
-  static FILE *TrcFP    = NULL;
+    static int  FirstCall = !0;
+    static FILE *TrcFP    = NULL;
 
-  if ( FirstCall )  {
-    FirstCall = 0;
+    if ( FirstCall )  {
+        FirstCall = 0;
 
-    {
-      char *fname  = getenv(TRC_FILE_ENVVAR);
+        {
+            char *fname  = getenv(TRC_FILE_ENVVAR);
 
-      if ( NULL == fname ) {
-        TrcFP = NULL;
-      } else {
-        if ( NULL != (TrcFP = fopen(fname, "a")) )  {
-          setbuf(TrcFP, NULL);
-        } else {
-          TrcFP = stderr;
+            if ( NULL == fname ) {
+                TrcFP = NULL;
+            } else {
+                if ( NULL != (TrcFP = fopen(fname, "a")) )  {
+                    setbuf(TrcFP, NULL);
+                } else {
+                    TrcFP = stderr;
+                }
+            }
         }
-      }
     }
-  }
 
-  return TrcFP;
+    return TrcFP;
 }
 
 int          DebugMessage_lnno_   = 0;
 CONST char  *DebugMessage_fname_  = (CONST char *)"";
+#if VARG
+int CDECL NEAR  DebugMessage (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
+#endif
 {
-    int     rc    = 0;
-    va_list ap;
-    FILE    *TFP  = GetTrcFP();
+    int         rc    = 0;
+    va_list     ap;
+#if VARG
+    CONST char  *fmt  = NULL;
+#endif
+    FILE        *TFP  = GetTrcFP();
 
     ZEROMEM(ap);
 
     if ( TFP )  {
       fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
               DebugMessage_lnno_);
+#if VARG
+      va_start(ap);
+      fmt = va_arg(ap, CONST char *);
+#else
       va_start(ap, fmt);
+#endif
       rc = vfprintf(TFP, fmt, ap);
       va_end(ap);
       fprintf(TFP, "%s", "\n");

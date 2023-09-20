@@ -199,6 +199,7 @@
 #define CTAGS   1   /* include vi-like tagging?                       */
 #define SPEECH  0   /* spoken EMACS, for the sight impared [not ready]*/
 #define VARARG  1   /* use varargs.h/stdarg.h for mlwrite()           */
+                    /* JES: 0 == VARARG is not supported any more.    */
 
 #if     XVT
 # undef  COLOR
@@ -587,15 +588,15 @@ union REGS {
 #define MAXargs 31
 int execl (const char *path, ...)
 {
-    va_list Argp;
-    char *array [MAXargs];
+    va_list ap;
+    char *args[MAXargs];
     int argno=0;
-    va_start (Argp, path);
-    while ((array[argno++] = va_arg(Argp, char*)) != (char*)0)
+    va_start (ap, path);
+    while ((args[argno++] = va_arg(ap, char*)) != (char*)0)
         ;
-    va_end(Argp);
+    va_end(ap);
 
-    return(execv(path, array));
+    return(execv(path, args));
 }
 main()
 {
@@ -607,25 +608,25 @@ main()
 /*....................................................................*/
 
 #include <varargs.h>
-#define MAXargS 100
+#define MAXargs 100
 /*
 **  execl is called by
-**  execl(file, arg1, arg2, . . . , (char *) 0);
+**  execl(path, arg1, arg2, . . . , (char *) 0);
 */
 execl(va_alist)
     va_dcl
 {
     va_list ap;
-    char *file;
-    char *args[MAXargS];
+    char *path;
+    char *args[MAXargs];
     int argno = 0;
     va_start(ap);
-    file = va_arg(ap, char *);
+    path = va_arg(ap, char *);
     while ((args[argno++] = va_arg(ap, char *)) != (char *) 0)
         ;   /* Empty loop body */
     va_end(ap);
 
-    return (execv(file, args));
+    return (execv(path, args));
 }
 
 /*....................................................................*/

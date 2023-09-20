@@ -1,0 +1,169 @@
+
+varargs Macros
+
+Purpose
+
+       Handles a variable-length parameter list.
+
+Library
+
+       Standard C Library (libc.a)
+
+Syntax
+
+       #include <stdarg.h>
+
+       type va_arg ( Argp, Type)
+
+       va_list Argp;
+
+       void va_start (Argp, ParmN)
+
+       va_list Argp;
+
+       void va_end (Argp)
+
+       va_list Argp;
+
+       OR
+
+       #include <varargs.h>
+
+       va_alist Argp;
+
+       va_dcl
+
+       void va_start (Argp)
+
+       va_list Argp;
+
+       type va_arg (Argp, Type)
+
+       va_list Argp;
+
+       void va_end (Argp)
+
+       va_list Argp;
+
+Description
+
+       The varargs set of macros allows you to write portable subroutines that accept a variable
+       number of parameters. Subroutines that have variable-length parameter lists (such as the
+       printf subroutine), but that do not use the varargs macros, are inherently nonportable
+       because different systems use different parameter-passing conventions. Note: Do not
+       include both <stdarg.h> and <varargs.h>. Use of <varargs.h> is not recommended. It is
+       supplied for backwards compatibility.
+
+For <stdarg.h>
+
+       va_start
+
+            Initializes the Argp parameter to point to the beginning of the list. The ParmN
+            parameter identifies the rightmost parameter in the function definition. For
+            compatibility with previous programs, it defaults to the address of the first
+            parameter on the parameter list. Acceptable parameters include: integer, double, and
+            pointer. The va_start macro is started before any access to the unnamed arguments.
+
+For <varargs.h>
+
+       va_alist
+            A variable used as the parameter list in the function header.
+       va_argp
+            A variable that the varargs macros use to keep track of the current location in the
+            parameter list. Do not modify this variable.
+       va_dcl
+            Declaration for va_alist. No semicolon should follow va_dcl.
+       va_start
+            Initializes the Argp parameter to point to the beginning of the list.
+
+For <stdarg.h> and <varargs.h>
+
+       va_list
+            Defines the type of the variable used to traverse the list.
+       va_arg
+            Returns the next parameter in the list pointed to by the Argp parameter.
+       va_end
+            Cleans up at the end.
+
+       Your subroutine can traverse, or scan, the parameter list more than once. Start each
+       traversal with a call to the va_start macro and end it with the va_end macro. Note: The
+       calling routine is responsible for specifying the number of parameters because it is not
+       always possible to determine this from the stack frame. For example, execl is passed a
+       null pointer to signal the end of the list. The printf subroutine determines the number
+       of parameters from its Format parameter.
+
+Parameters
+
+       Argp
+            Specifies a variable that the varargs macros use to keep track of the current
+            location in the parameter list. Do not modify this variable.
+       Type
+            Specifies the type to which the expected argument will be converted when passed as
+            an argument. In C, arguments that are char or short should be accessed as int;
+            unsigned char or short arguments are converted to unsigned int, and float arguments
+            are converted to double. Different types can be mixed, but it is up to the routine
+            to know what type of argument is expected, because it cannot be determined at
+            runtime.
+       ParmN
+            Specifies a parameter that is the identifier of the rightmost parameter in the
+            function definition.
+
+Examples
+
+       The following execl system call implementations are examples of the varargs macros usage.
+       1    The following example includes <stdarg.h>:
+
+            #include <stdarg.h>
+            #define MAXargs 31
+            int execl (const char *path, ...)
+            {
+
+               va_list Argp;
+               char *array [MAXargs];
+               int argno=0;
+               va_start (Argp, path);
+               while ((array[argno++] = va_arg(Argp, char*)) != (char*)0)
+                       ;
+               va_end(Argp);
+               return(execv(path, array));
+
+            }
+            main()
+            {
+               execl("/usr/bin/echo", "ArgV[0]", "This", "Is", "A", "Test",      "\0");
+               /* ArguementV[0] will be discarded by the execv in main(): */
+               /* by convention ArgV[0] should be a copy of path parameter */
+            }
+       2    The following example includes <varargs.h>:
+
+            #include <varargs.h>
+            #define MAXargS 100
+            /*
+            **  execl is called by
+            **  execl(file, arg1, arg2, . . . , (char *) 0);
+            */
+            execl(va_alist)
+               va_dcl
+            {  va_list ap;
+               char *file;
+               char *args[MAXargS];
+               int argno = 0;
+               va_start(ap);
+               file = va_arg(ap, char *);
+               while ((args[argno++] = va_arg(ap, char *)) != (char *) 0)
+                  ;   /* Empty loop body */
+               va_end(ap);
+               return (execv(file, args));
+            }
+
+Related Information
+
+       The exec subroutines.
+
+       The printf subroutine.
+
+       List of String Manipulation Services in AIX Version 6.1 General Programming Concepts:
+       Writing and Debugging Programs.
+
+       [ Top of Page | Previous Page | Next Page | Feedback ]
+
