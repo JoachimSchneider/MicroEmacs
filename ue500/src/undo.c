@@ -71,7 +71,7 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
         undo_size += (int)count;
 
     /* and allocate the memory */
-    up = (UNDO_OBJ *)malloc(undo_size);
+    up = (UNDO_OBJ *)calloc(undo_size, 1);  /* Don't use room() here  */
     if ( up == (UNDO_OBJ *)NULL )
         return;
 
@@ -177,7 +177,7 @@ int undo_op P0_()
 
     /* and discard the undo entry */
     curwp->w_bufp->undo_head = up->next;
-    free( (char *)up );
+    FREE(up);
     undoing = FALSE;
 
     return (status);
@@ -201,7 +201,7 @@ VOID undo_zot P1_(BUFFER *, bp)
         np = up->next;
 
         /* and clear it */
-        free( (char *)up );
+        FREE(up);
     }
 
     /* and tell the buffer it's gone */
@@ -408,7 +408,7 @@ VOID undo_dump P0_()
 /* ROOM:
  *
  * Allocate memory using malloc() on failure, discard oldest undo
- * information and retry
+ * information and retry. Memory region is initialized to zero.
  */
 char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 {
@@ -422,21 +422,22 @@ char *room P1_(int, nbytes  /* number of bytes to malloc() */)
 
     ptr = (char *)NULL;
     while ( ptr == (char *)NULL ) {
-
         /* attempt to allocate the memory */
         ptr = (char *)malloc(nbytes);
         if ( ptr != (char *)NULL )  {
-          memset(ptr, 0, nbytes);
+            memset(ptr, 0, nbytes);
 
-          return (ptr);
+            return (ptr);
         }
 
         /* find the oldest visited buffer */
-nextbuf:        bp = getoldb();
+nextbuf:
+        bp = getoldb();
 
         /* no buffers left to check? */
-        if ( bp == (BUFFER *)NULL )
+        if ( bp == (BUFFER *)NULL ) {
             return ( (char *)NULL );
+        }
 
         /* any undo info to discard? */
         if ( bp->undo_count == 0 ) {
@@ -453,7 +454,7 @@ nextbuf:        bp = getoldb();
         }
 
         /* dump the oldest undo */
-        free( (char *)up );
+        FREE(up);
         lp->next = (UNDO_OBJ *)NULL;
         bp->undo_count--;
     }
@@ -468,10 +469,10 @@ nextbuf:        bp = getoldb();
  */
 char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
 {
-    char   *ptr;        /* temporary pointer */
-    BUFFER *bp;         /* buffer to dealloc memory from */
-    UNDO_OBJ *up;       /* ptr to undo struct to free */
-    UNDO_OBJ *lp;       /* last undo struct before up */
+    char      *ptr  = NULL;   /* temporary pointer              */
+    BUFFER    *bp   = NULL;   /* buffer to dealloc memory from  */
+    UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free     */
+    UNDO_OBJ  *lp   = NULL;   /* last undo struct before up     */
 
     ASRT(0 <= nbytes);
     if ( 0 >= nbytes ) return (char *)0;
@@ -481,23 +482,26 @@ char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */
      * NULL pointers correctly by calling malloc() (by way of room()) directly
      * if orig_ptr is NULL.
      */
-    if ( orig_ptr == NULL )
+    if ( orig_ptr == NULL ) {
         return ( room(nbytes) );
+    }
 
-    ptr = (char *)NULL;
+    /* ptr == NULL  */
     while ( ptr == (char *)NULL ) {
-
         /* attempt to allocate the memory */
         ptr = (char *)realloc(orig_ptr, nbytes);
-        if ( ptr != (char *)NULL )
+        if ( ptr != (char *)NULL )  {
             return (ptr);
+        }
 
         /* find the oldest visited buffer */
-nxtbuf: bp = getoldb();
+nxtbuf:
+        bp = getoldb();
 
         /* no buffers left to check? */
-        if ( bp == (BUFFER *)NULL )
+        if ( bp == (BUFFER *)NULL ) {
             return ( (char *)NULL );
+        }
 
         /* any undo info to discard? */
         if ( bp->undo_count == 0 ) {
@@ -514,7 +518,7 @@ nxtbuf: bp = getoldb();
         }
 
         /* dump the oldest undo */
-        free( (char *)up );
+        FREE(up);
         lp->next = (UNDO_OBJ *)NULL;
         bp->undo_count--;
     }

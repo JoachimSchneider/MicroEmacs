@@ -405,11 +405,12 @@ out:    TTkopen();      /* open the keyboard again */
  */
 CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
 {
-    REGISTER char       *fnameA = xstrdup(fname);
-    REGISTER CONST char *cp1;
-    REGISTER char       *cp2;
-    REGISTER CONST char *pathp;
+    char                *fnameA = NULL;
+    REGISTER CONST char *cp1    = NULL;
+    REGISTER char       *cp2    = NULL;
+    REGISTER CONST char *pathp  = NULL;
 
+    fnameA  = xstrdup(fname);
 #if     AOSVS | MV_UX
     resolve_full_pathname(fnameA, fnameA);
     mklower(fnameA);       /* aos/vs not case sensitive */
@@ -461,7 +462,7 @@ CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
         *cp2++ = *cp1++;
     *cp2 = 0;
 
-    free(fnameA);
+    FREE(fnameA);
 
     return (pathp);
 }

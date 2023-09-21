@@ -137,9 +137,9 @@ int PASCAL NEAR find_screen P2_(int, f, int, n)
 VOID PASCAL NEAR free_screen P1_(SCREEN_T *, sp)
 /* sp:  Screen to dump  */
 {
-    REGISTER int cmark;         /* mark ordinal index */
-    REGISTER EWINDOW *wp;       /* ptr to window to free */
-    REGISTER EWINDOW *tp;       /* temp window pointer */
+    REGISTER int      cmark = 0;      /* mark ordinal index     */
+    EWINDOW           *wp   = NULL;   /* ptr to window to free  */
+    REGISTER EWINDOW  *tp   = NULL;   /* temp window pointer    */
 
     /* first, free the screen's windows */
     wp = sp->s_first_window;
@@ -156,7 +156,7 @@ VOID PASCAL NEAR free_screen P1_(SCREEN_T *, sp)
 
         /* on to the next window, free this one */
         tp = wp->w_wndp;
-        free( (char *) wp );
+        FREE(wp);
         wp = tp;
     }
 
@@ -164,8 +164,8 @@ VOID PASCAL NEAR free_screen P1_(SCREEN_T *, sp)
     term.t_delscr(sp);
 #endif
     /* and now, free the screen struct itself */
-    free(sp->s_screen_name);
-    free( (char *) sp );
+    FREE(sp->s_screen_name);
+    FREE(sp);
 }
 
 /* UNLIST_SCREEN:
@@ -247,7 +247,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
     sp->s_screen_name = copystr(scr_name);
 #if     WINDOW_MSWIN
     if ( term.t_newscr (sp) != TRUE ) {         /* failed */
-        free ( (VOIDP)sp );
+        FREE (sp);
 
         return ( (SCREEN_T *)NULL );
     }
@@ -268,7 +268,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
     /* allocate its first window */
     wp = (EWINDOW *)room( SIZEOF (EWINDOW) );
     if ( wp == (EWINDOW *)NULL ) {
-        free( (char *)sp );
+        FREE(sp);
 
         return ( (SCREEN_T *)NULL );
     }
@@ -543,7 +543,7 @@ int PASCAL NEAR rename_screen P2_(int, f, int, n)
     }
 
     /* replace the old screen name with the new */
-    free(first_screen->s_screen_name);
+    FREE(first_screen->s_screen_name);
     first_screen->s_screen_name = copystr(scr_name);
 #if     WINDOW_MSWIN
     SetWindowText(first_screen->s_drvhandle, scr_name);

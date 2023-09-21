@@ -577,11 +577,11 @@ int f, n;       /* Default flag and Numeric argument */
         } else
             back += line_bytes + 1;
         txtptr = ltext(lp);
-        while ( line_bytes-- )                          /* copy a line */
+        while ( line_bytes-- )    /* copy a line            */
             *pp++ = *txtptr++;
-        *pp++ = ' ';                            /* turn the NL to a space */
+        *pp++ = ' ';              /* turn the NL to a space */
         lp = lforw(lp);
-        lfree( lback(lp) );                     /* free the old line */
+        lfree( lback(lp) );       /* free the old line      */
     }
     *(--pp) = 0;        /* truncate the last space */
 
@@ -601,7 +601,7 @@ int f, n;       /* Default flag and Numeric argument */
     }
 
     /* free the buffer and return */
-    free(para);
+    FREE(para);
 
     return (status);
 }

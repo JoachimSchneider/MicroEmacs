@@ -1571,6 +1571,7 @@ EXTERN int PASCAL NEAR undo_delete DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_list DCL((int f, int n));
 EXTERN char *room DCL((int));
 EXTERN char *reroom DCL((VOIDP, int));
+#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes)) )
 
 EXTERN int PASCAL NEAR ab_insert DCL((char *sym, CONST char *expansion));
 EXTERN char *PASCAL NEAR ab_lookup DCL((CONST char *sym));

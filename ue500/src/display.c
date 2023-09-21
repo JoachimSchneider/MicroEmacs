@@ -139,16 +139,17 @@ int PASCAL NEAR vtinit P0_()
  */
 VOID PASCAL NEAR vtfree P0_()
 {
-    int i;
+    int i = 0;
+
     for ( i = 0; i < term.t_mrow; ++i ) {
-        if ( vscreen && vscreen[i] ) free(vscreen[i]);
+        if ( vscreen && vscreen[i] ) FREE(vscreen[i]);
 # if     MEMMAP == 0
-        if ( pscreen && pscreen[i] ) free(pscreen[i]);
+        if ( pscreen && pscreen[i] ) FREE(pscreen[i]);
 # endif
     }
-    if ( vscreen ) free(vscreen);
+    FREE(vscreen);
 # if     MEMMAP == 0
-    if ( pscreen ) free(pscreen);
+    FREE(pscreen);
 # endif
 }
 #endif
@@ -2212,20 +2213,20 @@ VOID PASCAL NEAR mlputf P1_(int, s)
  */
 VOID winch_vtresize P2_(int, rows, int, cols)
 {
-    int i;
-    REGISTER VIDEO *vp;
+    int             i   = 0;
+    REGISTER VIDEO  *vp = NULL;
 
     for ( i = 0; i < term.t_mrow; ++i ) {
-        free(vscreen[i]);
-        free(pscreen[i]);
+        FREE(vscreen[i]);
+        FREE(pscreen[i]);
     }
-    free(vscreen);
-    free(pscreen);
+    FREE(vscreen);
+    FREE(pscreen);
 
     term.t_mrow=term.t_nrow=rows-1;
     term.t_mcol=term.t_ncol=cols;
 
-    vscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
+    vscreen = (VIDEO **)room( term.t_mrow * SIZEOF (VIDEO *) );
 
     if ( vscreen == NULL )
         meexit(1);

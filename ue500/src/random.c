@@ -1538,7 +1538,7 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    ASRT(NULL != (s = (char *)calloc(STRLEN(s2) + 1, SIZEOF (char))));
+    ASRT(NULL != (s = room((STRLEN(s2) + 1) * SIZEOF(char))));
     strcpy(s, s2);
     strcpy(s1, s);
     FREE(s);
@@ -1602,7 +1602,7 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 
     l2  = STRLEN(s2);
     l2  = MAX2(l2, n);
-    ASRT(NULL !=(s  = (char *)calloc( l2 + 1, SIZEOF (char) )));
+    ASRT(NULL != (s = room((l2 + 1) * SIZEOF(char))));
     strncpy(s, s2, n);  /* This will always succedd and result in
                          * a '\0'-terminated s. */
 
@@ -1928,13 +1928,13 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
         return len;
     }
     len += 1;
-    ASRT(NULL != (cp = (char *)calloc(len, SIZEOF(char))));
+    ASRT(NULL != (cp = room(len * SIZEOF(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
         FREE(cp);
     }
     VA_END(aq);
-    *ret  = cp;
+    *ret  = cp;   /* NULL on error, see above */
 
     return rc;
 }
@@ -2031,10 +2031,10 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 
     if ( NULL == str ) {
         len = 1 + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
+        ASRT(NULL != (nstr = room(len * SIZEOF(char))));
     } else {
         len = STRLEN(str) + 1 + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
+        ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
     }
     nstr[len - 2]  = c;
     nstr[len - 1]  = '\0';
@@ -2056,11 +2056,11 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 
     if ( NULL == str ) {
         len = slen + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
+        ASRT(NULL != (nstr = room(len * SIZEOF(char))));
         strcpy(nstr, xs);
     } else {
         len = STRLEN(str) + slen + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
+        ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
         strcat(nstr, xs);
     }
 
@@ -2099,11 +2099,11 @@ VOIDP  NewStack P2_(int, stacksize, int, len)
     ASRT(0 < stacksize);
     ASRT(0 < len);
 
-    ASRT(NULL != (stack = (STACK_T_ *)calloc(1, SIZEOF(*stack))));
+    ASRT(NULL != (stack = (STACK_T_ *)room(SIZEOF(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
     stack->sp        = (-1);
-    ASRT(NULL != (stack->arr = (char *)calloc(stacksize, len)));
+    ASRT(NULL != (stack->arr = room(stacksize * len)));
 
     return (VOIDP)stack;
 }

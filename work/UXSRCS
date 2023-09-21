@@ -17,11 +17,11 @@ line.c
 lock.c
 main.c
 mouse.c
-screen.c
 random.c
 region.c
-search.c
 replace.c
+screen.c
+search.c
 tags.c
 undo.c
 unix.c

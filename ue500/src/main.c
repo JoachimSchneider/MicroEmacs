@@ -215,10 +215,7 @@ int PASCAL NEAR clean P0_()
     mcclear();
     rmcclear();
 # endif
-    if ( patmatch != NULL ) {
-        free(patmatch);
-        patmatch = NULL;
-    }
+    FREE(patmatch);
 
     /* dump the abbreviation list */
     ab_clean();
@@ -1220,7 +1217,6 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
 char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
 {
     char *mp;           /* ptr returned from malloc */
-    char *malloc();
     FILE *track;        /* malloc track file */
 
     mp = malloc(nbytes);
@@ -1269,7 +1265,7 @@ Erelease P1_(char *, mp /* chunk of RAM to release */)
 # else
         envram -= 1;
 # endif
-        free(mp);
+        FREE(mp);
 # if     RAMSHOW
         dspram();
 # endif

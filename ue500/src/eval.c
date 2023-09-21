@@ -70,8 +70,7 @@ VOID PASCAL NEAR uv_clean P1_(UTABLE *, ut)
     /* now clear the entries in this one */
     for ( i=0; i < ut->size; i++ )
         if ( ut->uv[i].u_name[0] != 0 )
-            free(ut->uv[i].u_value);
-
+            FREE(ut->uv[i].u_value);
 }
 
 /* VARCLEAN:
@@ -89,7 +88,7 @@ VOID PASCAL NEAR varclean P1_(UTABLE *, ut)
     uv_clean(ut);
 
     /* and then deallocate the this table itself */
-    free(ut);
+    FREE(ut);
 }
 
 /* GTFUN:
@@ -128,11 +127,11 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     if ( fnum == -1 ) {
         mlwrite(TEXT244, fnameL);
 /*          "%%No such function as '%s'" */
-        free(fnameL);
+        FREE(fnameL);
 
         RETURN ( errorm );
     }
-    free(fnameL);
+    FREE(fnameL);
 
     /* if needed, retrieve the first argument */
     if ( funcs[fnum].f_type >= MONAMIC ) {

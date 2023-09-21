@@ -75,8 +75,8 @@ static TAG *curtp = NULL;       /* Currently in-use 'tags'. */
  */
 static int newtags P1_(char *, path)
 {
-    REGISTER TAG    *tnewp;
-    REGISTER int i = NINDEXES;
+    TAG           *tnewp  = NULL;
+    REGISTER int  i       = NINDEXES;
 
     if ( ( tnewp = (TAG *) room( SIZEOF (TAG) ) ) == NULL ) {
         mlwrite("[OUT OF MEMORY]");
@@ -86,7 +86,7 @@ static int newtags P1_(char *, path)
     XSTRCPY(tnewp->t_path, path);
     XSTRCAT(path, "tags");
     if ( ( tnewp->t_fp = fopen(path, "r") ) == NULL ) {
-        free( (char *) tnewp );
+        FREE(tnewp);
 
         return (FALSE);
     }

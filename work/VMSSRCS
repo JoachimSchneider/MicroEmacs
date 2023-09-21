@@ -17,12 +17,12 @@ line.c
 lock.c
 main.c
 mouse.c
-screen.c
 random.c
 region.c
+replace.c
+screen.c
 search.c
 smg.c
-replace.c
 tags.c
 undo.c
 vms.c

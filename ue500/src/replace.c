@@ -273,7 +273,7 @@ qprompt:
             lastoff = get_w_doto(curwp);
             oldmatchlen = matchlen;             /* Save the length for un-do.*/
 
-            if ( ( oldpatmatch = reroom(oldpatmatch, matchlen + 1) ) == NULL ) {
+            if ( ( oldpatmatch = REROOM(oldpatmatch, matchlen + 1) ) == NULL ) {
                 mlabort(TEXT94);
 /*                  "%%Out of memory" */
                 mmove_flag = TRUE;
@@ -515,15 +515,13 @@ VOID PASCAL NEAR rmcclear P0_()
 
     while ( rmcptr->mc_type != MCNIL ) {
         if ( rmcptr->mc_type == LITSTRING )
-            free(rmcptr->u.rstr);
+            FREE(rmcptr->u.rstr);
         rmcptr++;
     }
 
     rmcpat[0].mc_type = MCNIL;
     rmagical = FALSE;
-    if ( oldpatmatch != NULL )
-        free(oldpatmatch);
-    oldpatmatch = NULL;
+    FREE(oldpatmatch);
 }
 
 #endif  /* MAGIC  */
