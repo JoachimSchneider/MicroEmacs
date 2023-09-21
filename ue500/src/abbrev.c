@@ -309,7 +309,7 @@ int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
         ab_delete(sym);
 
     /* allocate a new node to hold abbreviation */
-    new_node = (ABBREV *)room(SIZEOF(ABBREV) + STRLEN(expansion) +1);
+    new_node = (ABBREV *)ROOM(SIZEOF(ABBREV) + STRLEN(expansion) +1);
     if ( new_node == NULL )
         return (FALSE);
 

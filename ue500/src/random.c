@@ -1538,7 +1538,7 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    ASRT(NULL != (s = room((STRLEN(s2) + 1) * SIZEOF(char))));
+    ASRT(NULL != (s = ROOM((STRLEN(s2) + 1) * SIZEOF(char))));
     strcpy(s, s2);
     strcpy(s1, s);
     FREE(s);
@@ -1602,7 +1602,7 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 
     l2  = STRLEN(s2);
     l2  = MAX2(l2, n);
-    ASRT(NULL != (s = room((l2 + 1) * SIZEOF(char))));
+    ASRT(NULL != (s = ROOM((l2 + 1) * SIZEOF(char))));
     strncpy(s, s2, n);  /* This will always succedd and result in
                          * a '\0'-terminated s. */
 
@@ -1928,7 +1928,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
         return len;
     }
     len += 1;
-    ASRT(NULL != (cp = room(len * SIZEOF(char))));
+    ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
         FREE(cp);
@@ -2031,7 +2031,7 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 
     if ( NULL == str ) {
         len = 1 + 1;
-        ASRT(NULL != (nstr = room(len * SIZEOF(char))));
+        ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
     } else {
         len = STRLEN(str) + 1 + 1;
         ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
@@ -2056,7 +2056,7 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 
     if ( NULL == str ) {
         len = slen + 1;
-        ASRT(NULL != (nstr = room(len * SIZEOF(char))));
+        ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
         strcpy(nstr, xs);
     } else {
         len = STRLEN(str) + slen + 1;
@@ -2099,11 +2099,11 @@ VOIDP  NewStack P2_(int, stacksize, int, len)
     ASRT(0 < stacksize);
     ASRT(0 < len);
 
-    ASRT(NULL != (stack = (STACK_T_ *)room(SIZEOF(*stack))));
+    ASRT(NULL != (stack = (STACK_T_ *)ROOM(SIZEOF(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
     stack->sp        = (-1);
-    ASRT(NULL != (stack->arr = room(stacksize * len)));
+    ASRT(NULL != (stack->arr = ROOM(stacksize * len)));
 
     return (VOIDP)stack;
 }

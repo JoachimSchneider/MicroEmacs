@@ -1133,7 +1133,7 @@ litcase:    status = litmake(&patptr, mcptr);
          * string search, if the first or last meta-character types are strings.
          */
         if ( mcpat[0].mc_type == LITSTRING ) {
-            if ( ( tbl = (DELTA *) room( SIZEOF (DELTA) ) ) != NULL ) {
+            if ( ( tbl = (DELTA *) ROOM( SIZEOF (DELTA) ) ) != NULL ) {
                 make_delta(mcpat[0].u.lstring, tbl);
                 FREE(mcpat[0].u.lstring);
                 mcpat[0].u.jmptable = tbl;
@@ -1141,7 +1141,7 @@ litcase:    status = litmake(&patptr, mcptr);
             }
         }
         if ( tapcm[0].mc_type == LITSTRING ) {
-            if ( ( tbl = (DELTA *) room( SIZEOF (DELTA) ) ) != NULL ) {
+            if ( ( tbl = (DELTA *) ROOM( SIZEOF (DELTA) ) ) != NULL ) {
                 make_delta(tapcm[0].u.lstring, tbl);
                 FREE(tapcm[0].u.lstring);
                 tapcm[0].u.jmptable = tbl;
@@ -1266,7 +1266,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     REGISTER char   *patptr;
     REGISTER int pchr, ochr;
 
-    if ( ( bmap = (EBITMAP) room(BMAPSIZE) ) == NULL ) {
+    if ( ( bmap = (EBITMAP) ROOM(BMAPSIZE) ) == NULL ) {
         mlabort(TEXT94);
 /*          "%%Out of memory" */
         mcptr->mc_type = MCNIL;

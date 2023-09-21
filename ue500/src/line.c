@@ -53,7 +53,7 @@ LINE *PASCAL NEAR lalloc P1_(REGISTER int, used)
 {
     REGISTER LINE *lp = NULL;
 
-    if ( ( lp = (LINE *)room( SIZEOF (LINE) + used ) ) == NULL ) {
+    if ( ( lp = (LINE *)ROOM( SIZEOF (LINE) + used ) ) == NULL ) {
         mlabort(TEXT94);
 /*                      "%%Out of memory" */
 
@@ -992,7 +992,7 @@ int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to inse
 
         /* check to see if we need a new chunk */
         if ( kused[kill_index] >= KBLOCK ) {
-            if ( ( nchunk = (KILL *)room( SIZEOF (KILL) ) ) == NULL ) {
+            if ( ( nchunk = (KILL *)ROOM( SIZEOF (KILL) ) ) == NULL ) {
                 mlwrite(TEXT94);
 
 /*                  "%%Out of memory" */
@@ -1025,7 +1025,7 @@ int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to inse
         /* REVERSE */
         /* check to see if we need a new chunk */
         if ( kskip[kill_index] == 0 ) {
-            if ( ( nchunk = (KILL *)room( SIZEOF (KILL) ) ) == NULL ) {
+            if ( ( nchunk = (KILL *)ROOM( SIZEOF (KILL) ) ) == NULL ) {
                 mlwrite(TEXT94);
 
 /*                  "%%Out of memory" */

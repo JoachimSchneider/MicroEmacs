@@ -381,7 +381,7 @@ int PASCAL NEAR splitwind P2_(int, f, int, n)
 /*          "Cannot split a %d line window" */
         return (FALSE);
     }
-    if ( ( wp = (EWINDOW *)room( SIZEOF (EWINDOW) ) ) == NULL ) {
+    if ( ( wp = (EWINDOW *)ROOM( SIZEOF (EWINDOW) ) ) == NULL ) {
         mlabort(TEXT94);
 
 /*          "%%Out of memory" */

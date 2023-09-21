@@ -221,7 +221,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
 
     /* if we don't have an fline, allocate one */
     if ( fline == NULL )
-        if ( ( fline = room(flen = NSTRING) ) == NULL )
+        if ( ( fline = ROOM(flen = NSTRING) ) == NULL )
             return (FIOMEM);
 
 

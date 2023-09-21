@@ -78,7 +78,7 @@ static int newtags P1_(char *, path)
     TAG           *tnewp  = NULL;
     REGISTER int  i       = NINDEXES;
 
-    if ( ( tnewp = (TAG *) room( SIZEOF (TAG) ) ) == NULL ) {
+    if ( ( tnewp = (TAG *) ROOM( SIZEOF (TAG) ) ) == NULL ) {
         mlwrite("[OUT OF MEMORY]");
 
         return (FALSE);

@@ -415,7 +415,7 @@ int PASCAL NEAR rmcstr P0_()
              */
             if ( mj != 0 ) {
                 rmcptr->mc_type = LITSTRING;
-                if ( ( rmcptr->u.rstr = room(mj + 1) ) == NULL ) {
+                if ( ( rmcptr->u.rstr = ROOM(mj + 1) ) == NULL ) {
                     mlabort(TEXT94);
 /*                          "%%Out of memory" */
                     status = FALSE;
@@ -435,7 +435,7 @@ int PASCAL NEAR rmcstr P0_()
             if ( pchr <= '9' && pchr >= '1' ) {
                 if ( mj != 0 ) {
                     rmcptr->mc_type = LITSTRING;
-                    if ( ( rmcptr->u.rstr = room(mj + 1) ) == NULL ) {
+                    if ( ( rmcptr->u.rstr = ROOM(mj + 1) ) == NULL ) {
                         mlabort(TEXT94);
 /*                          "%%Out of memory" */
                         status = FALSE;
@@ -454,7 +454,7 @@ int PASCAL NEAR rmcstr P0_()
                 /* We room mj plus two here, instead of one, because we have to
                  * count the current character.
                  */
-                if ( ( rmcptr->u.rstr = room(mj + 2) ) == NULL ) {
+                if ( ( rmcptr->u.rstr = ROOM(mj + 2) ) == NULL ) {
                     mlabort(TEXT94);
 /*                      "%%Out of memory" */
                     status = FALSE;
@@ -486,7 +486,7 @@ int PASCAL NEAR rmcstr P0_()
 
     if ( rmagical && mj > 0 ) {
         rmcptr->mc_type = LITSTRING;
-        if ( ( rmcptr->u.rstr = room(mj + 1) ) == NULL ) {
+        if ( ( rmcptr->u.rstr = ROOM(mj + 1) ) == NULL ) {
             mlabort(TEXT94);
 /*              "%%Out of memory" */
             status = FALSE;

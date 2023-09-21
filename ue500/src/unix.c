@@ -1176,7 +1176,7 @@ int spal P1_(char *, cmd)
             return (1);
 
         /* Move color code to capability structure */
-        capbind[CAP_C0 + code].store = room(STRLEN(cp) + 1);
+        capbind[CAP_C0 + code].store = ROOM(STRLEN(cp) + 1);
         if ( capbind[CAP_C0 + code].store ) {
             XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,

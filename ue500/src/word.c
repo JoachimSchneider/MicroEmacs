@@ -557,7 +557,7 @@ int f, n;       /* Default flag and Numeric argument */
         return (TRUE);
 
     /* create a buffer to hold this stuff */
-    para = room(psize + 10);            /* this probably could be + 1 */
+    para = ROOM(psize + 10);            /* this probably could be + 1 */
     if ( para == NULL ) {
         mlabort(TEXT94);
 

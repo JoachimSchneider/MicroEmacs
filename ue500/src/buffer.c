@@ -549,7 +549,7 @@ BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
     if ( cflag != FALSE ) {
 
         /* allocate the needed memory */
-        if ( ( bp=(BUFFER *)room( SIZEOF (BUFFER) ) ) == NULL )
+        if ( ( bp=(BUFFER *)ROOM( SIZEOF (BUFFER) ) ) == NULL )
             return (NULL);
 
         if ( ( lp=lalloc(0) ) == NULL ) {

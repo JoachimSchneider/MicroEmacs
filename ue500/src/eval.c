@@ -49,7 +49,7 @@ VOID PASCAL NEAR varinit P0_()
 {
     /* allocate the global user variable table */
     uv_global = uv_head =
-        (UTABLE *)room( SIZEOF (UTABLE) + MAXVARS * SIZEOF (UVAR) );
+        (UTABLE *)ROOM( SIZEOF (UTABLE) + MAXVARS * SIZEOF (UVAR) );
 
     /* and set up its fields */
     uv_head->next = (UTABLE *)NULL;
