@@ -70,7 +70,7 @@ VOID PASCAL NEAR uv_clean P1_(UTABLE *, ut)
     /* now clear the entries in this one */
     for ( i=0; i < ut->size; i++ )
         if ( ut->uv[i].u_name[0] != 0 )
-            FREE(ut->uv[i].u_value);
+            CLROOM(ut->uv[i].u_value);
 }
 
 /* VARCLEAN:
@@ -88,7 +88,7 @@ VOID PASCAL NEAR varclean P1_(UTABLE *, ut)
     uv_clean(ut);
 
     /* and then deallocate the this table itself */
-    FREE(ut);
+    CLROOM(ut);
 }
 
 /* GTFUN:
@@ -127,11 +127,11 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     if ( fnum == -1 ) {
         mlwrite(TEXT244, fnameL);
 /*          "%%No such function as '%s'" */
-        FREE(fnameL);
+        CLROOM(fnameL);
 
         RETURN ( errorm );
     }
-    FREE(fnameL);
+    CLROOM(fnameL);
 
     /* if needed, retrieve the first argument */
     if ( funcs[fnum].f_type >= MONAMIC ) {
@@ -422,7 +422,7 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 
             /* is this the one? */
             if ( strcmp(vnameL, ut->uv[vnum].u_name) == 0 ) {
-                FREE(vnameL);
+                CLROOM(vnameL);
                 /* return its value..... */
                 vptr = ut->uv[vnum].u_value;
                 if ( vptr )
@@ -437,7 +437,7 @@ next_ut:
     }
 
     /* return errorm if we run off the end */
-    FREE(vnameL);
+    CLROOM(vnameL);
 
     return (errorm);
 }
@@ -1235,7 +1235,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
     status  = TRUE;
     switch ( vtype ) {
     case TKVAR:     /* set a user variable */
-        FREE(vut->uv[vnum].u_value);
+        CLROOM(vut->uv[vnum].u_value);
         vut->uv[vnum].u_value = xstrdup(valueL);
 
         /* setting a variable to error stops macro execution */
@@ -1675,7 +1675,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
     }
 
 
-    FREE(valueL);
+    CLROOM(valueL);
 
     return (status);
 }

@@ -462,7 +462,7 @@ CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
         *cp2++ = *cp1++;
     *cp2 = 0;
 
-    FREE(fnameA);
+    CLROOM(fnameA);
 
     return (pathp);
 }

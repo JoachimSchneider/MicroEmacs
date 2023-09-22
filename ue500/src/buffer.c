@@ -262,7 +262,7 @@ int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
     while ( bp->b_args ) {
         tmp_arg = bp->b_args;
         bp->b_args = bp->b_args->next;
-        FREE(tmp_arg);
+        CLROOM(tmp_arg);
     }
 
     /* if anything is bound to the buffer, unbind them */
@@ -274,7 +274,7 @@ int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
     if ( ( result = bclear(bp) ) != TRUE )      /* Blow text away.  */
         return (result);
 
-    FREE(bp->b_linep);                          /* Release header line. */
+    CLROOM(bp->b_linep);                        /* Release header line. */
     bp1 = NULL;                                 /* Find the header. */
     bp2 = bheadp;
     while ( bp2 != bp ) {
@@ -286,7 +286,7 @@ int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
         bheadp = bp2;
     else
         bp1->b_bufp = bp2;
-    FREE(bp);                                   /* Release buffer block */
+    CLROOM(bp);                                 /* Release buffer block */
 
     return (TRUE);
 }
@@ -553,7 +553,7 @@ BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
             return (NULL);
 
         if ( ( lp=lalloc(0) ) == NULL ) {
-            FREE(bp);
+            CLROOM(bp);
 
             return (NULL);
         }

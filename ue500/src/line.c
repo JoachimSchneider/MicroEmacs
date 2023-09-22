@@ -132,7 +132,7 @@ int PASCAL NEAR lfree P1_(LINE *, lp)
     }
     lp->l_bp->l_fp = lp->l_fp;
     lp->l_fp->l_bp = lp->l_bp;
-    FREE(lp);
+    CLROOM(lp);
 #if     WINDOW_MSWIN
     {
         static int o = 0;
@@ -316,7 +316,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         lp2->l_fp = lp1->l_fp;
         lp1->l_fp->l_bp = lp2;
         lp2->l_bp = lp1->l_bp;
-        /** DO NOT USE FREE(), DON'T CHANGE lp1: IT'S USED BELOW --- BAD STYLE **/
+        /** DO NOT USE CLROOM(), DON'T CHANGE lp1: IT'S USED BELOW --- BAD STYLE **/
         DEROOM(lp1);
     } else {                                      /* Easy: in place       */
         lp2 = lp1;                                /* Pretend new line     */
@@ -833,7 +833,7 @@ int PASCAL NEAR ldelnewline P0_()
         set_lused(lp1, get_lused(lp1) + get_lused(lp2));
         lp1->l_fp = lp2->l_fp;
         lp2->l_fp->l_bp = lp1;
-        FREE(lp2);
+        CLROOM(lp2);
 
         return (TRUE);
     }
@@ -881,8 +881,8 @@ int PASCAL NEAR ldelnewline P0_()
         scrp = scrp->s_next_screen;
     }
 
-    FREE(lp1);
-    FREE(lp2);
+    CLROOM(lp1);
+    CLROOM(lp2);
 
     return (TRUE);
 }
@@ -940,7 +940,7 @@ VOID PASCAL NEAR kdelete P0_()
         kbufp[kill_index] = kbufh[kill_index];
         while ( kbufp[kill_index] != NULL ) {
             kp = kbufp[kill_index]->d_next;
-            FREE(kbufp[kill_index]);
+            CLROOM(kbufp[kill_index]);
             kbufp[kill_index] = kp;
 #if     WINDOW_MSWIN
             {

@@ -236,7 +236,7 @@ int PASCAL NEAR onlywind P2_(int, f, int, n)
             }
             wp->w_bufp->b_fcol  = wp->w_fcol;
         }
-        FREE(wp);
+        CLROOM(wp);
     }
     while ( curwp->w_wndp != NULL ) {
         wp = curwp->w_wndp;
@@ -250,7 +250,7 @@ int PASCAL NEAR onlywind P2_(int, f, int, n)
             }
             wp->w_bufp->b_fcol  = wp->w_fcol;
         }
-        FREE(wp);
+        CLROOM(wp);
     }
     lp = curwp->w_linep;
     i  = curwp->w_toprow;
@@ -342,7 +342,7 @@ int PASCAL NEAR delwind P2_(int, f, int, n)
         first_screen->s_first_window = wheadp = curwp->w_wndp;
     else
         lwp->w_wndp = curwp->w_wndp;
-    FREE(curwp);
+    CLROOM(curwp);
     curwp = wp;
     wp->w_flag |= WFHARD;
     curbp = wp->w_bufp;
@@ -802,7 +802,7 @@ int PASCAL NEAR newsize P2_(int, f, int, n)
                     lastwp->w_wndp = NULL;
 
                 /* Free the structure */
-                FREE(wp);
+                CLROOM(wp);
 
             } else {
                 /* need to change this window size? */

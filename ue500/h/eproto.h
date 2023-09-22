@@ -749,17 +749,6 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 /**********************************************************************/
 
 /**********************************************************************/
-#define FREE(p) do  {             \
-    char **pp_  = (char **)&(p);  \
-                                  \
-    if ( NULL != *pp_ ) {         \
-        DEROOM(*pp_);             \
-        *pp_  = NULL;             \
-    }                             \
-} while ( 0 )
-/**********************************************************************/
-
-/**********************************************************************/
 /* Do something only *once*:  */
 #define BEGIN_DO_ONCE do {        \
     static int  FirstCall_  = !0; \
@@ -1505,8 +1494,8 @@ typedef struct {
 
 
 /**********************************************************************/
-
-/***    global function prototypes      ***/
+/***    global function prototypes                                  ***/
+/**********************************************************************/
 
 /* MicroEmacs named function type:  */
 typedef int PASCAL NEAR (*ue_fnc_T) DCL((int, int));
@@ -1569,13 +1558,6 @@ EXTERN VOID undo_zot DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR undo DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_delete DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_list DCL((int f, int n));
-EXTERN char *room DCL((int, CONST char *, int));
-#define ROOM(nbytes)              ( room((nbytes), __FILE__, __LINE__) )
-EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
-#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
-EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
-#define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
-
 EXTERN int PASCAL NEAR ab_insert DCL((char *sym, CONST char *expansion));
 EXTERN char *PASCAL NEAR ab_lookup DCL((CONST char *sym));
 EXTERN int PASCAL NEAR ab_delete DCL((CONST char *sym));
@@ -2090,7 +2072,10 @@ EXTERN int PASCAL NEAR tagword DCL((int f, int n));   /* vi-like tagging */
 EXTERN int PASCAL NEAR retagword DCL((int f, int n)); /* Try again (if redefined) */
 EXTERN int PASCAL NEAR backtagword DCL((int f, int n)); /* return from tagged word */
 #endif
+/**********************************************************************/
 
+
+/**********************************************************************/
 /* some library redefinitions */
 
 #if (WINXP | ZTC | TURBO | MSC) == 0
@@ -2102,8 +2087,26 @@ EXTERN char *ctime DCL((const char *));
 #elif IC  /* TURBO already has it defined */
 EXTERN char *ctime DCL((const time_t *));
 #endif
+/**********************************************************************/
 
 
+/**********************************************************************/
+/* Memor (de-)allocation functions and wrapper macros                 */
+/**********************************************************************/
+EXTERN char *room DCL((int, CONST char *, int));
+#define ROOM(nbytes)              ( room((nbytes), __FILE__, __LINE__) )
+EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
+#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
+EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
+#define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
+#define CLROOM(p) do  {           \
+    char **pp_  = (char **)&(p);  \
+                                  \
+    if ( NULL != *pp_ ) {         \
+        DEROOM(*pp_);             \
+        *pp_  = NULL;             \
+    }                             \
+} while ( 0 )
 /**********************************************************************/
 
 

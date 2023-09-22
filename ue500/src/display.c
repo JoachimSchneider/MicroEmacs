@@ -142,14 +142,14 @@ VOID PASCAL NEAR vtfree P0_()
     int i = 0;
 
     for ( i = 0; i < term.t_mrow; ++i ) {
-        if ( vscreen && vscreen[i] ) FREE(vscreen[i]);
+        if ( vscreen && vscreen[i] ) CLROOM(vscreen[i]);
 # if     MEMMAP == 0
-        if ( pscreen && pscreen[i] ) FREE(pscreen[i]);
+        if ( pscreen && pscreen[i] ) CLROOM(pscreen[i]);
 # endif
     }
-    FREE(vscreen);
+    CLROOM(vscreen);
 # if     MEMMAP == 0
-    FREE(pscreen);
+    CLROOM(pscreen);
 # endif
 }
 #endif
@@ -2217,11 +2217,11 @@ VOID winch_vtresize P2_(int, rows, int, cols)
     REGISTER VIDEO  *vp = NULL;
 
     for ( i = 0; i < term.t_mrow; ++i ) {
-        FREE(vscreen[i]);
-        FREE(pscreen[i]);
+        CLROOM(vscreen[i]);
+        CLROOM(pscreen[i]);
     }
-    FREE(vscreen);
-    FREE(pscreen);
+    CLROOM(vscreen);
+    CLROOM(pscreen);
 
     term.t_mrow=term.t_nrow=rows-1;
     term.t_mcol=term.t_ncol=cols;

@@ -601,7 +601,7 @@ int f, n;       /* Default flag and Numeric argument */
     }
 
     /* free the buffer and return */
-    FREE(para);
+    CLROOM(para);
 
     return (status);
 }

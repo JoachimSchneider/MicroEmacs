@@ -111,7 +111,7 @@ int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
 int PASCAL NEAR ffclose P0_()
 {
     /* Free this since we do not need it anymore */
-    FREE(fline);
+    CLROOM(fline);
 
 # if     WINDOW_MSWIN
     fbusy = FALSE;
@@ -216,7 +216,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
 
     /* dump fline if it ended up too big */
     if ( flen > NSTRING && fline != NULL ) {
-        FREE(fline);
+        CLROOM(fline);
     }
 
     /* if we don't have an fline, allocate one */

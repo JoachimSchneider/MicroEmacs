@@ -1541,7 +1541,7 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != (s = ROOM((STRLEN(s2) + 1) * SIZEOF(char))));
     strcpy(s, s2);
     strcpy(s1, s);
-    FREE(s);
+    CLROOM(s);
 
     return s1;
 }
@@ -1607,7 +1607,7 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
                          * a '\0'-terminated s. */
 
     strncpy(s1, s, n);
-    FREE(s);
+    CLROOM(s);
 
     return s1;
 }
@@ -1931,7 +1931,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
     ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
-        FREE(cp);
+        CLROOM(cp);
     }
     VA_END(aq);
     *ret  = cp;   /* NULL on error, see above */
@@ -2147,8 +2147,8 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
     ASRT(NULL != stk);
 
-    FREE(stk->arr);
-    FREE(stk);
+    CLROOM(stk->arr);
+    CLROOM(stk);
 }
 #endif
 
@@ -2487,8 +2487,8 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     set_w_doto(curwp, region.r_offset);
 
     if ( TRUE != ldelete(region.r_size, TRUE) ) {
-        FREE(rstart);
-        FREE(rtext);
+        CLROOM(rstart);
+        CLROOM(rtext);
 
         return FALSE;
     }
@@ -2499,10 +2499,10 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     /*===============================================================*/
     {
         char  *outline  = (*filter)(rstart, rtext, argp);
-        FREE(rstart);
-        FREE(rtext);
+        CLROOM(rstart);
+        CLROOM(rtext);
         linstr(outline);
-        FREE(outline);
+        CLROOM(outline);
     }
 
     return TRUE;
@@ -2570,7 +2570,7 @@ static char *PASCAL NEAR  filter_test_00 P3_(CONST char *, rstart,
     }
 
     xasprintf(&res, "<%s><%s>", str, rtext);
-    FREE(str);
+    CLROOM(str);
 
     return res;
 }
@@ -2854,7 +2854,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
 
         sflag = FALSE;
         res = astrcat(res, para);
-        FREE(para);
+        CLROOM(para);
         res = astrcat(res, "\r\r");
 
         if ( NULL == (lptr  = xstrtok_r(NULL, "\r", &context)) )  {
@@ -2873,9 +2873,9 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
     }
 
 
-    FREE(pptext);
-    FREE(text);
-    FREE(start);
+    CLROOM(pptext);
+    CLROOM(text);
+    CLROOM(start);
 
     return res;
 }

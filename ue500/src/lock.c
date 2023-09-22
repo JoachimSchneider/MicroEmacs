@@ -96,7 +96,7 @@ int lockrel P0_()
     while ( numlocks-- > 0 ) {
         if ( ( s = xunlock(lname[numlocks]) ) != TRUE )
             status = s;
-        FREE(lname[numlocks]);
+        CLROOM(lname[numlocks]);
     }
 
     return (status);

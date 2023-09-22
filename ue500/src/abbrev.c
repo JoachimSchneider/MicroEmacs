@@ -408,13 +408,13 @@ int PASCAL NEAR ab_delete P1_(CONST char *, sym)
 
             /*important: resets our head pointer*/
             ab_head=cur_node->ab_next;
-            FREE(cur_node);
+            CLROOM(cur_node);
 
             return (TRUE);
 
         } else if ( strcmp(sym, cur_node->ab_sym) == 0&& cur_node != NULL ) {
             previous->ab_next=NULL;
-            FREE(cur_node);
+            CLROOM(cur_node);
 
             return (TRUE);
         }
@@ -442,7 +442,7 @@ int PASCAL NEAR ab_clean P0_()
     /* cycle through the list */
     while ( cur_node != (ABBREV *)NULL ) {
         next = cur_node->ab_next;
-        FREE(cur_node);
+        CLROOM(cur_node);
         cur_node = next;
     }
 

@@ -1135,7 +1135,7 @@ litcase:    status = litmake(&patptr, mcptr);
         if ( mcpat[0].mc_type == LITSTRING ) {
             if ( ( tbl = (DELTA *) ROOM( SIZEOF (DELTA) ) ) != NULL ) {
                 make_delta(mcpat[0].u.lstring, tbl);
-                FREE(mcpat[0].u.lstring);
+                CLROOM(mcpat[0].u.lstring);
                 mcpat[0].u.jmptable = tbl;
                 mcpat[0].mc_type = JMPTABLE;
             }
@@ -1143,7 +1143,7 @@ litcase:    status = litmake(&patptr, mcptr);
         if ( tapcm[0].mc_type == LITSTRING ) {
             if ( ( tbl = (DELTA *) ROOM( SIZEOF (DELTA) ) ) != NULL ) {
                 make_delta(tapcm[0].u.lstring, tbl);
-                FREE(tapcm[0].u.lstring);
+                CLROOM(tapcm[0].u.lstring);
                 tapcm[0].u.jmptable = tbl;
                 tapcm[0].mc_type = JMPTABLE;
             }
@@ -1175,11 +1175,11 @@ VOID PASCAL NEAR mcclear P0_()
     mcptr = &mcpat[0];
     while ( mcptr->mc_type != MCNIL ) {
         if ( (mcptr->mc_type == CCL) || (mcptr->mc_type == NCCL) )
-            FREE(mcptr->u.cclmap);
+            CLROOM(mcptr->u.cclmap);
         else if ( mcptr->mc_type == LITSTRING )
-            FREE(mcptr->u.lstring);
+            CLROOM(mcptr->u.lstring);
         else if ( mcptr->mc_type == JMPTABLE )
-            FREE(mcptr->u.jmptable);
+            CLROOM(mcptr->u.jmptable);
         mcptr++;
     }
 
@@ -1191,9 +1191,9 @@ VOID PASCAL NEAR mcclear P0_()
     mcptr = &tapcm[0];
     while ( mcptr->mc_type != MCNIL ) {
         if ( mcptr->mc_type == LITSTRING )
-            FREE(mcptr->u.lstring);
+            CLROOM(mcptr->u.lstring);
         else if ( mcptr->mc_type == JMPTABLE )
-            FREE(mcptr->u.jmptable);
+            CLROOM(mcptr->u.jmptable);
         mcptr++;
     }
     mcpat[0].mc_type = tapcm[0].mc_type = MCNIL;
@@ -1202,7 +1202,7 @@ VOID PASCAL NEAR mcclear P0_()
      * Remember that grpmatch[0] == patmatch.
      */
     for ( j = 0; j < MAXGROUPS; j++ ) {
-        FREE(grpmatch[j]);
+        CLROOM(grpmatch[j]);
     }
     patmatch = NULL;
     group_count = 0;
@@ -1294,7 +1294,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     if ( (pchr = *patptr) == MC_ECCL ) {
         mlwrite(TEXT96);
 /*          "%%No characters in character class" */
-        FREE(bmap);
+        CLROOM(bmap);
 
         return FALSE;
     }
@@ -1335,7 +1335,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     if ( pchr == '\0' ) {
         mlwrite(TEXT97);
 /*          "%%Character class not ended" */
-        FREE(bmap);
+        CLROOM(bmap);
 
         return FALSE;
     }

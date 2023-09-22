@@ -1610,7 +1610,7 @@ static int makecmdbname P4_(char *,       bname,
     }
 
     l = xsnprintf(bname, size, "%s-%02x: %s", tag, seed % 0x100, xcmd);
-    FREE(xcmd);
+    CLROOM(xcmd);
     seed++;
 
     if ( l <= size - 1 ) {

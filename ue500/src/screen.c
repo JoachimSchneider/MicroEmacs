@@ -156,7 +156,7 @@ VOID PASCAL NEAR free_screen P1_(SCREEN_T *, sp)
 
         /* on to the next window, free this one */
         tp = wp->w_wndp;
-        FREE(wp);
+        CLROOM(wp);
         wp = tp;
     }
 
@@ -164,8 +164,8 @@ VOID PASCAL NEAR free_screen P1_(SCREEN_T *, sp)
     term.t_delscr(sp);
 #endif
     /* and now, free the screen struct itself */
-    FREE(sp->s_screen_name);
-    FREE(sp);
+    CLROOM(sp->s_screen_name);
+    CLROOM(sp);
 }
 
 /* UNLIST_SCREEN:
@@ -247,7 +247,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
     sp->s_screen_name = copystr(scr_name);
 #if     WINDOW_MSWIN
     if ( term.t_newscr (sp) != TRUE ) {         /* failed */
-        FREE (sp);
+        CLROOM (sp);
 
         return ( (SCREEN_T *)NULL );
     }
@@ -268,7 +268,7 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
     /* allocate its first window */
     wp = (EWINDOW *)ROOM( SIZEOF (EWINDOW) );
     if ( wp == (EWINDOW *)NULL ) {
-        FREE(sp);
+        CLROOM(sp);
 
         return ( (SCREEN_T *)NULL );
     }
@@ -543,7 +543,7 @@ int PASCAL NEAR rename_screen P2_(int, f, int, n)
     }
 
     /* replace the old screen name with the new */
-    FREE(first_screen->s_screen_name);
+    CLROOM(first_screen->s_screen_name);
     first_screen->s_screen_name = copystr(scr_name);
 #if     WINDOW_MSWIN
     SetWindowText(first_screen->s_drvhandle, scr_name);

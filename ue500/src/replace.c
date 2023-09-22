@@ -515,13 +515,13 @@ VOID PASCAL NEAR rmcclear P0_()
 
     while ( rmcptr->mc_type != MCNIL ) {
         if ( rmcptr->mc_type == LITSTRING )
-            FREE(rmcptr->u.rstr);
+            CLROOM(rmcptr->u.rstr);
         rmcptr++;
     }
 
     rmcpat[0].mc_type = MCNIL;
     rmagical = FALSE;
-    FREE(oldpatmatch);
+    CLROOM(oldpatmatch);
 }
 
 #endif  /* MAGIC  */

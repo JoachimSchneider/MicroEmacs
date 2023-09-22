@@ -86,7 +86,7 @@ static int newtags P1_(char *, path)
     XSTRCPY(tnewp->t_path, path);
     XSTRCAT(path, "tags");
     if ( ( tnewp->t_fp = fopen(path, "r") ) == NULL ) {
-        FREE(tnewp);
+        CLROOM(tnewp);
 
         return (FALSE);
     }

@@ -215,7 +215,7 @@ int PASCAL NEAR clean P0_()
     mcclear();
     rmcclear();
 # endif
-    FREE(patmatch);
+    CLROOM(patmatch);
 
     /* dump the abbreviation list */
     ab_clean();
@@ -1265,7 +1265,7 @@ Erelease P1_(char *, mp /* chunk of RAM to release */)
 # else
         envram -= 1;
 # endif
-        FREE(mp);
+        CLROOM(mp);
 # if     RAMSHOW
         dspram();
 # endif

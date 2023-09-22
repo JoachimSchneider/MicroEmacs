@@ -805,7 +805,7 @@ nxtscan:        /* on to the next line */
                 /* grab the value of the logical exp */
                 if ( execlevel == 0 ) {
                     if ( macarg(tkn) != TRUE ) {
-                        FREE(einit);
+                        CLROOM(einit);
                         goto eexec;
                     }
                     if ( stol(tkn) == FALSE )
@@ -818,7 +818,7 @@ nxtscan:        /* on to the next line */
                 /* grab the value of the logical exp */
                 if ( execlevel == 0 ) {
                     if ( macarg(tkn) != TRUE ) {
-                        FREE(einit);
+                        CLROOM(einit);
                         goto eexec;
                     }
                     if ( stol(tkn) == TRUE )
@@ -897,7 +897,7 @@ nxtscan:        /* on to the next line */
                         xstrcpy(rval, tkn);
 
                     /* and free the line resources */
-                    FREE(einit);
+                    CLROOM(einit);
                     goto eexec;
                 }
                 goto onward;
@@ -972,18 +972,18 @@ nxtscan:        /* on to the next line */
             execlevel = 0;
             freewhile(whlist);
             bp->b_exec -= 1;
-            FREE(einit);
+            CLROOM(einit);
 
             /* discard the local user variable table */
             uv_head = ut->next;
             uv_clean(ut);
-            FREE(ut);
+            CLROOM(ut);
 
             return (status);
         }
 
 onward: /* on to the next line */
-        FREE(einit);
+        CLROOM(einit);
         lp = lforw(lp);
         if ( skipflag )
             macbug = TRUE;
@@ -997,7 +997,7 @@ eexec:  /* exit the current function */
     /* discard the local user variable table */
     uv_head = ut->next;
     uv_clean(ut);
-    FREE(ut);
+    CLROOM(ut);
 
     return (TRUE);
 
@@ -1005,12 +1005,12 @@ eabort: /* exit the current function with a failure */
     execlevel = 0;
     freewhile(whlist);
     bp->b_exec -= 1;
-    FREE(einit);
+    CLROOM(einit);
 
     /* discard the local user variable table */
 freeut: uv_head = ut->next;
     uv_clean(ut);
-    FREE(ut);
+    CLROOM(ut);
 
     return (FALSE);
 }
@@ -1188,7 +1188,7 @@ VOID PASCAL NEAR freewhile P1_(WHBLOCK *, wp /* head of structure to free */)
 {
     if ( wp != NULL ) {
         freewhile(wp->w_next);
-        FREE(wp);
+        CLROOM(wp);
     }
 }
 

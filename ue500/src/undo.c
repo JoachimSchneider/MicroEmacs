@@ -177,7 +177,7 @@ int undo_op P0_()
 
     /* and discard the undo entry */
     curwp->w_bufp->undo_head = up->next;
-    FREE(up);
+    CLROOM(up);
     undoing = FALSE;
 
     return (status);
@@ -201,7 +201,7 @@ VOID undo_zot P1_(BUFFER *, bp)
         np = up->next;
 
         /* and clear it */
-        FREE(up);
+        CLROOM(up);
     }
 
     /* and tell the buffer it's gone */
@@ -456,7 +456,7 @@ nextbuf:
         }
 
         /* dump the oldest undo */
-        FREE(up);
+        CLROOM(up);
         lp->next = (UNDO_OBJ *)NULL;
         bp->undo_count--;
     }
@@ -525,7 +525,7 @@ nxtbuf:
         }
 
         /* dump the oldest undo */
-        FREE(up);
+        CLROOM(up);
         lp->next = (UNDO_OBJ *)NULL;
         bp->undo_count--;
     }
