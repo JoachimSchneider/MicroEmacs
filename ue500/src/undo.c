@@ -410,7 +410,8 @@ VOID undo_dump P0_()
  * Allocate memory using malloc() on failure, discard oldest undo
  * information and retry. Memory region is initialized to zero.
  */
-char *room P1_(int, nbytes  /* number of bytes to malloc() */)
+char *room P3_(int, nbytes, CONST char *, file, int, line)
+/* nbytes:  Number of bytes to malloc() */
 {
     char      *ptr  = NULL;   /* temporary pointer */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
@@ -430,6 +431,7 @@ char *room P1_(int, nbytes  /* number of bytes to malloc() */)
             return (ptr);
         }
 
+        TRCK(("%s", "room(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
 nextbuf:
         bp = getoldb();
@@ -459,6 +461,8 @@ nextbuf:
         bp->undo_count--;
     }
 
+    TRCK(("%s", "room(): ERROR: Could not allocate memory"), file, line);
+
     return NULL;  /**AVOID_WARNING**/
 }
 
@@ -467,7 +471,9 @@ nextbuf:
  * Allocate memory using realloc() on failure, discard oldest undo
  * information and retry
  */
-char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
+char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
+/* orig_ptr:  Pointer to re-allocate      */
+/* nbytes:    Number of bytes to malloc() */
 {
     char      *ptr  = NULL;   /* temporary pointer              */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from  */
@@ -483,7 +489,7 @@ char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */
      * if orig_ptr is NULL.
      */
     if ( orig_ptr == NULL ) {
-        return ( room(nbytes) );
+        return ( room(nbytes, file, line) );
     }
 
     /* ptr == NULL  */
@@ -494,6 +500,7 @@ char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */
             return (ptr);
         }
 
+        TRCK(("%s", "reroom(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
 nxtbuf:
         bp = getoldb();
@@ -523,7 +530,20 @@ nxtbuf:
         bp->undo_count--;
     }
 
+    TRCK(("%s", "reroom(): ERROR: Could not allocate memory"), file, line);
+
     return NULL;  /**AVOID_WARNING**/
+}
+
+/* DEROOM:
+ *
+ * Free the memory allocated by room/reroom.
+ */
+VOID deroom P3_(VOIDP, p, CONST char *, file, int, line)
+{
+    if ( NULL != p )  {
+        free(p);
+    }
 }
 
 

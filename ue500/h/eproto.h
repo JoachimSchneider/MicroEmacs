@@ -753,7 +753,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
     char **pp_  = (char **)&(p);  \
                                   \
     if ( NULL != *pp_ ) {         \
-        free(*pp_);               \
+        DEROOM(*pp_);             \
         *pp_  = NULL;             \
     }                             \
 } while ( 0 )
@@ -1569,10 +1569,12 @@ EXTERN VOID undo_zot DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR undo DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_delete DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_list DCL((int f, int n));
-EXTERN char *room DCL((int));
-#define ROOM(nbytes)              ( room((nbytes)) )
-EXTERN char *reroom DCL((VOIDP, int));
-#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes)) )
+EXTERN char *room DCL((int, CONST char *, int));
+#define ROOM(nbytes)              ( room((nbytes), __FILE__, __LINE__) )
+EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
+#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
+EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
+#define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
 
 EXTERN int PASCAL NEAR ab_insert DCL((char *sym, CONST char *expansion));
 EXTERN char *PASCAL NEAR ab_lookup DCL((CONST char *sym));

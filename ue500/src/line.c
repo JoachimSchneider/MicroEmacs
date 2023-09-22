@@ -317,7 +317,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         lp1->l_fp->l_bp = lp2;
         lp2->l_bp = lp1->l_bp;
         /** DO NOT USE FREE(), DON'T CHANGE lp1: IT'S USED BELOW --- BAD STYLE **/
-        free(lp1);
+        DEROOM(lp1);
     } else {                                      /* Easy: in place       */
         lp2 = lp1;                                /* Pretend new line     */
         set_lused(lp2, get_lused(lp2) + n);
