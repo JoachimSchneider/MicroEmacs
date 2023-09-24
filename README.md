@@ -50,7 +50,7 @@ Please use the *fixes* branch for pull requests.
 
 [2023-09-20.01]
 * Use room/reroom *everywhere*.
-* Use FREE() insted of free().
+* Use CLROOM() insted of free().
 
 [2023-09-20.00]
 * Modified the source to compile in a pre-ANSI, and varargs.h
