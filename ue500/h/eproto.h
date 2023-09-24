@@ -461,6 +461,17 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /**********************************************************************/
 
 /**********************************************************************/
+#define FREE(p) do  {             \
+    char **pp_  = (char **)&(p);  \
+                                  \
+    if ( NULL != *pp_ ) {         \
+        free(*pp_);               \
+        *pp_  = NULL;             \
+    }                             \
+} while ( 0 )
+/**********************************************************************/
+
+/**********************************************************************/
 /****************************************************************/
 /* We must check if DESTINATION is an array, because it will be */
 /* defined inside the function calling VA_COPY while the source */

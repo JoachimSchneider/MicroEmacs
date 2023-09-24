@@ -16,6 +16,7 @@
 
 
 #include        <stdio.h>
+#include        <stdlib.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
@@ -2119,6 +2120,7 @@ VOID PASCAL NEAR mlforce P1_(CONST char *, s)
 VOID PASCAL NEAR mlabort P1_(CONST char *, s)
 {
     mlforce(s);
+    abort();
 }
 
 #endif

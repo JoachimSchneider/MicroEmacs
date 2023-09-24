@@ -2261,8 +2261,10 @@ unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
     if ( n == lp->l_used_ ) {
+#if ( 0 )
         TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
               FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+#endif
 
         if ( n == lp->l_size_ ) {
             return ( '\0' );
@@ -2290,10 +2292,12 @@ char *PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
 #endif
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
+#if ( 0 )
     if ( n == lp->l_used_ ) {
         TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
               FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
     }
+#endif
 
     return ( &(lp->l_text_[n]) );
 }

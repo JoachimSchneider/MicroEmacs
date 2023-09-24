@@ -989,13 +989,12 @@ int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to inse
     KILL  *nchunk = NULL;   /* ptr to newly roomed chunk */
 
     if ( direct == FORWARD ) {
-
         /* check to see if we need a new chunk */
         if ( kused[kill_index] >= KBLOCK ) {
             if ( ( nchunk = (KILL *)ROOM( SIZEOF (KILL) ) ) == NULL ) {
                 mlwrite(TEXT94);
-
 /*                  "%%Out of memory" */
+
                 return (FALSE);
             }
             if ( kbufh[kill_index] == NULL )            /* set head ptr if first
