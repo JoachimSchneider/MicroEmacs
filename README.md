@@ -5,7 +5,7 @@ This is an unofficial repository for the MicroEMACS Editor by Daniel M. Lawrence
 Its purpose is to keep this wonderful editor usable and alive by doing
 necessary source code maintenance (currently for some Unix operating
 systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, for MSDOS and
---- thanks to the contribution of Martin --- for OpenVMS):
+--- thanks to the contribution of Martin Vorlaender --- for OpenVMS):
 
 * Bug fixing,
 * porting to current operating systems and
@@ -47,6 +47,17 @@ Please use the *fixes* branch for pull requests.
 
 
 ## Change Log
+
+[2023-09-20.01]
+* Use room/reroom *everywhere*.
+* Use CLROOM() insted of free().
+
+[2023-09-20.00]
+* Modified the source to compile in a pre-ANSI, and varargs.h
+  environment.
+
+* Checked the *old* (pre-ANSI, varargs.h) `PROTO == 0, VARG == 1`
+  settings on Solaris 5.7: It works.
 
 [2023-09-07.00]
 * On the UNIX platforms and on MSDOS it compiles *without warnings*

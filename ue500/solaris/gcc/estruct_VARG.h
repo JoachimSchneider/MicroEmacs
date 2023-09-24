@@ -69,12 +69,12 @@
 #define OPENBSD 0                     /* OPENBSD 386                  */
 #define OS2     0                     /* Microsoft or IBM OS/2        */
 #define SMOS    0                     /* Supermax UNIX System V       */
-#define SOLARIS 0                     /* SUN Solaris (SYSV)           */
+#define SOLARIS 1                     /* SUN Solaris (SYSV)           */
 #define SUN     0                     /* SUN v4.0                     */
 #define TOS     0                     /* ST520, TOS                   */
 #define USG     0                     /* UNIX system V                */
 #define VAT     0                     /* Related to XENIX (???)       */
-#define VMS     1                     /* VAX/VMS                      */
+#define VMS     0                     /* VAX/VMS                      */
 #define WINNT   0                     /* MS-Win NT                    */
 #define WINXP   0                     /* Windows XP/Visual studio 2008*/
 #define WMCS    0                     /* Wicat's MCS                  */
@@ -106,7 +106,7 @@
 #define MSC     0         /* MicroSoft C compile version 3 and up     */
 #define MWC     0         /* Mark Williams C                          */
 #define TURBO   0         /* Turbo C and Borland C++ under MSDOS      */
-#define UNIX    0         /* a standard UNIX compiler (cc)            */
+#define UNIX    1         /* a standard UNIX compiler (cc)            */
 #define ZTC     0         /* Zortech C/C++ 1.02 thru 2.10 under MSDOS */
 
 /*      Machine stack growth direction.                               */
@@ -127,10 +127,10 @@
 #define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
 #define WANGPC  0     /* WangPC - mostly escape sequences             */
 #define VT100   1     /* Handle VT100 style keypad - NOT VMS.         */
-#define KEYPAD  1     /* VMS - turn on and off application            */
+#define KEYPAD  0     /* VMS - turn on and off application            */
                       /* keypad automatically                         */
 #define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
-#define RMSIO   1     /* VMS - skip the rotten C runtime and          */
+#define RMSIO   0     /* VMS - skip the rotten C runtime and          */
                       /* use RMS directly                             */
 #define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
                       /* but more efficient memory allocator          */
@@ -149,7 +149,7 @@
 #define MAC     0           /* Macintosh                              */
 #define NEC     0           /* NEC-9801VM driver                      */
 #define OS2NPM  0           /* OS/2 non-Presentation Mgr.             */
-#define SMG     1           /* SMG library on VMS                     */
+#define SMG     0           /* SMG library on VMS                     */
 #define ST52    0           /* Atari 520/1040ST screen                */
 #define TIPC    0           /* TI Profesional PC driver               */
 #define VT52    0           /* VT52 terminal (Zenith).                */
@@ -189,7 +189,7 @@
 #define REVSTA  1   /* Status line appears in reverse video           */
 #define COLOR   1   /* color commands and windows                     */
 
-#define FILOCK  0   /* generic file locking under unix                */
+#define FILOCK  1   /* generic file locking under unix                */
 #define ISRCH   1   /* Incremental searches like ITS EMACS            */
 #define FLABEL  0   /* function key label code [HP150]                */
 #define CRYPT   1   /* file encryption enabled?                       */
@@ -220,7 +220,7 @@
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
 #define UEMACS_TRC            (!0)
-#define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
+#define TRC_FILE_ENVVAR       "UEMACS_TRC_FILE"
 
 
 /*=================================================================== */

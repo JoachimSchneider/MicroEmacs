@@ -16,6 +16,7 @@
 
 
 #include        <stdio.h>
+#include        <stdlib.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
@@ -62,7 +63,7 @@ int PASCAL NEAR vtinit P0_()
     TTrev(FALSE);
 
     /* allocate the virtual screen pointer array */
-    vscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
+    vscreen = (VIDEO **)ROOM( term.t_mrow*SIZEOF (VIDEO *) );
 
     if ( vscreen == NULL )
 #if     WINDOW_MSWIN
@@ -75,7 +76,7 @@ int PASCAL NEAR vtinit P0_()
 
 #if     MEMMAP == 0
     /* allocate the physical shadow screen array */
-    pscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
+    pscreen = (VIDEO **)ROOM( term.t_mrow*SIZEOF (VIDEO *) );
     if ( pscreen == NULL )
 # if     WINDOW_MSWIN
         return (FALSE);
@@ -89,7 +90,7 @@ int PASCAL NEAR vtinit P0_()
     for ( i = 0; i < term.t_mrow; ++i ) {
 
         /* allocate a virtual screen line */
-        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)ROOM(SIZEOF (VIDEO)+term.t_mcol);
         if ( vp == NULL )
 #if     WINDOW_MSWIN
             return (FALSE);
@@ -110,7 +111,7 @@ int PASCAL NEAR vtinit P0_()
 
 #if     MEMMAP == 0
         /* allocate and initialize physical shadow screen line */
-        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)ROOM(SIZEOF (VIDEO)+term.t_mcol);
         if ( vp == NULL )
 # if     WINDOW_MSWIN
             return (FALSE);
@@ -139,16 +140,17 @@ int PASCAL NEAR vtinit P0_()
  */
 VOID PASCAL NEAR vtfree P0_()
 {
-    int i;
+    int i = 0;
+
     for ( i = 0; i < term.t_mrow; ++i ) {
-        if ( vscreen && vscreen[i] ) free(vscreen[i]);
+        if ( vscreen && vscreen[i] ) CLROOM(vscreen[i]);
 # if     MEMMAP == 0
-        if ( pscreen && pscreen[i] ) free(pscreen[i]);
+        if ( pscreen && pscreen[i] ) CLROOM(pscreen[i]);
 # endif
     }
-    if ( vscreen ) free(vscreen);
+    CLROOM(vscreen);
 # if     MEMMAP == 0
-    if ( pscreen ) free(pscreen);
+    CLROOM(pscreen);
 # endif
 }
 #endif
@@ -2118,6 +2120,7 @@ VOID PASCAL NEAR mlforce P1_(CONST char *, s)
 VOID PASCAL NEAR mlabort P1_(CONST char *, s)
 {
     mlforce(s);
+    abort();
 }
 
 #endif
@@ -2212,31 +2215,31 @@ VOID PASCAL NEAR mlputf P1_(int, s)
  */
 VOID winch_vtresize P2_(int, rows, int, cols)
 {
-    int i;
-    REGISTER VIDEO *vp;
+    int             i   = 0;
+    REGISTER VIDEO  *vp = NULL;
 
     for ( i = 0; i < term.t_mrow; ++i ) {
-        free(vscreen[i]);
-        free(pscreen[i]);
+        CLROOM(vscreen[i]);
+        CLROOM(pscreen[i]);
     }
-    free(vscreen);
-    free(pscreen);
+    CLROOM(vscreen);
+    CLROOM(pscreen);
 
     term.t_mrow=term.t_nrow=rows-1;
     term.t_mcol=term.t_ncol=cols;
 
-    vscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
+    vscreen = (VIDEO **)ROOM( term.t_mrow * SIZEOF (VIDEO *) );
 
     if ( vscreen == NULL )
         meexit(1);
 
-    pscreen = (VIDEO **)room( term.t_mrow*SIZEOF (VIDEO *) );
+    pscreen = (VIDEO **)ROOM( term.t_mrow*SIZEOF (VIDEO *) );
 
     if ( pscreen == NULL )
         meexit(1);
 
     for ( i = 0; i < term.t_mrow; ++i ) {
-        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)ROOM(SIZEOF (VIDEO)+term.t_mcol);
 
         if ( vp == NULL )
             meexit(1);
@@ -2253,7 +2256,7 @@ VOID winch_vtresize P2_(int, rows, int, cols)
         vp->v_rline = i;
 # endif
         vscreen[i] = vp;
-        vp = (VIDEO *)room(SIZEOF (VIDEO)+term.t_mcol);
+        vp = (VIDEO *)ROOM(SIZEOF (VIDEO)+term.t_mcol);
 
         if ( vp == NULL )
             meexit(1);

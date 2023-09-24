@@ -71,7 +71,7 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
         undo_size += (int)count;
 
     /* and allocate the memory */
-    up = (UNDO_OBJ *)malloc(undo_size);
+    up = (UNDO_OBJ *)calloc(undo_size, 1);  /* Don't use room() here  */
     if ( up == (UNDO_OBJ *)NULL )
         return;
 
@@ -177,7 +177,7 @@ int undo_op P0_()
 
     /* and discard the undo entry */
     curwp->w_bufp->undo_head = up->next;
-    free( (char *)up );
+    CLROOM(up);
     undoing = FALSE;
 
     return (status);
@@ -201,7 +201,7 @@ VOID undo_zot P1_(BUFFER *, bp)
         np = up->next;
 
         /* and clear it */
-        free( (char *)up );
+        CLROOM(up);
     }
 
     /* and tell the buffer it's gone */
@@ -405,56 +405,79 @@ VOID undo_dump P0_()
     }
 }
 
+
+/**********************************************************************/
+/* Memory (de-)allocation:                                            */
+/**********************************************************************/
+
+#define AIRBAG_SIZE_  ( 1 << 14 )
+static char *AirBag_  = NULL;
+
 /* ROOM:
  *
  * Allocate memory using malloc() on failure, discard oldest undo
- * information and retry
+ * information and retry. Memory region is initialized to zero.
  */
-char *room P1_(int, nbytes  /* number of bytes to malloc() */)
+char *room P3_(int, nbytes, CONST char *, file, int, line)
+/* nbytes:  Number of bytes to malloc() */
 {
     char      *ptr  = NULL;   /* temporary pointer */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
     UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free */
     UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
 
+    static int  firstcall = !0;
+
+    if ( firstcall )  {
+        firstcall = 0;
+
+        ASRT( NULL != (AirBag_ = (char *)malloc(AIRBAG_SIZE_)) );
+    }
+
     ASRT(0 <= nbytes);
-    if ( 0 >= nbytes ) return (char *)0;
+    if ( 0 >= nbytes ) return NULL;
 
-    ptr = (char *)NULL;
-    while ( ptr == (char *)NULL ) {
-
+    ptr = NULL;
+    for ( ;; )  {
         /* attempt to allocate the memory */
         ptr = (char *)malloc(nbytes);
-        if ( ptr != (char *)NULL )  {
-          memset(ptr, 0, nbytes);
+        if ( ptr != NULL )  {
+            memset(ptr, 0, nbytes);
 
-          return (ptr);
+            return ptr;
         }
 
+        FREE(AirBag_);
+        TRCK(("%s", "room(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
-nextbuf:        bp = getoldb();
+nextbuf:
+        bp = getoldb();
 
         /* no buffers left to check? */
-        if ( bp == (BUFFER *)NULL )
-            return ( (char *)NULL );
+        if ( bp == NULL ) {
+            TRCK(("%s", "room(): ERROR: Could not allocate memory"), file, line);
+
+            return NULL;
+        }
 
         /* any undo info to discard? */
         if ( bp->undo_count == 0 ) {
             bp->last_access = 0;
+
             goto nextbuf;
         }
 
         /* dump the last undo structure */
-        lp = (UNDO_OBJ *)NULL;
+        lp = NULL;
         up = bp->undo_head;
-        while ( up->next != (UNDO_OBJ *)NULL ) {
+        while ( up->next != NULL )  {
             lp = up;
             up = up->next;
         }
 
         /* dump the oldest undo */
-        free( (char *)up );
-        lp->next = (UNDO_OBJ *)NULL;
+        CLROOM(up);
+        lp->next = NULL;
         bp->undo_count--;
     }
 
@@ -466,38 +489,47 @@ nextbuf:        bp = getoldb();
  * Allocate memory using realloc() on failure, discard oldest undo
  * information and retry
  */
-char *reroom P2_(VOIDP, orig_ptr, int, nbytes  /* number of bytes to malloc() */)
+char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
+/* orig_ptr:  Pointer to re-allocate      */
+/* nbytes:    Number of bytes to malloc() */
 {
-    char   *ptr;        /* temporary pointer */
-    BUFFER *bp;         /* buffer to dealloc memory from */
-    UNDO_OBJ *up;       /* ptr to undo struct to free */
-    UNDO_OBJ *lp;       /* last undo struct before up */
+    char      *ptr  = NULL;   /* temporary pointer              */
+    BUFFER    *bp   = NULL;   /* buffer to dealloc memory from  */
+    UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free     */
+    UNDO_OBJ  *lp   = NULL;   /* last undo struct before up     */
 
     ASRT(0 <= nbytes);
-    if ( 0 >= nbytes ) return (char *)0;
+    if ( 0 >= nbytes ) return NULL;
 
     /*
      * Avoid the whole problem of non-ANSI realloc() functions that don't handle
      * NULL pointers correctly by calling malloc() (by way of room()) directly
      * if orig_ptr is NULL.
      */
-    if ( orig_ptr == NULL )
-        return ( room(nbytes) );
+    if ( orig_ptr == NULL ) {
+        return ( room(nbytes, file, line) );
+    }
 
-    ptr = (char *)NULL;
-    while ( ptr == (char *)NULL ) {
-
+    /* ptr == NULL  */
+    for ( ;; )  {
         /* attempt to allocate the memory */
         ptr = (char *)realloc(orig_ptr, nbytes);
-        if ( ptr != (char *)NULL )
-            return (ptr);
+        if ( ptr != NULL )  {
+            return ptr;
+        }
 
+        FREE(AirBag_);
+        TRCK(("%s", "reroom(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
-nxtbuf: bp = getoldb();
+nxtbuf:
+        bp = getoldb();
 
         /* no buffers left to check? */
-        if ( bp == (BUFFER *)NULL )
-            return ( (char *)NULL );
+        if ( bp == NULL ) {
+            TRCK(("%s", "reroom(): ERROR: Could not allocate memory"), file, line);
+
+            return NULL;
+        }
 
         /* any undo info to discard? */
         if ( bp->undo_count == 0 ) {
@@ -506,21 +538,33 @@ nxtbuf: bp = getoldb();
         }
 
         /* dump the last undo structure */
-        lp = (UNDO_OBJ *)NULL;
+        lp = NULL;
         up = bp->undo_head;
-        while ( up->next != (UNDO_OBJ *)NULL ) {
+        while ( up->next != NULL )  {
             lp = up;
             up = up->next;
         }
 
         /* dump the oldest undo */
-        free( (char *)up );
-        lp->next = (UNDO_OBJ *)NULL;
+        CLROOM(up);
+        lp->next = NULL;
         bp->undo_count--;
     }
 
     return NULL;  /**AVOID_WARNING**/
 }
+
+/* DEROOM:
+ *
+ * Free the memory allocated by room/reroom.
+ */
+VOID deroom P3_(VOIDP, p, CONST char *, file, int, line)
+{
+    if ( NULL != p )  {
+        free(p);
+    }
+}
+/**********************************************************************/
 
 
 

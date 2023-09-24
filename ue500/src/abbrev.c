@@ -309,7 +309,7 @@ int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
         ab_delete(sym);
 
     /* allocate a new node to hold abbreviation */
-    new_node = (ABBREV *)room(SIZEOF(ABBREV) + STRLEN(expansion) +1);
+    new_node = (ABBREV *)ROOM(SIZEOF(ABBREV) + STRLEN(expansion) +1);
     if ( new_node == NULL )
         return (FALSE);
 
@@ -408,13 +408,13 @@ int PASCAL NEAR ab_delete P1_(CONST char *, sym)
 
             /*important: resets our head pointer*/
             ab_head=cur_node->ab_next;
-            free(cur_node);
+            CLROOM(cur_node);
 
             return (TRUE);
 
         } else if ( strcmp(sym, cur_node->ab_sym) == 0&& cur_node != NULL ) {
             previous->ab_next=NULL;
-            free(cur_node);
+            CLROOM(cur_node);
 
             return (TRUE);
         }
@@ -442,7 +442,7 @@ int PASCAL NEAR ab_clean P0_()
     /* cycle through the list */
     while ( cur_node != (ABBREV *)NULL ) {
         next = cur_node->ab_next;
-        free(cur_node);
+        CLROOM(cur_node);
         cur_node = next;
     }
 

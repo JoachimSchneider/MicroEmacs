@@ -83,7 +83,7 @@
 
 /** Include files **/
 #include <stdio.h>              /* Standard I/O definitions */
-#include <stdlib.h>             /* malloc(), ...            */
+#include <stdlib.h>             /* getenv()                 */
 #include <time.h>               /* time(), ...              */
 #include <errno.h>              /* errno, ...               */
 #include <sys/stat.h>           /* stat(), ...              */
@@ -1176,7 +1176,7 @@ int spal P1_(char *, cmd)
             return (1);
 
         /* Move color code to capability structure */
-        capbind[CAP_C0 + code].store = (char *)malloc(STRLEN(cp) + 1);
+        capbind[CAP_C0 + code].store = ROOM(STRLEN(cp) + 1);
         if ( capbind[CAP_C0 + code].store ) {
             XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
@@ -1610,7 +1610,7 @@ static int makecmdbname P4_(char *,       bname,
     }
 
     l = xsnprintf(bname, size, "%s-%02x: %s", tag, seed % 0x100, xcmd);
-    free(xcmd);
+    CLROOM(xcmd);
     seed++;
 
     if ( l <= size - 1 ) {

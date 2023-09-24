@@ -15,7 +15,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <assert.h>
 #include "estruct.h"
 #include "eproto.h"
@@ -1539,10 +1538,10 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    ASRT(NULL != (s = (char *)calloc(STRLEN(s2) + 1, SIZEOF (char))));
+    ASRT(NULL != (s = ROOM((STRLEN(s2) + 1) * SIZEOF(char))));
     strcpy(s, s2);
     strcpy(s1, s);
-    FREE(s);
+    CLROOM(s);
 
     return s1;
 }
@@ -1603,12 +1602,12 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 
     l2  = STRLEN(s2);
     l2  = MAX2(l2, n);
-    ASRT(NULL !=(s  = (char *)calloc( l2 + 1, SIZEOF (char) )));
+    ASRT(NULL != (s = ROOM((l2 + 1) * SIZEOF(char))));
     strncpy(s, s2, n);  /* This will always succedd and result in
                          * a '\0'-terminated s. */
 
     strncpy(s1, s, n);
-    FREE(s);
+    CLROOM(s);
 
     return s1;
 }
@@ -1873,15 +1872,32 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
  * Returns the number of characters (not including the trailing '\0')
  * that would have been written if n were large enough.
  */
+#if VARG
+int CDECL NEAR  xsnprintf (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
+#endif
 {
-    int     rc  = 0;
-    va_list ap;
+    int         rc    = 0;
+    va_list     ap;
+#if VARG
+    char        *s    = NULL;
+    size_t      n     = 0;
+    CONST char  *fmt  = NULL;
+#endif
 
     ZEROMEM(ap);
-    ASRT(NULL != fmt);
 
+#if VARG
+    va_start(ap);
+    s   = va_arg(ap, char *);
+    n   = va_arg(ap, size_t);
+    fmt = va_arg(ap, CONST char *);
+#else
     va_start(ap, fmt);
+#endif
+    ASRT(NULL != fmt);
     rc = xvsnprintf(s, n, fmt, ap);
     va_end(ap);
 
@@ -1912,13 +1928,13 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
         return len;
     }
     len += 1;
-    ASRT(NULL != (cp = (char *)calloc(len, SIZEOF(char))));
+    ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
-        FREE(cp);
+        CLROOM(cp);
     }
     VA_END(aq);
-    *ret  = cp;
+    *ret  = cp;   /* NULL on error, see above */
 
     return rc;
 }
@@ -1929,16 +1945,33 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
  * Allocate (using malloc()) a string large enough to hold the
  * resulting string.
  */
+#if VARG
+int CDECL NEAR  xasprintf (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
+#endif
 {
     int     rc  = 0;
     va_list ap;
+#if VARG
+    char        **ret = NULL;
+    CONST char  *fmt  = NULL;
+#endif
 
     ZEROMEM(ap);
+
+#if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+#else
+    va_start(ap, fmt);
+#endif
+
     ASRT(NULL != ret);
     ASRT(NULL != fmt);
 
-    va_start(ap, fmt);
     rc = xvasprintf(ret, fmt, ap);
     va_end(ap);
 
@@ -1998,10 +2031,10 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 
     if ( NULL == str ) {
         len = 1 + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
+        ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
     } else {
         len = STRLEN(str) + 1 + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
+        ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
     }
     nstr[len - 2]  = c;
     nstr[len - 1]  = '\0';
@@ -2023,11 +2056,11 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 
     if ( NULL == str ) {
         len = slen + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
+        ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
         strcpy(nstr, xs);
     } else {
         len = STRLEN(str) + slen + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
+        ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
         strcat(nstr, xs);
     }
 
@@ -2066,11 +2099,11 @@ VOIDP  NewStack P2_(int, stacksize, int, len)
     ASRT(0 < stacksize);
     ASRT(0 < len);
 
-    ASRT(NULL != (stack = (STACK_T_ *)calloc(1, SIZEOF(*stack))));
+    ASRT(NULL != (stack = (STACK_T_ *)ROOM(SIZEOF(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
     stack->sp        = (-1);
-    ASRT(NULL != (stack->arr = (char *)calloc(stacksize, len)));
+    ASRT(NULL != (stack->arr = ROOM(stacksize * len)));
 
     return (VOIDP)stack;
 }
@@ -2114,8 +2147,8 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
     ASRT(NULL != stk);
 
-    FREE(stk->arr);
-    FREE(stk);
+    CLROOM(stk->arr);
+    CLROOM(stk);
 }
 #endif
 
@@ -2124,44 +2157,57 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
 FILE *PASCAL NEAR GetTrcFP P0_()
 {
-  static int  FirstCall = !0;
-  static FILE *TrcFP    = NULL;
+    static int  FirstCall = !0;
+    static FILE *TrcFP    = NULL;
 
-  if ( FirstCall )  {
-    FirstCall = 0;
+    if ( FirstCall )  {
+        FirstCall = 0;
 
-    {
-      char *fname  = getenv(TRC_FILE_ENVVAR);
+        {
+            char *fname  = getenv(TRC_FILE_ENVVAR);
 
-      if ( NULL == fname ) {
-        TrcFP = NULL;
-      } else {
-        if ( NULL != (TrcFP = fopen(fname, "a")) )  {
-          setbuf(TrcFP, NULL);
-        } else {
-          TrcFP = stderr;
+            if ( NULL == fname ) {
+                TrcFP = NULL;
+            } else {
+                if ( NULL != (TrcFP = fopen(fname, "a")) )  {
+                    setbuf(TrcFP, NULL);
+                } else {
+                    TrcFP = stderr;
+                }
+            }
         }
-      }
     }
-  }
 
-  return TrcFP;
+    return TrcFP;
 }
 
 int          DebugMessage_lnno_   = 0;
 CONST char  *DebugMessage_fname_  = (CONST char *)"";
+#if VARG
+int CDECL NEAR  DebugMessage (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
+#endif
 {
-    int     rc    = 0;
-    va_list ap;
-    FILE    *TFP  = GetTrcFP();
+    int         rc    = 0;
+    va_list     ap;
+#if VARG
+    CONST char  *fmt  = NULL;
+#endif
+    FILE        *TFP  = GetTrcFP();
 
     ZEROMEM(ap);
 
     if ( TFP )  {
       fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
               DebugMessage_lnno_);
+#if VARG
+      va_start(ap);
+      fmt = va_arg(ap, CONST char *);
+#else
       va_start(ap, fmt);
+#endif
       rc = vfprintf(TFP, fmt, ap);
       va_end(ap);
       fprintf(TFP, "%s", "\n");
@@ -2215,8 +2261,10 @@ unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
     if ( n == lp->l_used_ ) {
+#if ( 0 )
         TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
               FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+#endif
 
         if ( n == lp->l_size_ ) {
             return ( '\0' );
@@ -2244,10 +2292,12 @@ char *PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
 #endif
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
+#if ( 0 )
     if ( n == lp->l_used_ ) {
         TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
               FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
     }
+#endif
 
     return ( &(lp->l_text_[n]) );
 }
@@ -2441,8 +2491,8 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     set_w_doto(curwp, region.r_offset);
 
     if ( TRUE != ldelete(region.r_size, TRUE) ) {
-        FREE(rstart);
-        FREE(rtext);
+        CLROOM(rstart);
+        CLROOM(rtext);
 
         return FALSE;
     }
@@ -2453,10 +2503,10 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     /*===============================================================*/
     {
         char  *outline  = (*filter)(rstart, rtext, argp);
-        FREE(rstart);
-        FREE(rtext);
+        CLROOM(rstart);
+        CLROOM(rtext);
         linstr(outline);
-        FREE(outline);
+        CLROOM(outline);
     }
 
     return TRUE;
@@ -2524,7 +2574,7 @@ static char *PASCAL NEAR  filter_test_00 P3_(CONST char *, rstart,
     }
 
     xasprintf(&res, "<%s><%s>", str, rtext);
-    FREE(str);
+    CLROOM(str);
 
     return res;
 }
@@ -2808,7 +2858,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
 
         sflag = FALSE;
         res = astrcat(res, para);
-        FREE(para);
+        CLROOM(para);
         res = astrcat(res, "\r\r");
 
         if ( NULL == (lptr  = xstrtok_r(NULL, "\r", &context)) )  {
@@ -2827,9 +2877,9 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
     }
 
 
-    FREE(pptext);
-    FREE(text);
-    FREE(start);
+    CLROOM(pptext);
+    CLROOM(text);
+    CLROOM(start);
 
     return res;
 }

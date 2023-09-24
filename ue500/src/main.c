@@ -118,7 +118,7 @@ int main P2_(int, argc, char **, argv)
 #endif
 
     /* the room mechanism would deallocate undo info no failure....
-     *  its not set up yet, so make sure it doesn't try until the editor is
+     * its not set up yet, so make sure it doesn't try until the editor is
      * initialized */
     bheadp = (BUFFER *) NULL;
 
@@ -215,10 +215,7 @@ int PASCAL NEAR clean P0_()
     mcclear();
     rmcclear();
 # endif
-    if ( patmatch != NULL ) {
-        free(patmatch);
-        patmatch = NULL;
-    }
+    CLROOM(patmatch);
 
     /* dump the abbreviation list */
     ab_clean();
@@ -1185,7 +1182,7 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
     /* make room!
      * Bail out on error: Old version returned NULL.
      */
-    ASRT(NULL !=(dp = room(STRLEN(sp) + 1)));
+    ASRT(NULL !=(dp = ROOM(STRLEN(sp) + 1)));
     strcpy(dp, sp);   /**UNSAFE_OK**/
 
     return (dp);
@@ -1220,7 +1217,6 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
 char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
 {
     char *mp;           /* ptr returned from malloc */
-    char *malloc();
     FILE *track;        /* malloc track file */
 
     mp = malloc(nbytes);
@@ -1269,7 +1265,7 @@ Erelease P1_(char *, mp /* chunk of RAM to release */)
 # else
         envram -= 1;
 # endif
-        free(mp);
+        CLROOM(mp);
 # if     RAMSHOW
         dspram();
 # endif

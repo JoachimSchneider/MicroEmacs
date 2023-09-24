@@ -819,7 +819,7 @@ int PASCAL NEAR savematch P0_()
     REGISTER int j;
     REGION tmpreg;
 
-    if ( ( patmatch = reroom(patmatch, matchlen + 1) ) == NULL ) {
+    if ( ( patmatch = REROOM(patmatch, matchlen + 1) ) == NULL ) {
         mlabort(TEXT94);
 
 /*          "%%Out of memory" */
@@ -842,7 +842,7 @@ int PASCAL NEAR savematch P0_()
         group_reg[j].r_size += group_len[j];
 
         if ( ( grpmatch[j] =
-                   reroom(grpmatch[j], group_reg[j].r_size + 1) ) == NULL ) {
+                   REROOM(grpmatch[j], group_reg[j].r_size + 1) ) == NULL ) {
             mlabort(TEXT94);
 
 /*          "%%Out of memory" */
@@ -1133,17 +1133,17 @@ litcase:    status = litmake(&patptr, mcptr);
          * string search, if the first or last meta-character types are strings.
          */
         if ( mcpat[0].mc_type == LITSTRING ) {
-            if ( ( tbl = (DELTA *) room( SIZEOF (DELTA) ) ) != NULL ) {
+            if ( ( tbl = (DELTA *) ROOM( SIZEOF (DELTA) ) ) != NULL ) {
                 make_delta(mcpat[0].u.lstring, tbl);
-                free(mcpat[0].u.lstring);
+                CLROOM(mcpat[0].u.lstring);
                 mcpat[0].u.jmptable = tbl;
                 mcpat[0].mc_type = JMPTABLE;
             }
         }
         if ( tapcm[0].mc_type == LITSTRING ) {
-            if ( ( tbl = (DELTA *) room( SIZEOF (DELTA) ) ) != NULL ) {
+            if ( ( tbl = (DELTA *) ROOM( SIZEOF (DELTA) ) ) != NULL ) {
                 make_delta(tapcm[0].u.lstring, tbl);
-                free(tapcm[0].u.lstring);
+                CLROOM(tapcm[0].u.lstring);
                 tapcm[0].u.jmptable = tbl;
                 tapcm[0].mc_type = JMPTABLE;
             }
@@ -1175,11 +1175,11 @@ VOID PASCAL NEAR mcclear P0_()
     mcptr = &mcpat[0];
     while ( mcptr->mc_type != MCNIL ) {
         if ( (mcptr->mc_type == CCL) || (mcptr->mc_type == NCCL) )
-            free(mcptr->u.cclmap);
+            CLROOM(mcptr->u.cclmap);
         else if ( mcptr->mc_type == LITSTRING )
-            free(mcptr->u.lstring);
+            CLROOM(mcptr->u.lstring);
         else if ( mcptr->mc_type == JMPTABLE )
-            free(mcptr->u.jmptable);
+            CLROOM(mcptr->u.jmptable);
         mcptr++;
     }
 
@@ -1191,9 +1191,9 @@ VOID PASCAL NEAR mcclear P0_()
     mcptr = &tapcm[0];
     while ( mcptr->mc_type != MCNIL ) {
         if ( mcptr->mc_type == LITSTRING )
-            free(mcptr->u.lstring);
+            CLROOM(mcptr->u.lstring);
         else if ( mcptr->mc_type == JMPTABLE )
-            free(mcptr->u.jmptable);
+            CLROOM(mcptr->u.jmptable);
         mcptr++;
     }
     mcpat[0].mc_type = tapcm[0].mc_type = MCNIL;
@@ -1202,10 +1202,7 @@ VOID PASCAL NEAR mcclear P0_()
      * Remember that grpmatch[0] == patmatch.
      */
     for ( j = 0; j < MAXGROUPS; j++ ) {
-        if ( grpmatch[j] != NULL ) {
-            free(grpmatch[j]);
-            grpmatch[j] = NULL;
-        }
+        CLROOM(grpmatch[j]);
     }
     patmatch = NULL;
     group_count = 0;
@@ -1269,7 +1266,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     REGISTER char   *patptr;
     REGISTER int pchr, ochr;
 
-    if ( ( bmap = (EBITMAP) room(BMAPSIZE) ) == NULL ) {
+    if ( ( bmap = (EBITMAP) ROOM(BMAPSIZE) ) == NULL ) {
         mlabort(TEXT94);
 /*          "%%Out of memory" */
         mcptr->mc_type = MCNIL;
@@ -1297,7 +1294,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     if ( (pchr = *patptr) == MC_ECCL ) {
         mlwrite(TEXT96);
 /*          "%%No characters in character class" */
-        free(bmap);
+        CLROOM(bmap);
 
         return FALSE;
     }
@@ -1338,7 +1335,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     if ( pchr == '\0' ) {
         mlwrite(TEXT97);
 /*          "%%Character class not ended" */
-        free(bmap);
+        CLROOM(bmap);
 
         return FALSE;
     }

@@ -22,15 +22,78 @@
 /***#include <stdlib.h>***/
 #include <errno.h>
 #include <ctype.h>
-#include <stdarg.h>
 /***#include <string.h>***/
 #include <limits.h>
 #include <time.h>
 /**********************************************************************/
 
+
+/**********************************************************************/
+/* If possible use XCONCAT* below -- CONCAT* might result in          */
+/* undefined behaviour due to unspecified evaluation order for        */
+/* multiple '##' operators.                                           */
+/**********************************************************************/
+#define CONCAT2(x, y)                           \
+    x##y
+#define CONCAT3(x, y, z)                        \
+    x##y##z
+#define CONCAT4(x1, x2, x3, x4)                 \
+    x1##x2##x3##x4
+#define CONCAT5(x1, x2, x3, x4, x5)             \
+    x1##x2##x3##x4##x5
+#define CONCAT6(x1, x2, x3, x4, x5, x6)         \
+    x1##x2##x3##x4##x5##x6
+#define CONCAT7(x1, x2, x3, x4, x5, x6, x7)     \
+    x1##x2##x3##x4##x5##x6##x7
+#define CONCAT8(x1, x2, x3, x4, x5, x6, x7, x8) \
+    x1##x2##x3##x4##x5##x6##x7##x8
+#define CONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)     \
+    x1##x2##x3##x4##x5##x6##x7##x8##x9
+/**********************************************************************/
+/* Expand argument macros, concatenate from left to right.            */
+/**********************************************************************/
+#define XCONCAT2(x, y)                          \
+    CONCAT2(x, y)
+#define XCONCAT3(x, y, z)                       \
+    XCONCAT2(XCONCAT2(x, y), z)
+#define XCONCAT4(x1, x2, x3, x4)                \
+    XCONCAT2(XCONCAT3(x1, x2, x3), x4)
+#define XCONCAT5(x1, x2, x3, x4, x5)            \
+    XCONCAT2(XCONCAT4(x1, x2, x3, x4), x5)
+#define XCONCAT6(x1, x2, x3, x4, x5, x6)        \
+    XCONCAT2(XCONCAT5(x1, x2, x3, x4, x5), x6)
+#define XCONCAT7(x1, x2, x3, x4, x5, x6, x7)            \
+    XCONCAT2(XCONCAT6(x1, x2, x3, x4, x5, x6), x7)
+#define XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)        \
+    XCONCAT2(XCONCAT7(x1, x2, x3, x4, x5, x6, x7), x8)
+#define XCONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)            \
+    XCONCAT2(XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8), x9)
+/**********************************************************************/
+
+/**********************************************************************/
+/*
+ * CASRT(condition):
+ *
+ * Use this macro to test a condition at compile time instead of
+ * runtime.  If condition is false, the compiler will abort with an
+ * error.  This is really useful, if you want to check e.g. sizes of
+ * structures against given needs.  Example: CASRT( SIZEOF(int) ==
+ * SIZEOF(long) );
+ */
+#define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+/**********************************************************************/
+
+
 /**********************************************************************/
 #include "estruct.h"
+/*....................................................................*/
+/* Check consistency of defines:                                      */
+/*....................................................................*/
+CASRT(0 != VARARG);               /* VARARG needed in any case!     */
+CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
+/*....................................................................*/
 /**********************************************************************/
+
 
 /**********************************************************************/
 /* Declaration of shared items:                                       */
@@ -48,6 +111,53 @@
 # define REGISTER     register
 #endif
 /**********************************************************************/
+
+/**********************************************************************/
+#if     PROTO
+# define P0_()                          (void)
+# define P1_(t1, x1)                                                                  \
+  (t1 x1)
+# define P2_(t1, x1, t2, x2)                                                          \
+  (t1 x1, t2 x2)
+# define P3_(t1, x1, t2, x2, t3, x3)                                                  \
+  (t1 x1, t2 x2, t3 x3)
+# define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4)
+# define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5)
+# define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6)
+# define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7)
+# define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8)
+# define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
+  (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
+# define DCL(args)                      args
+#else
+# define P0_()                          ()
+# define P1_(t1, x1)                                                                  \
+  (x1)                                  t1 x1;
+# define P2_(t1, x1, t2, x2)                                                          \
+  (x1, x2)                              t1 x1; t2 x2;
+# define P3_(t1, x1, t2, x2, t3, x3)                                                  \
+  (x1, x2, x3)                          t1 x1; t2 x2; t3 x3;
+# define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
+  (x1, x2, x3, x4)                      t1 x1; t2 x2; t3 x3; t4 x4;
+# define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
+  (x1, x2, x3, x4, x5)                  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5;
+# define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
+  (x1, x2, x3, x4, x5, x6)              t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6;
+# define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
+  (x1, x2, x3, x4, x5, x6, x7)          t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7;
+# define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
+  (x1, x2, x3, x4, x5, x6, x7, x8)      t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8;
+# define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
+  (x1, x2, x3, x4, x5, x6, x7, x8, x9)  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8; t9 x9;
+# define DCL(args)                      ()
+#endif
+/**********************************************************************/
+
 
 /*....................................................................*/
 #if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
@@ -98,53 +208,6 @@ EXTERN char *realloc DCL((char *block, int siz));
 # define DFT_STATIC_STACKSIZE (16)
 #endif
 /*....................................................................*/
-
-
-/**********************************************************************/
-#if     PROTO
-# define P0_()                          (void)
-# define P1_(t1, x1)                                                                  \
-  (t1 x1)
-# define P2_(t1, x1, t2, x2)                                                          \
-  (t1 x1, t2 x2)
-# define P3_(t1, x1, t2, x2, t3, x3)                                                  \
-  (t1 x1, t2 x2, t3 x3)
-# define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
-  (t1 x1, t2 x2, t3 x3, t4 x4)
-# define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
-  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5)
-# define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
-  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6)
-# define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
-  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7)
-# define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
-  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8)
-# define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
-  (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
-# define DCL(args)                      args
-#else
-# define P0_()                          ()
-# define P1_(t1, x1)                                                                  \
-  (x1)                                  t1 x1;
-# define P2_(t1, x1, t2, x2)                                                          \
-  (x1, x2)                              t1 x1; t2 x2;
-# define P3_(t1, x1, t2, x2, t3, x3)                                                  \
-  (x1, x2, x3)                          t1 x1; t2 x2; t3 x3;
-# define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
-  (x1, x2, x3, x4)                      t1 x1; t2 x2; t3 x3; t4 x4;
-# define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
-  (x1, x2, x3, x4, x5)                  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5;
-# define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
-  (x1, x2, x3, x4, x5, x6)              t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6;
-# define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
-  (x1, x2, x3, x4, x5, x6, x7)          t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7;
-# define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
-  (x1, x2, x3, x4, x5, x6, x7, x8)      t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8;
-# define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
-  (x1, x2, x3, x4, x5, x6, x7, x8, x9)  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8; t9 x9;
-# define DCL(args)                      ()
-#endif
-/**********************************************************************/
 
 
 /**********************************************************************/
@@ -214,7 +277,7 @@ EXTERN int PASCAL NEAR  xvsnprintf DCL((char *s, size_t n,
 /* be the result of an unrestricted write.                              */
 /* Returns the number of characters (not including the trailing '\0')   */
 /* that would have been written if n were large enough.                 */
-EXTERN int CDECL NEAR xsnprintf(char *s, size_t n, CONST char *fmt, ...);
+EXTERN int CDECL NEAR xsnprintf DCL((char *s, size_t n, CONST char *fmt, ...));
 
 /* Like GNU C vasprintf:                                        */
 /* Allocate (using malloc()) a string large enough to hold the  */
@@ -225,7 +288,7 @@ EXTERN int PASCAL NEAR  xvasprintf DCL((char **ret, CONST char *fmt,
 /* Like GNU C asprintf:                                         */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
-EXTERN int CDECL NEAR xasprintf(char **ret, CONST char *fmt, ...);
+EXTERN int CDECL NEAR xasprintf DCL((char **ret, CONST char *fmt, ...));
 
 #define xstrdup copystr
 
@@ -288,7 +351,7 @@ RETURN_L:
 }
 # endif
 /*--------------------------------------------------------------------*/
-#endif
+#endif  /* UEMACS_FEATURE_USE_STATIC_STACK  */
 
 
 /*--------------------------------------------------------------------*/
@@ -348,15 +411,14 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname)
 
 /**********************************************************************/
 
-/**********************************************************************/
-/**********************************************************************/
+
 
 /**********************************************************************/
 EXTERN FILE *PASCAL NEAR  GetTrcFP DCL((void));
 
 extern int         DebugMessage_lnno_;
 extern CONST char *DebugMessage_fname_;
-EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
+EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #if UEMACS_TRC
 # define  TRC(arg)  do {                        \
         DebugMessage_fname_ = __FILE__;         \
@@ -391,50 +453,22 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 #define MKSTRING(t)       #t
 #define MKXSTRING(t)      MKSTRING(t)
 /**********************************************************************/
-/* If possible use XCONCAT* below -- CONCAT* might result in          */
-/* undefined behaviour due to unspecified evaluation order for        */
-/* multiple '##' operators.                                           */
-/**********************************************************************/
-#define CONCAT2(x, y)                           \
-    x##y
-#define CONCAT3(x, y, z)                        \
-    x##y##z
-#define CONCAT4(x1, x2, x3, x4)                 \
-    x1##x2##x3##x4
-#define CONCAT5(x1, x2, x3, x4, x5)             \
-    x1##x2##x3##x4##x5
-#define CONCAT6(x1, x2, x3, x4, x5, x6)         \
-    x1##x2##x3##x4##x5##x6
-#define CONCAT7(x1, x2, x3, x4, x5, x6, x7)     \
-    x1##x2##x3##x4##x5##x6##x7
-#define CONCAT8(x1, x2, x3, x4, x5, x6, x7, x8) \
-    x1##x2##x3##x4##x5##x6##x7##x8
-#define CONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)     \
-    x1##x2##x3##x4##x5##x6##x7##x8##x9
-/**********************************************************************/
-/* Expand argument macros, concatenate from left to right.            */
-/**********************************************************************/
-#define XCONCAT2(x, y)                          \
-    CONCAT2(x, y)
-#define XCONCAT3(x, y, z)                       \
-    XCONCAT2(XCONCAT2(x, y), z)
-#define XCONCAT4(x1, x2, x3, x4)                \
-    XCONCAT2(XCONCAT3(x1, x2, x3), x4)
-#define XCONCAT5(x1, x2, x3, x4, x5)            \
-    XCONCAT2(XCONCAT4(x1, x2, x3, x4), x5)
-#define XCONCAT6(x1, x2, x3, x4, x5, x6)        \
-    XCONCAT2(XCONCAT5(x1, x2, x3, x4, x5), x6)
-#define XCONCAT7(x1, x2, x3, x4, x5, x6, x7)            \
-    XCONCAT2(XCONCAT6(x1, x2, x3, x4, x5, x6), x7)
-#define XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)        \
-    XCONCAT2(XCONCAT7(x1, x2, x3, x4, x5, x6, x7), x8)
-#define XCONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)            \
-    XCONCAT2(XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8), x9)
 /*
  * This macro tests for pointer to something versus array of something.
  * It fails for the definition w. initialization `type *p = (type *)&p;'
  */
 #define IS_ARRAY(a) ( (char *)(&(a)) == (char *)(&((a)[0])) )
+/**********************************************************************/
+
+/**********************************************************************/
+#define FREE(p) do  {             \
+    char **pp_  = (char **)&(p);  \
+                                  \
+    if ( NULL != *pp_ ) {         \
+        free(*pp_);               \
+        *pp_  = NULL;             \
+    }                             \
+} while ( 0 )
 /**********************************************************************/
 
 /**********************************************************************/
@@ -497,7 +531,6 @@ EXTERN int CDECL NEAR DebugMessage(CONST char *fmt, ...);
 /**********************************************************************/
 
 
-
 /**********************************************************************/
 EXTERN char *PASCAL NEAR  uitostr_memacs DCL((unsigned int i));
 #ifdef MAIN_C_
@@ -549,18 +582,6 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 #define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
 #define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
 /**********************************************************************/
-
-/**********************************************************************/
-/*
- * CASRT(condition):
- *
- * Use this macro to test a condition at compile time instead of
- * runtime.  If condition is false, the compiler will abort with an
- * error.  This is really useful, if you want to check e.g. sizes of
- * structures against given needs.  Example: CASRT( SIZEOF(int) ==
- * SIZEOF(long) );
- */
-#define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
 
 /**********************************************************************/
 /*
@@ -736,17 +757,6 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
-/**********************************************************************/
-
-/**********************************************************************/
-#define FREE(p) do  {             \
-    char **pp_  = (char **)&(p);  \
-                                  \
-    if ( NULL != *pp_ ) {         \
-        free(*pp_);               \
-        *pp_  = NULL;             \
-    }                             \
-} while ( 0 )
 /**********************************************************************/
 
 /**********************************************************************/
@@ -1495,8 +1505,8 @@ typedef struct {
 
 
 /**********************************************************************/
-
-/***    global function prototypes      ***/
+/***    global function prototypes                                  ***/
+/**********************************************************************/
 
 /* MicroEmacs named function type:  */
 typedef int PASCAL NEAR (*ue_fnc_T) DCL((int, int));
@@ -1559,9 +1569,6 @@ EXTERN VOID undo_zot DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR undo DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_delete DCL((int f, int n));
 EXTERN int PASCAL NEAR undo_list DCL((int f, int n));
-EXTERN char *room DCL((int));
-EXTERN char *reroom DCL((VOIDP, int));
-
 EXTERN int PASCAL NEAR ab_insert DCL((char *sym, CONST char *expansion));
 EXTERN char *PASCAL NEAR ab_lookup DCL((CONST char *sym));
 EXTERN int PASCAL NEAR ab_delete DCL((CONST char *sym));
@@ -2006,15 +2013,7 @@ EXTERN int PASCAL NEAR zotbuf DCL((BUFFER *bp));
 EXTERN unsigned int PASCAL NEAR chcase DCL((unsigned int ch));
 EXTERN unsigned int PASCAL NEAR getckey DCL((int mflag));
 EXTERN unsigned int PASCAL NEAR stock DCL((CONST char *keyname));
-#if     VARARG && VARG
-# if     GCC
-EXTERN VOID CDECL NEAR mlwrite DCL((va_alist));
-# else
-EXTERN VOID CDECL NEAR mlwrite DCL((va_dcl));
-# endif /* GCC */
-#else
-EXTERN VOID CDECL NEAR mlwrite(CONST char *fmt, ...);
-#endif
+EXTERN VOID CDECL  NEAR mlwrite DCL((CONST char *fmt, ...));
 EXTERN VOID PASCAL NEAR ab_init DCL((void));
 EXTERN VOID PASCAL NEAR ab_save DCL((char c));
 EXTERN VOID PASCAL NEAR ab_expand DCL((void));
@@ -2084,7 +2083,10 @@ EXTERN int PASCAL NEAR tagword DCL((int f, int n));   /* vi-like tagging */
 EXTERN int PASCAL NEAR retagword DCL((int f, int n)); /* Try again (if redefined) */
 EXTERN int PASCAL NEAR backtagword DCL((int f, int n)); /* return from tagged word */
 #endif
+/**********************************************************************/
 
+
+/**********************************************************************/
 /* some library redefinitions */
 
 #if (WINXP | ZTC | TURBO | MSC) == 0
@@ -2096,8 +2098,26 @@ EXTERN char *ctime DCL((const char *));
 #elif IC  /* TURBO already has it defined */
 EXTERN char *ctime DCL((const time_t *));
 #endif
+/**********************************************************************/
 
 
+/**********************************************************************/
+/* Memor (de-)allocation functions and wrapper macros                 */
+/**********************************************************************/
+EXTERN char *room DCL((int, CONST char *, int));
+#define ROOM(nbytes)              ( room((nbytes), __FILE__, __LINE__) )
+EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
+#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
+EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
+#define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
+#define CLROOM(p) do  {           \
+    char **pp_  = (char **)&(p);  \
+                                  \
+    if ( NULL != *pp_ ) {         \
+        DEROOM(*pp_);             \
+        *pp_  = NULL;             \
+    }                             \
+} while ( 0 )
 /**********************************************************************/
 
 

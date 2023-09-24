@@ -1029,7 +1029,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     /* the final sequence... */
     c |= *keynamePtr;
-    free(keynameA);
+    CLROOM(keynameA);
 
     return (c);
 }
