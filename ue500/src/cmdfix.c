@@ -151,7 +151,8 @@ int main P2_(int, argc, char **, argv)
         fix(argv[carg]);
         ++carg;
     }
-    exit(0);
+
+    return (0);
 }
 
 int PASCAL fix P1_(char *, fname)

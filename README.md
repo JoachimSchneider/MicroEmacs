@@ -48,6 +48,9 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2023-09-27.00]
+* pcdos/ansi build works (Uses ANSI escape sequences for screen control).
+
 [2023-09-20.01]
 * Use room/reroom *everywhere*.
 * Use CLROOM() insted of free().

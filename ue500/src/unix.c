@@ -118,7 +118,7 @@
 #else
 # define  TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
 #endif
-	
+
 /** Do nothing routine **/
 int scnothing P1_(char *, s)
 {
@@ -715,7 +715,9 @@ int ttgetc P0_()
 
 int typahead P0_()
 {
-    int count;
+#   if ( defined(FIONREAD) || ( !VAT && defined(FIORDCHK) ) )
+    int count = 0;
+#   endif
 
     /* See if internal buffer is non-empty */
     if ( inbufh != inbuft )
