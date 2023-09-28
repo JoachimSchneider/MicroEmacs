@@ -138,7 +138,7 @@
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
 
-#define ANSI    0           /* ANSI escape sequences                  */
+#define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */

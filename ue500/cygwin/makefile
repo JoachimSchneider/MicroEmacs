@@ -33,13 +33,13 @@ HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.
 
 #list of object files
 
-F1 = $(OBJD)/abbrev.o $(OBJD)/basic.o $(OBJD)/bind.o $(OBJD)/buffer.o
+F1 = $(OBJD)/abbrev.o $(OBJD)/ansi.o $(OBJD)/basic.o $(OBJD)/bind.o $(OBJD)/buffer.o
 F2 = $(OBJD)/char.o $(OBJD)/crypt.o $(OBJD)/display.o $(OBJD)/dolock.o
 F3 = $(OBJD)/eval.o $(OBJD)/exec.o $(OBJD)/file.o $(OBJD)/fileio.o
 F4 = $(OBJD)/input.o $(OBJD)/isearch.o $(OBJD)/keyboard.o $(OBJD)/line.o
 F5 = $(OBJD)/lock.o $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
 F6 = $(OBJD)/random.o $(OBJD)/region.o $(OBJD)/search.o $(OBJD)/replace.o
-F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unix.o $(OBJD)/window.o $(OBJD)/word.o
+F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unixansi.o $(OBJD)/window.o $(OBJD)/word.o
 
 # product list
 
@@ -52,6 +52,8 @@ emacs:	$(OFILES)
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c
+$(OBJD)/ansi.o: $(SRCD)/ansi.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/ansi.o $(SRCD)/ansi.c
 $(OBJD)/basic.o: $(SRCD)/basic.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/basic.o $(SRCD)/basic.c
 $(OBJD)/bind.o: $(SRCD)/bind.c $(HFILES)
@@ -104,8 +106,8 @@ $(OBJD)/tags.o: $(SRCD)/tags.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/tags.o $(SRCD)/tags.c
 $(OBJD)/undo.o: $(SRCD)/undo.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/undo.o $(SRCD)/undo.c
-$(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
+$(OBJD)/unixansi.o: $(SRCD)/unixansi.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/unixansi.o $(SRCD)/unixansi.c
 $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
