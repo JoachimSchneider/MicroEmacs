@@ -171,17 +171,18 @@ int scnothing P1_(char *, s)
 /* Found in `curses.h':                                         */
 /*==============================================================*/
 # if ( !USE_CURSES )
+#  if !ANSI
 EXTERN int  tgetflag            DCL((char *id));
 EXTERN int  tgetnum             DCL((char *id));
-# if !ANSI
-EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
-# else
-EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
-# endif /* !ANSI */
 EXTERN int  tgetent             DCL((char *bp, const char *name));
 EXTERN char *tgetstr            DCL((char *, char **));
 EXTERN char *tgoto              DCL((CONST char *cap, int col, int row));
-# endif
+EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
+#  endif  /* !ANSI */
+# endif /* !USE_CURSES */
+# if ANSI
+EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
+# endif /* ANSI */
 /*==============================================================*/
 
 
