@@ -24,7 +24,7 @@ CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
 #LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
 #LIB_TERMCAP = -L/usr/lib64/termcap -ltermcap    # SLES 15
 #LIB_TERMCAP = -ltermcap
-LIB_TERMCAP = -lncurses
+#LIB_TERMCAP = -lncurses
 #LIB_TERMCAP = -lcurses
 
 # list of header files

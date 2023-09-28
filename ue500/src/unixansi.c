@@ -171,12 +171,16 @@ int scnothing P1_(char *, s)
 /* Found in `curses.h':                                         */
 /*==============================================================*/
 # if ( !USE_CURSES )
-EXTERN int  tgetflag  DCL((char *id));
-EXTERN int  tgetnum   DCL((char *id));
-EXTERN int  tputs     DCL((CONST char *str, int affcnt, int (*putc)(int)));
-EXTERN int  tgetent   DCL((char *bp, const char *name));
-EXTERN char *tgetstr  DCL((char *, char **));
-EXTERN char *tgoto    DCL((CONST char *cap, int col, int row));
+EXTERN int  tgetflag            DCL((char *id));
+EXTERN int  tgetnum             DCL((char *id));
+# if !ANSI
+EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
+# else
+EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
+# endif /* !ANSI */
+EXTERN int  tgetent             DCL((char *bp, const char *name));
+EXTERN char *tgetstr            DCL((char *, char **));
+EXTERN char *tgoto              DCL((CONST char *cap, int col, int row));
 # endif
 /*==============================================================*/
 
@@ -289,14 +293,12 @@ static struct capbind capbind[] =       /* Capability binding list    */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
 };
-# endif /* !ANSI  */
+
 # if COLOR
-#  if !ANSI
 static int cfcolor = -1;                /* Current forground color    */
 static int cbcolor = -1;                /* Current background color   */
-#  endif  /* !ANSI */
 # endif /* COLOR */
-# if !ANSI
+
 static struct keybind keybind[] =       /* Keybinding list            */
 {
     { "bt", SHFT|CTRL|'i' },            /* Back-tab key               */
@@ -370,13 +372,11 @@ static int scclose  DCL((void));
 static int sceeol   DCL((void));
 static int sceeop   DCL((void));
 static int screv    DCL((int));
-# endif /* ANSI */
 # if COLOR
-#  if !ANSI
 static int scfcol   DCL((int));
 static int scbcol   DCL((int));
-#  endif /* ANSI */
 # endif /* COLOR */
+# endif /* ANSI */
 
 # if ( FLABEL )
 static VOID dis_sfk DCL((void));
@@ -783,8 +783,13 @@ VOID putpad P1_(char *, seq)
         return;
 
     /* Call on termcap to send sequence */
+# if ANSI
+    ttputs(seq);
+    TRC( ("ttputs(%s)", seq) );
+# else
     tputs(seq, 1, ttputc);
     TRC( ("tputs(%s, 1, ttputc)", seq) );
+# endif /* ANSI */
 }
 
 # if !ANSI
@@ -1071,14 +1076,12 @@ int scbeep P0_()
     /* Success */
     return (0);
 }
-# endif /* !ANSI */
 
-# if COLOR
-#  if USG || AUX
+#  if COLOR
+#   if USG || AUX
 static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
-#  if !ANSI
 /** Set foreground color **/
 int scfcol P1_(int, color)
 /* color: Color to set  */
@@ -1146,10 +1149,8 @@ int scbcol P1_(int, color)
 
     return (0);
 }
-#  endif  /* !ANSI */
-# endif /* COLOR */
+#  endif /* COLOR */
 
-# if !ANSI
 /** Set palette **/
 int spal P1_(char *, cmd)
 /* cmd: Palette command */
