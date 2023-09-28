@@ -254,6 +254,7 @@ static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
 #   define CAP_SB          26           /* Set background color       */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
+# if !ANSI
 static struct capbind capbind[] =       /* Capability binding list    */
 {
     { "cl" },                           /* Clear to end of page       */
@@ -288,6 +289,7 @@ static struct capbind capbind[] =       /* Capability binding list    */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
 };
+# endif /* !ANSI  */
 # if COLOR
 #  if !ANSI
 static int cfcolor = -1;                /* Current forground color    */
@@ -358,11 +360,11 @@ static char rbuf[NFILEN];               /* Return file buffer         */
 static char *nameptr;                 /* Ptr past end of path in rbuf */
 
 /** Terminal definition block **/
+# if !ANSI
 static int scmove   DCL((int, int));
 static int scbeep   DCL((void));
 static int sckclose DCL((void));
 static int sckopen  DCL((void));
-# if !ANSI
 static int scopen   DCL((void));
 static int scclose  DCL((void));
 static int sceeol   DCL((void));
@@ -687,7 +689,7 @@ VOID qin P1_(int, ch)
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
         /* Annoy user */
-        scbeep();
+        term.t_beep();
 
         return;
     }
@@ -942,16 +944,15 @@ int scclose P0_()
     /* Success */
     return ( 0 );
 }
-# endif /* !ANSI */
 
 /* open keyboard -hm */
 int sckopen P0_()
 {
     putpad(capbind[CAP_KS].store);
     ttflush();
-# if     FLABEL
+#  if     FLABEL
     dis_ufk();
-# endif
+#  endif
 
     return ( 0 );
 }
@@ -961,9 +962,9 @@ int sckclose P0_()
 {
     putpad(capbind[CAP_KE].store);
     ttflush();
-# if     FLABEL
+#  if     FLABEL
     dis_sfk();
-# endif
+#  endif
 
     return ( 0 );
 }
@@ -976,15 +977,14 @@ int scmove P2_(int, row, int, col)
     /* Call on termcap to create move sequence */
     putpad( tgoto(capbind[CAP_CM].store, col, row) );
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     move(row, col);
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
 }
 
-# if !ANSI
 /** Erase to end of line **/
 int sceeol P0_()
 {
@@ -1050,28 +1050,28 @@ int screv P1_(int, state)
     /* Success */
     return (0);
 }
-# endif /* !ANSI */
 
 /** Beep **/
 int scbeep P0_()
 {
-# if !NOISY
+#  if !NOISY
     /* Send out visible bell, if it exists */
     if ( capbind[CAP_VB].store )
         putpad(capbind[CAP_VB].store);
     else
-# endif /* not NOISY */
+#  endif /* not NOISY */
     /* The old standby method */
     ttputc('\7');
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     addch('\7');                /* FIX THIS! beep() and flash comes up undefined
                                  */
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
 }
+# endif /* !ANSI */
 
 # if COLOR
 #  if USG || AUX
@@ -1304,9 +1304,9 @@ int callout P1_(CONST char *, cmd)
     int status;
 
     /* Close down */
-    scmove(term.t_nrow, 0);
+    term.t_move(term.t_nrow, 0);
     ttflush();
-    sckclose();
+    term.t_kclose();
     ttclose();
 
     /* Do command */
@@ -1314,7 +1314,7 @@ int callout P1_(CONST char *, cmd)
 
     /* Restart system */
     sgarbf = TRUE;
-    sckopen();
+    term.t_kopen();
     if ( ttopen() ) {
         puts("** Error reopening terminal device **");
         exit(1);
