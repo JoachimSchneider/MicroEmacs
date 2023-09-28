@@ -306,18 +306,24 @@ static int PASCAL NEAR ansiopen P0_()
     REGISTER char *cp = NULL;
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
-        puts(TEXT4);
+        fputs(TEXT4, stderr);
+        TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
 
+# if ( 0 )
         meexit(1);
+# endif
     }
     if ( strcmp(cp, "vt100") != 0 &&
          strcmp(cp, "vt200") != 0 &&
          strcmp(cp, "vt300") != 0 ) {
-        puts(TEXT5);
+        fputs(TEXT5, stderr);
+        TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
 
+# if ( 0 )
         meexit(1);
+# endif
     }
 # endif
 # if     MOUSE && (IS_UNIX || VMS)

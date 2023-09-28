@@ -158,6 +158,10 @@
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
 
+/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
+
+#define UNIX_READ_TOUT  (15)
+
 /*      Windowing system style (pick one)                             */
 
 #define WINDOW_TEXT     1   /* [default] Text mode                    */

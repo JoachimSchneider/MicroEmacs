@@ -835,5 +835,21 @@ simulate a PROTO == 0, VARG == 1 system!
 And it works!
 
 
+[2023-09-28.00]
+Next Steps:
+- unixansi.c ---> unix.c
+- Remark in estruct.h that UNIX && ANSI *is* possible and avoids linking of termcap/terminfo/curses
+- New platform `cygwin' in estruct.h
+- Use "cywin: in cygwin
+- Change external and shell commands for cygwin in unix.c
+- Creatw a *.cmd to call emacs in cygwin
+- A little documentation:
+  + Use forward slashes with cygwin.
+- Should .emacsrc be moved to emacs.rc (Similar to DOS) for cygwin?
+- Create to cygwin ports:
+  + cygwin/ncurses
+  + cygwin/ansi     --- runs ouside of cygwin shell and does not need the ncurses-dll.
+
+
 
 # EOF

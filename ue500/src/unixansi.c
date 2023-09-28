@@ -649,7 +649,7 @@ unsigned char grabnowait P0_()
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] == 0 ) {
         curterm.c_cc[VMIN] = 0;
-        curterm.c_cc[VTIME] = 5;
+        curterm.c_cc[VTIME] = UNIX_READ_TOUT;
 # if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
 # elif ( USE_TERMIO_IOCTL )
