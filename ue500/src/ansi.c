@@ -317,9 +317,9 @@ static int PASCAL NEAR ansiopen P0_()
         TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
 
-# if ( 0 )  /* All terminals should support ANSI escape sequences!  */
+#  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
         meexit(1);
-# endif
+#  endif
     }
     if ( strcmp(cp, "vt100") != 0 &&
          strcmp(cp, "vt200") != 0 &&
@@ -328,9 +328,9 @@ static int PASCAL NEAR ansiopen P0_()
         TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
 
-# if ( 0 )  /* All terminals should support ANSI escape sequences!  */
+#  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
         meexit(1);
-# endif
+#  endif
     }
 # endif
 # if     MOUSE && (IS_UNIX || VMS)

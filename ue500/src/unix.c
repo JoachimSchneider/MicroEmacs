@@ -2088,7 +2088,7 @@ VOID winch_new_size P0_()
 
     ZEROMEM(win);
 
-    winch_flag=0;
+    winch_flag  = 0;
     ioctl(fileno(stdin), TIOCGWINSZ, &win);
     winch_vtresize(win.ws_row, win.ws_col);
     onlywind(0, 0);
