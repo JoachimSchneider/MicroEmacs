@@ -94,6 +94,9 @@
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
+/* Accordung to R. Stevens curses should contain some functions */
+/* for terminal control, but obviously they aren't used here    */
+/* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
 #if ( !IS_POSIX_UNIX() )
 # define USE_TERMIO_IOCTL       ( 1 )
@@ -171,13 +174,18 @@ int scnothing P1_(char *, s)
 /* Found in `curses.h':                                         */
 /*==============================================================*/
 # if ( !USE_CURSES )
-EXTERN int  tgetflag  DCL((char *id));
-EXTERN int  tgetnum   DCL((char *id));
-EXTERN int  tputs     DCL((CONST char *str, int affcnt, int (*putc)(int)));
-EXTERN int  tgetent   DCL((char *bp, const char *name));
-EXTERN char *tgetstr  DCL((char *, char **));
-EXTERN char *tgoto    DCL((CONST char *cap, int col, int row));
-# endif
+#  if !ANSI
+EXTERN int  tgetflag            DCL((char *id));
+EXTERN int  tgetnum             DCL((char *id));
+EXTERN int  tgetent             DCL((char *bp, const char *name));
+EXTERN char *tgetstr            DCL((char *, char **));
+EXTERN char *tgoto              DCL((CONST char *cap, int col, int row));
+EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
+#  endif  /* !ANSI */
+# endif /* !USE_CURSES */
+# if ANSI
+EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
+# endif /* ANSI */
 /*==============================================================*/
 
 
@@ -220,7 +228,9 @@ static struct termios oldterm;          /* Original modes             */
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
 # endif
+# if !ANSI
 static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
+# endif /* !ANSI */
 # define CAP_CL          0              /* Clear to end of page       */
 # define CAP_CM          1              /* Cursor motion              */
 # define CAP_CE          2              /* Clear to end of line       */
@@ -252,6 +262,7 @@ static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
 #   define CAP_SB          26           /* Set background color       */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
+# if !ANSI
 static struct capbind capbind[] =       /* Capability binding list    */
 {
     { "cl" },                           /* Clear to end of page       */
@@ -286,10 +297,12 @@ static struct capbind capbind[] =       /* Capability binding list    */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
 };
+
 # if COLOR
 static int cfcolor = -1;                /* Current forground color    */
 static int cbcolor = -1;                /* Current background color   */
 # endif /* COLOR */
+
 static struct keybind keybind[] =       /* Keybinding list            */
 {
     { "bt", SHFT|CTRL|'i' },            /* Back-tab key               */
@@ -339,6 +352,7 @@ static struct keybind keybind[] =       /* Keybinding list            */
     { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down      */
     { "kw", CTRL|'E' }                  /* End of line                */
 };
+# endif /* !ANSI */
 static int inbuf[NINCHAR];              /* Input buffer               */
 static int * inbufh = inbuf;            /* Head of input buffer       */
 static int * inbuft = inbuf;            /* Tail of input buffer       */
@@ -352,25 +366,30 @@ static char rbuf[NFILEN];               /* Return file buffer         */
 static char *nameptr;                 /* Ptr past end of path in rbuf */
 
 /** Terminal definition block **/
-static int scopen   DCL((void));
+# if !ANSI
 static int scmove   DCL((int, int));
+static int scbeep   DCL((void));
+static int sckclose DCL((void));
+static int sckopen  DCL((void));
+static int scopen   DCL((void));
+static int scclose  DCL((void));
 static int sceeol   DCL((void));
 static int sceeop   DCL((void));
 static int screv    DCL((int));
-static int scbeep   DCL((void));
-static int sckclose DCL((void));
-static int scclose  DCL((void));
-static int sckopen  DCL((void));
 # if COLOR
 static int scfcol   DCL((int));
 static int scbcol   DCL((int));
 # endif /* COLOR */
+# endif /* ANSI */
 
 # if ( FLABEL )
 static VOID dis_sfk DCL((void));
 static VOID dis_ufk DCL((void));
 # endif
 
+# if  ANSI
+COMMON TERM term;
+# else
 TERM term =
 {
     120,                        /* Maximum number of rows             */
@@ -404,8 +423,11 @@ TERM term =
     scdelline,                  /* delete a screen line               */
 # endif /* INSDEL */
 };
+# endif /* ANSI */
 
+# if !ANSI
 static int hpterm =0;           /* global flag braindead HP-terminal  */
+# endif
 
 
 /** Open terminal device **/
@@ -630,7 +652,7 @@ unsigned char grabnowait P0_()
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] == 0 ) {
         curterm.c_cc[VMIN] = 0;
-        curterm.c_cc[VTIME] = 5;
+        curterm.c_cc[VTIME] = UNIX_READ_TOUT;
 # if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
 # elif ( USE_TERMIO_IOCTL )
@@ -671,7 +693,7 @@ VOID qin P1_(int, ch)
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
         /* Annoy user */
-        scbeep();
+        term.t_beep();
 
         return;
     }
@@ -765,10 +787,16 @@ VOID putpad P1_(char *, seq)
         return;
 
     /* Call on termcap to send sequence */
+# if ANSI
+    ttputs(seq);
+    TRC( ("ttputs(%s)", seq) );
+# else
     tputs(seq, 1, ttputc);
     TRC( ("tputs(%s, 1, ttputc)", seq) );
+# endif /* ANSI */
 }
 
+# if !ANSI
 /** Initialize screen package **/
 int scopen P0_()
 {
@@ -778,16 +806,16 @@ int scopen P0_()
     struct keybind * kp;
     char err_str[NSTRING];
 
-# if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
+#  if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
     /* HP-UX, AUX and AIX5 doesn't seem to have these in the
      * termcap library  */
     char PC, * UP;
     short ospeed;
-# else /* not HPUX8 || HPUX9 || VAT || AUX */
+#  else /* not HPUX8 || HPUX9 || VAT || AUX */
     COMMON char   PC;
     COMMON char   *UP;
     COMMON short  ospeed;
-# endif /* HPUX8 || HPUX9 || VAT || AUX */
+#  endif /* HPUX8 || HPUX9 || VAT || AUX */
 
     /* Get terminal type */
     cp = getenv("TERM");
@@ -871,24 +899,24 @@ int scopen P0_()
     }
 
     /* Set speed for padding sequences */
-# if   ( USE_TERMIOS_TCXX )
+#  if   ( USE_TERMIOS_TCXX )
     ospeed = cfgetospeed(&curterm);
-# elif ( USE_TERMIO_IOCTL )
+#  elif ( USE_TERMIO_IOCTL )
     ospeed = curterm.c_cflag & CBAUD;
-# elif ( USE_CURSES )
+#  elif ( USE_CURSES )
     /* ? */
-# else
-#  error MISSING TERMINAL CONTROL DEFINITION
-# endif
+#  else
+#   error MISSING TERMINAL CONTROL DEFINITION
+#  endif
 
     /* Send out initialization sequences */
-# if ( !AIX )
+#  if ( !AIX )
     putpad(capbind[CAP_IS].store);
-# endif
+#  endif
     putpad(capbind[CAP_KS].store);
     sckopen();
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     /* Initialize screen */
     initscr();
 
@@ -901,7 +929,7 @@ int scopen P0_()
         puts("Cannot open terminal");
         exit(1);
     }
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return ( 0 );
@@ -914,10 +942,10 @@ int scclose P0_()
     putpad(capbind[CAP_KE].store);
     sckclose();
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     /* Turn off curses */
     endwin();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
     /* Close terminal device */
     ttflush();
     ttclose();
@@ -931,9 +959,9 @@ int sckopen P0_()
 {
     putpad(capbind[CAP_KS].store);
     ttflush();
-# if     FLABEL
+#  if     FLABEL
     dis_ufk();
-# endif
+#  endif
 
     return ( 0 );
 }
@@ -943,9 +971,9 @@ int sckclose P0_()
 {
     putpad(capbind[CAP_KE].store);
     ttflush();
-# if     FLABEL
+#  if     FLABEL
     dis_sfk();
-# endif
+#  endif
 
     return ( 0 );
 }
@@ -958,9 +986,9 @@ int scmove P2_(int, row, int, col)
     /* Call on termcap to create move sequence */
     putpad( tgoto(capbind[CAP_CM].store, col, row) );
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     move(row, col);
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
@@ -972,9 +1000,9 @@ int sceeol P0_()
     /* Send erase sequence */
     putpad(capbind[CAP_CE].store);
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     clrtoeol();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
@@ -983,16 +1011,16 @@ int sceeol P0_()
 /** Clear screen **/
 int sceeop P0_()
 {
-# if COLOR
+#  if COLOR
     scfcol(gfcolor);
     scbcol(gbcolor);
-# endif /* COLOR */
+#  endif /* COLOR */
     /* Send clear sequence */
     putpad(capbind[CAP_CL].store);
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     erase();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
 
     /* Success */
@@ -1003,14 +1031,14 @@ int sceeop P0_()
 int screv P1_(int, state)
 /* state: New state */
 {
-# if COLOR
+#  if COLOR
     int ftmp, btmp;             /* temporaries for colors */
-# endif /* COLOR */
+#  endif /* COLOR */
 
     /* Set reverse video state */
     putpad(state ? capbind[CAP_SO].store : capbind[CAP_SE].store);
 
-# if COLOR
+#  if COLOR
     if ( state == FALSE ) {
         ftmp = cfcolor;
         btmp = cbcolor;
@@ -1019,14 +1047,14 @@ int screv P1_(int, state)
         scfcol(ftmp);
         scbcol(btmp);
     }
-# endif /* COLOR */
+#  endif /* COLOR */
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     if ( state )
         standout();
     else
         standend();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
@@ -1035,28 +1063,28 @@ int screv P1_(int, state)
 /** Beep **/
 int scbeep P0_()
 {
-# if !NOISY
+#  if !NOISY
     /* Send out visible bell, if it exists */
     if ( capbind[CAP_VB].store )
         putpad(capbind[CAP_VB].store);
     else
-# endif /* not NOISY */
+#  endif /* not NOISY */
     /* The old standby method */
     ttputc('\7');
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     addch('\7');                /* FIX THIS! beep() and flash comes up undefined
                                  */
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
 }
 
-# if COLOR
-#  if USG || AUX
+#  if COLOR
+#   if USG || AUX
 static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
 /** Set foreground color **/
 int scfcol P1_(int, color)
@@ -1078,16 +1106,16 @@ int scfcol P1_(int, color)
         putpad(capbind[CAP_C0 + (color & 7)].store);
         cfcolor = color;
     }
-#  if USG || AUX
+#   if USG || AUX
     else if ( capbind[CAP_SF].store ) {
         putpad( tparm(capbind[CAP_SF].store, cmap[color & 7]) );
         cfcolor = color;
     }
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
-#  if ( USE_CURSES )
+#   if ( USE_CURSES )
     /* ? */
-#  endif /* USE_CURSES */
+#   endif /* USE_CURSES */
 
     return (0);
 }
@@ -1112,20 +1140,20 @@ int scbcol P1_(int, color)
         putpad(capbind[CAP_D0 + (color & 7)].store);
         cbcolor = color;
     }
-#  if USG || AUX
+#   if USG || AUX
     else if ( capbind[CAP_SB].store ) {
         putpad( tparm(capbind[CAP_SB].store, cmap[color & 7]) );
         cbcolor = color;
     }
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
-#  if ( USE_CURSES )
+#   if ( USE_CURSES )
     /* ? */
-#  endif /* USE_CURSES */
+#   endif /* USE_CURSES */
 
     return (0);
 }
-# endif /* COLOR */
+#  endif /* COLOR */
 
 /** Set palette **/
 int spal P1_(char *, cmd)
@@ -1139,11 +1167,11 @@ int spal P1_(char *, cmd)
     if ( strncmp(cmd, "KEYMAP ", 7) == 0 )
         dokeymap = 1;
     else
-# if COLOR
+#  if COLOR
     if ( strncmp(cmd, "CLRMAP ", 7) == 0 )
         dokeymap = 0;
     else
-# endif /* COLOR */
+#  endif /* COLOR */
         return (0);
 
     cmd += 7;
@@ -1169,7 +1197,7 @@ int spal P1_(char *, cmd)
         /* Add to tree */
         addkey((unsigned char *)cp, code);
     }
-# if COLOR
+#  if COLOR
     else {
 
         /* Convert to color number */
@@ -1185,10 +1213,11 @@ int spal P1_(char *, cmd)
                    STR(capbind[CAP_C0 + code].store) ) );
         }
     }
-# endif /* COLOR */
+#  endif /* COLOR */
 
     return (0);
 }
+# endif /* !ANSI */
 
 /* Surely more than just BSD systems do this: */
 
@@ -1204,7 +1233,7 @@ int bktoshell P2_(int, f, int, n)
     /* We should now be back here after resuming */
 
     /* Reopen the screen and redraw */
-    scopen();
+    term.t_open();
     curwp->w_flag = WFHARD;
     sgarbf = TRUE;
 
@@ -1280,9 +1309,9 @@ int callout P1_(CONST char *, cmd)
     int status;
 
     /* Close down */
-    scmove(term.t_nrow, 0);
+    term.t_move(term.t_nrow, 0);
     ttflush();
-    sckclose();
+    term.t_kclose();
     ttclose();
 
     /* Do command */
@@ -1290,7 +1319,7 @@ int callout P1_(CONST char *, cmd)
 
     /* Restart system */
     sgarbf = TRUE;
-    sckopen();
+    term.t_kopen();
     if ( ttopen() ) {
         puts("** Error reopening terminal device **");
         exit(1);

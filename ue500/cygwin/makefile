@@ -39,7 +39,7 @@ F3 = $(OBJD)/eval.o $(OBJD)/exec.o $(OBJD)/file.o $(OBJD)/fileio.o
 F4 = $(OBJD)/input.o $(OBJD)/isearch.o $(OBJD)/keyboard.o $(OBJD)/line.o
 F5 = $(OBJD)/lock.o $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
 F6 = $(OBJD)/random.o $(OBJD)/region.o $(OBJD)/search.o $(OBJD)/replace.o
-F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unixansi.o $(OBJD)/window.o $(OBJD)/word.o
+F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unix.o $(OBJD)/window.o $(OBJD)/word.o
 
 # product list
 
@@ -106,8 +106,8 @@ $(OBJD)/tags.o: $(SRCD)/tags.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/tags.o $(SRCD)/tags.c
 $(OBJD)/undo.o: $(SRCD)/undo.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/undo.o $(SRCD)/undo.c
-$(OBJD)/unixansi.o: $(SRCD)/unixansi.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/unixansi.o $(SRCD)/unixansi.c
+$(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
 $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)

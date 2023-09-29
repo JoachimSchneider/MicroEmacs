@@ -53,8 +53,13 @@ COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 
 # define NROW        25   /* Screen size.                   */
 # define NCOL        80   /* Edit if you want to.           */
-# define NROW_MAX   120   /* .............................. */
-# define NCOL_MAX   132   /* .............................. */
+# if HANDLE_WINCH
+#  define NROW_MAX 120    /* .............................. */
+#  define NCOL_MAX 132    /* .............................. */
+# else
+#  define NROW_MAX NROW   /* .............................. */
+#  define NCOL_MAX NCOL   /* .............................. */
+# endif
 # define NPAUSE     100   /* # times thru update to pause   */
 # define MARGIN       8   /* size of minimim margin and     */
 # define SCRSIZ      64   /* scroll size for extended lines */

@@ -837,7 +837,8 @@ And it works!
 
 [2023-09-28.00]
 Next Steps:
-- unixansi.c ---> unix.c
+- unixansi.c ---> unix.c  (\/)
+- ANSI: Send a SIGWINCH at startup to initialize or somehow after term.t_topen (in display.c).
 - Remark in estruct.h that UNIX && ANSI *is* possible and avoids linking of termcap/terminfo/curses
 - New platform `cygwin' in estruct.h
 - Use "cywin: in cygwin
