@@ -94,6 +94,9 @@
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
+/* Accordung to R. Stevens curses should contain some functions */
+/* for terminal control, but obviously they aren't used here    */
+/* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
 #if ( !IS_POSIX_UNIX() )
 # define USE_TERMIO_IOCTL       ( 1 )

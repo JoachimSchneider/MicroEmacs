@@ -51,13 +51,15 @@ typedef struct {
 COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 # endif /* VMS */
 
-# define NROW    25         /* Screen size.                   */
-# define NCOL    80         /* Edit if you want to.           */
-# define NPAUSE  100        /* # times thru update to pause   */
-# define MARGIN  8          /* size of minimim margin and     */
-# define SCRSIZ  64         /* scroll size for extended lines */
-# define BEL     0x07       /* BEL character.                 */
-# define ESC     0x1B       /* ESC character.                 */
+# define NROW        25   /* Screen size.                   */
+# define NCOL        80   /* Edit if you want to.           */
+# define NROW_MAX   120   /* .............................. */
+# define NCOL_MAX   132   /* .............................. */
+# define NPAUSE     100   /* # times thru update to pause   */
+# define MARGIN       8   /* size of minimim margin and     */
+# define SCRSIZ      64   /* scroll size for extended lines */
+# define BEL        0x07  /* BEL character.                 */
+# define ESC        0x1B  /* ESC character.                 */
 
 /* Forward references.          */
 static int PASCAL NEAR  ansimove    DCL((int row, int col));
@@ -100,9 +102,9 @@ int coltran[16] =
  * "termio" code.
  */
 NOSHARE TERM term = {
-    NROW-1,
-    NROW-1,
-    NCOL,
+    NROW_MAX - 1,
+    NROW - 1,
+    NCOL_MAX,
     NCOL,
     0, 0,
     MARGIN,
@@ -306,22 +308,22 @@ static int PASCAL NEAR ansiopen P0_()
     REGISTER char *cp = NULL;
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
-        fputs(TEXT4, stderr);
+        puts(TEXT4);
         TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
 
-# if ( 0 )
+# if ( 0 )  /* All terminals should support ANSI escape sequences!  */
         meexit(1);
 # endif
     }
     if ( strcmp(cp, "vt100") != 0 &&
          strcmp(cp, "vt200") != 0 &&
          strcmp(cp, "vt300") != 0 ) {
-        fputs(TEXT5, stderr);
+        puts(TEXT5);
         TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
 
-# if ( 0 )
+# if ( 0 )  /* All terminals should support ANSI escape sequences!  */
         meexit(1);
 # endif
     }
