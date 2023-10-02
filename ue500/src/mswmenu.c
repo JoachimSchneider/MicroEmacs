@@ -504,7 +504,7 @@ int PASCAL GetKeyText (int Key, char *Text, int TextLength)
 
         if ( Key & SHFT ) APPENDTEXT(TEXT311) /* "Shift+" */
 
-            if ( Key & CTRL ) {
+            if ( Key & CTRF ) {
                 switch ( c ) {
                 case 'H':
                     APPENDTEXT(TEXT312) /* "BkSp" */

@@ -115,7 +115,7 @@ typedef struct TBIND {
 
 TBIND ttable[] =
 {
-    "bt", SHFT | CTRL | 'i', "",                /* backtab */
+    "bt", SHFT | CTRF | 'i', "",                /* backtab */
     "k1", SPEC | '1', "",                       /* function key 1 */
     "k2", SPEC | '2', "",                       /* function key 2 */
     "k3", SPEC | '3', "",                       /* function key 3 */
@@ -126,21 +126,21 @@ TBIND ttable[] =
     "k8", SPEC | '8', "",                       /* function key 8 */
     "k9", SPEC | '9', "",                       /* function key 9 */
     "k0", SPEC | '0', "",                       /* function key 10 */
-    "kA", CTRL | 'O', "",                       /* insert line */
-    "kb", CTRL | 'H', "",                       /* backspace */
-    "kC", CTRL | 'L', "",                       /* clear screen */
+    "kA", CTRF | 'O', "",                       /* insert line */
+    "kb", CTRF | 'H', "",                       /* backspace */
+    "kC", CTRF | 'L', "",                       /* clear screen */
     "kD", SPEC | 'D', "",                       /* delete character */
     "kd", SPEC | 'N', "",                       /* down cursor */
-    "kE", CTRL | 'K', "",                       /* clear to end of line */
-    "kF", CTRL | 'V', "",                       /* scroll down */
+    "kE", CTRF | 'K', "",                       /* clear to end of line */
+    "kF", CTRF | 'V', "",                       /* scroll down */
     "kH", SPEC | '>', "",                       /* home down [END?] key */
     "kh", SPEC | '<', "",                       /* home */
     "kI", SPEC | 'C', "",                       /* insert character */
-    "kL", CTRL | 'K', "",                       /* delete line */
+    "kL", CTRF | 'K', "",                       /* delete line */
     "kl", SPEC | 'B', "",                       /* left cursor */
     "kN", SPEC | 'V', "",                       /* next page */
     "kP", SPEC | 'Z', "",                       /* previous page */
-    "kR", CTRL | 'Z', "",                       /* scroll down */
+    "kR", CTRF | 'Z', "",                       /* scroll down */
     "kr", SPEC | 'F', "",                       /* right cursor */
     "ku", SPEC | 'P', "",                       /* up cursor */
 # if     SMOS
@@ -403,8 +403,8 @@ int tcapgetc()
     c = get1key();
 
     /* unfold the control bit back into the character */
-    if ( CTRL & c )
-        c = (c & ~CTRL) - '@';
+    if ( CTRF & c )
+        c = (c & ~CTRF) - '@';
 
     /* fold the event type into the input stream as an escape seq */
     if ( (c & ~255) != 0 ) {
@@ -419,7 +419,7 @@ int tcapgetc()
 }
 
 /* GET1KEY: Get one keystroke. The only prefixs legal here
- *          are the SPEC and CTRL prefixes.
+ *          are the SPEC and CTRF prefixes.
  *
  * Note:
  *
@@ -464,7 +464,7 @@ int PASCAL NEAR get1key()
     /* check to see if things are pending soon */
     if ( kbdmode != PLAY &&
          select(1, &fdset, (int *)NULL, (int *)NULL, &timeout) == 0 )
-        return (CTRL | '[');
+        return (CTRF | '[');
 
 # endif
 
@@ -472,7 +472,7 @@ int PASCAL NEAR get1key()
     if ( (kbdmode != PLAY) && (rdchk(0) <= 0) ) {
         nap(35L);
         if ( rdchk(0) <= 0 )
-            return (CTRL | '[');
+            return (CTRF | '[');
     }
 # endif
 
@@ -481,7 +481,7 @@ int PASCAL NEAR get1key()
      * second machine independantly in the general System V case.... so we don't
      */
     if ( kbdmode != PLAY )
-        return (CTRL | '[');
+        return (CTRF | '[');
 
 # endif
 

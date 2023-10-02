@@ -853,5 +853,11 @@ Next Steps:
   + cygwin/ansi     --- runs ouside of cygwin shell and does not need the ncurses-dll.
 
 
+#============================== TODO LIST ==============================
+
+- Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq
+- Add ttgetc_nowait() to VMS
+- Check if Palette settings are applicable to ANSI.
+
 
 # EOF

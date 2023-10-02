@@ -1415,8 +1415,8 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 
         case EVHILITE:
             hilite = asc_int(valueL);
-            if ( hilite > NMARKS )
-                hilite = 255;
+            if ( !hilite_IsValid() )
+                hilite_InValidate();
             break;
 
         case EVHJUMP:

@@ -19,6 +19,7 @@ HDIR = ../h
 #
 #CFLAGS = -g -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
 CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
+#CFLAGS = -g -Wall -I. -I$(HDIR)
 
 # Where to find the termcap/cureses library:
 #LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15

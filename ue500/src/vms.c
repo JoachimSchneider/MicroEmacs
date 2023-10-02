@@ -567,15 +567,16 @@ int PASCAL NEAR ttflush P0_()
 }
 
 /*
-        grabnowait is a routine that tries to read another
-        character, and if one doesn't come in as fast as we expect
-        function keys sequences to arrive, we return -1.  This is called
-        after receving ESC to check for next character.  It's okay to wait
-        too long, but the length of the delay controls how log the user
-        waits after hitting ESC before results are seen.
+        grabnowait is a routine that tries to read another character,
+        and if one doesn't come in as fast as we expect function keys
+        sequences to arrive, we return grabnowait_TIMEOUT. This is
+        called after receving ESC to check for next character. It's
+        okay to wait too long, but the length of the delay controls how
+        log the user waits after hitting ESC before results are seen.
 
-        Note that we also wake from hibernation if a character arrives, so
-        this never causes an undue delay if the user it actually typing.
+        Note that we also wake from hibernation if a character arrives,
+        so this never causes an undue delay if the user it actually
+        typing.
 */
 unsigned char PASCAL NEAR grabnowait P0_()
 {
@@ -585,7 +586,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
         test(SYS$HIBER());
     }
 
-    return ((tylen == 0) ? -1 : ttgetc());
+    return ((tylen == 0) ? grabnowait_TIMEOUT : ttgetc());
 }
 
 unsigned char PASCAL NEAR grabwait P0_()

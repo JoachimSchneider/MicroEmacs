@@ -111,7 +111,7 @@ int PASCAL NEAR mlyesno P1_(CONST char *, prompt)
             return (ABORT);
 
         if ( (c == 'n') || (c == 'N')||
-             ( c & (SPEC|ALTD|CTRL|META|CTLX|MOUS) ) )
+             ( c & (SPEC|ALTD|CTRF|META|CTLX|MOUS) ) )
             return (FALSE);         /* ONLY 'y' or 'Y' allowed!!! */
 
 # if     FRENCH
@@ -146,15 +146,15 @@ int PASCAL NEAR mlreply P3_(CONST char *, prompt, char *, buf, int, nbuf)
 
 /* ECTOC:
  *
- * Expanded character to character collapse the CTRL and SPEC flags
+ * Expanded character to character collapse the CTRF and SPEC flags
  * back into an ascii code
  */
 int PASCAL NEAR ectoc P1_(int, c)
 {
-    if ( c == (CTRL | ' ') )
+    if ( c == (CTRF | ' ') )
         c = 0;
-    if ( c & CTRL )
-        c = c ^ (CTRL | 0x40);
+    if ( c & CTRF )
+        c = c ^ (CTRF | 0x40);
     if ( c & SPEC )
         c = c & 255;
 
@@ -164,15 +164,15 @@ int PASCAL NEAR ectoc P1_(int, c)
 
 /* CTOEC:
  *
- * Character to extended character pull out the CTRL and SPEC prefixes
+ * Character to extended character pull out the CTRF and SPEC prefixes
  * (if possible)
  */
 int PASCAL NEAR ctoec P1_(int, c)
 {
     if ( c == 0 )
-        c = CTRL | ' ';
+        c = CTRF | ' ';
     else if ( (c >= 0x00 && c <= 0x1F) || c == 0x7F )
-        c = CTRL | (c ^ 0x40);
+        c = CTRF | (c ^ 0x40);
 
     return (c);
 }
@@ -692,7 +692,7 @@ int PASCAL NEAR tgetc P0_()
 /* GET_KEY:
  *
  * Get one keystroke. The legal prefixs here are the SPEC, MOUS and
- * CTRL prefixes.
+ * CTRF prefixes.
  */
 int PASCAL NEAR get_key P0_()
 {
@@ -724,7 +724,7 @@ int PASCAL NEAR get_key P0_()
 
     /* yank out the control prefix */
     if ( ( (c & 255) >=0x00 && (c & 255) <= 0x1F ) || (c & 255) == 0x7F )
-        c = CTRL | (c ^ 0x40);
+        c = CTRF | (c ^ 0x40);
 
     /* return the character */
     return (c);
@@ -985,12 +985,12 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, CONST char *, dflt,
     /* Display the proper current search terminator character. */
     mlout('<');
     switch ( iterm ) {
-    case CTRL | '[':
+    case CTRF | '[':
         mlputs("META");
         tcol += 8;
         break;
 
-    case CTRL | 'M':
+    case CTRF | 'M':
         mlputs("NL");
         tcol += 6;
         break;

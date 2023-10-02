@@ -136,7 +136,7 @@ int scnothing P1_(char *, s)
 # include "elang.h"                     /* Language definitions     */
 
 /** Kill predefined **/
-# undef CTRL                            /* Problems with CTRL       */
+# undef CTRF                            /* Problems with CTRF       */
 
 
 /** Overall include files **/
@@ -190,8 +190,8 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 
 
 /** Restore predefined definitions **/
-# undef CTRL                            /* Restore CTRL               */
-# define CTRL 0x0100
+# undef CTRF                            /* Restore CTRF               */
+# define CTRF 0x0100
 
 /** Parameters **/
 # define NINCHAR         64             /* Input buffer size          */
@@ -202,9 +202,9 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # define NPAUSE          10           /* # times thru update to pause */
 
 /** CONSTANTS **/
-# define TIMEOUT         255            /* No character available     */
 # define MLWAIT          3
 
+/** Type definitions **/
 struct capbind {                        /* Capability binding entry   */
     CONST char  *name;                  /* Termcap name               */
     char        *store;                 /* Storage variable           */
@@ -305,7 +305,7 @@ static int cbcolor = -1;                /* Current background color   */
 
 static struct keybind keybind[] =       /* Keybinding list            */
 {
-    { "bt", SHFT|CTRL|'i' },            /* Back-tab key               */
+    { "bt", SHFT|CTRF|'i' },            /* Back-tab key               */
     { "k1", SPEC|'1' },                 /* F1 key                     */
     { "k2", SPEC|'2' },                 /* F2 key                     */
     { "k3", SPEC|'3' },                 /* F3 key                     */
@@ -327,35 +327,46 @@ static struct keybind keybind[] =       /* Keybinding list            */
     { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key        */
     { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key        */
     { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key        */
-    { "kA", CTRL|'O' },                 /* Insert line key            */
-    { "kb", CTRL|'H' },                 /* Backspace key              */
-    { "kC", CTRL|'L' },                 /* Clear screen key           */
+    { "kA", CTRF|'O' },                 /* Insert line key            */
+    { "kb", CTRF|'H' },                 /* Backspace key              */
+    { "kC", CTRF|'L' },                 /* Clear screen key           */
     { "kD", SPEC|'D' },                 /* Delete character key       */
     { "kd", SPEC|'N' },                 /* Down arrow key             */
-    { "kE", CTRL|'K' },                 /* Clear to end of line key   */
-    { "kF", CTRL|'V' },                 /* Scroll forward key         */
+    { "kE", CTRF|'K' },                 /* Clear to end of line key   */
+    { "kF", CTRF|'V' },                 /* Scroll forward key         */
     { "kH", SPEC|'>' },                 /* Home down key              */
     { "@7", SPEC|'>' },                 /* Home down key    (kjc)     */
     { "kh", SPEC|'<' },                 /* Home key                   */
     { "kI", SPEC|'C' },                 /* Insert character key       */
-    { "kL", CTRL|'K' },                 /* Delete line key            */
+    { "kL", CTRF|'K' },                 /* Delete line key            */
     { "kl", SPEC|'B' },                 /* Left arrow key             */
     { "kN", SPEC|'V' },                 /* Next page key              */
     { "kP", SPEC|'Z' },                 /* Previous page key          */
-    { "kR", CTRL|'Z' },                 /* Scroll backward key        */
+    { "kR", CTRF|'Z' },                 /* Scroll backward key        */
     { "kr", SPEC|'F' },                 /* Right arrow key            */
     { "ku", SPEC|'P' },                 /* Up arrow key               */
     { "K1", SPEC|'<' },                 /* Keypad 7 -> Home           */
     { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up        */
     { "K3", ' ' },                      /* Keypad 5                   */
     { "K4", SPEC|'>' },                 /* Keypad 1 -> End            */
-    { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down      */
-    { "kw", CTRL|'E' }                  /* End of line                */
+    { "K5", CTRF|'V' },                 /* Keypad 3 -> Page Down      */
+    { "kw", CTRF|'E' }                  /* End of line                */
 };
 # endif /* !ANSI */
 static int inbuf[NINCHAR];              /* Input buffer               */
 static int * inbufh = inbuf;            /* Head of input buffer       */
 static int * inbuft = inbuf;            /* Tail of input buffer       */
+#define PRINT_inbuf(where) do  {                                  \
+    int i = 0;                                                    \
+                                                                  \
+    fprintf(stderr, "%12s: inbuft = %d, inbufh = %d, inbuf = ",   \
+                    (char *)(where), (int)(inbuft - inbuf),       \
+                                     (int)(inbufh - inbuf));      \
+    for ( i = 0; i < NELEM(inbuf) - 1; i++ )  {                   \
+        fprintf(stderr, "0x%04X, ", inbuf[i]);                    \
+    }                                                             \
+    fprintf(stderr, "0x%04X\n", inbuf[i]);                        \
+} while ( 0 )
 static unsigned char outbuf[NOUTCHAR];  /* Output buffer              */
 static unsigned char * outbuft = outbuf;/* Output buffer tail         */
 
@@ -609,7 +620,7 @@ int ttputc P1_(int, ch)
 /** Grab input characters, with wait **/
 unsigned char grabwait()
 {
-    unsigned char ch;
+    unsigned char ch  = '\0';
 
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] ) {
@@ -638,16 +649,19 @@ unsigned char grabwait()
         exit(1);
     }
 # endif
-    /* Return new character */
 
+    /* Return new character */
+# if ( 0 )
+    TRC(("grabwait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+# endif
     return (ch);
 }
 
 /** Grab input characters, short wait **/
-unsigned char grabnowait P0_()
+unsigned char PASCAL NEAR grabnowait P0_()
 {
-    int count;
-    unsigned char ch;
+    int           count = 0;
+    unsigned char ch    = '\0';
 
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] == 0 ) {
@@ -677,10 +691,14 @@ unsigned char grabnowait P0_()
         exit(1);
     }
 # endif
-    if ( count == 0 )
-        return (TIMEOUT);
+    if ( count == 0 ) {
+        return (grabnowait_TIMEOUT);
+    }
 
     /* Return new character */
+# if ( 0 )
+    TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+# endif
     return (ch);
 }
 
@@ -690,6 +708,9 @@ unsigned char grabnowait P0_()
  */
 VOID qin P1_(int, ch)
 {
+# if ( 0 )
+    PRINT_inbuf("BEGIN qin");
+# endif
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
         /* Annoy user */
@@ -700,6 +721,9 @@ VOID qin P1_(int, ch)
 
     /* Add character */
     *inbuft++ = ch;
+# if ( 0 )
+    PRINT_inbuf("  END qin");
+# endif
 }
 
 /* QREP:
@@ -708,14 +732,21 @@ VOID qin P1_(int, ch)
  */
 VOID qrep P1_(int, ch)
 {
+# if ( 0 )
+    PRINT_inbuf("BEGIN qrep");
+# endif
     inbuft = inbuf;
     qin(ch);
+# if ( 0 )
+    PRINT_inbuf("  END qrep");
+# endif
 }
 
 /** Return cooked characters **/
-int ttgetc P0_()
+int PASCAL NEAR ttgetc P0_()
 {
-    int ch;
+    int ch  = 0;
+
     ttflush();
     /* Loop until character is in input buffer */
     while ( inbufh == inbuft )
@@ -730,6 +761,36 @@ int ttgetc P0_()
         inbufh = inbuft = inbuf;
 
     /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc(): 0x%04X", (unsigned int)ch));
+# endif
+    return (ch);
+}
+
+int PASCAL NEAR ttgetc_nowait P0_()
+{
+    int ch  = 0;
+
+    ttflush();
+    /* Loop until character is in input buffer */
+    while ( inbufh == inbuft )  {
+        if ( !cook_nowait() ) {
+            return grabnowait_TIMEOUT;
+        }
+    }
+
+    /* Get input from buffer, now that it is available */
+    ch = *inbufh++;
+
+    /* reset us to the beginning of the buffer if there are no more pending
+     * characters */
+    if ( inbufh == inbuft )
+        inbufh = inbuft = inbuf;
+
+    /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
+# endif
     return (ch);
 }
 
@@ -1156,23 +1217,26 @@ int scbcol P1_(int, color)
 #  endif /* COLOR */
 
 /** Set palette **/
-int spal P1_(char *, cmd)
+int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
 {
     int   code      = 0;
     int   dokeymap  = 0;
+#  if COLOR
+    int   doclrmap  = 0;
+#  endif /* COLOR */
     char  *cp       = NULL;
 
     /* Check for keymapping command */
-    if ( strncmp(cmd, "KEYMAP ", 7) == 0 )
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
         dokeymap = 1;
-    else
 #  if COLOR
-    if ( strncmp(cmd, "CLRMAP ", 7) == 0 )
-        dokeymap = 0;
-    else
+    } else if ( strncmp(cmd, "CLRMAP ", 7) == 0 ) {
+            doclrmap = 1;
 #  endif /* COLOR */
+    } else                                        {
         return (0);
+    }
 
     cmd += 7;
 
@@ -1189,17 +1253,14 @@ int spal P1_(char *, cmd)
     for (; *cp == ' '; cp++ );
 
     /* Perform operation */
-    if ( dokeymap ) {
-
+    if        ( dokeymap )  {
         /* Convert to keycode */
         code = stock(cmd);
 
         /* Add to tree */
         addkey((unsigned char *)cp, code);
-    }
 #  if COLOR
-    else {
-
+    } else if ( doclrmap )  {
         /* Convert to color number */
         code = atoi(cmd);
         if ( code < 0 || code > 15 )
@@ -1210,10 +1271,12 @@ int spal P1_(char *, cmd)
         if ( capbind[CAP_C0 + code].store ) {
             XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
-                   STR(capbind[CAP_C0 + code].store) ) );
+                  STR(capbind[CAP_C0 + code].store) ) );
         }
-    }
 #  endif /* COLOR */
+    } else                  {
+        /**EMPTY**/
+    }
 
     return (0);
 }

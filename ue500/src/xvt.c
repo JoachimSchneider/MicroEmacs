@@ -265,7 +265,7 @@ static long windowHandler(WINDOW win, EVENT *ep)
         if ( ep->v.mouse.shift == TRUE )
             etype |= (SHFT >> 8);
         if ( ep->v.mouse.control == TRUE )
-            etype |= (CTRL >> 8);
+            etype |= (CTRF >> 8);
 
         /* no buttons changes */
         if ( ep->type == E_MOUSE_MOVE ) {
@@ -430,19 +430,19 @@ int xvt_code;
         break;
 
     case K_WLEFT:              /* word left */
-        code = SPEC | CTRL | 'B';
+        code = SPEC | CTRF | 'B';
         break;
 
     case K_WRIGHT:             /* word right */
-        code = SPEC | CTRL | 'F';
+        code = SPEC | CTRF | 'F';
         break;
 
     case K_BTAB:               /* back tab */
-        code = SPEC | CTRL | 'I';
+        code = SPEC | CTRF | 'I';
         break;
 
     case K_HELP:               /* help */
-        code = SPEC | CTRL | '>';
+        code = SPEC | CTRF | '>';
         break;
 
     case K_CLEAR:              /* clear */

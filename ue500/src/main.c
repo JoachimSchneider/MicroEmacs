@@ -557,19 +557,6 @@ loop:
         /* `winch_flag  = 0': Already done in `winch_new_size()'  */
         winch_new_size();
     }
-    /* Re-init window size in 2nd run of edit loop. TODO: Understand  */
-    {
-        static int  countdown = 1;
-
-        if ( 0 <= countdown ) {
-            if ( 0 == countdown ) {
-                countdown = (-1);
-
-                winch_new_size();
-            }
-            countdown--;
-        }
-    }
 #endif
     /* Fix up the screen    */
     update(FALSE);

@@ -34,16 +34,20 @@
 ;;
 ; FN1 -- FN4 did not work with TERM=xterm and RXVT
 ;;
+set $palette "KEYMAP FN1 ~eOP"
+set $palette "KEYMAP FN2 ~eOQ"
+set $palette "KEYMAP FN3 ~eOR"
+set $palette "KEYMAP FN4 ~eOS"
 set $palette "KEYMAP FN1 ~e[11~~"
 set $palette "KEYMAP FN2 ~e[12~~"
 set $palette "KEYMAP FN3 ~e[13~~"
 set $palette "KEYMAP FN4 ~e[14~~"
 set $palette "KEYMAP FN5 ~e[15~~"
-set $palette "KEYMAP FN6 ~e[16~~"
-set $palette "KEYMAP FN7 ~e[17~~"
-set $palette "KEYMAP FN8 ~e[18~~"
-set $palette "KEYMAP FN9 ~e[19~~"
-set $palette "KEYMAP FN0 ~e[10~~"
+set $palette "KEYMAP FN6 ~e[17~~"
+set $palette "KEYMAP FN7 ~e[18~~"
+set $palette "KEYMAP FN8 ~e[19~~"
+set $palette "KEYMAP FN9 ~e[20~~"
+set $palette "KEYMAP FN0 ~e[21~~"
 ;;
 set $palette "KEYMAP S-FN1 ~e[25;2~~"
 set $palette "KEYMAP S-FN2 ~e[26;2~~"
@@ -249,6 +253,11 @@ macro-to-key mouse-clicks MSa
 
 ;       ***** Rebind the Function key group
 
+; ANSI gives FN^[1-4] ... instead of FN[1-4] ...: TODO: Remap in C-Source
+;bind-to-key search-forward              FN^1
+;bind-to-key search-reverse              FN^2
+;bind-to-key hunt-forward                FN^3
+;bind-to-key hunt-backward               FN^4
 bind-to-key search-forward              FN1
 bind-to-key search-reverse              FN2
 bind-to-key hunt-forward                FN3
@@ -341,6 +350,7 @@ set $softtab 2
 set $hardtab 8
 bind-to-key set-mark ^@
 set $dispundo TRUE
+set $hilight 255
 ;===============================================================================
 
 

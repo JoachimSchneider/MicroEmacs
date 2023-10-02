@@ -21,7 +21,10 @@
 #include "edef.h"
 #include "elang.h"
 
+/* BE CAREFUL: The related C-variable is `hilite', the macro variable
+ * is `$hilight'  */
 #define SEARCH_HIGHLIGHT        10      /* mark # used to highlight */
+CASRT( 0 <=  SEARCH_HIGHLIGHT && SEARCH_HIGHLIGHT < NMARKS - 1 );
 #define MAGIC_JUMP_TABLES       1       /* Jump tables in MAGIC mode */
 
 #if MAGIC

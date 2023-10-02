@@ -160,7 +160,7 @@
 
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
-#define UNIX_READ_TOUT  (9)
+#define UNIX_READ_TOUT  (5)
 
 /*      Windowing system style (pick one)                             */
 
@@ -702,7 +702,7 @@ execl(va_alist)
 #define MAXSYM  32              /* max # chars in symbol to expand    */
 #define MINFLEN 3               /* min # chars to match &func         */
 
-#define CTRL    0x0100          /* Control flag, or'ed in             */
+#define CTRF    0x0100          /* Control flag, or'ed in             */
 #define META    0x0200          /* Meta flag, or'ed in                */
 #define CTLX    0x0400          /* ^X flag, or'ed in                  */
 #define SPEC    0x0800          /* special key (function keys)        */

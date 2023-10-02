@@ -61,10 +61,10 @@ int PASCAL NEAR extcode P1_(unsigned, c)
 
     /* control function keys */
     if ( c >= 0x5E && c < 0x67 )
-        return (SPEC | CTRL | c - 0x5D + '0');
+        return (SPEC | CTRF | c - 0x5D + '0');
 
     if ( c == 0x67 )
-        return (SPEC | CTRL | '0');
+        return (SPEC | CTRF | '0');
 
     /* ALTed function keys */
     if ( c >= 0x68 && c < 0x71 )
@@ -95,7 +95,7 @@ int PASCAL NEAR extcode P1_(unsigned, c)
         return (0);                     /* null           */
 
     case 0x0F:
-        return (SHFT | CTRL | 'I');     /* backtab        */
+        return (SHFT | CTRF | 'I');     /* backtab        */
 
     case 0x10:
         return (ALTD | 'Q');
@@ -209,37 +209,37 @@ int PASCAL NEAR extcode P1_(unsigned, c)
         return (SPEC | 'D');            /* delete                 */
 
     case 0x73:
-        return (SPEC | CTRL | 'B');     /* control left           */
+        return (SPEC | CTRF | 'B');     /* control left           */
 
     case 0x74:
-        return (SPEC | CTRL | 'F');     /* control right          */
+        return (SPEC | CTRF | 'F');     /* control right          */
 
     case 0x75:
-        return (SPEC | CTRL | '>');     /* control end            */
+        return (SPEC | CTRF | '>');     /* control end            */
 
     case 0x76:
-        return (SPEC | CTRL | 'V');     /* control page down      */
+        return (SPEC | CTRF | 'V');     /* control page down      */
 
     case 0x77:
-        return (SPEC | CTRL | '<');     /* control home           */
+        return (SPEC | CTRF | '<');     /* control home           */
 
     case 0x84:
-        return (SPEC | CTRL | 'Z');     /* control page up        */
+        return (SPEC | CTRF | 'Z');     /* control page up        */
 
     case 0x8D:
-        return (SPEC | CTRL | 'P');     /* control up             */
+        return (SPEC | CTRF | 'P');     /* control up             */
 
     case 0x8F:
-        return (SPEC | CTRL | 'L');     /* control NP5            */
+        return (SPEC | CTRF | 'L');     /* control NP5            */
 
     case 0x91:
-        return (SPEC | CTRL | 'N');     /* control down           */
+        return (SPEC | CTRF | 'N');     /* control down           */
 
     case 0x92:
-        return (SPEC | CTRL | 'C');     /* control grey insert    */
+        return (SPEC | CTRF | 'C');     /* control grey insert    */
 
     case 0x93:
-        return (SPEC | CTRL | 'D');     /* control grey delete    */
+        return (SPEC | CTRF | 'D');     /* control grey delete    */
 
     case 0x82:
         return (ALTD | '-');            /* alt -                  */
@@ -279,10 +279,10 @@ int PASCAL NEAR extcode P1_(unsigned, c)
         return (SPEC | SHFT | '=');     /* shift F12              */
 
     case 0x89:
-        return (SPEC | CTRL | '-');     /* control F11            */
+        return (SPEC | CTRF | '-');     /* control F11            */
 
     case 0x8A:
-        return (SPEC | CTRL | '=');     /* control F12            */
+        return (SPEC | CTRF | '=');     /* control F12            */
 
     case 0x8B:
         return (SPEC | ALTD | '-');     /* alt F11                */
@@ -330,34 +330,34 @@ int PASCAL NEAR extcode P1_(unsigned, c)
         return (SPEC | 'k');            /* grey delete            */
 
     case 0xE077:
-        return (SPEC | CTRL | 'a');     /* control grey home      */
+        return (SPEC | CTRF | 'a');     /* control grey home      */
 
     case 0xE08D:
-        return (SPEC | CTRL | 'b');     /* control grey up        */
+        return (SPEC | CTRF | 'b');     /* control grey up        */
 
     case 0xE084:
-        return (SPEC | CTRL | 'c');     /* control grey page up   */
+        return (SPEC | CTRF | 'c');     /* control grey page up   */
 
     case 0xE073:
-        return (SPEC | CTRL | 'd');     /* control grey left      */
+        return (SPEC | CTRF | 'd');     /* control grey left      */
 
     case 0xE074:
-        return (SPEC | CTRL | 'f');     /* control grey right     */
+        return (SPEC | CTRF | 'f');     /* control grey right     */
 
     case 0xE075:
-        return (SPEC | CTRL | 'g');     /* control grey end       */
+        return (SPEC | CTRF | 'g');     /* control grey end       */
 
     case 0xE091:
-        return (SPEC | CTRL | 'h');     /* control grey down      */
+        return (SPEC | CTRF | 'h');     /* control grey down      */
 
     case 0xE076:
-        return (SPEC | CTRL | 'i');     /* control grey page down */
+        return (SPEC | CTRF | 'i');     /* control grey page down */
 
     case 0xE092:
-        return (SPEC | CTRL | 'j');     /* control grey insert    */
+        return (SPEC | CTRF | 'j');     /* control grey insert    */
 
     case 0xE093:
-        return (SPEC | CTRL | 'k');     /* control grey delete    */
+        return (SPEC | CTRF | 'k');     /* control grey delete    */
 
     case 0xE097:
         return (SPEC | ALTD | 'a');     /* alt grey home          */
@@ -435,16 +435,16 @@ int PASCAL NEAR extcode P1_(unsigned, c)
         return (SPEC | ALTD | '+');     /* alt grey +             */
 
     case 0x95:
-        return (SPEC | CTRL | '/');     /* ctrl grey /            */
+        return (SPEC | CTRF | '/');     /* ctrl grey /            */
 
     case 0x96:
-        return (SPEC | CTRL | '*');     /* ctrl grey *            */
+        return (SPEC | CTRF | '*');     /* ctrl grey *            */
 
     case 0x8E:
-        return (SPEC | CTRL | '-');     /* ctrl grey -            */
+        return (SPEC | CTRF | '-');     /* ctrl grey -            */
 
     case 0x90:
-        return (SPEC | CTRL | '+');     /* ctrl grey +            */
+        return (SPEC | CTRF | '+');     /* ctrl grey +            */
 
 #  endif
 
@@ -614,6 +614,9 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
     if ( seq == NULL || STRLEN( (char *)seq ) < 2 )
         return FALSE;
 
+#  if ( 0 )
+    TRC(("addkey(): seq = <%s>", (char *)seq));
+#  endif
     /* If no keys defined, go directly to insert mode */
     first = 1;
     if ( nxtkey != keymap ) {
@@ -678,7 +681,6 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
  *
  * To use, we need a grabwait(), grabnowait(), qin() and qrep() function.
  */
-# define TIMEOUT  (255)
 VOID cook P0_()
 {
     REGISTER unsigned char  ch    = '\0';
@@ -690,11 +692,9 @@ VOID cook P0_()
      * Skip if the key isn't a special leading escape sequence.
      */
     if ( keyseq[ch] == 0 ) {
-        /*
-         * But if it is a '\0', make it a (0/1/32).
-         */
+        /* But if it is a '\0', make it a (0/1/32). */
         if ( ch == 0 ) {
-            qin(CTRL >> 8); /* control */
+            qin(CTRF >> 8); /* control */
             qin(32); /* space */
         }
 
@@ -706,10 +706,8 @@ VOID cook P0_()
 
     /* Loop until keymap exhausts */
     while ( cur ) {
-
         /* Did we find a matching character */
         if ( cur->ch == ch ) {
-
             /* Is this the end */
             if ( cur->nxtlvl == NULL ) {
                 /* Replace all characters with a new sequence */
@@ -722,18 +720,83 @@ VOID cook P0_()
 
                 /* Get next character, timed */
                 ch = grabnowait();
-                if ( ch == TIMEOUT )
+                if ( ch == grabnowait_TIMEOUT ) {
                     return;
+                }
 
                 /* Queue character */
                 qin(ch);
             }
-        } else
+        } else {
             /* Try next character on same level */
             cur = cur->samlvl;
+        }
     }
 }
-#endif
+
+/* Cook input characters, using the key sequences stored by addkey().
+ *
+ * To use, we need a grabwait(), grabnowait(), qin() and qrep() function.
+ */
+int cook_nowait P0_()
+{
+    REGISTER unsigned char  ch    = '\0';
+    KEYENT                  *cur  = NULL;
+
+    if ( grabnowait_TIMEOUT == (ch = grabnowait()) )  {
+        return FALSE;
+    } else {
+        qin(ch);
+    }
+
+    /*
+     * Skip if the key isn't a special leading escape sequence.
+     */
+    if ( keyseq[ch] == 0 ) {
+        /* But if it is a '\0', make it a (0/1/32). */
+        if ( ch == 0 ) {
+            qin(CTRF >> 8); /* control */
+            qin(32); /* space */
+        }
+
+        return TRUE;
+    }
+
+    /* Start at root of keymap */
+    cur = keymap;
+
+    /* Loop until keymap exhausts */
+    while ( cur ) {
+        /* Did we find a matching character */
+        if ( cur->ch == ch ) {
+            /* Is this the end */
+            if ( cur->nxtlvl == NULL ) {
+                /* Replace all characters with a new sequence */
+                qrep(cur->code);
+
+                return TRUE;
+            } else {
+                /* Advance to next level */
+                cur = cur->nxtlvl;
+
+                /* Get next character, timed */
+                ch = grabnowait();
+                if ( ch == grabnowait_TIMEOUT ) {
+                    return TRUE;
+                }
+
+                /* Queue character */
+                qin(ch);
+            }
+        } else {
+            /* Try next character on same level */
+            cur = cur->samlvl;
+        }
+    }
+
+    return TRUE;
+}
+#endif  /* ( IS_UNIX() || (VMS && SMG) || MPE ) */
 
 
 

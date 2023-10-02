@@ -123,16 +123,16 @@ DCLDEF NOSHARE int            lbound              INIT_(0);             /* leftm
 DCLDEF NOSHARE int            taboff              INIT_(0);             /* tab offset for display           */
 DCLDEF NOSHARE int            tabsize             INIT_(8);             /* current hard tab size            */
 DCLDEF NOSHARE int            stabsize            INIT_(0);             /* current soft tab size (0: use hard tabs) */
-DCLDEF NOSHARE int            reptc               INIT_(CTRL | 'U');    /* current universal repeat char    */
-DCLDEF NOSHARE int            abortc              INIT_(CTRL | 'G');    /* current abort command char       */
-DCLDEF NOSHARE int            sterm               INIT_(CTRL | '[');    /* search terminating character     */
-DCLDEF NOSHARE int            isterm              INIT_(CTRL | '[');    /* incremental-search terminating char  */
+DCLDEF NOSHARE int            reptc               INIT_(CTRF | 'U');    /* current universal repeat char    */
+DCLDEF NOSHARE int            abortc              INIT_(CTRF | 'G');    /* current abort command char       */
+DCLDEF NOSHARE int            sterm               INIT_(CTRF | '[');    /* search terminating character     */
+DCLDEF NOSHARE int            isterm              INIT_(CTRF | '[');    /* incremental-search terminating char  */
 DCLDEF NOSHARE int            searchtype          INIT_(SRNORM);        /* current search style             */
 DCLDEF NOSHARE int            yankflag            INIT_(FALSE);         /* current yank style               */
 DCLDEF NOSHARE int            prefix              INIT_(0);             /* currently pending prefix bits    */
 DCLDEF NOSHARE int            prenum              INIT_(0);             /*     "       "     numeric arg    */
 DCLDEF NOSHARE int            predef              INIT_(TRUE);          /*     "       "     default flag   */
-DCLDEF NOSHARE int            quotec              INIT_(CTRL | 'Q');    /* quote char during mlreply()      */
+DCLDEF NOSHARE int            quotec              INIT_(CTRF | 'Q');    /* quote char during mlreply()      */
 DCLDEF NOSHARE CONST char     *cname[NOSZ_]                             /* names of colors                  */
     INIT_({
         "BLACK" _K_ "RED" _K_ "GREEN" _K_ "YELLOW" _K_ "BLUE" _K_ "MAGENTA" _K_ "CYAN" _K_ "GREY" _K_
@@ -179,6 +179,9 @@ DCLDEF NOSHARE int            notquiescent        INIT_(1);             /* <=0 o
 DCLDEF NOSHARE int            fbusy               INIT_(FALSE);         /* indicates file activity if FREADING or FWRITING.
                                                                          * Used by abort mechanism          */
 DCLDEF NOSHARE int            hilite              INIT_(10);            /* current region to highlight (255 if none)  */
+#define hilite_IsValid()      ( 0 <= hilite && hilite < NMARKS - 1 )
+#define hilite_InValidate()   ( hilite = 0xFF )
+CASRT(NMARKS -1 <= 0xFF);
 
 
 /* uninitialized global definitions */

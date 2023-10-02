@@ -419,7 +419,7 @@ int PASCAL NEAR checkmouse P0_()
     if ( sstate & 3 )           /* shifted? */
         etype |= (SHFT >> 8);
     if ( sstate & 4 )           /* controled? */
-        etype |= (CTRL >> 8);
+        etype |= (CTRF >> 8);
 
     /* no buttons changes */
     if ( oldbut == newbut ) {

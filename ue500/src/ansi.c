@@ -19,11 +19,28 @@
 
 #include        <stdio.h>
 #include        "estruct.h"
+#if IS_UNIX()
+# if ( !IS_POSIX_UNIX() )
+#  include <termio.h>
+# else
+#  include <termios.h>
+# endif /* !IS_POSIX_UNIX() */
+#endif  /* IS_UNIX() */
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
 
 #if     ANSI
+
+/*==============================================================*/
+/* FEATURES                                                     */
+/*==============================================================*/
+#define USE_PALETTE ( !0 )
+#define USE_COOKED  ( !0 )
+CASRT( !USE_PALETTE || (IS_UNIX() || (VMS && SMG) || MPE) );
+CASRT( !USE_COOKED  || (IS_UNIX() || (VMS && SMG) || MPE) );
+CASRT( !USE_PALETTE || USE_COOKED );
+/*==============================================================*/
 
 EXTERN int  PASCAL NEAR fnclabel    DCL((int f, int n));
 EXTERN int  PASCAL NEAR readparam   DCL((int *v));
@@ -67,15 +84,15 @@ COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 # define ESC        0x1B  /* ESC character.                 */
 
 /* Forward references.          */
-static int PASCAL NEAR  ansimove    DCL((int row, int col));
-static int PASCAL NEAR  ansieeol    DCL((void));
-static int PASCAL NEAR  ansieeop    DCL((void));
-static int PASCAL NEAR  ansibeep    DCL((void));
-static int PASCAL NEAR  ansiopen    DCL((void));
-static int PASCAL NEAR  ansirev     DCL((int state));
-static int PASCAL NEAR  ansiclose   DCL((void));
-static int PASCAL NEAR  ansikopen   DCL((void));
-static int PASCAL NEAR  ansikclose  DCL((void));
+static int  PASCAL NEAR ansimove    DCL((int row, int col));
+static int  PASCAL NEAR ansieeol    DCL((void));
+static int  PASCAL NEAR ansieeop    DCL((void));
+static int  PASCAL NEAR ansibeep    DCL((void));
+static int  PASCAL NEAR ansiopen    DCL((void));
+static int  PASCAL NEAR ansirev     DCL((int state));
+static int  PASCAL NEAR ansiclose   DCL((void));
+static int  PASCAL NEAR ansikopen   DCL((void));
+static int  PASCAL NEAR ansikclose  DCL((void));
 static int  PASCAL NEAR ansicres    DCL((char * dummy));
 static VOID PASCAL NEAR ansiparm    DCL((int n));
 static int  PASCAL NEAR ansigetc    DCL((void));
@@ -99,8 +116,8 @@ int coltran[16] =
 {
     2, 3, 5, 7, 0, 4, 6, 1, 8, 12, 10, 14, 9, 13, 11, 15
 };
-#  endif
-# endif
+#  endif  /* AMIGA */
+# endif /* COLOR */
 
 /*
  * Standard terminal interface dispatch table. Most of the fields point into
@@ -132,7 +149,7 @@ NOSHARE TERM term = {
 # if    COLOR
     , ansifcol,
     ansibcol
-#endif
+# endif /* COLOR */
 };
 
 # if    COLOR
@@ -165,8 +182,8 @@ static int PASCAL NEAR ansifcol P1_(int, color)
     ansiparm(coltran[color]+30);
 #   else
     ansiparm(color+30);
-#   endif
-#  endif
+#   endif /* AMIGA */
+#  endif  /* MSDOS */
     ttputc('m');
     cfcolor = color;
 
@@ -189,7 +206,7 @@ static int PASCAL NEAR ansibcol P1_(int, color)
     ansiparm(coltran[color]+40);
 #  else
     ansiparm( (color&7)+40 );
-#  endif
+#  endif  /* AMIGA */
     ttputc('m');
     cbcolor = color;
 
@@ -223,7 +240,7 @@ static int PASCAL NEAR ansieeop P0_()
 # if     COLOR
     ansifcol(gfcolor);
     ansibcol(gbcolor);
-# endif
+# endif /* COLOR */
     ttputc(ESC);
     ttputc('[');
     ttputc('0');
@@ -258,7 +275,7 @@ static int PASCAL NEAR ansirev P1_(int, state)
     ttputc('[');
     ttputc(state ? '7': '0');
     ttputc('m');
-# endif
+# endif /* COLOR */
 
     return 0;
 }
@@ -276,11 +293,48 @@ static int PASCAL NEAR ansicres P1_(char *, dummy)
  *
  * Change pallette settings
  */
-int PASCAL NEAR spal P1_(char *, dummy)
+int PASCAL NEAR spal P1_(char *, cmd)
+/* cmd: Palette command */
 {
-    /* none for now */
+# if ( USE_PALETTE )
+    int   code      = 0;
+    int   dokeymap  = 0;
+    char  *cp       = NULL;
 
-    return 0;
+    /* Check for keymapping command */
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
+        dokeymap = 1;
+    } else                                        {
+        return (0);
+    }
+
+    cmd += 7;
+
+    /* Look for space */
+    for ( cp = cmd; *cp == ' '; cp++ );
+    for (; *cp != '\0'; cp++ )
+        if ( *cp == ' ' ) {
+            *cp++ = '\0';
+            break;
+        }
+    if ( *cp == '\0' )
+        return (1);
+
+    for (; *cp == ' '; cp++ );
+
+    /* Perform operation */
+    if        ( dokeymap )  {
+        /* Convert to keycode */
+        code = stock(cmd);
+
+        /* Add to tree */
+        addkey((unsigned char *)cp, code);
+    } else                  {
+        /**EMPTY**/
+    }
+# endif /* USE_PALETTE */
+
+    return (0);
 }
 
 static int PASCAL NEAR ansibeep P0_()
@@ -311,13 +365,16 @@ static int PASCAL NEAR ansiopen P0_()
 {
 # if     IS_UNIX()
     REGISTER char *cp = NULL;
+    struct winsize win;
+
+    ZEROMEM(win);
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
         puts(TEXT4);
         TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
-
 #  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
+
         meexit(1);
 #  endif
     }
@@ -327,12 +384,19 @@ static int PASCAL NEAR ansiopen P0_()
         puts(TEXT5);
         TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
-
 #  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
+
         meexit(1);
 #  endif
     }
-# endif
+    ioctl(fileno(stdin), TIOCGWINSZ, &win);
+    term.t_nrow = win.ws_row - 1;
+    term.t_ncol = win.ws_col;
+#  if ( !0 )
+    term.t_mrow = win.ws_row - 1;
+    term.t_mcol = win.ws_col;
+#  endif
+# endif /* IS_UNIX() */
 # if     MOUSE && (IS_UNIX || VMS)
    /*
     * If this is an ansi terminal of at least DEC level 2 capability,
@@ -349,7 +413,7 @@ static int PASCAL NEAR ansiopen P0_()
         if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
         ttputs(s);
     }
-# endif
+# endif /* MOUSE && (IS_UNIX || VMS) */
     xstrcpy(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
@@ -357,7 +421,7 @@ static int PASCAL NEAR ansiopen P0_()
 # if     KEYPAD
     ttputc(ESC);
     ttputc('=');
-# endif
+# endif /* KEYPAD */
 
     return 0;
 }
@@ -367,7 +431,7 @@ static int PASCAL NEAR ansiclose P0_()
 # if     COLOR
     ansifcol(7);
     ansibcol(0);
-# endif
+# endif /* COLOR */
 # if     MOUSE && (IS_UNIX() || VMS)
     {
         CONST char  *s  = NULL;
@@ -378,16 +442,16 @@ static int PASCAL NEAR ansiclose P0_()
             s = "\033[0'{\033[0;0'z";
         ttputs(s);
     }
-# endif
+# endif /* MOUSE && (IS_UNIX() || VMS) */
 # if     KEYPAD
 #  if     VMS
     if ( (orgchar.tt2 & TT2$M_APP_KEYPAD)==0 )
-#  endif
+#  endif  /* VMS */
     {
         ttputc(ESC);
         ttputc('>');
     }
-# endif
+# endif /* KEYPAD */
     ttclose();
 
     return 0;
@@ -449,7 +513,11 @@ int PASCAL NEAR readparam P1_(int *, v)
 
     *v = 0;
     for (;;)  { /* Read in a number */
+#  if USE_COOKED
         ch = ttgetc();
+#  else
+        ch = grabwait();
+#  endif
         if ( ch >= '0' && ch <= '9' ) *v = 10 * *v + (ch - '0');
         else return ( ch );
     }
@@ -527,7 +595,7 @@ VOID PASCAL NEAR docsi P1_(int, oh)
                     inbuffer[inlen++] = (SPEC)>>8;
                     inbuffer[inlen++] = crsr[ch - 'A'];
                 } else if ( ch <= 'S' && ch >= 'P' ) { /* PF keys.*/
-                    inbuffer[inlen++] = (SPEC|CTRL)>>8;
+                    inbuffer[inlen++] = (SPEC|CTRF)>>8;
                     inbuffer[inlen++] = ch - ('P' - '1');
                 } else {
                     inbuffer[inlen++] = (ALTD)>>8;
@@ -603,7 +671,11 @@ static int PASCAL NEAR ansigetc P0_()
         }
         inpos = 0;
         inlen = 0;
+#  if USE_COOKED
         ch = ttgetc();
+#  else
+        ch = grabwait();
+#  endif
         if ( ch == 27 ) {   /* ESC, see if sequence follows */
             /*
              * If the "terminator" is ESC, and if we are currently
@@ -612,8 +684,12 @@ static int PASCAL NEAR ansigetc P0_()
              * to operate properly. This makes VT100 users much
              * happier.
              */
+#  if USE_COOKED
+            ch = ttgetc_nowait();
+#  else
             ch = grabnowait();
-            if ( ch < 0 ) return ( 27);   /* Wasn't a function key  */
+#  endif
+            if ( grabnowait_TIMEOUT == ch ) return ( 27); /* Wasn't a function key  */
 
             if ( ch == '[' )      docsi(ch);
             else if ( ch == ':' ) dobbnmouse();
@@ -648,12 +724,12 @@ int PASCAL NEAR fnclabel P2_(int, f, int, n)
     /* on machines with no function keys...don't bother */
     return (TRUE);
 }
-# endif
+# endif /* FLABEL */
 #else
 VOID ansihello P0_()
 {
 }
-#endif
+#endif  /* ANSI */
 
 
 

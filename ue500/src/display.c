@@ -652,7 +652,7 @@ VOID PASCAL NEAR update_hilite P0_()
 
     /* $hilight must be set to the first of 2 consecutive marks used to define
      * the region to highlight */
-    if ( hilite > NMARKS )
+    if ( !hilite_IsValid() )
         return;
 
     /* Both marks must be set to define a highlighted region */
@@ -669,7 +669,6 @@ VOID PASCAL NEAR update_hilite P0_()
     b_linep = curwp->w_bufp->b_linep;
     while ( ( (first_pos == -1) || (last_pos == -1) ) &&
             ( (forptr != (LINE *)NULL) || (bckptr != (LINE *)NULL) ) ) {
-
         /* have we found either mark? */
         if ( forptr == first_mark ) {
             first_line = forline;
@@ -760,7 +759,6 @@ VOID PASCAL NEAR update_hilite P0_()
                 vscreen[forline]->v_right = 0;
             } else if ( vscreen[forline]->v_right>term.t_ncol )
                 vscreen[forline]->v_right = term.t_ncol;
-
         } else {
             vscreen[forline]->v_left = FARRIGHT;
             vscreen[forline]->v_right = 0;
