@@ -138,7 +138,7 @@
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
 
-#define ANSI    0           /* ANSI escape sequences                  */
+#define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */
@@ -191,7 +191,7 @@
 #define CALLED  0   /* is emacs a called subroutine? or stand alone   */
 
 #define REVSTA  1   /* Status line appears in reverse video           */
-#define COLOR   1   /* color commands and windows                     */
+#define COLOR   0   /* color commands and windows                     */
 
 #define FILOCK  1   /* generic file locking under unix                */
 #define ISRCH   1   /* Incremental searches like ITS EMACS            */

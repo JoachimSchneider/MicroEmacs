@@ -37,8 +37,8 @@
 /*==============================================================*/
 #define USE_PALETTE ( !0 )
 #define USE_COOKED  ( !0 )
-CASRT( !USE_PALETTE || (IS_UNIX() || (VMS && SMG) || MPE) );
-CASRT( !USE_COOKED  || (IS_UNIX() || (VMS && SMG) || MPE) );
+CASRT( !USE_PALETTE || IS_UNIX() );
+CASRT( !USE_COOKED  || IS_UNIX() );
 CASRT( !USE_PALETTE || USE_COOKED );
 /*==============================================================*/
 

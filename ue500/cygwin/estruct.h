@@ -191,7 +191,7 @@
 #define CALLED  0   /* is emacs a called subroutine? or stand alone   */
 
 #define REVSTA  1   /* Status line appears in reverse video           */
-#define COLOR   1   /* color commands and windows                     */
+#define COLOR   0   /* color commands and windows                     */
 
 #define FILOCK  1   /* generic file locking under unix                */
 #define ISRCH   1   /* Incremental searches like ITS EMACS            */

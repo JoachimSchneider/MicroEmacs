@@ -856,7 +856,7 @@ Next Steps:
 #============================== TODO LIST ==============================
 
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq
-- Add ttgetc_nowait() to VMS
+- Add ttgetc_nowait() to VMS  --- NO, we'll us it only for IS_UNIX() && ANSI
 - Check if Palette settings are applicable to ANSI.
 
 
