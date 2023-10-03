@@ -20,6 +20,7 @@
 #include        <stdio.h>
 #include        "estruct.h"
 #if IS_UNIX()
+# include <sys/ioctl.h>                 /* I/O control definitions  */
 # if ( !IS_POSIX_UNIX() )
 #  include <termio.h>
 # else

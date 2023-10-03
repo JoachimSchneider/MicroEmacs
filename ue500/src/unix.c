@@ -1371,11 +1371,13 @@ int callout P1_(CONST char *, cmd)
 {
     int status  = 0;
 # if ( CYGWIN )
-    CONST char  *SystemRoot = NULL;
-    char        WinCmd[NFILEN];
+    char  *cp = NULL;
+    char  SystemRoot[NFILEN];
+    char  WinCmd[NFILEN];
 # endif
 
 # if ( CYGWIN )
+    ZEROMEM(SystemRoot);
     ZEROMEM(WinCmd);
 # endif
 
@@ -1388,8 +1390,15 @@ int callout P1_(CONST char *, cmd)
     ttclose();
 
 # if ( CYGWIN )
-    if ( !(SystemRoot = getenv("SYSTEMROOT")) ) {
-        SystemRoot  = "C:/WINDOWS";
+    if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
+        xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
+    }
+    cp  = SystemRoot;
+    while ( *cp ) {
+        if ( '\\' == *cp )  {
+            *cp = '/';
+        }
+        cp++;
     }
     xsnprintf(WinCmd, SIZEOF(WinCmd), "%s/system32/cmd.exe /C %s", SystemRoot, cmd);
 # endif
@@ -1420,8 +1429,9 @@ int spawncli P2_(int, f, int, n)
 {
     CONST char  *sh = NULL;
 # if ( CYGWIN )
-    CONST char  *SystemRoot = NULL;
-    char        CmdPath[NFILEN];
+    char  *cp = NULL;
+    char  SystemRoot[NFILEN];
+    char  CmdPath[NFILEN];
 # endif
 
 # if ( CYGWIN )
@@ -1433,8 +1443,15 @@ int spawncli P2_(int, f, int, n)
         return ( resterr() );
 
 # if ( CYGWIN )
-    if ( !(SystemRoot = getenv("SYSTEMROOT")) ) {
-        SystemRoot  = "C:/WINDOWS";
+    if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
+        xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
+    }
+    cp  = SystemRoot;
+    while ( *cp ) {
+        if ( '\\' == *cp )  {
+            *cp = '/';
+        }
+        cp++;
     }
     xsnprintf(CmdPath, SIZEOF(CmdPath), "%s/system32/cmd.exe", SystemRoot);
 # endif
