@@ -35,11 +35,31 @@
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
-#define USE_PALETTE ( !0 )
-#define USE_COOKED  ( !0 )
-CASRT( !USE_PALETTE || IS_UNIX() );
-CASRT( !USE_COOKED  || IS_UNIX() );
-CASRT( !USE_PALETTE || USE_COOKED );
+/* ( IS_UNIX() || (VMS && SMG) || MPE ): `addkey()' works       */
+/*..............................................................*/
+#if    ( IS_UNIX() )
+# define USE_PALETTE ( !0 )
+#elif  ( (VMS && SMG) )
+# define USE_PALETTE ( !0 )
+#elif  ( MPE )
+# define USE_PALETTE ( !0 )
+#else
+# define USE_PALETTE ( 0 )    /* DON'T CHANGE */
+  CASRT( !USE_PALETTE );
+#endif /* IS_UNIX() */
+/*..............................................................*/
+/* USE_COOKED_ code only works on UNIX (`ttgetc()' cookes) and  */
+/* it gives sense there only if USE_PALETTE:                    */
+/*..............................................................*/
+#if ( IS_UNIX() )
+# if ( USE_PALETTE )
+#  define USE_COOKED_    ( !0 )
+# else
+#  define USE_COOKED_    (  0 )
+# endif
+#else
+# define USE_COOKED_    (  0 )
+#endif
 /*==============================================================*/
 
 EXTERN int  PASCAL NEAR fnclabel    DCL((int f, int n));
@@ -397,7 +417,7 @@ static int PASCAL NEAR ansiopen P0_()
     term.t_mcol = win.ws_col;
 #  endif
 # endif /* IS_UNIX() */
-# if     MOUSE && (IS_UNIX || VMS)
+# if     MOUSE && (IS_UNIX() || VMS)
    /*
     * If this is an ansi terminal of at least DEC level 2 capability,
     * some terminals of this level, such as the "Whack" emulator, the
@@ -413,7 +433,7 @@ static int PASCAL NEAR ansiopen P0_()
         if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
         ttputs(s);
     }
-# endif /* MOUSE && (IS_UNIX || VMS) */
+# endif /* MOUSE && (IS_UNIX() || VMS) */
     xstrcpy(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
@@ -513,7 +533,7 @@ int PASCAL NEAR readparam P1_(int *, v)
 
     *v = 0;
     for (;;)  { /* Read in a number */
-#  if USE_COOKED
+#  if USE_COOKED_
         ch = ttgetc();
 #  else
         ch = grabwait();
@@ -671,7 +691,7 @@ static int PASCAL NEAR ansigetc P0_()
         }
         inpos = 0;
         inlen = 0;
-#  if USE_COOKED
+#  if USE_COOKED_
         ch = ttgetc();
 #  else
         ch = grabwait();
@@ -684,7 +704,7 @@ static int PASCAL NEAR ansigetc P0_()
              * to operate properly. This makes VT100 users much
              * happier.
              */
-#  if USE_COOKED
+#  if USE_COOKED_
             ch = ttgetc_nowait();
 #  else
             ch = grabnowait();

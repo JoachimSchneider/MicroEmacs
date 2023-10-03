@@ -48,6 +48,9 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2023-10-03.00]
+* Enabled ANSI terminal driver for UNIX
+
 [2023-09-27.00]
 * pcdos/ansi build works (Uses ANSI escape sequences for screen control).
 

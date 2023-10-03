@@ -4,6 +4,8 @@
 ;                       Last Update: 11/13/93
 
 ;;
+; `set $palette "CLRMAP  ...' *doesn't* work with ANSI terminal driver.
+;;
 ; tput setf [1-7]
 ; tput setb [1-7]
 ;;
@@ -352,7 +354,7 @@ set $softtab 2
 set $hardtab 8
 bind-to-key set-mark ^@
 set $dispundo TRUE
-; tyrn off highlighting:
+; turn off highlighting:
 set $hilight 255
 ;===============================================================================
 

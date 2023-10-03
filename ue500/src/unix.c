@@ -1369,16 +1369,37 @@ int rename P2_(char *, file1, char *, file2)
 int callout P1_(CONST char *, cmd)
 /* cmd: Command to execute  */
 {
-    int status;
+    int status  = 0;
+# if ( CYGWIN )
+    CONST char  *SystemRoot = NULL;
+    char        WinCmd[NFILEN];
+# endif
 
+# if ( CYGWIN )
+    ZEROMEM(WinCmd);
+# endif
+
+    if ( NULL == cmd )  {
+    }
     /* Close down */
     term.t_move(term.t_nrow, 0);
     ttflush();
     term.t_kclose();
     ttclose();
 
+# if ( CYGWIN )
+    if ( !(SystemRoot = getenv("SYSTEMROOT")) ) {
+        SystemRoot  = "C:/WINDOWS";
+    }
+    xsnprintf(WinCmd, SIZEOF(WinCmd), "%s/system32/cmd.exe /C %s", SystemRoot, cmd);
+# endif
+
     /* Do command */
+# if ( CYGWIN )
+    status = system(WinCmd) == 0;
+# else
     status = system(cmd) == 0;
+# endif
 
     /* Restart system */
     sgarbf = TRUE;
@@ -1397,12 +1418,26 @@ int spawncli P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    CONST char  *sh;
+    CONST char  *sh = NULL;
+# if ( CYGWIN )
+    CONST char  *SystemRoot = NULL;
+    char        CmdPath[NFILEN];
+# endif
+
+# if ( CYGWIN )
+    ZEROMEM(CmdPath);
+# endif
 
     /* Don't allow this command if restricted */
     if ( restflag )
         return ( resterr() );
 
+# if ( CYGWIN )
+    if ( !(SystemRoot = getenv("SYSTEMROOT")) ) {
+        SystemRoot  = "C:/WINDOWS";
+    }
+    xsnprintf(CmdPath, SIZEOF(CmdPath), "%s/system32/cmd.exe", SystemRoot);
+# endif
     /* Get shell path */
     sh = getenv("SHELL");
     if ( !sh )
@@ -1410,6 +1445,8 @@ int spawncli P2_(int, f, int, n)
         sh = "/bin/bash";
 # elif ( SOLARIS )
         sh = "/usr/bin/ksh";
+# elif ( CYGWIN )
+        sh = CmdPath;
 # else
         sh = "/bin/sh";
 # endif
@@ -1423,8 +1460,10 @@ int spawn P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    char line[NLINE];
-    int s;
+    char  line[NLINE];
+    int   s = 0;
+
+    ZEROMEM(line);
 
     /* Don't allow this command if restricted */
     if ( restflag )

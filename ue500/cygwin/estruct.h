@@ -58,9 +58,10 @@
 #define AIX5    0                     /* IBM UNIX newer rs6000        */
 #define AVIION  0                     /* Data General AViiON          */
 #define BSD     0                     /* UNIX BSD 4.2 and ULTRIX      */
+#define CYGWIN  1                     /* Unix emulation on MS Windows */
 #define FINDER  0                     /* Macintosh OS                 */
 #define FREEBSD 0                     /* FREEBSD 386 version 2 or +   */
-#define LINUX   1                     /* Linux                        */
+#define LINUX   0                     /* Linux                        */
 #define HPUX8   0                     /* HPUX HP 9000 ver 8 or less   */
 #define HPUX9   0                     /* HPUX HP 9000 ver 9           */
 #define MPE     0                     /* HP MPE/XL                    */
@@ -82,9 +83,9 @@
 
 
 #define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD       \
-                          || FREEBSD || HPUX8 || HPUX9 || LINUX     \
-                          || OPENBSD || SMOS || SOLARIS || SUN      \
-                          || USG || XENIX )
+                          || CYGWIN || FREEBSD || HPUX8 || HPUX9    \
+                          || LINUX || OPENBSD || SMOS || SOLARIS    \
+                          || SUN || USG || XENIX )
 #define IS_POSIX_UNIX() ( IS_UNIX()                                 \
                           && !( USG || AIX || AUX || SMOS || HPUX8  \
                                 || HPUX9 || SUN || XENIX ) )
@@ -137,6 +138,8 @@
 
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
+/*      It is possible to use the ANSI terminal with UNIX:  No        */
+/*      termcap/curses library needed with this setup.                */
 
 #define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
@@ -160,7 +163,7 @@
 
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
-#define UNIX_READ_TOUT  (5)
+#define UNIX_READ_TOUT  (7)
 
 /*      Windowing system style (pick one)                             */
 
