@@ -428,7 +428,7 @@ static int PASCAL NEAR ansiopen P0_()
     * escape sequences for the mouse.
     */
     {
-        char  *s  = NULL;
+        CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_ENABLE");
         if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";

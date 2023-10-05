@@ -169,6 +169,10 @@ int scnothing P1_(char *, s)
 #  define DIRENTRY       dirent
 # endif /* XENIX || VAT */
 
+# if ( CYGWIN )
+#  include <spawn.h>
+#  include <sys/wait.h>
+# endif /* CYGWIN */
 
 /*==============================================================*/
 /* Found in `curses.h':                                         */
@@ -1365,23 +1369,116 @@ int rename P2_(char *, file1, char *, file2)
 # endif
 /*====================================================================*/
 
+# if CYGWIN
+CONST char *wingetshell P0_()
+{
+    static CONST char *res  = NULL;
+
+    if ( NULL == res )  {
+        char        *cp = NULL;
+        char        SystemRoot[NFILEN];
+        static char WinCmd[NFILEN];
+
+        ZEROMEM(SystemRoot);
+        ZEROMEM(WinCmd);
+
+        if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
+            xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
+        }
+        cp  = SystemRoot;
+        while ( *cp ) {
+            if ( '\\' == *cp )  {
+                *cp = '/';
+            }
+            cp++;
+        }
+        xsnprintf(WinCmd, SIZEOF(WinCmd), "%s/system32/cmd.exe", SystemRoot);
+        res = WinCmd;
+    }
+
+    return res;
+}
+
+#define SHELL_C_  "/C"
+static int winsystem P1_(CONST char *, cmd)
+{
+    pid_t               child_pid = 0;
+    int                 status    = 0;
+    int                 errno_sv  = 0;
+    CONST char          *shell    = NULL;
+    sigset_t            mask;
+    posix_spawnattr_t   attr;
+    char  * /**CONST**/ sargv[] = { NULL, (char *)SHELL_C_, (char *)cmd, NULL };
+
+    extern char **environ;
+
+    ZEROMEM(mask);
+    ZEROMEM(attr);
+
+    ASRT( NULL != (shell = wingetshell()) );
+    sargv[0]  = (char *)shell;
+
+    if ( NULL == cmd )  {
+        cmd = "";
+    }
+
+    /* Create an attributes object and add a "set signal mask"
+       action to it. */
+
+    if ( 0 != posix_spawnattr_init(&attr) ) {
+        return ( -C_20 );
+    }
+    if ( 0 != posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETSIGMASK) ) {
+        return ( -C_30 );
+    }
+    sigfillset(&mask);
+    if ( 0 != posix_spawnattr_setsigmask(&attr, &mask) )  {
+        return ( -C_40 );
+    }
+
+    if ( 0 != posix_spawnp(&child_pid, shell, NULL, &attr, sargv, environ) )  {
+        errno_sv  = errno;
+    }
+
+    /* Destroy any objects that we created earlier. */
+    if ( 0 != posix_spawnattr_destroy(&attr) )  {
+        /**EMPTY**/
+    }
+
+    if ( 0 != errno_sv )  {
+        return ( (-1) * errno_sv );
+    }
+
+    /* Monitor status of the child until it terminates. */
+    do {
+        if ( 0 > waitpid(child_pid, &status, WUNTRACED | WCONTINUED) )  {
+            return ( -1 );
+        }
+
+        if (WIFEXITED(status)) {
+            return WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            return WTERMSIG(status);
+        } else if (WIFSTOPPED(status)) {
+            /**EMPTY**/
+        } else if (WIFCONTINUED(status)) {
+            /**EMPTY**/
+        }
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+    return WEXITSTATUS ( status );
+}
+#  undef SHELL_C_
+# endif
+
 /** Callout to system to perform command **/
 int callout P1_(CONST char *, cmd)
 /* cmd: Command to execute  */
 {
     int status  = 0;
-# if ( CYGWIN )
-    char  *cp = NULL;
-    char  SystemRoot[NFILEN];
-    char  WinCmd[NFILEN];
-# endif
-
-# if ( CYGWIN )
-    ZEROMEM(SystemRoot);
-    ZEROMEM(WinCmd);
-# endif
 
     if ( NULL == cmd )  {
+        return 0;
     }
     /* Close down */
     term.t_move(term.t_nrow, 0);
@@ -1389,23 +1486,9 @@ int callout P1_(CONST char *, cmd)
     term.t_kclose();
     ttclose();
 
-# if ( CYGWIN )
-    if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
-        xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
-    }
-    cp  = SystemRoot;
-    while ( *cp ) {
-        if ( '\\' == *cp )  {
-            *cp = '/';
-        }
-        cp++;
-    }
-    xsnprintf(WinCmd, SIZEOF(WinCmd), "%s/system32/cmd.exe /C %s", SystemRoot, cmd);
-# endif
-
     /* Do command */
 # if ( CYGWIN )
-    status = system(WinCmd) == 0;
+    status = winsystem(cmd) == 0;
 # else
     status = system(cmd) == 0;
 # endif
@@ -1428,33 +1511,11 @@ int spawncli P2_(int, f, int, n)
 /* n: Argument count  */
 {
     CONST char  *sh = NULL;
-# if ( CYGWIN )
-    char  *cp = NULL;
-    char  SystemRoot[NFILEN];
-    char  CmdPath[NFILEN];
-# endif
-
-# if ( CYGWIN )
-    ZEROMEM(CmdPath);
-# endif
 
     /* Don't allow this command if restricted */
     if ( restflag )
         return ( resterr() );
 
-# if ( CYGWIN )
-    if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
-        xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
-    }
-    cp  = SystemRoot;
-    while ( *cp ) {
-        if ( '\\' == *cp )  {
-            *cp = '/';
-        }
-        cp++;
-    }
-    xsnprintf(CmdPath, SIZEOF(CmdPath), "%s/system32/cmd.exe", SystemRoot);
-# endif
     /* Get shell path */
     sh = getenv("SHELL");
     if ( !sh )
@@ -1463,7 +1524,7 @@ int spawncli P2_(int, f, int, n)
 # elif ( SOLARIS )
         sh = "/usr/bin/ksh";
 # elif ( CYGWIN )
-        sh = CmdPath;
+        sh = wingetshell();
 # else
         sh = "/bin/sh";
 # endif
