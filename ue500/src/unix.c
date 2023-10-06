@@ -164,6 +164,7 @@ int scnothing P1_(char *, s)
 # if ( CYGWIN )
 #  include <spawn.h>
 #  include <sys/wait.h>
+#  include <sys/cygwin.h>
 # endif /* CYGWIN */
 
 /*==============================================================*/
@@ -1386,7 +1387,33 @@ int rename P2_(char *, file1, char *, file2)
 /*====================================================================*/
 
 # if CYGWIN
-CONST char *wingetshell P0_()
+
+CONST char  *getwinpath P1_(CONST char *, in)
+{
+    int   size      = 0;
+    char  *winpath  = NULL;
+
+    if ( NULL == in ) {
+        in  = "";
+    }
+
+    if ( 0 > (size = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE,
+                                      in, NULL, 0) )                    {
+        return NULL;
+    } else          {
+        winpath = (char *) ROOM(size);
+        if ( 0 != cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE,
+                                   in, winpath, size) )                 {
+            CLROOM(winpath);
+
+            return NULL;
+        }
+
+        return winpath;
+    }
+}
+
+CONST char  *wingetshell P0_()
 {
     static CONST char *res  = NULL;
 
@@ -1737,6 +1764,12 @@ static int LaunchPrg P4_(const char *,  Cmd,
 # else
         InFile  = "/dev/null";
 # endif
+    } else  {
+# if CYGWIN
+        InFile = getwinpath(InFile);
+# else
+        /**EMPTY**/
+# endif
     }
     if ( !OutFile || !*OutFile ) {
 # if CYGWIN
@@ -1744,12 +1777,24 @@ static int LaunchPrg P4_(const char *,  Cmd,
 # else
         OutFile  = "/dev/null";
 # endif
+    } else  {
+# if CYGWIN
+        OutFile = getwinpath(OutFile);
+# else
+        /**EMPTY**/
+# endif
     }
     if ( !ErrFile || !*ErrFile ) {
 # if CYGWIN
         ErrFile  = "NUL";
 # else
         ErrFile  = "/dev/null";
+# endif
+    } else  {
+# if CYGWIN
+        ErrFile = getwinpath(ErrFile);
+# else
+        /**EMPTY**/
 # endif
     }
 
@@ -1764,6 +1809,11 @@ static int LaunchPrg P4_(const char *,  Cmd,
               InFile,
               OutFile,
               ErrFile);
+# if CYGWIN
+    CLROOM(InFile);
+    CLROOM(OutFile);
+    CLROOM(ErrFile);
+# endif
 
     return callout(FullCmd);
 } /* LaunchPrg */

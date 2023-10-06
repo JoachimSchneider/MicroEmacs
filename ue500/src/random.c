@@ -1808,6 +1808,7 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
  */
 int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
                                va_list, ap)
+# if ( 0 )  /* tmpfile() does not work with CYGWIN in Windows console!  */
 {
     int nn  = n;                /* Want a signed value */
     int rc  = 0;
@@ -1863,6 +1864,63 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
 
     return rc;
 }
+# else
+{
+    int     nn  = n;              /* Want a signed value */
+    int     rc  = 0;
+    int     nr  = 0;              /* Number of chars to read */
+    va_list aq;
+    static FILE *fp = NULL;
+
+    ZEROMEM(aq);
+
+    ASRT(0    <= nn);
+    ASRT(NULL != fmt);
+
+    VA_COPY(aq, ap);
+
+    if ( NULL == fp ) {           /* One-time initialization */
+        if ( NULL == ( fp = fopen("/dev/null", "wb+") ) ) {
+            return (-1);
+        }
+    }
+
+    if ( 0 > ( rc = vfprintf(fp, fmt, ap) ) ) {
+        return (-3);
+    }
+
+    if ( 0 == nn ) {
+        /*
+         * EMPTY
+         */
+    } else if ( 1 == nn ) {
+        ASRT(NULL != s);
+
+        s[0] = '\0';
+    } else {
+        ASRT(NULL != s);
+
+        if ( 0 == rc ) {
+            s[0] = '\0';
+        } else {
+            char  *cp = NULL;
+
+            cp  = (char *)ROOM(rc + 1);
+            vsprintf(cp, fmt, aq);
+
+            nr = MIN2(rc, nn - 1);
+            strlcpy(s, cp, nr + 1);
+            CLROOM(cp);
+        }
+    }
+
+    if ( 0 < nn ) {
+        TRC(("xvsnprintf: %s", s));
+    }
+
+    return rc;
+}
+# endif
 
 /* XSNPRINTF:
  *
