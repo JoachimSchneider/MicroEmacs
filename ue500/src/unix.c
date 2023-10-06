@@ -1754,13 +1754,15 @@ static int LaunchPrg P4_(const char *,  Cmd,
 {
     char FullCmd[NLINE];
 
+    ZEROMEM(FullCmd);
+
     if ( !Cmd ) {
         return FALSE;
     }
 
     if ( !InFile || !*InFile ) {
 # if CYGWIN
-        InFile  = "NUL";
+        InFile  = xstrdup("NUL");
 # else
         InFile  = "/dev/null";
 # endif
@@ -1773,7 +1775,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     }
     if ( !OutFile || !*OutFile ) {
 # if CYGWIN
-        OutFile  = "NUL";
+        OutFile  = xstrdup("NUL");
 # else
         OutFile  = "/dev/null";
 # endif
@@ -1786,7 +1788,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     }
     if ( !ErrFile || !*ErrFile ) {
 # if CYGWIN
-        ErrFile  = "NUL";
+        ErrFile  = xstrdup("NUL");
 # else
         ErrFile  = "/dev/null";
 # endif
