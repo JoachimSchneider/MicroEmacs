@@ -1586,12 +1586,42 @@ int execprg P2_(int, f, int, n)
  */
 char *gettmpfname P1_(CONST char *, ident)
 {
-    char str[NFILEN];
-    int i;
-    static int seed = 0;
+    char        str[NFILEN];
+    char        tmpf[NFILEN];
+    CONST char  *tmpdir = NULL;
+    int         i   = 0;
+    char        *cp = NULL;
+    static int  seed = 0;
     static char res[NFILEN];
 
-    xsnprintf( str, SIZEOF (str), "/tmp/me-%s-%02x", ident,
+    ZEROMEM(str);
+    ZEROMEM(tmpf);
+    ZEROMEM(res);
+    /* Get a directory for temporary files: */
+    if ( 0 == xstrlcpy(tmpf, tmpnam(NULL), SIZEOF(tmpf)) )  {
+# if CYGWIN
+        xstrlcpy(tmpf, "DUMMY", SIZEOF(tmpf));
+# else
+        xstrlcpy(tmpf, "/tmp/DUMMY", SIZEOF(tmpf));
+# endif
+    }
+# if CYGWIN
+    cp  = tmpf;
+    while ( *cp ) {
+        if ( '\\' == *cp )  {
+            *cp = '/';
+        }
+        cp++;
+    }
+# endif
+    if ( NULL == (cp = strrchr(tmpf, '/')) )  {
+        tmpdir  = ".";
+    } else {
+        *cp = '\0';
+        tmpdir  = tmpf;
+    }
+
+    xsnprintf( str, SIZEOF (str), "%s/me-%s-%02x", tmpdir, ident,
                ( (int)getpid() % 0x100 ) );
     for ( i = 0; i < 0x100; i++ ) {
         struct stat sb;
@@ -1639,18 +1669,34 @@ static int LaunchPrg P4_(const char *,  Cmd,
     }
 
     if ( !InFile || !*InFile ) {
+# if CYGWIN
+        InFile  = "NUL";
+# else
         InFile  = "/dev/null";
+# endif
     }
     if ( !OutFile || !*OutFile ) {
+# if CYGWIN
+        OutFile  = "NUL";
+# else
         OutFile  = "/dev/null";
+# endif
     }
     if ( !ErrFile || !*ErrFile ) {
+# if CYGWIN
+        ErrFile  = "NUL";
+# else
         ErrFile  = "/dev/null";
+# endif
     }
 
     xsnprintf(FullCmd,
               SIZEOF (FullCmd),
+# if CYGWIN
+              "%s < %s > %s 2>%s",
+# else
               "( %s ) < %s > %s 2>%s",
+# endif
               Cmd,
               InFile,
               OutFile,
