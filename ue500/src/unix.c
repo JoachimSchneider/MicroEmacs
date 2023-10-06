@@ -1398,7 +1398,7 @@ CONST char  *getwinpath P1_(CONST char *, in)
     }
 
     if ( 0 > (size = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE,
-                                      in, NULL, 0) )                    {
+                                      in, NULL, 0)) )                   {
         return NULL;
     } else          {
         winpath = (char *) ROOM(size);
