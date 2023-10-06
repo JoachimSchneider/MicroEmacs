@@ -114,14 +114,6 @@
 /*==============================================================*/
 
 
-#define   TGETFLAG(x)     tgetflag((char *)(x))
-#define   TGETNUM(x)      tgetnum((char *)(x))
-#if VAT
-# define  TGETSTR(a, b)   tgetstr( (char *)(a), *(b) )
-#else
-# define  TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
-#endif
-
 /** Do nothing routine **/
 int scnothing P1_(char *, s)
 {
@@ -190,6 +182,30 @@ EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(in
 # if ANSI
 EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # endif /* ANSI */
+/*==============================================================*/
+
+/*==============================================================*/
+#define   TGETFLAG(x)     tgetflag((char *)(x))
+#define   TGETNUM(x)      tgetnum((char *)(x))
+# if VAT
+#  define TGETSTR(a, b)   tgetstr( (char *)(a), *(b) )
+# else
+#  define TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
+# endif
+# if CYGWIN
+#  define NormalizeDirSep(path) do  {     \
+    char  *cp_  = (path);                 \
+                                          \
+    while ( *cp_ )  {                     \
+        if ( '\\' == *cp_ ) {             \
+            *cp_ = '/';                   \
+        }                                 \
+        cp_++;                            \
+    }                                     \
+} while ( 0 )
+# else
+#  define  NormalizeDirSep(path)
+# endif
 /*==============================================================*/
 
 
@@ -1375,7 +1391,6 @@ CONST char *wingetshell P0_()
     static CONST char *res  = NULL;
 
     if ( NULL == res )  {
-        char        *cp = NULL;
         char        SystemRoot[NFILEN];
         static char WinCmd[NFILEN];
 
@@ -1385,13 +1400,7 @@ CONST char *wingetshell P0_()
         if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
             xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
         }
-        cp  = SystemRoot;
-        while ( *cp ) {
-            if ( '\\' == *cp )  {
-                *cp = '/';
-            }
-            cp++;
-        }
+        NormalizeDirSep(SystemRoot);
         xsnprintf(WinCmd, SIZEOF(WinCmd), "%s/system32/cmd.exe", SystemRoot);
         res = WinCmd;
     }
@@ -1438,6 +1447,7 @@ static int winsystem P1_(CONST char *, cmd)
 
     if ( 0 != posix_spawnp(&child_pid, shell, NULL, &attr, sargv, environ) )  {
         errno_sv  = errno;
+        TRC(("Error executing <%s>, errno = %d: %s", shell, errno_sv, strerror(errno_sv)));
     }
 
     /* Destroy any objects that we created earlier. */
@@ -1579,22 +1589,7 @@ int execprg P2_(int, f, int, n)
 /* Joachim Schneider, 2018-11-02/2023-08-19, joachim<at>hal.rhein-neckar.org   */
 /*=============================================================================*/
 
-# if CYGWIN
-#  define  normalizeDirSep(path) do  {    \
-    char  *cp_  = (path);                 \
-                                          \
-    while ( *cp_ )  {                     \
-        if ( '\\' == *cp_ ) {             \
-            *cp_ = '/';                   \
-        }                                 \
-        cp_++;                            \
-    }                                     \
-} while ( 0 )
-# else
-#  define  normalizeDirSep(path)
-# endif
-
-static int  isDir P1_(CONST char *, dir)
+static int  IsDir P1_(CONST char *, dir)
 {
     struct stat sb;
 
@@ -1615,55 +1610,59 @@ static int  isDir P1_(CONST char *, dir)
 /* Get a directory for temporary files: Cannot fail.  */
 static char *gettmpdir P0_()
 {
-    static char res[NFILEN];
-    char        tmpf[NFILEN];
-    char        *cp = NULL;
+    static char *res  = NULL;
 
-    ZEROMEM(tmpf);
-    ZEROMEM(res);
+    if ( NULL == res )  {
+        static char tmpd[NFILEN];
+        int         l   = 0;
 
-    /* Test the directory returned by `tmpnam()': */
-    if ( 0 < xstrlcpy(tmpf, tmpnam(NULL), SIZEOF(tmpf)) ) {
-        normalizeDirSep(tmpf);
-        if ( NULL != (cp = strrchr(tmpf, '/')) )  {
-            *cp = '\0';
+        /**ZEROMEM(tmpd);**/
+
+        /* Test environment variables TMP, and TEMP: */
+        if ( 0 < xstrlcpy(tmpd, getenv("TMP"), SIZEOF(tmpd)) )  {
+            NormalizeDirSep(tmpd);
+            if ( IsDir(tmpd) )  {
+                goto found;
+            }
         }
-        if ( isDir(tmpf) )  {
+        if ( 0 < xstrlcpy(tmpd, getenv("TEMP"), SIZEOF(tmpd)) ) {
+            NormalizeDirSep(tmpd);
+            if ( IsDir(tmpd) )  {
+                goto found;
+            }
+        }
+
+        /* Test the directory used by `tmpnam()': */
+# ifdef P_tmpdir
+        xstrlcpy(tmpd, P_tmpdir, SIZEOF(tmpd));
+        if ( IsDir(tmpd) )  {
             goto found;
         }
-    }
-
-    /* Test environment variables TMP, and TEMP: */
-    if ( 0 < xstrlcpy(tmpf, getenv("TMP"), SIZEOF(tmpf)) )  {
-        normalizeDirSep(tmpf);
-        if ( isDir(tmpf) )  {
-            goto found;
-        }
-    }
-    if ( 0 < xstrlcpy(tmpf, getenv("TEMP"), SIZEOF(tmpf)) ) {
-        normalizeDirSep(tmpf);
-        if ( isDir(tmpf) )  {
-            goto found;
-        }
-    }
-
-    /* Last resort: Use current directory:  */
-    xstrlcpy(tmpf, ".", SIZEOF(tmpf));
-
-
-found:
-    if ( '\0' == tmpf[0] )  {
-        xstrlcpy(tmpf, ".", SIZEOF(tmpf));
-    }
-# if CYGWIN
-    if ( ':' == tmpf[1] ) { /* C:/... */
-        xsnprintf(res, sizeof(res), "/cygdrive/%c/%s", tmpf[0], &tmpf[3]);
-    } else {
-        xstrlcpy(res, tmpf, SIZEOF(res));
-    }
 # else
-    xstrlcpy(res, tmpf, SIZEOF(res));
+        if ( IsDir("/tmp") )  {
+            xstrlcpy(tmpd, "/tmp", SIZEOF(tmpd));
+            goto found;
+        }
 # endif
+
+        /* Last resort: Use current directory:  */
+        xstrlcpy(tmpd, ".", SIZEOF(tmpd));
+
+
+    found:
+        l = strlen(tmpd);
+        if        ( 0 == l )              {
+            xstrlcpy(tmpd, ".", SIZEOF(tmpd));
+        } else if ( '/' == tmpd[l - 1] )  {
+            if ( 1 < l )  {
+                tmpd[l - 1] = '\0';
+            } else {  /* "/"  */
+                tmpd[l - 1] = '.';
+            }
+        }
+
+        res = tmpd;
+    }
 
     return res;
 }
@@ -1771,7 +1770,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
 
 /*=============================================================================*/
 /* Some helper functions that could also be in char.c/eproto.h                 */
-/* We do nit want to use the ctype.h functions as they depend on the locale.   */
+/* We do not want to use the ctype.h functions as they depend on the locale.   */
 /*=============================================================================*/
 
 static int IsIn P3_(const char, c, const char *, set, int, len)
@@ -1986,7 +1985,7 @@ int pipecmd P2_(int, f, int, n)
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
-        mlwrite("[Cannot write filter file]");
+        mlwrite("[Cannot write filter file <%s>]", InFile);
         XSTRCPY(bp->b_fname, tmpnam);
         unlink(InFile);
         sleep(MLWAIT);
@@ -2124,7 +2123,7 @@ int f_filter P2_(int, f, int, n)
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
-        mlwrite("[Cannot write filter file]");
+        mlwrite("[Cannot write filter file <%s>]", InFile);
         XSTRCPY(bp->b_fname, tmpnam);
         unlink(InFile);
         sleep(MLWAIT);
