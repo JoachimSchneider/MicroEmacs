@@ -1579,6 +1579,95 @@ int execprg P2_(int, f, int, n)
 /* Joachim Schneider, 2018-11-02/2023-08-19, joachim<at>hal.rhein-neckar.org   */
 /*=============================================================================*/
 
+# if CYGWIN
+#  define  normalizeDirSep(path) do  {    \
+    char  *cp_  = (path);                 \
+                                          \
+    while ( *cp_ )  {                     \
+        if ( '\\' == *cp_ ) {             \
+            *cp_ = '/';                   \
+        }                                 \
+        cp_++;                            \
+    }                                     \
+} while ( 0 )
+# else
+#  define  normalizeDirSep(path)
+# endif
+
+static int  isDir P1_(CONST char *, dir)
+{
+    struct stat sb;
+
+    ZEROMEM(sb);
+
+    if ( !dir || !*dir )  {
+        return FALSE;
+    }
+    if        ( 0 > stat(dir, &sb) )  {
+        return FALSE;
+    } else if ( S_ISDIR(sb.st_mode) ) {
+        return TRUE;
+    } else                            {
+        return FALSE;
+    }
+}
+
+/* Get a directory for temporary files: Cannot fail.  */
+static char *gettmpdir P0_()
+{
+    static char res[NFILEN];
+    char        tmpf[NFILEN];
+    char        *cp = NULL;
+
+    ZEROMEM(tmpf);
+    ZEROMEM(res);
+
+    /* Test the directory returned by `tmpnam()': */
+    if ( 0 < xstrlcpy(tmpf, tmpnam(NULL), SIZEOF(tmpf)) ) {
+        normalizeDirSep(tmpf);
+        if ( NULL != (cp = strrchr(tmpf, '/')) )  {
+            *cp = '\0';
+        }
+        if ( isDir(tmpf) )  {
+            goto found;
+        }
+    }
+
+    /* Test environment variables TMP, and TEMP: */
+    if ( 0 < xstrlcpy(tmpf, getenv("TMP"), SIZEOF(tmpf)) )  {
+        normalizeDirSep(tmpf);
+        if ( isDir(tmpf) )  {
+            goto found;
+        }
+    }
+    if ( 0 < xstrlcpy(tmpf, getenv("TEMP"), SIZEOF(tmpf)) ) {
+        normalizeDirSep(tmpf);
+        if ( isDir(tmpf) )  {
+            goto found;
+        }
+    }
+
+    /* Last resort: Use current directory:  */
+    xstrlcpy(tmpf, ".", SIZEOF(tmpf));
+
+
+found:
+    if ( '\0' == tmpf[0] )  {
+        xstrlcpy(tmpf, ".", SIZEOF(tmpf));
+    }
+# if CYGWIN
+    if ( ':' == tmpf[1] ) { /* C:/... */
+        xsnprintf(res, sizeof(res), "/cygdrive/%c/%s", tmpf[0], &tmpf[3]);
+    } else {
+        xstrlcpy(res, tmpf, SIZEOF(res));
+    }
+# else
+    xstrlcpy(res, tmpf, SIZEOF(res));
+# endif
+
+    return res;
+}
+
 /* gettmpfname:
  *
  * Return in a static buffer the name of a temporary currently not
@@ -1587,44 +1676,19 @@ int execprg P2_(int, f, int, n)
 char *gettmpfname P1_(CONST char *, ident)
 {
     char        str[NFILEN];
-    char        tmpf[NFILEN];
-    CONST char  *tmpdir = NULL;
     int         i   = 0;
-    char        *cp = NULL;
     static int  seed = 0;
     static char res[NFILEN];
 
     ZEROMEM(str);
-    ZEROMEM(tmpf);
     ZEROMEM(res);
-    /* Get a directory for temporary files: */
-    if ( 0 == xstrlcpy(tmpf, tmpnam(NULL), SIZEOF(tmpf)) )  {
-# if CYGWIN
-        xstrlcpy(tmpf, "DUMMY", SIZEOF(tmpf));
-# else
-        xstrlcpy(tmpf, "/tmp/DUMMY", SIZEOF(tmpf));
-# endif
-    }
-# if CYGWIN
-    cp  = tmpf;
-    while ( *cp ) {
-        if ( '\\' == *cp )  {
-            *cp = '/';
-        }
-        cp++;
-    }
-# endif
-    if ( NULL == (cp = strrchr(tmpf, '/')) )  {
-        tmpdir  = ".";
-    } else {
-        *cp = '\0';
-        tmpdir  = tmpf;
-    }
 
-    xsnprintf( str, SIZEOF (str), "%s/me-%s-%02x", tmpdir, ident,
+    xsnprintf( str, SIZEOF (str), "%s/me-%s-%02x", gettmpdir(), ident,
                ( (int)getpid() % 0x100 ) );
     for ( i = 0; i < 0x100; i++ ) {
         struct stat sb;
+
+        ZEROMEM(sb);
 
         xsnprintf(res, SIZEOF (res), "%s-%02x", str, (seed + i) % 0x100);
         if ( 0 > stat(res, &sb) ) {
