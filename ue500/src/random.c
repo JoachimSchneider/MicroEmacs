@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "estruct.h"
+#if CYGWIN
+# include <unistd.h>
+#endif
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
@@ -1808,7 +1811,7 @@ static FILE *mytmpfile P0_()
         char  *fname  = NULL;
         FILE  *fp     = NULL;
 
-        if ( NULL == (fname = gettmpfname()) )  {
+        if ( NULL == (fname = gettmpfname("mytmpfile")) ) {
             TRC(("%s", "mytempfile(): gettmpfname() failed"));
 
             return NULL;
