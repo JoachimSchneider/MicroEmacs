@@ -578,6 +578,9 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
     return buf + pos + 1;
 }
 #endif
+/* Non negative int to string:  */
+#define nni2s_(i)     ( uitostr_memacs((unsigned int)(i)) )
+
 /**********************************************************************/
 #define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
 #define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
@@ -1853,6 +1856,9 @@ EXTERN int PASCAL NEAR getccol DCL((int bflg));
 EXTERN int PASCAL NEAR getcmd DCL((void));
 EXTERN int PASCAL NEAR getfence DCL((int f, int n));
 EXTERN int PASCAL NEAR getfile DCL((CONST char *fname, int lockfl));
+#if IS_UNIX()
+EXTERN char *          gettmpfname DCL((CONST char *ident));
+#endif
 EXTERN int PASCAL NEAR get_key DCL((void));
 EXTERN int PASCAL NEAR getregion DCL((REGION *rp));
 EXTERN int PASCAL NEAR gotobob DCL((int f, int n));
@@ -1990,7 +1996,7 @@ EXTERN int PASCAL NEAR ttclose DCL((void));
 EXTERN int PASCAL NEAR ttflush DCL((void));
 EXTERN int PASCAL NEAR ttgetc DCL((void));
 #if IS_UNIX()
-EXTERN int PASCAL NEAR ttgetc_nowait DCL((void));
+EXTERN int             ttgetc_nowait DCL((void));
 #endif
 EXTERN int PASCAL NEAR ttopen DCL((void));
 EXTERN int PASCAL NEAR ttputc DCL((int c));

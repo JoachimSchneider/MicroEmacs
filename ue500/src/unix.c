@@ -205,7 +205,7 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
     }                                     \
 } while ( 0 )
 # else
-#  define  NormalizeDirSep(path)
+#  define  NormalizeDirSep(path)  VOIDCAST(0)
 # endif
 /*==============================================================*/
 
@@ -788,7 +788,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
-int PASCAL NEAR ttgetc_nowait P0_()
+int ttgetc_nowait P0_()
 {
     int ch  = 0;
 
@@ -1709,14 +1709,20 @@ char *gettmpfname P1_(CONST char *, ident)
     ZEROMEM(str);
     ZEROMEM(res);
 
-    xsnprintf( str, SIZEOF (str), "%s/me-%s-%02x", gettmpdir(), ident,
-               ( (int)getpid() % 0x100 ) );
+    xstrlcpy(str, gettmpdir(),              SIZEOF(str));
+    xstrlcat(str, "/me-",                   SIZEOF(str));
+    xstrlcat(str, ident,                    SIZEOF(str));
+    xstrlcat(str, "-",                      SIZEOF(str));
+    xstrlcat(str, nni2s_(getpid() % 0x100), SIZEOF(str));
+
     for ( i = 0; i < 0x100; i++ ) {
         struct stat sb;
 
         ZEROMEM(sb);
 
-        xsnprintf(res, SIZEOF (res), "%s-%02x", str, (seed + i) % 0x100);
+        xstrlcpy(res, str,                        SIZEOF(res));
+        xstrlcat(res, "-",                        SIZEOF(res));
+        xstrlcat(res, nni2s_((seed + i) % 0x100), SIZEOF(res));
         if ( 0 > stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
                 seed = (seed + i + 1) % 0x100;
