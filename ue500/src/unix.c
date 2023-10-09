@@ -83,10 +83,6 @@
 
 /** Include files **/
 #include <stdio.h>              /* Standard I/O definitions */
-#include <stdlib.h>             /* getenv()                 */
-#include <time.h>               /* time(), ...              */
-#include <errno.h>              /* errno, ...               */
-#include <sys/stat.h>           /* stat(), ...              */
 #include "estruct.h"            /* Emacs definitions        */
 #include "eproto.h"             /* Function definitions     */
 
@@ -98,7 +94,7 @@
 /* for terminal control, but obviously they aren't used here    */
 /* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
-#if ( !IS_POSIX_UNIX() || CYGWIN )
+#if ( !IS_POSIX_UNIX() )
 # define USE_TERMIO_IOCTL       ( 1 )
 # define USE_TERMIOS_TCXX       ( 0 )
 #else
@@ -124,8 +120,16 @@ int scnothing P1_(char *, s)
 #if ( IS_UNIX() )
 
 /** Include files **/
-# include "edef.h"                      /* Global variable definitions  */
-# include "elang.h"                     /* Language definitions     */
+# include <stdlib.h>            /* getenv()                 */
+# include <time.h>              /* time(), ...              */
+# include <errno.h>             /* errno, ...               */
+# include <sys/stat.h>          /* stat(), ...              */
+# if CYGWIN
+#  include <sys/select.h>
+#  include <sys/time.h>
+# endif
+# include "edef.h"              /* Global variable definitions  */
+# include "elang.h"             /* Language definitions     */
 
 /** Kill predefined **/
 # undef CTRF                            /* Problems with CTRF       */
@@ -679,6 +683,62 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
+# if ( CYGWIN )
+unsigned char PASCAL NEAR grabnowait P0_()
+{
+    fd_set          rfds;
+    struct timeval  tv;
+    int             retval  = 0;
+
+    ZEROMEM(rfds);
+    ZEROMEM(tv);
+
+    /* Watch stdin (fd 0) to see when it has input. */
+
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+
+    /* Wait up to UNIX_READ_TOUT * 1/10 seconds:  */
+    tv.tv_sec = 0;
+    tv.tv_usec = 100000 * UNIX_READ_TOUT;
+
+    retval = select(1, &rfds, NULL, NULL, &tv);
+    if        ( 0 >  retval ) { /* error          */
+        TRC(("grabnowait(): %s", "select error"));
+
+        return (grabnowait_TIMEOUT);
+    } else if ( 0 == retval ) { /* timeout        */
+        return (grabnowait_TIMEOUT);
+    } else /* 0 < retval */   { /* data available */
+        int           count = 0;
+        unsigned char ch    = '\0';
+
+        /* Perform read */
+# if HANDLE_WINCH
+        while ( ( count = read(0, &ch, 1) ) < 0 ) {
+            if ( winch_flag )
+                return 0;
+        }
+# else
+        count = read(0, &ch, 1);
+        if ( count < 0 ) {
+            puts("** Horrible read error occured **");
+            exit(1);
+        }
+# endif
+        if ( count == 0 ) { /* Should not happen  */
+            TRC(("grabnowait(): %s", "select .GT. 0 but no data"));
+
+            return (grabnowait_TIMEOUT);
+        }
+        /* Return new character */
+# if ( 0 )
+        TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+# endif
+        return (ch);
+    }
+}
+# else
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     int           count = 0;
@@ -722,6 +782,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
 # endif
     return (ch);
 }
+# endif
 
 /* QIN:
  *
