@@ -98,7 +98,7 @@
 /* for terminal control, but obviously they aren't used here    */
 /* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
-#if ( !IS_POSIX_UNIX() )
+#if ( !IS_POSIX_UNIX() || CYGWIN )
 # define USE_TERMIO_IOCTL       ( 1 )
 # define USE_TERMIOS_TCXX       ( 0 )
 #else

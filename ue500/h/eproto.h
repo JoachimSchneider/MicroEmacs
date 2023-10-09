@@ -473,6 +473,12 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 
 /**********************************************************************/
 /****************************************************************/
+/* We want to define VA_COPY here. We *assume* that va_list is  */
+/* either                                                       */
+/* - An array type or                                           */
+/* - A non void pointer type or                                 */
+/* - something that can be assigned (e.g. void *, struct, ...). */
+/*                                                              */
 /* We must check if DESTINATION is an array, because it will be */
 /* defined inside the function calling VA_COPY while the source */
 /* could be given as a function argument which will be          */
@@ -482,16 +488,55 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /* assignment, because otherwise the code won't compile for     */
 /* array implementations of va_list.                            */
 /*                                                              */
+/* Why can't we just do a                                       */
+/* `memcpy(&(dst), &(src), sizeof(va_list))'? Consider a this   */
+/* typical use case:                                            */
+/*                                                              */
+/*  void print2fp12(FILE *fp1, FILE *fp2, const char *fmt,      */
+/*                  va_list ap)                                 */
+/*  {                                                           */
+/*     va_list  aq;                                             */
+/*                                                              */
+/*     ZEROMEM(aq);                                             */
+/*                                                              */
+/*     VA_COPY(aq, ap:                                          */
+/*     vfprintf(fp1, fmt, ap);                                  */
+/*     vfprintf(fp2, fmt, aq);                                  */
+/*  }                                                           */
+/*                                                              */
+/*  CASE A: IS_ARRAY(aq):                                       */
+/*    - aq = ap:                                                */
+/*      Compile error                                           */
+/*    - memcpy(&(aq), &(ap), sizeof(va_list)):  WRONG           */
+/*      Wrong access of &(ap)                                   */
+/*    - memcpy(&(aq), (ap),  sizeof(va_list)):  CORRECT         */
+/*    - memcpy((aq),  (ap),  sizeof(va_list)):  CORRECT         */
+/*                                                              */
+/*  CASE B: !IS_ARRAY(aq):                                      */
+/*    - aq = ap:                                CORRECT         */
+/*    - memcpy(&(aq), &(ap), sizeof(va_list)):  CORRECT         */
+/*    - memcpy(&(aq), (ap),  sizeof(va_list)):  WRONG           */
+/*      aq does not get the adress where ap points to           */
+/*    - memcpy((aq),  (ap),  sizeof(va_list)):  WRONG           */
+/*      Will overwrite at (char *)0                             */
+/*                                                              */
 /* Tested on many Platforms.                                    */
 /****************************************************************/
+
 #if ( MSDOS && TURBO )
 /* Something like `typedef void * <spec> va_list' */
+# define VA_LIST_ASSIGN_  (1)
+#else
+# define VA_LIST_ASSIGN_  (0)
+#endif
+
+#if ( VA_LIST_ASSIGN_ )
+/* `IS_ARRAY() won't work!                        */
 # define MY_VA_COPY(d, s)     (               \
-      memcpy(&(d), &(s), SIZEOF((d)))         \
+      ( (d) = (s) )                           \
     )
 # define MY_VA_END(x)         VOIDCAST(0)
-#endif
-#ifndef MY_VA_COPY
+#else /* Array or non-void pointer  */
 # define MY_VA_COPY(d, s)     (               \
     IS_ARRAY((d))?                            \
       memcpy((d), (s), SIZEOF((d)))           \
@@ -500,6 +545,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #endif
+#undef VA_LIST_ASSIGN_
 
 #if ( 0 )
 # define VA_COPY            MY_VA_COPY
