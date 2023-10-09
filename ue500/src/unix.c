@@ -107,6 +107,16 @@
  * get grief with this
  */
 #define USE_CTL_SQ              ( 0 )
+
+/* Use select instead of VMIN/VTIME setting of the terminal attributes.
+ * This *must* be used with CygWin as setting VMIN/VTIME won't work
+ * with CygWin.
+ */
+#define USE_TERMINAL_SELECT     ( 1 )
+#if ( CYGWIN )
+# undef USE_TERMINAL_SELECT
+# define USE_TERMINAL_SELECT    ( 1 )
+#endif
 /*==============================================================*/
 
 
@@ -124,7 +134,7 @@ int scnothing P1_(char *, s)
 # include <time.h>              /* time(), ...              */
 # include <errno.h>             /* errno, ...               */
 # include <sys/stat.h>          /* stat(), ...              */
-# if CYGWIN
+# if USE_TERMINAL_SELECT
 #  include <sys/select.h>
 #  include <sys/time.h>
 # endif
@@ -683,7 +693,7 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
-# if ( CYGWIN )
+# if ( USE_TERMINAL_SELECT )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     fd_set          rfds;
@@ -714,27 +724,27 @@ unsigned char PASCAL NEAR grabnowait P0_()
         unsigned char ch    = '\0';
 
         /* Perform read */
-# if HANDLE_WINCH
+#  if HANDLE_WINCH
         while ( ( count = read(0, &ch, 1) ) < 0 ) {
             if ( winch_flag )
                 return 0;
         }
-# else
+#  else
         count = read(0, &ch, 1);
         if ( count < 0 ) {
             puts("** Horrible read error occured **");
             exit(1);
         }
-# endif
+#  endif
         if ( count == 0 ) { /* Should not happen  */
             TRC(("grabnowait(): %s", "select .GT. 0 but no data"));
 
             return (grabnowait_TIMEOUT);
         }
         /* Return new character */
-# if ( 0 )
+#  if ( 0 )
         TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
-# endif
+#  endif
         return (ch);
     }
 }
@@ -748,41 +758,41 @@ unsigned char PASCAL NEAR grabnowait P0_()
     if ( curterm.c_cc[VTIME] == 0 ) {
         curterm.c_cc[VMIN] = 0;
         curterm.c_cc[VTIME] = UNIX_READ_TOUT;
-# if   ( USE_TERMIOS_TCXX )
+#  if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
-# elif ( USE_TERMIO_IOCTL )
+#  elif ( USE_TERMIO_IOCTL )
         ioctl(0, TCSETA, &curterm);
-# elif ( USE_CURSES )
+#  elif ( USE_CURSES )
         /* ? */
-# else
+#  else
 #  error MISSING TERMINAL CONTROL DEFINITION
-# endif
+#  endif
     }
 
     /* Perform read */
-# if HANDLE_WINCH
+#  if HANDLE_WINCH
     while ( ( count = read(0, &ch, 1) ) < 0 ) {
         if ( winch_flag )
             return 0;
     }
-# else
+#  else
     count = read(0, &ch, 1);
     if ( count < 0 ) {
         puts("** Horrible read error occured **");
         exit(1);
     }
-# endif
+#  endif
     if ( count == 0 ) {
         return (grabnowait_TIMEOUT);
     }
 
     /* Return new character */
-# if ( 0 )
+#  if ( 0 )
     TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
-# endif
+#  endif
     return (ch);
 }
-# endif
+# endif /* USE_TERMINAL_SELECT */
 
 /* QIN:
  *
