@@ -207,19 +207,43 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # else
 #  define TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
 # endif
-# if CYGWIN
-#  define NormalizeDirSep(path) do  {     \
-    char  *cp_  = (path);                 \
+
+# define MkUNXDirSep_(path)	do	{         \
+    char  *cp__ = (path);                 \
                                           \
-    while ( *cp_ )  {                     \
-        if ( '\\' == *cp_ ) {             \
-            *cp_ = '/';                   \
+    while ( *cp__ )	{                     \
+        if ( '\\' == *cp__ )	{           \
+            *cp__ = '/';                  \
         }                                 \
-        cp_++;                            \
+        cp__++;                           \
     }                                     \
 } while ( 0 )
+
+# define MkDOSDirSep_(path)	do	{         \
+    char  *cp__	= (path);                 \
+                                          \
+    while ( *cp__ )	{                     \
+        if ( '/' == *cp__ )	{             \
+            *cp__	= '\\';                 \
+        }                                 \
+        cp__++;                           \
+    }                                     \
+} while ( 0 )
+
+# if CYGWIN
+#  define NormalizePath(path) do  {                         \
+    char  *cp_  = (path);                                   \
+                                                            \
+    if ( 0 <= IsDOSPath(cp_) )  {                           \
+        MkDOSDirSep_(cp_);                                  \
+        xstrlcpy(cp_, getunxpath(cp_), SIZEOF(path));       \
+    }                                                       \
+    MkUNXDirSep_(cp_);                                      \
+} while ( 0 )
+#  define NULL_DEVICE         "NUL"
 # else
-#  define  NormalizeDirSep(path)  VOIDCAST(0)
+#  define NormalizePath(path) VOIDCAST(0)
+#  define NULL_DEVICE         "/dev/null"
 # endif
 /*==============================================================*/
 
@@ -709,8 +733,8 @@ unsigned char PASCAL NEAR grabnowait P0_()
     FD_SET(0, &rfds);
 
     /* Wait up to UNIX_READ_TOUT * 1/10 seconds:  */
-    tv.tv_sec = 0;
-    tv.tv_usec = 100000 * UNIX_READ_TOUT;
+    tv.tv_sec = UNIX_READ_TOUT / 10;
+    tv.tv_usec = 100000 * (UNIX_READ_TOUT % 10);
 
     retval = select(1, &rfds, NULL, NULL, &tv);
     if        ( 0 >  retval ) { /* error          */
@@ -1459,32 +1483,120 @@ int rename P2_(char *, file1, char *, file2)
 
 # if CYGWIN
 
-CONST char  *getwinpath P1_(CONST char *, in)
+/* ISDOSPATH:
+ *
+ * Classify path:
+ * .GT. 0:  DOS Path
+ * .EQ. 0:  Unknown
+ * .LT. 0:  UNIX Path
+ */
+static int  IsDOSPath P1_(CONST char *, path)
 {
-    int   size      = 0;
-    char  *winpath  = NULL;
+    int len = 0;
 
+    if ( NULL == path || '\0' == *path )  {
+        return 0;
+    }
+
+    len = strlen(path);
+    if        ( 1 == len )  {
+        if        ( '\\' == *path ) {
+            return  ( 1 );
+        } else if ( '/' == *path )  {
+            return  ( -1 );
+        } else                      {
+            return  ( 0 );
+        }
+    } else if ( 2 == len )  {
+        if        ( '\\' == *path ) {
+            return  ( 1 );
+        } else if ( '/' == *path )  {
+            return  ( -1 );
+        } else                      {
+            if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
+                return  ( 1 );
+            } else if ( '.' == *path )                          {
+                if        ( '.'  == *(path + 1) ) {
+                    return ( 0 );
+                } else if ( '\\' == *(path + 1) ) {
+                    return ( 1 );
+                } else if ( '/' == *(path + 1) )  {
+                    return ( -1 );
+                } else                            {
+                    return ( 0 );
+                }
+            } else                                              {
+                return 0;
+            }
+        }
+    } else  /* 3 <= len */  {
+        if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
+            return  ( 1 );
+        } else if ( '.' == *path )                          {
+            if        ( '.'  == *(path + 1) ) {
+                if        ( '\\' == *(path + 2) ) {
+                    return ( 1 );
+                } else if ( '/' == *(path + 2) )  {
+                    return ( -1 );
+                } else                            {
+                    return ( 0 );
+                }
+            } else if ( '\\' == *(path + 1) ) {
+                return ( 1 );
+            } else if ( '/' == *(path + 1) )  {
+                return ( -1 );
+            } else                            {
+                return ( 0 );
+            }
+        } else                                              {
+            return ( 0 );
+        }
+    }
+}
+
+static CONST char *getdospath P1_(CONST char *, in)
+{
+    static char dospath[NFILEN];
+
+    ZEROMEM(dospath);
     if ( NULL == in ) {
         in  = "";
     }
 
-    if ( 0 > (size = cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE,
-                                      in, NULL, 0)) )                   {
+    if ( 0 != cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE, in,
+                               dospath, SIZEOF(dospath)) )            {
+        int errno_sv  = errno;
+
+        TRC(("cygwin_conv_path(%s) (==> DOS): %s", in,
+             strerror(errno_sv)));
         return NULL;
-    } else          {
-        winpath = (char *) ROOM(size);
-        if ( 0 != cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE,
-                                   in, winpath, size) )                 {
-            CLROOM(winpath);
-
-            return NULL;
-        }
-
-        return winpath;
     }
+
+    return dospath;
 }
 
-CONST char  *wingetshell P0_()
+static CONST char *getunxpath P1_(CONST char *, in)
+{
+    static char unxpath[NFILEN];
+
+    ZEROMEM(unxpath);
+    if ( NULL == in ) {
+        in  = "";
+    }
+
+    if ( 0 != cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_ABSOLUTE, in,
+                               unxpath, SIZEOF(unxpath)) )            {
+        int errno_sv  = errno;
+
+        TRC(("cygwin_conv_path(%s) (==> UNX): %s", in,
+             strerror(errno_sv)));
+        return NULL;
+    }
+
+    return unxpath;
+}
+
+static CONST char *wingetshell P0_()
 {
     static CONST char *res  = NULL;
 
@@ -1496,10 +1608,10 @@ CONST char  *wingetshell P0_()
         ZEROMEM(WinCmd);
 
         if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
-            xstrlcpy(SystemRoot, "C:/WINDOWS", SIZEOF(SystemRoot));
+            xstrlcpy(SystemRoot, "C:\\WINDOWS", SIZEOF(SystemRoot));
         }
-        NormalizeDirSep(SystemRoot);
-        xsnprintf(WinCmd, SIZEOF(WinCmd), "%s/system32/cmd.exe", SystemRoot);
+        MkDOSDirSep_(SystemRoot);
+        xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
         res = WinCmd;
     }
 
@@ -1527,6 +1639,7 @@ static int winsystem P1_(CONST char *, cmd)
 
     if ( NULL == cmd )  {
         cmd = "";
+        sargv[2] = (char *)cmd;
     }
 
     /* Create an attributes object and add a "set signal mask"
@@ -1543,9 +1656,13 @@ static int winsystem P1_(CONST char *, cmd)
         return ( -C_40 );
     }
 
+#  if ( !0 )
+    TRC(("Executing <%s %s %s>", shell, SHELL_C_, cmd));
+#  endif
     if ( 0 != posix_spawnp(&child_pid, shell, NULL, &attr, sargv, environ) )  {
         errno_sv  = errno;
-        TRC(("Error executing <%s>, errno = %d: %s", shell, errno_sv, strerror(errno_sv)));
+        TRC(("Error executing <%s %s %s>, errno = %d: %s", shell, SHELL_C_,
+             cmd, errno_sv, strerror(errno_sv)));
     }
 
     /* Destroy any objects that we created earlier. */
@@ -1577,7 +1694,7 @@ static int winsystem P1_(CONST char *, cmd)
     return WEXITSTATUS ( status );
 }
 #  undef SHELL_C_
-# endif
+# endif /* CYGWIN */
 
 /** Callout to system to perform command **/
 int callout P1_(CONST char *, cmd)
@@ -1625,7 +1742,11 @@ int spawncli P2_(int, f, int, n)
         return ( resterr() );
 
     /* Get shell path */
+# if ( CYGWIN )
+    sh = getenv("COMSPEC");
+# else
     sh = getenv("SHELL");
+# endif /* CYGWIN */
     if ( !sh )
 # if ( LINUX )
         sh = "/bin/bash";
@@ -1635,7 +1756,7 @@ int spawncli P2_(int, f, int, n)
         sh = wingetshell();
 # else
         sh = "/bin/sh";
-# endif
+# endif /* LINUX */
 
     /* Do shell */
     return ( callout(sh) );
@@ -1718,13 +1839,13 @@ static char *gettmpdir P0_()
 
         /* Test environment variables TMP, and TEMP: */
         if ( 0 < xstrlcpy(tmpd, getenv("TMP"), SIZEOF(tmpd)) )  {
-            NormalizeDirSep(tmpd);
+            NormalizePath(tmpd);
             if ( IsDir(tmpd) )  {
                 goto found;
             }
         }
         if ( 0 < xstrlcpy(tmpd, getenv("TEMP"), SIZEOF(tmpd)) ) {
-            NormalizeDirSep(tmpd);
+            NormalizePath(tmpd);
             if ( IsDir(tmpd) )  {
                 goto found;
             }
@@ -1829,51 +1950,45 @@ static int LaunchPrg P4_(const char *,  Cmd,
                          const char *,  OutFile,
                          const char *,  ErrFile)
 {
-    char FullCmd[NLINE];
+    char  FullCmd[NLINE];
+    char  lInFile[NFILEN];
+    char  lOutFile[NFILEN];
+    char  lErrFile[NFILEN];
 
     ZEROMEM(FullCmd);
+    ZEROMEM(lInFile);
+    ZEROMEM(lOutFile);
+    ZEROMEM(lErrFile);
 
     if ( !Cmd ) {
         return FALSE;
     }
 
     if ( !InFile || !*InFile ) {
-# if CYGWIN
-        InFile  = xstrdup("NUL");
-# else
-        InFile  = "/dev/null";
-# endif
+        XSTRCPY(lInFile, NULL_DEVICE);
     } else  {
 # if CYGWIN
-        InFile = getwinpath(InFile);
+        XSTRCPY(lInFile, getdospath(InFile));
 # else
-        /**EMPTY**/
+        XSTRCPY(lInFile, InFile);
 # endif
     }
     if ( !OutFile || !*OutFile ) {
-# if CYGWIN
-        OutFile  = xstrdup("NUL");
-# else
-        OutFile  = "/dev/null";
-# endif
+        XSTRCPY(lOutFile, NULL_DEVICE);
     } else  {
 # if CYGWIN
-        OutFile = getwinpath(OutFile);
+        XSTRCPY(lOutFile, getdospath(OutFile));
 # else
-        /**EMPTY**/
+        XSTRCPY(lOutFile, OutFile);
 # endif
     }
     if ( !ErrFile || !*ErrFile ) {
-# if CYGWIN
-        ErrFile  = xstrdup("NUL");
-# else
-        ErrFile  = "/dev/null";
-# endif
+        XSTRCPY(lErrFile, NULL_DEVICE);
     } else  {
 # if CYGWIN
-        ErrFile = getwinpath(ErrFile);
+        XSTRCPY(lErrFile, getdospath(ErrFile));
 # else
-        /**EMPTY**/
+        XSTRCPY(lErrFile, ErrFile);
 # endif
     }
 
@@ -1885,14 +2000,9 @@ static int LaunchPrg P4_(const char *,  Cmd,
               "( %s ) < %s > %s 2>%s",
 # endif
               Cmd,
-              InFile,
-              OutFile,
-              ErrFile);
-# if CYGWIN
-    CLROOM(InFile);
-    CLROOM(OutFile);
-    CLROOM(ErrFile);
-# endif
+              lInFile,
+              lOutFile,
+              lErrFile);
 
     return callout(FullCmd);
 } /* LaunchPrg */
