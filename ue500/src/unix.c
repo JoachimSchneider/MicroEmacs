@@ -1757,7 +1757,7 @@ int spawncli P2_(int, f, int, n)
         char  cygsh[NFILEN];
 
         ZEROMEM(cygsh);
-        xstrlcpy(cygsh, sh, sizeof(cygsh);
+        xstrlcpy(cygsh, sh, SIZEOF(cygsh));
         NormalizePathDOS(cygsh);
         sh  = cygsh;
     } else                                {
