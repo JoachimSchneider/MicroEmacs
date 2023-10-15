@@ -298,7 +298,7 @@ checkmouse()
     if ( sstate & (4|32|64) )           /* shifted? */
         etype |= (SHFT >> 8);
     if ( sstate & 16 )                  /* controled? */
-        etype |= (CTRL >> 8);
+        etype |= (CTRF >> 8);
 
     /* no buttons changes */
     if ( oldbut == newbut ) {

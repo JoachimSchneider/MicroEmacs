@@ -41,12 +41,31 @@ Documentation: See `ue500/doc/emacs.pdf`.
   on Linux and OpenBSD.
 
 
+## Branches:
+
+* *master*:   Tested
+
+* *fixes*:    Compiles and runs
+
+* *current*:  Need not even compile --- *Not testet*
+
+
 ## Pull requests
 
 Please use the *fixes* branch for pull requests.
 
 
 ## Change Log
+
+[2023-10-15.00]
+* MicroEMACAS compiles and runs with CygWin on Windows 10. See
+  ue500/cygwin/Readme.txt.
+
+[2023-10-03.00]
+* Enabled ANSI terminal driver for UNIX
+
+[2023-09-27.00]
+* pcdos/ansi build works (Uses ANSI escape sequences for screen control).
 
 [2023-09-20.01]
 * Use room/reroom *everywhere*.

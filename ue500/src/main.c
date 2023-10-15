@@ -553,7 +553,10 @@ loop:
      * Did our window get resized?
      */
 #if HANDLE_WINCH
-    if ( winch_flag ) winch_new_size();
+    if ( winch_flag ) {
+        /* `winch_flag  = 0': Already done in `winch_new_size()'  */
+        winch_new_size();
+    }
 #endif
     /* Fix up the screen    */
     update(FALSE);

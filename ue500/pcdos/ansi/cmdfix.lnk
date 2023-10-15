@@ -1,5 +1,4 @@
-c:\sys\turbo\lib\c0l obj\cmdfix
+e:\bc\lib\c0l obj\cmdfix
 bin\cmdfix /m /linenumbers
 cmdfix.map
-c:\sys\turbo\lib\cl
-
+e:\bc\lib\cl

@@ -135,7 +135,7 @@ KeyDown:
         /*-process the non-ascii keys (Page-up, Page-down, End, Home, Arrows,
          * Insert, Delete, function keys) */
         prefix |= SPEC;
-        if ( GetKeyState (VK_CONTROL) < 0 ) prefix |= CTRL;
+        if ( GetKeyState (VK_CONTROL) < 0 ) prefix |= CTRF;
         if ( GetKeyState (VK_SHIFT) < 0 ) prefix |= SHFT;
         switch ( Key ) {
 
@@ -184,7 +184,7 @@ KeyDown:
                 if ( Key == VK_F10 ) evt = '0';
                 else evt = Key - VK_F1 + '1';
             } else if ( (vk_at > 0) && ( Key == LOBYTE(vk_at) ) &&
-                        ( ( prefix & (SHFT | CTRL) ) == CTRL ) ) {
+                        ( ( prefix & (SHFT | CTRF) ) == CTRF ) ) {
                 /* we assume a ^@ or A-^@ */
                 prefix &= ALTD;
                 evt = 0;
@@ -204,7 +204,7 @@ KeyDown:
         goto KeyDown;
 
     case WM_CHAR:
-        /*-process regular ASCII, with CTRL & SHFT embedded in event */
+        /*-process regular ASCII, with CTRF & SHFT embedded in event */
         evt = Key;
         break;
 
@@ -298,7 +298,7 @@ VOID PASCAL    PutMouseMessage (UINT wMsg, WPARAM wParam, POINT Position)
     if ( wParam & MK_SHIFT )
         prefix |= SHFT;
     if ( wParam & MK_CONTROL )
-        prefix |= CTRL;
+        prefix |= CTRF;
     in_put (0);
     in_put (prefix >> 8);
     in_put ( (unsigned char)Position.x );

@@ -484,10 +484,10 @@ int extcode(unsigned c      /* byte following a zero extended char byte */
 
     /* control function keys */
     if ( c >= 94 && c < 103 )
-        return (SPEC | CTRL | c - 93 + '0');
+        return (SPEC | CTRF | c - 93 + '0');
 
     if ( c == 103 )
-        return (SPEC | CTRL | '0');
+        return (SPEC | CTRF | '0');
 
     /* ALTed function keys */
     if ( c >= 104 && c < 113 )
@@ -507,7 +507,7 @@ int extcode(unsigned c      /* byte following a zero extended char byte */
     /* some others as well */
     switch (c) {
         case 3:         return(0);                      /* null */
-        case 15:        return(SHFT | CTRL | 'I');      /* backtab */
+        case 15:        return(SHFT | CTRF | 'I');      /* backtab */
 
         case 16:        return(ALTD | 'Q');
         case 17:        return(ALTD | 'W');
@@ -548,12 +548,12 @@ int extcode(unsigned c      /* byte following a zero extended char byte */
         case 81:        return(SPEC | 'V');             /* page down */
         case 82:        return(SPEC | 'C');             /* insert */
         case 83:        return(SPEC | 'D');             /* delete */
-        case 115:       return(SPEC | CTRL | 'B');      /* control left */
-        case 116:       return(SPEC | CTRL | 'F');      /* control right */
-        case 117:       return(SPEC | CTRL | '>');      /* control END */
-        case 118:       return(SPEC | CTRL | 'V');      /* control page down */
-        case 119:       return(SPEC | CTRL | '<');      /* control HOME */
-        case 132:       return(SPEC | CTRL | 'Z');      /* control page up */
+        case 115:       return(SPEC | CTRF | 'B');      /* control left */
+        case 116:       return(SPEC | CTRF | 'F');      /* control right */
+        case 117:       return(SPEC | CTRF | '>');      /* control END */
+        case 118:       return(SPEC | CTRF | 'V');      /* control page down */
+        case 119:       return(SPEC | CTRF | '<');      /* control HOME */
+        case 132:       return(SPEC | CTRF | 'Z');      /* control page up */
     }
 
     return (ALTD | c);

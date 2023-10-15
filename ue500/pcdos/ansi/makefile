@@ -8,17 +8,18 @@
 OBJD = obj			# object file directory
 SRCD = ..\..\src		# source file directory
 HDIR = ..\..\h			# header file directory
-INCD = c:\sys\turbo\include	# system include directory
+INCD = e:\bc\include		# system include directory
 
 # options and arguments to the C compiler
 
-CC = tcc
+#CC = tcc
+CC = bcc -g0
 
 #These options or with debugging on!
-CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -v -w-par -y -Z 
+CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -v -w-par -y -Z
 
 #These options are production (no debugging)
-#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -w-par -Z 
+#CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -w-par -Z
 
 # list of header files
 
@@ -40,10 +41,10 @@ F8 = $(OBJD)\tags.obj $(OBJD)\window.obj $(OBJD)\word.obj  $(OBJD)\execpr.obj
 all:	bin\emacs.exe bin\cmdfix.exe
 
 bin\emacs.exe: $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
-	link @emacs.lnk
+	tlink @emacs.lnk
 
 bin\cmdfix.exe: $(OBJD)\cmdfix.obj
-	link @cmdfix.lnk
+	tlink @cmdfix.lnk
 
 # compilation rules
 
@@ -111,5 +112,19 @@ $(OBJD)\window.obj: $(SRCD)\window.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\word.obj: $(SRCD)\word.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
+#$(OBJD)\execpr.obj: $(SRCD)\execpr.asm
+#	masm $(SRCD)\execpr.asm, $(OBJD)\execpr.obj, , ,
 $(OBJD)\execpr.obj: $(SRCD)\execpr.asm
-	masm $(SRCD)\execpr.asm, $(OBJD)\execpr.obj, , ,
+	tasm $(SRCD)\execpr.asm,$(OBJD)\execpr.obj
+
+
+clean:
+	del obj\*.obj
+	del emacs.map
+	del cmdfix.map
+	del bin\emacs.exe
+	del bin\cmdfix.exe
+
+
+
+# EOF

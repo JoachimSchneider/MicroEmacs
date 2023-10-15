@@ -825,7 +825,7 @@ char *PASCAL NEAR cmdstr P2_(int , c, char *, seq)
     }
 
     /* apply control sequence if needed */
-    if ( c & CTRL ) {
+    if ( c & CTRF ) {
 
         /* non normal spaces look like @ */
         if ( ptr == seq && ( (c & 255) == ' ' ) )
@@ -1006,7 +1006,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     /* a control char?  (NOT Always upper case anymore) */
     if ( *keynamePtr == '^' && *(keynamePtr+1) != 0 ) {
-        c |= CTRL;
+        c |= CTRF;
         ++keynamePtr;
         if ( *keynamePtr == '@' )
             *keynamePtr = ' ';
@@ -1014,7 +1014,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     /* A literal control character? (Boo, hiss) */
     if ( *keynamePtr < 32 ) {
-        c |= CTRL;
+        c |= CTRF;
         *keynamePtr += '@';
     }
 

@@ -114,7 +114,7 @@ EXTERN int PASCAL NEAR fnclabel DCL((int f, int n));
 EXTERN int PASCAL NEAR readparam DCL((int *v));
 EXTERN VOID PASCAL NEAR dobbnmouse DCL((void));
 EXTERN VOID PASCAL NEAR docsi DCL((int oh));
-EXTERN VOID PASCAL NEAR ttputs DCL((char *string));
+EXTERN VOID PASCAL NEAR ttputs DCL((CONST char *string));
 EXTERN VOID PASCAL NEAR charwrite DCL((int row, char *outstr, int forg,
                                        int left, int right));
 

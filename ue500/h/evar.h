@@ -25,101 +25,104 @@
 
 static NOSHARE CONST char *envars[] =
 {
-    "abbell",                   /* ring bell on abbreviation expansion? */
-    "abcap",                    /* match capitolization in expansions */
-    "abquick",                  /* quick, aggressive expansions enabled? */
-    "acount",                   /* # of chars until next auto-save */
-    "asave",                    /* # of chars between auto-saves */
-    "bufhook",                  /* enter buffer switch hook */
-    "cbflags",                  /* current buffer flags */
-    "cbufname",                 /* current buffer name */
-    "cfname",                   /* current file name */
-    "cmdhook",                  /* command loop hook */
-    "cmode",                    /* mode of current buffer */
-    "cquote",                   /* close quote character */
-    "curchar",                  /* current character under the cursor */
-    "curcol",                   /* current column pos of cursor */
-    "curline",                  /* current line in file */
-    "curwidth",                 /* current screen width */
+    "abbell",                   /* ring bell on abbreviation expansion?     */
+    "abcap",                    /* match capitolization in expansions       */
+    "abquick",                  /* quick, aggressive expansions enabled?    */
+    "acount",                   /* # of chars until next auto-save          */
+    "asave",                    /* # of chars between auto-saves            */
+    "bufhook",                  /* enter buffer switch hook                 */
+    "cbflags",                  /* current buffer flags                     */
+    "cbufname",                 /* current buffer name                      */
+    "cfname",                   /* current file name                        */
+    "cmdhook",                  /* command loop hook                        */
+    "cmode",                    /* mode of current buffer                   */
+    "cquote",                   /* close quote character                    */
+    "curchar",                  /* current character under the cursor       */
+    "curcol",                   /* current column pos of cursor             */
+    "curline",                  /* current line in file                     */
+    "curwidth",                 /* current screen width                     */
     "curwind",                  /* current window ordinal on current screen */
-    "cwline",                   /* current screen line in window */
-    "debug",                    /* macro debugging */
-    "deskcolor",                /* desktop color */
-    "diagflag",                 /* diagonal mouse movements enabled? */
-    "discmd",                   /* display commands on command line */
-    "disinp",                   /* display command line input characters */
-    "disphigh",                 /* display high bit characters escaped */
-    "dispundo",                 /* display undo depth on command line */
-    "exbhook",                  /* exit buffer switch hook */
-    "exithook",                 /* exiting emacs hook */
-    "fcol",                     /* first displayed column in curent window */
-    "fillcol",                  /* current fill column */
-    "flicker",                  /* flicker supression */
-    "fmtlead",                  /* format command lead characters */
-    "gflags",                   /* global internal emacs flags */
-    "gmode",                    /* global modes */
-    "hardtab",                  /* current hard tab size */
-    "hilight",                  /* region # to hilight (255 to turn off) */
-    "hjump",                    /* horizontal screen jump size */
-    "hscrlbar",                 /* horizontal scroll bar flag */
-    "hscroll",                  /* horizontal scrolling flag */
-    "isterm",                   /* incremental-search terminator character */
-    "kill",                     /* kill buffer (read only) */
-    "language",                 /* language of text messages */
-    "lastkey",                  /* last keyboard char struck */
-    "lastmesg",                 /* last string mlwrite()ed */
-    "line",                     /* text of current line */
-    "lterm",                    /* current line terminator for writes */
-    "lwidth",                   /* width of current line */
-    "match",                    /* last matched magic pattern */
-    "mmove",                    /* mouse moves events style */
-    "modeflag",                 /* Modelines displayed flag */
-    "msflag",                   /* activate mouse? */
-    "newscreen",                /* new screen with new buffer? */
-    "numwind",                  /* number of windows on current screen */
-    "oquote",                   /* open quote character */
-    "orgcol",                   /* screen origin column */
-    "orgrow",                   /* screen origin row */
-    "os",                       /* what Operating System? */
-    "overlap",                  /* line overlap when paging */
-    "pagelen",                  /* number of lines used by editor */
-    "palette",                  /* current palette string */
-    "paralead",                 /* paragraph leadin characters */
-    "parindent",                /* paragraph first line indent with fill */
-    "pending",                  /* type ahead pending flag */
-    "popflag",                  /* pop-up windows active? */
-    "popwait",                  /* user wait on end of pop-up window? */
-    "posflag",                  /* display point position on modeline? */
+    "cwline",                   /* current screen line in window            */
+    "debug",                    /* macro debugging                          */
+    "deskcolor",                /* desktop color                            */
+    "diagflag",                 /* diagonal mouse movements enabled?        */
+    "discmd",                   /* display commands on command line         */
+    "disinp",                   /* display command line input characters    */
+    "disphigh",                 /* display high bit characters escaped      */
+    "dispundo",                 /* display undo depth on command line       */
+    "exbhook",                  /* exit buffer switch hook                  */
+    "exithook",                 /* exiting emacs hook                       */
+    "fcol",                     /* first displayed column in curent window  */
+    "fillcol",                  /* current fill column                      */
+    "flicker",                  /* flicker supression                       */
+    "fmtlead",                  /* format command lead characters           */
+    "gflags",                   /* global internal emacs flags              */
+    "gmode",                    /* global modes                             */
+    "hardtab",                  /* current hard tab size                    */
+    "hilight",                  /* region # to hilight (255 to turn off)    */
+                                /* BE CAREFUL: The corresponding case       */
+                                /* code (EVHILITE) and C-variable (hilite)  */
+                                /* are spelled differntly!                  */
+    "hjump",                    /* horizontal screen jump size              */
+    "hscrlbar",                 /* horizontal scroll bar flag               */
+    "hscroll",                  /* horizontal scrolling flag                */
+    "isterm",                   /* incremental-search terminator character  */
+    "kill",                     /* kill buffer (read only)                  */
+    "language",                 /* language of text messages                */
+    "lastkey",                  /* last keyboard char struck                */
+    "lastmesg",                 /* last string mlwrite()ed                  */
+    "line",                     /* text of current line                     */
+    "lterm",                    /* current line terminator for writes       */
+    "lwidth",                   /* width of current line                    */
+    "match",                    /* last matched magic pattern               */
+    "mmove",                    /* mouse moves events style                 */
+    "modeflag",                 /* Modelines displayed flag                 */
+    "msflag",                   /* activate mouse?                          */
+    "newscreen",                /* new screen with new buffer?              */
+    "numwind",                  /* number of windows on current screen      */
+    "oquote",                   /* open quote character                     */
+    "orgcol",                   /* screen origin column                     */
+    "orgrow",                   /* screen origin row                        */
+    "os",                       /* what Operating System?                   */
+    "overlap",                  /* line overlap when paging                 */
+    "pagelen",                  /* number of lines used by editor           */
+    "palette",                  /* current palette string                   */
+    "paralead",                 /* paragraph leadin characters              */
+    "parindent",                /* paragraph first line indent with fill    */
+    "pending",                  /* type ahead pending flag                  */
+    "popflag",                  /* pop-up windows active?                   */
+    "popwait",                  /* user wait on end of pop-up window?       */
+    "posflag",                  /* display point position on modeline?      */
     "progname",                 /* returns current prog name - "MicroEMACS" */
-    "ram",                      /* ram in use by malloc */
-    "readhook",                 /* read file execution hook */
-    "region",                   /* current region (read only) */
-    "replace",                  /* replacement pattern */
-    "rval",                     /* child process return value */
-    "scrname",                  /* current screen name */
-    "search",                   /* search pattern */
-    "searchpnt",                /* differing search styles (term point) */
-    "seed",                     /* current random number seed */
-    "softtab",                  /* current soft tab size */
-    "sres",                     /* current screen resolution */
-    "ssave",                    /* safe save flag */
-    "sscroll",                  /* smooth scrolling flag */
-    "status",                   /* returns the status of the last command */
-    "sterm",                    /* search terminator character */
-    "target",                   /* target for line moves */
-    "time",                     /* date and time */
-    "timeflag",                 /* display time? */
-    "tpause",                   /* length to pause for paren matching */
-    "undoflag",                 /* currently processing undos */
-    "version",                  /* current version number */
-    "vscrlbar",                 /* vertical scroll bar flag */
-    "wchars",                   /* set of characters legal in words */
-    "wline",                    /* # of lines in current window */
-    "wraphook",                 /* wrap word execution hook */
-    "writehook",                /* write file hook */
-    "xpos",                     /* current mouse X position */
-    "yankflag",                 /* point placement at yanked/included text */
-    "ypos"                      /* current mouse Y position */
+    "ram",                      /* ram in use by malloc                     */
+    "readhook",                 /* read file execution hook                 */
+    "region",                   /* current region (read only)               */
+    "replace",                  /* replacement pattern                      */
+    "rval",                     /* child process return value               */
+    "scrname",                  /* current screen name                      */
+    "search",                   /* search pattern                           */
+    "searchpnt",                /* differing search styles (term point)     */
+    "seed",                     /* current random number seed               */
+    "softtab",                  /* current soft tab size                    */
+    "sres",                     /* current screen resolution                */
+    "ssave",                    /* safe save flag                           */
+    "sscroll",                  /* smooth scrolling flag                    */
+    "status",                   /* returns the status of the last command   */
+    "sterm",                    /* search terminator character              */
+    "target",                   /* target for line moves                    */
+    "time",                     /* date and time                            */
+    "timeflag",                 /* display time?                            */
+    "tpause",                   /* length to pause for paren matching       */
+    "undoflag",                 /* currently processing undos               */
+    "version",                  /* current version number                   */
+    "vscrlbar",                 /* vertical scroll bar flag                 */
+    "wchars",                   /* set of characters legal in words         */
+    "wline",                    /* # of lines in current window             */
+    "wraphook",                 /* wrap word execution hook                 */
+    "writehook",                /* write file hook                          */
+    "xpos",                     /* current mouse X position                 */
+    "yankflag",                 /* point placement at yanked/included text  */
+    "ypos"                      /* current mouse Y position                 */
 };
 
 /*  and its preprocesor definitions     */

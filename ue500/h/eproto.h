@@ -461,18 +461,24 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /**********************************************************************/
 
 /**********************************************************************/
-#define FREE(p) do  {             \
-    char **pp_  = (char **)&(p);  \
+#define FREE_(p)  do  {           \
+    char **pp__ = (char **)&(p);  \
                                   \
-    if ( NULL != *pp_ ) {         \
-        free(*pp_);               \
-        *pp_  = NULL;             \
+    if ( NULL != *pp__ )  {       \
+        free(*pp__);              \
+        *pp__ = NULL;             \
     }                             \
 } while ( 0 )
 /**********************************************************************/
 
 /**********************************************************************/
 /****************************************************************/
+/* We want to define VA_COPY here. We *assume* that va_list is  */
+/* either                                                       */
+/* - An array type or                                           */
+/* - A non void pointer type or                                 */
+/* - something that can be assigned (e.g. void *, struct, ...). */
+/*                                                              */
 /* We must check if DESTINATION is an array, because it will be */
 /* defined inside the function calling VA_COPY while the source */
 /* could be given as a function argument which will be          */
@@ -482,16 +488,55 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /* assignment, because otherwise the code won't compile for     */
 /* array implementations of va_list.                            */
 /*                                                              */
+/* Why can't we just do a                                       */
+/* `memcpy(&(dst), &(src), sizeof(va_list))'? Consider a this   */
+/* typical use case:                                            */
+/*                                                              */
+/*  void print2fp12(FILE *fp1, FILE *fp2, const char *fmt,      */
+/*                  va_list ap)                                 */
+/*  {                                                           */
+/*     va_list  aq;                                             */
+/*                                                              */
+/*     ZEROMEM(aq);                                             */
+/*                                                              */
+/*     VA_COPY(aq, ap:                                          */
+/*     vfprintf(fp1, fmt, ap);                                  */
+/*     vfprintf(fp2, fmt, aq);                                  */
+/*  }                                                           */
+/*                                                              */
+/*  CASE A: IS_ARRAY(aq):                                       */
+/*    - aq = ap:                                                */
+/*      Compile error                                           */
+/*    - memcpy(&(aq), &(ap), sizeof(va_list)):  WRONG           */
+/*      Wrong access of &(ap)                                   */
+/*    - memcpy(&(aq), (ap),  sizeof(va_list)):  CORRECT         */
+/*    - memcpy((aq),  (ap),  sizeof(va_list)):  CORRECT         */
+/*                                                              */
+/*  CASE B: !IS_ARRAY(aq):                                      */
+/*    - aq = ap:                                CORRECT         */
+/*    - memcpy(&(aq), &(ap), sizeof(va_list)):  CORRECT         */
+/*    - memcpy(&(aq), (ap),  sizeof(va_list)):  WRONG           */
+/*      aq does not get the adress where ap points to           */
+/*    - memcpy((aq),  (ap),  sizeof(va_list)):  WRONG           */
+/*      Will overwrite at (char *)0                             */
+/*                                                              */
 /* Tested on many Platforms.                                    */
 /****************************************************************/
+
 #if ( MSDOS && TURBO )
 /* Something like `typedef void * <spec> va_list' */
+# define VA_LIST_ASSIGN_  (1)
+#else
+# define VA_LIST_ASSIGN_  (0)
+#endif
+
+#if ( VA_LIST_ASSIGN_ )
+/* `IS_ARRAY() won't work!                        */
 # define MY_VA_COPY(d, s)     (               \
-      memcpy(&(d), &(s), SIZEOF((d)))         \
+      ( (d) = (s) )                           \
     )
 # define MY_VA_END(x)         VOIDCAST(0)
-#endif
-#ifndef MY_VA_COPY
+#else /* Array or non-void pointer  */
 # define MY_VA_COPY(d, s)     (               \
     IS_ARRAY((d))?                            \
       memcpy((d), (s), SIZEOF((d)))           \
@@ -500,6 +545,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #endif
+#undef VA_LIST_ASSIGN_
 
 #if ( 0 )
 # define VA_COPY            MY_VA_COPY
@@ -578,6 +624,9 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
     return buf + pos + 1;
 }
 #endif
+/* Non negative int to string:  */
+#define nni2s_(i)     ( uitostr_memacs((unsigned int)(i)) )
+
 /**********************************************************************/
 #define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
 #define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
@@ -1696,6 +1745,7 @@ EXTERN int PASCAL NEAR getwpos DCL((void));
 EXTERN int PASCAL NEAR get_char DCL((void));
 EXTERN int PASCAL NEAR global_var DCL((int f, int n));
 EXTERN unsigned char PASCAL NEAR grabnowait DCL((void));
+#define grabnowait_TIMEOUT  ( 0xFF )
 EXTERN unsigned char PASCAL NEAR grabwait DCL((void));
 #if     DBCS
 EXTERN int PASCAL NEAR is2byte DCL((char *sp, char *cp));
@@ -1852,6 +1902,9 @@ EXTERN int PASCAL NEAR getccol DCL((int bflg));
 EXTERN int PASCAL NEAR getcmd DCL((void));
 EXTERN int PASCAL NEAR getfence DCL((int f, int n));
 EXTERN int PASCAL NEAR getfile DCL((CONST char *fname, int lockfl));
+#if IS_UNIX()
+EXTERN char *          gettmpfname DCL((CONST char *ident));
+#endif
 EXTERN int PASCAL NEAR get_key DCL((void));
 EXTERN int PASCAL NEAR getregion DCL((REGION *rp));
 EXTERN int PASCAL NEAR gotobob DCL((int f, int n));
@@ -1988,6 +2041,9 @@ EXTERN int PASCAL NEAR trim DCL((int f, int n));
 EXTERN int PASCAL NEAR ttclose DCL((void));
 EXTERN int PASCAL NEAR ttflush DCL((void));
 EXTERN int PASCAL NEAR ttgetc DCL((void));
+#if IS_UNIX()
+EXTERN int             ttgetc_nowait DCL((void));
+#endif
 EXTERN int PASCAL NEAR ttopen DCL((void));
 EXTERN int PASCAL NEAR ttputc DCL((int c));
 EXTERN int PASCAL NEAR twiddle DCL((int f, int n));
@@ -2072,7 +2128,10 @@ EXTERN VOID PASCAL NEAR varclean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR uv_init DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR uv_clean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR vtfree DCL((void));
-EXTERN VOID cook DCL((void));
+#if ( IS_UNIX() || (VMS && SMG) || MPE )
+EXTERN VOID cook        DCL((void));
+EXTERN int  cook_nowait DCL((void));
+#endif
 EXTERN VOID qin DCL((int ch));
 EXTERN VOID qrep DCL((int ch));
 EXTERN EWINDOW *PASCAL NEAR mousewindow DCL((int row));
@@ -2137,6 +2196,21 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #define ISXDIGIT(x) isxdigit((unsigned char)(x))
 #define ISASCII(x)  isascii((unsigned char)(x))
 #define ISBLANK(x)  isblank((unsigned char)(x))
+/**********************************************************************/
+
+/**********************************************************************/
+/* Some constants:                                                    */
+/**********************************************************************/
+/* No braces `()' here!                                               */
+#define C_10  10
+#define C_20  20
+#define C_30  30
+#define C_40  40
+#define C_50  50
+#define C_60  60
+#define C_70  70
+#define C_80  80
+#define C_90  90
 /**********************************************************************/
 
 

@@ -41,7 +41,6 @@ int scnothing()
 
 /** Constants **/
 # define CCE             2              /* Command successful       */
-# define TIMEOUT         255            /* No character available   */
 
 /** Intrinsics **/
 # pragma intrinsic FCLOSE               /* File close intrinsic     */
@@ -299,7 +298,7 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
-unsigned char grabnowait()
+unsigned char PASCAL NEAR grabnowait()
 {
     char ch;
     int count;
@@ -318,7 +317,7 @@ unsigned char grabnowait()
     /* Read character */
     count = FREAD(mpetermin, &ch, -1);
     if ( count == 0 )
-        return TIMEOUT;
+        return grabnowait_TIMEOUT;
 
     if ( count != 1 ) {
         puts("** Horrible read error occured **");

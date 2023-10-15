@@ -255,7 +255,7 @@ unsigned c;             /* byte following a zero extended char byte */
 
     /* remember if we are controled */
     if ( (shiftb & 0x08) != 0 )
-        sstate |= CTRL;
+        sstate |= CTRF;
 
     /* function keys 1 through 9 */
     if ( c >= 0 && c < 9 )
@@ -341,9 +341,9 @@ unsigned c;             /* byte following a zero extended char byte */
         case 83:
         case 89:        return(sstate | SPEC | 'Q');    /* reformat paragraph */
         case 81:        return(sstate | CTLX | 'C');    /* shell up to system */
-        case 67:        return(sstate | SPEC | CTRL | 'L'); /* center display */
-        case 68:        return(sstate | CTRL | 'O');    /* open line */
-        case 69:        return(sstate | CTRL | 'K');    /* Kill to end of line */
+        case 67:        return(sstate | SPEC | CTRF | 'L'); /* center display */
+        case 68:        return(sstate | CTRF | 'O');    /* open line */
+        case 69:        return(sstate | CTRF | 'K');    /* Kill to end of line */
     }
 
     return (sstate | c);

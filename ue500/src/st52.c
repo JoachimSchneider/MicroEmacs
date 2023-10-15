@@ -899,7 +899,7 @@ unsigned key;   /* GEMDOS translation of the key */
     code = 0;
    /*
     * I don't know why, but for some reason the codes for ALT of top
-    * row and for CTRL of left, right and HOME come up wrong, and this
+    * row and for CTRF of left, right and HOME come up wrong, and this
     * fixes them.
     */
     if      ( sc == 0x77 ) sc = 0x47;
@@ -924,7 +924,7 @@ unsigned key;   /* GEMDOS translation of the key */
         * keyboards.
         */
         if        ( sk & K_CTRL ) {
-            code |= CTRL;
+            code |= CTRF;
             key = kt->caps[ sc];
         } else if ( sk & 3 )      {
             key = kt->shift[ sc];   /* shift */
@@ -939,8 +939,8 @@ unsigned key;   /* GEMDOS translation of the key */
     */
     if ( sc == 0x72 ) key = 'E';
     if ( sc >= 0x63 || sc == 0x4A || sc == 0x4E ) {
-        /* Keypad keys are SPEC or CTRL of what's on the key  */
-        code |= SPEC | CTRL;
+        /* Keypad keys are SPEC or CTRF of what's on the key  */
+        code |= SPEC | CTRF;
     }
    /*
     * translate function keys into digits
@@ -959,12 +959,12 @@ unsigned key;   /* GEMDOS translation of the key */
     if ( sc == 0x50 ) { code |= SPEC; key = 'N'; }
     if ( sc == 0x4d ) { code |= SPEC; key = 'F'; }
    /*
-    * translate CTRL-shifted of keys that don't usually CTRL
+    * translate CTRF-shifted of keys that don't usually CTRF
     */
     if ( (sk & K_CTRL) && (sc <= 0x0D || key == 0) ) {
         /* Control of a non-usually-control key */
         shift = Getshift(-1);   /* Get state of CAPS lock */
-        code |= CTRL;
+        code |= CTRF;
         if      ( sk & 3 )      key = kt->shift[ sc];   /* shift */
         else if ( shift & 16 )  key = kt->caps[ sc];    /* Caps lock */
         else                    key = kt->norm[ sc];
@@ -973,7 +973,7 @@ unsigned key;   /* GEMDOS translation of the key */
     if ( code != 0 ) { /* This is a special key */
         if ( code & SPEC ) { /* Get shift and ctrl of function keys */
             if ( sk & 3 )       code |= SHFT;
-            if ( sk & K_CTRL )  code |= CTRL;
+            if ( sk & K_CTRL )  code |= CTRF;
         }
         in_put(0);
         in_put(code>>8);

@@ -83,10 +83,6 @@
 
 /** Include files **/
 #include <stdio.h>              /* Standard I/O definitions */
-#include <stdlib.h>             /* getenv()                 */
-#include <time.h>               /* time(), ...              */
-#include <errno.h>              /* errno, ...               */
-#include <sys/stat.h>           /* stat(), ...              */
 #include "estruct.h"            /* Emacs definitions        */
 #include "eproto.h"             /* Function definitions     */
 
@@ -94,6 +90,9 @@
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
+/* Accordung to R. Stevens curses should contain some functions */
+/* for terminal control, but obviously they aren't used here    */
+/* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
 #if ( !IS_POSIX_UNIX() )
 # define USE_TERMIO_IOCTL       ( 1 )
@@ -108,17 +107,19 @@
  * get grief with this
  */
 #define USE_CTL_SQ              ( 0 )
+
+/* Use select instead of VMIN/VTIME setting of the terminal attributes.
+ * This *must* be used with CygWin as setting VMIN/VTIME won't work
+ * with CygWin.
+ */
+#define USE_TERMINAL_SELECT     ( 1 )
+#if ( CYGWIN )
+# undef USE_TERMINAL_SELECT
+# define USE_TERMINAL_SELECT    ( 1 )
+#endif
 /*==============================================================*/
 
 
-#define   TGETFLAG(x)     tgetflag((char *)(x))
-#define   TGETNUM(x)      tgetnum((char *)(x))
-#if VAT
-# define  TGETSTR(a, b)   tgetstr( (char *)(a), *(b) )
-#else
-# define  TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
-#endif
-	
 /** Do nothing routine **/
 int scnothing P1_(char *, s)
 {
@@ -129,11 +130,19 @@ int scnothing P1_(char *, s)
 #if ( IS_UNIX() )
 
 /** Include files **/
-# include "edef.h"                      /* Global variable definitions  */
-# include "elang.h"                     /* Language definitions     */
+# include <stdlib.h>            /* getenv()                 */
+# include <time.h>              /* time(), ...              */
+# include <errno.h>             /* errno, ...               */
+# include <sys/stat.h>          /* stat(), ...              */
+# if USE_TERMINAL_SELECT
+#  include <sys/select.h>
+#  include <sys/time.h>
+# endif
+# include "edef.h"              /* Global variable definitions  */
+# include "elang.h"             /* Language definitions     */
 
 /** Kill predefined **/
-# undef CTRL                            /* Problems with CTRL       */
+# undef CTRF                            /* Problems with CTRF       */
 
 
 /** Overall include files **/
@@ -166,24 +175,92 @@ int scnothing P1_(char *, s)
 #  define DIRENTRY       dirent
 # endif /* XENIX || VAT */
 
+# if ( CYGWIN )
+#  include <spawn.h>
+#  include <sys/wait.h>
+#  include <sys/cygwin.h>
+# endif /* CYGWIN */
 
 /*==============================================================*/
 /* Found in `curses.h':                                         */
 /*==============================================================*/
 # if ( !USE_CURSES )
-EXTERN int  tgetflag  DCL((char *id));
-EXTERN int  tgetnum   DCL((char *id));
-EXTERN int  tputs     DCL((CONST char *str, int affcnt, int (*putc)(int)));
-EXTERN int  tgetent   DCL((char *bp, const char *name));
-EXTERN char *tgetstr  DCL((char *, char **));
-EXTERN char *tgoto    DCL((CONST char *cap, int col, int row));
+#  if !ANSI
+EXTERN int  tgetflag            DCL((char *id));
+EXTERN int  tgetnum             DCL((char *id));
+EXTERN int  tgetent             DCL((char *bp, const char *name));
+EXTERN char *tgetstr            DCL((char *, char **));
+EXTERN char *tgoto              DCL((CONST char *cap, int col, int row));
+EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
+#  endif  /* !ANSI */
+# endif /* !USE_CURSES */
+# if ANSI
+EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
+# endif /* ANSI */
+/*==============================================================*/
+
+/*==============================================================*/
+#define   TGETFLAG(x)     tgetflag((char *)(x))
+#define   TGETNUM(x)      tgetnum((char *)(x))
+# if VAT
+#  define TGETSTR(a, b)   tgetstr( (char *)(a), *(b) )
+# else
+#  define TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
+# endif
+
+# define MkUNXDirSep_(path)	do	{         \
+    char  *cp__ = (path);                 \
+                                          \
+    while ( *cp__ )	{                     \
+        if ( '\\' == *cp__ )	{           \
+            *cp__ = '/';                  \
+        }                                 \
+        cp__++;                           \
+    }                                     \
+} while ( 0 )
+
+# define MkDOSDirSep_(path)	do	{         \
+    char  *cp__	= (path);                 \
+                                          \
+    while ( *cp__ )	{                     \
+        if ( '/' == *cp__ )	{             \
+            *cp__	= '\\';                 \
+        }                                 \
+        cp__++;                           \
+    }                                     \
+} while ( 0 )
+
+# if CYGWIN
+#  define NormalizePathUNX(path)  do  {                     \
+    char  *cp_  = (path);                                   \
+                                                            \
+    if ( 0 <= IsDOSPath(cp_) )  {                           \
+        MkDOSDirSep_(cp_);                                  \
+        xstrlcpy(cp_, getunxpath(cp_), SIZEOF(path));       \
+    }                                                       \
+    MkUNXDirSep_(cp_);                                      \
+} while ( 0 )
+#  define NormalizePathDOS(path)  do  {                     \
+    char  *cp_  = (path);                                   \
+                                                            \
+    if ( 0 >= IsDOSPath(cp_) )  {                           \
+        MkUNXDirSep_(cp_);                                  \
+        xstrlcpy(cp_, getdospath(cp_), SIZEOF(path));       \
+    }                                                       \
+    MkDOSDirSep_(cp_);                                      \
+} while ( 0 )
+#  define NULL_DEVICE             "NUL"
+# else
+#  define NormalizePathUNX(path)  MkUNXDirSep_(path)
+#  define NormalizePathDOS(path)  MkDOSDirSep_(path)
+#  define NULL_DEVICE             "/dev/null"
 # endif
 /*==============================================================*/
 
 
 /** Restore predefined definitions **/
-# undef CTRL                            /* Restore CTRL               */
-# define CTRL 0x0100
+# undef CTRF                            /* Restore CTRF               */
+# define CTRF 0x0100
 
 /** Parameters **/
 # define NINCHAR         64             /* Input buffer size          */
@@ -194,9 +271,9 @@ EXTERN char *tgoto    DCL((CONST char *cap, int col, int row));
 # define NPAUSE          10           /* # times thru update to pause */
 
 /** CONSTANTS **/
-# define TIMEOUT         255            /* No character available     */
 # define MLWAIT          3
 
+/** Type definitions **/
 struct capbind {                        /* Capability binding entry   */
     CONST char  *name;                  /* Termcap name               */
     char        *store;                 /* Storage variable           */
@@ -220,7 +297,9 @@ static struct termios oldterm;          /* Original modes             */
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
 # endif
+# if !ANSI
 static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
+# endif /* !ANSI */
 # define CAP_CL          0              /* Clear to end of page       */
 # define CAP_CM          1              /* Cursor motion              */
 # define CAP_CE          2              /* Clear to end of line       */
@@ -252,6 +331,7 @@ static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
 #   define CAP_SB          26           /* Set background color       */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
+# if !ANSI
 static struct capbind capbind[] =       /* Capability binding list    */
 {
     { "cl" },                           /* Clear to end of page       */
@@ -286,13 +366,15 @@ static struct capbind capbind[] =       /* Capability binding list    */
 #  endif /* USG || AIX || AUX */
 # endif /* COLOR */
 };
+
 # if COLOR
 static int cfcolor = -1;                /* Current forground color    */
 static int cbcolor = -1;                /* Current background color   */
 # endif /* COLOR */
+
 static struct keybind keybind[] =       /* Keybinding list            */
 {
-    { "bt", SHFT|CTRL|'i' },            /* Back-tab key               */
+    { "bt", SHFT|CTRF|'i' },            /* Back-tab key               */
     { "k1", SPEC|'1' },                 /* F1 key                     */
     { "k2", SPEC|'2' },                 /* F2 key                     */
     { "k3", SPEC|'3' },                 /* F3 key                     */
@@ -314,34 +396,46 @@ static struct keybind keybind[] =       /* Keybinding list            */
     { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key        */
     { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key        */
     { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key        */
-    { "kA", CTRL|'O' },                 /* Insert line key            */
-    { "kb", CTRL|'H' },                 /* Backspace key              */
-    { "kC", CTRL|'L' },                 /* Clear screen key           */
+    { "kA", CTRF|'O' },                 /* Insert line key            */
+    { "kb", CTRF|'H' },                 /* Backspace key              */
+    { "kC", CTRF|'L' },                 /* Clear screen key           */
     { "kD", SPEC|'D' },                 /* Delete character key       */
     { "kd", SPEC|'N' },                 /* Down arrow key             */
-    { "kE", CTRL|'K' },                 /* Clear to end of line key   */
-    { "kF", CTRL|'V' },                 /* Scroll forward key         */
+    { "kE", CTRF|'K' },                 /* Clear to end of line key   */
+    { "kF", CTRF|'V' },                 /* Scroll forward key         */
     { "kH", SPEC|'>' },                 /* Home down key              */
     { "@7", SPEC|'>' },                 /* Home down key    (kjc)     */
     { "kh", SPEC|'<' },                 /* Home key                   */
     { "kI", SPEC|'C' },                 /* Insert character key       */
-    { "kL", CTRL|'K' },                 /* Delete line key            */
+    { "kL", CTRF|'K' },                 /* Delete line key            */
     { "kl", SPEC|'B' },                 /* Left arrow key             */
     { "kN", SPEC|'V' },                 /* Next page key              */
     { "kP", SPEC|'Z' },                 /* Previous page key          */
-    { "kR", CTRL|'Z' },                 /* Scroll backward key        */
+    { "kR", CTRF|'Z' },                 /* Scroll backward key        */
     { "kr", SPEC|'F' },                 /* Right arrow key            */
     { "ku", SPEC|'P' },                 /* Up arrow key               */
     { "K1", SPEC|'<' },                 /* Keypad 7 -> Home           */
     { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up        */
     { "K3", ' ' },                      /* Keypad 5                   */
     { "K4", SPEC|'>' },                 /* Keypad 1 -> End            */
-    { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down      */
-    { "kw", CTRL|'E' }                  /* End of line                */
+    { "K5", CTRF|'V' },                 /* Keypad 3 -> Page Down      */
+    { "kw", CTRF|'E' }                  /* End of line                */
 };
+# endif /* !ANSI */
 static int inbuf[NINCHAR];              /* Input buffer               */
 static int * inbufh = inbuf;            /* Head of input buffer       */
 static int * inbuft = inbuf;            /* Tail of input buffer       */
+#define PRINT_inbuf(where) do  {                                  \
+    int i = 0;                                                    \
+                                                                  \
+    fprintf(stderr, "%12s: inbuft = %d, inbufh = %d, inbuf = ",   \
+                    (char *)(where), (int)(inbuft - inbuf),       \
+                                     (int)(inbufh - inbuf));      \
+    for ( i = 0; i < NELEM(inbuf) - 1; i++ )  {                   \
+        fprintf(stderr, "0x%04X, ", inbuf[i]);                    \
+    }                                                             \
+    fprintf(stderr, "0x%04X\n", inbuf[i]);                        \
+} while ( 0 )
 static unsigned char outbuf[NOUTCHAR];  /* Output buffer              */
 static unsigned char * outbuft = outbuf;/* Output buffer tail         */
 
@@ -352,25 +446,30 @@ static char rbuf[NFILEN];               /* Return file buffer         */
 static char *nameptr;                 /* Ptr past end of path in rbuf */
 
 /** Terminal definition block **/
-static int scopen   DCL((void));
+# if !ANSI
 static int scmove   DCL((int, int));
+static int scbeep   DCL((void));
+static int sckclose DCL((void));
+static int sckopen  DCL((void));
+static int scopen   DCL((void));
+static int scclose  DCL((void));
 static int sceeol   DCL((void));
 static int sceeop   DCL((void));
 static int screv    DCL((int));
-static int scbeep   DCL((void));
-static int sckclose DCL((void));
-static int scclose  DCL((void));
-static int sckopen  DCL((void));
 # if COLOR
 static int scfcol   DCL((int));
 static int scbcol   DCL((int));
 # endif /* COLOR */
+# endif /* ANSI */
 
 # if ( FLABEL )
 static VOID dis_sfk DCL((void));
 static VOID dis_ufk DCL((void));
 # endif
 
+# if  ANSI
+COMMON TERM term;
+# else
 TERM term =
 {
     120,                        /* Maximum number of rows             */
@@ -404,8 +503,11 @@ TERM term =
     scdelline,                  /* delete a screen line               */
 # endif /* INSDEL */
 };
+# endif /* ANSI */
 
+# if !ANSI
 static int hpterm =0;           /* global flag braindead HP-terminal  */
+# endif
 
 
 /** Open terminal device **/
@@ -587,7 +689,7 @@ int ttputc P1_(int, ch)
 /** Grab input characters, with wait **/
 unsigned char grabwait()
 {
-    unsigned char ch;
+    unsigned char ch  = '\0';
 
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] ) {
@@ -616,51 +718,115 @@ unsigned char grabwait()
         exit(1);
     }
 # endif
-    /* Return new character */
 
+    /* Return new character */
+# if ( 0 )
+    TRC(("grabwait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+# endif
     return (ch);
 }
 
 /** Grab input characters, short wait **/
-unsigned char grabnowait P0_()
+# if ( USE_TERMINAL_SELECT )
+unsigned char PASCAL NEAR grabnowait P0_()
 {
-    int count;
-    unsigned char ch;
+    fd_set          rfds;
+    struct timeval  tv;
+    int             retval  = 0;
+
+    ZEROMEM(rfds);
+    ZEROMEM(tv);
+
+    /* Watch stdin (fd 0) to see when it has input. */
+
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+
+    /* Wait up to UNIX_READ_TOUT * 1/10 seconds:  */
+    tv.tv_sec = UNIX_READ_TOUT / 10;
+    tv.tv_usec = 100000 * (UNIX_READ_TOUT % 10);
+
+    retval = select(1, &rfds, NULL, NULL, &tv);
+    if        ( 0 >  retval ) { /* error          */
+        TRC(("grabnowait(): %s", "select error"));
+
+        return (grabnowait_TIMEOUT);
+    } else if ( 0 == retval ) { /* timeout        */
+        return (grabnowait_TIMEOUT);
+    } else /* 0 < retval */   { /* data available */
+        int           count = 0;
+        unsigned char ch    = '\0';
+
+        /* Perform read */
+#  if HANDLE_WINCH
+        while ( ( count = read(0, &ch, 1) ) < 0 ) {
+            if ( winch_flag )
+                return 0;
+        }
+#  else
+        count = read(0, &ch, 1);
+        if ( count < 0 ) {
+            puts("** Horrible read error occured **");
+            exit(1);
+        }
+#  endif
+        if ( count == 0 ) { /* Should not happen  */
+            TRC(("grabnowait(): %s", "select .GT. 0 but no data"));
+
+            return (grabnowait_TIMEOUT);
+        }
+        /* Return new character */
+#  if ( 0 )
+        TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+#  endif
+        return (ch);
+    }
+}
+# else
+unsigned char PASCAL NEAR grabnowait P0_()
+{
+    int           count = 0;
+    unsigned char ch    = '\0';
 
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] == 0 ) {
         curterm.c_cc[VMIN] = 0;
-        curterm.c_cc[VTIME] = 5;
-# if   ( USE_TERMIOS_TCXX )
+        curterm.c_cc[VTIME] = UNIX_READ_TOUT;
+#  if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
-# elif ( USE_TERMIO_IOCTL )
+#  elif ( USE_TERMIO_IOCTL )
         ioctl(0, TCSETA, &curterm);
-# elif ( USE_CURSES )
+#  elif ( USE_CURSES )
         /* ? */
-# else
+#  else
 #  error MISSING TERMINAL CONTROL DEFINITION
-# endif
+#  endif
     }
 
     /* Perform read */
-# if HANDLE_WINCH
+#  if HANDLE_WINCH
     while ( ( count = read(0, &ch, 1) ) < 0 ) {
         if ( winch_flag )
             return 0;
     }
-# else
+#  else
     count = read(0, &ch, 1);
     if ( count < 0 ) {
         puts("** Horrible read error occured **");
         exit(1);
     }
-# endif
-    if ( count == 0 )
-        return (TIMEOUT);
+#  endif
+    if ( count == 0 ) {
+        return (grabnowait_TIMEOUT);
+    }
 
     /* Return new character */
+#  if ( 0 )
+    TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+#  endif
     return (ch);
 }
+# endif /* USE_TERMINAL_SELECT */
 
 /* QIN:
  *
@@ -668,16 +834,22 @@ unsigned char grabnowait P0_()
  */
 VOID qin P1_(int, ch)
 {
+# if ( 0 )
+    PRINT_inbuf("BEGIN qin");
+# endif
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
         /* Annoy user */
-        scbeep();
+        term.t_beep();
 
         return;
     }
 
     /* Add character */
     *inbuft++ = ch;
+# if ( 0 )
+    PRINT_inbuf("  END qin");
+# endif
 }
 
 /* QREP:
@@ -686,14 +858,21 @@ VOID qin P1_(int, ch)
  */
 VOID qrep P1_(int, ch)
 {
+# if ( 0 )
+    PRINT_inbuf("BEGIN qrep");
+# endif
     inbuft = inbuf;
     qin(ch);
+# if ( 0 )
+    PRINT_inbuf("  END qrep");
+# endif
 }
 
 /** Return cooked characters **/
-int ttgetc P0_()
+int PASCAL NEAR ttgetc P0_()
 {
-    int ch;
+    int ch  = 0;
+
     ttflush();
     /* Loop until character is in input buffer */
     while ( inbufh == inbuft )
@@ -708,6 +887,36 @@ int ttgetc P0_()
         inbufh = inbuft = inbuf;
 
     /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc(): 0x%04X", (unsigned int)ch));
+# endif
+    return (ch);
+}
+
+int ttgetc_nowait P0_()
+{
+    int ch  = 0;
+
+    ttflush();
+    /* Loop until character is in input buffer */
+    while ( inbufh == inbuft )  {
+        if ( !cook_nowait() ) {
+            return grabnowait_TIMEOUT;
+        }
+    }
+
+    /* Get input from buffer, now that it is available */
+    ch = *inbufh++;
+
+    /* reset us to the beginning of the buffer if there are no more pending
+     * characters */
+    if ( inbufh == inbuft )
+        inbufh = inbuft = inbuf;
+
+    /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
+# endif
     return (ch);
 }
 
@@ -715,7 +924,9 @@ int ttgetc P0_()
 
 int typahead P0_()
 {
-    int count;
+#   if ( defined(FIONREAD) || ( !VAT && defined(FIORDCHK) ) )
+    int count = 0;
+#   endif
 
     /* See if internal buffer is non-empty */
     if ( inbufh != inbuft )
@@ -763,10 +974,16 @@ VOID putpad P1_(char *, seq)
         return;
 
     /* Call on termcap to send sequence */
+# if ANSI
+    ttputs(seq);
+    TRC( ("ttputs(%s)", seq) );
+# else
     tputs(seq, 1, ttputc);
     TRC( ("tputs(%s, 1, ttputc)", seq) );
+# endif /* ANSI */
 }
 
+# if !ANSI
 /** Initialize screen package **/
 int scopen P0_()
 {
@@ -776,16 +993,16 @@ int scopen P0_()
     struct keybind * kp;
     char err_str[NSTRING];
 
-# if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
+#  if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
     /* HP-UX, AUX and AIX5 doesn't seem to have these in the
      * termcap library  */
     char PC, * UP;
     short ospeed;
-# else /* not HPUX8 || HPUX9 || VAT || AUX */
+#  else /* not HPUX8 || HPUX9 || VAT || AUX */
     COMMON char   PC;
     COMMON char   *UP;
     COMMON short  ospeed;
-# endif /* HPUX8 || HPUX9 || VAT || AUX */
+#  endif /* HPUX8 || HPUX9 || VAT || AUX */
 
     /* Get terminal type */
     cp = getenv("TERM");
@@ -869,24 +1086,24 @@ int scopen P0_()
     }
 
     /* Set speed for padding sequences */
-# if   ( USE_TERMIOS_TCXX )
+#  if   ( USE_TERMIOS_TCXX )
     ospeed = cfgetospeed(&curterm);
-# elif ( USE_TERMIO_IOCTL )
+#  elif ( USE_TERMIO_IOCTL )
     ospeed = curterm.c_cflag & CBAUD;
-# elif ( USE_CURSES )
+#  elif ( USE_CURSES )
     /* ? */
-# else
-#  error MISSING TERMINAL CONTROL DEFINITION
-# endif
+#  else
+#   error MISSING TERMINAL CONTROL DEFINITION
+#  endif
 
     /* Send out initialization sequences */
-# if ( !AIX )
+#  if ( !AIX )
     putpad(capbind[CAP_IS].store);
-# endif
+#  endif
     putpad(capbind[CAP_KS].store);
     sckopen();
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     /* Initialize screen */
     initscr();
 
@@ -899,7 +1116,7 @@ int scopen P0_()
         puts("Cannot open terminal");
         exit(1);
     }
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return ( 0 );
@@ -912,10 +1129,10 @@ int scclose P0_()
     putpad(capbind[CAP_KE].store);
     sckclose();
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     /* Turn off curses */
     endwin();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
     /* Close terminal device */
     ttflush();
     ttclose();
@@ -929,9 +1146,9 @@ int sckopen P0_()
 {
     putpad(capbind[CAP_KS].store);
     ttflush();
-# if     FLABEL
+#  if     FLABEL
     dis_ufk();
-# endif
+#  endif
 
     return ( 0 );
 }
@@ -941,9 +1158,9 @@ int sckclose P0_()
 {
     putpad(capbind[CAP_KE].store);
     ttflush();
-# if     FLABEL
+#  if     FLABEL
     dis_sfk();
-# endif
+#  endif
 
     return ( 0 );
 }
@@ -956,9 +1173,9 @@ int scmove P2_(int, row, int, col)
     /* Call on termcap to create move sequence */
     putpad( tgoto(capbind[CAP_CM].store, col, row) );
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     move(row, col);
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
@@ -970,9 +1187,9 @@ int sceeol P0_()
     /* Send erase sequence */
     putpad(capbind[CAP_CE].store);
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     clrtoeol();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
@@ -981,16 +1198,16 @@ int sceeol P0_()
 /** Clear screen **/
 int sceeop P0_()
 {
-# if COLOR
+#  if COLOR
     scfcol(gfcolor);
     scbcol(gbcolor);
-# endif /* COLOR */
+#  endif /* COLOR */
     /* Send clear sequence */
     putpad(capbind[CAP_CL].store);
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     erase();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
 
     /* Success */
@@ -1001,14 +1218,14 @@ int sceeop P0_()
 int screv P1_(int, state)
 /* state: New state */
 {
-# if COLOR
+#  if COLOR
     int ftmp, btmp;             /* temporaries for colors */
-# endif /* COLOR */
+#  endif /* COLOR */
 
     /* Set reverse video state */
     putpad(state ? capbind[CAP_SO].store : capbind[CAP_SE].store);
 
-# if COLOR
+#  if COLOR
     if ( state == FALSE ) {
         ftmp = cfcolor;
         btmp = cbcolor;
@@ -1017,14 +1234,14 @@ int screv P1_(int, state)
         scfcol(ftmp);
         scbcol(btmp);
     }
-# endif /* COLOR */
+#  endif /* COLOR */
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     if ( state )
         standout();
     else
         standend();
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
@@ -1033,28 +1250,28 @@ int screv P1_(int, state)
 /** Beep **/
 int scbeep P0_()
 {
-# if !NOISY
+#  if !NOISY
     /* Send out visible bell, if it exists */
     if ( capbind[CAP_VB].store )
         putpad(capbind[CAP_VB].store);
     else
-# endif /* not NOISY */
+#  endif /* not NOISY */
     /* The old standby method */
     ttputc('\7');
 
-# if ( USE_CURSES )
+#  if ( USE_CURSES )
     addch('\7');                /* FIX THIS! beep() and flash comes up undefined
                                  */
-# endif /* USE_CURSES */
+#  endif /* USE_CURSES */
 
     /* Success */
     return (0);
 }
 
-# if COLOR
-#  if USG || AUX
+#  if COLOR
+#   if USG || AUX
 static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
 /** Set foreground color **/
 int scfcol P1_(int, color)
@@ -1076,16 +1293,16 @@ int scfcol P1_(int, color)
         putpad(capbind[CAP_C0 + (color & 7)].store);
         cfcolor = color;
     }
-#  if USG || AUX
+#   if USG || AUX
     else if ( capbind[CAP_SF].store ) {
         putpad( tparm(capbind[CAP_SF].store, cmap[color & 7]) );
         cfcolor = color;
     }
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
-#  if ( USE_CURSES )
+#   if ( USE_CURSES )
     /* ? */
-#  endif /* USE_CURSES */
+#   endif /* USE_CURSES */
 
     return (0);
 }
@@ -1110,39 +1327,42 @@ int scbcol P1_(int, color)
         putpad(capbind[CAP_D0 + (color & 7)].store);
         cbcolor = color;
     }
-#  if USG || AUX
+#   if USG || AUX
     else if ( capbind[CAP_SB].store ) {
         putpad( tparm(capbind[CAP_SB].store, cmap[color & 7]) );
         cbcolor = color;
     }
-#  endif /* USG || AUX */
+#   endif /* USG || AUX */
 
-#  if ( USE_CURSES )
+#   if ( USE_CURSES )
     /* ? */
-#  endif /* USE_CURSES */
+#   endif /* USE_CURSES */
 
     return (0);
 }
-# endif /* COLOR */
+#  endif /* COLOR */
 
 /** Set palette **/
-int spal P1_(char *, cmd)
+int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
 {
     int   code      = 0;
     int   dokeymap  = 0;
+#  if COLOR
+    int   doclrmap  = 0;
+#  endif /* COLOR */
     char  *cp       = NULL;
 
     /* Check for keymapping command */
-    if ( strncmp(cmd, "KEYMAP ", 7) == 0 )
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
         dokeymap = 1;
-    else
-# if COLOR
-    if ( strncmp(cmd, "CLRMAP ", 7) == 0 )
-        dokeymap = 0;
-    else
-# endif /* COLOR */
+#  if COLOR
+    } else if ( strncmp(cmd, "CLRMAP ", 7) == 0 ) {
+            doclrmap = 1;
+#  endif /* COLOR */
+    } else                                        {
         return (0);
+    }
 
     cmd += 7;
 
@@ -1159,17 +1379,14 @@ int spal P1_(char *, cmd)
     for (; *cp == ' '; cp++ );
 
     /* Perform operation */
-    if ( dokeymap ) {
-
+    if        ( dokeymap )  {
         /* Convert to keycode */
         code = stock(cmd);
 
         /* Add to tree */
         addkey((unsigned char *)cp, code);
-    }
-# if COLOR
-    else {
-
+#  if COLOR
+    } else if ( doclrmap )  {
         /* Convert to color number */
         code = atoi(cmd);
         if ( code < 0 || code > 15 )
@@ -1180,13 +1397,16 @@ int spal P1_(char *, cmd)
         if ( capbind[CAP_C0 + code].store ) {
             XSTRCPY(capbind[CAP_C0 + code].store, cp);
             TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
-                   STR(capbind[CAP_C0 + code].store) ) );
+                  STR(capbind[CAP_C0 + code].store) ) );
         }
+#  endif /* COLOR */
+    } else                  {
+        /**EMPTY**/
     }
-# endif /* COLOR */
 
     return (0);
 }
+# endif /* !ANSI */
 
 /* Surely more than just BSD systems do this: */
 
@@ -1202,7 +1422,7 @@ int bktoshell P2_(int, f, int, n)
     /* We should now be back here after resuming */
 
     /* Reopen the screen and redraw */
-    scopen();
+    term.t_open();
     curwp->w_flag = WFHARD;
     sgarbf = TRUE;
 
@@ -1271,24 +1491,246 @@ int rename P2_(char *, file1, char *, file2)
 # endif
 /*====================================================================*/
 
+# if CYGWIN
+
+/* ISDOSPATH:
+ *
+ * Classify path:
+ * .GT. 0:  DOS Path
+ * .EQ. 0:  Unknown
+ * .LT. 0:  UNIX Path
+ */
+static int  IsDOSPath P1_(CONST char *, path)
+{
+    int len = 0;
+
+    if ( NULL == path || '\0' == *path )  {
+        return 0;
+    }
+
+    len = strlen(path);
+    if        ( 1 == len )  {
+        if        ( '\\' == *path ) {
+            return  ( 1 );
+        } else if ( '/' == *path )  {
+            return  ( -1 );
+        } else                      {
+            return  ( 0 );
+        }
+    } else if ( 2 == len )  {
+        if        ( '\\' == *path ) {
+            return  ( 1 );
+        } else if ( '/' == *path )  {
+            return  ( -1 );
+        } else                      {
+            if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
+                return  ( 1 );
+            } else if ( '.' == *path )                          {
+                if        ( '.'  == *(path + 1) ) {
+                    return ( 0 );
+                } else if ( '\\' == *(path + 1) ) {
+                    return ( 1 );
+                } else if ( '/' == *(path + 1) )  {
+                    return ( -1 );
+                } else                            {
+                    return ( 0 );
+                }
+            } else                                              {
+                return 0;
+            }
+        }
+    } else  /* 3 <= len */  {
+        if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
+            return  ( 1 );
+        } else if ( '.' == *path )                          {
+            if        ( '.'  == *(path + 1) ) {
+                if        ( '\\' == *(path + 2) ) {
+                    return ( 1 );
+                } else if ( '/' == *(path + 2) )  {
+                    return ( -1 );
+                } else                            {
+                    return ( 0 );
+                }
+            } else if ( '\\' == *(path + 1) ) {
+                return ( 1 );
+            } else if ( '/' == *(path + 1) )  {
+                return ( -1 );
+            } else                            {
+                return ( 0 );
+            }
+        } else                                              {
+            return ( 0 );
+        }
+    }
+}
+
+static CONST char *getdospath P1_(CONST char *, in)
+{
+    static char dospath[NFILEN];
+
+    ZEROMEM(dospath);
+    if ( NULL == in ) {
+        in  = "";
+    }
+
+    if ( 0 != cygwin_conv_path(CCP_POSIX_TO_WIN_A | CCP_ABSOLUTE, in,
+                               dospath, SIZEOF(dospath)) )            {
+        int errno_sv  = errno;
+
+        TRC(("cygwin_conv_path(%s) (==> DOS): %s", in,
+             strerror(errno_sv)));
+        return NULL;
+    }
+
+    return dospath;
+}
+
+static CONST char *getunxpath P1_(CONST char *, in)
+{
+    static char unxpath[NFILEN];
+
+    ZEROMEM(unxpath);
+    if ( NULL == in ) {
+        in  = "";
+    }
+
+    if ( 0 != cygwin_conv_path(CCP_WIN_A_TO_POSIX | CCP_ABSOLUTE, in,
+                               unxpath, SIZEOF(unxpath)) )            {
+        int errno_sv  = errno;
+
+        TRC(("cygwin_conv_path(%s) (==> UNX): %s", in,
+             strerror(errno_sv)));
+        return NULL;
+    }
+
+    return unxpath;
+}
+
+static CONST char *wingetshell P0_()
+{
+    static CONST char *res  = NULL;
+
+    if ( NULL == res )  {
+        char        SystemRoot[NFILEN];
+        static char WinCmd[NFILEN];
+
+        ZEROMEM(SystemRoot);
+        ZEROMEM(WinCmd);
+
+        if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
+            xstrlcpy(SystemRoot, "C:\\WINDOWS", SIZEOF(SystemRoot));
+        }
+        MkDOSDirSep_(SystemRoot);
+        xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
+        res = WinCmd;
+    }
+
+    return res;
+}
+
+#define SHELL_C_  "/C"
+static int winsystem P1_(CONST char *, cmd)
+{
+    pid_t               child_pid = 0;
+    int                 status    = 0;
+    int                 errno_sv  = 0;
+    CONST char          *shell    = NULL;
+    sigset_t            mask;
+    posix_spawnattr_t   attr;
+    char  * /**CONST**/ sargv[] = { NULL, (char *)SHELL_C_, (char *)cmd, NULL };
+
+    extern char **environ;
+
+    ZEROMEM(mask);
+    ZEROMEM(attr);
+
+    ASRT( NULL != (shell = wingetshell()) );
+    sargv[0]  = (char *)shell;
+
+    if ( NULL == cmd )  {
+        cmd = "";
+        sargv[2] = (char *)cmd;
+    }
+
+    /* Create an attributes object and add a "set signal mask"
+       action to it. */
+
+    if ( 0 != posix_spawnattr_init(&attr) ) {
+        return ( -C_20 );
+    }
+    if ( 0 != posix_spawnattr_setflags(&attr, POSIX_SPAWN_SETSIGMASK) ) {
+        return ( -C_30 );
+    }
+    sigfillset(&mask);
+    if ( 0 != posix_spawnattr_setsigmask(&attr, &mask) )  {
+        return ( -C_40 );
+    }
+
+#  if ( !0 )
+    TRC(("Executing <%s %s %s>", shell, SHELL_C_, cmd));
+#  endif
+    if ( 0 != posix_spawnp(&child_pid, shell, NULL, &attr, sargv, environ) )  {
+        errno_sv  = errno;
+        TRC(("Error executing <%s %s %s>, errno = %d: %s", shell, SHELL_C_,
+             cmd, errno_sv, strerror(errno_sv)));
+    }
+
+    /* Destroy any objects that we created earlier. */
+    if ( 0 != posix_spawnattr_destroy(&attr) )  {
+        /**EMPTY**/
+    }
+
+    if ( 0 != errno_sv )  {
+        return ( (-1) * errno_sv );
+    }
+
+    /* Monitor status of the child until it terminates. */
+    do {
+        if ( 0 > waitpid(child_pid, &status, WUNTRACED | WCONTINUED) )  {
+            return ( -1 );
+        }
+
+        if (WIFEXITED(status)) {
+            return WEXITSTATUS(status);
+        } else if (WIFSIGNALED(status)) {
+            return WTERMSIG(status);
+        } else if (WIFSTOPPED(status)) {
+            /**EMPTY**/
+        } else if (WIFCONTINUED(status)) {
+            /**EMPTY**/
+        }
+    } while (!WIFEXITED(status) && !WIFSIGNALED(status));
+
+    return WEXITSTATUS ( status );
+}
+#  undef SHELL_C_
+# endif /* CYGWIN */
+
 /** Callout to system to perform command **/
 int callout P1_(CONST char *, cmd)
 /* cmd: Command to execute  */
 {
-    int status;
+    int status  = 0;
 
+    if ( NULL == cmd )  {
+        return 0;
+    }
     /* Close down */
-    scmove(term.t_nrow, 0);
+    term.t_move(term.t_nrow, 0);
     ttflush();
-    sckclose();
+    term.t_kclose();
     ttclose();
 
     /* Do command */
+# if ( CYGWIN )
+    status = winsystem(cmd) == 0;
+# else
     status = system(cmd) == 0;
+# endif
 
     /* Restart system */
     sgarbf = TRUE;
-    sckopen();
+    term.t_kopen();
     if ( ttopen() ) {
         puts("** Error reopening terminal device **");
         exit(1);
@@ -1303,22 +1745,39 @@ int spawncli P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    CONST char  *sh;
+    CONST char  *sh = NULL;
 
     /* Don't allow this command if restricted */
     if ( restflag )
         return ( resterr() );
 
     /* Get shell path */
+# if ( CYGWIN )
+    if ( NULL != (sh = getenv("SHELL")) ) { /* e.g. in a cygwin term  */
+        char  cygsh[NFILEN];
+
+        ZEROMEM(cygsh);
+        xstrlcpy(cygsh, sh, SIZEOF(cygsh));
+        NormalizePathDOS(cygsh);
+        sh  = cygsh;
+    } else                                {
+        sh  = getenv("COMSPEC");
+    }
+# else
     sh = getenv("SHELL");
-    if ( !sh )
+# endif /* CYGWIN */
+
+    if ( !sh )  {
 # if ( LINUX )
         sh = "/bin/bash";
 # elif ( SOLARIS )
         sh = "/usr/bin/ksh";
+# elif ( CYGWIN )
+        sh = wingetshell();
 # else
         sh = "/bin/sh";
-# endif
+# endif /* LINUX */
+    }
 
     /* Do shell */
     return ( callout(sh) );
@@ -1329,8 +1788,10 @@ int spawn P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    char line[NLINE];
-    int s;
+    char  line[NLINE];
+    int   s = 0;
+
+    ZEROMEM(line);
 
     /* Don't allow this command if restricted */
     if ( restflag )
@@ -1368,6 +1829,84 @@ int execprg P2_(int, f, int, n)
 /* Joachim Schneider, 2018-11-02/2023-08-19, joachim<at>hal.rhein-neckar.org   */
 /*=============================================================================*/
 
+static int  IsDir P1_(CONST char *, dir)
+{
+    struct stat sb;
+
+    ZEROMEM(sb);
+
+    if ( !dir || !*dir )  {
+        return FALSE;
+    }
+    if        ( 0 > stat(dir, &sb) )  {
+        return FALSE;
+    } else if ( S_ISDIR(sb.st_mode) ) {
+        return TRUE;
+    } else                            {
+        return FALSE;
+    }
+}
+
+/* Get a directory for temporary files: Cannot fail.  */
+static char *gettmpdir P0_()
+{
+    static char *res  = NULL;
+
+    if ( NULL == res )  {
+        static char tmpd[NFILEN];
+        int         l   = 0;
+
+        /**ZEROMEM(tmpd);**/
+
+        /* Test environment variables TMP, and TEMP: */
+        if ( 0 < xstrlcpy(tmpd, getenv("TMP"), SIZEOF(tmpd)) )  {
+            NormalizePathUNX(tmpd);
+            if ( IsDir(tmpd) )  {
+                goto found;
+            }
+        }
+        if ( 0 < xstrlcpy(tmpd, getenv("TEMP"), SIZEOF(tmpd)) ) {
+            NormalizePathUNX(tmpd);
+            if ( IsDir(tmpd) )  {
+                goto found;
+            }
+        }
+
+        /* Test the directory used by `tmpnam()': */
+# ifdef P_tmpdir
+        xstrlcpy(tmpd, P_tmpdir, SIZEOF(tmpd));
+        if ( IsDir(tmpd) )  {
+            goto found;
+        }
+# else
+        if ( IsDir("/tmp") )  {
+            xstrlcpy(tmpd, "/tmp", SIZEOF(tmpd));
+            goto found;
+        }
+# endif
+
+        /* Last resort: Use current directory:  */
+        xstrlcpy(tmpd, ".", SIZEOF(tmpd));
+
+
+    found:
+        l = strlen(tmpd);
+        if        ( 0 == l )              {
+            xstrlcpy(tmpd, ".", SIZEOF(tmpd));
+        } else if ( '/' == tmpd[l - 1] )  {
+            if ( 1 < l )  {
+                tmpd[l - 1] = '\0';
+            } else {  /* "/"  */
+                tmpd[l - 1] = '.';
+            }
+        }
+
+        res = tmpd;
+    }
+
+    return res;
+}
+
 /* gettmpfname:
  *
  * Return in a static buffer the name of a temporary currently not
@@ -1375,17 +1914,28 @@ int execprg P2_(int, f, int, n)
  */
 char *gettmpfname P1_(CONST char *, ident)
 {
-    char str[NFILEN];
-    int i;
-    static int seed = 0;
+    char        str[NFILEN];
+    int         i   = 0;
+    static int  seed = 0;
     static char res[NFILEN];
 
-    xsnprintf( str, SIZEOF (str), "/tmp/me-%s-%02x", ident,
-               ( (int)getpid() % 0x100 ) );
+    ZEROMEM(str);
+    ZEROMEM(res);
+
+    xstrlcpy(str, gettmpdir(),              SIZEOF(str));
+    xstrlcat(str, "/me-",                   SIZEOF(str));
+    xstrlcat(str, ident,                    SIZEOF(str));
+    xstrlcat(str, "-",                      SIZEOF(str));
+    xstrlcat(str, nni2s_(getpid() % 0x100), SIZEOF(str));
+
     for ( i = 0; i < 0x100; i++ ) {
         struct stat sb;
 
-        xsnprintf(res, SIZEOF (res), "%s-%02x", str, (seed + i) % 0x100);
+        ZEROMEM(sb);
+
+        xstrlcpy(res, str,                        SIZEOF(res));
+        xstrlcat(res, "-",                        SIZEOF(res));
+        xstrlcat(res, nni2s_((seed + i) % 0x100), SIZEOF(res));
         if ( 0 > stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
                 seed = (seed + i + 1) % 0x100;
@@ -1421,36 +1971,66 @@ static int LaunchPrg P4_(const char *,  Cmd,
                          const char *,  OutFile,
                          const char *,  ErrFile)
 {
-    char FullCmd[NLINE];
+    char  FullCmd[NLINE];
+    char  lInFile[NFILEN];
+    char  lOutFile[NFILEN];
+    char  lErrFile[NFILEN];
+
+    ZEROMEM(FullCmd);
+    ZEROMEM(lInFile);
+    ZEROMEM(lOutFile);
+    ZEROMEM(lErrFile);
 
     if ( !Cmd ) {
         return FALSE;
     }
 
     if ( !InFile || !*InFile ) {
-        InFile  = "/dev/null";
+        XSTRCPY(lInFile, NULL_DEVICE);
+    } else  {
+# if CYGWIN
+        XSTRCPY(lInFile, getdospath(InFile));
+# else
+        XSTRCPY(lInFile, InFile);
+# endif
     }
     if ( !OutFile || !*OutFile ) {
-        OutFile  = "/dev/null";
+        XSTRCPY(lOutFile, NULL_DEVICE);
+    } else  {
+# if CYGWIN
+        XSTRCPY(lOutFile, getdospath(OutFile));
+# else
+        XSTRCPY(lOutFile, OutFile);
+# endif
     }
     if ( !ErrFile || !*ErrFile ) {
-        ErrFile  = "/dev/null";
+        XSTRCPY(lErrFile, NULL_DEVICE);
+    } else  {
+# if CYGWIN
+        XSTRCPY(lErrFile, getdospath(ErrFile));
+# else
+        XSTRCPY(lErrFile, ErrFile);
+# endif
     }
 
     xsnprintf(FullCmd,
               SIZEOF (FullCmd),
+# if CYGWIN
+              "%s < %s > %s 2>%s",
+# else
               "( %s ) < %s > %s 2>%s",
+# endif
               Cmd,
-              InFile,
-              OutFile,
-              ErrFile);
+              lInFile,
+              lOutFile,
+              lErrFile);
 
     return callout(FullCmd);
 } /* LaunchPrg */
 
 /*=============================================================================*/
 /* Some helper functions that could also be in char.c/eproto.h                 */
-/* We do nit want to use the ctype.h functions as they depend on the locale.   */
+/* We do not want to use the ctype.h functions as they depend on the locale.   */
 /*=============================================================================*/
 
 static int IsIn P3_(const char, c, const char *, set, int, len)
@@ -1665,7 +2245,7 @@ int pipecmd P2_(int, f, int, n)
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
-        mlwrite("[Cannot write filter file]");
+        mlwrite("[Cannot write filter file <%s>]", InFile);
         XSTRCPY(bp->b_fname, tmpnam);
         unlink(InFile);
         sleep(MLWAIT);
@@ -1803,7 +2383,7 @@ int f_filter P2_(int, f, int, n)
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
-        mlwrite("[Cannot write filter file]");
+        mlwrite("[Cannot write filter file <%s>]", InFile);
         XSTRCPY(bp->b_fname, tmpnam);
         unlink(InFile);
         sleep(MLWAIT);
@@ -2057,7 +2637,7 @@ VOID winch_new_size P0_()
 
     ZEROMEM(win);
 
-    winch_flag=0;
+    winch_flag  = 0;
     ioctl(fileno(stdin), TIOCGWINSZ, &win);
     winch_vtresize(win.ws_row, win.ws_col);
     onlywind(0, 0);

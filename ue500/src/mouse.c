@@ -105,7 +105,7 @@ int PASCAL NEAR mmove P2_(int, f, int, n)
                                          * line? */
 
     /* ignore this if not hilighting */
-    if ( hilite >= NMARKS )
+    if ( !hilite_IsValid() )
         return (TRUE);
 
     /* ignore this if we did not just do a mouse region down */
@@ -232,11 +232,11 @@ int PASCAL NEAR mregdown P2_(int, f, int, n)
 
     /* perform the region function */
     if ( nclicks == 1 ) {
-        if ( hilite < NMARKS ) {
-            curwp->w_markp[hilite+1] = NULL;
-            curwp->w_marko[hilite+1] = 0;
-            curwp->w_markp[hilite] = curwp->w_dotp;
-            curwp->w_marko[hilite] = get_w_doto(curwp);
+        if ( hilite_IsValid() ) {
+            curwp->w_markp[hilite+1]  = NULL;
+            curwp->w_marko[hilite+1]  = 0;
+            curwp->w_markp[hilite]    = curwp->w_dotp;
+            curwp->w_marko[hilite]    = get_w_doto(curwp);
         }
 
         return ( setmark(FALSE, 0) );

@@ -102,7 +102,7 @@ int scnothing()
 # include "elang.h"                     /* Language definitions     */
 
 /** Kill predefined **/
-# undef CTRL                            /* Problems with CTRL       */
+# undef CTRF                            /* Problems with CTRF       */
 
 
 /** Overall include files **/
@@ -157,8 +157,8 @@ int scnothing()
          * (AVVION || TERMIOS) */
 
 /** Restore predefined definitions **/
-# undef CTRL                            /* Restore CTRL         */
-# define CTRL 0x0100
+# undef CTRF                            /* Restore CTRF         */
+# define CTRF 0x0100
 
 /** Parameters **/
 # define NINCHAR         64             /* Input buffer size        */
@@ -171,8 +171,8 @@ int scnothing()
 # define NPAUSE          10             /* # times thru update to pause */
 
 /** CONSTANTS **/
-# define TIMEOUT         255            /* No character available   */
 
+/** Type definitions **/
 # if TERMCAP || TERMIOS
 struct capbind {                        /* Capability binding entry */
     char * name;                        /* Termcap name         */
@@ -187,7 +187,7 @@ char *reset = (char*) NULL;             /* reset string kjc */
 
 /** Local variables **/
 # if (BSD && !TERMIOS)
-static struct sgttyb cursgtty;          /* Current modes        */
+  static struct sgttyb cursgtty;          /* Current modes        */
 static struct sgttyb oldsgtty;          /* Original modes       */
 static struct tchars oldtchars;         /* Current tchars       */
 static struct ltchars oldlchars;        /* Current ltchars      */
@@ -276,7 +276,7 @@ static int cbcolor = -1;                /* Current background color */
 #  endif /* COLOR */
 static struct keybind keybind[] =       /* Keybinding list      */
 {
-    { "bt", SHFT|CTRL|'i' },            /* Back-tab key         */
+    { "bt", SHFT|CTRF|'i' },            /* Back-tab key         */
     { "k1", SPEC|'1' },                 /* F1 key           */
     { "k2", SPEC|'2' },                 /* F2 key           */
     { "k3", SPEC|'3' },                 /* F3 key           */
@@ -298,30 +298,30 @@ static struct keybind keybind[] =       /* Keybinding list      */
     { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key      */
     { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key      */
     { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key      */
-    { "kA", CTRL|'O' },                 /* Insert line key      */
-    { "kb", CTRL|'H' },                 /* Backspace key        */
-    { "kC", CTRL|'L' },                 /* Clear screen key     */
+    { "kA", CTRF|'O' },                 /* Insert line key      */
+    { "kb", CTRF|'H' },                 /* Backspace key        */
+    { "kC", CTRF|'L' },                 /* Clear screen key     */
     { "kD", SPEC|'D' },                 /* Delete character key     */
     { "kd", SPEC|'N' },                 /* Down arrow key       */
-    { "kE", CTRL|'K' },                 /* Clear to end of line key */
-    { "kF", CTRL|'V' },                 /* Scroll forward key       */
+    { "kE", CTRF|'K' },                 /* Clear to end of line key */
+    { "kF", CTRF|'V' },                 /* Scroll forward key       */
     { "kH", SPEC|'>' },                 /* Home down key        */
     { "@7", SPEC|'>' },                 /* Home down key    (kjc)   */
     { "kh", SPEC|'<' },                 /* Home key         */
     { "kI", SPEC|'C' },                 /* Insert character key     */
-    { "kL", CTRL|'K' },                 /* Delete line key      */
+    { "kL", CTRF|'K' },                 /* Delete line key      */
     { "kl", SPEC|'B' },                 /* Left arrow key       */
     { "kN", SPEC|'V' },                 /* Next page key        */
     { "kP", SPEC|'Z' },                 /* Previous page key        */
-    { "kR", CTRL|'Z' },                 /* Scroll backward key      */
+    { "kR", CTRF|'Z' },                 /* Scroll backward key      */
     { "kr", SPEC|'F' },                 /* Right arrow key      */
     { "ku", SPEC|'P' },                 /* Up arrow key         */
     { "K1", SPEC|'<' },                 /* Keypad 7 -> Home     */
     { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up      */
     { "K3", ' ' },                      /* Keypad 5             */
     { "K4", SPEC|'>' },                 /* Keypad 1 -> End      */
-    { "K5", CTRL|'V' },                 /* Keypad 3 -> Page Down    */
-    { "kw", CTRL|'E' }                  /* End of line          */
+    { "K5", CTRF|'V' },                 /* Keypad 3 -> Page Down    */
+    { "kw", CTRF|'E' }                  /* End of line          */
 };
 # endif /* TERMCAP */
 static int inbuf[NINCHAR];              /* Input buffer         */
@@ -649,7 +649,7 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
-unsigned char grabnowait()
+unsigned char PASCAL NEAR grabnowait()
 {
 # if (BSD && !TERMIOS)
     static struct timeval timout = { 0, 500000L };
@@ -659,7 +659,7 @@ unsigned char grabnowait()
     r = 1;
     count = select(1, &r, NULL, NULL, &timout);
     if ( count == 0 )
-        return (TIMEOUT);
+        return (grabnowait_TIMEOUT);
 
     if ( count < 0 ) {
         puts("** Horrible select error occured **");
@@ -702,7 +702,7 @@ unsigned char grabnowait()
     }
 #  endif
     if ( count == 0 )
-        return (TIMEOUT);
+        return (grabnowait_TIMEOUT);
 
     /* Return new character */
     return (ch);

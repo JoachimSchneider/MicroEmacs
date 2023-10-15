@@ -17,6 +17,9 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "estruct.h"
+#if CYGWIN
+# include <unistd.h>
+#endif
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
@@ -1798,6 +1801,34 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
+static FILE *mytmpfile P0_()
+{
+# if !CYGWIN
+    return tmpfile();
+# else
+/* `tmpfile() does *not* work with cygwin in the windows console! */
+    {
+        char  *fname  = NULL;
+        FILE  *fp     = NULL;
+
+        if ( NULL == (fname = gettmpfname("mytmpfile")) ) {
+            TRC(("%s", "mytempfile(): gettmpfname() failed"));
+
+            return NULL;
+        }
+        if ( NULL == (fp = fopen(fname, "wb+")) ) {
+            TRC(("mytempfile(): fopen(\"%s\") failed", fname));
+
+            return NULL;
+        }
+
+        unlink(fname);  /* ``Silly delete'' */
+
+        return fp;
+    }
+# endif
+}
+
 /* XVSNPRINTF:
  *
  * An unelegant but portable version of C99 vsnprintf():
@@ -1818,7 +1849,7 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
     ASRT(NULL != fmt);
 
     if ( NULL == fp ) {           /* One-time initialization */
-        if ( NULL == ( fp = tmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
+        if ( NULL == ( fp = mytmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
             return (-1);
         }
         /*

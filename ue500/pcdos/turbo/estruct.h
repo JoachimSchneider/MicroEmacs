@@ -58,6 +58,7 @@
 #define AIX5    0                     /* IBM UNIX newer rs6000        */
 #define AVIION  0                     /* Data General AViiON          */
 #define BSD     0                     /* UNIX BSD 4.2 and ULTRIX      */
+#define CYGWIN  0                     /* Unix emulation on MS Windows */
 #define FINDER  0                     /* Macintosh OS                 */
 #define FREEBSD 0                     /* FREEBSD 386 version 2 or +   */
 #define LINUX   0                     /* Linux                        */
@@ -82,9 +83,9 @@
 
 
 #define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD       \
-                          || FREEBSD || HPUX8 || HPUX9 || LINUX     \
-                          || OPENBSD || SMOS || SOLARIS || SUN      \
-                          || USG || XENIX )
+                          || CYGWIN || FREEBSD || HPUX8 || HPUX9    \
+                          || LINUX || OPENBSD || SMOS || SOLARIS    \
+                          || SUN || USG || XENIX )
 #define IS_POSIX_UNIX() ( IS_UNIX()                                 \
                           && !( USG || AIX || AUX || SMOS || HPUX8  \
                                 || HPUX9 || SUN || XENIX ) )
@@ -137,6 +138,8 @@
 
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
+/*      It is possible to use the ANSI terminal with UNIX:  No        */
+/*      termcap/curses library needed with this setup.                */
 
 #define ANSI    0           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
@@ -157,6 +160,10 @@
 #define XPCON   0           /* windows XP console app                 */
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
+
+/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
+
+#define UNIX_READ_TOUT  (4)
 
 /*      Windowing system style (pick one)                             */
 
@@ -701,7 +708,7 @@ execl(va_alist)
 #define MAXSYM  32              /* max # chars in symbol to expand    */
 #define MINFLEN 3               /* min # chars to match &func         */
 
-#define CTRL    0x0100          /* Control flag, or'ed in             */
+#define CTRF    0x0100          /* Control flag, or'ed in             */
 #define META    0x0200          /* Meta flag, or'ed in                */
 #define CTLX    0x0400          /* ^X flag, or'ed in                  */
 #define SPEC    0x0800          /* special key (function keys)        */

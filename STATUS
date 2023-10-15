@@ -835,5 +835,36 @@ simulate a PROTO == 0, VARG == 1 system!
 And it works!
 
 
+[2023-09-28.00]
+Next Steps:
+- unixansi.c ---> unix.c  (\/)
+- ANSI: Send a SIGWINCH at startup to initialize or somehow after term.t_topen (in display.c).
+        ===> Done (countdown loop in main.c) but not really understood.
+- Remark in estruct.h that UNIX && ANSI *is* possible and avoids linking of termcap/terminfo/curses (\/)
+- New platform `cygwin' in estruct.h                                                                (\/)
+- Use "cywin: in cygwin                                                                             (\/)
+- Change external and shell commands for cygwin in unix.c                                           (\/)
+- Creatw a *.cmd to call emacs in cygwin
+- A little documentation:
+  + Use forward slashes with cygwin.
+- Should .emacsrc be moved to emacs.rc (Similar to DOS) for cygwin?                                 (\/)
+- Create two cygwin ports:  --- NO we only create ANSI                                              (\/)
+  + cygwin/ncurses
+  + cygwin/ansi     --- runs ouside of cygwin shell and does not need the ncurses-dll.              (\/)
+- tempfile() does *not* work with cygwin in windows console! Therefor xvsnprintf fails! Steps needed:
+  + implement gettmpfname() *without* xvsnprintf (using our `uitostr_memacs()')                     (\/)
+  + Use mytempfile():                                                                               (\/)
+    o tempfile() if not CYGWIN
+    o Open a file using gettmpfname. Register an exitproc removing this file: No, "silllly delete"  (\/)
+- Check again VA_COPY: Should `memcpy(&dst, &src, sizeof(dst)' not *always* be correct? NO!         (\/)
+
+
+#============================== TODO LIST ==============================
+
+- Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq
+- Check if Palette settings are applicable to ANSI.
+- grabnowait(): Change it to return int and return grabnowait_TIMEOUT == (-1) on
+  timeout: Tis allows 0xFF to be used as text character.
+
 
 # EOF

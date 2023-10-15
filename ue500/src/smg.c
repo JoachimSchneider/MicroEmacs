@@ -787,10 +787,10 @@ int smgcap P0_()
     smgaddkey(SMG$K_KEY_RIGHT_ARROW, SPEC | 'F');
     smgaddkey(SMG$K_KEY_UP_ARROW, SPEC | 'P');
 
-    smgaddkey(SMG$K_KEY_PF1, CTRL | SPEC | '1');
-    smgaddkey(SMG$K_KEY_PF2, CTRL | SPEC | '2');
-    smgaddkey(SMG$K_KEY_PF3, CTRL | SPEC | '3');
-    smgaddkey(SMG$K_KEY_PF4, CTRL | SPEC | '4');
+    smgaddkey(SMG$K_KEY_PF1, CTRF | SPEC | '1');
+    smgaddkey(SMG$K_KEY_PF2, CTRF | SPEC | '2');
+    smgaddkey(SMG$K_KEY_PF3, CTRF | SPEC | '3');
+    smgaddkey(SMG$K_KEY_PF4, CTRF | SPEC | '4');
 
     smgaddkey(SMG$K_KEY_0, ALTD | '0');
     smgaddkey(SMG$K_KEY_1, ALTD | '1');
