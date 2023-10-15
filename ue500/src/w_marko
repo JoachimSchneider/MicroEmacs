@@ -1,1 +1,0 @@
-history.c: *      - a missing long cast in abbrev.c in ab_expand() cause problems
