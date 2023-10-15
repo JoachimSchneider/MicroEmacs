@@ -1754,7 +1754,12 @@ int spawncli P2_(int, f, int, n)
     /* Get shell path */
 # if ( CYGWIN )
     if ( NULL != (sh = getenv("SHELL")) ) { /* e.g. in a cygwin term  */
-        sh  = NormalizePathDOS(sh);
+        char  cygsh[NFILEN];
+
+        ZEROMEM(cygsh);
+        xstrlcpy(cygsh, sh, sizeof(cygsh);
+        NormalizePathDOS(cygsh);
+        sh  = cygsh;
     } else                                {
         sh  = getenv("COMSPEC");
     }
