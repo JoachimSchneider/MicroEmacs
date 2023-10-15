@@ -1,0 +1,20 @@
+random.c:            for ( j_ = 0; j_ < count; j_++ )  {                     \
+random.c:                    for ( i_ = 0; i_ < stabsize; i_++ ) {           \
+random.c:    for ( j_ = 0; j_ < count; j_++ )  {                         \
+random.c:            for ( i_ = 0; i_ < stabsize; i_++ ) {               \
+undo.c:        ASRT( NULL != (AirBag_ = (char *)malloc(AIRBAG_SIZE_)) );
+undo.c:        FREE(AirBag_);
+undo.c:        FREE(AirBag_);
+unix.c:    if ( 0 <= IsDOSPath(cp_) )  {                           \
+unix.c:        MkDOSDirSep_(cp_);                                  \
+unix.c:        xstrlcpy(cp_, getunxpath(cp_), SIZEOF(path));       \
+unix.c:    MkUNXDirSep_(cp_);                                      \
+unix.c:# define IsUpper(c)      ( IsIn( (c), UPPERS_, SIZEOF (UPPERS_) - 1 ) )
+unix.c:# define IsLower(c)      ( IsIn( (c), LOWERS_, SIZEOF (LOWERS_) - 1 ) )
+unix.c:# define IsDigit(c)      ( IsIn( (c), DIGITS_, SIZEOF (DIGITS_) - 1 ) )
+unix.c:# define IsSpace(c)      ( IsIn( (c), SPACES_, SIZEOF (SPACES_) - 1 ) )
+unix.c:# define IsUndersqr(c)   ( IsIn( (c), UNDERSQS_, SIZEOF (UNDERSQS_) - 1 ) )
+unix.c:    for ( i = 0; i < SIZEOF (LOWERS_) - 1; i++ ) {
+unix.c:    for ( i = 0; i < SIZEOF (UPPERS_) - 1; i++ ) {
+word.c:    if ( is_letter(c_) )
+word.c:    if ( c_ == '_' )

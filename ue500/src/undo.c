@@ -447,7 +447,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
             return ptr;
         }
 
-        FREE(AirBag_);
+        FREE_(AirBag_);
         TRCK(("%s", "room(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
 nextbuf:
@@ -518,7 +518,7 @@ char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
             return ptr;
         }
 
-        FREE(AirBag_);
+        FREE_(AirBag_);
         TRCK(("%s", "reroom(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
 nxtbuf:

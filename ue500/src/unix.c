@@ -231,7 +231,7 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 } while ( 0 )
 
 # if CYGWIN
-#  define NormalizePath(path) do  {                         \
+#  define NormalizePathUNX(path)  do  {                     \
     char  *cp_  = (path);                                   \
                                                             \
     if ( 0 <= IsDOSPath(cp_) )  {                           \
@@ -240,10 +240,20 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
     }                                                       \
     MkUNXDirSep_(cp_);                                      \
 } while ( 0 )
-#  define NULL_DEVICE         "NUL"
+#  define NormalizePathDOS(path)  do  {                     \
+    char  *cp_  = (path);                                   \
+                                                            \
+    if ( 0 >= IsDOSPath(cp_) )  {                           \
+        MkUNXDirSep_(cp_);                                  \
+        xstrlcpy(cp_, getdospath(cp_), SIZEOF(path));       \
+    }                                                       \
+    MkDOSDirSep_(cp_);                                      \
+} while ( 0 )
+#  define NULL_DEVICE             "NUL"
 # else
-#  define NormalizePath(path) VOIDCAST(0)
-#  define NULL_DEVICE         "/dev/null"
+#  define NormalizePathUNX(path)  MkUNXDirSep_(path)
+#  define NormalizePathDOS(path)  MkDOSDirSep_(path)
+#  define NULL_DEVICE             "/dev/null"
 # endif
 /*==============================================================*/
 
@@ -1743,11 +1753,16 @@ int spawncli P2_(int, f, int, n)
 
     /* Get shell path */
 # if ( CYGWIN )
-    sh = getenv("COMSPEC");
+    if ( NULL != (sh = getenv("SHELL")) ) { /* e.g. in a cygwin term  */
+        sh  = NormalizePathDOS(sh);
+    } else                                {
+        sh  = getenv("COMSPEC");
+    }
 # else
     sh = getenv("SHELL");
 # endif /* CYGWIN */
-    if ( !sh )
+
+    if ( !sh )  {
 # if ( LINUX )
         sh = "/bin/bash";
 # elif ( SOLARIS )
@@ -1757,6 +1772,7 @@ int spawncli P2_(int, f, int, n)
 # else
         sh = "/bin/sh";
 # endif /* LINUX */
+    }
 
     /* Do shell */
     return ( callout(sh) );
@@ -1839,13 +1855,13 @@ static char *gettmpdir P0_()
 
         /* Test environment variables TMP, and TEMP: */
         if ( 0 < xstrlcpy(tmpd, getenv("TMP"), SIZEOF(tmpd)) )  {
-            NormalizePath(tmpd);
+            NormalizePathUNX(tmpd);
             if ( IsDir(tmpd) )  {
                 goto found;
             }
         }
         if ( 0 < xstrlcpy(tmpd, getenv("TEMP"), SIZEOF(tmpd)) ) {
-            NormalizePath(tmpd);
+            NormalizePathUNX(tmpd);
             if ( IsDir(tmpd) )  {
                 goto found;
             }
