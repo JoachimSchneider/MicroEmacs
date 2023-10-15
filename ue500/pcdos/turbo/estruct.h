@@ -163,7 +163,7 @@
 
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
-#define UNIX_READ_TOUT  (7)
+#define UNIX_READ_TOUT  (4)
 
 /*      Windowing system style (pick one)                             */
 
