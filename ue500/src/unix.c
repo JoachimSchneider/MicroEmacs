@@ -1876,6 +1876,7 @@ static char *gettmpdir P0_()
 # define CHKDIR_(d)  do  {                                            \
     /**ZEROMEM(tmpd);**/                                              \
     if ( 0 < xstrlcpy(tmpd, (d), SIZEOF(tmpd)) )  {                   \
+        TRC(("gettmpdir(): Testing <%s> as candidate", tmpd));        \
         NormalizePathUNX(tmpd);                                       \
         if ( IsDir(tmpd) )  {                                         \
             if ( IsAccessable(tmpd) ) {                               \
