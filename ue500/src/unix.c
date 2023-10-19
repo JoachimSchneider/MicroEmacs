@@ -1540,26 +1540,32 @@ static int  IsDOSPath P1_(CONST char *, path)
             }
         }
     } else  /* 3 <= len */  {
-        if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
+        if        ( '\\' == *path ) {
             return  ( 1 );
-        } else if ( '.' == *path )                          {
-            if        ( '.'  == *(path + 1) ) {
-                if        ( '\\' == *(path + 2) ) {
+        } else if ( '/' == *path )  {
+            return  ( -1 );
+        } else                      {
+            if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
+                return  ( 1 );
+            } else if ( '.' == *path )                          {
+                if        ( '.'  == *(path + 1) ) {
+                    if        ( '\\' == *(path + 2) ) {
+                        return ( 1 );
+                    } else if ( '/' == *(path + 2) )  {
+                        return ( -1 );
+                    } else                            {
+                        return ( 0 );
+                    }
+                } else if ( '\\' == *(path + 1) ) {
                     return ( 1 );
-                } else if ( '/' == *(path + 2) )  {
+                } else if ( '/' == *(path + 1) )  {
                     return ( -1 );
                 } else                            {
                     return ( 0 );
                 }
-            } else if ( '\\' == *(path + 1) ) {
-                return ( 1 );
-            } else if ( '/' == *(path + 1) )  {
-                return ( -1 );
-            } else                            {
+            } else                                {
                 return ( 0 );
             }
-        } else                                              {
-            return ( 0 );
         }
     }
 }
