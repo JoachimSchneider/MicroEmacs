@@ -1847,6 +1847,21 @@ static int  IsDir P1_(CONST char *, dir)
     }
 }
 
+static int IsAccessable(CONST char *d)
+{
+/* This is *not* perfect: `access()' only check for uid/gid but not */
+/* for euid/egid.                                                   */
+    if ( NULL == d )  {
+        return FALSE;
+    }
+
+    if ( 0 == access(d, R_OK|W_OK|X_OK) ) {
+        return TRUE;
+    } else                                {
+        return FALSE;
+    }
+}
+
 /* Get a directory for temporary files: Cannot fail.  */
 static char *gettmpdir P0_()
 {
@@ -1858,36 +1873,39 @@ static char *gettmpdir P0_()
 
         /**ZEROMEM(tmpd);**/
 
-        /* Test environment variables TMP, and TEMP: */
-        if ( 0 < xstrlcpy(tmpd, getenv("TMP"), SIZEOF(tmpd)) )  {
-            NormalizePathUNX(tmpd);
-            if ( IsDir(tmpd) )  {
-                goto found;
-            }
-        }
-        if ( 0 < xstrlcpy(tmpd, getenv("TEMP"), SIZEOF(tmpd)) ) {
-            NormalizePathUNX(tmpd);
-            if ( IsDir(tmpd) )  {
-                goto found;
-            }
-        }
+# define CHKDIR_(d)  do  {                                            \
+    /**ZEROMEM(tmpd);**/                                              \
+    if ( 0 < xstrlcpy(tmpd, (d), SIZEOF(tmpd)) )  {                   \
+        NormalizePathUNX(tmpd);                                       \
+        if ( IsDir(tmpd) )  {                                         \
+            if ( IsAccessable(tmpd) ) {                               \
+                goto found;                                           \
+            } else                  {                                 \
+                TRC(("gettmpdir(): <%s> is not a accessable", tmpd)); \
+            }                                                         \
+        } else              {                                         \
+            TRC(("gettmpdir(): <%s> is not a directory", tmpd));      \
+        }                                                             \
+    }                                                                 \
+} while ( 0 )
+
+        /* Test environment variables UETMPDIR, TMPDIR, TMP, and TEMP:  */
+        CHKDIR_(getenv("UETMPDIR"));
+        CHKDIR_(getenv("TMPDIR"));
+        CHKDIR_(getenv("TMP"));
+        CHKDIR_(getenv("TEMP"));
 
         /* Test the directory used by `tmpnam()': */
 # ifdef P_tmpdir
-        xstrlcpy(tmpd, P_tmpdir, SIZEOF(tmpd));
-        if ( IsDir(tmpd) )  {
-            goto found;
-        }
+        CHKDIR_(P_tmpdir);
 # else
-        if ( IsDir("/tmp") )  {
-            xstrlcpy(tmpd, "/tmp", SIZEOF(tmpd));
-            goto found;
-        }
+        CHKDIR_("/tmp");
 # endif
 
         /* Last resort: Use current directory:  */
         xstrlcpy(tmpd, ".", SIZEOF(tmpd));
 
+# undef CHKDIR_
 
     found:
         l = strlen(tmpd);
@@ -1902,6 +1920,9 @@ static char *gettmpdir P0_()
         }
 
         res = tmpd;
+# if ( !0 )
+        TRC(("gettmpdir(): Found <%s>", res));
+# endif
     }
 
     return res;
