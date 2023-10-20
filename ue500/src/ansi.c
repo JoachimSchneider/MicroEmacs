@@ -89,8 +89,19 @@ typedef struct {
 COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 # endif /* VMS */
 
-# define NROW        25   /* Screen size.                   */
-# define NCOL        80   /* Edit if you want to.           */
+/* --- See also vt52.c --- */
+# define NROW       25    /* Screen size.                   */
+# define NCOL       80    /* Edit if you want to.           */
+# if DJGPP_DOS
+/* DJGPP needs term.t_ncol == 79: Otherwise we get --- at least
+ * since DJDEV204 a SIGSEGV in vbios_write_ch() (DJGPP runtime).
+ */
+#  undef  NCOL
+#  define NCOL      79
+CASRT(1 <= NCOL && NCOL < 80);
+# endif
+
+
 # if HANDLE_WINCH
 #  define NROW_MAX 120    /* .............................. */
 #  define NCOL_MAX 132    /* .............................. */
@@ -141,8 +152,8 @@ int coltran[16] =
 # endif /* COLOR */
 
 /*
- * Standard terminal interface dispatch table. Most of the fields point into
- * "termio" code.
+ * Standard terminal interface dispatch table. Most of the fields point
+ * into "termio" code.
  */
 NOSHARE TERM term = {
     NROW_MAX - 1,
@@ -386,36 +397,52 @@ static int PASCAL NEAR ansiopen P0_()
 {
 # if     IS_UNIX()
     REGISTER char *cp = NULL;
+#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
     struct winsize win;
 
     ZEROMEM(win);
+#  endif
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
         puts(TEXT4);
         TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
 #  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
-
         meexit(1);
 #  endif
-    }
-    if ( strcmp(cp, "vt100") != 0 &&
-         strcmp(cp, "vt200") != 0 &&
-         strcmp(cp, "vt300") != 0 ) {
-        puts(TEXT5);
-        TRC(("%s", TEXT5));
+    } else {
+        if ( strcmp(cp, "vt100") != 0 &&
+             strcmp(cp, "vt200") != 0 &&
+             strcmp(cp, "vt300") != 0 ) {
+            puts(TEXT5);
+            TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
 #  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
-
         meexit(1);
 #  endif
+        }
     }
-    ioctl(fileno(stdin), TIOCGWINSZ, &win);
-    term.t_nrow = win.ws_row - 1;
-    term.t_ncol = win.ws_col;
+#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+    if ( 0 == ioctl(fileno(stdin), TIOCGWINSZ, &win) )  {
+        /* REPAIR(): Sometimes --- e.g. with `qterminal -e emacs <args>'
+         *           the ioctl() called at *this* point gives wrong
+         *           results.
+         */
+        term.t_nrow = win.ws_row - 1;
+        REPAIR(term.t_nrow >= 1,  term.t_nrow = NROW - 1);
+        term.t_ncol = win.ws_col;
+        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL);
+    } else {
+        term.t_nrow = NROW - 1;
+        term.t_ncol = NCOL;
+    }
+#  else
+    term.t_nrow = NROW - 1;
+    term.t_ncol = NCOL;
+#  endif  /* !DJGPP_DOS */
 #  if ( !0 )
-    term.t_mrow = win.ws_row - 1;
-    term.t_mcol = win.ws_col;
+    term.t_mrow = term.t_nrow;
+    term.t_mcol = term.t_ncol;
 #  endif
 # endif /* IS_UNIX() */
 # if     MOUSE && (IS_UNIX() || VMS)

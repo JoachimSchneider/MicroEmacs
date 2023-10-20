@@ -631,7 +631,7 @@ int n;                                  /* Argument count */
     }
 
     /* ...and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (1);
 }
@@ -693,8 +693,8 @@ int n;                                  /* Argument count */
     xstrcpy(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     /* Show status */
     if ( !s )
@@ -763,7 +763,7 @@ char *getnfile()
         /* Check to make sure we skip all weird entries except directories */
         xstrcpy(nameptr, dp->d_name);
 
-    } while ( stat(rbuf,
+    } while ( umc_stat(rbuf,
                    &fstat) ||
               !( S_ISDIR(fstat.st_mode) !!S_ISREG(fstat.st_mode) ) );
 

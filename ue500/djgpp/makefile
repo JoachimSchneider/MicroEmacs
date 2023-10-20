@@ -1,5 +1,5 @@
-#               Linux makefile for
-#               MicroEMACS 4.00
+#               DJGPP makefile for
+#               MicroEMACS 5.00
 #               (C)Copyright 1995 by Daniel Lawrence
 #               all rights reserved
 
@@ -43,7 +43,7 @@ HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.
 #list of object files
 
 F1 = $(OBJD)/abbrev.o $(OBJD)/ansi.o $(OBJD)/basic.o $(OBJD)/bind.o $(OBJD)/buffer.o
-F2 = $(OBJD)/char.o $(OBJD)/crypt.o $(OBJD)/cygw32.o $(OBJD)/display.o $(OBJD)/dolock.o
+F2 = $(OBJD)/char.o $(OBJD)/crypt.o $(OBJD)/display.o $(OBJD)/dolock.o
 F3 = $(OBJD)/eval.o $(OBJD)/exec.o $(OBJD)/file.o $(OBJD)/fileio.o
 F4 = $(OBJD)/input.o $(OBJD)/isearch.o $(OBJD)/keyboard.o $(OBJD)/line.o
 F5 = $(OBJD)/lock.o $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
@@ -73,8 +73,6 @@ $(OBJD)/char.o: $(SRCD)/char.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/char.o $(SRCD)/char.c
 $(OBJD)/crypt.o: $(SRCD)/crypt.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/crypt.o $(SRCD)/crypt.c
-$(OBJD)/cygw32.o: $(SRCD)/cygw32.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/cygw32.o $(SRCD)/cygw32.c
 $(OBJD)/cmdfix.o: $(SRCD)/cmdfix.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/cmdfix.o $(SRCD)/cmdfix.c
 $(OBJD)/display.o: $(SRCD)/display.c $(HFILES)
@@ -126,8 +124,9 @@ $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
 
 
 clean:
-	rm -f *.o
-	rm -f emacs
+	del *.o
+	del emacs
+	del emacs.exe
 
 
 # EOF

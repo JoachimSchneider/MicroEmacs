@@ -241,8 +241,7 @@ qprompt:
             lastline = lback(curwp->w_dotp);
         }
 
-        /* Delete the sucker, and insert its replacement.
-         */
+        /* Delete the sucker, and insert its replacement. */
 #if     MAGIC
         status = delins(matchlen, (char *)&rpat[0], rmagical);
 #else
@@ -280,7 +279,7 @@ qprompt:
 
                 return (ABORT);
             }
-            XSTRCPY(oldpatmatch, patmatch);
+            xstrlcpy(oldpatmatch, patmatch, matchlen + 1);
         } else if ( matchlen == 0 ) {
             mlwrite(TEXT91);
 /*              "Empty string replaced, stopping." */
@@ -346,16 +345,15 @@ VOID PASCAL NEAR mlrquery P0_()
  */
 int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
 {
-    REGISTER int status;
-    REGISTER CONST char     *rstr;
+    REGISTER int        status  = 0;
+    REGISTER CONST char *rstr   = NULL;
 #if     MAGIC
-    REGISTER RMC        *rmcptr;
+    REGISTER RMC        *rmcptr = NULL;
 #endif
 
     replen = 0;
 
-    /* Zap what we gotta, and insert its replacement.
-     */
+    /* Zap what we gotta, and insert its replacement. */
     if ( ( status = ldelete( (long) dlength, FALSE ) ) != TRUE )
         mlwrite(TEXT93);
 /*          "%%ERROR while deleting" */
@@ -376,8 +374,13 @@ int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
     } else
 #endif
     {
-        status = linstr(instr);
-        replen = STRLEN(instr);
+        if ( instr && *instr )  {
+            status = linstr(instr);
+            replen = STRLEN(instr);
+        } else {
+            status = TRUE;
+            replen = 0;
+        }
     }
 
     return (status);

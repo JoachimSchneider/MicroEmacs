@@ -108,7 +108,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { CTLX|'A',           BINDFNC, { setvar } },
     { CTLX|'B',           BINDFNC, { usebuffer } },
     { CTLX|'C',           BINDFNC, { spawncli } },
-#if ( IS_UNIX() || VMS )
+#if ( IS_UNIX() && !DJGPP_DOS || VMS )
     { CTLX|'D',           BINDFNC, { bktoshell } },
 #endif
     { CTLX|'E',           BINDFNC, { ctlxe } },
@@ -170,7 +170,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { META|'P',           BINDFNC, { gotobop } },
     { META|'Q',           BINDFNC, { trParFill } },
     { META|'R',           BINDFNC, { sreplace } },
-#if ( IS_UNIX() || VMS )
+#if ( IS_UNIX() && !DJGPP_DOS || VMS )
     { META|'S',           BINDFNC, { bktoshell } },
 #endif
     { META|'U',           BINDFNC, { upperword } },

@@ -1311,11 +1311,11 @@ char * file2;                           /* New file name        */
     struct stat buf2;
 
     /* No good if source file doesn't exist */
-    if ( stat(file1, &buf1) )
+    if ( umc_stat(file1, &buf1) )
         return (-1);
 
     /* Check for target */
-    if ( stat(file2, &buf2) == 0 ) {
+    if ( umc_stat(file2, &buf2) == 0 ) {
 
         /* See if file is the same */
         if ( buf1.st_dev == buf2.st_dev &&buf1.st_ino == buf2.st_ino )
@@ -1325,14 +1325,14 @@ char * file2;                           /* New file name        */
     }
 
     /* Get rid of target */
-    unlink(file2);
+    umc_unlink(file2);
 
     /* Link two files together */
     if ( link(file1, file2) )
         return (-1);
 
     /* Unlink original file */
-    return ( unlink(file1) );
+    return ( umc_unlink(file1) );
 }
 # endif /* USG || AUX || SMOS || HPUX8 || XENIX */
 
@@ -1490,7 +1490,7 @@ int n;                                  /* Argument count       */
     }
 
     /* ...and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (1);
 }
@@ -1552,8 +1552,8 @@ int n;                                  /* Argument count       */
     xstrcpy(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     /* Show status */
     if ( !s )
@@ -1621,7 +1621,7 @@ char *getnfile()
         /* Check to make sure we skip all weird entries except directories */
         xstrcpy(nameptr, dp->d_name);
 
-    } while (stat(rbuf,
+    } while (umc_stat(rbuf,
                   &fstat) ||
              ( (fstat.st_mode & S_IFMT) & (S_IFREG | S_IFDIR) ) == 0);
 

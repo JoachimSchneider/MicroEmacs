@@ -22,10 +22,16 @@ store-procedure	init-help
 	;make this screen the proper size for help
 	set $orgrow 0
 	set $orgcol 0
-	set $curwidth 80
-	!if &not &equ $pagelen 24
-		set $pagelen 25
-	!endif
+	; DJGPP only allows 79
+	!force set $curwidth 79
+	!force set $curwidth 80
+	!force set $pagelen  24
+	; BEGIN Previous coding
+	;;set $curwidth 80
+	;;!if &not &equ $pagelen 24
+	;;	set $pagelen 25
+	;;!endif
+	;   END Previous coding
 	set $mmove 0
 
 	set $modeflag FALSE
@@ -72,7 +78,7 @@ store-procedure gethscreen %helpscreen	;switch the current help screen
 			set %helpfile 1		;mark which help file we are in
 		!endif
 		delete-mode "view"		;don't lock the help file
-			
+
 		beginning-of-file
 		!force search-forward %tmp
 		!if &seq $status FALSE
@@ -428,7 +434,7 @@ store-procedure select-mouse
 			!return
 		!endif
 
-		!if &seq %cmd "F10" 
+		!if &seq %cmd "F10"
 			exit-help
 			!return
 		!endif

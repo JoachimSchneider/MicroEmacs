@@ -1,6 +1,6 @@
 /*======================================================================
- * This file contains the command processing functions for a number of random
- * commands. There is no functional grouping here, for sure.
+ * This file contains the command processing functions for a number of
+ * random commands. There is no functional grouping here, for sure.
  *====================================================================*/
 
 /*====================================================================*/
@@ -1801,7 +1801,7 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
-static FILE *mytmpfile P0_()
+FILE *uetmpfile_ P1_(int, delmode)
 {
 # if !IS_UNIX() /**!CYGWIN**/
     return tmpfile();
@@ -1812,23 +1812,69 @@ static FILE *mytmpfile P0_()
 /* no be what we want. Our implementation evaluates (via              */
 /* `gettmpfname()') the `UETMPDIR' environmant variable.              */
     {
-        char  *fname  = NULL;
-        FILE  *fp     = NULL;
+        static CONST char **fname_list    = NULL;
+        static int        fname_list_pos  = 0;
+        static int        fname_list_len  = 0;
 
-        if ( NULL == (fname = gettmpfname("mytmpfile")) ) {
-            TRC(("%s", "mytempfile(): gettmpfname() failed"));
+        if ( !delmode ) {
+            CONST char  *fname  = NULL;
+            FILE        *fp     = NULL;
+
+            if ( NULL == (fname = gettmpfname("t")) ) {
+                TRC(("%s", "uetmpfile(): gettmpfname() failed"));
+
+                return NULL;
+            }
+            if ( NULL == (fp = fopen(fname, "wb+")) ) {
+                TRC(("uetmpfile(): fopen(\"%s\") failed", fname));
+
+                return NULL;
+            }
+
+            TRC(("uetmpfile(): Created \"%s\"", fname));
+#  if ( 0 )
+            /* Silly delete might not work if not on UNIX
+             * (e.g. on DJGPP)
+             */
+            umc_unlink(fname);  /* ``Silly delete'' */
+#  else
+            if ( fname_list_pos >= fname_list_len )  {
+                if ( 0 >= fname_list_len )  {
+                    fname_list_len  = 1;
+                }
+                while ( fname_list_pos >= fname_list_len )  {
+                    fname_list_len  *= 2;
+                }
+                /* Avoid REROOM() in this very low level function and
+                 * take care of non standard realloc() behaviour:
+                 */
+                if ( NULL == fname_list ) {
+                    ASRT( NULL != (fname_list =
+                            (CONST char **)calloc(fname_list_len,
+                                                  SIZEOF(*fname_list)))
+                        );
+                } else                    {
+                    ASRT(NULL != (fname_list =
+                            (CONST char **)realloc(fname_list,
+                                fname_list_len * SIZEOF(*fname_list)))
+                        );
+                }
+            }
+            fname_list[fname_list_pos++]  = xstrdup(fname);
+#  endif
+
+            return fp;
+        } else {
+            int i = 0;
+
+            for ( i = 0; i < fname_list_pos; i++ )  {
+                umc_unlink(fname_list[i]);
+                FREE_(fname_list[i]);
+            }
+            FREE_(fname_list);
 
             return NULL;
         }
-        if ( NULL == (fp = fopen(fname, "wb+")) ) {
-            TRC(("mytempfile(): fopen(\"%s\") failed", fname));
-
-            return NULL;
-        }
-
-        unlink(fname);  /* ``Silly delete'' */
-
-        return fp;
     }
 # endif
 }
@@ -1844,26 +1890,38 @@ static FILE *mytmpfile P0_()
 int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
                                va_list, ap)
 {
-    int nn  = n;                /* Want a signed value */
-    int rc  = 0;
-    int nr  = 0;                /* Number of chars to read */
+    int         rc  = 0;            /* Final return code  */
+    int         nn  = n;            /* Want a signed value */
+    int         sc  = 0;            /* Ret code of intermediate calls */
+    int         nr  = 0;            /* Number of chars to read */
     static FILE *fp = NULL;
+    static char buf[BUFSIZ];
 
     ASRT(0    <= nn);
     ASRT(NULL != fmt);
 
     if ( NULL == fp ) {           /* One-time initialization */
+         /* ANSI C: fp should be opened in wb+ mode */
 # if ( 0 )
-        if ( NULL == ( fp = mytmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
+        if ( NULL == ( fp = uetmpfile() ) ) {
             return (-1);
         }
 # else
-        ASRT( NULL != ( fp = mytmpfile() ) ); /* ANSI C: Opened in wb+ mode */
+        ASRT( NULL != ( fp = uetmpfile() ) );
 # endif
         /*
          * Buffering: No real IO for not too large junks
+         *
+         * `setvbuf(fp, NULL, _IOFBF, 0)' does not work everywhere,
+         * e.g. not with DJGPP_DOS.
          */
-        if ( 0 != setvbuf(fp, NULL, _IOFBF, 0) ) {
+        if ( 0 != (sc = setvbuf(fp, buf, _IOFBF, SIZEOF(buf))) )  {
+            int errno_sv  = 0;
+
+            errno_sv  = errno;
+            TRC(("xvsnprintf: setvbuf(), sc = %d, errno = %d: %s",
+                 sc, errno_sv, strerror(errno_sv)));
+
             return (-2);
         }
     }
@@ -1943,6 +2001,7 @@ int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
     return rc;
 }
 
+#if UEMACS_FEATURE_USE_VA_COPY
 /* XVASPRINTF:
  *
  * Like GNU C vasprintf:
@@ -1977,6 +2036,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 
     return rc;
 }
+#endif    /* UEMACS_FEATURE_USE_VA_COPY */
 
 /* XASPRINTF:
  *
@@ -1990,23 +2050,24 @@ int CDECL NEAR  xasprintf (va_alist)
 #else
 int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
 #endif
+#if ( 0 ) /* Version if xvasprintf() is available */
 {
     int     rc  = 0;
     va_list ap;
-#if VARG
+# if VARG
     char        **ret = NULL;
     CONST char  *fmt  = NULL;
-#endif
+# endif
 
     ZEROMEM(ap);
 
-#if VARG
+# if VARG
     va_start(ap);
     ret = va_arg(ap, char **);
     fmt = va_arg(ap, CONST char *);
-#else
+# else
     va_start(ap, fmt);
-#endif
+# endif
 
     ASRT(NULL != ret);
     ASRT(NULL != fmt);
@@ -2016,6 +2077,69 @@ int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
 
     return rc;
 }
+#else
+{
+    int     rc  = 0;
+    int     len = 0;
+    char    *cp = NULL;
+    va_list ap;
+# if VARG
+    char        **ret = NULL;
+    CONST char  *fmt  = NULL;
+# endif
+
+    ZEROMEM(ap);
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    len = xvsnprintf(NULL, 0, fmt, ap);
+
+    va_end(ap);
+
+
+    if ( 0 > len )  {
+        *ret  = NULL;
+
+        return len;
+    }
+    len += 1;
+    ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
+
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    rc  = xvsnprintf(cp, len, fmt, ap);
+
+    va_end(ap);
+
+
+    if ( 0 > rc ) {
+        CLROOM(cp);
+    }
+
+    *ret  = cp;   /* NULL on error, see above */
+
+    return rc;
+}
+#endif  /* Version if xvasprintf() is available */
 
 /* XSTRTOK_R:
  */
@@ -2052,6 +2176,89 @@ char *PASCAL NEAR xstrtok_r P3_(char *, str, CONST char *, sep,
     }
 
     return  res;
+}
+
+/* XSTRCASECMP:
+ */
+int PASCAL NEAR xstrcasecmp P2_(CONST char *, s1, CONST char *, s2)
+{
+    REGISTER int  i = 0;
+
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+
+# define us1_ ( (unsigned char *)s1 )
+# define us2_ ( (unsigned char *)s2 )
+
+    for ( i = 0; ; i++ )  {
+        REGISTER int  c1  = '\0';
+        REGISTER int  c2  = '\0';
+        REGISTER int  lc1 = '\0';
+        REGISTER int  lc2 = '\0';
+
+        c1  = us1_[i];
+        c2  = us2_[i];
+        lc1 = tolower(c1);
+        lc2 = tolower(c2);
+        if ( '\0' == c1 || '\0' == c2 || lc1 != lc2 ) {
+            return ( lc1 - lc2 );
+        }
+    }
+# undef us1_
+# undef us2_
+}
+
+/* XSTRNCASECMP:
+ */
+int PASCAL NEAR xstrncasecmp P3_(CONST char *, s1, CONST char *, s2, int, len)
+{
+    REGISTER int  i = 0;
+
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+    ASRT(0    <= len);
+
+# define us1_ ( (unsigned char *)s1 )
+# define us2_ ( (unsigned char *)s2 )
+
+    for ( i = 0; i < len; i++ ) {
+        REGISTER int  c1  = '\0';
+        REGISTER int  c2  = '\0';
+        REGISTER int  lc1 = '\0';
+        REGISTER int  lc2 = '\0';
+
+        c1  = us1_[i];
+        c2  = us2_[i];
+        lc1 = tolower(c1);
+        lc2 = tolower(c2);
+        if ( '\0' == c1 || '\0' == c2 || lc1 != lc2 ) {
+            return ( lc1 - lc2 );
+        }
+    }
+
+    return ( 0 );
+# undef us1_
+# undef us2_
+}
+
+/* STRCASESTART:
+ */
+int PASCAL NEAR strcasestart P2_(CONST char *, start, CONST char *, test)
+{
+    REGISTER int  slen  = 0;
+    REGISTER int  tlen  = 0;
+
+    ASRT(NULL != start);
+    ASRT(NULL != test);
+
+    slen  = strlen(start);
+    tlen  = strlen(test);
+
+    if ( tlen < slen )  {
+        return ( 0 );
+    } else              {
+        return ( 0 == xstrncasecmp(start, test, slen) );
+    }
 }
 
 

@@ -268,7 +268,7 @@ int PASCAL fix P1_(char *, fname)
     /* close the files */
     fclose(infile);
     fclose(outfile);
-    unlink("tempfile");
+    umc_unlink("tempfile");
 
     /* and report */
     printf("[%u keys fixed in %s]\n", nseq, fname);
