@@ -28,7 +28,7 @@ MicroEMACS for CygWin
   ```
 
 
-This simple session script shows how to get and compile the MicroEmacs:
+This simple session script shows how to get and compile the MicroEMACS:
 
 We are inside of a cygwin bash terminal:
 
@@ -39,16 +39,16 @@ $ make clean
 $ make
 # We assume that C:\bin is in your Windows path
 $ mkdir -p C:/bin
-$ mkdir -p C:/Pgm/MicroEmacs/bin
-$ mkdir -p C:/Pgm/MicroEmacs/cmd
-$ cp -p ../cmd/*  C:/Pgm/MicroEmacs/cmd/
-$ cp -p emacs.rc  C:/Pgm/MicroEmacs/bin/
-$ cp -p emacs.exe C:/Pgm/MicroEmacs/bin/
+$ mkdir -p C:/Pgm/MicroEMACS/bin
+$ mkdir -p C:/Pgm/MicroEMACS/cmd
+$ cp -p ../cmd/*  C:/Pgm/MicroEMACS/cmd/
+$ cp -p emacs.rc  C:/Pgm/MicroEMACS/bin/
+$ cp -p emacs.exe C:/Pgm/MicroEMACS/bin/
 $ cat << 'EOC'  | awk '{ printf "%s\r\n", $0; }' > C:/bin/uemacs.cmd
 @REM uemacs.cmd
 @echo off
-set PATH=C:\Pgm\MicroEmacs\bin;C:\Pgm\MicroEmacs\cmd;%PATH%
-C:\Pgm\MicroEmacs\bin\emacs.exe %1 %2 %3 %4 %5 %6 %7 %8 %9
+set PATH=C:\Pgm\MicroEMACS\bin;C:\Pgm\MicroEMACS\cmd;%PATH%
+C:\Pgm\MicroEMACS\bin\emacs.exe %1 %2 %3 %4 %5 %6 %7 %8 %9
 REM EOF
 EOC
 

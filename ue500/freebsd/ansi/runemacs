@@ -1,6 +1,6 @@
 #!/bin/sh -
 ## CHANGE THIS TO YOUR NEEDS:
-mybas=/usr/loc/pkg/MicroEmacs
+mybas=/usr/loc/pkg/MicroEMACS
 ##
 mybin="${mybas}/bin"
 mycmd="${mybas}/cmd"

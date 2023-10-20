@@ -8,9 +8,9 @@
 # object file directory
 OBJD = .
 # source file directory
-SRCD = ../src
+SRCD = ../../src
 # header file directory
-HDIR = ../h
+HDIR = ../../h
 
 # options and arguments to the C compiler
 #

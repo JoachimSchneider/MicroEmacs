@@ -1502,64 +1502,52 @@ int rename P2_(char *, file1, char *, file2)
  */
 static int  IsDOSPath P1_(CONST char *, path)
 {
-    int len = 0;
+    int         len       = 0;
+    CONST char  *pFSlash  = NULL; /* Points to '/'  */
+    CONST char  *pBSlash  = NULL; /* Points to '\\' */
 
     if ( NULL == path || '\0' == *path )  {
         return 0;
     }
 
-    len = strlen(path);
-    if        ( 1 == len )  {
-        if        ( '\\' == *path ) {
-            return  ( 1 );
-        } else if ( '/' == *path )  {
-            return  ( -1 );
-        } else                      {
-            return  ( 0 );
+    ASRT(1 <= (len = strlen(path)));
+
+    if        ( '\\' == *path ) {
+        return  ( 1 );
+    } else if ( '/' == *path )  {
+        return  ( -1 );
+    } else if ( 1 == len )      {
+        return ( 0 );
+    }
+
+
+    /* 2 .GE. len .AND. *path .NOT. .IN. { '\\', '/' }  */
+
+    /* Path with drive letter, e.g. "C:": */
+    if  ( ISALPHA(*path) && ':' == *(path + 1) )  {
+        return  ( 1 );
+    }
+
+    pFSlash = strchr(path, '/');
+    pBSlash = strchr(path, '\\');
+    if ( NULL == pFSlash  ) {
+        if ( NULL == pBSlash )  {
+            return ( 0 );
+        } else                  {
+            return ( 1 );
         }
-    } else if ( 2 == len )  {
-        if        ( '\\' == *path ) {
-            return  ( 1 );
-        } else if ( '/' == *path )  {
-            return  ( -1 );
-        } else                      {
-            if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
-                return  ( 1 );
-            } else if ( '.' == *path )                          {
-                if        ( '.'  == *(path + 1) ) {
-                    return ( 0 );
-                } else if ( '\\' == *(path + 1) ) {
-                    return ( 1 );
-                } else if ( '/' == *(path + 1) )  {
-                    return ( -1 );
-                } else                            {
-                    return ( 0 );
-                }
-            } else                                              {
-                return 0;
-            }
-        }
-    } else  /* 3 <= len */  {
-        if        ( ISALPHA(*path) && ':' == *(path + 1) )  {
-            return  ( 1 );
-        } else if ( '.' == *path )                          {
-            if        ( '.'  == *(path + 1) ) {
-                if        ( '\\' == *(path + 2) ) {
-                    return ( 1 );
-                } else if ( '/' == *(path + 2) )  {
-                    return ( -1 );
-                } else                            {
-                    return ( 0 );
-                }
-            } else if ( '\\' == *(path + 1) ) {
+    } else                  {
+        if ( NULL == pBSlash )  {
+            return ( -1 );
+        } else                  {
+            /* '/' and '\\' occur in path:  */
+            if ( pBSlash < pFSlash )  {
                 return ( 1 );
-            } else if ( '/' == *(path + 1) )  {
-                return ( -1 );
-            } else                            {
+            } else if ( pBSlash > pFSlash ) {
+                return ( - 1 );
+            } else                          {
                 return ( 0 );
             }
-        } else                                              {
-            return ( 0 );
         }
     }
 }
@@ -1847,6 +1835,21 @@ static int  IsDir P1_(CONST char *, dir)
     }
 }
 
+static int IsAccessable(CONST char *d)
+{
+/* This is *not* perfect: `access()' only check for uid/gid but not */
+/* for euid/egid.                                                   */
+    if ( NULL == d )  {
+        return FALSE;
+    }
+
+    if ( 0 == access(d, R_OK|W_OK|X_OK) ) {
+        return TRUE;
+    } else                                {
+        return FALSE;
+    }
+}
+
 /* Get a directory for temporary files: Cannot fail.  */
 static char *gettmpdir P0_()
 {
@@ -1858,36 +1861,40 @@ static char *gettmpdir P0_()
 
         /**ZEROMEM(tmpd);**/
 
-        /* Test environment variables TMP, and TEMP: */
-        if ( 0 < xstrlcpy(tmpd, getenv("TMP"), SIZEOF(tmpd)) )  {
-            NormalizePathUNX(tmpd);
-            if ( IsDir(tmpd) )  {
-                goto found;
-            }
-        }
-        if ( 0 < xstrlcpy(tmpd, getenv("TEMP"), SIZEOF(tmpd)) ) {
-            NormalizePathUNX(tmpd);
-            if ( IsDir(tmpd) )  {
-                goto found;
-            }
-        }
+# define CHKDIR_(d)  do  {                                            \
+    /**ZEROMEM(tmpd);**/                                              \
+    if ( 0 < xstrlcpy(tmpd, (d), SIZEOF(tmpd)) )  {                   \
+        TRC(("gettmpdir(): Testing <%s> as candidate", tmpd));        \
+        NormalizePathUNX(tmpd);                                       \
+        if ( IsDir(tmpd) )  {                                         \
+            if ( IsAccessable(tmpd) ) {                               \
+                goto found;                                           \
+            } else                  {                                 \
+                TRC(("gettmpdir(): <%s> is not a accessable", tmpd)); \
+            }                                                         \
+        } else              {                                         \
+            TRC(("gettmpdir(): <%s> is not a directory", tmpd));      \
+        }                                                             \
+    }                                                                 \
+} while ( 0 )
+
+        /* Test environment variables UETMPDIR, TMPDIR, TMP, and TEMP:  */
+        CHKDIR_(getenv("UETMPDIR"));
+        CHKDIR_(getenv("TMPDIR"));
+        CHKDIR_(getenv("TMP"));
+        CHKDIR_(getenv("TEMP"));
 
         /* Test the directory used by `tmpnam()': */
 # ifdef P_tmpdir
-        xstrlcpy(tmpd, P_tmpdir, SIZEOF(tmpd));
-        if ( IsDir(tmpd) )  {
-            goto found;
-        }
+        CHKDIR_(P_tmpdir);
 # else
-        if ( IsDir("/tmp") )  {
-            xstrlcpy(tmpd, "/tmp", SIZEOF(tmpd));
-            goto found;
-        }
+        CHKDIR_("/tmp");
 # endif
 
         /* Last resort: Use current directory:  */
         xstrlcpy(tmpd, ".", SIZEOF(tmpd));
 
+# undef CHKDIR_
 
     found:
         l = strlen(tmpd);
@@ -1902,6 +1909,9 @@ static char *gettmpdir P0_()
         }
 
         res = tmpd;
+# if ( !0 )
+        TRC(("gettmpdir(): Found <%s>", res));
+# endif
     }
 
     return res;

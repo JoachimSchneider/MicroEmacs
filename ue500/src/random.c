@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "estruct.h"
-#if CYGWIN
+#if IS_UNIX() /**CYGWIN**/
 # include <unistd.h>
 #endif
 #include "eproto.h"
@@ -1803,10 +1803,14 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
 
 static FILE *mytmpfile P0_()
 {
-# if !CYGWIN
+# if !IS_UNIX() /**!CYGWIN**/
     return tmpfile();
 # else
-/* `tmpfile() does *not* work with cygwin in the windows console! */
+/* `tmpfile()' does *not* work with cygwin in the windows console!    */
+/* We use our own implementation also on UNIX: On e.g. OpenBSD        */
+/* `tmpfile()' evaluates the `TMPDIR' environment variable --- might  */
+/* no be what we want. Our implementation evaluates (via              */
+/* `gettmpfname()') the `UETMPDIR' environmant variable.              */
     {
         char  *fname  = NULL;
         FILE  *fp     = NULL;
@@ -1849,9 +1853,13 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
     ASRT(NULL != fmt);
 
     if ( NULL == fp ) {           /* One-time initialization */
+# if ( 0 )
         if ( NULL == ( fp = mytmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
             return (-1);
         }
+# else
+        ASRT( NULL != ( fp = mytmpfile() ) ); /* ANSI C: Opened in wb+ mode */
+# endif
         /*
          * Buffering: No real IO for not too large junks
          */
