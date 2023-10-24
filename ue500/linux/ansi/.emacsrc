@@ -50,8 +50,10 @@ set $palette "KEYMAP FN7 ~e[18~~"
 set $palette "KEYMAP FN8 ~e[19~~"
 set $palette "KEYMAP FN9 ~e[20~~"
 set $palette "KEYMAP FN0 ~e[21~~"
-; HOME
-set $palette "KEYMAP FN< ~e[7~~"
+; HOME on FreeBSD terminal
+;set $palette "KEYMAP FN< ~e[7~~"
+; HOME on Linux terminal
+set $palette "KEYMAP FN< ~e[H"
 ;;
 set $palette "KEYMAP S-FN1 ~e[25;2~~"
 set $palette "KEYMAP S-FN2 ~e[26;2~~"
@@ -86,7 +88,8 @@ set $posflag TRUE
 ;;
 ;
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
-set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
+;set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
+set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
 ; Default paragraph indent used with fill-*
 set $parindent 0
 ; Default is " \t" which means that indents are recognized as BOP.
