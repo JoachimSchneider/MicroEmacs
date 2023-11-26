@@ -411,24 +411,22 @@ static int PASCAL NEAR ansiopen P0_()
 #  endif
     }
     if ( 0 == ioctl(fileno(stdin), TIOCGWINSZ, &win) )  {
-        /* MAX2(): Sometimes --- e.g. with `qterminal -e emacs <args>'
-         *         the ioctl() called at *this* point gives wrong
-         *         results.
+        /* REPAIR(): Sometimes --- e.g. with `qterminal -e emacs <args>'
+         *           the ioctl() called at *this* point gives wrong
+         *           results.
          */
-        term.t_nrow = MAX2(win.ws_row, NROW) - 1;
-        term.t_ncol = MAX2(win.ws_col, NCOL);
-#  if ( !0 )
-        term.t_mrow = MAX2(win.ws_row, NROW_MAX) - 1;
-        term.t_mcol = MAX2(win.ws_col, NCOL_MAX);
-#  endif
+        term.t_nrow = win.ws_row - 1;
+        REPAIR(term.t_nrow >= 1,  term.t_nrow = NROW - 1);
+        term.t_ncol = win.ws_col;
+        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL);
     } else {
         term.t_nrow = NROW - 1;
         term.t_ncol = NCOL;
-#  if ( !0 )
-        term.t_mrow = NROW_MAX - 1;
-        term.t_mcol = NCOL_MAX;
-#  endif
     }
+#  if ( !0 )
+    term.t_mrow = term.t_nrow;
+    term.t_mcol = term.t_ncol;
+#  endif
 # endif /* IS_UNIX() */
 # if     MOUSE && (IS_UNIX() || VMS)
    /*

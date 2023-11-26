@@ -634,7 +634,7 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 
 /**********************************************************************/
 /*
- * All the ASRT* REPAIT* macros below evaluate their expression (`e')
+ * All the ASRT* REPAIR* macros below evaluate their expression (`e')
  * argument exactly *once*. So a use like
  * `ASRT(NULL != (fp = fopen("FileName", "rw")));' is correct!
  */
