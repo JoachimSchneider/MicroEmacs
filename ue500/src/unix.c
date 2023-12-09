@@ -208,23 +208,23 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 #  define TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
 # endif
 
-# define MkUNXDirSep_(path)	do	{         \
+# define MkUNXDirSep_(path) do  {         \
     char  *cp__ = (path);                 \
                                           \
-    while ( *cp__ )	{                     \
-        if ( '\\' == *cp__ )	{           \
+    while ( *cp__ ) {                     \
+        if ( '\\' == *cp__ )  {           \
             *cp__ = '/';                  \
         }                                 \
         cp__++;                           \
     }                                     \
 } while ( 0 )
 
-# define MkDOSDirSep_(path)	do	{         \
-    char  *cp__	= (path);                 \
+# define MkDOSDirSep_(path) do  {         \
+    char  *cp__ = (path);                 \
                                           \
-    while ( *cp__ )	{                     \
-        if ( '/' == *cp__ )	{             \
-            *cp__	= '\\';                 \
+    while ( *cp__ ) {                     \
+        if ( '/' == *cp__ ) {             \
+            *cp__ = '\\';                 \
         }                                 \
         cp__++;                           \
     }                                     \
@@ -1837,13 +1837,13 @@ static int  IsDir P1_(CONST char *, dir)
 
 static int IsAccessable(CONST char *d)
 {
-/* This is *not* perfect: `access()' only check for uid/gid but not */
-/* for euid/egid.                                                   */
+/* This is *not* perfect: `uaccess()' only checks for uid/gid but not */
+/* for euid/egid.                                                     */
     if ( NULL == d )  {
         return FALSE;
     }
 
-    if ( 0 == access(d, R_OK|W_OK|X_OK) ) {
+    if ( 0 == uaccess(d, R_OK|W_OK|X_OK) )  {
         return TRUE;
     } else                                {
         return FALSE;
@@ -2631,6 +2631,23 @@ int rmdir P1_(char *, name)
 }
 
 # endif /* XENIX & FILOCK */
+
+int uaccess P2_(CONST char *, path, int, mode)
+# if CYGWIN
+{
+    char new_path[NFILEN];
+
+    ZEROMEM(new_path);
+    xstrlcpy(new_path, path, SIZEOF(new_path));
+    NormalizePathUNX(new_path);
+
+    return access(new_path, mode);
+}
+# else
+{
+    return access(path, mode);
+}
+# endif
 
 # if HANDLE_WINCH
 /* Window size changes handled via signals. */

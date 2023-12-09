@@ -2048,6 +2048,9 @@ EXTERN int PASCAL NEAR ttopen DCL((void));
 EXTERN int PASCAL NEAR ttputc DCL((int c));
 EXTERN int PASCAL NEAR twiddle DCL((int f, int n));
 EXTERN int PASCAL NEAR typahead DCL((void));
+#if IS_UNIX()
+EXTERN int             uaccess DCL((CONST char * path, int mode));
+#endif
 EXTERN int PASCAL NEAR unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR unbindchar DCL((int c));
 EXTERN int PASCAL NEAR unbindkey DCL((int f, int n));

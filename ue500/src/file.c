@@ -344,7 +344,7 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
 #if ( IS_UNIX() )
     /* if we don't have write priviledges, make this in VIEW mode */
     if ( s !=FIOERR && s != FIOFNF ) {
-        if ( access(fname, 2 /* W_OK*/) != 0 )
+        if ( uaccess(fname, 2 /* W_OK*/) != 0 )
             curbp->b_mode |= MDVIEW;
     }
 #endif

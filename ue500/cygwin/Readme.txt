@@ -8,7 +8,7 @@ MicroEMACS for CygWin
   One may also use a MobaXTerm environment
   <https://mobaxterm.mobatek.net/>
 
-* Testet on Microsoft Windows [Version 10.0.19045.3570].
+* Testet on Microsoft Windows 11 [Version 10.0.19045.3570, 10.0.22621.2715].
 
 * It needs a Windows Console supporting ANSI Escape Sequences --- the
   version mentioned above supports them out of the box --- for earlier
@@ -48,7 +48,7 @@ $ cat << 'EOC'  | awk '{ printf "%s\r\n", $0; }' > C:/bin/uemacs.cmd
 @REM uemacs.cmd
 @echo off
 set PATH=C:\Pgm\MicroEMACS\bin;C:\Pgm\MicroEMACS\cmd;%PATH%
-C:\Pgm\MicroEMACS\bin\emacs.exe %1 %2 %3 %4 %5 %6 %7 %8 %9
+start C:\Pgm\MicroEMACS\bin\emacs.exe %1 %2 %3 %4 %5 %6 %7 %8 %9
 REM EOF
 EOC
 
@@ -69,7 +69,8 @@ with the help of the scancodes program with C source in the tools
 subdirectory.
 
 When using MicroEMACS use forward slashes instead of backslashes when
-specifing paths.
+specifing paths: When using backslashes MicroEMACS opens the files in
+read only mode (this is a bug which will be fixed soon).
 
 
 
