@@ -1,5 +1,5 @@
 /**********************************************************************/
-/* Test access() with:                                                */
+/* Test stat() with:                                                  */
 /* - Directories                                                      */
 /* - CYGWIN:                                                          */
 /*   + C:/Temp/X                                                      */
@@ -9,7 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <sys/fcntl.h>
+#include <sys/stat.h>
 
 
 #define Cd42  42
@@ -22,11 +22,13 @@
 
 static int accessable(CONST char *d)
 {
+    struct stat buf;
+
     if ( NULL == d )  {
         return FALSE;
     }
 
-    if ( 0 == access(d, R_OK|W_OK|X_OK) ) {
+    if ( 0 == stat(d, &buf) )             {
         return TRUE;
     } else                                {
         return FALSE;
