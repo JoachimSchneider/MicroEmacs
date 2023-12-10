@@ -180,6 +180,9 @@ EXTERN VOID free DCL((char *));
 EXTERN char *realloc DCL((char *block, int siz));
 # endif
 #endif
+#if CYGWIN
+# include <sys/stat.h>
+#endif
 /*....................................................................*/
 
 /* Switch On/Off some features:                                       */
