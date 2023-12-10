@@ -1826,24 +1826,24 @@ static int  IsDir P1_(CONST char *, dir)
     if ( !dir || !*dir )  {
         return FALSE;
     }
-    if        ( 0 > stat(dir, &sb) )  {
+    if        ( 0 > unx_stat(dir, &sb) )  {
         return FALSE;
-    } else if ( S_ISDIR(sb.st_mode) ) {
+    } else if ( S_ISDIR(sb.st_mode) )     {
         return TRUE;
-    } else                            {
+    } else                                {
         return FALSE;
     }
 }
 
 static int IsAccessable(CONST char *d)
 {
-/* This is *not* perfect: `uaccess()' only checks for uid/gid but not */
-/* for euid/egid.                                                     */
+/* This is *not* perfect: `unx_access()' only checks for uid/gid but  */
+/* not for euid/egid.                                                 */
     if ( NULL == d )  {
         return FALSE;
     }
 
-    if ( 0 == uaccess(d, R_OK|W_OK|X_OK) )  {
+    if ( 0 == unx_access(d, R_OK|W_OK|X_OK) )  {
         return TRUE;
     } else                                {
         return FALSE;
@@ -1946,7 +1946,7 @@ char *gettmpfname P1_(CONST char *, ident)
         xstrlcpy(res, str,                        SIZEOF(res));
         xstrlcat(res, "-",                        SIZEOF(res));
         xstrlcat(res, nni2s_((seed + i) % 0x100), SIZEOF(res));
-        if ( 0 > stat(res, &sb) ) {
+        if ( 0 > unx_stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
                 seed = (seed + i + 1) % 0x100;
 
@@ -2487,7 +2487,7 @@ char *getnfile P0_()
         /* Check to make sure we skip all weird entries except directories */
         XSTRCPY(nameptr, dp->d_name);
 
-    } while (stat(rbuf,
+    } while (unx_stat(rbuf,
                   &fstat) ||
              ( (fstat.st_mode & S_IFMT) & (S_IFREG | S_IFDIR) ) == 0);
 
@@ -2632,8 +2632,8 @@ int rmdir P1_(char *, name)
 
 # endif /* XENIX & FILOCK */
 
-int uaccess P2_(CONST char *, path, int, mode)
 # if CYGWIN
+int cyg_access P2_(CONST char *, path, int, mode)
 {
     char new_path[NFILEN];
 
@@ -2643,11 +2643,18 @@ int uaccess P2_(CONST char *, path, int, mode)
 
     return access(new_path, mode);
 }
-# else
+
+int cyg_stat P2_(CONST char *, path, struct stat *, sb)
 {
-    return access(path, mode);
+    char new_path[NFILEN];
+
+    ZEROMEM(new_path);
+    xstrlcpy(new_path, path, SIZEOF(new_path));
+    NormalizePathUNX(new_path);
+
+    return stat(new_path, sb);
 }
-# endif
+# endif /* CYGWIN */
 
 # if HANDLE_WINCH
 /* Window size changes handled via signals. */

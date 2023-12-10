@@ -864,7 +864,8 @@ Next Steps:
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq
 - Check if Palette settings are applicable to ANSI.
 - grabnowait(): Change it to return int and return grabnowait_TIMEOUT == (-1) on
-  timeout: Tis allows 0xFF to be used as text character.
+  timeout: This allows 0xFF to be used as text character.
+- access() and stat() in CYGWIN don't work with DOS-Paths: Create cyg_access, cyg_stat.
 
 
 # EOF

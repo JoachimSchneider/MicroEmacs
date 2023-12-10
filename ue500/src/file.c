@@ -344,7 +344,7 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
 #if ( IS_UNIX() )
     /* if we don't have write priviledges, make this in VIEW mode */
     if ( s !=FIOERR && s != FIOFNF ) {
-        if ( uaccess(fname, 2 /* W_OK*/) != 0 )
+        if ( unx_access(fname, 2 /* W_OK*/) != 0 )
             curbp->b_mode |= MDVIEW;
     }
 #endif
@@ -710,7 +710,7 @@ int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
         if ( sflag ) {
 #if ( IS_UNIX() )
             /* get the permisions on the original file */
-            stat(fn, &st);
+            unx_stat(fn, &st);
 #endif
             /* erase original file */
             /* rename temporary file to original name */

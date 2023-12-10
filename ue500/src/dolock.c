@@ -267,9 +267,10 @@ char *dolock P1_(CONST char *, filespec)
 
 # if  ( IS_UNIX() )
     /* check to see if we can access the path */
-    if ( stat(pathname, &sb) != 0 ) {
+    if ( unx_stat(pathname, &sb) != 0 ) {
 #  if  LOCKDEBUG
-        printf("stat() = %u   errno = %u\n", stat(pathname, &sb), errno);
+        printf("unx_stat() = %u   errno = %u\n",
+               unx_stat(pathname, &sb), errno);
         tgetc();
 #  endif
         XSTRCPY(result, LOCKMSG);
@@ -283,7 +284,7 @@ char *dolock P1_(CONST char *, filespec)
 
         return (result);
     }
-# endif
+# endif /* IS_UNIX()  */
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
@@ -294,8 +295,11 @@ char *dolock P1_(CONST char *, filespec)
     tgetc();
 # endif
 
-    if ( stat(lockpath, &sb) != 0 ) {
-
+# if  ( IS_UNIX() )
+    if ( unx_stat(lockpath, &sb) != 0 ) {
+# else
+    if (     stat(lockpath, &sb) != 0 ) {
+# endif
         /* create it! */
 # if  LOCKDEBUG
         printf("MKDIR(%s)\n", lockpath);
@@ -334,8 +338,11 @@ char *dolock P1_(CONST char *, filespec)
     tgetc();
 # endif
 
-    if ( stat(lockfile, &sb) != 0 ) {
-
+# if  ( IS_UNIX() )
+    if ( unx_stat(lockfile, &sb) != 0 ) {
+# else
+    if (     stat(lockfile, &sb) != 0 ) {
+# endif
         /* create the lock file */
         fp = fopen(lockfile, "w");
         if ( fp == (FILE *)NULL ) {
