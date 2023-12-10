@@ -250,9 +250,22 @@ char *dolock P1_(CONST char *, filespec)
     static char result[NSTRING]; /* error return string */
 
     /* separate filespec into components */
+#if ( IS_UNIX() )
+    {
+        char  new_filespec[NFILEN];
+
+        ZEROMEM(new_filespec);
+        xstrlcpy(new_filespec, GetPathUNX(filespec), SIZEOF(new_filespec));
+
+        XSTRCPY( filename, parse_name(new_filespec) );
+        XSTRCPY( pathname, parse_path(new_filespec) );
+        XSTRCPY( drivename, parse_drive(new_filespec) );
+    }
+#else
     XSTRCPY( filename, parse_name(filespec) );
     XSTRCPY( pathname, parse_path(filespec) );
     XSTRCPY( drivename, parse_drive(filespec) );
+#endif
     if ( pathname[0] == 0 )
         XSTRCPY(pathname, ".");
 
@@ -419,7 +432,6 @@ char *dolock P1_(CONST char *, filespec)
         ZEROMEM(host);
         gethostname(host, SIZEOF(host) - 1);
         if ( strcmp(buf, host) == 0 ) {
-
             /* see if the process is dead already */
             if ( kill(proc_id, 0) != 0 && errno == ESRCH ) {
 
@@ -468,9 +480,22 @@ char *undolock P1_(CONST char *, filespec)
     static char result[NSTRING];    /* error return string */
 
     /* separate filespec into components */
+#if ( IS_UNIX() )
+    {
+        char  new_filespec[NFILEN];
+
+        ZEROMEM(new_filespec);
+        xstrlcpy(new_filespec, GetPathUNX(filespec), SIZEOF(new_filespec));
+
+        XSTRCPY( filename, parse_name(new_filespec) );
+        XSTRCPY( pathname, parse_path(new_filespec) );
+        XSTRCPY( drivename, parse_drive(new_filespec) );
+    }
+#else
     XSTRCPY( filename, parse_name(filespec) );
     XSTRCPY( pathname, parse_path(filespec) );
     XSTRCPY( drivename, parse_drive(filespec) );
+#endif
     if ( pathname[0] == 0 )
         XSTRCPY(pathname, ".");
 

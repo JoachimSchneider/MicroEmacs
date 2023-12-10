@@ -180,7 +180,7 @@ EXTERN VOID free DCL((char *));
 EXTERN char *realloc DCL((char *block, int siz));
 # endif
 #endif
-#if CYGWIN
+#if IS_UNIX()
 # include <sys/stat.h>
 #endif
 /*....................................................................*/
@@ -2052,15 +2052,9 @@ EXTERN int PASCAL NEAR          ttputc DCL((int c));
 EXTERN int PASCAL NEAR          twiddle DCL((int f, int n));
 EXTERN int PASCAL NEAR          typahead DCL((void));
 #if IS_UNIX()
-# if CYGWIN
-EXTERN int                      cyg_access DCL((CONST char *path, int mode));
-EXTERN int                      cyg_stat DCL((CONST char *path, struct stat *sb));
-#   define  unx_access  cyg_access
-#   define  unx_stat    cyg_stat
-# else
-#   define  unx_access  access
-#   define  unx_stat    stat
-# endif
+EXTERN int                      unx_access DCL((CONST char *path, int mode));
+EXTERN int                      unx_stat DCL((CONST char *path, struct stat *sb));
+EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
 #endif
 EXTERN int PASCAL NEAR          unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR          unbindchar DCL((int c));

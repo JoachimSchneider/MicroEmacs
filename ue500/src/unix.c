@@ -230,7 +230,7 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
     }                                     \
 } while ( 0 )
 
-# if CYGWIN
+# if ( CYGWIN )
 #  define NormalizePathUNX(path)  do  {                     \
     char  *cp_  = (path);                                   \
                                                             \
@@ -251,8 +251,8 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 } while ( 0 )
 #  define NULL_DEVICE             "NUL"
 # else
-#  define NormalizePathUNX(path)  MkUNXDirSep_(path)
-#  define NormalizePathDOS(path)  MkDOSDirSep_(path)
+#  define NormalizePathUNX(path)  VOIDCAST(0)
+#  define NormalizePathDOS(path)  VOIDCAST(0)
 #  define NULL_DEVICE             "/dev/null"
 # endif
 /*==============================================================*/
@@ -1491,7 +1491,7 @@ int rename P2_(char *, file1, char *, file2)
 # endif
 /*====================================================================*/
 
-# if CYGWIN
+# if ( CYGWIN )
 
 /* ISDOSPATH:
  *
@@ -1998,7 +1998,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     if ( !InFile || !*InFile ) {
         XSTRCPY(lInFile, NULL_DEVICE);
     } else  {
-# if CYGWIN
+# if ( CYGWIN )
         XSTRCPY(lInFile, getdospath(InFile));
 # else
         XSTRCPY(lInFile, InFile);
@@ -2007,7 +2007,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     if ( !OutFile || !*OutFile ) {
         XSTRCPY(lOutFile, NULL_DEVICE);
     } else  {
-# if CYGWIN
+# if ( CYGWIN )
         XSTRCPY(lOutFile, getdospath(OutFile));
 # else
         XSTRCPY(lOutFile, OutFile);
@@ -2016,7 +2016,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     if ( !ErrFile || !*ErrFile ) {
         XSTRCPY(lErrFile, NULL_DEVICE);
     } else  {
-# if CYGWIN
+# if ( CYGWIN )
         XSTRCPY(lErrFile, getdospath(ErrFile));
 # else
         XSTRCPY(lErrFile, ErrFile);
@@ -2025,7 +2025,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
 
     xsnprintf(FullCmd,
               SIZEOF (FullCmd),
-# if CYGWIN
+# if ( CYGWIN )
               "%s < %s > %s 2>%s",
 # else
               "( %s ) < %s > %s 2>%s",
@@ -2632,8 +2632,7 @@ int rmdir P1_(char *, name)
 
 # endif /* XENIX & FILOCK */
 
-# if CYGWIN
-int cyg_access P2_(CONST char *, path, int, mode)
+int unx_access P2_(CONST char *, path, int, mode)
 {
     char new_path[NFILEN];
 
@@ -2644,7 +2643,7 @@ int cyg_access P2_(CONST char *, path, int, mode)
     return access(new_path, mode);
 }
 
-int cyg_stat P2_(CONST char *, path, struct stat *, sb)
+int unx_stat P2_(CONST char *, path, struct stat *, sb)
 {
     char new_path[NFILEN];
 
@@ -2654,7 +2653,17 @@ int cyg_stat P2_(CONST char *, path, struct stat *, sb)
 
     return stat(new_path, sb);
 }
-# endif /* CYGWIN */
+
+CONST char *GetPathUNX P1_(CONST char *, path)
+{
+    static char new_path[NFILEN];
+
+    ZEROMEM(new_path);
+    xstrlcpy(new_path, path, SIZEOF(new_path));
+    NormalizePathUNX(new_path);
+
+    return (CONST char *)&new_path[0];
+}
 
 # if HANDLE_WINCH
 /* Window size changes handled via signals. */
