@@ -2052,9 +2052,15 @@ EXTERN int PASCAL NEAR          ttputc DCL((int c));
 EXTERN int PASCAL NEAR          twiddle DCL((int f, int n));
 EXTERN int PASCAL NEAR          typahead DCL((void));
 #if IS_UNIX()
+/*======================================================================
+ * CYGWIN needs wrapper for some (but not all) functions with file name
+ * arguments to be able to work with DOS and UNIX style file names:
+ * - access(), stat() only work with UNIX style file names.
+ * - fopen(), ... work with DOS and UNIX style file names.
+ *====================================================================*/
+EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
 EXTERN int                      unx_access DCL((CONST char *path, int mode));
 EXTERN int                      unx_stat DCL((CONST char *path, struct stat *sb));
-EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
 #endif
 EXTERN int PASCAL NEAR          unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR          unbindchar DCL((int c));

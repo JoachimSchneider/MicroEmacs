@@ -2632,28 +2632,16 @@ int rmdir P1_(char *, name)
 
 # endif /* XENIX & FILOCK */
 
-int unx_access P2_(CONST char *, path, int, mode)
-{
-    char new_path[NFILEN];
-
-    ZEROMEM(new_path);
-    xstrlcpy(new_path, path, SIZEOF(new_path));
-    NormalizePathUNX(new_path);
-
-    return access(new_path, mode);
-}
-
-int unx_stat P2_(CONST char *, path, struct stat *, sb)
-{
-    char new_path[NFILEN];
-
-    ZEROMEM(new_path);
-    xstrlcpy(new_path, path, SIZEOF(new_path));
-    NormalizePathUNX(new_path);
-
-    return stat(new_path, sb);
-}
-
+/*======================================================================
+ * CYGWIN needs wrapper for some (but not all) functions with file name
+ * arguments to be able to work with DOS and UNIX style file names:
+ * - access(), stat() only work with UNIX style file names.
+ * - fopen(), ... work with DOS and UNIX style file names.
+ *====================================================================*/
+/* GETPATHUNX:
+ *
+ * Return UNIX style path.
+ */
 CONST char *GetPathUNX P1_(CONST char *, path)
 {
     static char new_path[NFILEN];
@@ -2664,6 +2652,25 @@ CONST char *GetPathUNX P1_(CONST char *, path)
 
     return (CONST char *)&new_path[0];
 }
+
+int unx_access P2_(CONST char *, path, int, mode)
+{
+    /* It is OK here to *not* immediatley copy GetPathUNX's internal
+     * static buffer, because we *know* that `access' won't call
+     * GetPathUNX
+     */
+    return access(GetPathUNX(path), mode);
+}
+
+int unx_stat P2_(CONST char *, path, struct stat *, sb)
+{
+    /* It is OK here to *not* immediatley copy GetPathUNX's internal
+     * static buffer, because we *know* that `stat' won't call
+     * GetPathUNX
+     */
+    return stat(GetPathUNX(path), sb);
+}
+
 
 # if HANDLE_WINCH
 /* Window size changes handled via signals. */

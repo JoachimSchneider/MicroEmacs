@@ -240,6 +240,9 @@ char *dolock P1_(CONST char *, filespec)
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
     long proc_id;               /* process id from lock file */
+#if ( IS_UNIX() )
+    int rc;                     /* syscall return code */
+#endif
     char filename[NFILEN];      /* name of file to lock */
     char pathname[NFILEN];      /* path leading to file to lock */
     char drivename[NFILEN];     /* drive for file to lock */
@@ -280,10 +283,9 @@ char *dolock P1_(CONST char *, filespec)
 
 # if  ( IS_UNIX() )
     /* check to see if we can access the path */
-    if ( unx_stat(pathname, &sb) != 0 ) {
+    if ( (rc = unx_stat(pathname, &sb)) != 0 )  {
 #  if  LOCKDEBUG
-        printf("unx_stat() = %u   errno = %u\n",
-               unx_stat(pathname, &sb), errno);
+        printf("unx_stat() = %u   errno = %u\n", rc, errno);
         tgetc();
 #  endif
         XSTRCPY(result, LOCKMSG);
