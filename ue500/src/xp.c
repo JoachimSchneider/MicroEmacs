@@ -195,7 +195,7 @@ PASCAL NEAR pipecmd(f, n)
     sgarbf = TRUE;
 
     /* did the output file get generated? */
-    if ( access(filnam, 0) != 0 )
+    if ( umc_access(filnam, 0) != 0 )
         return (FALSE);
 
     /* split the current window to make room for the command output */

@@ -2059,8 +2059,8 @@ EXTERN int PASCAL NEAR          typahead DCL((void));
  * - fopen(), ... work with DOS and UNIX style file names.
  *====================================================================*/
 EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
-EXTERN int                      unx_access DCL((CONST char *path, int mode));
-EXTERN int                      unx_stat DCL((CONST char *path, struct stat *sb));
+EXTERN int                      unx_access_ DCL((CONST char *path, int mode));
+EXTERN int                      unx_stat_ DCL((CONST char *path, struct stat *sb));
 #endif
 EXTERN int PASCAL NEAR          unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR          unbindchar DCL((int c));
@@ -2155,6 +2155,19 @@ EXTERN int PASCAL NEAR          wpopup DCL((BUFFER *popbuf));
 EXTERN int PASCAL NEAR         tagword DCL((int f, int n));   /* vi-like tagging */
 EXTERN int PASCAL NEAR         retagword DCL((int f, int n)); /* Try again (if redefined) */
 EXTERN int PASCAL NEAR         backtagword DCL((int f, int n)); /* return from tagged word */
+#endif
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* MicroEMACS (umc_*) specific wrappers for some library functions:   */
+/**********************************************************************/
+#if IS_UNIX()
+# define umc_access  unx_access_
+# define umc_stat    unx_stat_
+#else
+# define umc_access  access
+# define umc_stat    stat
 #endif
 /**********************************************************************/
 

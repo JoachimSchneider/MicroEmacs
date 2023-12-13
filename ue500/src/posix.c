@@ -763,7 +763,7 @@ char *getnfile()
         /* Check to make sure we skip all weird entries except directories */
         xstrcpy(nameptr, dp->d_name);
 
-    } while ( stat(rbuf,
+    } while ( umc_stat(rbuf,
                    &fstat) ||
               !( S_ISDIR(fstat.st_mode) !!S_ISREG(fstat.st_mode) ) );
 

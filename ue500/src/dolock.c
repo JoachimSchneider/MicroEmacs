@@ -283,9 +283,9 @@ char *dolock P1_(CONST char *, filespec)
 
 # if  ( IS_UNIX() )
     /* check to see if we can access the path */
-    if ( (rc = unx_stat(pathname, &sb)) != 0 )  {
+    if ( (rc = umc_stat(pathname, &sb)) != 0 )  {
 #  if  LOCKDEBUG
-        printf("unx_stat() = %u   errno = %u\n", rc, errno);
+        printf("umc_stat() = %u   errno = %u\n", rc, errno);
         tgetc();
 #  endif
         XSTRCPY(result, LOCKMSG);
@@ -310,11 +310,7 @@ char *dolock P1_(CONST char *, filespec)
     tgetc();
 # endif
 
-# if  ( IS_UNIX() )
-    if ( unx_stat(lockpath, &sb) != 0 ) {
-# else
-    if (     stat(lockpath, &sb) != 0 ) {
-# endif
+    if ( umc_stat(lockpath, &sb) != 0 ) {
         /* create it! */
 # if  LOCKDEBUG
         printf("MKDIR(%s)\n", lockpath);
@@ -353,11 +349,7 @@ char *dolock P1_(CONST char *, filespec)
     tgetc();
 # endif
 
-# if  ( IS_UNIX() )
-    if ( unx_stat(lockfile, &sb) != 0 ) {
-# else
-    if (     stat(lockfile, &sb) != 0 ) {
-# endif
+    if ( umc_stat(lockfile, &sb) != 0 ) {
         /* create the lock file */
         fp = fopen(lockfile, "w");
         if ( fp == (FILE *)NULL ) {

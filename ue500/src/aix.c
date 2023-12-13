@@ -1311,11 +1311,11 @@ char * file2;                           /* New file name        */
     struct stat buf2;
 
     /* No good if source file doesn't exist */
-    if ( stat(file1, &buf1) )
+    if ( umc_stat(file1, &buf1) )
         return (-1);
 
     /* Check for target */
-    if ( stat(file2, &buf2) == 0 ) {
+    if ( umc_stat(file2, &buf2) == 0 ) {
 
         /* See if file is the same */
         if ( buf1.st_dev == buf2.st_dev &&buf1.st_ino == buf2.st_ino )
@@ -1621,7 +1621,7 @@ char *getnfile()
         /* Check to make sure we skip all weird entries except directories */
         xstrcpy(nameptr, dp->d_name);
 
-    } while (stat(rbuf,
+    } while (umc_stat(rbuf,
                   &fstat) ||
              ( (fstat.st_mode & S_IFMT) & (S_IFREG | S_IFDIR) ) == 0);
 
