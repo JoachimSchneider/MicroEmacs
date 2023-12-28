@@ -386,30 +386,32 @@ static int PASCAL NEAR ansiopen P0_()
 {
 # if     IS_UNIX()
     REGISTER char *cp = NULL;
+#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
     struct winsize win;
 
     ZEROMEM(win);
+#  endif
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
         puts(TEXT4);
         TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
 #  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
-
         meexit(1);
 #  endif
-    }
-    if ( strcmp(cp, "vt100") != 0 &&
-         strcmp(cp, "vt200") != 0 &&
-         strcmp(cp, "vt300") != 0 ) {
-        puts(TEXT5);
-        TRC(("%s", TEXT5));
+    } else {
+        if ( strcmp(cp, "vt100") != 0 &&
+             strcmp(cp, "vt200") != 0 &&
+             strcmp(cp, "vt300") != 0 ) {
+            puts(TEXT5);
+            TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
 #  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
-
         meexit(1);
 #  endif
+        }
     }
+#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
     if ( 0 == ioctl(fileno(stdin), TIOCGWINSZ, &win) )  {
         /* REPAIR(): Sometimes --- e.g. with `qterminal -e emacs <args>'
          *           the ioctl() called at *this* point gives wrong
@@ -423,6 +425,10 @@ static int PASCAL NEAR ansiopen P0_()
         term.t_nrow = NROW - 1;
         term.t_ncol = NCOL;
     }
+#  else
+    term.t_nrow = NROW - 1;
+    term.t_ncol = NCOL;
+#  endif  /* !DJGPP_DOS */
 #  if ( !0 )
     term.t_mrow = term.t_nrow;
     term.t_mcol = term.t_ncol;

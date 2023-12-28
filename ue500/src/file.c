@@ -714,7 +714,7 @@ int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
 #endif
             /* erase original file */
             /* rename temporary file to original name */
-            if ( unlink(fn) == 0 && rename(tname, fn) == 0 ) {
+            if ( umc_unlink(fn) == 0 && umc_rename(tname, fn) == 0 ) {
 #if ( IS_UNIX() )
                 chown(fn, (int)st.st_uid, (int)st.st_gid);
                 chmod(fn, (int)st.st_mode);

@@ -631,7 +631,7 @@ int n;                                  /* Argument count */
     }
 
     /* ...and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (1);
 }
@@ -693,8 +693,8 @@ int n;                                  /* Argument count */
     xstrcpy(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     /* Show status */
     if ( !s )

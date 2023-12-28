@@ -51,43 +51,44 @@
 /*      Machine/OS definitions                                        */
 /*===== [Set one of these!!] ======================================== */
 
-#define AMIGA   0                     /* AmigaDOS                     */
-#define AOSVS   0                     /* Data General AOS/VS          */
-#define AUX     0                     /* Apple UNIX for Macintosh     */
-#define AIX     0                     /* IBM UNIX for various machines*/
-#define AIX5    0                     /* IBM UNIX newer rs6000        */
-#define AVIION  0                     /* Data General AViiON          */
-#define BSD     0                     /* UNIX BSD 4.2 and ULTRIX      */
-#define CYGWIN  1                     /* Unix emulation on MS Windows */
-#define FINDER  0                     /* Macintosh OS                 */
-#define FREEBSD 0                     /* FREEBSD 386 version 2 or +   */
-#define LINUX   0                     /* Linux                        */
-#define HPUX8   0                     /* HPUX HP 9000 ver 8 or less   */
-#define HPUX9   0                     /* HPUX HP 9000 ver 9           */
-#define MPE     0                     /* HP MPE/XL                    */
-#define MSDOS   0                     /* MS-DOS                       */
-#define MV_UX   0                     /* Data General MV/UX (Eclipse) */
-#define OPENBSD 0                     /* OPENBSD 386                  */
-#define OS2     0                     /* Microsoft or IBM OS/2        */
-#define SMOS    0                     /* Supermax UNIX System V       */
-#define SOLARIS 0                     /* SUN Solaris (SYSV)           */
-#define SUN     0                     /* SUN v4.0                     */
-#define TOS     0                     /* ST520, TOS                   */
-#define USG     0                     /* UNIX system V                */
-#define VAT     0                     /* Related to XENIX (???)       */
-#define VMS     0                     /* VAX/VMS                      */
-#define WINNT   0                     /* MS-Win NT                    */
-#define WINXP   0                     /* Windows XP/Visual studio 2008*/
-#define WMCS    0                     /* Wicat's MCS                  */
-#define XENIX   0                     /* IBM-PC SCO XENIX             */
+#define AMIGA       0                 /* AmigaDOS                     */
+#define AOSVS       0                 /* Data General AOS/VS          */
+#define AUX         0                 /* Apple UNIX for Macintosh     */
+#define AIX         0                 /* IBM UNIX for various machines*/
+#define AIX5        0                 /* IBM UNIX newer rs6000        */
+#define AVIION      0                 /* Data General AViiON          */
+#define BSD         0                 /* UNIX BSD 4.2 and ULTRIX      */
+#define CYGWIN      1                 /* Unix emulation on MS Windows */
+#define DJGPP_DOS   0                 /* Unix emulation on MS DOS     */
+#define FINDER      0                 /* Macintosh OS                 */
+#define FREEBSD     0                 /* FREEBSD 386 version 2 or +   */
+#define LINUX       0                 /* Linux                        */
+#define HPUX8       0                 /* HPUX HP 9000 ver 8 or less   */
+#define HPUX9       0                 /* HPUX HP 9000 ver 9           */
+#define MPE         0                 /* HP MPE/XL                    */
+#define MSDOS       0                 /* MS-DOS                       */
+#define MV_UX       0                 /* Data General MV/UX (Eclipse) */
+#define OPENBSD     0                 /* OPENBSD 386                  */
+#define OS2         0                 /* Microsoft or IBM OS/2        */
+#define SMOS        0                 /* Supermax UNIX System V       */
+#define SOLARIS     0                 /* SUN Solaris (SYSV)           */
+#define SUN         0                 /* SUN v4.0                     */
+#define TOS         0                 /* ST520, TOS                   */
+#define USG         0                 /* UNIX system V                */
+#define VAT         0                 /* Related to XENIX (???)       */
+#define VMS         0                 /* VAX/VMS                      */
+#define WINNT       0                 /* MS-Win NT                    */
+#define WINXP       0                 /* Windows XP/Visual studio 2008*/
+#define WMCS        0                 /* Wicat's MCS                  */
+#define XENIX       0                 /* IBM-PC SCO XENIX             */
 
 
-#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD       \
-                          || CYGWIN || FREEBSD || HPUX8 || HPUX9    \
-                          || LINUX || OPENBSD || SMOS || SOLARIS    \
-                          || SUN || USG || XENIX )
-#define IS_POSIX_UNIX() ( IS_UNIX()                                 \
-                          && !( USG || AIX || AUX || SMOS || HPUX8  \
+#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD         \
+                          || CYGWIN || DJGPP_DOS || FREEBSD || HPUX8  \
+                          || HPUX9 || LINUX || OPENBSD || SMOS        \
+                          || SOLARIS || SUN || USG || XENIX )
+#define IS_POSIX_UNIX() ( IS_UNIX()                                   \
+                          && !( USG || AIX || AUX || SMOS || HPUX8    \
                                 || HPUX9 || SUN || XENIX ) )
 #if defined (__STDC__) || defined(__cplusplus)
 # define IS_ANSI_C()  (1)
@@ -294,7 +295,12 @@
 /*      Can we catch the SIGWINCH (the window size change signal)? */
 
 #if     IS_UNIX()
-# define HANDLE_WINCH    1
+/* We could maybee also check for `# ifdef TIOCGWINSZ' here:  */
+# if DJGPP_DOS
+#   define HANDLE_WINCH    0
+# else
+#   define HANDLE_WINCH    1
+# endif
 #else
 # define HANDLE_WINCH    0
 #endif
@@ -529,9 +535,9 @@ union REGS {
 #if     VMS
 # define getname xgetname
 # ifdef __cplusplus
-#   define unlink(a)       remove(a)
+#   define umc_unlink(a)       remove(a)
 # else
-#   define unlink(a)       delete(a)  /* Won't compile with C++ */
+#   define umc_unlink(a)       delete(a)  /* Won't compile with C++ */
 # endif
 #endif
 

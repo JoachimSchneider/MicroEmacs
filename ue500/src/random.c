@@ -1826,7 +1826,7 @@ static FILE *mytmpfile P0_()
             return NULL;
         }
 
-        unlink(fname);  /* ``Silly delete'' */
+        umc_unlink(fname);  /* ``Silly delete'' */
 
         return fp;
     }
@@ -1943,6 +1943,7 @@ int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
     return rc;
 }
 
+#if UEMACS_FEATURE_USE_VA_COPY
 /* XVASPRINTF:
  *
  * Like GNU C vasprintf:
@@ -1977,6 +1978,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 
     return rc;
 }
+#endif    /* UEMACS_FEATURE_USE_VA_COPY */
 
 /* XASPRINTF:
  *
@@ -1990,23 +1992,24 @@ int CDECL NEAR  xasprintf (va_alist)
 #else
 int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
 #endif
+#if ( 0 ) /* Version if xvasprintf() is available */
 {
     int     rc  = 0;
     va_list ap;
-#if VARG
+# if VARG
     char        **ret = NULL;
     CONST char  *fmt  = NULL;
-#endif
+# endif
 
     ZEROMEM(ap);
 
-#if VARG
+# if VARG
     va_start(ap);
     ret = va_arg(ap, char **);
     fmt = va_arg(ap, CONST char *);
-#else
+# else
     va_start(ap, fmt);
-#endif
+# endif
 
     ASRT(NULL != ret);
     ASRT(NULL != fmt);
@@ -2016,6 +2019,69 @@ int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
 
     return rc;
 }
+#else
+{
+    int     rc  = 0;
+    int     len = 0;
+    char    *cp = NULL;
+    va_list ap;
+# if VARG
+    char        **ret = NULL;
+    CONST char  *fmt  = NULL;
+# endif
+
+    ZEROMEM(ap);
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    len = xvsnprintf(NULL, 0, fmt, ap);
+
+    va_end(ap);
+
+
+    if ( 0 > len )  {
+        *ret  = NULL;
+
+        return len;
+    }
+    len += 1;
+    ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
+
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    rc  = xvsnprintf(cp, len, fmt, ap);
+
+    va_end(ap);
+
+
+    if ( 0 > rc ) {
+        CLROOM(cp);
+    }
+
+    *ret  = cp;   /* NULL on error, see above */
+
+    return rc;
+}
+#endif  /* Version if xvasprintf() is available */
 
 /* XSTRTOK_R:
  */

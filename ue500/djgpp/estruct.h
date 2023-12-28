@@ -59,10 +59,10 @@
 #define AVIION      0                 /* Data General AViiON          */
 #define BSD         0                 /* UNIX BSD 4.2 and ULTRIX      */
 #define CYGWIN      0                 /* Unix emulation on MS Windows */
-#define DJGPP_DOS   0                 /* Unix emulation on MS DOS     */
+#define DJGPP_DOS   1                 /* Unix emulation on MS DOS     */
 #define FINDER      0                 /* Macintosh OS                 */
 #define FREEBSD     0                 /* FREEBSD 386 version 2 or +   */
-#define LINUX       1                 /* Linux                        */
+#define LINUX       0                 /* Linux                        */
 #define HPUX8       0                 /* HPUX HP 9000 ver 8 or less   */
 #define HPUX9       0                 /* HPUX HP 9000 ver 9           */
 #define MPE         0                 /* HP MPE/XL                    */
@@ -142,7 +142,7 @@
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
 
-#define ANSI    0           /* ANSI escape sequences                  */
+#define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */
@@ -195,7 +195,7 @@
 #define CALLED  0   /* is emacs a called subroutine? or stand alone   */
 
 #define REVSTA  1   /* Status line appears in reverse video           */
-#define COLOR   1   /* color commands and windows                     */
+#define COLOR   0   /* color commands and windows                     */
 
 #define FILOCK  1   /* generic file locking under unix                */
 #define ISRCH   1   /* Incremental searches like ITS EMACS            */

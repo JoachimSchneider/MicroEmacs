@@ -431,7 +431,7 @@ char *dolock P1_(CONST char *, filespec)
 
                 /* kill the lock file and retry the lock */
                 fclose(fp);
-                unlink(lockfile);
+                umc_unlink(lockfile);
 
                 return ( dolock(filespec) );
             }
@@ -518,7 +518,7 @@ char *undolock P1_(CONST char *, filespec)
     printf("Lockfile [%s]\n", lockfile);
     tgetc();
 # endif
-    if ( unlink(lockfile) ) {
+    if ( umc_unlink(lockfile) ) {
         XSTRCAT(result, "could not remove lock file");
 
         return (result);

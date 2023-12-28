@@ -106,7 +106,11 @@
  * if you do, change this 1 to a 0, but be warned, all sorts of terminals will
  * get grief with this
  */
-#define USE_CTL_SQ              ( 0 )
+#if ( DJGPP_DOS )
+# define USE_CTL_SQ               ( 1 )
+#else
+# define USE_CTL_SQ               ( 0 )
+#endif
 
 /* Use select instead of VMIN/VTIME setting of the terminal attributes.
  * This *must* be used with CygWin as setting VMIN/VTIME won't work
@@ -116,6 +120,10 @@
 #if ( CYGWIN )
 # undef USE_TERMINAL_SELECT
 # define USE_TERMINAL_SELECT    ( 1 )
+#endif
+#if ( DJGPP_DOS )
+# undef USE_TERMINAL_SELECT
+# define USE_TERMINAL_SELECT    ( 0 )
 #endif
 /*==============================================================*/
 
@@ -135,7 +143,9 @@ int scnothing P1_(char *, s)
 # include <errno.h>             /* errno, ...               */
 # include <sys/stat.h>          /* stat(), ...              */
 # if USE_TERMINAL_SELECT
-#  include <sys/select.h>
+#  if ( !DJGPP_DOS )  /* select() prototype in time.h */
+#   include <sys/select.h>
+#  endif
 #  include <sys/time.h>
 # endif
 # include "edef.h"              /* Global variable definitions  */
@@ -247,6 +257,18 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
         MkUNXDirSep_(cp_);                                  \
         xstrlcpy(cp_, getdospath(cp_), SIZEOF(path));       \
     }                                                       \
+    MkDOSDirSep_(cp_);                                      \
+} while ( 0 )
+#  define NULL_DEVICE             "NUL"
+# elif ( DJGPP_DOS )
+#  define NormalizePathUNX(path)  do  {                     \
+    char  *cp_  = (path);                                   \
+                                                            \
+    MkUNXDirSep_(cp_);                                      \
+} while ( 0 )
+#  define NormalizePathDOS(path)  do  {                     \
+    char  *cp_  = (path);                                   \
+                                                            \
     MkDOSDirSep_(cp_);                                      \
 } while ( 0 )
 #  define NULL_DEVICE             "NUL"
@@ -537,7 +559,6 @@ int ttopen P0_()
 #  else
     curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
 #  endif
-    curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
     curterm.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
     curterm.c_cc[VMIN] = 1;
     curterm.c_cc[VTIME] = 0;
@@ -583,7 +604,6 @@ int ttopen P0_()
 #  else
     curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
 #  endif
-    curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
     curterm.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
     curterm.c_cc[VMIN] = 1;
     curterm.c_cc[VTIME] = 0;
@@ -1416,8 +1436,10 @@ int bktoshell P2_(int, f, int, n)
     /* Reset the terminal and go to the last line */
     vttidy();
 
+# if ( !DJGPP_DOS )
     /* Okay, stop... */
     kill(getpid(), SIGTSTP);
+# endif
 
     /* We should now be back here after resuming */
 
@@ -2257,7 +2279,7 @@ int pipecmd P2_(int, f, int, n)
     if ( !writeout(InFile, "w") ) {
         mlwrite("[Cannot write filter file <%s>]", InFile);
         XSTRCPY(bp->b_fname, tmpnam);
-        unlink(InFile);
+        umc_unlink(InFile);
         sleep(MLWAIT);
 
         return FALSE;
@@ -2269,7 +2291,7 @@ int pipecmd P2_(int, f, int, n)
     makename(bname, OutFile);           /* New buffer name. */
 # elif ( !0 )
     if ( !makecmdbname(bname, SIZEOF (bname), Command, "@Cmd") ) {
-        unlink(InFile);
+        umc_unlink(InFile);
 
         return FALSE;
     }
@@ -2280,7 +2302,7 @@ int pipecmd P2_(int, f, int, n)
         /*-make sure the contents can safely be blown away */
         if ( bp->b_flag & BFCHG ) {
             if ( mlyesno (TEXT32) != TRUE ) {
-                unlink(InFile);
+                umc_unlink(InFile);
 
                 return FALSE;
             }
@@ -2289,7 +2311,7 @@ int pipecmd P2_(int, f, int, n)
     } else if ( ( bp = bfind (bname, TRUE, 0) ) == NULL ) {
         mlwrite (TEXT137);
         /* cannot create buffer */
-        unlink(InFile);
+        umc_unlink(InFile);
         sleep(MLWAIT);
 
         return FALSE;
@@ -2298,8 +2320,8 @@ int pipecmd P2_(int, f, int, n)
     if ( !( Result = LaunchPrg (Command, InFile, OutFile, NULL) ) ) {
         mlwrite (TEXT3);
         /* [execution failed] */
-        unlink(InFile);
-        unlink(OutFile);
+        umc_unlink(InFile);
+        umc_unlink(OutFile);
         sleep(MLWAIT);
 
         return FALSE;
@@ -2315,8 +2337,8 @@ int pipecmd P2_(int, f, int, n)
 /* Use multiple "command" windows                               */
 /* Split the current window to make room for the command output */
         if ( !splitwind(FALSE, 1) ) {
-            unlink(InFile);
-            unlink(OutFile);
+            umc_unlink(InFile);
+            umc_unlink(OutFile);
 
             return FALSE;
         }
@@ -2339,8 +2361,8 @@ int pipecmd P2_(int, f, int, n)
             bp->b_flag = bflag;
             swbuffer (temp_bp);
         }
-        unlink(InFile);
-        unlink(OutFile);
+        umc_unlink(InFile);
+        umc_unlink(OutFile);
     }
 
     return TRUE;
@@ -2395,7 +2417,7 @@ int f_filter P2_(int, f, int, n)
     if ( !writeout(InFile, "w") ) {
         mlwrite("[Cannot write filter file <%s>]", InFile);
         XSTRCPY(bp->b_fname, tmpnam);
-        unlink(InFile);
+        umc_unlink(InFile);
         sleep(MLWAIT);
 
         return FALSE;
@@ -2417,8 +2439,8 @@ int f_filter P2_(int, f, int, n)
     XSTRCPY(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
-    unlink(InFile);
-    unlink(OutFile);
+    umc_unlink(InFile);
+    umc_unlink(OutFile);
 
     /* Show status */
     if ( !s ) {
@@ -2633,8 +2655,8 @@ int rmdir P1_(char *, name)
 # endif /* XENIX & FILOCK */
 
 /*======================================================================
- * CYGWIN needs wrapper for some (but not all) functions with file name
- * arguments to be able to work with DOS and UNIX style file names:
+ * CYGWIN, DJGPP_DOS need wrappers for some (but not all) functions with file
+ * name arguments to be able to work with DOS and UNIX style file names:
  * - access(), stat() only work with UNIX style file names.
  * - fopen(), ... work with DOS and UNIX style file names.
  *====================================================================*/
@@ -2662,6 +2684,20 @@ int unx_access_ P2_(CONST char *, path, int, mode)
     return access(GetPathUNX(path), mode);
 }
 
+int unx_rename_ P2_(CONST char *, from, CONST char *, to)
+{
+    char  new_from[NFILEN];
+    char  new_to[NFILEN];
+
+    ZEROMEM(new_from);
+    ZEROMEM(new_to);
+
+    xstrlcpy(new_from, GetPathUNX(from), SIZEOF(new_from));
+    xstrlcpy(new_to,   GetPathUNX(to),   SIZEOF(new_to));
+
+    return rename(new_from, new_to);
+}
+
 int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
 {
     /* It is OK here to *not* immediatley copy GetPathUNX's internal
@@ -2669,6 +2705,15 @@ int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
      * GetPathUNX
      */
     return stat(GetPathUNX(path), sb);
+}
+
+int unx_unlink_ P1_(CONST char *, path)
+{
+    /* It is OK here to *not* immediatley copy GetPathUNX's internal
+     * static buffer, because we *know* that `unlink' won't call
+     * GetPathUNX
+     */
+    return unlink(GetPathUNX(path));
 }
 
 

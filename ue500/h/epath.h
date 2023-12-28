@@ -36,7 +36,7 @@ static NOSHARE CONST char *pathname[] =
     "emacs.rc", "emacs.hlp", "/bin", "/sys/public", ""
 };
 
-# elif   MSDOS || WINNT || WINXP || CYGWIN
+# elif   MSDOS || WINNT || WINXP || CYGWIN || DJGPP_DOS
 {
     "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\",
     ""

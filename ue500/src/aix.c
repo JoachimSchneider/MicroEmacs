@@ -1325,14 +1325,14 @@ char * file2;                           /* New file name        */
     }
 
     /* Get rid of target */
-    unlink(file2);
+    umc_unlink(file2);
 
     /* Link two files together */
     if ( link(file1, file2) )
         return (-1);
 
     /* Unlink original file */
-    return ( unlink(file1) );
+    return ( umc_unlink(file1) );
 }
 # endif /* USG || AUX || SMOS || HPUX8 || XENIX */
 
@@ -1490,7 +1490,7 @@ int n;                                  /* Argument count       */
     }
 
     /* ...and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (1);
 }
@@ -1552,8 +1552,8 @@ int n;                                  /* Argument count       */
     xstrcpy(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     /* Show status */
     if ( !s )

@@ -57,8 +57,8 @@ int PASCAL NEAR usebuffer P2_(int, f, int, n)
 int PASCAL NEAR nextbuffer P2_(int, f, int, n)
 /* f, n:  Default flag, numeric argument  */
 {
-    REGISTER BUFFER *bp;        /* current eligable buffer */
-    REGISTER int status;
+    REGISTER BUFFER *bp     = NULL;   /* current eligable buffer */
+    REGISTER int    status  = 0;
 
     /* make sure the arg is legit */
     if ( f == FALSE )
@@ -332,7 +332,7 @@ ask:    if ( mlreply(TEXT29, bufn, NBUFN) != TRUE )
 int PASCAL NEAR listbuffers P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER int status;        /* stutus return */
+    REGISTER int status;        /* status return */
 
     if ( ( status = makelist(f) ) != TRUE )
         return (status);

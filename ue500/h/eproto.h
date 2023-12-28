@@ -17,7 +17,6 @@
 
 
 /**********************************************************************/
-#include <string.h>
 #include <stdio.h>
 /***#include <stdlib.h>***/
 #include <errno.h>
@@ -80,7 +79,19 @@
  * structures against given needs.  Example: CASRT( SIZEOF(int) ==
  * SIZEOF(long) );
  */
-#define CASRT(condition)  typedef int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+#define CASRT_0(condition)  typedef     int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+#ifdef __cplusplus
+# define CASRT_1(condition) extern "C"  int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+#else
+# define CASRT_1(condition) extern      int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+#endif
+/* CASRT_0 gives warnings about unused typedefs:
+ * - FreeBSD clang version 13.0.0: `warning: unused typedef'
+ * - gcc version 12.2.0: `warning: typedef ''dummy_805_'' locally defined but not used'
+ * CASRT_1 gives warnings about unused variables:
+ * - gcc version 12.2.0: `warning: unused variable ''dummy_2224_'''
+ */
+#define CASRT CASRT_0
 /**********************************************************************/
 
 
@@ -166,6 +177,7 @@ CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
 # include <string.h>
 #else
 EXTERN char *getenv DCL((CONST char *));
+EXTERN char *memcpy DCL((char *dst, CONST char *src, int len));
 EXTERN char *strcat DCL((char *, CONST char *));
 EXTERN char *strcpy DCL((char *, CONST char *));
 EXTERN int  strncmp DCL((CONST char *, CONST char *, int));
@@ -179,7 +191,9 @@ EXTERN VOID free DCL((char *));
 #  endif
 EXTERN char *realloc DCL((char *block, int siz));
 # endif
-#endif
+#endif  /* WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO)) \
+         * || GCC || VMS || IS_UNIX()
+         */
 #if IS_UNIX()
 # include <sys/stat.h>
 #endif
@@ -188,6 +202,7 @@ EXTERN char *realloc DCL((char *block, int siz));
 /* Switch On/Off some features:                                       */
 /*....................................................................*/
 #define UEMACS_FEATURE_USE_STATIC_STACK (0)
+#define UEMACS_FEATURE_USE_VA_COPY      (0)
 /*....................................................................*/
 
 
@@ -282,11 +297,13 @@ EXTERN int PASCAL NEAR  xvsnprintf DCL((char *s, size_t n,
 /* that would have been written if n were large enough.                 */
 EXTERN int CDECL NEAR xsnprintf DCL((char *s, size_t n, CONST char *fmt, ...));
 
+#if UEMACS_FEATURE_USE_VA_COPY
 /* Like GNU C vasprintf:                                        */
 /* Allocate (using malloc()) a string large enough to hold the  */
 /* resulting string.                                            */
 EXTERN int PASCAL NEAR  xvasprintf DCL((char **ret, CONST char *fmt,
                                         va_list ap));
+#endif    /* UEMACS_FEATURE_USE_VA_COPY */
 
 /* Like GNU C asprintf:                                         */
 /* Allocate (using malloc()) a string large enough to hold the  */
@@ -550,10 +567,10 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #endif
 #undef VA_LIST_ASSIGN_
 
-#if ( 0 )
+#if ( 0 ) /* Don't use own implementation per default */
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( defined(va_copy) )
+#elif ( defined(va_copy) )  /* C99, i.e.: __STDC_VERSION__ >= 199901  */
 # define VA_COPY            va_copy
 # define VA_END             va_end
 #elif ( defined(__va_copy) )
@@ -563,14 +580,17 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #elif VMS && (__DECC_VER < 70500000)
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( defined(__STDC_VERSION__) && __STDC_VERSION__ >= 199901 )
-# define VA_COPY            va_copy
-# define VA_END             va_end
-#elif ( 0 )
-# error CANNOT DEFINE VA_COPY
-#else
+#elif ( MSDOS && TURBO )
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
+#elif ( UEMACS_FEATURE_USE_VA_COPY )
+# error CANNOT DEFINE VA_COPY
+#else
+/**EMPTY**/
+#endif
+#if ( !UEMACS_FEATURE_USE_VA_COPY )
+# undef VA_COPY
+# undef VA_END
 #endif
 /**********************************************************************/
 
@@ -2053,14 +2073,18 @@ EXTERN int PASCAL NEAR          twiddle DCL((int f, int n));
 EXTERN int PASCAL NEAR          typahead DCL((void));
 #if IS_UNIX()
 /*======================================================================
- * CYGWIN needs wrapper for some (but not all) functions with file name
- * arguments to be able to work with DOS and UNIX style file names:
- * - access(), stat() only work with UNIX style file names.
+ * CYGWIN/DJGPP_DOS need wrappers for some (but not all) functions with
+ * file name arguments to be able to work with DOS and UNIX style file
+ * names:
+ * - access(), stat() (CYGWIN), rename(), unlink() (DJGPP_DOS) only
+ *   work with UNIX style file names.
  * - fopen(), ... work with DOS and UNIX style file names.
  *====================================================================*/
 EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
 EXTERN int                      unx_access_ DCL((CONST char *path, int mode));
+EXTERN int                      unx_rename_ DCL((CONST char *from, CONST char *to));
 EXTERN int                      unx_stat_ DCL((CONST char *path, struct stat *sb));
+EXTERN int                      unx_unlink_ DCL((CONST char* path));
 #endif
 EXTERN int PASCAL NEAR          unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR          unbindchar DCL((int c));
@@ -2164,10 +2188,14 @@ EXTERN int PASCAL NEAR         backtagword DCL((int f, int n)); /* return from t
 /**********************************************************************/
 #if IS_UNIX()
 # define umc_access  unx_access_
+# define umc_rename  unx_rename_
 # define umc_stat    unx_stat_
+# define umc_unlink  unx_unlink_
 #else
 # define umc_access  access
+# define umc_rename  rename
 # define umc_stat    stat
+# define umc_unlink  unlink
 #endif
 /**********************************************************************/
 
@@ -2196,13 +2224,30 @@ EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
 #define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
 EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
-#define CLROOM(p) do  {           \
-    char **pp_  = (char **)&(p);  \
-                                  \
-    if ( NULL != *pp_ ) {         \
-        DEROOM(*pp_);             \
-        *pp_  = NULL;             \
-    }                             \
+
+/* With DJGPP_DOS (gcc version 4.0.1) and `-O2' this leads to the warning:
+ *  `dereferencing type-punned pointer will break strict aliasing rules'
+ * *and* to generation of wrong code!
+ */
+#define CLROOM_DEACTIVATED(p) do  { \
+    char **pp_  = (char **)&(p);    \
+                                    \
+    if ( NULL != *pp_ ) {           \
+        DEROOM(*pp_);               \
+        *pp_  = NULL;               \
+    }                               \
+} while ( 0 )
+#define CLROOM(p) do  {                 \
+    char  *z_ = (char *)&(p);           \
+    char  *p_ = NULL;                   \
+    CASRT(sizeof(p) == sizeof(p_));     \
+                                        \
+    memcpy(&p_, z_, sizeof(p_));        \
+    if ( NULL != p_ )   {               \
+        DEROOM(p_);                     \
+        p_  = NULL;                     \
+        memcpy(z_, &p_, sizeof(p));     \
+    }                                   \
 } while ( 0 )
 /**********************************************************************/
 
