@@ -864,6 +864,26 @@ Next Steps:
 - access() and stat() in CYGWIN don't work with DOS-Paths: Create unx_access, unx_stat.             (\/)
 
 
+[2023-12-28.00]
+DJGPP-Port: (With DJDEV204)
+Program received signal SIGSEGV, Segmentation fault.
+0x0004ca2d in vbios_write_ch ()
+(gdb) where
+#0  0x0004ca2d in vbios_write_ch ()
+#1  0x00049316 in __libc_termios_write_tty ()
+#2  0x00049262 in __libc_termios_write ()
+#3  0x00040752 in __write ()
+#4  0x0002bde6 in ttflush () at ../src/unix.c:679
+#5  0x00007df4 in update (force=0) at ../src/display.c:526
+#6  0x0001cd2a in editloop () at ../src/main.c:562
+#7  0x0001c449 in main (argc=1, argv=0xe02d0) at ../src/main.c:152
+(gdb)
+
+===> RESOLVED: The new (obviously since DJDEV204) termios-functions are
+               very sensitive when writing outside of the screen area
+               (maybee the write directly into video memory?).
+               Decreasing NCOL by one in ansi.c resolved the problem!
+
 #============================== TODO LIST ==============================
 
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq

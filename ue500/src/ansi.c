@@ -141,14 +141,14 @@ int coltran[16] =
 # endif /* COLOR */
 
 /*
- * Standard terminal interface dispatch table. Most of the fields point into
- * "termio" code.
+ * Standard terminal interface dispatch table. Most of the fields point
+ * into "termio" code.
  */
 NOSHARE TERM term = {
     NROW_MAX - 1,
     NROW - 1,
-    NCOL_MAX,
-    NCOL,
+    NCOL_MAX - 1,
+    NCOL - 1,
     0, 0,
     MARGIN,
     SCRSIZ,
@@ -420,14 +420,14 @@ static int PASCAL NEAR ansiopen P0_()
         term.t_nrow = win.ws_row - 1;
         REPAIR(term.t_nrow >= 1,  term.t_nrow = NROW - 1);
         term.t_ncol = win.ws_col;
-        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL);
+        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL - 1);
     } else {
         term.t_nrow = NROW - 1;
-        term.t_ncol = NCOL;
+        term.t_ncol = NCOL - 1;
     }
 #  else
     term.t_nrow = NROW - 1;
-    term.t_ncol = NCOL;
+    term.t_ncol = NCOL - 1;
 #  endif  /* !DJGPP_DOS */
 #  if ( !0 )
     term.t_mrow = term.t_nrow;
