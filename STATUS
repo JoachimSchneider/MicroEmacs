@@ -884,6 +884,28 @@ Program received signal SIGSEGV, Segmentation fault.
                (maybee the write directly into video memory?).
                Decreasing NCOL by one in ansi.c resolved the problem!
 
+
+[2023-12-29.00]
+Search-string termination needs two (instead of one) <ESC>:
+We have seen this error before when working on the ANSI terminal for UNIX:
+
+...
+ 157 commit 69cc6eef9742564e1fc755bc82657da5802ef218
+ 158 Author: Dr. Joachim Schneider <jesmx@hal.rhein-neckar.de>
+ 159 Date:   Mon Oct 9 22:10:17 2023 +0200
+ 160
+ 161     Finally search string <META> works with CYGWIN
+ 162
+ 163 commit 638af231ef47e05322dec458602a4db0eddf050e
+ 164 Author: Dr. Joachim Schneider <jesmx@hal.rhein-neckar.de>
+ 165 Date:   Mon Oct 9 21:44:16 2023 +0200
+ 166
+ 167     CYGWIN: Use select instead of IOCTL to read with timeout.
+ 168
+...
+===> Fixed with `USE_TERMINAL_SELECT'
+
+
 #============================== TODO LIST ==============================
 
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq

@@ -40,6 +40,15 @@ set $palette "KEYMAP FN1 ~eOP"
 set $palette "KEYMAP FN2 ~eOQ"
 set $palette "KEYMAP FN3 ~eOR"
 set $palette "KEYMAP FN4 ~eOS"
+
+; DJGPP
+set $palette "KEYMAP FN1 ~e[[A"
+set $palette "KEYMAP FN2 ~e[[B"
+set $palette "KEYMAP FN3 ~e[[C"
+set $palette "KEYMAP FN4 ~e[[D"
+set $palette "KEYMAP FN5 ~e[[E"
+set $palette "KEYMAP FN6 ~e[[F"
+
 set $palette "KEYMAP FN1 ~e[11~~"
 set $palette "KEYMAP FN2 ~e[12~~"
 set $palette "KEYMAP FN3 ~e[13~~"

@@ -113,17 +113,16 @@
 #endif
 
 /* Use select instead of VMIN/VTIME setting of the terminal attributes.
- * This *must* be used with CygWin as setting VMIN/VTIME won't work
- * with CygWin.
+ * This *must* be used with CygWin or DJGPP s setting VMIN/VTIME won't
+ * work with CygWin or DJGPP.
+ *
+ * If VMIN/VTIME setting do not work terminating search strings
+ * with <META> is not working (two <META>s needed).
  */
 #define USE_TERMINAL_SELECT     ( 1 )
-#if ( CYGWIN )
+#if ( CYGWIN || DJGPP_DOS )
 # undef USE_TERMINAL_SELECT
 # define USE_TERMINAL_SELECT    ( 1 )
-#endif
-#if ( DJGPP_DOS )
-# undef USE_TERMINAL_SELECT
-# define USE_TERMINAL_SELECT    ( 0 )
 #endif
 /*==============================================================*/
 
@@ -1716,6 +1715,91 @@ static int winsystem P1_(CONST char *, cmd)
 #  undef SHELL_C_
 # endif /* CYGWIN */
 
+# if ( DJGPP_DOS )
+static CONST char *getdospath P1_(CONST char *, in)
+{
+    static char dospath[NFILEN];
+
+    ZEROMEM(dospath);
+    if ( NULL == in ) {
+        in  = "";
+    }
+
+    xstrlcpy(dospath, in, SIZEOF(dospath));
+    NormalizePathDOS(dospath);
+
+    return dospath;
+}
+
+#  if ( 0 ) /**NOT_USED**/
+static CONST char *getunxpath P1_(CONST char *, in)
+{
+    static char unxpath[NFILEN];
+
+    ZEROMEM(unxpath);
+    if ( NULL == in ) {
+        in  = "";
+    }
+
+    xstrlcpy(unxpath, in, SIZEOF(unxpath));
+    NormalizePathUNX(unxpath);
+
+    return unxpath;
+}
+#  endif
+
+static CONST char *dosgetshell P0_()
+{
+    static CONST char *res  = NULL;
+
+    if ( NULL == res )  {
+        CONST char  *comspec  = NULL;
+        char        SystemRoot[NFILEN];
+        static char DOSCmd[NFILEN];
+
+        ZEROMEM(SystemRoot);
+        ZEROMEM(DOSCmd);
+
+        if ( NULL != (comspec = getenv("COMSPEC")) )  {
+            xstrlcpy(DOSCmd, comspec, SIZEOF(DOSCmd));
+        } else {
+            xstrlcpy(SystemRoot, "C:\\", SIZEOF(SystemRoot));
+            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%s\\command.com", SystemRoot);
+        }
+
+        res = DOSCmd;
+    }
+
+    return res;
+}
+
+#define SHELL_C_  "/C"
+static int dossystem P1_(CONST char *, cmd)
+{
+    int                 status    = 0;
+    CONST char          *shell    = NULL;
+    char                cmdstr[NFILEN];
+
+    ZEROMEM(cmdstr);
+    ASRT( NULL != (shell = dosgetshell()) );
+
+    if ( NULL == cmd )  {
+        cmd = "";
+    }
+
+   xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s %s", shell, SHELL_C_, cmd);
+#  if ( !0 )
+    TRC(("Executing <%s>", cmdstr));
+#  endif
+
+    status  = system(cmdstr);
+
+    return ( status );
+}
+#  undef SHELL_C_
+
+# endif /* DJGPP_DOS */
+
 /** Callout to system to perform command **/
 int callout P1_(CONST char *, cmd)
 /* cmd: Command to execute  */
@@ -1734,6 +1818,8 @@ int callout P1_(CONST char *, cmd)
     /* Do command */
 # if ( CYGWIN )
     status = winsystem(cmd) == 0;
+# elif ( DJGPP_DOS )
+    status = dossystem(cmd) == 0;
 # else
     status = system(cmd) == 0;
 # endif
@@ -1762,7 +1848,7 @@ int spawncli P2_(int, f, int, n)
         return ( resterr() );
 
     /* Get shell path */
-# if ( CYGWIN )
+# if ( CYGWIN || DJGPP_DOS )
     if ( NULL != (sh = getenv("SHELL")) ) { /* e.g. in a cygwin term  */
         char  cygsh[NFILEN];
 
@@ -1775,7 +1861,7 @@ int spawncli P2_(int, f, int, n)
     }
 # else
     sh = getenv("SHELL");
-# endif /* CYGWIN */
+# endif /* CYGWIN || DJGPP_DOS */
 
     if ( !sh )  {
 # if ( LINUX )
@@ -1784,6 +1870,8 @@ int spawncli P2_(int, f, int, n)
         sh = "/usr/bin/ksh";
 # elif ( CYGWIN )
         sh = wingetshell();
+# elif ( DJGPP_DOS )
+        sh = dosgetshell();
 # else
         sh = "/bin/sh";
 # endif /* LINUX */
@@ -1911,6 +1999,10 @@ static char *gettmpdir P0_()
         CHKDIR_(P_tmpdir);
 # else
         CHKDIR_("/tmp");
+#  if ( CYGWIN || DJGPP_DOS )
+        CHKDIR_("C:/TEMP");
+        CHKDIR_("C:/TMP");
+#  endif
 # endif
 
         /* Last resort: Use current directory:  */
@@ -1996,7 +2088,7 @@ char *gettmpfname P1_(CONST char *, ident)
  * redirected. If it is NULL or an empty string, stdout is not redirected.
  *
  * ErrFile is the name of the file where stderr is expected to be
- * redirected. If it is NULL or an empty string, stdout is not redirected.
+ * redirected. If it is NULL or an empty string, stderr is not redirected.
 */
 static int LaunchPrg P4_(const char *,  Cmd,
                          const char *,  InFile,
@@ -2020,7 +2112,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     if ( !InFile || !*InFile ) {
         XSTRCPY(lInFile, NULL_DEVICE);
     } else  {
-# if ( CYGWIN )
+# if ( CYGWIN || DJGPP_DOS )
         XSTRCPY(lInFile, getdospath(InFile));
 # else
         XSTRCPY(lInFile, InFile);
@@ -2029,7 +2121,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     if ( !OutFile || !*OutFile ) {
         XSTRCPY(lOutFile, NULL_DEVICE);
     } else  {
-# if ( CYGWIN )
+# if ( CYGWIN || DJGPP_DOS )
         XSTRCPY(lOutFile, getdospath(OutFile));
 # else
         XSTRCPY(lOutFile, OutFile);
@@ -2038,7 +2130,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     if ( !ErrFile || !*ErrFile ) {
         XSTRCPY(lErrFile, NULL_DEVICE);
     } else  {
-# if ( CYGWIN )
+# if ( CYGWIN || DJGPP_DOS )
         XSTRCPY(lErrFile, getdospath(ErrFile));
 # else
         XSTRCPY(lErrFile, ErrFile);
@@ -2047,15 +2139,20 @@ static int LaunchPrg P4_(const char *,  Cmd,
 
     xsnprintf(FullCmd,
               SIZEOF (FullCmd),
-# if ( CYGWIN )
+# if ( CYGWIN  )
               "%s < %s > %s 2>%s",
+# elif ( DJGPP_DOS )
+              "%s < %s > %s",
 # else
               "( %s ) < %s > %s 2>%s",
 # endif
               Cmd,
               lInFile,
-              lOutFile,
-              lErrFile);
+              lOutFile
+# if ( !DJGPP_DOS )
+              , lErrFile
+# endif
+              );
 
     return callout(FullCmd);
 } /* LaunchPrg */
