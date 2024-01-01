@@ -208,6 +208,14 @@ EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # endif /* ANSI */
 /*==============================================================*/
 
+
+/*====================================================================*/
+/* Static functions declared here:                                    */
+/*====================================================================*/
+static int IsExecutable DCL((CONST char * file));
+/*====================================================================*/
+
+
 /*==============================================================*/
 #define   TGETFLAG(x)     tgetflag((char *)(x))
 #define   TGETNUM(x)      tgetnum((char *)(x))
@@ -1617,9 +1625,10 @@ static CONST char *getunxpath P1_(CONST char *, in)
 
 static CONST char *wingetshell P0_()
 {
-    static CONST char *res  = NULL;
+    static int        FirstCall = !0;
+    static CONST char *res      = NULL;
 
-    if ( NULL == res )  {
+    if ( FirstCall )  {
         char        SystemRoot[NFILEN];
         static char WinCmd[NFILEN];
 
@@ -1631,7 +1640,13 @@ static CONST char *wingetshell P0_()
         }
         MkDOSDirSep_(SystemRoot);
         xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
-        res = WinCmd;
+        if ( IsExecutable(WinCmd) ) {
+            res = WinCmd;
+        } else                      {
+            res = NULL;
+        }
+
+        FirstCall = 0;
     }
 
     return res;
@@ -1653,7 +1668,11 @@ static int winsystem P1_(CONST char *, cmd)
     ZEROMEM(mask);
     ZEROMEM(attr);
 
-    ASRT( NULL != (shell = wingetshell()) );
+    if ( NULL == (shell = wingetshell()) )  {
+        TRC(("%s", "Could not get a shell"));
+
+        return ( -C_10 );
+    }
     sargv[0]  = (char *)shell;
 
     if ( NULL == cmd )  {
@@ -1750,24 +1769,46 @@ static CONST char *getunxpath P1_(CONST char *, in)
 
 static CONST char *dosgetshell P0_()
 {
-    static CONST char *res  = NULL;
+    static int        FirstCall = !0;
+    static CONST char *res      = NULL;
+    int               Drive     = '\0';
 
-    if ( NULL == res )  {
+    if ( FirstCall )  {
         CONST char  *comspec  = NULL;
-        char        SystemRoot[NFILEN];
         static char DOSCmd[NFILEN];
 
-        ZEROMEM(SystemRoot);
         ZEROMEM(DOSCmd);
 
         if ( NULL != (comspec = getenv("COMSPEC")) )  {
             xstrlcpy(DOSCmd, comspec, SIZEOF(DOSCmd));
-        } else {
-            xstrlcpy(SystemRoot, "C:\\", SIZEOF(SystemRoot));
-            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%s\\command.com", SystemRoot);
         }
 
-        res = DOSCmd;
+        for ( Drive = 'C'; !IsExecutable(DOSCmd) && Drive <= 'Z'; Drive++ ) {
+            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%c:\\%s", Drive, "command.com");
+            if ( !IsExecutable(DOSCmd) )  {
+                xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%c:\\DOS\\%s", Drive, "command.com");
+            }
+        }
+        if ( !IsExecutable(DOSCmd) )  {
+            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%c:\\%s",      'A', "command.com");
+        }
+        if ( !IsExecutable(DOSCmd) )  {
+            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%c:\\DOS\\%s", 'A', "command.com");
+        }
+        if ( !IsExecutable(DOSCmd) )  {
+            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%c:\\%s",      'B', "command.com");
+        }
+        if ( !IsExecutable(DOSCmd) )  {
+            xsnprintf(DOSCmd, SIZEOF(DOSCmd), "%c:\\DOS\\%s", 'B', "command.com");
+        }
+
+        if ( IsExecutable(DOSCmd) ) {
+            res = DOSCmd;
+        } else {
+            res = NULL;
+        }
+
+        FirstCall = 0;
     }
 
     return res;
@@ -1781,7 +1822,11 @@ static int dossystem P1_(CONST char *, cmd)
     char                cmdstr[NFILEN];
 
     ZEROMEM(cmdstr);
-    ASRT( NULL != (shell = dosgetshell()) );
+    if ( NULL == (shell = dosgetshell()) )  {
+        TRC(("%s", "Could not get a shell"));
+
+        return ( -C_10 );
+    }
 
     if ( NULL == cmd )  {
         cmd = "";
@@ -1842,28 +1887,25 @@ int spawncli P2_(int, f, int, n)
 /* n: Argument count  */
 {
     CONST char  *sh = NULL;
+# if ( CYGWIN || DJGPP_DOS )
+    char        dossh[NFILEN];
+
+    ZEROMEM(dossh);
+# endif
 
     /* Don't allow this command if restricted */
-    if ( restflag )
+    if ( restflag ) {
         return ( resterr() );
-
-    /* Get shell path */
-# if ( CYGWIN || DJGPP_DOS )
-    if ( NULL != (sh = getenv("SHELL")) ) { /* e.g. in a cygwin term  */
-        char  cygsh[NFILEN];
-
-        ZEROMEM(cygsh);
-        xstrlcpy(cygsh, sh, SIZEOF(cygsh));
-        NormalizePathDOS(cygsh);
-        sh  = cygsh;
-    } else                                {
-        sh  = getenv("COMSPEC");
     }
-# else
-    sh = getenv("SHELL");
-# endif /* CYGWIN || DJGPP_DOS */
 
-    if ( !sh )  {
+    /* Get shell path if envvar `SHELL' is set: */
+    if ( NULL != (sh = getenv("SHELL")) ) {
+# if ( CYGWIN || DJGPP_DOS )  /* e.g. in a cygwin term  */
+        xstrlcpy(dossh, sh, SIZEOF(dossh));
+        NormalizePathDOS(dossh);
+        sh  = dossh;
+# endif
+    } else                                {
 # if ( LINUX )
         sh = "/bin/bash";
 # elif ( SOLARIS )
@@ -1877,8 +1919,12 @@ int spawncli P2_(int, f, int, n)
 # endif /* LINUX */
     }
 
-    /* Do shell */
-    return ( callout(sh) );
+    if ( IsExecutable(sh) ) {
+        /* Do shell */
+        return ( callout(sh) );
+    } else {
+        return FALSE;
+    }
 }
 
 /** Spawn a command **/
@@ -1945,19 +1991,56 @@ static int  IsDir P1_(CONST char *, dir)
     }
 }
 
-static int IsAccessable(CONST char *d)
+static int  IsFil P1_(CONST char *, fil)
 {
-/* This is *not* perfect: `umc_access()' only checks for uid/gid but  */
-/* not for euid/egid.                                                 */
-    if ( NULL == d )  {
+    struct stat sb;
+
+    ZEROMEM(sb);
+
+    if ( !fil || !*fil )  {
         return FALSE;
     }
-
-    if ( 0 == umc_access(d, R_OK|W_OK|X_OK) )  {
+    if        ( 0 > umc_stat(fil, &sb) )  {
+        return FALSE;
+    } else if ( S_ISREG(sb.st_mode) )     {
         return TRUE;
     } else                                {
         return FALSE;
     }
+}
+
+static int IsAccessable P2_(CONST char *, d, CONST char *, mode)
+{
+/* This is *not* perfect: `umc_access()' only checks for uid/gid but  */
+/* not for euid/egid.                                                 */
+    int mflag = 0;
+
+    if        ( NULL == d )     {
+        return FALSE;
+    } else if ( NULL == mode )  {
+        return TRUE;
+    }
+
+    if ( strchr(mode, 'r') || strchr(mode, 'R') ) {
+        mflag |= R_OK;
+    }
+    if ( strchr(mode, 'w') || strchr(mode, 'W') ) {
+        mflag |= W_OK;
+    }
+    if ( strchr(mode, 'x') || strchr(mode, 'X') ) {
+        mflag |= X_OK;
+    }
+
+    if ( 0 == umc_access(d, mflag) )  {
+        return TRUE;
+    } else                            {
+        return FALSE;
+    }
+}
+
+static int IsExecutable P1_(CONST char *, file)
+{
+    return ( IsFil(file) && IsAccessable(file, "rx") );
 }
 
 /* Get a directory for temporary files: Cannot fail.  */
@@ -1977,7 +2060,7 @@ static char *gettmpdir P0_()
         TRC(("gettmpdir(): Testing <%s> as candidate", tmpd));        \
         NormalizePathUNX(tmpd);                                       \
         if ( IsDir(tmpd) )  {                                         \
-            if ( IsAccessable(tmpd) ) {                               \
+            if ( IsAccessable(tmpd, "rwx") )  {                       \
                 goto found;                                           \
             } else                  {                                 \
                 TRC(("gettmpdir(): <%s> is not a accessable", tmpd)); \
