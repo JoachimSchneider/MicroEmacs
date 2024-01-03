@@ -2736,20 +2736,27 @@ char *getnfile P0_()
 
     /* ...and call for the next file */
     do {
-        dp = readdir(dirptr);
-        if ( !dp )
+        if ( !(dp = readdir(dirptr)) )  {
             return (NULL);
+        }
 
-        /* Check to make sure we skip all weird entries except directories */
-        XSTRCPY(nameptr, dp->d_name);
-
-    } while (umc_stat(rbuf,
-                  &fstat) ||
-             ( (fstat.st_mode & S_IFMT) & (S_IFREG | S_IFDIR) ) == 0);
+        xstrlcpy(nameptr, dp->d_name, SIZEOF(rbuf) - (nameptr - rbuf));
+        /* Check to make sure we skip all weird entries except
+         * regular files and directories:
+         */
+    } while ( !( 0 == umc_stat(rbuf, &fstat) &&
+                  (
+                    (fstat.st_mode & S_IFMT) == S_IFDIR
+                      ||
+                    (fstat.st_mode & S_IFMT) == S_IFREG
+                  )
+               )
+            );
 
     /* if this entry is a directory name, say so */
-    if ( (fstat.st_mode & S_IFMT) == S_IFDIR )
+    if ( (fstat.st_mode & S_IFMT) == S_IFDIR )  {
         XSTRCAT(rbuf, DIRSEPSTR);
+    }
 
     /* Return the next file name! */
     return (rbuf);
