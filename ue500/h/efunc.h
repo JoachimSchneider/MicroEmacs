@@ -243,7 +243,7 @@ NOSHARE NBIND names[] =
     { "source", execfile },
     { "split-current-window", splitwind },
     { "store-procedure", storeproc },
-#if ( IS_UNIX() || VMS )
+#if ( IS_UNIX() && !DJGPP_DOS || VMS )
     { "suspend-emacs", bktoshell },
 #endif
 #if     CTAGS

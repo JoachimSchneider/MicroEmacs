@@ -28,6 +28,25 @@
 
 
 /**********************************************************************/
+/* Some constants:                                                    */
+/**********************************************************************/
+/* No braces `()' here!                                               */
+#define C_04   4
+#define C_07   7
+#define C_10  10
+#define C_16  16
+#define C_20  20
+#define C_30  30
+#define C_40  40
+#define C_50  50
+#define C_60  60
+#define C_70  70
+#define C_80  80
+#define C_90  90
+/**********************************************************************/
+
+
+/**********************************************************************/
 /* If possible use XCONCAT* below -- CONCAT* might result in          */
 /* undefined behaviour due to unspecified evaluation order for        */
 /* multiple '##' operators.                                           */
@@ -229,6 +248,10 @@ EXTERN char *realloc DCL((char *block, int siz));
 
 
 /**********************************************************************/
+EXTERN FILE *uetmpfile_ DCL((int delete));
+#define uetmpfile() ( uetmpfile_(0) )
+#define clntmpfls() ( uetmpfile_(!0)  )
+
 /* strcpy() possibly overlapping regions:   */
 EXTERN char *PASCAL NEAR  xstrcpy DCL((char *s1, CONST char *s2));
 
@@ -481,14 +504,32 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /**********************************************************************/
 
 /**********************************************************************/
-#define FREE_(p)  do  {           \
-    char **pp__ = (char **)&(p);  \
-                                  \
-    if ( NULL != *pp__ )  {       \
-        free(*pp__);              \
-        *pp__ = NULL;             \
-    }                             \
+/* With DJGPP_DOS (gcc version 4.0.1) and `-O2' this leads to the warning:
+ *  `dereferencing type-punned pointer will break strict aliasing rules'
+ * *and* to generation of wrong code!
+ */
+#define FREE_DEACTIVATED_(p)  do  {   \
+    char **pp__ = (char **)&(p);      \
+                                      \
+    if ( NULL != *pp__ )  {           \
+        free(*pp__);                  \
+        *pp__ = NULL;                 \
+    }                                 \
 } while ( 0 )
+
+#define FREE_(p)  do  {               \
+    char  *z__  = (char *)&(p);       \
+    char  *p__  = NULL;               \
+    CASRT(sizeof(p) == sizeof(p__));  \
+                                      \
+    memcpy(&p__, z__, sizeof(p__));   \
+    if ( NULL != p__ )  {             \
+        free(p__);                    \
+        p__ = NULL;                   \
+        memcpy(z__, &p__, sizeof(p)); \
+    }                                 \
+} while ( 0 )
+
 /**********************************************************************/
 
 /**********************************************************************/
@@ -601,11 +642,12 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 
 
 /**********************************************************************/
-EXTERN char *PASCAL NEAR  uitostr_memacs DCL((unsigned int i));
+EXTERN char *PASCAL NEAR  uitostr10_memacs DCL((unsigned int i));
+EXTERN char *PASCAL NEAR  uitostr16_memacs DCL((unsigned int i));
 #ifdef MAIN_C_
-char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
+char *PASCAL NEAR uitostr10_memacs P1_(unsigned int, i)
 {
-    unsigned int  base  = 10;
+    unsigned int  base  = C_10;
 
     /*******************************************************************
      * a hat n (> 0) Dezimalstellen <==> 10^(n-1) <= a < 10^n
@@ -627,6 +669,8 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 3*SIZEOF(a)
      *
      ******************************************************************/
+    CONST char    tab[] = "0123456789";
+    CASRT(C_10 + 1 == SIZEOF(tab));
     static char buf[1 + 3*SIZEOF(i) + 1];
     int           pos   = SIZEOF(buf) - 2;
     unsigned int  rest  = 0;
@@ -637,7 +681,53 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
     {
         rest  = i % base;
         i     = i / base;
-        buf[pos--]  = '0' + rest;
+        buf[pos--]  = tab[rest];
+        if ( 0 == i )
+        {
+            break;
+        }
+    }
+
+    return buf + pos + 1;
+}
+
+char *PASCAL NEAR uitostr16_memacs P1_(unsigned int, i)
+{
+    unsigned int  base  = C_16;
+
+    /*******************************************************************
+     * a hat n (> 0) Hexadezimalstellen <==> 16^(n-1) <= a < 16^n
+     *                                  <==> n -1 <= log_16(a) < n
+     * Also n <= 1 + log_16(a).
+     *
+     * a hat m (> 0) Stellen im 256-er System
+     *                              <==> 256^(m-1) <= a < 256^n
+     *                              <==> m -1 <= log_256(a) < m
+     * Ausserdem m <= SIZEOF(a), also log_256(a) < SIZEOF(a)
+     *
+     * Umrechnung der Logarithmen:
+     *  y = log_b x <==> b^y = x
+     *  ==> y*log_a(b) = log_a(x)
+     *  ==> log_a(x) = log_a(b)*log_b(x)
+     *
+     * log_16(a) = log_16(256)*log_256(a) < log_16(256)*SIZEOF(a)
+     *
+     * Damit n <= 1 + 2*SIZEOF(a)
+     *
+     ******************************************************************/
+    CONST char    tab[] = "0123456789abcdef";
+    CASRT(C_16 + 1 == SIZEOF(tab));
+    static char   buf[1 + 2*SIZEOF(i) + 1];
+    int           pos   = SIZEOF(buf) - 2;
+    unsigned int  rest  = 0;
+
+    ZEROMEM(buf);
+
+    for (;;)
+    {
+        rest  = i % base;
+        i     = i / base;
+        buf[pos--]  = tab[rest];
         if ( 0 == i )
         {
             break;
@@ -648,11 +738,12 @@ char *PASCAL NEAR uitostr_memacs P1_(unsigned int, i)
 }
 #endif
 /* Non negative int to string:  */
-#define nni2s_(i)     ( uitostr_memacs((unsigned int)(i)) )
+#define nni2s10_(i)     ( uitostr10_memacs((unsigned int)(i)) )
+#define nni2s16_(i)     ( uitostr16_memacs((unsigned int)(i)) )
 
 /**********************************************************************/
 #define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
-#define eputi(i)      eputs(uitostr_memacs((unsigned int)(i)))
+#define eputi(i)      eputs(uitostr10_memacs((unsigned int)(i)))
 /**********************************************************************/
 
 /**********************************************************************/
@@ -1926,7 +2017,7 @@ EXTERN int PASCAL NEAR          getcmd DCL((void));
 EXTERN int PASCAL NEAR          getfence DCL((int f, int n));
 EXTERN int PASCAL NEAR          getfile DCL((CONST char *fname, int lockfl));
 #if IS_UNIX()
-EXTERN char *                   gettmpfname DCL((CONST char *ident));
+EXTERN CONST char *             gettmpfname DCL((CONST char *ident));
 #endif
 EXTERN int PASCAL NEAR          get_key DCL((void));
 EXTERN int PASCAL NEAR          getregion DCL((REGION *rp));
@@ -2268,21 +2359,6 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #define ISXDIGIT(x) isxdigit((unsigned char)(x))
 #define ISASCII(x)  isascii((unsigned char)(x))
 #define ISBLANK(x)  isblank((unsigned char)(x))
-/**********************************************************************/
-
-/**********************************************************************/
-/* Some constants:                                                    */
-/**********************************************************************/
-/* No braces `()' here!                                               */
-#define C_10  10
-#define C_20  20
-#define C_30  30
-#define C_40  40
-#define C_50  50
-#define C_60  60
-#define C_70  70
-#define C_80  80
-#define C_90  90
 /**********************************************************************/
 
 

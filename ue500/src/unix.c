@@ -276,6 +276,9 @@ static int IsExecutable DCL((CONST char * file));
 #  define NormalizePathDOS(path)  do  {                     \
     char  *cp_  = (path);                                   \
                                                             \
+    if ( 0 >= IsDOSPath(cp_) )  {                           \
+        xstrlcpy(cp_, getdospath(cp_), SIZEOF(path));       \
+    }                                                       \
     MkDOSDirSep_(cp_);                                      \
 } while ( 0 )
 #  define NULL_DEVICE             "NUL"
@@ -1437,16 +1440,15 @@ int PASCAL NEAR spal P1_(char *, cmd)
 
 /* Surely more than just BSD systems do this: */
 
+# if ( !DJGPP_DOS )
 /** Perform a stop signal **/
 int bktoshell P2_(int, f, int, n)
 {
     /* Reset the terminal and go to the last line */
     vttidy();
 
-# if ( !DJGPP_DOS )
     /* Okay, stop... */
     kill(getpid(), SIGTSTP);
-# endif
 
     /* We should now be back here after resuming */
 
@@ -1458,6 +1460,7 @@ int bktoshell P2_(int, f, int, n)
     /* Success */
     return (0);
 }
+# endif
 
 /** Get time of day **/
 char * timeset P0_()
@@ -1520,7 +1523,7 @@ int rename P2_(char *, file1, char *, file2)
 # endif
 /*====================================================================*/
 
-# if ( CYGWIN )
+# if ( CYGWIN || DJGPP_DOS )
 
 /* ISDOSPATH:
  *
@@ -1557,6 +1560,22 @@ static int  IsDOSPath P1_(CONST char *, path)
         return  ( 1 );
     }
 
+#  if DJGPP_DOS /* /dev/c is C: */
+    if ( C_07 <= strlen(path) ) {
+        char  l_path[C_07 + 1];
+
+        xstrlcpy(l_path, path, SIZEOF(l_path));
+#   if ( 0 )
+        mklower(l_path);
+#   endif
+        if ( 0 == strncmp(l_path, "/dev/", SIZEOF("/dev/") - 1) ) {
+            if ( ISALPHA(l_path[5]) && '/' == l_path[6] ) {
+                return (-1);
+            }
+        }
+    }
+#  endif
+
     pFSlash = strchr(path, '/');
     pBSlash = strchr(path, '\\');
     if ( NULL == pFSlash  ) {
@@ -1580,6 +1599,10 @@ static int  IsDOSPath P1_(CONST char *, path)
         }
     }
 }
+
+# endif
+
+# if ( CYGWIN )
 
 static CONST char *getdospath P1_(CONST char *, in)
 {
@@ -1737,17 +1760,20 @@ static int winsystem P1_(CONST char *, cmd)
 # if ( DJGPP_DOS )
 static CONST char *getdospath P1_(CONST char *, in)
 {
-    static char dospath[NFILEN];
+    char        temp_dospath[NFILEN];
+    static char full_dospath[MAX2(NFILEN, FILENAME_MAX + 1)];
 
-    ZEROMEM(dospath);
+    ZEROMEM(temp_dospath);
+    ZEROMEM(full_dospath);
     if ( NULL == in ) {
         in  = "";
     }
 
-    xstrlcpy(dospath, in, SIZEOF(dospath));
-    NormalizePathDOS(dospath);
+    xstrlcpy(temp_dospath, in, SIZEOF(temp_dospath));
+    _fixpath(temp_dospath, full_dospath);
+    MkDOSDirSep_(full_dospath);
 
-    return dospath;
+    return full_dospath;
 }
 
 #  if ( 0 ) /**NOT_USED**/
@@ -1814,7 +1840,11 @@ static CONST char *dosgetshell P0_()
     return res;
 }
 
-#define SHELL_C_  "/C"
+#if ( !0 )
+# define SHELL_C_  "/E:4096 /C"
+#else
+# define SHELL_C_  "/C"
+#endif
 static int dossystem P1_(CONST char *, cmd)
 {
     int                 status    = 0;
@@ -1832,12 +1862,15 @@ static int dossystem P1_(CONST char *, cmd)
         cmd = "";
     }
 
-   xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s %s", shell, SHELL_C_, cmd);
+    xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s %s", shell, SHELL_C_, cmd);
 #  if ( !0 )
     TRC(("Executing <%s>", cmdstr));
 #  endif
+    __system_flags &= ~__system_use_shell;
 
-    status  = system(cmdstr);
+    if ( 0 != (status = system(cmdstr)) ) {
+        TRC(("system(%s) returned %d", cmdstr, status));
+    }
 
     return ( status );
 }
@@ -1923,6 +1956,8 @@ int spawncli P2_(int, f, int, n)
         /* Do shell */
         return ( callout(sh) );
     } else {
+        TRC(("spawncli: `SHELL=%s' is not executable"));
+
         return FALSE;
     }
 }
@@ -2119,33 +2154,42 @@ static char *gettmpdir P0_()
  * Return in a static buffer the name of a temporary currently not
  * existing file name containing ident in its name.
  */
-char *gettmpfname P1_(CONST char *, ident)
+CONST char *gettmpfname P1_(CONST char *, ident)
 {
     char        str[NFILEN];
-    int         i   = 0;
-    static int  seed = 0;
+    int         i     = 0;
+    static int  seed  = 0;
     static char res[NFILEN];
+    char        l_ident[C_04 + 1] = "xxxx";
 
     ZEROMEM(str);
     ZEROMEM(res);
 
-    xstrlcpy(str, gettmpdir(),              SIZEOF(str));
-    xstrlcat(str, "/me-",                   SIZEOF(str));
-    xstrlcat(str, ident,                    SIZEOF(str));
-    xstrlcat(str, "-",                      SIZEOF(str));
-    xstrlcat(str, nni2s_(getpid() % 0x100), SIZEOF(str));
+    xstrlcpy(str, gettmpdir(),                SIZEOF(str));
+    /* The filename part should have DOS 8.3 format:  */
+    xstrlcat(str, "/me",                      SIZEOF(str));
+    if ( NULL != ident )  {
+        int i = 0;
 
-    for ( i = 0; i < 0x100; i++ ) {
+        for ( i = 0; i < SIZEOF(l_ident) - 1 && ident[i]; i++ ) {
+            l_ident[i]  = ident[i];
+        }
+        mklower(l_ident);
+    }
+    xstrlcat(str, l_ident,                    SIZEOF(str));
+    xstrlcat(str, nni2s16_(getpid() % 0x100), SIZEOF(str));
+
+    for ( i = 0; i < 0x1000; i++ ) {
         struct stat sb;
 
         ZEROMEM(sb);
 
-        xstrlcpy(res, str,                        SIZEOF(res));
-        xstrlcat(res, "-",                        SIZEOF(res));
-        xstrlcat(res, nni2s_((seed + i) % 0x100), SIZEOF(res));
+        xstrlcpy(res, str,                            SIZEOF(res));
+        xstrlcat(res, ".",  /* `.': DJGPP_DOS */      SIZEOF(res));
+        xstrlcat(res, nni2s16_((seed + i) % 0x1000),  SIZEOF(res));
         if ( 0 > umc_stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
-                seed = (seed + i + 1) % 0x100;
+                seed = (seed + i + 1) % 0x1000;
 
                 return res;
             }
@@ -2420,14 +2464,19 @@ int pipecmd P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    char Command[NLINE];
-    int Result;
-    char tmpnam[NFILEN];
-    char InFile[NFILEN];
-    char OutFile[NFILEN];
-    char bname[NFILEN]   = "command";
-    char            *cp;
-    BUFFER          *bp;
+    char        Command[NLINE];
+    int         Result          = 0;
+    char        tmpnam[NFILEN];
+    char        InFile[NFILEN];
+    char        OutFile[NFILEN];
+    char        bname[NFILEN]   = "command";
+    CONST char  *cp             = NULL;
+    BUFFER      *bp             = NULL;
+
+    ZEROMEM(Command);
+    ZEROMEM(tmpnam);
+    ZEROMEM(InFile);
+    ZEROMEM(OutFile);
 
     /* Don't allow this command if restricted */
     if ( restflag ) {
@@ -2439,12 +2488,12 @@ int pipecmd P2_(int, f, int, n)
         return FALSE;
     }
 
-    if ( NULL != ( cp = gettmpfname("fltinp") ) ) {
+    if ( NULL != ( cp = gettmpfname("finp") ) ) {
         XSTRCPY(InFile, cp);
     } else {
         return FALSE;
     }
-    if ( NULL != ( cp = gettmpfname("command") ) ) {
+    if ( NULL != ( cp = gettmpfname("cmnd") ) ) {
         XSTRCPY(OutFile, cp);
     } else {
         return FALSE;
@@ -2553,20 +2602,25 @@ int f_filter P2_(int, f, int, n)
 /* f: Flags           */
 /* n: Argument count  */
 {
-    char line[NLINE];
-    int s;
-    BUFFER  *bp;
-    char    *cp;
-    char tmpnam[NFILEN];
-    char InFile[NFILEN];
-    char OutFile[NFILEN];
+    char        line[NLINE];
+    int         s   = 0;
+    BUFFER      *bp = NULL;
+    CONST char  *cp = NULL;
+    char        tmpnam[NFILEN];
+    char        InFile[NFILEN];
+    char        OutFile[NFILEN];
 
-    if ( NULL != ( cp = gettmpfname("fltinp") ) ) {
+    ZEROMEM(line);
+    ZEROMEM(tmpnam);
+    ZEROMEM(InFile);
+    ZEROMEM(OutFile);
+
+    if ( NULL != ( cp = gettmpfname("finp") ) ) {
         XSTRCPY(InFile, cp);
     } else {
         return FALSE;
     }
-    if ( NULL != ( cp = gettmpfname("fltout") ) ) {
+    if ( NULL != ( cp = gettmpfname("fout") ) ) {
         XSTRCPY(OutFile, cp);
     } else {
         return FALSE;

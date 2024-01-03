@@ -1,12 +1,12 @@
 /*======================================================================
- *	MicroEMACS 5.00
- *		written by Daniel M. Lawrence
- *		based on code by Dave G. Conroy.
+ *      MicroEMACS 5.00
+ *              written by Daniel M. Lawrence
+ *              based on code by Dave G. Conroy.
  *
- *	(C)Copyright 1988-2009 by Daniel M. Lawrence
- *	MicroEMACS 5.00 can be copied and distributed freely for any
- *	non-commercial purposes. MicroEMACS 5.00 can only be incorporated
- *	into commercial software with the permission of the current author.
+ *      (C)Copyright 1988-2009 by Daniel M. Lawrence
+ *      MicroEMACS 5.00 can be copied and distributed freely for any
+ *      non-commercial purposes. MicroEMACS 5.00 can only be incorporated
+ *      into commercial software with the permission of the current author.
  *
  * This file contains the main driving routine, and some keyboard processing
  * code, for the MicroEMACS screen editor.
@@ -76,9 +76,11 @@ COMMON unsigned int _stklen = 10000;
 #endif
 
 /*
- * Systems that handle window size changes via signals.
+ * HANDLE_WINCH:  Systems that handle window size changes via signals.
+ * DJGPP_DOS:     Need to disable SIGINT (Ctrl-X,Ctrl-C (exit-emacs)
+ *                sometimes did not work on windows 2000)
  */
-#if HANDLE_WINCH
+#if ( HANDLE_WINCH || DJGPP_DOS )
 # include <signal.h>
 #endif
 
@@ -115,6 +117,9 @@ int main P2_(int, argc, char **, argv)
 
 #if HANDLE_WINCH
     signal(SIGWINCH, winch_changed);
+#endif
+#if DJGPP_DOS
+    signal(SIGINT, SIG_IGN);
 #endif
 
     /* the room mechanism would deallocate undo info no failure....
@@ -166,6 +171,7 @@ abortrun:
 #if CLEAN
     clean();
 #endif
+    clntmpfls();
 
 #if CALLED
     return (status);

@@ -1,6 +1,6 @@
 /*======================================================================
- * This file contains the command processing functions for a number of random
- * commands. There is no functional grouping here, for sure.
+ * This file contains the command processing functions for a number of
+ * random commands. There is no functional grouping here, for sure.
  *====================================================================*/
 
 /*====================================================================*/
@@ -1801,7 +1801,7 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
-static FILE *mytmpfile P0_()
+FILE *uetmpfile_ P1_(int, delete)
 {
 # if !IS_UNIX() /**!CYGWIN**/
     return tmpfile();
@@ -1812,23 +1812,57 @@ static FILE *mytmpfile P0_()
 /* no be what we want. Our implementation evaluates (via              */
 /* `gettmpfname()') the `UETMPDIR' environmant variable.              */
     {
-        char  *fname  = NULL;
-        FILE  *fp     = NULL;
+        static CONST char **fname_list    = NULL;
+        static int        fname_list_pos  = 0;
+        static int        fname_list_len  = 0;
 
-        if ( NULL == (fname = gettmpfname("mytmpfile")) ) {
-            TRC(("%s", "mytempfile(): gettmpfname() failed"));
+        if ( !delete )  {
+            CONST char  *fname  = NULL;
+            FILE        *fp     = NULL;
+
+            if ( NULL == (fname = gettmpfname("tmpf")) )  {
+                TRC(("%s", "uetmpfile(): gettmpfname() failed"));
+
+                return NULL;
+            }
+            if ( NULL == (fp = fopen(fname, "wb+")) ) {
+                TRC(("uetmpfile(): fopen(\"%s\") failed", fname));
+
+                return NULL;
+            }
+
+            TRC(("uetmpfile(): Created \"%s\"", fname));
+#  if ( 0 )
+            /* Silly delete might not work if not on UNIX
+             * (e.g. on DJGPP)
+             */
+            umc_unlink(fname);  /* ``Silly delete'' */
+#  else
+            if ( fname_list_pos >= fname_list_len )  {
+                if ( 0 >= fname_list_len )  {
+                    fname_list_len  = 1;
+                }
+                while ( fname_list_pos >= fname_list_len )  {
+                    fname_list_len  *= 2;
+                }
+                ASRT(NULL != (fname_list = realloc(fname_list,
+                              fname_list_len * SIZEOF(*fname_list))));
+            }
+            fname_list[fname_list_pos++]  = xstrdup(fname);
+#  endif
+
+            return fp;
+        } else {
+            int i = 0;
+
+            for ( i = 0; i < fname_list_pos; i++ )  {
+                umc_unlink(fname_list[i]);
+                FREE_(fname_list[i]);
+            }
+            FREE_(fname_list);
 
             return NULL;
         }
-        if ( NULL == (fp = fopen(fname, "wb+")) ) {
-            TRC(("mytempfile(): fopen(\"%s\") failed", fname));
-
-            return NULL;
-        }
-
-        umc_unlink(fname);  /* ``Silly delete'' */
-
-        return fp;
     }
 # endif
 }
@@ -1844,26 +1878,38 @@ static FILE *mytmpfile P0_()
 int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
                                va_list, ap)
 {
-    int nn  = n;                /* Want a signed value */
-    int rc  = 0;
-    int nr  = 0;                /* Number of chars to read */
+    int         rc  = 0;            /* Final return code  */
+    int         nn  = n;            /* Want a signed value */
+    int         sc  = 0;            /* Ret code of intermediate calls */
+    int         nr  = 0;            /* Number of chars to read */
     static FILE *fp = NULL;
+    static char buf[BUFSIZ];
 
     ASRT(0    <= nn);
     ASRT(NULL != fmt);
 
     if ( NULL == fp ) {           /* One-time initialization */
+         /* ANSI C: fp should be opened in wb+ mode */
 # if ( 0 )
-        if ( NULL == ( fp = mytmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
+        if ( NULL == ( fp = uetmpfile() ) ) {
             return (-1);
         }
 # else
-        ASRT( NULL != ( fp = mytmpfile() ) ); /* ANSI C: Opened in wb+ mode */
+        ASRT( NULL != ( fp = uetmpfile() ) );
 # endif
         /*
          * Buffering: No real IO for not too large junks
+         *
+         * `setvbuf(fp, NULL, _IOFBF, 0)' does not work everywhere,
+         * e.g. not with DJGPP_DOS.
          */
-        if ( 0 != setvbuf(fp, NULL, _IOFBF, 0) ) {
+        if ( 0 != (sc = setvbuf(fp, buf, _IOFBF, SIZEOF(buf))) )  {
+            int errno_sv  = 0;
+
+            errno_sv  = errno;
+            TRC(("xvsnprintf: setvbuf(), sc = %d, errno = %d: %s",
+                 sc, errno_sv, strerror(errno_sv)));
+
             return (-2);
         }
     }
