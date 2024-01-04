@@ -1600,6 +1600,35 @@ static int  IsDOSPath P1_(CONST char *, path)
     }
 }
 
+static CONST char *wingetshell P0_()
+{
+    static int        FirstCall = !0;
+    static CONST char *res      = NULL;
+
+    if ( FirstCall )  {
+        char        SystemRoot[NFILEN];
+        static char WinCmd[NFILEN];
+
+        ZEROMEM(SystemRoot);
+        ZEROMEM(WinCmd);
+
+        if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
+            xstrlcpy(SystemRoot, "C:\\WINDOWS", SIZEOF(SystemRoot));
+        }
+        MkDOSDirSep_(SystemRoot);
+        xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
+        if ( IsExecutable(WinCmd) ) {
+            res = WinCmd;
+        } else                      {
+            res = NULL;
+        }
+
+        FirstCall = 0;
+    }
+
+    return res;
+}
+
 # endif
 
 # if ( CYGWIN )
@@ -1646,36 +1675,7 @@ static CONST char *getunxpath P1_(CONST char *, in)
     return unxpath;
 }
 
-static CONST char *wingetshell P0_()
-{
-    static int        FirstCall = !0;
-    static CONST char *res      = NULL;
-
-    if ( FirstCall )  {
-        char        SystemRoot[NFILEN];
-        static char WinCmd[NFILEN];
-
-        ZEROMEM(SystemRoot);
-        ZEROMEM(WinCmd);
-
-        if ( 0 == xstrlcpy(SystemRoot, getenv("SYSTEMROOT"), SIZEOF(SystemRoot)) )  {
-            xstrlcpy(SystemRoot, "C:\\WINDOWS", SIZEOF(SystemRoot));
-        }
-        MkDOSDirSep_(SystemRoot);
-        xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
-        if ( IsExecutable(WinCmd) ) {
-            res = WinCmd;
-        } else                      {
-            res = NULL;
-        }
-
-        FirstCall = 0;
-    }
-
-    return res;
-}
-
-#define SHELL_C_  "/C"
+#define WIN_SHELL_C_  "/C"
 static int winsystem P1_(CONST char *, cmd)
 {
     pid_t               child_pid = 0;
@@ -1684,7 +1684,7 @@ static int winsystem P1_(CONST char *, cmd)
     CONST char          *shell    = NULL;
     sigset_t            mask;
     posix_spawnattr_t   attr;
-    char  * /**CONST**/ sargv[] = { NULL, (char *)SHELL_C_, (char *)cmd, NULL };
+    char  * /**CONST**/ sargv[] = { NULL, (char *)WIN_SHELL_C_, (char *)cmd, NULL };
 
     extern char **environ;
 
@@ -1718,11 +1718,11 @@ static int winsystem P1_(CONST char *, cmd)
     }
 
 #  if ( !0 )
-    TRC(("Executing <%s %s %s>", shell, SHELL_C_, cmd));
+    TRC(("Executing <%s %s %s>", shell, WIN_SHELL_C_, cmd));
 #  endif
     if ( 0 != posix_spawnp(&child_pid, shell, NULL, &attr, sargv, environ) )  {
         errno_sv  = errno;
-        TRC(("Error executing <%s %s %s>, errno = %d: %s", shell, SHELL_C_,
+        TRC(("Error executing <%s %s %s>, errno = %d: %s", shell, WIN_SHELL_C_,
              cmd, errno_sv, strerror(errno_sv)));
     }
 
@@ -1754,7 +1754,7 @@ static int winsystem P1_(CONST char *, cmd)
 
     return WEXITSTATUS ( status );
 }
-#  undef SHELL_C_
+#  undef WIN_SHELL_C_
 # endif /* CYGWIN */
 
 # if ( DJGPP_DOS )
@@ -1841,28 +1841,35 @@ static CONST char *dosgetshell P0_()
 }
 
 #if ( !0 )
-# define SHELL_C_  "/E:4096 /C"
+# define DOS_SHELL_C_   "/E:4096 /C"
 #else
-# define SHELL_C_  "/C"
+# define DOS_SHELL_C_   "/C"
 #endif
+#define WIN_SHELL_C_  "/C"
 static int dossystem P1_(CONST char *, cmd)
 {
-    int                 status    = 0;
-    CONST char          *shell    = NULL;
+    int                 status      = 0;
+    CONST char          *win_shell  = NULL;
+    CONST char          *dos_shell  = NULL;
     char                cmdstr[NFILEN];
 
     ZEROMEM(cmdstr);
-    if ( NULL == (shell = dosgetshell()) )  {
-        TRC(("%s", "Could not get a shell"));
 
-        return ( -C_10 );
-    }
-
+    win_shell = wingetshell();
+    dos_shell = dosgetshell();
     if ( NULL == cmd )  {
         cmd = "";
     }
 
-    xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s %s", shell, SHELL_C_, cmd);
+    if        ( win_shell ) {
+        xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s \"%s\"", win_shell, WIN_SHELL_C_, cmd);
+    } else if ( dos_shell ) {
+        xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s %s", dos_shell, DOS_SHELL_C_, cmd);
+    } else                  {
+        TRC(("%s", "Could not get a shell"));
+
+        return ( -C_10 );
+    }
 #  if ( !0 )
     TRC(("Executing <%s>", cmdstr));
 #  endif
@@ -1874,7 +1881,8 @@ static int dossystem P1_(CONST char *, cmd)
 
     return ( status );
 }
-#  undef SHELL_C_
+#  undef WIN_SHELL_C_
+#  undef DOS_SHELL_C_
 
 # endif /* DJGPP_DOS */
 
@@ -1946,7 +1954,12 @@ int spawncli P2_(int, f, int, n)
 # elif ( CYGWIN )
         sh = wingetshell();
 # elif ( DJGPP_DOS )
-        sh = dosgetshell();
+        /* First try Windows shell --- are we running in the 16-Bit
+         * Windows subsystem?
+         */
+        if ( NULL == (sh = wingetshell()) ) {
+            sh = dosgetshell();
+        }
 # else
         sh = "/bin/sh";
 # endif /* LINUX */
@@ -2167,7 +2180,7 @@ CONST char *gettmpfname P1_(CONST char *, ident)
 
     xstrlcpy(str, gettmpdir(),                SIZEOF(str));
     /* The filename part should have DOS 8.3 format:  */
-    xstrlcat(str, "/me",                      SIZEOF(str));
+    xstrlcat(str, "/ue",                      SIZEOF(str));
     if ( NULL != ident )  {
         int i = 0;
 
@@ -2265,22 +2278,25 @@ static int LaunchPrg P4_(const char *,  Cmd,
 # endif
     }
 
-    xsnprintf(FullCmd,
-              SIZEOF (FullCmd),
 # if ( CYGWIN  )
+    xsnprintf(FullCmd, SIZEOF (FullCmd),
               "%s < %s > %s 2>%s",
+              Cmd, lInFile, lOutFile, lErrFile);
 # elif ( DJGPP_DOS )
-              "%s < %s > %s",
+    if ( NULL != wingetshell() )  {
+        xsnprintf(FullCmd, SIZEOF (FullCmd),
+                  "%s < %s > %s 2>%s",
+                  Cmd, lInFile, lOutFile, lErrFile);
+    } else {
+        xsnprintf(FullCmd, SIZEOF (FullCmd),
+                  "%s < %s > %s",
+                  Cmd, lInFile, lOutFile);
+    }
 # else
+    xsnprintf(FullCmd, SIZEOF (FullCmd),
               "( %s ) < %s > %s 2>%s",
+              Cmd, lInFile, lOutFile, lErrFile);
 # endif
-              Cmd,
-              lInFile,
-              lOutFile
-# if ( !DJGPP_DOS )
-              , lErrFile
-# endif
-              );
 
     return callout(FullCmd);
 } /* LaunchPrg */

@@ -915,6 +915,18 @@ The existing version implicitly assumed that the S_IFDIR and S_IFREG
 flags have exactly one bit set.
 
 
+[2024-01-04.00]
+Fixed "ambigous redirect" error message of DJGPP's internal system()
+when running in Windows 2000 by introducing additional qotes:
+
+cmd /C COMMAND < IN > OUT 2> ERR
+--->
+cmd /C "COMMAND < IN > OUT 2> ERR"
+
+A better solution will be to implement DJGPP's `dossystem()' via
+spawn().
+
+
 #============================== TODO LIST ==============================
 
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq
