@@ -906,6 +906,15 @@ We have seen this error before when working on the ANSI terminal for UNIX:
 ===> Fixed with `USE_TERMINAL_SELECT'
 
 
+[2024-01-03.00]
+Commit `0xb629cbc9cdfdf83be7c3e0c9d418caee7cd6b3a8' ("Fixed an error in
+getnfile().") fixes a wrong evaluation of the struct stat st_mode
+field:
+
+The existing version implicitly assumed that the S_IFDIR and S_IFREG
+flags have exactly one bit set.
+
+
 #============================== TODO LIST ==============================
 
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq

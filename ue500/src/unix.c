@@ -1561,8 +1561,8 @@ static int  IsDOSPath P1_(CONST char *, path)
     }
 
 #  if DJGPP_DOS /* /dev/c is C: */
-    if ( C_07 <= strlen(path) ) {
-        char  l_path[C_07 + 1];
+    if ( C_7 <= strlen(path) )  {
+        char  l_path[C_7 + 1];
 
         xstrlcpy(l_path, path, SIZEOF(l_path));
 #   if ( 0 )
@@ -2160,7 +2160,7 @@ CONST char *gettmpfname P1_(CONST char *, ident)
     int         i     = 0;
     static int  seed  = 0;
     static char res[NFILEN];
-    char        l_ident[C_04 + 1] = "xxxx";
+    char        l_ident[C_4 + 1]  = "xxxx";
 
     ZEROMEM(str);
     ZEROMEM(res);
@@ -2176,17 +2176,18 @@ CONST char *gettmpfname P1_(CONST char *, ident)
         }
         mklower(l_ident);
     }
-    xstrlcat(str, l_ident,                    SIZEOF(str));
-    xstrlcat(str, nni2s16_(getpid() % 0x100), SIZEOF(str));
+    xstrlcat(str, l_ident,                            SIZEOF(str));
+    xstrlcat(str, nni2s36_(getpid() % (C_36 * C_36)), SIZEOF(str));
 
     for ( i = 0; i < 0x1000; i++ ) {
         struct stat sb;
 
         ZEROMEM(sb);
 
-        xstrlcpy(res, str,                            SIZEOF(res));
-        xstrlcat(res, ".",  /* `.': DJGPP_DOS */      SIZEOF(res));
-        xstrlcat(res, nni2s16_((seed + i) % 0x1000),  SIZEOF(res));
+        xstrlcpy(res, str,                      SIZEOF(res));
+        xstrlcat(res, "." /* `.': DJGPP_DOS */, SIZEOF(res));
+        xstrlcat(res, nni2s36_((seed + i) % (C_36 * C_36 * C_36)),
+                 SIZEOF(res));
         if ( 0 > umc_stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
                 seed = (seed + i + 1) % 0x1000;

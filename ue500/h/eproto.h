@@ -31,12 +31,13 @@
 /* Some constants:                                                    */
 /**********************************************************************/
 /* No braces `()' here!                                               */
-#define C_04   4
-#define C_07   7
+#define C_4    4
+#define C_7    7
 #define C_10  10
 #define C_16  16
 #define C_20  20
 #define C_30  30
+#define C_36  36
 #define C_40  40
 #define C_50  50
 #define C_60  60
@@ -644,6 +645,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /**********************************************************************/
 EXTERN char *PASCAL NEAR  uitostr10_memacs DCL((unsigned int i));
 EXTERN char *PASCAL NEAR  uitostr16_memacs DCL((unsigned int i));
+EXTERN char *PASCAL NEAR  uitostr36_memacs DCL((unsigned int i));
 #ifdef MAIN_C_
 char *PASCAL NEAR uitostr10_memacs P1_(unsigned int, i)
 {
@@ -736,10 +738,59 @@ char *PASCAL NEAR uitostr16_memacs P1_(unsigned int, i)
 
     return buf + pos + 1;
 }
+
+char *PASCAL NEAR uitostr36_memacs P1_(unsigned int, i)
+{
+    unsigned int  base  = C_36;
+
+    /*******************************************************************
+     * a hat n (> 0) 36er-Stellen   <==> 36^(n-1) <= a < 36^n
+     *                              <==> n -1 <= log_36(a) < n
+     * Also n <= 1 + log_36(a).
+     *
+     * a hat m (> 0) Stellen im 256-er System
+     *                              <==> 256^(m-1) <= a < 256^n
+     *                              <==> m -1 <= log_256(a) < m
+     * Ausserdem m <= SIZEOF(a), also log_256(a) < SIZEOF(a)
+     *
+     * Umrechnung der Logarithmen:
+     *  y = log_b x <==> b^y = x
+     *  ==> y*log_a(b) = log_a(x)
+     *  ==> log_a(x) = log_a(b)*log_b(x)
+     *
+     * log_36(a) = log_36(256)*log_256(a) < log_36(256)*SIZEOF(a)
+     * Mit log_b(x) = log_a(x)/log_a(b) wird
+     * log_36(256) = log_2(256)/log_2(36) = 8/log_2(36) < 8/5 < 2
+     *
+     * Damit n <= 1 + 2*SIZEOF(a)
+     *
+     ******************************************************************/
+    CONST char    tab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    CASRT(C_36 + 1 == SIZEOF(tab));
+    static char   buf[1 + 2*SIZEOF(i) + 1];
+    int           pos   = SIZEOF(buf) - 2;
+    unsigned int  rest  = 0;
+
+    ZEROMEM(buf);
+
+    for (;;)
+    {
+        rest  = i % base;
+        i     = i / base;
+        buf[pos--]  = tab[rest];
+        if ( 0 == i )
+        {
+            break;
+        }
+    }
+
+    return buf + pos + 1;
+}
 #endif
 /* Non negative int to string:  */
 #define nni2s10_(i)     ( uitostr10_memacs((unsigned int)(i)) )
 #define nni2s16_(i)     ( uitostr16_memacs((unsigned int)(i)) )
+#define nni2s36_(i)     ( uitostr36_memacs((unsigned int)(i)) )
 
 /**********************************************************************/
 #define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
