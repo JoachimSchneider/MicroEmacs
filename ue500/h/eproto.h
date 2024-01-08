@@ -31,6 +31,7 @@
 /* Some constants:                                                    */
 /**********************************************************************/
 /* No braces `()' here!                                               */
+#define C_1    1
 #define C_4    4
 #define C_7    7
 #define C_10  10

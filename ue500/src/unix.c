@@ -2302,13 +2302,15 @@ CONST char *gettmpfname P1_(CONST char *, ident)
     int         i     = 0;
     static int  seed  = 0;
     static char res[NFILEN];
-    char        l_ident[C_4 + 1]  = "xxxx";
+    char        l_ident[C_1 + 1]  = "x";
 
     ZEROMEM(str);
     ZEROMEM(res);
 
     xstrlcpy(str, gettmpdir(),                SIZEOF(str));
-    /* The filename part should have DOS 8.3 format:  */
+    /* The filename part should have DOS 6.0 format --- remind DOS's
+     * 126 byte command line limit
+     */
     xstrlcat(str, "/ue",                      SIZEOF(str));
     if ( NULL != ident )  {
         int i = 0;
@@ -2318,21 +2320,20 @@ CONST char *gettmpfname P1_(CONST char *, ident)
         }
         mklower(l_ident);
     }
-    xstrlcat(str, l_ident,                            SIZEOF(str));
-    xstrlcat(str, nni2s36_(getpid() % (C_36 * C_36)), SIZEOF(str));
+    xstrlcat(str, l_ident,                      SIZEOF(str));
+    xstrlcat(str, nni2s36_(getpid() % (C_36)),  SIZEOF(str));
 
-    for ( i = 0; i < 0x1000; i++ ) {
+    for ( i = 0; i < (C_36 * C_36); i++ ) {
         struct stat sb;
 
         ZEROMEM(sb);
 
         xstrlcpy(res, str,                      SIZEOF(res));
-        xstrlcat(res, "." /* `.': DJGPP_DOS */, SIZEOF(res));
-        xstrlcat(res, nni2s36_((seed + i) % (C_36 * C_36 * C_36)),
+        xstrlcat(res, nni2s36_((seed + i) % (C_36 * C_36)),
                  SIZEOF(res));
         if ( 0 > umc_stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
-                seed = (seed + i + 1) % 0x1000;
+                seed = (seed + i + 1) % (C_36 * C_36);
 
                 return res;
             }
@@ -2634,12 +2635,12 @@ int pipecmd P2_(int, f, int, n)
         return FALSE;
     }
 
-    if ( NULL != ( cp = gettmpfname("finp") ) ) {
+    if ( NULL != ( cp = gettmpfname("i") ) )  {
         XSTRCPY(InFile, cp);
     } else {
         return FALSE;
     }
-    if ( NULL != ( cp = gettmpfname("cmnd") ) ) {
+    if ( NULL != ( cp = gettmpfname("o") ) )  {
         XSTRCPY(OutFile, cp);
     } else {
         return FALSE;
@@ -2761,12 +2762,12 @@ int f_filter P2_(int, f, int, n)
     ZEROMEM(InFile);
     ZEROMEM(OutFile);
 
-    if ( NULL != ( cp = gettmpfname("finp") ) ) {
+    if ( NULL != ( cp = gettmpfname("i") ) )  {
         XSTRCPY(InFile, cp);
     } else {
         return FALSE;
     }
-    if ( NULL != ( cp = gettmpfname("fout") ) ) {
+    if ( NULL != ( cp = gettmpfname("o") ) )  {
         XSTRCPY(OutFile, cp);
     } else {
         return FALSE;

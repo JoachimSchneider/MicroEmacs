@@ -1820,7 +1820,7 @@ FILE *uetmpfile_ P1_(int, delete)
             CONST char  *fname  = NULL;
             FILE        *fp     = NULL;
 
-            if ( NULL == (fname = gettmpfname("tmpf")) )  {
+            if ( NULL == (fname = gettmpfname("t")) ) {
                 TRC(("%s", "uetmpfile(): gettmpfname() failed"));
 
                 return NULL;
