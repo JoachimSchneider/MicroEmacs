@@ -124,6 +124,11 @@
 # undef USE_TERMINAL_SELECT
 # define USE_TERMINAL_SELECT    ( 1 )
 #endif
+
+#if ( DJGPP_DOS )
+/* Use spawn() or DJGPP's smart system() for `dossystem()': */
+# define USE_SPAWN_FOR_SYSTEM   ( 1 )
+#endif
 /*==============================================================*/
 
 
@@ -189,6 +194,12 @@ int scnothing P1_(char *, s)
 #  include <sys/wait.h>
 #  include <sys/cygwin.h>
 # endif /* CYGWIN */
+
+# if ( DJGPP_DOS )
+#  if ( USE_SPAWN_FOR_SYSTEM )
+#   include <process.h>
+#  endif
+# endif
 
 /*==============================================================*/
 /* Found in `curses.h':                                         */
@@ -1675,7 +1686,7 @@ static CONST char *getunxpath P1_(CONST char *, in)
     return unxpath;
 }
 
-#define WIN_SHELL_C_  "/C"
+#define WIN_SHELL_C_  "/c"
 static int winsystem P1_(CONST char *, cmd)
 {
     pid_t               child_pid = 0;
@@ -1840,12 +1851,127 @@ static CONST char *dosgetshell P0_()
     return res;
 }
 
-#if ( !0 )
-# define DOS_SHELL_C_   "/E:4096 /C"
-#else
-# define DOS_SHELL_C_   "/C"
-#endif
-#define WIN_SHELL_C_  "/C"
+/* WE MUST USE A LOWERCASE 'C' HERE:
+ *
+ * DJGPP checks for '/c' in dosexec.c:direct_exec():
+ *
+ * static int direct_exec(const char *program, char **argv, char **envp)
+ * {
+ *   int i, arglen;
+ *   char *args, *argp;
+ *   int need_quote = !__dosexec_in_system;
+ *   int unescape_quote = __dosexec_in_system;
+ *
+ *   /o PROGRAM can be a shell which expects a single argument
+ *      (beyond the /c or -c switch) that is the entire command
+ *      line.  With some shells, we must NOT quote that command
+ *      line, because that will confuse the shell.
+ *
+ *      The hard problem is to know when PROGRAM names a shell
+ *      that doesn't like its command line quoted...  o/
+ *
+ *   if (need_quote
+ *       && argv[1] && !strcmp (argv[1], "/c")
+ *       && argv[2] && !argv[3]
+ *       && _is_dos_shell (program))
+ *     need_quote = 0;
+ *
+ * ...
+ */
+#  define DOS_SHELL_C_  "/c"
+#  define WIN_SHELL_C_  "/c"
+
+#  if ( USE_SPAWN_FOR_SYSTEM )
+
+static int dossystem P1_(CONST char *, cmd)
+{
+    int                 status      = 0;
+    CONST char          *dos_shell  = NULL;
+    CONST char          *win_shell  = NULL;
+    int                 errno_sv    = 0;
+    char  * /**CONST**/ dos_argv[]  = { NULL, (char *)DOS_SHELL_C_, (char *)cmd, NULL };
+    char  * /**CONST**/ win_argv[]  = { NULL, (char *)WIN_SHELL_C_, (char *)cmd, NULL };
+
+    win_shell = wingetshell();
+    dos_shell = dosgetshell();
+    if ( NULL == win_shell && NULL == dos_shell ) {
+        TRC(("%s", "Could not get a shell"));
+
+        return ( -C_10 );
+    }
+    if ( NULL == cmd )  {
+        cmd = "";
+        win_argv[2] = (char *)cmd;
+        dos_argv[2] = (char *)cmd;
+    }
+
+    dos_argv[0] = (char *)dos_shell;
+    win_argv[0] = (char *)win_shell;
+#   if ( !0 )
+    if        ( win_shell ) {
+        TRC(("Executing <%s %s %s>", win_shell, WIN_SHELL_C_, cmd));
+    } else if ( dos_shell ) {
+        TRC(("Executing <%s %s %s>", dos_shell, DOS_SHELL_C_, cmd));
+    } else                  {
+        ASRT(!"IMPOSSIBLE");
+    }
+#   endif
+    if        ( win_shell ) {
+        status    = spawnv(P_WAIT, win_shell, win_argv);
+        errno_sv  = errno;
+    } else if ( dos_shell ) {
+        status    = spawnv(P_WAIT, dos_shell, dos_argv);
+        errno_sv  = errno;
+    } else                  {
+        ASRT(!"IMPOSSIBLE");
+    }
+
+    if        ( 0 > status )        {
+        if        ( win_shell ) {
+            TRC(("Error executing <%s %s %s>, errno = %d: %s", win_shell, WIN_SHELL_C_,
+                 cmd, errno_sv, strerror(errno_sv)));
+        } else if ( dos_shell ) {
+            TRC(("Error executing <%s %s %s>, errno = %d: %s", dos_shell, DOS_SHELL_C_,
+                 cmd, errno_sv, strerror(errno_sv)));
+        } else                  {
+            ASRT(!"IMPOSSIBLE");
+        }
+
+        return ( (-1) * errno_sv );
+    } else if ( EINTR == errno_sv ) {
+        int signo = 0;
+
+        signo = ( (status & 0xFF00) >> 8 );
+        if        ( win_shell ) {
+            TRC(("RC <%s %s %s>: Got signal %d, errno = %d: %s",
+                 win_shell, WIN_SHELL_C_, cmd, signo, errno_sv,
+                 strerror(errno_sv)));
+        } else if ( dos_shell ) {
+            TRC(("RC <%s %s %s>: Got signal %d, errno = %d: %s",
+                 dos_shell, DOS_SHELL_C_, cmd, signo, errno_sv,
+                 strerror(errno_sv)));
+        } else                  {
+            ASRT(!"IMPOSSIBLE");
+        }
+
+        return ( (-1) * signo );
+    } else                          {
+        if        ( win_shell ) {
+            TRC(("RC <%s %s %s>: Status = %d",
+                 win_shell, WIN_SHELL_C_, cmd, status));
+        } else if ( dos_shell ) {
+            TRC(("RC <%s %s %s>: Status = %d",
+                 dos_shell, DOS_SHELL_C_, cmd, status));
+        } else                  {
+            ASRT(!"IMPOSSIBLE");
+        }
+
+        return ( 0xFF & status );
+    }
+}
+
+#  else
+
 static int dossystem P1_(CONST char *, cmd)
 {
     int                 status      = 0;
@@ -1870,9 +1996,9 @@ static int dossystem P1_(CONST char *, cmd)
 
         return ( -C_10 );
     }
-#  if ( !0 )
+#   if ( !0 )
     TRC(("Executing <%s>", cmdstr));
-#  endif
+#   endif
     __system_flags &= ~__system_use_shell;
 
     if ( 0 != (status = system(cmdstr)) ) {
@@ -1881,6 +2007,9 @@ static int dossystem P1_(CONST char *, cmd)
 
     return ( status );
 }
+
+#  endif  /* USE_SPAWN_FOR_SYSTEM */
+
 #  undef WIN_SHELL_C_
 #  undef DOS_SHELL_C_
 
