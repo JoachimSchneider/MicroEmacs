@@ -8,24 +8,9 @@ MicroEMACS for CygWin
   One may also use a MobaXTerm environment
   <https://mobaxterm.mobatek.net/>
 
-* Testet on Microsoft Windows 10 [Version 10.0.19045.3570, 10.0.22621.2715].
+* Testet on Microsoft Windows XP, 10, 11
 
-* It needs a Windows Console supporting ANSI Escape Sequences --- the
-  version mentioned above supports them out of the box --- for earlier
-  Windows 10 versions this hint might help:
-
-  <https://stackoverflow.com/questions/16755142/how-to-make-win32-console-recognize-ansi-vt100-escape-sequences-in-c>
-
-  ```
-  FYI, in latest Windows 10, you can enable ANSI in conhost via the
-  following reghack -- in HKCU\Console create a DWORD named
-  VirtualTerminalLevel and set it to 0x1; then restart cmd.exe.
-  ...
-
-  BrainSlugs83
-
-  Oct 27, 2018 at 21:17
-  ```
+* CYGWIN seens to support ANSI Escape Sequences via its runtime.
 
 
 This simple session script shows how to get and compile the MicroEMACS:

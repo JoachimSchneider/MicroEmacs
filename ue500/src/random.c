@@ -2166,6 +2166,89 @@ char *PASCAL NEAR xstrtok_r P3_(char *, str, CONST char *, sep,
     return  res;
 }
 
+/* XSTRCASECMP:
+ */
+int PASCAL NEAR xstrcasecmp P2_(CONST char *, s1, CONST char *, s2)
+{
+    REGISTER int  i = 0;
+
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+
+# define us1_ ( (unsigned char *)s1 )
+# define us2_ ( (unsigned char *)s2 )
+
+    for ( i = 0; ; i++ )  {
+        REGISTER int  c1  = '\0';
+        REGISTER int  c2  = '\0';
+        REGISTER int  lc1 = '\0';
+        REGISTER int  lc2 = '\0';
+
+        c1  = us1_[i];
+        c2  = us2_[i];
+        lc1 = tolower(c1);
+        lc2 = tolower(c2);
+        if ( '\0' == c1 || '\0' == c2 || lc1 != lc2 ) {
+            return ( lc1 - lc2 );
+        }
+    }
+# undef us1_
+# undef us2_
+}
+
+/* XSTRNCASECMP:
+ */
+int PASCAL NEAR xstrncasecmp P3_(CONST char *, s1, CONST char *, s2, int, len)
+{
+    REGISTER int  i = 0;
+
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+    ASRT(0    <= len);
+
+# define us1_ ( (unsigned char *)s1 )
+# define us2_ ( (unsigned char *)s2 )
+
+    for ( i = 0; i < len; i++ ) {
+        REGISTER int  c1  = '\0';
+        REGISTER int  c2  = '\0';
+        REGISTER int  lc1 = '\0';
+        REGISTER int  lc2 = '\0';
+
+        c1  = us1_[i];
+        c2  = us2_[i];
+        lc1 = tolower(c1);
+        lc2 = tolower(c2);
+        if ( '\0' == c1 || '\0' == c2 || lc1 != lc2 ) {
+            return ( lc1 - lc2 );
+        }
+    }
+
+    return ( 0 );
+# undef us1_
+# undef us2_
+}
+
+/* STRCASESTART:
+ */
+int PASCAL NEAR strcasestart P2_(CONST char *, start, CONST char *, test)
+{
+    REGISTER int  slen  = 0;
+    REGISTER int  tlen  = 0;
+
+    ASRT(NULL != start);
+    ASRT(NULL != test);
+
+    slen  = strlen(start);
+    tlen  = strlen(test);
+
+    if ( tlen < slen )  {
+        return ( 0 );
+    } else              {
+        return ( 0 == xstrncasecmp(start, test, slen) );
+    }
+}
+
 
 /*====================================================================*/
 

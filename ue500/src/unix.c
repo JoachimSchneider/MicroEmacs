@@ -111,6 +111,17 @@
 #else
 # define USE_CTL_SQ               ( 0 )
 #endif
+#if ( CYGWIN )
+# define  USE_CYGWIN_CONV_PATH    ( 0 )
+# define  USE_CYGWIN_SPAWN        ( 0 )
+# if ( 3 >= __GNUC__ )
+/* Old CYGWIN Versions don't have these:  */
+#  undef  USE_CYGWIN_CONV_PATH
+#  undef  USE_CYGWIN_SPAWN
+#  define USE_CYGWIN_CONV_PATH    ( 0 )
+#  define USE_CYGWIN_SPAWN        ( 0 )
+# endif
+#endif
 
 /* Use select instead of VMIN/VTIME setting of the terminal attributes.
  * This *must* be used with CygWin or DJGPP s setting VMIN/VTIME won't
@@ -190,9 +201,13 @@ int scnothing P1_(char *, s)
 # endif /* XENIX || VAT */
 
 # if ( CYGWIN )
-#  include <spawn.h>
+#  if USE_CYGWIN_CONV_PATH
+#   include <sys/cygwin.h>
+#  endif
+#  if USE_CYGWIN_SPAWN
+#   include <spawn.h>
+#  endif
 #  include <sys/wait.h>
-#  include <sys/cygwin.h>
 # endif /* CYGWIN */
 
 # if ( DJGPP_DOS )
@@ -1571,20 +1586,30 @@ static int  IsDOSPath P1_(CONST char *, path)
         return  ( 1 );
     }
 
-#  if DJGPP_DOS /* /dev/c is C: */
-    if ( C_7 <= strlen(path) )  {
-        char  l_path[C_7 + 1];
-
-        xstrlcpy(l_path, path, SIZEOF(l_path));
-#   if ( 0 )
-        mklower(l_path);
-#   endif
-        if ( 0 == strncmp(l_path, "/dev/", SIZEOF("/dev/") - 1) ) {
-            if ( ISALPHA(l_path[5]) && '/' == l_path[6] ) {
-                return (-1);
-            }
-        }
+#  if   CYGWIN    /* /cygdrive/c is C:  */
+#   define CYGDRIVE_      "/cygdrive/"
+#   define CYGDRIVE_LEN_  ( SIZEOF(CYGDRIVE_) - 1 )
+    if ( strcasestart(CYGDRIVE_, path)                                &&
+         CYGDRIVE_LEN_  < len                                         &&
+         ISALPHA(path[CYGDRIVE_LEN_])                                 &&
+         (CYGDRIVE_LEN_ + 1 == len || '/' == path[CYGDRIVE_LEN_ + 1])
+        )   {
+        return (-1);
     }
+#   undef CYGDRIVE_
+#   undef CYGDRIVE_LEN_
+#  elif DJGPP_DOS /* /dev/c is C: */
+#   define DJGPPDRIVE_      "/dev/"
+#   define DJGPPDRIVE_LEN_  ( SIZEOF(DJGPPDRIVE_) - 1 )
+    if ( strcasestart(DJGPPDRIVE_, path)                              &&
+         DJGPPDRIVE_LEN_  < len                                       &&
+         ISALPHA(path[DJGPPDRIVE_LEN_])                               &&
+         (DJGPPDRIVE_LEN_ + 1 == len || '/' == path[DJGPPDRIVE_LEN_ + 1])
+        )   {
+        return (-1);
+    }
+#   undef DJGPPDRIVE_
+#   undef DJGPPDRIVE_LEN_
 #  endif
 
     pFSlash = strchr(path, '/');
@@ -1630,6 +1655,7 @@ static CONST char *wingetshell P0_()
         xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
         if ( IsExecutable(WinCmd) ) {
             res = WinCmd;
+            TRC(("wingetshell(): %s", res));
         } else                      {
             res = NULL;
         }
@@ -1644,7 +1670,343 @@ static CONST char *wingetshell P0_()
 
 # if ( CYGWIN )
 
+#  define TO_DOS_SEP_(x)  do  {                 \
+    unsigned char *cp__ = (unsigned char *)(x); \
+    unsigned char c__   = '\0';                 \
+                                                \
+    while ( ( c__ = *cp__) )  {                 \
+        if ( '/' == c__ ) {                     \
+            *cp__ = '\\';                       \
+        }                                       \
+        cp__++;                                 \
+    }                                           \
+} while ( 0 )
+
+#  define TO_UNX_SEP_(x)  do  {                 \
+    unsigned char *cp__ = (unsigned char *)(x); \
+    unsigned char c__   = '\0';                 \
+                                                \
+    while ( ( c__ = *cp__) )  {                 \
+        if ( '\\' == c__ )  {                   \
+            *cp__ = '/';                        \
+        }                                       \
+        cp__++;                                 \
+    }                                           \
+} while ( 0 )
+
+static CONST char *cygabsdos2unxpath_ P1_(CONST char *, dos)
+{
+#  define CYGDRIVE_     "/cygdrive/"
+#  define CYGDRIVE_LEN_ ( SIZEOF(CYGDRIVE_) - 1 )
+    unsigned char in[NFILEN];
+    static char   res[NFILEN];
+    int           len = 0;
+    int           drv = '\0';
+
+    ASRT(NULL != dos);
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+    xstrlcpy((char *)in, dos, SIZEOF(in));
+    TO_DOS_SEP_(in);
+    len = strlen((CONST char *)in);
+
+    if ( 2 <= len && ':' == in[1] && ISALPHA(drv = in[0]) ) {
+        int i = 2;
+        int j = CYGDRIVE_LEN_;
+
+        drv = tolower(drv);
+        xstrlcpy(res, CYGDRIVE_, SIZEOF(res));
+        res[j++]  = drv;
+        if ( 2 == len ) {
+            return res;
+        }
+        res[j++]  = '/';
+        CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
+        if ( '\\' == in[i] )  {
+            i++;
+        }
+        for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+            if ( '\\' == in[i] )  {
+                res[j]  = '/';
+            } else                {
+                res[j]  = in[i];
+            }
+        }
+
+    }
+
+    return res;
+#  undef CYGDRIVE_LEN_
+#  undef CYGDRIVE_
+}
+
+static CONST char *cygrootdos P0_()
+{
+    static int  FirstCall = !0;
+    static char res[NFILEN];
+
+    if ( FirstCall )  {
+        int                 c             = '\0';
+        FILE                *pp           = NULL;
+        CONST char          *doswinshell  = NULL;
+        CONST char          *unxwinshell  = NULL;
+        char                cmd[NFILEN];
+        char                doscygroot[NFILEN];
+        enum { start, get } state         = start;
+        int                 i             = 0;
+        char                *cp           = NULL;
+
+        ZEROMEM(cmd);
+        ZEROMEM(doscygroot);
+
+        ASRTM(NULL != (doswinshell = wingetshell()),
+              "cygrootdos(): Could not get a windows shell!");
+        unxwinshell = cygabsdos2unxpath_(doswinshell);
+        /* Do *not* use `/' but use `/tmp': Cygwin might use links. */
+        xsnprintf(cmd, SIZEOF(cmd), "( cd /tmp && %s /c cd )", unxwinshell);
+        if ( NULL != (pp = popen(cmd, "r")) ) {
+            while ( EOF != (c = fgetc(pp)) )  {
+                if ( state == start && ISSPACE(c) ) {
+                    continue;
+                }
+                state = get;
+                if ( i >= SIZEOF(res) - 1 )   {
+                    break;
+                }
+                if ( '\n' == c || '\r' == c ) {
+                    break;
+                }
+                res[i++]  = c;
+            }
+            pclose(pp);
+        }
+        /* Strip `\tmp':  */
+        if ( NULL != (cp = strrchr(res, '\\')) )  {
+            *cp = '\0';
+        }
+
+        TRC(("cygrootdos(): %s", res));
+        FirstCall = 0;
+    }
+
+    return res;
+}
+
+static CONST char *cygrootunx P0_()
+{
+    static int  FirstCall = !0;
+    static char res[NFILEN];
+
+    if ( FirstCall )  {
+        xsnprintf(res, SIZEOF(res), "%s", cygabsdos2unxpath_(cygrootdos()));
+    }
+
+    return res;
+}
+
+static CONST char *cygpwddos P0_()
+{
+    static char res[NFILEN];
+
+    int                 c             = '\0';
+    FILE                *pp           = NULL;
+    CONST char          *doswinshell  = NULL;
+    CONST char          *unxwinshell  = NULL;
+    char                cmd[NFILEN];
+    char                doscygroot[NFILEN];
+    enum { start, get } state         = start;
+    int                 i             = 0;
+    static char         prevcwd[NFILEN];
+    char                cwd[NFILEN];
+
+    ZEROMEM(cmd);
+    ZEROMEM(doscygroot);
+    ZEROMEM(cwd);
+
+    /* An optimization:
+     *  We assume that DOS cwd doesn't change if UNIX cwd stays
+     *  the same.
+     */
+    if ( NULL != getcwd(cwd, SIZEOF(cwd)) ) {
+        if ( 0 == strcmp(prevcwd, cwd) )  {
+            return res;
+        } else                            {
+            xstrlcpy(prevcwd, cwd, SIZEOF(prevcwd));
+        }
+    }
+
+    ASRTM(NULL != (doswinshell = wingetshell()),
+          "cygpwddos(): Could not get a windows shell!");
+    unxwinshell = cygabsdos2unxpath_(doswinshell);
+    xsnprintf(cmd, SIZEOF(cmd), "( %s /c cd )", unxwinshell);
+    if ( NULL != (pp = popen(cmd, "r")) ) {
+        while ( EOF != (c = fgetc(pp)) )  {
+            if ( state == start && ISSPACE(c) ) {
+                continue;
+            }
+            state = get;
+            if ( i >= SIZEOF(res) - 1 )   {
+                break;
+            }
+            if ( '\n' == c || '\r' == c ) {
+                break;
+            }
+            res[i++]  = c;
+        }
+        pclose(pp);
+    }
+    TRC(("cygpwddos(): %s", res));
+
+    return res;
+}
+
+static CONST char *cygpwdunx P0_()
+{
+    static int  FirstCall = !0;
+    static char res[NFILEN];
+
+    if ( FirstCall )  {
+        xsnprintf(res, SIZEOF(res), "%s", cygabsdos2unxpath_(cygpwddos()));
+    }
+
+    return res;
+}
+
+static int cygdrvdos P0_()
+{
+    return (unsigned char)cygpwddos()[0];
+}
+
+static CONST char *cygdos2unxpath P1_(CONST char *, dos)
+{
+#  define CYGDRIVE_       "/cygdrive/"
+#  define CYGDRIVE_LEN_   ( SIZEOF(CYGDRIVE_) - 1 )
+    unsigned char in[NFILEN];
+    static char   res[NFILEN];
+    int           len = 0;
+
+    ASRT(NULL != dos);
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+    xstrlcpy((char *)in, dos, SIZEOF(in));
+    TO_DOS_SEP_(in);
+    len = strlen((CONST char *)in);
+    if ( 2 <= len && ':' == in[1]  && ISALPHA(in[0]) )  {
+         xstrlcpy(res, cygabsdos2unxpath_((CONST char *)in), SIZEOF(res));
+    } else {
+        char xpath[NFILEN];
+
+        ZEROMEM(xpath);
+
+        if ( '\\' == in[0] )  {
+            xsnprintf(xpath, SIZEOF(xpath), "%c:%s", cygdrvdos(), in);
+        } else                {
+            xsnprintf(xpath, SIZEOF(xpath), "%s\\%s", cygpwddos(), in);
+        }
+        xstrlcpy(res, cygabsdos2unxpath_(xpath), SIZEOF(res));
+    }
+
+    return res;
+#  undef CYGDRIVE_LEN_
+#  undef CYGDRIVE_
+}
+
+static CONST char *cygabsunx2dospath_ P1_(CONST char *, unx)
+{
+#  define CYGDRIVE_       "/cygdrive/"
+#  define CYGDRIVE_LEN_   ( SIZEOF(CYGDRIVE_) - 1 )
+    unsigned char in[NFILEN];
+    static char   res[NFILEN];
+    int           len = 0;
+    int           drv = '\0';
+
+    ASRT(NULL != unx);
+
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+    xstrlcpy((char *)in, unx, SIZEOF(in));
+    TO_UNX_SEP_(in);
+    len = strlen((CONST char *)in);
+    if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
+         CYGDRIVE_LEN_  < len                                         &&
+         ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
+         (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
+        )   {
+        int i = 0;
+        int j = 0;
+
+        drv = toupper(drv);
+        res[0]  = drv;
+        res[1]  = ':';
+        res[2]  = '\\';
+        CASRT(SIZEOF(res) - 1 >= 3);
+        i = CYGDRIVE_LEN_ + 1;
+        j = CYGDRIVE_LEN_ + 1 == len ? 3 : 2;
+        for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+            if ( '/' == in[i] ) {
+                res[j]  = '\\';
+            } else              {
+                res[j]  = in[i];
+            }
+        }
+    }
+
+    return res;
+#  undef CYGDRIVE_LEN_
+#  undef CYGDRIVE_
+}
+
+static CONST char *cygunx2dospath P1_(CONST char *, unx)
+{
+#  define CYGDRIVE_       "/cygdrive/"
+#  define CYGDRIVE_LEN_   ( SIZEOF(CYGDRIVE_) - 1 )
+    unsigned char in[NFILEN];
+    static char   res[NFILEN];
+    int           len = 0;
+    int           drv = '\0';
+
+    ASRT(NULL != unx);
+
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+    xstrlcpy((char *)in, unx, SIZEOF(in));
+    TO_UNX_SEP_(in);
+    len = strlen((CONST char *)in);
+
+    if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
+         CYGDRIVE_LEN_  < len                                         &&
+         ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
+         (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
+        )   {
+        xstrlcpy(res, cygabsunx2dospath_((CONST char *)in), SIZEOF(res));
+    } else {
+        char  xpath[NFILEN];
+
+        ZEROMEM(xpath);
+
+        if ( in[0] == '/' ) {
+            xsnprintf(xpath, SIZEOF(xpath), "%s%s",  cygrootunx(), in);
+        } else                {
+            xsnprintf(xpath, SIZEOF(xpath), "%s/%s", cygpwdunx(),  in);
+        }
+        xstrlcpy(res, cygabsunx2dospath_(xpath), SIZEOF(res));
+    }
+
+    return res;
+#  undef CYGDRIVE_LEN_
+#  undef CYGDRIVE_
+}
+
 static CONST char *getdospath P1_(CONST char *, in)
+#  if !USE_CYGWIN_CONV_PATH
+{
+    return cygunx2dospath(in);
+}
+#  else
 {
     static char dospath[NFILEN];
 
@@ -1664,8 +2026,14 @@ static CONST char *getdospath P1_(CONST char *, in)
 
     return dospath;
 }
+#  endif
 
 static CONST char *getunxpath P1_(CONST char *, in)
+#  if !USE_CYGWIN_CONV_PATH
+{
+    return cygdos2unxpath(in);
+}
+#  else
 {
     static char unxpath[NFILEN];
 
@@ -1685,9 +2053,44 @@ static CONST char *getunxpath P1_(CONST char *, in)
 
     return unxpath;
 }
+#  endif
 
-#define WIN_SHELL_C_  "/c"
+#  define WIN_SHELL_C_  "/c"
 static int winsystem P1_(CONST char *, cmd)
+#  if !USE_CYGWIN_SPAWN
+{
+    int                 status        = 0;
+    CONST char          *doswinshell  = NULL;
+    char                cmdstr[NFILEN];
+
+    ZEROMEM(cmdstr);
+
+    if ( NULL == cmd )  {
+        cmd = "";
+    }
+
+    if ( (doswinshell = wingetshell()) )  {
+        CONST char  *unxwinshell  = NULL;
+
+        unxwinshell = cygabsdos2unxpath_(doswinshell);
+        xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s \"%s\"", unxwinshell,
+                  WIN_SHELL_C_, cmd);
+    } else                                {
+        TRC(("%s: %s", "winsystem()", "Could not get a shell"));
+
+        return ( -C_10 );
+    }
+#   if ( !0 )
+    TRC(("Executing <%s>", cmdstr));
+#   endif
+
+    if ( 0 != (status = system(cmdstr)) ) {
+        TRC(("system(%s) returned %d", cmdstr, status));
+    }
+
+    return ( status );
+}
+#  else
 {
     pid_t               child_pid = 0;
     int                 status    = 0;
@@ -1765,6 +2168,7 @@ static int winsystem P1_(CONST char *, cmd)
 
     return WEXITSTATUS ( status );
 }
+#  endif
 #  undef WIN_SHELL_C_
 # endif /* CYGWIN */
 

@@ -17,9 +17,16 @@ HDIR = ../../h
 # - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
 # - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
 #
-#CFLAGS = -g -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
-CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
-#CFLAGS = -g -Wall -I. -I$(HDIR)
+##
+#WARNFLAGS = -Wall
+ WARNFLAGS = -Wall -Wno-unused-local-typedefs
+##
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)
+##
 
 # Where to find the termcap/cureses library:
 #LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15

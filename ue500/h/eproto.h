@@ -340,6 +340,10 @@ EXTERN int CDECL NEAR xasprintf DCL((char **ret, CONST char *fmt, ...));
 EXTERN char *PASCAL NEAR  xstrtok_r DCL((char *str, CONST char *sep,
                                          char **next));
 
+EXTERN int PASCAL NEAR  xstrcasecmp  DCL((CONST char *s1, CONST char *s2));
+EXTERN int PASCAL NEAR  xstrncasecmp DCL((CONST char *s1, CONST char *s2, int len));
+EXTERN int PASCAL NEAR  strcasestart DCL((CONST char *start, CONST char *test));
+
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
 EXTERN char *PASCAL NEAR  astrcatc DCL((CONST char *str, CONST char c));
@@ -794,8 +798,24 @@ char *PASCAL NEAR uitostr36_memacs P1_(unsigned int, i)
 #define nni2s36_(i)     ( uitostr36_memacs((unsigned int)(i)) )
 
 /**********************************************************************/
-#define eputs(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
-#define eputi(i)      eputs(uitostr10_memacs((unsigned int)(i)))
+#define trcs_(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
+#define trci_(i)      trcs_(uitostr10_memacs((unsigned int)(i)))
+EXTERN VOID PASCAL NEAR ASRT_WriteStr_  DCL((CONST char *s));
+#define asrs_(s)      ASRT_WriteStr_((s))
+#define asri_(i)      asrs_(uitostr10_memacs((unsigned int)(i)))
+#ifdef MAIN_C_
+VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *s, )
+{
+    trcs_(s);
+    VOIDCAST fputs(s, stderr);
+# if ( 0 )
+    VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );
+    VOIDCAST fflush(NULL);
+# else
+    VOIDCAST fflush(NULL);
+# endif
+}
+#endif
 /**********************************************************************/
 
 /**********************************************************************/
@@ -818,12 +838,11 @@ VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
      * might use malloc(), but we want to use ASRT to exit
      * when malloc() fails
      */
-    eputs("File: "); eputs(file); eputs(", Line: ");
-    eputi(line); eputs("\n");
-    eputs("\tAssertion `"); eputs(cond); eputs("' failed!\n");
-    eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");
-    eputs("--- abort ...\n");
-    VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );
+    asrs_("File: "); asrs_(file); asrs_(", Line: ");
+    asri_(line); asrs_("\n");
+    asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
+    asrs_("OS: `"); asrs_(strerror(errno_sv_)); asrs_("'\n");
+    asrs_("--- abort ...\n");
     abort();
 }
 #endif
@@ -838,13 +857,12 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 {
     int errno_sv_ = errno;
 
-    eputs("File: "); eputs(file); eputs(", Line: ");
-    eputi(line); eputs("\n");
-    eputs("\t"); eputs(msg); eputs("\n");
-    eputs("\tAssertion `"); eputs(cond); eputs("' failed!\n");
-    eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");
-    eputs("--- abort ...\n");
-    VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );
+    asrs_("File: "); asrs_(file); asrs_(", Line: ");
+    asri_(line); asrs_("\n");
+    asrs_("\t"); asrs_(msg); asrs_("\n");
+    asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
+    asrs_("OS: `"); asrs_(strerror(errno_sv_)); asrs_("'\n");
+    asrs_("--- abort ...\n");
     abort();
 }
 #endif
@@ -904,15 +922,15 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         {                                                               \
             int errno_sv_ = errno;                                      \
                                                                         \
-            eputs("File: "); eputs(__FILE__); eputs(", Line: ");        \
-            eputi(__LINE__); eputs("\n");                               \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- REPAIRING ...\n");                               \
-            eputs("    `" #r "'"); eputs("\n");                         \
+            trcs_("File: "); trcs_(__FILE__); trcs_(", Line: ");        \
+            trci_(__LINE__); trcs_("\n");                               \
+            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
+            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("--- REPAIRING ...\n");                               \
+            trcs_("    `" #r "'"); trcs_("\n");                         \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
-            eputs("--- ... DONE\n");                                    \
+            trcs_("--- ... DONE\n");                                    \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
@@ -922,16 +940,16 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         {                                                               \
             int errno_sv_ = errno;                                      \
                                                                         \
-            eputs("File: "); eputs(__FILE__); eputs(", Line: ");        \
-            eputi(__LINE__); eputs("\n");                               \
-            eputs("\t"); eputs((m)); eputs("\n");                       \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- REPAIRING ...\n");                               \
-            eputs("    `" #r "'"); eputs("\n");                         \
+            trcs_("File: "); trcs_(__FILE__); trcs_(", Line: ");        \
+            trci_(__LINE__); trcs_("\n");                               \
+            trcs_("\t"); trcs_((m)); trcs_("\n");                       \
+            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
+            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("--- REPAIRING ...\n");                               \
+            trcs_("    `" #r "'"); trcs_("\n");                         \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
-            eputs("--- ... DONE\n");                                    \
+            trcs_("--- ... DONE\n");                                    \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
@@ -941,15 +959,15 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         {                                                               \
             int errno_sv_ = errno;                                      \
                                                                         \
-            eputs("File: "); eputs((file)); eputs(", Line: ");          \
-            eputi((line)); eputs("\n");                                 \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- REPAIRING ...\n");                               \
-            eputs("    `" #r "'"); eputs("\n");                         \
+            trcs_("File: "); trcs_((file)); trcs_(", Line: ");          \
+            trci_((line)); trcs_("\n");                                 \
+            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
+            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("--- REPAIRING ...\n");                               \
+            trcs_("    `" #r "'"); trcs_("\n");                         \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
-            eputs("--- ... DONE\n");                                    \
+            trcs_("--- ... DONE\n");                                    \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
@@ -959,16 +977,16 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         {                                                               \
             int errno_sv_ = errno;                                      \
                                                                         \
-            eputs("File: "); eputs((file)); eputs(", Line: ");          \
-            eputi((line)); eputs("\n");                                 \
-            eputs("\t"); eputs((m)); eputs("\n");                       \
-            eputs("\tAssertion `"); eputs(#e); eputs("' failed!\n");    \
-            eputs("OS: `"); eputs(strerror(errno_sv_)); eputs("'\n");   \
-            eputs("--- REPAIRING ...\n");                               \
-            eputs("    `" #r "'"); eputs("\n");                         \
+            trcs_("File: "); trcs_((file)); trcs_(", Line: ");          \
+            trci_((line)); trcs_("\n");                                 \
+            trcs_("\t"); trcs_((m)); trcs_("\n");                       \
+            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
+            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("--- REPAIRING ...\n");                               \
+            trcs_("    `" #r "'"); trcs_("\n");                         \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
-            eputs("--- ... DONE\n");                                    \
+            trcs_("--- ... DONE\n");                                    \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)

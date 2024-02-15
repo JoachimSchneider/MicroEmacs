@@ -253,7 +253,14 @@ int main(int argc, char *argv[])
     {
         tcgetattr(0, &t_old);
         t_new = t_old;
+#if ( 0 ) /* Not all OS implement this conveniance funtion  */
         cfmakeraw(&t_new);
+#else
+        t_new.c_iflag &= ~(INLCR|ICRNL|IGNCR);
+        t_new.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
+        t_new.c_cc[VMIN] = 1;
+        t_new.c_cc[VTIME] = 0;
+#endif
         tcsetattr(0, TCSANOW, &t_new);
         readfunc  = readt;
     }
