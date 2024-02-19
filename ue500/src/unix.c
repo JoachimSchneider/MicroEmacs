@@ -1832,6 +1832,7 @@ static CONST char *cygpwddos P0_()
         if ( 0 == strcmp(prevcwd, cwd) )  {
             return res;
         } else                            {
+            ZEROMEM(res);
             xstrlcpy(prevcwd, cwd, SIZEOF(prevcwd));
         }
     }
