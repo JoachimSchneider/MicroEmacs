@@ -937,6 +937,11 @@ flags in `unix.c'. Of course this means that the prototypes in
 `eproto.h' now *look* different to their implementations in `unix.c'.
 
 
+[2024-02-23.01]
+Again cygwin: unfortunately cygwins win32 headers only work well with
+older cygwin releases.
+
+
 
 #============================== TODO LIST ==============================
 

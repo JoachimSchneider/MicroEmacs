@@ -124,8 +124,9 @@
 #  define USE_CYGWIN_SPAWN        ( 0 )
 # endif
 # if ( !USE_CYGWIN_CONV_PATH )  /* We must implement our own version  */
-#  /**define USE_CYGWIN_WIN32_GETCURDIR    ( 0 )**/
-#  define USE_CYGWIN_WIN32_GETCURDIR    ( 1 )
+/* Unfortunately works only with older CygWin releases: */
+#  define USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
+#  /**define USE_CYGWIN_WIN32_GETCURDIR    ( 1 )**/
 #  ifndef __CYGWIN__  /* Make it compilable on non CYGWIN (checking)  */
 #   undef   USE_CYGWIN_WIN32_GETCURDIR
 #   define  USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
