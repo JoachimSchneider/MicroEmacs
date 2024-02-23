@@ -925,6 +925,17 @@ cmd /C "COMMAND < IN > OUT 2> ERR"
 
 A better solution will be to implement DJGPP's `dossystem()' via
 spawn().
+===> DONE
+
+
+[2024-02-23.00]
+For cygwin we include `windows.h' in `unix.c' but `windows.h' defines
+PASCAL as `__attribute__((stdcall))' --- gcc gets confused at first
+simply by seeing the differing prototypes in `eproto.h'. As `unix.c'
+gets compiled only in the IS_UNIX() case we removed all `PASCAL *'
+flags in `unix.c'. Of course this means that the prototypes in
+`eproto.h' now *look* different to their implementations in `unix.c'.
+
 
 
 #============================== TODO LIST ==============================

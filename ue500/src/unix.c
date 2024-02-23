@@ -112,14 +112,26 @@
 # define USE_CTL_SQ               ( 0 )
 #endif
 #if ( CYGWIN )
+/* Old CYGWIN Versions don't have these:  */
+# /**define  USE_CYGWIN_CONV_PATH    ( 1 )**/
 # define  USE_CYGWIN_CONV_PATH    ( 0 )
+# /**define  USE_CYGWIN_SPAWN        ( 1 )**/
 # define  USE_CYGWIN_SPAWN        ( 0 )
 # if ( 3 >= __GNUC__ )
-/* Old CYGWIN Versions don't have these:  */
 #  undef  USE_CYGWIN_CONV_PATH
 #  undef  USE_CYGWIN_SPAWN
 #  define USE_CYGWIN_CONV_PATH    ( 0 )
 #  define USE_CYGWIN_SPAWN        ( 0 )
+# endif
+# if ( !USE_CYGWIN_CONV_PATH )  /* We must implement our own version  */
+#  /**define USE_CYGWIN_WIN32_GETCURDIR    ( 0 )**/
+#  define USE_CYGWIN_WIN32_GETCURDIR    ( 1 )
+#  ifndef __CYGWIN__  /* Make it compilable on non CYGWIN (checking)  */
+#   undef   USE_CYGWIN_WIN32_GETCURDIR
+#   define  USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
+#  endif
+# else
+#  define USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
 # endif
 #endif
 
@@ -208,6 +220,9 @@ int scnothing P1_(char *, s)
 #   include <spawn.h>
 #  endif
 #  include <sys/wait.h>
+#  if ( USE_CYGWIN_WIN32_GETCURDIR  )
+#   include <w32api/windows.h>
+#  endif
 # endif /* CYGWIN */
 
 # if ( DJGPP_DOS )
@@ -230,7 +245,7 @@ EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(in
 #  endif  /* !ANSI */
 # endif /* !USE_CURSES */
 # if ANSI
-EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
+EXTERN VOID ttputs  DCL((CONST char *string));
 # endif /* ANSI */
 /*==============================================================*/
 
@@ -274,6 +289,88 @@ static int IsExecutable DCL((CONST char * file));
 } while ( 0 )
 
 # if ( CYGWIN )
+
+/* Will not fail  */
+static CONST char *cygdrive_ P0_()
+{
+    static char res[NFILEN];
+    static int  FirstCall = !0;
+
+    if ( FirstCall )  {
+        CONST char  drives[]  = "CDEFGHIJKLMNOPQRSTUVWXYZAB";
+        char        cwd[NFILEN];
+        int         i         = 0;
+        int         l         = 0;
+
+        ZEROMEM(cwd);
+
+        if ( NULL == getcwd(cwd, SIZEOF(cwd)) ) {
+            goto notfound;
+        }
+        /*------------------------------------------------------------*/
+
+        for ( i = 0; i < SIZEOF(drives) - 1; i++ )  {
+            char  dir[4];
+
+            dir[0]  = drives[i];
+            dir[1]  = ':';
+            dir[2]  = '/';
+            dir[3]  = '\0';
+
+            ZEROMEM(res);
+            if ( 0 == chdir(dir) )  {
+                if ( NULL != getcwd(res, SIZEOF(res)) ) {
+                    break;
+                }
+            }
+        }
+
+        /*------------------------------------------------------------*/
+        if ( 0 != chdir(cwd) )  {
+            goto notfound;
+        }
+
+        if ( SIZEOF(drives) - 1 <= i )  {
+            goto notfound;
+        }
+
+        if ( 0 == (l = strlen(res)) ) {
+            goto notfound;
+        }
+
+        res[l - 1]  = '\0';
+
+        goto found;
+notfound:
+        /* This is the default: */
+        xstrlcpy(res, "/cygdrive/", SIZEOF(res));
+found:
+
+        FirstCall = 0;
+    }
+
+    return res;
+}
+
+static int cygdrive_len_ P0_()
+{
+    static  int len = (-1);
+
+    if ( 0 > len )  {
+        len = strlen(cygdrive_());
+    }
+
+    return len;
+}
+
+#if ( !0 )
+# define CYGDRIVE_      ( cygdrive_() )
+# define CYGDRIVE_LEN_  ( cygdrive_len_() )
+#else
+# define CYGDRIVE_      "/cygdrive/"
+# define CYGDRIVE_LEN_  ( SIZEOF(CYGDRIVE_) - 1 )
+#endif
+
 #  define NormalizePathUNX(path)  do  {                     \
     char  *cp_  = (path);                                   \
                                                             \
@@ -784,7 +881,7 @@ unsigned char grabwait()
 
 /** Grab input characters, short wait **/
 # if ( USE_TERMINAL_SELECT )
-unsigned char PASCAL NEAR grabnowait P0_()
+unsigned char grabnowait P0_()
 {
     fd_set          rfds;
     struct timeval  tv;
@@ -839,7 +936,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
     }
 }
 # else
-unsigned char PASCAL NEAR grabnowait P0_()
+unsigned char grabnowait P0_()
 {
     int           count = 0;
     unsigned char ch    = '\0';
@@ -925,7 +1022,7 @@ VOID qrep P1_(int, ch)
 }
 
 /** Return cooked characters **/
-int PASCAL NEAR ttgetc P0_()
+int ttgetc P0_()
 {
     int ch  = 0;
 
@@ -1399,7 +1496,7 @@ int scbcol P1_(int, color)
 #  endif /* COLOR */
 
 /** Set palette **/
-int PASCAL NEAR spal P1_(char *, cmd)
+int spal P1_(char *, cmd)
 /* cmd: Palette command */
 {
     int   code      = 0;
@@ -1587,8 +1684,6 @@ static int  IsDOSPath P1_(CONST char *, path)
     }
 
 #  if   CYGWIN    /* /cygdrive/c is C:  */
-#   define CYGDRIVE_      "/cygdrive/"
-#   define CYGDRIVE_LEN_  ( SIZEOF(CYGDRIVE_) - 1 )
     if ( strcasestart(CYGDRIVE_, path)                                &&
          CYGDRIVE_LEN_  < len                                         &&
          ISALPHA(path[CYGDRIVE_LEN_])                                 &&
@@ -1596,8 +1691,6 @@ static int  IsDOSPath P1_(CONST char *, path)
         )   {
         return (-1);
     }
-#   undef CYGDRIVE_
-#   undef CYGDRIVE_LEN_
 #  elif DJGPP_DOS /* /dev/c is C: */
 #   define DJGPPDRIVE_      "/dev/"
 #   define DJGPPDRIVE_LEN_  ( SIZEOF(DJGPPDRIVE_) - 1 )
@@ -1694,18 +1787,21 @@ static CONST char *wingetshell P0_()
     }                                           \
 } while ( 0 )
 
-static CONST char *cygabsdos2unxpath_ P1_(CONST char *, dos)
+/* Return NULL if dos is not an absolute DOS path */
+/* Pass through NULL                              */
+static CONST char *cygads2enx_ P1_(CONST char *, dos)
 {
-#  define CYGDRIVE_     "/cygdrive/"
-#  define CYGDRIVE_LEN_ ( SIZEOF(CYGDRIVE_) - 1 )
     unsigned char in[NFILEN];
     static char   res[NFILEN];
     int           len = 0;
     int           drv = '\0';
 
-    ASRT(NULL != dos);
     ZEROMEM(in);
     ZEROMEM(res);
+
+    if ( NULL == dos )  {
+        return NULL;
+    }
 
     xstrlcpy((char *)in, dos, SIZEOF(in));
     TO_DOS_SEP_(in);
@@ -1713,7 +1809,8 @@ static CONST char *cygabsdos2unxpath_ P1_(CONST char *, dos)
 
     if ( 2 <= len && ':' == in[1] && ISALPHA(drv = in[0]) ) {
         int i = 2;
-        int j = CYGDRIVE_LEN_;
+        int j = 0;
+            j = CYGDRIVE_LEN_;
 
         drv = tolower(drv);
         xstrlcpy(res, CYGDRIVE_, SIZEOF(res));
@@ -1734,199 +1831,29 @@ static CONST char *cygabsdos2unxpath_ P1_(CONST char *, dos)
             }
         }
 
-    }
-
-    return res;
-#  undef CYGDRIVE_LEN_
-#  undef CYGDRIVE_
-}
-
-static CONST char *cygrootdos P0_()
-{
-    static int  FirstCall = !0;
-    static char res[NFILEN];
-
-    if ( FirstCall )  {
-        int                 c             = '\0';
-        FILE                *pp           = NULL;
-        CONST char          *doswinshell  = NULL;
-        CONST char          *unxwinshell  = NULL;
-        char                cmd[NFILEN];
-        char                doscygroot[NFILEN];
-        enum { start, get } state         = start;
-        int                 i             = 0;
-        char                *cp           = NULL;
-
-        ZEROMEM(cmd);
-        ZEROMEM(doscygroot);
-
-        ASRTM(NULL != (doswinshell = wingetshell()),
-              "cygrootdos(): Could not get a windows shell!");
-        unxwinshell = cygabsdos2unxpath_(doswinshell);
-        /* Do *not* use `/' but use `/tmp': Cygwin might use links. */
-        xsnprintf(cmd, SIZEOF(cmd), "( cd /tmp && %s /c cd )", unxwinshell);
-        if ( NULL != (pp = popen(cmd, "r")) ) {
-            while ( EOF != (c = fgetc(pp)) )  {
-                if ( state == start && ISSPACE(c) ) {
-                    continue;
-                }
-                state = get;
-                if ( i >= SIZEOF(res) - 1 )   {
-                    break;
-                }
-                if ( '\n' == c || '\r' == c ) {
-                    break;
-                }
-                res[i++]  = c;
-            }
-            pclose(pp);
-        }
-        /* Strip `\tmp':  */
-        if ( NULL != (cp = strrchr(res, '\\')) )  {
-            *cp = '\0';
-        }
-
-        TRC(("cygrootdos(): %s", res));
-        FirstCall = 0;
+    } else                                                  {
+        return NULL;
     }
 
     return res;
 }
 
-static CONST char *cygrootunx P0_()
+
+/* Return NULL if unx is *not* an expanded UNIX path  */
+/* Pass through NULL                                  */
+static CONST char *cygenx2ads_ P1_(CONST char *, unx)
 {
-    static int  FirstCall = !0;
-    static char res[NFILEN];
-
-    if ( FirstCall )  {
-        xsnprintf(res, SIZEOF(res), "%s", cygabsdos2unxpath_(cygrootdos()));
-    }
-
-    return res;
-}
-
-static CONST char *cygpwddos P0_()
-{
-    static char res[NFILEN];
-
-    int                 c             = '\0';
-    FILE                *pp           = NULL;
-    CONST char          *doswinshell  = NULL;
-    CONST char          *unxwinshell  = NULL;
-    char                cmd[NFILEN];
-    char                doscygroot[NFILEN];
-    enum { start, get } state         = start;
-    int                 i             = 0;
-    static char         prevcwd[NFILEN];
-    char                cwd[NFILEN];
-
-    ZEROMEM(cmd);
-    ZEROMEM(doscygroot);
-    ZEROMEM(cwd);
-
-    /* An optimization:
-     *  We assume that DOS cwd doesn't change if UNIX cwd stays
-     *  the same.
-     */
-    if ( NULL != getcwd(cwd, SIZEOF(cwd)) ) {
-        if ( 0 == strcmp(prevcwd, cwd) )  {
-            return res;
-        } else                            {
-            ZEROMEM(res);
-            xstrlcpy(prevcwd, cwd, SIZEOF(prevcwd));
-        }
-    }
-
-    ASRTM(NULL != (doswinshell = wingetshell()),
-          "cygpwddos(): Could not get a windows shell!");
-    unxwinshell = cygabsdos2unxpath_(doswinshell);
-    xsnprintf(cmd, SIZEOF(cmd), "( %s /c cd )", unxwinshell);
-    if ( NULL != (pp = popen(cmd, "r")) ) {
-        while ( EOF != (c = fgetc(pp)) )  {
-            if ( state == start && ISSPACE(c) ) {
-                continue;
-            }
-            state = get;
-            if ( i >= SIZEOF(res) - 1 )   {
-                break;
-            }
-            if ( '\n' == c || '\r' == c ) {
-                break;
-            }
-            res[i++]  = c;
-        }
-        pclose(pp);
-    }
-    TRC(("cygpwddos(): %s", res));
-
-    return res;
-}
-
-static CONST char *cygpwdunx P0_()
-{
-    static int  FirstCall = !0;
-    static char res[NFILEN];
-
-    if ( FirstCall )  {
-        xsnprintf(res, SIZEOF(res), "%s", cygabsdos2unxpath_(cygpwddos()));
-    }
-
-    return res;
-}
-
-static int cygdrvdos P0_()
-{
-    return (unsigned char)cygpwddos()[0];
-}
-
-static CONST char *cygdos2unxpath P1_(CONST char *, dos)
-{
-#  define CYGDRIVE_       "/cygdrive/"
-#  define CYGDRIVE_LEN_   ( SIZEOF(CYGDRIVE_) - 1 )
-    unsigned char in[NFILEN];
-    static char   res[NFILEN];
-    int           len = 0;
-
-    ASRT(NULL != dos);
-    ZEROMEM(in);
-    ZEROMEM(res);
-
-    xstrlcpy((char *)in, dos, SIZEOF(in));
-    TO_DOS_SEP_(in);
-    len = strlen((CONST char *)in);
-    if ( 2 <= len && ':' == in[1]  && ISALPHA(in[0]) )  {
-         xstrlcpy(res, cygabsdos2unxpath_((CONST char *)in), SIZEOF(res));
-    } else {
-        char xpath[NFILEN];
-
-        ZEROMEM(xpath);
-
-        if ( '\\' == in[0] )  {
-            xsnprintf(xpath, SIZEOF(xpath), "%c:%s", cygdrvdos(), in);
-        } else                {
-            xsnprintf(xpath, SIZEOF(xpath), "%s\\%s", cygpwddos(), in);
-        }
-        xstrlcpy(res, cygabsdos2unxpath_(xpath), SIZEOF(res));
-    }
-
-    return res;
-#  undef CYGDRIVE_LEN_
-#  undef CYGDRIVE_
-}
-
-static CONST char *cygabsunx2dospath_ P1_(CONST char *, unx)
-{
-#  define CYGDRIVE_       "/cygdrive/"
-#  define CYGDRIVE_LEN_   ( SIZEOF(CYGDRIVE_) - 1 )
     unsigned char in[NFILEN];
     static char   res[NFILEN];
     int           len = 0;
     int           drv = '\0';
 
-    ASRT(NULL != unx);
-
     ZEROMEM(in);
     ZEROMEM(res);
+
+    if ( NULL == unx )  {
+        return NULL;
+    }
 
     xstrlcpy((char *)in, unx, SIZEOF(in));
     TO_UNX_SEP_(in);
@@ -1953,59 +1880,418 @@ static CONST char *cygabsunx2dospath_ P1_(CONST char *, unx)
                 res[j]  = in[i];
             }
         }
+    } else  {
+        return NULL;
     }
 
     return res;
-#  undef CYGDRIVE_LEN_
-#  undef CYGDRIVE_
 }
 
-static CONST char *cygunx2dospath P1_(CONST char *, unx)
+/* Cannot fail  */
+static CONST char *cygpwdads P0_()
 {
-#  define CYGDRIVE_       "/cygdrive/"
-#  define CYGDRIVE_LEN_   ( SIZEOF(CYGDRIVE_) - 1 )
+    static char res[NFILEN];
+
+    static int          FirstCall     = !0;
+    char                cmd[NFILEN];
+    static char         prevcwd[NFILEN];
+    char                cwd[NFILEN];
+
+    ZEROMEM(cmd);
+    ZEROMEM(cwd);
+
+    /* Optimize for:
+     * - CWD same as previous call
+     * - Return old res
+     *  We assume that DOS cwd doesn't change if UNIX cwd stays
+     *  the same.
+     */
+    if ( FirstCall )  {
+        FirstCall = 0;
+    } else            {
+        if ( NULL != getcwd(cwd, SIZEOF(cwd))  &&
+            0 == strcmp(prevcwd, cwd)  ) {
+
+            return res;
+        }
+    }
+
+    xstrlcpy(prevcwd, cwd, SIZEOF(prevcwd));
+    ZEROMEM(res);
+
+#  if ( USE_CYGWIN_WIN32_GETCURDIR  )
+    {
+        int rc  = 0;
+
+
+        rc  = GetCurrentDirectoryA(SIZEOF(res), res);
+        /* Return values:
+         * - Success:         strlen(CurrenDirectory)
+         * - Error:           0
+         * - Buffer to small: strlen(CurrentDirectory) + 1
+         */
+        ASRT(0 < rc);
+        ASRT(rc < SIZEOF(res));
+    }
+#  else
+    {
+        FILE        *pp           = NULL;
+        CONST char  *unxwinshell  = NULL;
+
+        unxwinshell = cygads2enx_(wingetshell());
+        ASRT( NULL != unxwinshell );
+        /**To Avoid:
+        xsnprintf(cmd, SIZEOF(cmd), "( %s /c cd )", unxwinshell);
+        **/
+        xstrlcpy(cmd, "( ",         SIZEOF(cmd));
+        xstrlcat(cmd, unxwinshell,  SIZEOF(cmd));
+        xstrlcat(cmd, " /c cd )",   SIZEOF(cmd));
+
+        ASRT( NULL != (pp = popen(cmd, "r")) );
+        {
+            enum { start, get } state = start;
+            int                 c     = '\0';
+            int                 i     = 0;
+
+            while ( EOF != (c = fgetc(pp)) )  {
+                if ( state == start && ISSPACE(c) ) {
+                    continue;
+                }
+                state = get;
+                if ( i >= SIZEOF(res) - 1 )   {
+                    break;
+                }
+                if ( '\n' == c || '\r' == c ) {
+                    break;
+                }
+                res[i++]  = c;
+            }
+            i = strlen(res) - 1;
+            while ( 0 <= i &&  ISSPACE(res[i]) )  {
+                res[i--]  = '\0';
+            }
+
+            pclose(pp);
+        }
+    }
+#  endif  /* USE_CYGWIN_WIN32_GETCURDIR */
+
+    return res;
+}
+
+#  if ( 0 ) /* Not needed */
+/* Cannot fail  */
+static CONST char *cygrootads P0_()
+{
+    static int  FirstCall = !0;
+    static char res[NFILEN];
+
+    if ( FirstCall )  {
+        char  cwd[NFILEN];
+
+        ZEROMEM(cwd);
+
+        ZEROMEM(res);
+        ASRT( NULL != getcwd(cwd, SIZEOF(cwd)) );
+        ASRT( 0 == chdir("/") );
+        xstrlcpy(res, cygpwdads(), SIZEOF(res));
+        ASRT( 0 == chdir(cwd) );
+
+
+        FirstCall = 0;
+    }
+
+    return res;
+}
+#  endif  /* Not needed */
+
+#  if ( 0 ) /* Not needed */
+/* Cannot fail  */
+static CONST char *cygrootenx P0_()
+{
+    static int  FirstCall = !0;
+    static char res[NFILEN];
+
+    if ( FirstCall )  {
+        CONST char  *cp = NULL;
+
+        ZEROMEM(res);
+        ASRT( NULL != (cp = cygads2enx_(cygrootads())) );
+        xstrlcpy(res, cp, SIZEOF(res));
+    }
+
+    return res;
+}
+#  endif  /* Not needed */
+
+/* Cannot fail  */
+static CONST char *cygpwdenx P0_()
+{
+    static char res[NFILEN];
+
+    CONST char  *cp = NULL;
+
+    ZEROMEM(res);
+
+    ASRT( NULL != (cp = cygads2enx_(cygpwdads())) );
+    xstrlcpy(res, cp, SIZEOF(res));
+
+    return res;
+}
+
+/* Cannot fail  */
+static int cygdrvdos P0_()
+{
+    return (unsigned char)cygpwdads()[0];
+}
+
+#  if ( 0 ) /* Not needed */
+/* Return DOS path of an *existing* (`xunx') UNIX directory */
+/* Return NULL if unx does not exist as a directory         */
+/* Pass through NULL                                        */
+static CONST char *cygxunx2ads_ P1_(CONST char *, unx)
+{
+    static char res[NFILEN];
+    CONST char  *rc = res;
+    char        cwd[NFILEN];
+
+    ZEROMEM(res);
+    ZEROMEM(cwd);
+
+    if ( NULL == unx )  {
+        return NULL;
+    }
+
+    ASRT( NULL != getcwd(cwd, SIZEOF(cwd)) );
+
+    if ( 0 != chdir(unx) )  {
+        rc  = NULL;
+    } else                  {
+        xstrlcpy(res, cygpwdads(), SIZEOF(res));
+    }
+
+    ASRT( 0 == chdir(cwd) );
+
+    return rc;
+
+}
+#  endif  /* Not needed */
+
+/* Return expanded UNIX path of an *existing* (`xunx') UNIX directory */
+/* Return NULL if unx does not exist as a directory                   */
+/* Pass through NULL                                                  */
+static CONST char *cygxunx2enx_ P1_(CONST char *, unx)
+{
+    static char res[NFILEN];
+    CONST char  *rc = res;
+    char        cwd[NFILEN];
+
+    ZEROMEM(res);
+    ZEROMEM(cwd);
+
+    if ( NULL == unx )  {
+        return NULL;
+    }
+
+    ASRT( NULL != getcwd(cwd, SIZEOF(cwd)) );
+
+    if ( 0 != chdir(unx) )  {
+        rc  = NULL;
+    } else                  {
+        xstrlcpy(res, cygpwdenx(), SIZEOF(res));
+    }
+
+    ASRT( 0 == chdir(cwd) );
+
+    return rc;
+
+}
+
+/* Return expanded (`/cygdrive/...') UNIX path of an UNIX directory */
+/* Cannot fail                                                      */
+static CONST char *cygunx2enx P1_(CONST char *, unx)
+{
+    static char res[NFILEN];
+
+    char        cwd[NFILEN];
+    static char prevcwd[NFILEN];
+    static char prevunx[NFILEN];
+
+    CONST char  *hp   = NULL;
+    int         l     = 0;
+    int         i     = 0;
+
+
+    ZEROMEM(cwd);
+
+#  if ( 0 )
+    ASRT(NULL != unx);
+#  else
+    if ( NULL == unx )  {
+        unx = "";
+    }
+#  endif
+
+    /* Optimize for:
+     * - CWD and unx same as previous call
+     * - Return old res
+     */
+    if ( *res  /* NOT the first call */    &&
+         NULL != getcwd(cwd, SIZEOF(cwd))  &&
+         0 == strcmp(prevcwd, cwd)         &&
+         0 == strcmp(prevunx, unx) ) {
+        return res;
+    }
+
+    xstrlcpy(prevcwd, cwd, SIZEOF(prevcwd));
+    xstrlcpy(prevunx, unx, SIZEOF(prevunx));
+    ZEROMEM(res);
+
+    /* Empty input: Return CWD: */
+    if ( 0 == (l = strlen(unx)) ) {
+        xstrlcpy(res, cygpwdenx(), SIZEOF(res));
+
+        goto found;
+    }
+    /* Return existing absolute or relative directory:  */
+    if ( NULL != (hp = cygxunx2enx_(unx)) )  {
+        xstrlcpy(res, hp, SIZEOF(res));
+
+        goto found;
+    }
+    for ( i = l - 1; i >= 0; i-- )  {
+        char  head[NFILEN];
+        char  tail[NFILEN];
+
+        ZEROMEM(head);
+        ZEROMEM(tail);
+
+        CASRT(SIZEOF(res) == SIZEOF(head));
+        CASRT(SIZEOF(res) == SIZEOF(tail));
+
+        if ( '/' == ((unsigned char *)unx)[i] ) {
+            int j = 0;
+
+            for ( j = 0; j < i; j ++ )  {
+                head[j] = unx[j];
+            }
+            for ( j = i + 1; j < l; j ++ )  {
+                tail[j - i - 1] = unx[j];
+            }
+            if        ( ! *head ) {
+                /* The case of an exisiting `/<something>' was
+                 * handled already above.
+                 */
+                if ( NULL != (hp = cygxunx2enx_("/")) )  {
+                    xstrlcpy(res, hp,   SIZEOF(res));
+                    xstrlcat(res, "/",  SIZEOF(res));
+                    xstrlcat(res, tail, SIZEOF(res));
+
+                    goto found;
+                }
+            } else if ( ! *tail ) {
+                if ( NULL != (hp = cygxunx2enx_(head)) ) {
+                    xstrlcpy(res, hp,   SIZEOF(res));
+
+                    goto found;
+                }
+            } else                {
+                if ( NULL != (hp = cygxunx2enx_(head)) ) {
+                    xstrlcpy(res, hp,   SIZEOF(res));
+                    xstrlcat(res, "/",  SIZEOF(res));
+                    xstrlcat(res, tail, SIZEOF(res));
+
+                    goto found;
+                }
+            }
+        }
+    }
+
+    /* When we arrive here it cannot be one of these cases:
+     * - `/<something>' existing
+     * - `/<something>' not existing
+     * - `<something>'  existing
+     */
+    xstrlcpy(res, cygpwdenx(), SIZEOF(res));
+    xstrlcat(res, "/", SIZEOF(res));
+    xstrlcat(res, unx, SIZEOF(res));
+
+found:
+    return res;
+}
+
+/* Return absolute DOS path of an UNIX directory  */
+/* Cannot fail                                    */
+static CONST char *cygunx2ads P1_(CONST char *, unx)
+{
+    return cygenx2ads_(cygunx2enx(unx));
+}
+
+/* Cannot fail  */
+static CONST char *cygdos2enx P1_(CONST char *, dos)
+{
     unsigned char in[NFILEN];
     static char   res[NFILEN];
     int           len = 0;
-    int           drv = '\0';
-
-    ASRT(NULL != unx);
 
     ZEROMEM(in);
     ZEROMEM(res);
 
-    xstrlcpy((char *)in, unx, SIZEOF(in));
-    TO_UNX_SEP_(in);
-    len = strlen((CONST char *)in);
+#  if ( 0 )
+    ASRT(NULL != dos);
+#  else
+    if ( NULL == dos )  {
+        dos = "";
+    }
+#  endif
 
-    if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
-         CYGDRIVE_LEN_  < len                                         &&
-         ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
-         (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
-        )   {
-        xstrlcpy(res, cygabsunx2dospath_((CONST char *)in), SIZEOF(res));
+    xstrlcpy((char *)in, dos, SIZEOF(in));
+    TO_DOS_SEP_(in);
+    len = strlen((CONST char *)in);
+    if ( 2 <= len && ':' == in[1]  && ISALPHA(in[0]) )  {
+         xstrlcpy(res, cygads2enx_((CONST char *)in), SIZEOF(res));
     } else {
-        char  xpath[NFILEN];
+        char xpath[NFILEN];
 
         ZEROMEM(xpath);
 
-        if ( in[0] == '/' ) {
-            xsnprintf(xpath, SIZEOF(xpath), "%s%s",  cygrootunx(), in);
+        if ( '\\' == in[0] )  {
+            xpath[0]  = cygdrvdos();
+            xpath[1]  = ':';
+            CASRT(3 <= SIZEOF(xpath));
+            xstrlcat(xpath, (CONST char *)in, SIZEOF(xpath));
         } else                {
-            xsnprintf(xpath, SIZEOF(xpath), "%s/%s", cygpwdunx(),  in);
+            int l = 0;
+
+            xstrlcpy(xpath, cygpwdads(), SIZEOF(xpath) - 1 /* '\\' */);
+            l = strlen(xpath);
+            xpath[l]  = '\\';
+            xstrlcat(xpath, (CONST char *)in, SIZEOF(xpath));
         }
-        xstrlcpy(res, cygabsunx2dospath_(xpath), SIZEOF(res));
+        xstrlcpy(res, cygads2enx_(xpath), SIZEOF(res));
     }
 
     return res;
-#  undef CYGDRIVE_LEN_
-#  undef CYGDRIVE_
 }
+
+#  if ( 0 ) /* Not needed */
+/* Return absolute DOS path of a DOS directory  */
+/* Cannot fail                                  */
+static CONST char *cygdos2ads P1_(CONST char *, dos)
+{
+    CONST char  *rc = NULL;
+
+    ASRT( NULL != (rc = cygenx2ads_(cygdos2enx(dos))) );
+
+    return rc;
+}
+#  endif  /* Not needed */
+
 
 static CONST char *getdospath P1_(CONST char *, in)
 #  if !USE_CYGWIN_CONV_PATH
 {
-    return cygunx2dospath(in);
+    return cygunx2ads(in);
 }
 #  else
 {
@@ -2022,7 +2308,7 @@ static CONST char *getdospath P1_(CONST char *, in)
 
         TRC(("cygwin_conv_path(%s) (==> DOS): %s", in,
              strerror(errno_sv)));
-        return NULL;
+        return "";
     }
 
     return dospath;
@@ -2032,7 +2318,7 @@ static CONST char *getdospath P1_(CONST char *, in)
 static CONST char *getunxpath P1_(CONST char *, in)
 #  if !USE_CYGWIN_CONV_PATH
 {
-    return cygdos2unxpath(in);
+    return cygdos2enx(in);
 }
 #  else
 {
@@ -2049,7 +2335,7 @@ static CONST char *getunxpath P1_(CONST char *, in)
 
         TRC(("cygwin_conv_path(%s) (==> UNX): %s", in,
              strerror(errno_sv)));
-        return NULL;
+        return "";
     }
 
     return unxpath;
@@ -2073,7 +2359,8 @@ static int winsystem P1_(CONST char *, cmd)
     if ( (doswinshell = wingetshell()) )  {
         CONST char  *unxwinshell  = NULL;
 
-        unxwinshell = cygabsdos2unxpath_(doswinshell);
+        unxwinshell = cygads2enx_(doswinshell);
+        ASRT( NULL != unxwinshell );
         xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s \"%s\"", unxwinshell,
                   WIN_SHELL_C_, cmd);
     } else                                {
@@ -2191,23 +2478,6 @@ static CONST char *getdospath P1_(CONST char *, in)
 
     return full_dospath;
 }
-
-#  if ( 0 ) /**NOT_USED**/
-static CONST char *getunxpath P1_(CONST char *, in)
-{
-    static char unxpath[NFILEN];
-
-    ZEROMEM(unxpath);
-    if ( NULL == in ) {
-        in  = "";
-    }
-
-    xstrlcpy(unxpath, in, SIZEOF(unxpath));
-    NormalizePathUNX(unxpath);
-
-    return unxpath;
-}
-#  endif
 
 static CONST char *dosgetshell P0_()
 {
