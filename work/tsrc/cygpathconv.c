@@ -198,7 +198,7 @@ static CONST char *wingetshell(void)
 
 /* Will not fail  */
 #  define CYGDRIVE_DFT_ "/cygdrive/"
-static CONST char *cygdrive_ P0_()
+static CONST char *cygdrive_(void)
 {
     static char       res[NFILEN];
     static CONST char *rc       = res;
@@ -278,7 +278,7 @@ end:
     return rc;
 }
 
-static int cygdrive_len_ P0_()
+static int cygdrive_len_(void)
 {
     static int  FirstCall = !0;
     static int  len       = (-1);
