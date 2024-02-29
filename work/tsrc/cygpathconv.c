@@ -808,10 +808,18 @@ static CONST char *cygdos2enx(CONST char *dos)
     xstrlcpy((char *)in, dos, SIZEOF(in));
     TO_DOS_SEP_(in);
     len = strlen((CONST char *)in);
-    if ( 2 <= len && ':' == in[1]  && ISALPHA(in[0]) )  {
-         xstrlcpy(res, cygads2enx_((CONST char *)in), SIZEOF(res));
+    if ( 2 <= len       &&
+        ':' == in[1]    &&
+        ISALPHA(in[0])  &&
+        (NULL != CYGDRIVE_ || tolower(in[0]) == tolower(cygcurdrv()) )
+    {
+        CONST char  *cp = NULL;
+
+        ASRT( NULL != (cp = cygads2enx_((CONST char *)in)) );
+        xstrlcpy(res, cp, SIZEOF(res));
     } else {
-        char xpath[NFILEN];
+        char        xpath[NFILEN];
+        CONST char  *cp = NULL;
 
         ZEROMEM(xpath);
 
@@ -828,7 +836,8 @@ static CONST char *cygdos2enx(CONST char *dos)
             xpath[l]  = '\\';
             xstrlcat(xpath, (CONST char *)in, SIZEOF(xpath));
         }
-        xstrlcpy(res, cygads2enx_(xpath), SIZEOF(res));
+        ASRT( NULL != (cp = cygads2enx_(xpath)) );
+        xstrlcpy(res, cp, SIZEOF(res));
     }
 
     return res;
