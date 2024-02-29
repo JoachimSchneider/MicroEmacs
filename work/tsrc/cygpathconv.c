@@ -811,7 +811,7 @@ static CONST char *cygdos2enx(CONST char *dos)
     if ( 2 <= len       &&
         ':' == in[1]    &&
         ISALPHA(in[0])  &&
-        (NULL != CYGDRIVE_ || tolower(in[0]) == tolower(cygcurdrv()) )
+        (NULL != CYGDRIVE_ || tolower(in[0]) == tolower(cygcurdrv())) )
     {
         CONST char  *cp = NULL;
 
