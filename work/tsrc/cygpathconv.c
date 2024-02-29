@@ -422,8 +422,9 @@ static CONST char *cygpwdads(void)
 }
 #define cygcurdrv() ( cygpwdads()[0] )
 
-/* Return NULL if dos is not an absolute DOS path */
-/* Pass through NULL                              */
+/* Return NULL if dos is not an absolute DOS path               */
+/* Return NULL if NULL == CYGDRIVE_ .AND. drv .NE. cygcurdrv()  */
+/* Pass through NULL                                            */
 static CONST char *cygads2enx_(CONST char *dos)
 {
     unsigned char in[NFILEN];
@@ -467,6 +468,9 @@ static CONST char *cygads2enx_(CONST char *dos)
                 }
             }
         } else                    {
+            if ( tolower(drv) != tolower(cygcurdrv()) ) {
+                return NULL;
+            }
             res[j++]  = '/';
             if ( 2 == len ) {
                 return res;
@@ -858,6 +862,7 @@ int main(int argc, char *argv[])
 #define TST_(x) do  {                                               \
   fprintf(stdout, "cygxunx2ads_ ===> %s <<\n", cygxunx2ads_((x)));  \
   fprintf(stdout, "cygxunx2enx_ ===> %s <<\n", cygxunx2enx_((x)));  \
+  fprintf(stdout, "cygads2enx_  ===> %s <<\n", cygads2enx_((x)));   \
   fprintf(stdout, "cygunx2ads   ===> %s <<\n", cygunx2ads((x)));    \
   fprintf(stdout, "cygunx2enx   ===> %s <<\n", cygunx2enx((x)));    \
   fprintf(stdout, "cygdos2ads   ===> %s <<\n", cygdos2ads((x)));    \
