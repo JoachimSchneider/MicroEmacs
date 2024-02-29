@@ -35,7 +35,7 @@ const char *cygpwd_(void)
 
     int rc  = 0;
 
-    memset(res, 0 sizeof(res));
+    memset(res, 0, sizeof(res));
 
     rc  = GetCurrentDirectoryA(sizeof(res), res);
     /* Return values:
