@@ -111,10 +111,12 @@
 #else
 # define USE_CTL_SQ               ( 0 )
 #endif
+
 #if ( CYGWIN )
 /* Old CYGWIN Versions don't have these:  */
 # /**define  USE_CYGWIN_CONV_PATH    ( 1 )**/
 # define  USE_CYGWIN_CONV_PATH    ( 0 )
+/* On CygWin spawn is more reliable than fork/exec  */
 # /**define  USE_CYGWIN_SPAWN        ( 1 )**/
 # define  USE_CYGWIN_SPAWN        ( 0 )
 # if ( 3 >= __GNUC__ )
@@ -122,17 +124,6 @@
 #  undef  USE_CYGWIN_SPAWN
 #  define USE_CYGWIN_CONV_PATH    ( 0 )
 #  define USE_CYGWIN_SPAWN        ( 0 )
-# endif
-# if ( !USE_CYGWIN_CONV_PATH )  /* We must implement our own version  */
-/* Unfortunately works only with older CygWin releases: */
-#  define USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
-#  /**define USE_CYGWIN_WIN32_GETCURDIR    ( 1 )**/
-#  ifndef __CYGWIN__  /* Make it compilable on non CYGWIN (checking)  */
-#   undef   USE_CYGWIN_WIN32_GETCURDIR
-#   define  USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
-#  endif
-# else
-#  define USE_CYGWIN_WIN32_GETCURDIR    ( 0 )
 # endif
 #endif
 
@@ -221,9 +212,6 @@ int scnothing P1_(char *, s)
 #   include <spawn.h>
 #  endif
 #  include <sys/wait.h>
-#  if ( USE_CYGWIN_WIN32_GETCURDIR  )
-#   include <w32api/windows.h>
-#  endif
 # endif /* CYGWIN */
 
 # if ( DJGPP_DOS )
@@ -246,7 +234,7 @@ EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(in
 #  endif  /* !ANSI */
 # endif /* !USE_CURSES */
 # if ANSI
-EXTERN VOID ttputs  DCL((CONST char *string));
+EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # endif /* ANSI */
 /*==============================================================*/
 
@@ -292,10 +280,12 @@ static int IsExecutable DCL((CONST char * file));
 # if ( CYGWIN )
 
 /* Will not fail  */
+#  define CYGDRIVE_DFT_ "/cygdrive/"
 static CONST char *cygdrive_ P0_()
 {
-    static char res[NFILEN];
-    static int  FirstCall = !0;
+    static char       res[NFILEN];
+    static CONST char *rc       = res;
+    static int        FirstCall = !0;
 
     if ( FirstCall )  {
         CONST char  drives[]  = "CDEFGHIJKLMNOPQRSTUVWXYZAB";
@@ -339,26 +329,53 @@ static CONST char *cygdrive_ P0_()
             goto notfound;
         }
 
-        res[l - 1]  = '\0';
+        /* No Cygdrive: `C:\' ---> `/': */
+        if ( 1 == l && '/' == res[0] )  {
+            rc  = NULL;
 
-        goto found;
+            goto end;
+        }
+
+        l--;
+        res[l]  = '\0';
+        /* Is it `/abcde/'? If not classify as "notfound":  */
+        if ( !( 3 <= l && '/' == res[0] && '/' == res[l - 1] ) )  {
+            ZEROMEM(res);
+
+            goto notfound;
+        }
+
+        goto end;
+
+
 notfound:
-        /* This is the default: */
-        xstrlcpy(res, "/cygdrive/", SIZEOF(res));
-found:
+        xstrlcpy(res, CYGDRIVE_DFT_, SIZEOF(res));
 
+        goto end;
+
+
+end:
         FirstCall = 0;
     }
 
-    return res;
+    return rc;
 }
 
 static int cygdrive_len_ P0_()
 {
-    static  int len = (-1);
+    static int  FirstCall = !0;
+    static int  len       = (-1);
 
-    if ( 0 > len )  {
-        len = strlen(cygdrive_());
+    if ( FirstCall )  {
+        CONST char  *cd = NULL;
+
+        if ( NULL == (cd = cygdrive_()) ) {
+            len = (-1);
+        } else                            {
+            len = strlen(cd);
+        }
+
+        FirstCall = 0;
     }
 
     return len;
@@ -882,7 +899,7 @@ unsigned char grabwait()
 
 /** Grab input characters, short wait **/
 # if ( USE_TERMINAL_SELECT )
-unsigned char grabnowait P0_()
+unsigned char PASCAL NEAR grabnowait P0_()
 {
     fd_set          rfds;
     struct timeval  tv;
@@ -937,7 +954,7 @@ unsigned char grabnowait P0_()
     }
 }
 # else
-unsigned char grabnowait P0_()
+unsigned char PASCAL NEAR grabnowait P0_()
 {
     int           count = 0;
     unsigned char ch    = '\0';
@@ -1023,7 +1040,7 @@ VOID qrep P1_(int, ch)
 }
 
 /** Return cooked characters **/
-int ttgetc P0_()
+int PASCAL NEAR ttgetc P0_()
 {
     int ch  = 0;
 
@@ -1497,7 +1514,7 @@ int scbcol P1_(int, color)
 #  endif /* COLOR */
 
 /** Set palette **/
-int spal P1_(char *, cmd)
+int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
 {
     int   code      = 0;
@@ -1685,7 +1702,8 @@ static int  IsDOSPath P1_(CONST char *, path)
     }
 
 #  if   CYGWIN    /* /cygdrive/c is C:  */
-    if ( strcasestart(CYGDRIVE_, path)                                &&
+    if ( NULL != CYGDRIVE_                                            &&
+         strcasestart(CYGDRIVE_, path)                                &&
          CYGDRIVE_LEN_  < len                                         &&
          ISALPHA(path[CYGDRIVE_LEN_])                                 &&
          (CYGDRIVE_LEN_ + 1 == len || '/' == path[CYGDRIVE_LEN_ + 1])
@@ -1788,6 +1806,22 @@ static CONST char *wingetshell P0_()
     }                                           \
 } while ( 0 )
 
+/* Cannot fail  */
+static CONST char *cygpwdads P0_()
+{
+    static char       res[NFILEN];
+    EXTERN const char *cygpwd_ DCL((void));
+    CONST char        *cp = NULL;
+
+    ZEROMEM(res);
+
+    ASRT(NULL != (cp = cygpwd_()));
+    xstrlcpy(res, cp, SIZEOF(res));
+
+    return res;
+}
+#define cygcurdrv() ( cygpwdads()[0] )
+
 /* Return NULL if dos is not an absolute DOS path */
 /* Pass through NULL                              */
 static CONST char *cygads2enx_ P1_(CONST char *, dos)
@@ -1811,27 +1845,43 @@ static CONST char *cygads2enx_ P1_(CONST char *, dos)
     if ( 2 <= len && ':' == in[1] && ISALPHA(drv = in[0]) ) {
         int i = 2;
         int j = 0;
-            j = CYGDRIVE_LEN_;
 
-        drv = tolower(drv);
-        xstrlcpy(res, CYGDRIVE_, SIZEOF(res));
-        res[j++]  = drv;
-        if ( 2 == len ) {
-            return res;
-        }
-        res[j++]  = '/';
-        CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
-        if ( '\\' == in[i] )  {
-            i++;
-        }
-        for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+        if ( NULL != CYGDRIVE_ )  {
+            j = CYGDRIVE_LEN_;
+            drv = tolower(drv);
+            xstrlcpy(res, CYGDRIVE_, SIZEOF(res));
+            res[j++]  = drv;
+            if ( 2 == len ) {
+                return res;
+            }
+            res[j++]  = '/';
+            CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
             if ( '\\' == in[i] )  {
-                res[j]  = '/';
-            } else                {
-                res[j]  = in[i];
+                i++;
+            }
+            for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+                if ( '\\' == in[i] )  {
+                    res[j]  = '/';
+                } else                {
+                    res[j]  = in[i];
+                }
+            }
+        } else                    {
+            res[j++]  = '/';
+            if ( 2 == len ) {
+                return res;
+            }
+            if ( '\\' == in[i] )  {
+                i++;
+            }
+            for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+                if ( '\\' == in[i] )  {
+                    res[j]  = '/';
+                } else                {
+                    res[j]  = in[i];
+                }
             }
         }
-
     } else                                                  {
         return NULL;
     }
@@ -1859,21 +1909,16 @@ static CONST char *cygenx2ads_ P1_(CONST char *, unx)
     xstrlcpy((char *)in, unx, SIZEOF(in));
     TO_UNX_SEP_(in);
     len = strlen((CONST char *)in);
-    if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
-         CYGDRIVE_LEN_  < len                                         &&
-         ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
-         (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
-        )   {
+    if ( NULL == CYGDRIVE_ )  {
         int i = 0;
-        int j = 0;
+        int j = 2;
 
-        drv = toupper(drv);
-        res[0]  = drv;
+        if ( '/' != in[0] ) {
+            return NULL;
+        }
+        res[0]  = cygcurdrv();
         res[1]  = ':';
-        res[2]  = '\\';
-        CASRT(SIZEOF(res) - 1 >= 3);
-        i = CYGDRIVE_LEN_ + 1;
-        j = CYGDRIVE_LEN_ + 1 == len ? 3 : 2;
+        CASRT(SIZEOF(res) - 1 >= 2);
         for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
             if ( '/' == in[i] ) {
                 res[j]  = '\\';
@@ -1881,101 +1926,33 @@ static CONST char *cygenx2ads_ P1_(CONST char *, unx)
                 res[j]  = in[i];
             }
         }
-    } else  {
-        return NULL;
-    }
+    } else                    {
+        if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
+             CYGDRIVE_LEN_  < len                                         &&
+             ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
+             (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
+            )   {
+            int i = 0;
+            int j = 0;
 
-    return res;
-}
-
-/* Cannot fail  */
-static CONST char *cygpwdads P0_()
-{
-    static char res[NFILEN];
-
-    static int          FirstCall     = !0;
-    char                cmd[NFILEN];
-    static char         prevcwd[NFILEN];
-    char                cwd[NFILEN];
-
-    ZEROMEM(cmd);
-    ZEROMEM(cwd);
-
-    /* Optimize for:
-     * - CWD same as previous call
-     * - Return old res
-     *  We assume that DOS cwd doesn't change if UNIX cwd stays
-     *  the same.
-     */
-    if ( FirstCall )  {
-        FirstCall = 0;
-    } else            {
-        if ( NULL != getcwd(cwd, SIZEOF(cwd))  &&
-            0 == strcmp(prevcwd, cwd)  ) {
-
-            return res;
+            drv = toupper(drv);
+            res[0]  = drv;
+            res[1]  = ':';
+            res[2]  = '\\';
+            CASRT(SIZEOF(res) - 1 >= 3);
+            i = CYGDRIVE_LEN_ + 1;
+            j = CYGDRIVE_LEN_ + 1 == len ? 3 : 2;
+            for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+                if ( '/' == in[i] ) {
+                    res[j]  = '\\';
+                } else              {
+                    res[j]  = in[i];
+                }
+            }
+        } else  {
+            return NULL;
         }
     }
-
-    xstrlcpy(prevcwd, cwd, SIZEOF(prevcwd));
-    ZEROMEM(res);
-
-#  if ( USE_CYGWIN_WIN32_GETCURDIR  )
-    {
-        int rc  = 0;
-
-
-        rc  = GetCurrentDirectoryA(SIZEOF(res), res);
-        /* Return values:
-         * - Success:         strlen(CurrenDirectory)
-         * - Error:           0
-         * - Buffer to small: strlen(CurrentDirectory) + 1
-         */
-        ASRT(0 < rc);
-        ASRT(rc < SIZEOF(res));
-    }
-#  else
-    {
-        FILE        *pp           = NULL;
-        CONST char  *unxwinshell  = NULL;
-
-        unxwinshell = cygads2enx_(wingetshell());
-        ASRT( NULL != unxwinshell );
-        /**To Avoid:
-        xsnprintf(cmd, SIZEOF(cmd), "( %s /c cd )", unxwinshell);
-        **/
-        xstrlcpy(cmd, "( ",         SIZEOF(cmd));
-        xstrlcat(cmd, unxwinshell,  SIZEOF(cmd));
-        xstrlcat(cmd, " /c cd )",   SIZEOF(cmd));
-
-        ASRT( NULL != (pp = popen(cmd, "r")) );
-        {
-            enum { start, get } state = start;
-            int                 c     = '\0';
-            int                 i     = 0;
-
-            while ( EOF != (c = fgetc(pp)) )  {
-                if ( state == start && ISSPACE(c) ) {
-                    continue;
-                }
-                state = get;
-                if ( i >= SIZEOF(res) - 1 )   {
-                    break;
-                }
-                if ( '\n' == c || '\r' == c ) {
-                    break;
-                }
-                res[i++]  = c;
-            }
-            i = strlen(res) - 1;
-            while ( 0 <= i &&  ISSPACE(res[i]) )  {
-                res[i--]  = '\0';
-            }
-
-            pclose(pp);
-        }
-    }
-#  endif  /* USE_CYGWIN_WIN32_GETCURDIR */
 
     return res;
 }
@@ -2343,38 +2320,131 @@ static CONST char *getunxpath P1_(CONST char *, in)
 }
 #  endif
 
+#  if !USE_CYGWIN_SPAWN
+
+/* We need an own system as CygWin's system uses `/bin/sh' and
+ * therefore does *not* work outside of a complete cygwin environment,
+ * e.g. with cygwin-DLL only.
+ */
+/* See
+ * W. Richard Stevens:  Advanced Programming in the UNIX Environment. Reading, MA, 1992.
+ *                      Program 10.20
+ */
+static int xsystem P3_(CONST char *, shell, CONST char *, shell_flag, CONST char *, cmdstring)
+{
+    pid_t             pid     = 0;
+    int               status  = 0;
+    CONST char        *arg0   = NULL;
+    int               l       = 0;
+    struct sigaction  ignore;
+    struct sigaction  saveintr;
+    struct sigaction  savequit;
+    sigset_t          chldmask;
+    sigset_t          savemask;
+
+    ZEROMEM(ignore);
+    ZEROMEM(saveintr);
+    ZEROMEM(savequit);
+    ZEROMEM(chldmask);
+    ZEROMEM(savemask);
+
+    if ( NULL == cmdstring )  {
+        if ( NULL == shell )  {
+            return ( 0 );
+        } else                {
+            return ( !0 );
+        }
+    }
+    for ( l = strlen(shell) - 1; l >= 0; l-- )  {
+        if ( '/' == shell[l] || '\\' == shell[l] )  {
+            l++;
+
+            break;
+        }
+    }
+    arg0  = shell + l;
+
+    ignore.sa_handler = SIG_IGN;        /* ignore SIGINT and SIGQUIT  */
+    sigemptyset(&ignore.sa_mask);
+    ignore.sa_flags = 0;
+    if ( sigaction(SIGINT, &ignore, &saveintr) < 0 )  {
+        return ( -1 );
+    }
+    if ( sigaction(SIGQUIT, &ignore, &savequit) < 0 ) {
+        return ( -1 );
+    }
+
+    sigemptyset(&chldmask);             /* now block SIGCHLD  */
+    sigaddset(&chldmask, SIGCHLD);
+    if ( sigprocmask(SIG_BLOCK, &chldmask, &savemask) < 0 ) {
+        return(-1);
+    }
+
+    if        ( (pid = fork()) < 0) {
+        status  = -1;                   /* probably out of processes  */
+    } else if ( pid == 0 )          {   /* child  */
+        /* restore previous signal actions & reset signal mask  */
+        sigaction(SIGINT, &saveintr, NULL);
+        sigaction(SIGQUIT, &savequit, NULL);
+        sigprocmask(SIG_SETMASK, &savemask, NULL);
+
+        if ( NULL != shell_flag ) {
+            execl(shell, arg0, shell_flag, cmdstring, (char *) 0);
+        } else                    {
+            execl(shell, arg0, cmdstring, (char *) 0);
+        }
+
+        _exit(127);                     /* exec error */
+    } else                          {   /* parent */
+        while ( waitpid(pid, &status, 0) < 0 )  {
+            if ( errno != EINTR)  {
+                status  = -1;           /* error other than EINTR from
+                                         * waitpid()  */
+
+                break;
+            }
+        }
+    }
+
+    /* restore previous signal actions & reset signal mask  */
+    if ( sigaction(SIGINT, &saveintr, NULL) < 0 )         {
+        return (-1);
+    }
+    if ( sigaction(SIGQUIT, &savequit, NULL) < 0 )        {
+        return (-1);
+    }
+    if ( sigprocmask(SIG_SETMASK, &savemask, NULL) < 0 )  {
+        return(-1);
+    }
+
+    return WEXITSTATUS(status);
+}
+#  endif
+
 #  define WIN_SHELL_C_  "/c"
 static int winsystem P1_(CONST char *, cmd)
 #  if !USE_CYGWIN_SPAWN
 {
-    int                 status        = 0;
-    CONST char          *doswinshell  = NULL;
-    char                cmdstr[NFILEN];
-
-    ZEROMEM(cmdstr);
+    int         status  = 0;
+    CONST char  *shell  = NULL;
 
     if ( NULL == cmd )  {
         cmd = "";
     }
 
-    if ( (doswinshell = wingetshell()) )  {
-        CONST char  *unxwinshell  = NULL;
-
-        unxwinshell = cygads2enx_(doswinshell);
-        ASRT( NULL != unxwinshell );
-        xsnprintf(cmdstr, SIZEOF(cmdstr), "%s %s \"%s\"", unxwinshell,
-                  WIN_SHELL_C_, cmd);
+    if ( (shell = wingetshell()) )  {
+        TRC(("winsystem(): Got shell `%s'", shell));
     } else                                {
-        TRC(("%s: %s", "winsystem()", "Could not get a shell"));
+        TRC(("winsystem(): %s", "Could not get a shell"));
 
         return ( -C_10 );
     }
 #   if ( !0 )
-    TRC(("Executing <%s>", cmdstr));
+    TRC(("Executing <%s>", cmd));
 #   endif
 
-    if ( 0 != (status = system(cmdstr)) ) {
-        TRC(("system(%s) returned %d", cmdstr, status));
+    if ( 0 != (status = xsystem(shell, WIN_SHELL_C_, cmd)) )  {
+        TRC(("xsystem(%s) returned %d", cmd, status));
     }
 
     return ( status );
@@ -2394,8 +2464,10 @@ static int winsystem P1_(CONST char *, cmd)
     ZEROMEM(mask);
     ZEROMEM(attr);
 
-    if ( NULL == (shell = wingetshell()) )  {
-        TRC(("%s", "Could not get a shell"));
+    if ( (shell = wingetshell()) )  {
+        TRC(("winsystem(): Got shell `%s'", shell));
+    } else                                {
+        TRC(("winsystem(): %s", "Could not get a shell"));
 
         return ( -C_10 );
     }

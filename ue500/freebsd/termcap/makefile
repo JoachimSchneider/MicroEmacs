@@ -16,9 +16,20 @@ HDIR = ../../h
 
 
 # options and arguments to the C compiler
-#CFLAGS = -I. -I$(HDIR) -g -Wall -Wno-unused-local-typedefs -DJES_REPAIR_CODE -DEMACS_TRC
- CFLAGS = -I. -I$(HDIR) -g -Wall -Wno-unused-local-typedefs -O2
-#CFLAGS = -I. -I$(HDIR) -g -Wall -Wno-unused-local-typedefs
+#
+# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
+# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
+#
+##
+#WARNFLAGS = -Wall
+ WARNFLAGS = -Wall -Wno-unused-local-typedefs
+##
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)
+##
 
 
 # list of header files

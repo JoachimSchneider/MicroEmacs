@@ -197,10 +197,12 @@ static CONST char *wingetshell(void)
 } while ( 0 )
 
 /* Will not fail  */
-static CONST char *cygdrive_(void)
+#  define CYGDRIVE_DFT_ "/cygdrive/"
+static CONST char *cygdrive_ P0_()
 {
-    static char res[NFILEN];
-    static int  FirstCall = !0;
+    static char       res[NFILEN];
+    static CONST char *rc       = res;
+    static int        FirstCall = !0;
 
     if ( FirstCall )  {
         CONST char  drives[]  = "CDEFGHIJKLMNOPQRSTUVWXYZAB";
@@ -244,26 +246,53 @@ static CONST char *cygdrive_(void)
             goto notfound;
         }
 
-        res[l - 1]  = '\0';
+        /* No Cygdrive: `C:\' ---> `/': */
+        if ( 1 == l && '/' == res[0] )  {
+            rc  = NULL;
 
-        goto found;
+            goto end;
+        }
+
+        l--;
+        res[l]  = '\0';
+        /* Is it `/abcde/'? If not classify as "notfound":  */
+        if ( !( 3 <= l && '/' == res[0] && '/' == res[l - 1] ) )  {
+            ZEROMEM(res);
+
+            goto notfound;
+        }
+
+        goto end;
+
+
 notfound:
-        /* This is the default: */
-        xstrlcpy(res, "/cygdrive/", SIZEOF(res));
-found:
+        xstrlcpy(res, CYGDRIVE_DFT_, SIZEOF(res));
 
+        goto end;
+
+
+end:
         FirstCall = 0;
     }
 
-    return res;
+    return rc;
 }
 
-static int cygdrive_len_(void)
+static int cygdrive_len_ P0_()
 {
-    static  int len = (-1);
+    static int  FirstCall = !0;
+    static int  len       = (-1);
 
-    if ( 0 > len )  {
-        len = strlen(cygdrive_());
+    if ( FirstCall )  {
+        CONST char  *cd = NULL;
+
+        if ( NULL == (cd = cygdrive_()) ) {
+            len = (-1);
+        } else                            {
+            len = strlen(cd);
+        }
+
+        FirstCall = 0;
     }
 
     return len;
@@ -276,99 +305,6 @@ static int cygdrive_len_(void)
 # define CYGDRIVE_      "/cygdrive/"
 # define CYGDRIVE_LEN_  ( SIZEOF(CYGDRIVE_) - 1 )
 #endif
-
-/* Return NULL if dos is not an absolute DOS path */
-static CONST char *cygads2enx_(CONST char *dos)
-{
-    unsigned char in[NFILEN];
-    static char   res[NFILEN];
-    int           len = 0;
-    int           drv = '\0';
-
-    ASRT(NULL != dos);
-    ZEROMEM(in);
-    ZEROMEM(res);
-
-    xstrlcpy((char *)in, dos, SIZEOF(in));
-    TO_DOS_SEP_(in);
-    len = strlen((CONST char *)in);
-
-    if ( 2 <= len && ':' == in[1] && ISALPHA(drv = in[0]) ) {
-        int i = 2;
-        int j = 0;
-            j = CYGDRIVE_LEN_;
-
-        drv = tolower(drv);
-        xstrlcpy(res, CYGDRIVE_, SIZEOF(res));
-        res[j++]  = drv;
-        if ( 2 == len ) {
-            return res;
-        }
-        res[j++]  = '/';
-        CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
-        if ( '\\' == in[i] )  {
-            i++;
-        }
-        for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
-            if ( '\\' == in[i] )  {
-                res[j]  = '/';
-            } else                {
-                res[j]  = in[i];
-            }
-        }
-
-    } else                                                  {
-        return NULL;
-    }
-
-    return res;
-}
-
-
-/* Return NULL if unx is *not* an expanded UNIX path  */
-static CONST char *cygenx2ads_(CONST char *unx)
-{
-    unsigned char in[NFILEN];
-    static char   res[NFILEN];
-    int           len = 0;
-    int           drv = '\0';
-
-    ASRT(NULL != unx);
-
-    ZEROMEM(in);
-    ZEROMEM(res);
-
-    xstrlcpy((char *)in, unx, SIZEOF(in));
-    TO_UNX_SEP_(in);
-    len = strlen((CONST char *)in);
-    if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
-         CYGDRIVE_LEN_  < len                                         &&
-         ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
-         (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
-        )   {
-        int i = 0;
-        int j = 0;
-
-        drv = toupper(drv);
-        res[0]  = drv;
-        res[1]  = ':';
-        res[2]  = '\\';
-        CASRT(SIZEOF(res) - 1 >= 3);
-        i = CYGDRIVE_LEN_ + 1;
-        j = CYGDRIVE_LEN_ + 1 == len ? 3 : 2;
-        for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
-            if ( '/' == in[i] ) {
-                res[j]  = '\\';
-            } else              {
-                res[j]  = in[i];
-            }
-        }
-    } else  {
-        return NULL;
-    }
-
-    return res;
-}
 
 /* Cannot fail  */
 static CONST char *cygpwdads(void)
@@ -481,6 +417,142 @@ static CONST char *cygpwdads(void)
         }
     }
 #endif
+
+    return res;
+}
+#define cygcurdrv() ( cygpwdads()[0] )
+
+/* Return NULL if dos is not an absolute DOS path */
+/* Pass through NULL                              */
+static CONST char *cygads2enx_ P1_(CONST char *, dos)
+{
+    unsigned char in[NFILEN];
+    static char   res[NFILEN];
+    int           len = 0;
+    int           drv = '\0';
+
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+    if ( NULL == dos )  {
+        return NULL;
+    }
+
+    xstrlcpy((char *)in, dos, SIZEOF(in));
+    TO_DOS_SEP_(in);
+    len = strlen((CONST char *)in);
+
+    if ( 2 <= len && ':' == in[1] && ISALPHA(drv = in[0]) ) {
+        int i = 2;
+        int j = 0;
+
+        if ( NULL != CYGDRIVE_ )  {
+            j = CYGDRIVE_LEN_;
+            drv = tolower(drv);
+            xstrlcpy(res, CYGDRIVE_, SIZEOF(res));
+            res[j++]  = drv;
+            if ( 2 == len ) {
+                return res;
+            }
+            res[j++]  = '/';
+            CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
+            if ( '\\' == in[i] )  {
+                i++;
+            }
+            for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+                if ( '\\' == in[i] )  {
+                    res[j]  = '/';
+                } else                {
+                    res[j]  = in[i];
+                }
+            }
+        } else                    {
+            res[j++]  = '/';
+            if ( 2 == len ) {
+                return res;
+            }
+            if ( '\\' == in[i] )  {
+                i++;
+            }
+            for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+                if ( '\\' == in[i] )  {
+                    res[j]  = '/';
+                } else                {
+                    res[j]  = in[i];
+                }
+            }
+        }
+    } else                                                  {
+        return NULL;
+    }
+
+    return res;
+}
+
+
+/* Return NULL if unx is *not* an expanded UNIX path  */
+/* Pass through NULL                                  */
+static CONST char *cygenx2ads_ P1_(CONST char *, unx)
+{
+    unsigned char in[NFILEN];
+    static char   res[NFILEN];
+    int           len = 0;
+    int           drv = '\0';
+
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+    if ( NULL == unx )  {
+        return NULL;
+    }
+
+    xstrlcpy((char *)in, unx, SIZEOF(in));
+    TO_UNX_SEP_(in);
+    len = strlen((CONST char *)in);
+    if ( NULL == CYGDRIVE_ )  {
+        int i = 0;
+        int j = 2;
+
+        if ( '/' != in[0] ) {
+            return NULL;
+        }
+        res[0]  = cygcurdrv();
+        res[1]  = ':';
+        CASRT(SIZEOF(res) - 1 >= 2);
+        for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+            if ( '/' == in[i] ) {
+                res[j]  = '\\';
+            } else              {
+                res[j]  = in[i];
+            }
+        }
+    } else                    {
+        if ( strcasestart(CYGDRIVE_, (CONST char *)in)                    &&
+             CYGDRIVE_LEN_  < len                                         &&
+             ISALPHA(drv = in[CYGDRIVE_LEN_])                             &&
+             (CYGDRIVE_LEN_ + 1 == len || '/' == in[CYGDRIVE_LEN_ + 1])
+            )   {
+            int i = 0;
+            int j = 0;
+
+            drv = toupper(drv);
+            res[0]  = drv;
+            res[1]  = ':';
+            res[2]  = '\\';
+            CASRT(SIZEOF(res) - 1 >= 3);
+            i = CYGDRIVE_LEN_ + 1;
+            j = CYGDRIVE_LEN_ + 1 == len ? 3 : 2;
+            for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
+                if ( '/' == in[i] ) {
+                    res[j]  = '\\';
+                } else              {
+                    res[j]  = in[i];
+                }
+            }
+        } else  {
+            return NULL;
+        }
+    }
 
     return res;
 }

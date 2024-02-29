@@ -1,0 +1,34 @@
+head	1.1;
+access;
+symbols;
+locks
+	joachim:1.1; strict;
+comment	@# @;
+
+
+1.1
+date	2024.02.24.18.22.07;	author joachim;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@# SOF(Notes)
+
+
+[2024-02-24.00]
+<https://cygwin.com/cygwin-ug-net/cygwin-ug-net.pdf>
+
+
+
+# EOF(Notes)
+
+@

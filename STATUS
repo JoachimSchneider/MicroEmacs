@@ -942,6 +942,36 @@ Again cygwin: unfortunately cygwins win32 headers only work well with
 older cygwin releases.
 
 
+[2024-02-24.00]
+My previous remarks (2024-02-23.00/2024-02-23.01) about CyWin need to
+be revisted:
+- It *is* possible that
+  $ cd c:/
+  $ pwd
+  gets '/' as output and *not* `/cygdrive/c'
+  In this case one has these ads ---> enx conversions:
+
+  C:\d1\d2\...\dn ---> /d1/d2/.../dn
+    \d1\d2\...\dn ---> /d1/d2/.../dn
+  X:\d1\d2\...\dn ---> ERROR
+
+  and these enx ---> ads conversions:
+  /d1/d2/.../dn ----> C:\d1\d2\...\dn
+
+- CygWin WIN32 Functions:
+  + Create an own source file
+  + Then `PASCAL NEAR' can be restored.
+
+- Create an own system implementation using fork/exec --- yes that is
+  supported by *all* CygWin versions.
+
+
+[2024-02-26.00]
+When executing Emacs Help on too small terminals one gets en error
+message caused by `set $pagelen 25': "%Screen size out of range" would
+be useful but isn't displayed.
+
+
 
 #============================== TODO LIST ==============================
 
@@ -949,6 +979,8 @@ older cygwin releases.
 - Check if Palette settings are applicable to ANSI.
 - grabnowait(): Change it to return int and return grabnowait_TIMEOUT == (-1) on
   timeout: This allows 0xFF to be used as text character.
+- Line-Numbers in Macro-Errormessages do *not* include empty or comment lines.
+
 
 
 # EOF
