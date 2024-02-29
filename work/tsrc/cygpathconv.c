@@ -424,7 +424,7 @@ static CONST char *cygpwdads(void)
 
 /* Return NULL if dos is not an absolute DOS path */
 /* Pass through NULL                              */
-static CONST char *cygads2enx_ P1_(CONST char *, dos)
+static CONST char *cygads2enx_(CONST char *dos)
 {
     unsigned char in[NFILEN];
     static char   res[NFILEN];
@@ -492,7 +492,7 @@ static CONST char *cygads2enx_ P1_(CONST char *, dos)
 
 /* Return NULL if unx is *not* an expanded UNIX path  */
 /* Pass through NULL                                  */
-static CONST char *cygenx2ads_ P1_(CONST char *, unx)
+static CONST char *cygenx2ads_(CONST char *unx)
 {
     unsigned char in[NFILEN];
     static char   res[NFILEN];
