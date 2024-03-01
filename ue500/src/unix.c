@@ -116,7 +116,8 @@
 /* Old CYGWIN Versions don't have these:  */
 # /**define  USE_CYGWIN_CONV_PATH    ( 1 )**/
 # define  USE_CYGWIN_CONV_PATH    ( 0 )
-/* On CygWin spawn is more reliable than fork/exec  */
+/* On CygWin spawn is more reliable than fork/exec but it's not
+ * available on older CygWin versions */
 # /**define  USE_CYGWIN_SPAWN        ( 1 )**/
 # define  USE_CYGWIN_SPAWN        ( 0 )
 # if ( 3 >= __GNUC__ )
@@ -329,8 +330,9 @@ static CONST char *cygdrive_ P0_()
             goto notfound;
         }
 
-        /* No Cygdrive: `C:\' ---> `/': */
+        /* If there is no "/cygdrive" then `C:\' ---> `/':  */
         if ( 1 == l && '/' == res[0] )  {
+            TRC(("cygdrive_(): `%s'", "no `/cygdrive' here, returning NULL"));
             rc  = NULL;
 
             goto end;
@@ -345,11 +347,14 @@ static CONST char *cygdrive_ P0_()
             goto notfound;
         }
 
+        TRC(("cygdrive_(): `%s'", res));
+
         goto end;
 
 
 notfound:
         xstrlcpy(res, CYGDRIVE_DFT_, SIZEOF(res));
+        TRC(("cygdrive_(): Not found using default `%s'", res));
 
         goto end;
 
@@ -1820,10 +1825,16 @@ static CONST char *cygpwdads P0_()
 
     return res;
 }
-#define cygcurdrv() ( cygpwdads()[0] )
 
-/* Return NULL if dos is not an absolute DOS path */
-/* Pass through NULL                              */
+/* Cannot fail  */
+static int cygdrvdos P0_()
+{
+    return (unsigned char)cygpwdads()[0];
+}
+
+/* Return NULL if dos is not an absolute DOS path               */
+/* Return NULL if NULL == CYGDRIVE_ .AND. drv .NE. cygdrvdos()  */
+/* Pass through NULL                                            */
 static CONST char *cygads2enx_ P1_(CONST char *, dos)
 {
     unsigned char in[NFILEN];
@@ -1867,6 +1878,9 @@ static CONST char *cygads2enx_ P1_(CONST char *, dos)
                 }
             }
         } else                    {
+            if ( tolower(drv) != tolower(cygdrvdos()) ) {
+                return NULL;
+            }
             res[j++]  = '/';
             if ( 2 == len ) {
                 return res;
@@ -1916,7 +1930,7 @@ static CONST char *cygenx2ads_ P1_(CONST char *, unx)
         if ( '/' != in[0] ) {
             return NULL;
         }
-        res[0]  = cygcurdrv();
+        res[0]  = cygdrvdos();
         res[1]  = ':';
         CASRT(SIZEOF(res) - 1 >= 2);
         for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
@@ -2015,12 +2029,6 @@ static CONST char *cygpwdenx P0_()
     xstrlcpy(res, cp, SIZEOF(res));
 
     return res;
-}
-
-/* Cannot fail  */
-static int cygdrvdos P0_()
-{
-    return (unsigned char)cygpwdads()[0];
 }
 
 #  if ( 0 ) /* Not needed */
@@ -2226,10 +2234,18 @@ static CONST char *cygdos2enx P1_(CONST char *, dos)
     xstrlcpy((char *)in, dos, SIZEOF(in));
     TO_DOS_SEP_(in);
     len = strlen((CONST char *)in);
-    if ( 2 <= len && ':' == in[1]  && ISALPHA(in[0]) )  {
-         xstrlcpy(res, cygads2enx_((CONST char *)in), SIZEOF(res));
-    } else {
-        char xpath[NFILEN];
+    if ( 2 <= len       &&
+         ':' == in[1]   &&
+         ISALPHA(in[0]) &&
+         (NULL != CYGDRIVE_ || tolower(in[0]) == tolower(cygdrvdos()))
+        )   {
+        CONST char  *cp = NULL;
+
+        ASRT( NULL != (cp = cygads2enx_((CONST char *)in)) );
+        xstrlcpy(res, cp, SIZEOF(res));
+    } else  {
+        CONST char  *cp = NULL;
+        char        xpath[NFILEN];
 
         ZEROMEM(xpath);
 
@@ -2246,7 +2262,8 @@ static CONST char *cygdos2enx P1_(CONST char *, dos)
             xpath[l]  = '\\';
             xstrlcat(xpath, (CONST char *)in, SIZEOF(xpath));
         }
-        xstrlcpy(res, cygads2enx_(xpath), SIZEOF(res));
+        ASRT( NULL != (cp = cygads2enx_(xpath)) );
+        xstrlcpy(res, cp, SIZEOF(res));
     }
 
     return res;
@@ -2844,9 +2861,11 @@ int spawncli P2_(int, f, int, n)
 
     if ( IsExecutable(sh) ) {
         /* Do shell */
+        TRC(("spawncli: Opening `SHELL=%s'", sh));
+
         return ( callout(sh) );
     } else {
-        TRC(("spawncli: `SHELL=%s' is not executable"));
+        TRC(("spawncli: `SHELL=%s' is not executable", sh));
 
         return FALSE;
     }
