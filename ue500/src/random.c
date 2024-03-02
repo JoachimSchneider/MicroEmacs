@@ -1801,7 +1801,7 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
-FILE *uetmpfile_ P1_(int, delete)
+FILE *uetmpfile_ P1_(int, delmode)
 {
 # if !IS_UNIX() /**!CYGWIN**/
     return tmpfile();
@@ -1816,7 +1816,7 @@ FILE *uetmpfile_ P1_(int, delete)
         static int        fname_list_pos  = 0;
         static int        fname_list_len  = 0;
 
-        if ( !delete )  {
+        if ( !delmode ) {
             CONST char  *fname  = NULL;
             FILE        *fp     = NULL;
 
@@ -1845,7 +1845,7 @@ FILE *uetmpfile_ P1_(int, delete)
                 while ( fname_list_pos >= fname_list_len )  {
                     fname_list_len  *= 2;
                 }
-                ASRT(NULL != (fname_list = realloc(fname_list,
+                ASRT(NULL != (fname_list = (CONST char **)realloc(fname_list,
                               fname_list_len * SIZEOF(*fname_list))));
             }
             fname_list[fname_list_pos++]  = xstrdup(fname);

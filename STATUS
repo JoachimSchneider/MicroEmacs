@@ -936,12 +936,6 @@ gets compiled only in the IS_UNIX() case we removed all `PASCAL *'
 flags in `unix.c'. Of course this means that the prototypes in
 `eproto.h' now *look* different to their implementations in `unix.c'.
 
-
-[2024-02-23.01]
-Again cygwin: unfortunately cygwins win32 headers only work well with
-older cygwin releases.
-
-
 [2024-02-24.00]
 My previous remarks (2024-02-23.00/2024-02-23.01) about CyWin need to
 be revisted:
@@ -961,15 +955,26 @@ be revisted:
 - CygWin WIN32 Functions:
   + Create an own source file
   + Then `PASCAL NEAR' can be restored.
+  ===> Done
 
 - Create an own system implementation using fork/exec --- yes that is
   supported by *all* CygWin versions.
+  ===> Done
 
 
 [2024-02-26.00]
 When executing Emacs Help on too small terminals one gets en error
 message caused by `set $pagelen 25': "%Screen size out of range" would
 be useful but isn't displayed.
+
+
+[2024-03-01.00]
+In DJGPP_port the `pipe-command' (bound to ^X-@) does not report errors
+when executing non-existing commands but `filter-buffer' (bound to
+^X-#) does.
+
+===> But it does report errors when executed under Windows (2000): So
+     this is a restriction of the DOS-Shell.
 
 
 

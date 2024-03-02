@@ -41,7 +41,7 @@ set $palette "KEYMAP FN2 ~eOQ"
 set $palette "KEYMAP FN3 ~eOR"
 set $palette "KEYMAP FN4 ~eOS"
 
-; DJGPP
+; DJGPP and older CYGWIN
 set $palette "KEYMAP FN1 ~e[[A"
 set $palette "KEYMAP FN2 ~e[[B"
 set $palette "KEYMAP FN3 ~e[[C"
@@ -55,15 +55,18 @@ set $palette "KEYMAP FN3 ~e[13~~"
 set $palette "KEYMAP FN4 ~e[14~~"
 set $palette "KEYMAP FN5 ~e[15~~"
 set $palette "KEYMAP FN6 ~e[17~~"
+
 set $palette "KEYMAP FN7 ~e[18~~"
 set $palette "KEYMAP FN8 ~e[19~~"
 set $palette "KEYMAP FN9 ~e[20~~"
 set $palette "KEYMAP FN0 ~e[21~~"
-; HOME
+; === HOME ===
 ; UNIX
 ;set $palette "KEYMAP FN< ~e[7~~"
 ; CYGWIN
 set $palette "KEYMAP FN< ~e[H"
+; DJGPP
+set $palette "KEYMAP FN< ~e[1~~"
 ;;
 set $palette "KEYMAP S-FN1 ~e[25;2~~"
 set $palette "KEYMAP S-FN2 ~e[26;2~~"

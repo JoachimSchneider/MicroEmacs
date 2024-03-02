@@ -345,7 +345,7 @@ VOID PASCAL NEAR mlrquery P0_()
  */
 int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
 {
-    REGISTER int        status  = 0;;
+    REGISTER int        status  = 0;
     REGISTER CONST char *rstr   = NULL;
 #if     MAGIC
     REGISTER RMC        *rmcptr = NULL;

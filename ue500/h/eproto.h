@@ -250,7 +250,7 @@ EXTERN char *realloc DCL((char *block, int siz));
 
 
 /**********************************************************************/
-EXTERN FILE *uetmpfile_ DCL((int delete));
+EXTERN FILE *uetmpfile_ DCL((int delmode));
 #define uetmpfile() ( uetmpfile_(0) )
 #define clntmpfls() ( uetmpfile_(!0)  )
 

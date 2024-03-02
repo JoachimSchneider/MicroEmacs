@@ -147,8 +147,8 @@ int coltran[16] =
 NOSHARE TERM term = {
     NROW_MAX - 1,
     NROW - 1,
-    NCOL_MAX - 1,
-    NCOL - 1,
+    NCOL_MAX,
+    NCOL,
     0, 0,
     MARGIN,
     SCRSIZ,
@@ -420,15 +420,23 @@ static int PASCAL NEAR ansiopen P0_()
         term.t_nrow = win.ws_row - 1;
         REPAIR(term.t_nrow >= 1,  term.t_nrow = NROW - 1);
         term.t_ncol = win.ws_col;
-        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL - 1);
+        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL);
     } else {
         term.t_nrow = NROW - 1;
-        term.t_ncol = NCOL - 1;
+        term.t_ncol = NCOL;
     }
 #  else
     term.t_nrow = NROW - 1;
+#   if DJGPP_DOS
+    /* DJGPP needs term.t_ncol == 79: Otherwise we get --- at least
+     * since DJDEV204 a SIGSEGV in vbios_write_ch() (DJGPP runtime).
+     */
+    CASRT(1 <= NCOL - 1 && NCOL - 1 <= 79);
     term.t_ncol = NCOL - 1;
-#  endif  /* !DJGPP_DOS */
+#   else
+    term.t_ncol = NCOL;
+#   endif
+#  endif  /* !DJGPP_DOS (One might also use `ifdef TIOCGWINSZ') */
 #  if ( !0 )
     term.t_mrow = term.t_nrow;
     term.t_mcol = term.t_ncol;

@@ -60,11 +60,13 @@ set $palette "KEYMAP FN7 ~e[18~~"
 set $palette "KEYMAP FN8 ~e[19~~"
 set $palette "KEYMAP FN9 ~e[20~~"
 set $palette "KEYMAP FN0 ~e[21~~"
-; HOME
+; === HOME ===
 ; UNIX
 ;set $palette "KEYMAP FN< ~e[7~~"
 ; CYGWIN
 set $palette "KEYMAP FN< ~e[H"
+; DJGPP
+set $palette "KEYMAP FN< ~e[1~~"
 ;;
 set $palette "KEYMAP S-FN1 ~e[25;2~~"
 set $palette "KEYMAP S-FN2 ~e[26;2~~"
