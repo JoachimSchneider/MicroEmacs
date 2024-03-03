@@ -89,8 +89,19 @@ typedef struct {
 COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 # endif /* VMS */
 
-# define NROW        25   /* Screen size.                   */
-# define NCOL        80   /* Edit if you want to.           */
+/* --- See also vt52.c --- */
+# define NROW       25    /* Screen size.                   */
+# define NCOL       80    /* Edit if you want to.           */
+# if DJGPP_DOS
+/* DJGPP needs term.t_ncol == 79: Otherwise we get --- at least
+ * since DJDEV204 a SIGSEGV in vbios_write_ch() (DJGPP runtime).
+ */
+#  undef  NCOL
+#  define NCOL      79
+CASRT(1 <= NCOL && NCOL < 80);
+# endif
+
+
 # if HANDLE_WINCH
 #  define NROW_MAX 120    /* .............................. */
 #  define NCOL_MAX 132    /* .............................. */
@@ -427,16 +438,8 @@ static int PASCAL NEAR ansiopen P0_()
     }
 #  else
     term.t_nrow = NROW - 1;
-#   if DJGPP_DOS
-    /* DJGPP needs term.t_ncol == 79: Otherwise we get --- at least
-     * since DJDEV204 a SIGSEGV in vbios_write_ch() (DJGPP runtime).
-     */
-    CASRT(1 <= NCOL - 1 && NCOL - 1 <= 79);
-    term.t_ncol = NCOL - 1;
-#   else
     term.t_ncol = NCOL;
-#   endif
-#  endif  /* !DJGPP_DOS (One might also use `ifdef TIOCGWINSZ') */
+#  endif  /* !DJGPP_DOS */
 #  if ( !0 )
     term.t_mrow = term.t_nrow;
     term.t_mcol = term.t_ncol;
