@@ -58,8 +58,9 @@ Please use the *fixes* branch for pull requests.
 ## Change Log
 
 [2024-03-01.01]
-* MicroEMACAS compiles and runs with DJGPP: Testet on MS-DOS 6.22,
-  Windows 2000 and Windows XP. See ue500/djgpp/Readme.txt.
+* MicroEMACAS compiles and runs with DJGPP: Testet on MS-DOS 6.22 in
+  Linux DOSEMU, DOSBox with cwsdpmi, Windows 2000 and Windows XP. See
+  ue500/djgpp/Readme.txt.
 
   It runs standalone (outside of a DJGPP environment) if a DPMI server
   (e.g. cwsdpmi or the built-in Windows DPMI) is available.
@@ -70,10 +71,6 @@ Please use the *fixes* branch for pull requests.
 
   It runs standalone (outside of a CygWin environment) if the
   cygwin1.dll is located in the Windows search Path.
-
-[2023-10-15.00]
-* MicroEMACAS compiles and runs with CygWin on Windows 10. See
-  ue500/cygwin/Readme.txt.
 
 [2023-10-03.00]
 * Enabled ANSI terminal driver for UNIX

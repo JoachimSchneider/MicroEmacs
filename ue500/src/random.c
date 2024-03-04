@@ -1845,8 +1845,20 @@ FILE *uetmpfile_ P1_(int, delmode)
                 while ( fname_list_pos >= fname_list_len )  {
                     fname_list_len  *= 2;
                 }
-                ASRT(NULL != (fname_list = (CONST char **)realloc(fname_list,
-                              fname_list_len * SIZEOF(*fname_list))));
+                /* Avoid REROOM() in this very low level function and
+                 * take care of non standard realloc() behaviour:
+                 */
+                if ( NULL == fname_list ) {
+                    ASRT( NULL != (fname_list =
+                            (CONST char **)calloc(fname_list_len,
+                                                  SIZEOF(*fname_list)))
+                        );
+                } else                    {
+                    ASRT(NULL != (fname_list =
+                            (CONST char **)realloc(fname_list,
+                                fname_list_len * SIZEOF(*fname_list)))
+                        );
+                }
             }
             fname_list[fname_list_pos++]  = xstrdup(fname);
 #  endif

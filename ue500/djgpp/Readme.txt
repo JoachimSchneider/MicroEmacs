@@ -16,7 +16,7 @@ MicroEMACS for DJGPP
   reworked terminal handling.
 
 * To run you need a DPMI server:
-  - e.g. cwsdpmi if you run it in plain DOS or in DOSBOX
+  - e.g. cwsdpmi if you run it in plain DOS or in DOSBox
   - The Linux DOSEMU supports DPMI.
   - Or run it in Windows 2000 or Windows XP which have a built-in DPMI
     server.
@@ -32,7 +32,9 @@ MicroEMACS for DJGPP
   typedefs in CASRT add `-Wno-unused-local-typedefs' by uncommenting
   the appropriate WARNFLAGS in the makefile.
 
-* Testet on MS-DOS 6.22, Microsoft Windows 2000 and Windows XP:
+* Testet on MS-DOS 6.22 (in Linux DOSEMU), DOSBox, Microsoft Windows
+  2000 and Windows XP:
+
   On Windows it has these additional Features:
   - Long File Name support
   - MicroEMACS uses the Windows shell (cmd.exe) rather than the DOS
