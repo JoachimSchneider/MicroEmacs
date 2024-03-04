@@ -29,7 +29,18 @@
 # include <w32api/windows.h>
 
 
-const char *cygpwd_(void)
+/**********************************************************************/
+#ifdef __cplusplus
+# define EXTERN       extern "C"
+# define REGISTER
+#else
+# define EXTERN       extern
+# define REGISTER     register
+#endif
+/**********************************************************************/
+
+
+EXTERN const char *cygpwd_(void)
 {
     static char res[NFILEN];
 
