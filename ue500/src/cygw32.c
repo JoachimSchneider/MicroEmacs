@@ -55,9 +55,9 @@ EXTERN const char *cygpwd_(void)
      * - Buffer to small: strlen(CurrentDirectory) + 1
      */
 
-    if ( 0 < rc && rc < sizeof(res) ) {
+    if ( 0 < rc && rc < (int)sizeof(res) )  {
         return res;
-    } else                            {
+    } else                                  {
         return NULL;
     }
 }
