@@ -935,6 +935,8 @@ simply by seeing the differing prototypes in `eproto.h'. As `unix.c'
 gets compiled only in the IS_UNIX() case we removed all `PASCAL *'
 flags in `unix.c'. Of course this means that the prototypes in
 `eproto.h' now *look* different to their implementations in `unix.c'.
+===> REVERTED
+
 
 [2024-02-24.00]
 My previous remarks (2024-02-23.00/2024-02-23.01) about CyWin need to
@@ -966,6 +968,7 @@ be revisted:
 When executing Emacs Help on too small terminals one gets en error
 message caused by `set $pagelen 25': "%Screen size out of range" would
 be useful but isn't displayed.
+===> Done
 
 
 [2024-03-01.00]
