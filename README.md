@@ -3,9 +3,10 @@
 This is an unofficial repository for the MicroEMACS Editor by Daniel M. Lawrence.
 
 Its purpose is to keep this wonderful editor usable and alive by doing
-necessary source code maintenance (currently for some Unix operating
-systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, for MSDOS and
---- thanks to the contribution of Martin Vorlaender --- for OpenVMS):
+necessary source code maintenance. Currently it works on some Unix
+operating systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, on
+MSDOS (using Turbo C or DJGPP), on Windows (XP up to 11) with CygWin
+and --- thanks to the contribution of Martin Vorlaender --- on OpenVMS:
 
 * Bug fixing,
 * porting to current operating systems and

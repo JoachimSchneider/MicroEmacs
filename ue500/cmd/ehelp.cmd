@@ -22,10 +22,19 @@ store-procedure	init-help
 	;make this screen the proper size for help
 	set $orgrow 0
 	set $orgcol 0
+	local %widstat
+	local %lenstat
 	; DJGPP only allows 79
 	!force set $curwidth 79
+	set %widstat $status
 	!force set $curwidth 80
 	!force set $pagelen  24
+	set %lenstat $status
+	!if &or &seq %widstat FALSE &seq %lenstat FALSE
+		print &cat &cat &cat &cat "          [Terminal too small: " $curwidth " x " $pagelen " --- Press any key ...]"
+		local %res
+		set %res &GTK
+        !endif
 	; BEGIN Previous coding
 	;;set $curwidth 80
 	;;!if &not &equ $pagelen 24
