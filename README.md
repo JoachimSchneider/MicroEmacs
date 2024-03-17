@@ -1,5 +1,6 @@
 # MicroEMACS
 
+
 This is an unofficial repository for the MicroEMACS Editor by Daniel M. Lawrence.
 
 Its purpose is to keep this wonderful editor usable and alive by doing
@@ -16,7 +17,19 @@ It started as a *copy* of Peter Chapman's repository
 <https://github.com/pmachapman/memacs>. I've frozen the state at the
 time of the copy (Aug 6, 2021) in the *archive* branch.
 
-Documentation: See `ue500/doc/emacs.pdf`.
+Documentation:
+
+* See `ue500/doc/emacs.pdf`.
+
+* For platform specific instructions see
+  (`$ find ue500 -type f \(-name 'Readme*' -or -name 'Install*' \)`):
+
+  - ue500/djgpp/Readme.txt
+  - ue500/cygwin/Readme.txt
+  - ue500/linux/termcap/Install
+  - ue500/linux/ansi/Install
+  - ue500/aix5/Install
+  - ue500/freebsd/ansi/Install
 
 
 ## Some history:
@@ -40,6 +53,16 @@ Documentation: See `ue500/doc/emacs.pdf`.
 * Aug 6, 2021: Peter Chapman's repository was copied by me (Joachim
   Schneider). First purpose was to get Daniels MicroEMACS running again
   on Linux and OpenBSD.
+
+  Steps used to copy:
+
+  - Fork of Peter Chapmans repository to "memacs".
+  - Create Repository "MicroEmacs" on GitHub.
+  - `git clone --bare https://github.com/JoachimSchneider/memacs.git`
+  - `cd memacs.git`
+  - `git push --mirror https://github.com/JoachimSchneider/MicroEmacs.git`
+  - Delete "memacs.git" on GitHub
+
 
 
 ## Branches:
@@ -228,16 +251,16 @@ modern Linux and FreeBSD systems:
 ## TODO
 - Compile on Windows:
   + Borland C++
-  + CygWin
   + MSC
 - UTF-8 support
-- Try to compile on *really old* compilers:
-  + Provide a `stdarg.h' *and* `varargs.h` version for all functions
-    whit variable argumebnt lists.
+- Try to compile on *really old* compilers (Pre-ANSI-C with varargs.h
+  only --- set VARG to TRUE in eproto.h). First (successful) tests were
+  done on AIX5.
 
 
 
-# For completeness I quote Peter Chapman's README.md here:
+## For completeness I quote Peter Chapman's README.md here:
+
 ```
 ## Introduction
 I have found it hard to track down the source code for MicroEMACS,
@@ -255,3 +278,7 @@ This code retains the copyright Daniel placed on this work (refer to [LICENSE.md
 
 I will endeavour to respect this, and request that you do the same, until notified otherwise.
 ```
+
+
+
+# EOF
