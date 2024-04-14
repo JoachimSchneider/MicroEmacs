@@ -983,13 +983,15 @@ when executing non-existing commands but `filter-buffer' (bound to
 
 #============================== TODO LIST ==============================
 
-- Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.cq
+- Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.c
 - Check if Palette settings are applicable to ANSI.
 - grabnowait(): Change it to return int and return grabnowait_TIMEOUT == (-1) on
   timeout: This allows 0xFF to be used as text character.
 - Line-Numbers in Macro-Errormessages do *not* include empty or comment lines.
 - Include something like '-Wnounused-result' in WARNFLAGS
 - Linux ANSI does use one column less then possible on the screen.
+- After `Ctrl-X,C' screen-resizing does not work any more.
+- Modify PROMPT for the `Ctrl-X,C'-shell.
 
 
 
