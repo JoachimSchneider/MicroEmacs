@@ -452,12 +452,16 @@ int PASCAL NEAR ibmcres P1_(char *, res)
 /* SPAL:
  *
  * Reset the pallette registers
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
  */
 int PASCAL NEAR spal P1_(char *, mode)
 {
     /* nothin here now..... */
 
-    return TRUE;
+    return 0;
 }
 
 /* IBMBEEP:

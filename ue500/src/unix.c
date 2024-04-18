@@ -1521,7 +1521,11 @@ int scbcol P1_(int, color)
 }
 #  endif /* COLOR */
 
-/** Set palette **/
+/** Set palette
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
+ **/
 int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
 {
@@ -1534,10 +1538,10 @@ int PASCAL NEAR spal P1_(char *, cmd)
 
     /* Check for keymapping command */
     if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
-        dokeymap = 1;
+        dokeymap = !0;
 #  if COLOR
     } else if ( strncmp(cmd, "CLRMAP ", 7) == 0 ) {
-            doclrmap = 1;
+        doclrmap = !0;
 #  endif /* COLOR */
     } else                                        {
         return (0);

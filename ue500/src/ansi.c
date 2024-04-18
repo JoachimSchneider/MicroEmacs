@@ -324,6 +324,10 @@ static int PASCAL NEAR ansicres P1_(char *, dummy)
 /* SPAL:
  *
  * Change pallette settings
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
  */
 int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
@@ -335,7 +339,7 @@ int PASCAL NEAR spal P1_(char *, cmd)
 
     /* Check for keymapping command */
     if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
-        dokeymap = 1;
+        dokeymap = !0;
     } else                                        {
         return (0);
     }

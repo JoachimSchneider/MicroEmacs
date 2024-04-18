@@ -996,7 +996,10 @@ int smggetc P0_()
  *  a color palette which is available under the graphics modes.
  *  Further, a foreign terminal could also change color registers.
  *
- *  Nothing returned
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
  ***/
 int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
