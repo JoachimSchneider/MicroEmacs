@@ -980,6 +980,10 @@ when executing non-existing commands but `filter-buffer' (bound to
      this is a restriction of the DOS-Shell.
 
 
+[2024-04-16.00]
+Implemented spal() in smg.c (like in ansi.c): This makes adaptions of
+the keymap via emacs.rc possible.
+
 
 #============================== TODO LIST ==============================
 

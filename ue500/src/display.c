@@ -1475,7 +1475,11 @@ VOID PASCAL NEAR modeline P1_(EWINDOW *, wp)
     else
 #if     REVSTA
     if ( revexist )
+# if ( !VMS ) /* VMS: Reverse video outut does not work with ' '. */
         lchar = ' ';
+# else
+        lchar = '-';
+# endif
     else
 #endif
         lchar = '-';
