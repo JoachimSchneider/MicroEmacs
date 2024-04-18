@@ -2584,6 +2584,13 @@
  *      - indent_region/undent_region work now with '\t' or spaces depending on
  *        $softtab (i.e. stabsize) setting.
  *      - indent_region and undent_region are undoable now.
+ *      03 Oct 2023 Joachim Schneider
+ *      - Enabled ANSI terminal driver for UNIX
+ *      02 Mar 2024 Joachim Schneider
+ *      - Support for DJGPP and CYGWIN
+ *      18 Apr 2024 Joachim Schneider
+ *      - VAX (SMG): Enabled keymap reconfiguration via
+ *        `set $palette KEYMAP <keybinding> <escape-sequence>'.
  *====================================================================*/
 
 /*====================================================================*/

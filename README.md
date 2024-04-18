@@ -81,6 +81,10 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2024-04-18.00]
+* VAX (SMG): Enabled keymap reconfiguration via
+  `set $palette KEYMAP <keybinding> <escape-sequence>'.
+
 [2024-03-01.01]
 * MicroEMACAS compiles and runs with DJGPP: Testet on MS-DOS 6.22 in
   Linux DOSEMU, DOSBox with cwsdpmi, Windows 2000 and Windows XP. See

@@ -68,6 +68,18 @@
  *      11-dec-89:      Kevin A. Mitchell
  *              Don't restore numeric keypad if the user had it set that way
  *              in DCL.
+ *      18-apr-24:      Joachim Schneider
+ *              Enabled keymap reconfiguration like in unix.c:
+ *              ```
+ *              ... Additional keymapping entries can be made from the
+ *              command language by issuing a 'set $palette xxx'.  The
+ *              format of xxx is a string as follows:
+ *                      "KEYMAP keybinding escape-sequence".
+ *              To add "<ESC><[><A>" as a keybinding of FNN, issue:
+ *                      "KEYMAP FNN ~e[A".
+ *              Note that the "~e" sequence represents the escape
+ *              character in the MicroEMACS command language.
+ *              ```
  *====================================================================*/
 
 /*====================================================================*/
