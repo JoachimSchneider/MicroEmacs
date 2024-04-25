@@ -11,7 +11,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <unistd.h>       /* sleep()                                                */
+#include <socket.h>       /* select(), struct timeval                               */
 #include <lib$routines.h> /* lib$get_command()                                      */
 #include <starlet.h>      /* sys$qiow(), sys$getdviw(), sys$assign(), sys$dassgn()  */
 #include <ssdef.h>        /* SS$_NORMAL                                             */
@@ -39,6 +39,7 @@
 #define TRACE_MODE      (  0 )
 #define TEST_MODE       (  0 )
 #define READ_WITH_TOUT  ( !0 )
+#define READ_WAIT_MS    ( 100 )
 
 
 typedef unsigned char       uchar_t;
@@ -129,6 +130,7 @@ static terminal_t *TerminalOpen(void);
 static int        TerminalClose(const terminal_t *tp);
 /* Return number of bytes read  */
 static int        TerminalRead(const terminal_t *tp, char *buf, int bufsiz, int read_echo);
+static void       microsleep(int us);
 
 
 int TerminalReadVMS(char *buf, int bufsiz, int read_echo)
@@ -379,7 +381,7 @@ again:
     } else                                                    {
       rc = iosb.nwritten;
       if ( 0 == rc )  {
-        sleep(0);
+        microsleep(READ_WAIT_MS * 1000);
         goto again;
       }
       TRC(("rc = %d", rc));
@@ -409,6 +411,20 @@ again:
 
   return rc;
 #undef  TT_READ_BUFSZ
+}
+
+static void microsleep(int us)
+{
+  struct timeval  timeout;
+
+  ZEROMEM(timeout);
+  ASRT(0 <= us);
+
+  timeout.tv_sec  = 0;
+  timeout.tv_usec = us;
+  select(0, NULL, NULL, NULL, &timeout);
+
+  return;
 }
 
 
