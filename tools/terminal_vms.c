@@ -37,7 +37,7 @@
 
 
 #define TRACE_MODE      (  0 )
-#define TEST_MODE       ( !0 )
+#define TEST_MODE       (  0 )
 #define READ_WITH_TOUT  ( !0 )
 
 

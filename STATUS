@@ -996,6 +996,7 @@ the keymap via emacs.rc possible.
 - Linux ANSI does use one column less then possible on the screen.
 - After `Ctrl-X,C' screen-resizing does not work any more.
 - Modify PROMPT for the `Ctrl-X,C'-shell.
+- On VMS MicroEMACS does *not* produce new file versions.
 
 
 

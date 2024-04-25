@@ -534,7 +534,13 @@ union REGS {
 /* this keeps VMS happy */
 #if     VMS
 /* Needed e.g for Compaq C 6.4: */
-# define VMS_LOWERCASE_PROTOTYPES  ( !0 )
+# define VMS_LOWERCASE_PROTOTYPES   (  0 )
+# ifdef __DECC_VER
+#  if ( 60490005 <= __DECC_VER )
+#   undef  VMS_LOWERCASE_PROTOTYPES
+#   define VMS_LOWERCASE_PROTOTYPES ( !0 )
+#  endif
+# endif
 
 # define getname xgetname
 # ifdef __cplusplus

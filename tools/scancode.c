@@ -79,7 +79,11 @@ The ASCII(7) man-page:
 
   =====================================================================*/
 
-#include <termios.h>
+#ifdef  __VMS
+# include "terminal_vms.h"
+#else
+# include <termios.h>
+#endif
 #include <unistd.h>
 #include <string.h>
 #include <stdio.h>
@@ -95,7 +99,12 @@ The ASCII(7) man-page:
  * This should fit on one line of the screen (worst case: Character needs
  * 3 letters ($FA), line number is 9 digits + ": "
  */
-#define RDBUFSIZ      ((80-(9+2))/3)
+#ifdef  __VMS
+/* We must use `1' as long as we do not read with timeout (IO$M_TIMED flag) */
+# define RDBUFSIZ     ((80-(9+2))/3)
+#else
+# define RDBUFSIZ     ((80-(9+2))/3)
+#endif
 
 #define CTRL_CHRS     ("@ABCDEFGHIJKLMNOPQRSTUVWXYZ")
 #define MAX_CTRL_CHRS (sizeof(CTRL_CHRS) - 2)
@@ -185,7 +194,11 @@ void outs(char *s, int nread)
 
 int readt(int fd, char *buf, int size)
 {
+#ifdef  __VMS
+    return TerminalReadVMS(buf, size, 0);
+#else
     return read(fd, buf, size);
+#endif
 }
 
 /*
@@ -228,15 +241,21 @@ int readf(int fd, char *buf, int size)
 
 int main(int argc, char *argv[])
 {
+#ifdef  __VMS
+#else
     struct termios  t_new, t_old;
+#endif
     char  buf[RDBUFSIZ];
     int lno     = 0;
     int on_tty  = 0;
     int (*readfunc)(int, char *, int) = NULL;
     extern int decode(FILE *, FILE *);
 
+#ifdef  __VMS
+#else
     memset(&t_new, 0, sizeof(t_new));
     memset(&t_old, 0, sizeof(t_old));
+#endif
     memset(buf, 0, sizeof(buf));
 
     if ( 2 == argc && !strcasecmp("--decode", argv[1]) )
@@ -251,17 +270,20 @@ int main(int argc, char *argv[])
 
     if ( on_tty )
     {
+#ifdef  __VMS
+#else
         tcgetattr(0, &t_old);
         t_new = t_old;
-#if ( 0 ) /* Not all OS implement this conveniance funtion  */
+# if ( 0 )  /* Not all OS implement this conveniance funtion  */
         cfmakeraw(&t_new);
-#else
+# else
         t_new.c_iflag &= ~(INLCR|ICRNL|IGNCR);
         t_new.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
         t_new.c_cc[VMIN] = 1;
         t_new.c_cc[VTIME] = 0;
-#endif
+# endif
         tcsetattr(0, TCSANOW, &t_new);
+#endif
         readfunc  = readt;
     }
     else
@@ -293,7 +315,10 @@ int main(int argc, char *argv[])
 
     if ( on_tty )
     {
+#ifdef  __VMS
+#else
         tcsetattr(0, TCSANOW, &t_old);
+#endif
     }
 
     return 0;
