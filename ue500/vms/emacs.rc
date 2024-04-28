@@ -259,7 +259,7 @@ macro-to-key mouse-clicks MSa
 
 ;       ***** Rebind the Function key group
 
-; ANSI and VMS SMG give FN^[1-4] ... instead of FN[1-4] ...: Remapped above
+; ANSI and VMS SMG give FN^[1-4] ... instead of FN[1-4]
 bind-to-key search-forward              FN^1
 bind-to-key search-reverse              FN^2
 bind-to-key hunt-forward                FN^3
@@ -412,4 +412,3 @@ macro-to-key german-umlaut-Ue M-^U
 ;;
 ; EOF
 ;;
-                                                                                                                                                                                                                                                                                                                                                                                          -Oe M-^O    store-procedure german-umlaut-Ue         insert-string "Ü"  !endm " macro-to-key german-umlaut-Ue M-^UP ;===============================================================================       ;; ; EOF  ;;

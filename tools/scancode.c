@@ -1,5 +1,16 @@
 /*
  * Print Keyboard Codes, Quit with 'Q'  (Joachim Schneider, August 2003)
+ *
+ * - Extended for VMS, April 2024
+ *
+ * Compile:
+ *  - UNIX:
+ *    $ cc -o scancode scancode.c
+ *  - VMS
+ *    $ cc terminal_vms.c
+ *    $ cc scancode.c
+ *    $ link scancode.obj.terminal_vms.obj
+ *    Remark: Compile in 32-bit mode on 64-bit platforms.
  */
 
 /*=====================================================================

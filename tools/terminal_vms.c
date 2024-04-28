@@ -4,7 +4,28 @@
 /* Lookup headers in SYS$COMMON:[DECC$LIB.REFERENCE.DECC$RTLDEF] and  */
 /*                in SYS$COMMON:[DECC$LIB.REFERENCE.SYS$STARLET_C]    */
 /*                                                                    */
-/* See VAX/VMS I/O User's Guide (August 1987) for Documentation.      */
+/* Documentation:                                                     */
+/* - HP C User's Guide for OpenVMS Systems (Jan. 2005)                */
+/* - Introduction to VMS System Services (Nov. 1991)                  */
+/* - VMS System Services Reference Manual (Nov. 1991)                 */
+/* - VSI OpenVMS RTL Library (LIB$) Manual (Aug. 2021)                */
+/* - HP OpenVMS Programming Concepts Manual, Volume  I (Jan. 2005)    */
+/* - HP OpenVMS Programming Concepts Manual, Volume II (Jan. 2005)    */
+/* - OpenVMS Programming Concepts Manual Volume I, 7.3-1 (Jun. 2002)  */
+/* - HP OpenVMS I/O User's Reference Manual (Jun. 2010)               */
+/* - VMS 1/0 User's Reference Manual: Part I (Jun. 1990)              */
+/* - VAX/VMS I/O User's Guide (Aug. 1987)                             */
+/*                                                                    */
+/* APIs:                                                              */
+/*  - SYS$GETDVIW:  Get Device/Volume Information                     */
+/*  - SYS$QIOW:     Queue I/O Request and Wait                        */
+/*  - SYS$ASSIGN:   Provides a process with an I/O channel so that    */
+/*                  input/output operations can be performed on a     */
+/*                  device.                                           */
+/*  - LIB$GET_COMMAND:  The Get Line from SYS$COMMAND routine gets    */
+/*                      one record of ASCII text from the current     */
+/*                      controlling input device, specified by the    */
+/*                      logical name SYS$COMMAND.                     */
 /*====================================================================*/
 
 
@@ -153,7 +174,7 @@ int TerminalReadVMS(char *buf, int bufsiz, int read_echo)
 }
 
 
-static ttchar_t   TerminalRaw(const terminal_t *tp)
+static ttchar_t TerminalRaw(const terminal_t *tp)
 {
   /* This is `$ set terminal /PASTHRU'    */
   /* Could be executed via system()       */
@@ -188,7 +209,7 @@ static ttchar_t   TerminalRaw(const terminal_t *tp)
   return oldchar;
 }
 
-static ttchar_t   TerminalCooked(const terminal_t *tp)
+static ttchar_t TerminalCooked(const terminal_t *tp)
 {
   /* This is `$ set terminal /NOPASTHRU'  */
   /* Could be executed via system()       */
@@ -223,7 +244,7 @@ static ttchar_t   TerminalCooked(const terminal_t *tp)
   return oldchar;
 }
 
-static ttchar_t   TerminalRestore(const terminal_t *tp, const ttchar_t *ttcharp)
+static ttchar_t TerminalRestore(const terminal_t *tp, const ttchar_t *ttcharp)
 {
   int           status  = 0;
   ttchar_t      oldchar;
@@ -262,6 +283,7 @@ static terminal_t *TerminalOpen(void)
   int         status      = 0;
   terminal_t  *tp         = NULL;
   /* $DESCRIPTOR()-Macro creates a structure definition from a string literal */
+  /* SYS$COMMAND: A logical, similar to UNIX's `/dev/tty' */
   $DESCRIPTOR(tt_desc, "SYS$COMMAND");
   xiosb_t     iosb;
 
@@ -286,7 +308,7 @@ static terminal_t *TerminalOpen(void)
     return NULL;
   }
 
-  /* Assign channel to terminal:  */
+  /* Assign channel to the terminal:  */
   status = sys$assign(&tt_desc, &tp->tt_chan, 0, 0);
   if (! (status & 1) )  {
     TRC(("status = %d", (int)status));
@@ -298,7 +320,7 @@ static terminal_t *TerminalOpen(void)
   return tp;
 }
 
-int TerminalClose(const terminal_t *tp)
+static int  TerminalClose(const terminal_t *tp)
 {
   int status  = 0;
 
@@ -318,7 +340,7 @@ int TerminalClose(const terminal_t *tp)
 }
 
 /* Return number of bytes read  */
-int TerminalRead(const terminal_t *tp, char *buf, int bufsiz, int read_echo)
+static int  TerminalRead(const terminal_t *tp, char *buf, int bufsiz, int read_echo)
 {
 #define TT_READ_BUFSZ (1024)
   int                     rc            = 0;
@@ -368,12 +390,12 @@ int TerminalRead(const terminal_t *tp, char *buf, int bufsiz, int read_echo)
       TRC(("rc = %d", rc));
     }
 #else
-# define TOUT (0)
+# define TOUT_S (0) /* Read timeout in seconds  */
 again:
     status = sys$qiow (0, tp->tt_chan, read_flags | IO$M_TIMED, &iosb, 0, 0,
                        tmp_buf,
                        bufsiz,
-                       TOUT, noterm, 0, 0);
+                       TOUT_S, noterm, 0, 0);
     if ( status != SS$_NORMAL && !(iosb.status & 1) )  {
       TRC(("status = %d, SS$_NORMAL = %d, iosb.status = %d",
            (int)status, (int)SS$_NORMAL, (int)iosb.status));
