@@ -113,7 +113,11 @@ DCLDEF NOSHARE int            hscroll             INIT_(TRUE);          /* horiz
 DCLDEF NOSHARE int            hscrollbar          INIT_(TRUE);          /* horizontal scroll bar flag       */
 DCLDEF NOSHARE int            vscrollbar          INIT_(TRUE);          /* vertical scroll bar flag         */
 DCLDEF NOSHARE int            hjump               INIT_(1);             /* horizontal jump size             */
+#if VMS /* Per default don't use $ssave as it disables VMS file versions: */
+DCLDEF NOSHARE int            ssave               INIT_(FALSE);         /* safe save flag                   */
+#else
 DCLDEF NOSHARE int            ssave               INIT_(TRUE);          /* safe save flag                   */
+#endif
 DCLDEF NOSHARE struct BUFFER *bstore              INIT_(NULL);          /* buffer to store macro text to    */
 DCLDEF NOSHARE int            vtrow               INIT_(0);             /* Row location of SW cursor        */
 DCLDEF NOSHARE int            vtcol               INIT_(0);             /* Column location of SW cursor     */
