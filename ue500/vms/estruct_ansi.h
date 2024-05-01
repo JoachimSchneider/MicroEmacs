@@ -142,7 +142,7 @@
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
 
-#define ANSI    0           /* ANSI escape sequences                  */
+#define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */
@@ -153,7 +153,7 @@
 #define MAC     0           /* Macintosh                              */
 #define NEC     0           /* NEC-9801VM driver                      */
 #define OS2NPM  0           /* OS/2 non-Presentation Mgr.             */
-#define SMG     1           /* SMG library on VMS                     */
+#define SMG     0           /* SMG library on VMS                     */
 #define ST52    0           /* Atari 520/1040ST screen                */
 #define TIPC    0           /* TI Profesional PC driver               */
 #define VT52    0           /* VT52 terminal (Zenith).                */

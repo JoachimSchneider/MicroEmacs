@@ -169,6 +169,22 @@ static int newbrdcst = FALSE;   /* Flag - is message in Emacs buffer yet. */
 static unsigned char tybuf[TYPSIZE];    /* Typeahead buffer */
 static unsigned tyin, tyout, tylen, tymax;      /* Inptr, outptr, and length */
 
+#define NINCHAR   64                    /* Input buffer size          */
+static int inbuf[NINCHAR];              /* Input buffer               */
+static int * inbufh = inbuf;            /* Head of input buffer       */
+static int * inbuft = inbuf;            /* Tail of input buffer       */
+#define TRACE_inbuf(where) do  {                                  \
+    int i = 0;                                                    \
+                                                                  \
+    TRC(("%12s: inbuft = %d, inbufh = %d, inbuf = ",              \
+          (char *)(where), (int)(inbuft - inbuf),                 \
+          (int)(inbufh - inbuf)));                                \
+    for ( i = 0; i < NELEM(inbuf) - 1; i++ )  {                   \
+        TRC(("0x%04X, ", inbuf[i]));                              \
+    }                                                             \
+    TRC(("0x%04X\n", inbuf[i]));                                  \
+} while ( 0 )
+
 static TTIOSB ttiosb;           /* Terminal I/O status block */
 static MBIOSB mbiosb;           /* Associated mailbox status block */
 static TTMESSAGE mbmsg;         /* Associated mailbox message */
@@ -586,15 +602,10 @@ unsigned char PASCAL NEAR grabnowait P0_()
         test(SYS$HIBER());
     }
 
-    return ((tylen == 0) ? grabnowait_TIMEOUT : ttgetc());
+    return ((tylen == 0) ? grabnowait_TIMEOUT : grabwait());
 }
 
 unsigned char PASCAL NEAR grabwait P0_()
-{
-    return (ttgetc());
-}
-
-int PASCAL NEAR ttgetc P0_()
 {
     REGISTER unsigned ret;
 
@@ -626,6 +637,100 @@ int PASCAL NEAR ttgetc P0_()
     SYS$SETAST(1);
 
     return (ret);
+}
+
+# if ( !SMG ) /* Has it's own qin()/qrep()  */
+/* QIN:
+ *
+ * Queue in a character to the input buffer.
+ */
+VOID qin P1_(int, ch)
+{
+#  if ( 0 )
+    TRACE_inbuf("BEGIN qin");
+#  endif
+    /* Check for overflow */
+    if ( inbuft == &inbuf[NELEM(inbuf)] ) {
+        /* Annoy user */
+        term.t_beep();
+
+        return;
+    }
+
+    /* Add character */
+    *inbuft++ = ch;
+#  if ( 0 )
+    TRACE_inbuf("  END qin");
+#  endif
+}
+
+/* QREP:
+ *
+ * Replace a key sequence with a single character in the input buffer.
+ */
+VOID qrep P1_(int, ch)
+{
+#  if ( 0 )
+    TRACE_inbuf("BEGIN qrep");
+#  endif
+    inbuft = inbuf;
+    qin(ch);
+#  if ( 0 )
+    TRACE_inbuf("  END qrep");
+#  endif
+}
+# endif /* ( !SMG ) */
+
+/** Return cooked characters **/
+int PASCAL NEAR ttgetc P0_()
+{
+    int ch  = 0;
+
+    ttflush();
+    /* Loop until character is in input buffer */
+    while ( inbufh == inbuft )
+        cook();
+
+    /* Get input from buffer, now that it is available */
+    ch = *inbufh++;
+
+    /* reset us to the beginning of the buffer if there are no more pending
+     * characters */
+    if ( inbufh == inbuft )
+        inbufh = inbuft = inbuf;
+
+    /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc(): 0x%04X", (unsigned int)ch));
+# endif
+    return (ch);
+}
+
+int ttgetc_nowait P0_()
+{
+    int ch  = 0;
+
+    ttflush();
+    /* Loop until character is in input buffer */
+    while ( inbufh == inbuft )  {
+        if ( !cook_nowait() ) {
+            return grabnowait_TIMEOUT;
+        }
+    }
+
+    /* Get input from buffer, now that it is available */
+    ch = *inbufh++;
+
+    /* reset us to the beginning of the buffer if there are no more pending
+     * characters */
+    if ( inbufh == inbuft )
+        inbufh = inbuft = inbuf;
+
+    /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
+# endif
+    return (ch);
 }
 
 /*
