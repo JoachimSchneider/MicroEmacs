@@ -676,7 +676,22 @@ CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
     /* If we have a qualified path.. check only there!  */
     cp = fname;
     while ( *cp ) {
-        if ( *cp == ':' || *cp == '\\' || *cp == '/' ) {
+#if     AMIGA
+        if ( *cp == ':' || *cp == '/' )
+elif    AOSVS | MV_UX
+        if ( *cp == ':' )
+#elif   VMS
+        if ( *cp == ':' || *cp == ']' )
+#elif   TOS
+        if ( *cp == ':' || *cp == '\\' )
+#elif   IS_UNIX()
+        if ( *cp == '/' )
+#elif   WMCS
+        if ( *cp == '_' || *cp == '/' )
+#else /* e.g. MSDOS | OS2 | WINNT | WINXP | FINDER  */
+        if ( *cp == ':' || *cp == '\\' || *cp == '/' )
+#endif
+        {
             if ( ffropen(fname) == FIOSUC ) {
                 ffclose();
 
@@ -771,6 +786,9 @@ CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
 
     /* look it up via the old table method */
     for ( i = 2; i < NPNAMES; i++ ) {
+        if ( !*pathname[i] && !cflag )  {
+            continue;
+        }
         XSTRCPY(fspec, pathname[i]);
         XSTRCAT(fspec, fname);
 

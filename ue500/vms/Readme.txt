@@ -80,17 +80,18 @@ Compiling and installing MicroEMACS on VMS:
 
 Of course it is possible to do a system-wide install of MicroEMACS in a
 similar way. Then create and populate directories like QDATA:[BIN] and
-QDATA:[LIB.UECMD] and place commands like
+QDATA:[LIB.UECMD] set the permissions so that all users are able to
+execute MicroEMACS and read the command files and place commands like
 
   $ me :== $ QDATA:[BIN]MEANSI.EXE
   or
   $ me :== $ QDATA:[BIN]MESMG.EXE
 
-into SYS$MANAGER:SYLOGIN and
+into SYS$MANAGER:SYLOGIN.COM and
 
   $ def /SYSTEM MICROEMACS$LIB   QDATA:[LIB.UECMD]
 
-into SYS$MANAGER:SYSTARTUP_VMS.COM
+into SYS$MANAGER:SYSTARTUP_VMS.COM.
 
 
 

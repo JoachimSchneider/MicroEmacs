@@ -24,10 +24,8 @@
  * pathname[1]:             Help File
  * pathname[2:NPNAMES - 1]: Search Path for bind.c:flook(),
  *                          `""' would result in current directory, but
- *                          normaly won't get activated as this case is
- *                          handled separately in flook(); only the
- *                          startup file would be loaded from current
- *                          directory if you specify `""'.
+ *                          won't get activated as this case is
+ *                          handled separately in flook().
  *
  * - flook() is used in exec.c to execute command files. For some
  *   platforms (e.g.MSDOS, Windows, OS2) also to execute binaries.
@@ -48,7 +46,7 @@ static NOSHARE CONST char *pathname[] =
 
 # elif   FINDER
 {
-    "emacs.rc", "emacs.hlp", "/bin", "/sys/public"
+    "emacs.rc", "emacs.hlp", "/bin/", "/sys/public/"
 };
 
 # elif   MSDOS || WINNT || WINXP || CYGWIN || DJGPP_DOS
