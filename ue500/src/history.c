@@ -2589,8 +2589,13 @@
  *      02 Mar 2024 Joachim Schneider
  *      - Support for DJGPP and CYGWIN
  *      18 Apr 2024 Joachim Schneider
- *      - VAX (SMG): Enabled keymap reconfiguration via
+ *      - VAX (SMG/ANSI): Enabled keymap reconfiguration via
  *        `set $palette KEYMAP <keybinding> <escape-sequence>'.
+ *      02 May 2024 Joachim Schneider
+ *      - Startup file won't be loaded from current directory any more:
+ *        It is a security hole.
+ *      - VMS: Lookup startup file first in SYS$STARTUP, then
+ *        in MICROEMACS$LIB.
  *====================================================================*/
 
 /*====================================================================*/

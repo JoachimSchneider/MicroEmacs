@@ -1824,7 +1824,7 @@ EXTERN char *PASCAL NEAR        cmdstr DCL((int c, char *seq));
 EXTERN char *PASCAL NEAR        copystr DCL((CONST char *));
 EXTERN CONST char *PASCAL NEAR  envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR  fixnull DCL((CONST char *s));
-EXTERN CONST char *PASCAL NEAR  flook DCL((CONST char *fname, int hflag));
+EXTERN CONST char *PASCAL NEAR  flook DCL((CONST char *fname, int hflag, int cflag));
 EXTERN CONST char *PASCAL NEAR  funval DCL((int i));
 EXTERN char *PASCAL NEAR        getctext DCL((char *rline));
 EXTERN char *PASCAL NEAR        getffile DCL((char *fspec));

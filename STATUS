@@ -996,15 +996,7 @@ the keymap via emacs.rc possible.
 - Linux ANSI does use one column less then possible on the screen.
 - After `Ctrl-X,C' screen-resizing does not work any more.
 - Modify PROMPT for the `Ctrl-X,C'-shell.
-- On VMS MicroEMACS does *not* produce new file versions.
-- On emacs.rc is searched first in current directory (because HOME typyically
-  is not set) and it is set in the wrong precedence:
-
-  HOME, [.], MICROEMACS$LIB, SYS$LOGIN
-
-  Should be
-
-  HOME, SYS$LOGIN, MICROEMACS$LIB.
+- Move the (duplicated) qin(), qrep() functions into keyboard.c
 
 
 

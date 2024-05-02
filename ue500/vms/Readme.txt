@@ -4,7 +4,14 @@
 Compiling and installing MicroEMACS on VMS:
 ===========================================
 
-- You may use the DCL script memake.com to build MicroEMACS.
+- You may use the DCL scripts meansimake.com or mesmgmake.com to build
+  MicroEMACS:
+  + If you want to build the ANSI version:
+    o copy estruct_ansi.h to estruct.h and adapt it if needed.
+    o $ @meansimake
+  + If you want to build the SMG version:
+    o copy estruct_smg.h to estruct.h and adapt it if needed.
+    o $ @mesmgmake
 
 - Create a directory for the MicroEMACS binary
 
@@ -12,15 +19,21 @@ Compiling and installing MicroEMACS on VMS:
     "SYS$LOGIN" = "QDATA:[USERS.JOACHIM]" (LNM$JOB_83A28180)
   $ create /directory QDATA:[USERS.JOACHIM.BIN]
 
-  Copy the MESMG.EXE into this directory.
+  Copy the MEANSI.EXE or MESMG.EXE into this directory.
 
   Create a foreign command `me' to call MicroEmacs:
 
-  $ me :== $ QDATA:[USERS.JOACHIM.BIN]MESMG.EXE
+  $ me :== $ QDATA:[USERS.JOACHIM.BIN]MEANSI.EXE
+
+  or
+
+  $ me :== $ QDATA:[USERS.JOACHIM.BIN]MEANSI.EXE
 
 - Compile also tools/scancode via `$ @mk_scancode'
 
-- Place emacs.rc in your home directory (SYS$LOGIN).
+- Place emacs.rc in your home directory (SYS$LOGIN) and adapt it if
+  needed. If you don't like VMS version numbers (why?) set `$ssave =
+  TRUE' there.
 
 - The keyboard may be configured via
 
@@ -57,6 +70,8 @@ Compiling and installing MicroEMACS on VMS:
 
 - Add the commands
 
+  $ me :== $ QDATA:[USERS.JOACHIM.BIN]MEANSI.EXE
+  or
   $ me :== $ QDATA:[USERS.JOACHIM.BIN]MESMG.EXE
   $ def /JOB MICROEMACS$LIB   QDATA:[USERS.JOACHIM.UECMD]
 
@@ -67,6 +82,8 @@ Of course it is possible to do a system-wide install of MicroEMACS in a
 similar way. Then create and populate directories like QDATA:[BIN] and
 QDATA:[LIB.UECMD] and place commands like
 
+  $ me :== $ QDATA:[BIN]MEANSI.EXE
+  or
   $ me :== $ QDATA:[BIN]MESMG.EXE
 
 into SYS$MANAGER:SYLOGIN and

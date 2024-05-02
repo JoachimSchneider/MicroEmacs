@@ -240,7 +240,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( ltos( fexist(arg1) ) );
 
     case UFFIND:
-        RETURN ( fixnull( flook(arg1, TRUE) ) );
+        RETURN ( fixnull( flook(arg1, TRUE, TRUE) ) );
 
     case UFGREATER:
         RETURN ( ltos( asc_int(arg1) > asc_int(arg2) ) );

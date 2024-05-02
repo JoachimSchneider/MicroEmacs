@@ -81,8 +81,14 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2024-05-02.00]
+ * Startup file won't be loaded from current directory any more:
+   It is a security hole.
+ * VMS: Lookup startup file first in SYS$STARTUP, then
+   in MICROEMACS$LIB.
+
 [2024-04-18.00]
-* VAX (SMG): Enabled keymap reconfiguration via
+* VAX (ANSI/SMG): Enabled keymap reconfiguration via
   `set $palette KEYMAP <keybinding> <escape-sequence>'.
 
 [2024-03-01.01]

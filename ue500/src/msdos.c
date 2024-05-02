@@ -904,10 +904,10 @@ static int PASCAL NEAR execprog P1_(CONST char *, cmd)
     xstrlcat(&tail[1], "\r", SIZEOF(tail) - 1);
 
     /* look up the program on the path trying various extentions */
-    if ( ( csp = flook(prog, TRUE) ) == NULL )
-        if ( ( csp = flook(XSTRCAT(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( csp = flook(prog, TRUE, TRUE) ) == NULL )
+        if ( ( csp = flook(XSTRCAT(prog, ".exe"), TRUE, TRUE) ) == NULL ) {
             xstrcpy(&prog[STRLEN(prog)-4], ".com"); /**UNSAFE_OK**/
-            if ( ( csp = flook(prog, TRUE) ) == NULL )
+            if ( ( csp = flook(prog, TRUE, TRUE) ) == NULL )
                 return (FALSE);
         }
     XSTRCPY(prog, csp);
