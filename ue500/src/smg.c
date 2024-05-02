@@ -68,6 +68,18 @@
  *      11-dec-89:      Kevin A. Mitchell
  *              Don't restore numeric keypad if the user had it set that way
  *              in DCL.
+ *      18-apr-24:      Joachim Schneider
+ *              Enabled keymap reconfiguration like in unix.c:
+ *              ```
+ *              ... Additional keymapping entries can be made from the
+ *              command language by issuing a 'set $palette xxx'.  The
+ *              format of xxx is a string as follows:
+ *                      "KEYMAP keybinding escape-sequence".
+ *              To add "<ESC><[><A>" as a keybinding of FNN, issue:
+ *                      "KEYMAP FNN ~e[A".
+ *              Note that the "~e" sequence represents the escape
+ *              character in the MicroEMACS command language.
+ *              ```
  *====================================================================*/
 
 /*====================================================================*/
@@ -109,6 +121,9 @@ int smg_noop1 P1_(int, param)
 #include <ttdef.h>
 #include <tt2def.h>
 #include <smg$routines.h>
+
+
+#define USE_PALETTE ( !0 )
 
 #ifdef NEED_SMGTRMPTR
 /*
@@ -971,19 +986,63 @@ int smggetc P0_()
 }
 
 /***
- *  spal  -  Set palette type
+ * SPAL:
  *
+ * Change pallette settings
+ *
+ * Not implemented (Color settings):
  *  spal sets the palette colors for the 8 colors available.  Currently,
  *  there is nothing here, but some DEC terminals, (VT240 and VT340) have
  *  a color palette which is available under the graphics modes.
  *  Further, a foreign terminal could also change color registers.
  *
- *  Nothing returned
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
  ***/
-int PASCAL NEAR spal P1_(char *, pstr)
+int PASCAL NEAR spal P1_(char *, cmd)
+/* cmd: Palette command */
 {
-    /* Nothing */
-    return 1;
+# if ( USE_PALETTE )
+    int   code      = 0;
+    int   dokeymap  = 0;
+    char  *cp       = NULL;
+
+    /* Check for keymapping command */
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
+        dokeymap = !0;
+    } else                                        {
+        return (0);
+    }
+
+    cmd += 7;
+
+    /* Look for space */
+    for ( cp = cmd; *cp == ' '; cp++ );
+    for (; *cp != '\0'; cp++ )
+        if ( *cp == ' ' ) {
+            *cp++ = '\0';
+            break;
+        }
+    if ( *cp == '\0' )
+        return (1);
+
+    for (; *cp == ' '; cp++ );
+
+    /* Perform operation */
+    if        ( dokeymap )  {
+        /* Convert to keycode */
+        code = stock(cmd);
+
+        /* Add to tree */
+        addkey((unsigned char *)cp, code);
+    } else                  {
+        /**EMPTY**/
+    }
+# endif /* USE_PALETTE */
+
+    return (0);
 }
 
 #if FLABEL

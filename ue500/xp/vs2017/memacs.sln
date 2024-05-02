@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.26403.3
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "memacs", "memacs.vcxproj", "{E5216D5D-1F3A-4E77-922B-ADC7FC5492D4}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "memacs", "memacs_vcxproj", "{E5216D5D-1F3A-4E77-922B-ADC7FC5492D4}"
 EndProject
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cmdfix", "cmdfix.vcxproj", "{DF861FD8-273A-44B0-BAE0-97B5BF73FC42}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cmdfix", "cmdfix_vcxproj", "{DF861FD8-273A-44B0-BAE0-97B5BF73FC42}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

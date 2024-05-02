@@ -1219,7 +1219,7 @@ int PASCAL NEAR execfile P2_(
         return (status);
 
     /* look up the path for the file */
-    fspec = flook(fname, TRUE);
+    fspec = flook(fname, TRUE, TRUE);
 
     /* if it isn't around */
     if ( fspec == NULL ) {
@@ -1227,7 +1227,7 @@ int PASCAL NEAR execfile P2_(
         /* try to default the extension */
         if ( sindex(fname, ".") == 0 ) {
             XSTRCAT(fname, ".cmd");
-            fspec = flook(fname, TRUE);
+            fspec = flook(fname, TRUE, TRUE);
             if ( fspec != NULL )
                 goto exec1;
         }

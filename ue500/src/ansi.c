@@ -36,11 +36,11 @@
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
-/* ( IS_UNIX() || (VMS && SMG) || MPE ): `addkey()' works       */
+/* ( IS_UNIX() || VMS || MPE ): `addkey()' works                */
 /*..............................................................*/
 #if    ( IS_UNIX() )
 # define USE_PALETTE ( !0 )
-#elif  ( (VMS && SMG) )
+#elif  ( VMS )
 # define USE_PALETTE ( !0 )
 #elif  ( MPE )
 # define USE_PALETTE ( !0 )
@@ -49,10 +49,10 @@
   CASRT( !USE_PALETTE );
 #endif /* IS_UNIX() */
 /*..............................................................*/
-/* USE_COOKED_ code only works on UNIX (`ttgetc()' cookes) and  */
-/* it gives sense there only if USE_PALETTE:                    */
+/* USE_COOKED_ code only works on UNIX and VMS (`ttgetc()'      */
+/* cookes) and it gives sense there only if USE_PALETTE:        */
 /*..............................................................*/
-#if ( IS_UNIX() )
+#if ( IS_UNIX() || VMS )
 # if ( USE_PALETTE )
 #  define USE_COOKED_    ( !0 )
 # else
@@ -324,6 +324,10 @@ static int PASCAL NEAR ansicres P1_(char *, dummy)
 /* SPAL:
  *
  * Change pallette settings
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
  */
 int PASCAL NEAR spal P1_(char *, cmd)
 /* cmd: Palette command */
@@ -333,9 +337,12 @@ int PASCAL NEAR spal P1_(char *, cmd)
     int   dokeymap  = 0;
     char  *cp       = NULL;
 
+#  if ( 0 )
+    TRC(("spal(%s)", cmd));
+#  endif
     /* Check for keymapping command */
     if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
-        dokeymap = 1;
+        dokeymap = !0;
     } else                                        {
         return (0);
     }
@@ -357,7 +364,13 @@ int PASCAL NEAR spal P1_(char *, cmd)
     /* Perform operation */
     if        ( dokeymap )  {
         /* Convert to keycode */
+#  if ( 0 )
+        TRC(("cp = <%s>, cmd = <%s>", cp, cmd));
+#  endif
         code = stock(cmd);
+#  if ( 0 )
+        TRC(("code = <%d>, cmd = <%s>", code, cmd));
+#  endif
 
         /* Add to tree */
         addkey((unsigned char *)cp, code);

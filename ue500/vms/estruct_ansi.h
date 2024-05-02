@@ -142,7 +142,7 @@
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
 
-#define ANSI    0           /* ANSI escape sequences                  */
+#define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */
@@ -153,7 +153,7 @@
 #define MAC     0           /* Macintosh                              */
 #define NEC     0           /* NEC-9801VM driver                      */
 #define OS2NPM  0           /* OS/2 non-Presentation Mgr.             */
-#define SMG     1           /* SMG library on VMS                     */
+#define SMG     0           /* SMG library on VMS                     */
 #define ST52    0           /* Atari 520/1040ST screen                */
 #define TIPC    0           /* TI Profesional PC driver               */
 #define VT52    0           /* VT52 terminal (Zenith).                */
@@ -195,7 +195,7 @@
 #define CALLED  0   /* is emacs a called subroutine? or stand alone   */
 
 #define REVSTA  1   /* Status line appears in reverse video           */
-#define COLOR   1   /* color commands and windows                     */
+#define COLOR   0   /* color commands and windows                     */
 
 #define FILOCK  0   /* generic file locking under unix                */
 #define ISRCH   1   /* Incremental searches like ITS EMACS            */
@@ -533,11 +533,55 @@ union REGS {
 
 /* this keeps VMS happy */
 #if     VMS
+/* Needed e.g for Compaq C 6.4: */
+# define VMS_LOWERCASE_PROTOTYPES   (  0 )
+# ifdef __DECC_VER
+#  if ( 60490005 <= __DECC_VER )
+#   undef  VMS_LOWERCASE_PROTOTYPES
+#   define VMS_LOWERCASE_PROTOTYPES ( !0 )
+#  endif
+# endif
+
 # define getname xgetname
 # ifdef __cplusplus
-#   define umc_unlink(a)       remove(a)
+#   define unlink(a)       remove(a)
 # else
-#   define umc_unlink(a)       delete(a)  /* Won't compile with C++ */
+    /* `With Compaq C 6.4 `delete' needs `#include <unixio.h>':     */
+#   /*define unlink(a)       delete(a)  /o Won't compile with C++ o/*/
+#   define unlink(a)       remove(a)
+# endif
+
+# if ( VMS_LOWERCASE_PROTOTYPES )
+#  define LIB$ASN_WTH_MBX             lib$asn_wth_mbx
+#  define LIB$DELETE_LOGICAL          lib$delete_logical
+#  define LIB$FIND_FILE               lib$find_file
+#  define LIB$FIND_FILE_END           lib$find_file_end
+#  define LIB$GETJPI                  lib$getjpi
+#  define LIB$SET_LOGICAL             lib$set_logical
+#  define LIB$SIGNAL                  lib$signal
+#  define LIB$SPAWN                   lib$spawn
+#  define SMG$GET_NUMERIC_DATA        smg$get_numeric_data
+#  define SMG$GET_TERM_DATA           smg$get_term_data
+#  define SMG$INIT_TERM_TABLE_BY_TYPE smg$init_term_table_by_type
+#  define STR$FREE1_DX                str$free1_dx
+#  define SYS$ASSIGN                  sys$assign
+#  define SYS$CANCEL                  sys$cancel
+#  define SYS$CLOSE                   sys$close
+#  define SYS$CONNECT                 sys$connect
+#  define SYS$CREATE                  sys$create
+#  define SYS$DASSGN                  sys$dassgn
+#  define SYS$DCLAST                  sys$dclast
+#  define SYS$DISCONNECT              sys$disconnect
+#  define SYS$GET                     sys$get
+#  define SYS$HIBER                   sys$hiber
+#  define SYS$OPEN                    sys$open
+#  define SYS$PUT                     sys$put
+#  define SYS$QIO                     sys$qio
+#  define SYS$QIOW                    sys$qiow
+#  define SYS$SCHDWK                  sys$schdwk
+#  define SYS$SETAST                  sys$setast
+#  define SYS$SETDDIR                 sys$setddir
+#  define SYS$WAKE                    sys$wake
 # endif
 #endif
 

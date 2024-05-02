@@ -39,7 +39,7 @@ NOSHARE NBIND names[] =
     { "abort-command", ctrlg },
     { "add-abbrev", add_abbrev },
     { "add-global-mode", setgmode },
-#if IS_UNIX() || (VMS && SMG) || MPE
+#if IS_UNIX() || VMS || MPE
     { "add-keymap", addkeymap },
 #endif
     { "add-mode", setmod },
@@ -158,7 +158,7 @@ NOSHARE NBIND names[] =
     { "label-function-key", fnclabel },
 #endif
     { "list-buffers", listbuffers },
-#if UNIX || (VMS && SMG) || MPE
+#if UNIX || VMS || MPE
     { "list-keymappings", listkeymaps },
 #endif
     { "list-screens", list_screens },

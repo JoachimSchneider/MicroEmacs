@@ -1824,7 +1824,7 @@ EXTERN char *PASCAL NEAR        cmdstr DCL((int c, char *seq));
 EXTERN char *PASCAL NEAR        copystr DCL((CONST char *));
 EXTERN CONST char *PASCAL NEAR  envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR  fixnull DCL((CONST char *s));
-EXTERN CONST char *PASCAL NEAR  flook DCL((CONST char *fname, int hflag));
+EXTERN CONST char *PASCAL NEAR  flook DCL((CONST char *fname, int hflag, int cflag));
 EXTERN CONST char *PASCAL NEAR  funval DCL((int i));
 EXTERN char *PASCAL NEAR        getctext DCL((char *rline));
 EXTERN char *PASCAL NEAR        getffile DCL((char *fspec));
@@ -2225,7 +2225,7 @@ EXTERN int PASCAL NEAR          trim DCL((int f, int n));
 EXTERN int PASCAL NEAR          ttclose DCL((void));
 EXTERN int PASCAL NEAR          ttflush DCL((void));
 EXTERN int PASCAL NEAR          ttgetc DCL((void));
-#if IS_UNIX()
+#if ( IS_UNIX() || VMS )
 EXTERN int                      ttgetc_nowait DCL((void));
 #endif
 EXTERN int PASCAL NEAR          ttopen DCL((void));
@@ -2327,7 +2327,7 @@ EXTERN VOID PASCAL NEAR         varclean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         uv_init DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         uv_clean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         vtfree DCL((void));
-#if ( IS_UNIX() || (VMS && SMG) || MPE )
+#if ( IS_UNIX() || VMS || MPE )
 EXTERN VOID                     cook        DCL((void));
 EXTERN int                      cook_nowait DCL((void));
 #endif

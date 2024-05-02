@@ -526,10 +526,10 @@ char *cmd;      /*  Incoming command line to execute  */
     xstrcat(&tail[1], "\r");
 
     /* look up the program on the path trying various extentions */
-    if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
+        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE, TRUE) ) == NULL )  {
             xstrcpy(&prog[STRLEN(prog)-4], ".com");
-            if ( ( sp = flook(prog, TRUE) ) == NULL )
+            if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
                 return (FALSE);
         }
     xstrcpy(prog, sp);

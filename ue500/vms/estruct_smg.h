@@ -61,7 +61,7 @@
 #define CYGWIN      0                 /* Unix emulation on MS Windows */
 #define DJGPP_DOS   0                 /* Unix emulation on MS DOS     */
 #define FINDER      0                 /* Macintosh OS                 */
-#define FREEBSD     1                 /* FREEBSD 386 version 2 or +   */
+#define FREEBSD     0                 /* FREEBSD 386 version 2 or +   */
 #define LINUX       0                 /* Linux                        */
 #define HPUX8       0                 /* HPUX HP 9000 ver 8 or less   */
 #define HPUX9       0                 /* HPUX HP 9000 ver 9           */
@@ -76,7 +76,7 @@
 #define TOS         0                 /* ST520, TOS                   */
 #define USG         0                 /* UNIX system V                */
 #define VAT         0                 /* Related to XENIX (???)       */
-#define VMS         0                 /* VAX/VMS                      */
+#define VMS         1                 /* VAX/VMS                      */
 #define WINNT       0                 /* MS-Win NT                    */
 #define WINXP       0                 /* Windows XP/Visual studio 2008*/
 #define WMCS        0                 /* Wicat's MCS                  */
@@ -102,7 +102,7 @@
 #define ALCYON  0         /* ALCYON Atari ST compiler                 */
 #define AZTEC   0         /* Aztec C 4.00e ONLY for the amiga now...  */
 #define DGC     0         /* Data General AOS/VS C...                 */
-#define GCC     1         /* the GNU C compiler                       */
+#define GCC     0         /* the GNU C compiler                       */
 #define IC      0         /* Rational Systems Instant C               */
 #define LATTICE 0         /* Lattice 2.14 through 3.0 compilers       */
 #define MSC     0         /* MicroSoft C compile version 3 and up     */
@@ -129,10 +129,10 @@
 #define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
 #define WANGPC  0     /* WangPC - mostly escape sequences             */
 #define VT100   1     /* Handle VT100 style keypad - NOT VMS.         */
-#define KEYPAD  0     /* VMS - turn on and off application            */
+#define KEYPAD  1     /* VMS - turn on and off application            */
                       /* keypad automatically                         */
 #define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
-#define RMSIO   0     /* VMS - skip the rotten C runtime and          */
+#define RMSIO   1     /* VMS - skip the rotten C runtime and          */
                       /* use RMS directly                             */
 #define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
                       /* but more efficient memory allocator          */
@@ -153,7 +153,7 @@
 #define MAC     0           /* Macintosh                              */
 #define NEC     0           /* NEC-9801VM driver                      */
 #define OS2NPM  0           /* OS/2 non-Presentation Mgr.             */
-#define SMG     0           /* SMG library on VMS                     */
+#define SMG     1           /* SMG library on VMS                     */
 #define ST52    0           /* Atari 520/1040ST screen                */
 #define TIPC    0           /* TI Profesional PC driver               */
 #define VT52    0           /* VT52 terminal (Zenith).                */
@@ -195,9 +195,9 @@
 #define CALLED  0   /* is emacs a called subroutine? or stand alone   */
 
 #define REVSTA  1   /* Status line appears in reverse video           */
-#define COLOR   1   /* color commands and windows                     */
+#define COLOR   0   /* color commands and windows                     */
 
-#define FILOCK  1   /* generic file locking under unix                */
+#define FILOCK  0   /* generic file locking under unix                */
 #define ISRCH   1   /* Incremental searches like ITS EMACS            */
 #define FLABEL  0   /* function key label code [HP150]                */
 #define CRYPT   1   /* file encryption enabled?                       */

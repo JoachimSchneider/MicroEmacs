@@ -218,7 +218,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
             if ( FullCmd[0] == '\0' ) {   /* try to find it on the "path" */
                 char    *s;
 
-                if ( ( s = flook ("DOSEXEC.PIF", TRUE) ) != NULL ) {
+                if ( ( s = flook ("DOSEXEC.PIF", TRUE, TRUE) ) != NULL )  {
                     xstrcpy (FullCmd, s);
                 }
             }
@@ -234,7 +234,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
             if ( FullCmd[0] == '\0' ) {   /* try to find it on the "path" */
                 char    *s;
 
-                if ( ( s = flook ("DOSBOX.PIF", TRUE) ) != NULL ) {
+                if ( ( s = flook ("DOSBOX.PIF", TRUE, TRUE) ) != NULL ) {
                     xstrcpy (FullCmd, s);
                 } else xstrcpy (FullCmd, "command.com");
             }

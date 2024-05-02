@@ -17,7 +17,7 @@
                BlueprintIdentifier = "D01207951EB043A3003ECD97"
                BuildableName = "memacs"
                BlueprintName = "memacs"
-               ReferencedContainer = "container:memacs.xcodeproj">
+               ReferencedContainer = "container:memacs_xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
       </BuildActionEntries>
@@ -35,7 +35,7 @@
             BlueprintIdentifier = "D01207951EB043A3003ECD97"
             BuildableName = "memacs"
             BlueprintName = "memacs"
-            ReferencedContainer = "container:memacs.xcodeproj">
+            ReferencedContainer = "container:memacs_xcodeproj">
          </BuildableReference>
       </MacroExpansion>
       <AdditionalOptions>
@@ -58,7 +58,7 @@
             BlueprintIdentifier = "D01207951EB043A3003ECD97"
             BuildableName = "memacs"
             BlueprintName = "memacs"
-            ReferencedContainer = "container:memacs.xcodeproj">
+            ReferencedContainer = "container:memacs_xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
       <AdditionalOptions>
@@ -77,7 +77,7 @@
             BlueprintIdentifier = "D01207951EB043A3003ECD97"
             BuildableName = "memacs"
             BlueprintName = "memacs"
-            ReferencedContainer = "container:memacs.xcodeproj">
+            ReferencedContainer = "container:memacs_xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
    </ProfileAction>

@@ -19,6 +19,19 @@
 #ifdef BIND_C_
 
 
+/*======================================================================
+ * pathname[0]:             Startup File
+ * pathname[1]:             Help File
+ * pathname[2:NPNAMES - 1]: Search Path for bind.c:flook(),
+ *                          `""' would result in current directory, but
+ *                          won't get activated as this case is
+ *                          handled separately in flook().
+ *
+ * - flook() is used in exec.c to execute command files. For some
+ *   platforms (e.g.MSDOS, Windows, OS2) also to execute binaries.
+ * - In bind.c:startup() it is used to locate the startup file.
+ *====================================================================*/
+
 static NOSHARE CONST char *pathname[] =
 
 # if     AMIGA
@@ -28,34 +41,33 @@ static NOSHARE CONST char *pathname[] =
 
 # elif   TOS
 {
-    "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\", ""
+    "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\"
 };
 
 # elif   FINDER
 {
-    "emacs.rc", "emacs.hlp", "/bin", "/sys/public", ""
+    "emacs.rc", "emacs.hlp", "/bin/", "/sys/public/"
 };
 
 # elif   MSDOS || WINNT || WINXP || CYGWIN || DJGPP_DOS
 {
-    "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\",
-    ""
+    "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\"
 };
 
 # elif   OS2
 {
     "emacs.rc", "emacs.hlp", "C:\\OS2\\SYSTEM\\", "C:\\OS2\\DLL\\",
-    "C:\\OS2\\BIN\\", "C:\\OS2\\", "\\", ""
+    "C:\\OS2\\BIN\\", "C:\\OS2\\", "\\"
 };
 
 # elif   IS_UNIX()
 {
-    ".emacsrc", "emacs.hlp", "/usr/local/", "/usr/lib/", ""
+    ".emacsrc", "emacs.hlp", "/usr/local/", "/usr/lib/"
 };
 
 # elif   VMS
 {
-    "emacs.rc", "emacs.hlp", "MICROEMACS$LIB:", "SYS$LOGIN:", ""
+    "emacs.rc", "emacs.hlp", "SYS$LOGIN:", "MICROEMACS$LIB:"
 };
 
 # elif   WMCS
@@ -73,7 +85,7 @@ static NOSHARE CONST char *pathname[] =
 
 # elif   MPE
 {
-    "emacsrc", "emacshlp", ".pub", ".pub.sys", ""
+    "emacsrc", "emacshlp", ".pub", ".pub.sys"
 };
 
 # else

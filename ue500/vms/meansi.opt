@@ -20,6 +20,7 @@ file.obj,-
 fileio.obj,-
 input.obj,-
 isearch.obj,-
+keyboard.obj,-
 line.obj,-
 lock.obj,-
 main.obj,-

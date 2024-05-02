@@ -353,8 +353,8 @@ execprog(char *cmd)
 
 
     /* look up the program on the path, trying various extentions */
-    if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
+        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE, TRUE) ) == NULL )  {
             return (FALSE);
         }
     xstrcpy(prog, sp);
