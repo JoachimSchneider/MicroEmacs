@@ -997,6 +997,10 @@ the keymap via emacs.rc possible.
 - After `Ctrl-X,C' screen-resizing does not work any more.
 - Modify PROMPT for the `Ctrl-X,C'-shell.
 - Move the (duplicated) qin(), qrep() functions into keyboard.c
+- list-keymappings is not available on FeeBSD but on VMS
+- set `$palette KEYMAP' does *not* overwrite existing entries.
+- VMS-SMG has a lot of exiting entries
+- VMS-ANSI has none.
 
 
 
