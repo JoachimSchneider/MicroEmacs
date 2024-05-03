@@ -158,7 +158,7 @@ NOSHARE NBIND names[] =
     { "label-function-key", fnclabel },
 #endif
     { "list-buffers", listbuffers },
-#if UNIX || VMS || MPE
+#if IS_UNIX() || VMS || MPE
     { "list-keymappings", listkeymaps },
 #endif
     { "list-screens", list_screens },
