@@ -2596,6 +2596,9 @@
  *        It is a security hole.
  *      - VMS: Lookup startup file first in SYS$STARTUP, then
  *        in MICROEMACS$LIB.
+ *      07 May 2024 Joachim Schneider
+ *      - It's possible now to modify entries in John Gamble's (1995)
+ *        keymap; until now it was only possible to create new ones.
  *====================================================================*/
 
 /*====================================================================*/
