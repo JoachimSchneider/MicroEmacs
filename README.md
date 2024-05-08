@@ -19,7 +19,11 @@ time of the copy (Aug 6, 2021) in the *archive* branch.
 
 Documentation:
 
-* See `ue500/doc/emacs.pdf`.
+* See `ue500/doc/emacs.pdf` for the original documentation of MicroEMACS.
+
+* Necessary changes and updates to this documentation caused by bug
+  fixes and new features will be desribed in *this* file in the section
+  called "Documentation Updates".
 
 * For platform specific instructions see
   (`$ find ue500 -type f \(-name 'Readme*' -or -name 'Install*' \)`):
@@ -80,6 +84,11 @@ Please use the *fixes* branch for pull requests.
 
 
 ## Change Log
+
+[2024-05-08.00]
+  * It's possible now to *update* the keymap (it was only possible to
+    create new entries before). This affects `set $palette KEYMAP ...'
+    and `add-keymap'.
 
 [2024-05-02.00]
  * Startup file won't be loaded from current directory any more:
@@ -221,7 +230,7 @@ modern Linux and FreeBSD systems:
     xstrdup().
 
 
-## New features
+## Documentation Updates
 
 * New user functions (efunc.h) fill-buffer and fill-region. With fill-region
   if the region starts in the middle of a line the start of the line will be
@@ -256,6 +265,15 @@ modern Linux and FreeBSD systems:
        text text text text text text text text text text text text text
        text text text text text text text text text text text text text
   ```
+
+* The startup file (.emacsrc, emacs.rc, ...) is not searched in the
+  current directory any more; this obviously was a security hole.
+
+* VMS: emacs.rc is first searched in SYS$STARTUP and then in
+  MICROEMACS$LIB.
+
+* VMS: $ssave defaults to FALSE now: This way the VMS versions work out
+  of the box.
 
 
 ## TODO
