@@ -598,8 +598,7 @@ int PASCAL NEAR rec_seq P3_(char *, buf, char *, bufstart, KEYENT *, node)
  * try to explain this table to you in detail. However, in short, it
  * creates a tree which can easily be transversed to see if input is in
  * a sequence which can be translated to a function key (arrows and
- * find/select/do etc. are treated like function keys). If the sequence
- * is ambiguous or duplicated, it is silently ignored.
+ * find/select/do etc. are treated like function keys).
  *
  * Replaces code in SMG.C, MPE.C, POSIX.C, and UNIX.C Nothing returned
  *
