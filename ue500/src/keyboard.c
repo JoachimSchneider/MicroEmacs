@@ -461,21 +461,22 @@ int PASCAL NEAR extcode P1_(unsigned, c)
 
 # define NKEYSEQ  (300) /* Number of keymap entries */
 
-typedef struct keyent {                 /* Key mapping entry            */
-    struct keyent *samlvl;              /* Character on same level      */
-    struct keyent *nxtlvl;              /* Character on next level      */
-    unsigned char ch;                   /* Character                    */
-    int           code;                 /* Resulting keycode            */
+typedef struct keyent {                 /* Key mapping entry          */
+    struct keyent *samlvl;              /* Character on same level    */
+    struct keyent *nxtlvl;              /* Character on next level    */
+    unsigned char ch;                   /* Character                  */
+    int           code;                 /* Resulting keycode          */
 } KEYENT;
 
 /* Needed Prototype */
 EXTERN int PASCAL NEAR rec_seq DCL((char *buf, char *bufstart, KEYENT *node));
 
 /* some globals needed here */
-static unsigned char  keyseq[256];      /* Prefix escape sequence table */
-static KEYENT         keymap[NKEYSEQ];  /* Key map                      */
-static KEYENT         *nxtkey = keymap; /* Next free key entry          */
-static BUFFER         *seqbuf;          /* For the pop-up buffer        */
+/*  Prefix escape sequence table:                                     */
+static unsigned char  keyseq[(int)(unsigned char)(-1) + 1];
+static KEYENT         keymap[NKEYSEQ];  /* Key map                    */
+static KEYENT         *nxtkey = keymap; /* Next free key entry        */
+static BUFFER         *seqbuf;          /* For the pop-up buffer      */
 
 /* add-keymap "escape sequence" keyname
  */
@@ -597,18 +598,100 @@ int PASCAL NEAR rec_seq P3_(char *, buf, char *, bufstart, KEYENT *, node)
  * try to explain this table to you in detail. However, in short, it
  * creates a tree which can easily be transversed to see if input is in
  * a sequence which can be translated to a function key (arrows and
- * find/select/do etc. are treated like function keys). If the sequence
- * is ambiguous or duplicated, it is silently ignored.
+ * find/select/do etc. are treated like function keys).
  *
  * Replaces code in SMG.C, MPE.C, POSIX.C, and UNIX.C Nothing returned
+ *
+ *======================================================================
+  typedef struct keyent {             /o Key mapping entry            o/
+    struct keyent *samlvl;            /o Character on same level      o/
+    struct keyent *nxtlvl;            /o Character on next level      o/
+    unsigned char ch;                 /o Character                    o/
+    int           code;               /o Resulting keycode            o/
+  } KEYENT;
+
+  ch:     Character in the character sequence seq
+  code:   MicroEMACS keycode fn
+  samlvl: Points to a KEYENT with a ch at the *same* position in seq as
+          this one --- a horizontal arrow in the picture below.
+  nxtlvl: Points to a KEYENT with a ch at the *next* position in seq
+          --- a vertical arrow in the picture below.
+
+  Step One: Start with seq = "ABC", fn = r
+
+    A(r)
+      |
+      v
+    B(r)
+      |
+      v
+    C(r)
+
+
+  Step Two: Add seq = "XY", fn = q
+
+    A(r) --> X(q)
+      |       |
+      v       v
+    B(r)     Y(q)
+      |
+      v
+    C(r)
+
+
+  Step Three: Add seq = "ABD", fn = s
+
+    A(r) --------> X(q)
+      |             |
+      v             v
+    B(r)           Y(q)
+      |
+      v
+    C(r) --> D(s)
+
+
+  Those KEYENT records with nxtlvl == NULL give the mapping between seq
+  and fn, so the last picture could also be
+
+    A(0) --------> X(0)
+      |             |
+      v             v
+    B(0)           Y(q)
+      |
+      v
+    C(r) --> D(s)
+
+
+  Here U(x) --> R
+        |
+        v
+        S
+
+  means the KEYENT
+
+  {
+    R;    /o Character on same level      o/
+    S;    /o Character on next level      o/
+    U;    /o Character                    o/
+    x;    /o Resulting keycode            o/
+  }
+
+ Overwriting does currently not work:
+ - Longer sequences tries to override a shorther one:
+   `if ( *seq == cur->ch )' chrashes because NULL == cur, which was set
+   as `cur = cur->nxtlvl;' in the previous step.
+ - Shorter sequences cannot overwrite longer ones.
+ *======================================================================
  *
  * seq - character sequence fn  - Resulting keycode
  */
 int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
 {
-    int     first   = 0;
-    KEYENT  *cur    = NULL;
-    KEYENT  *nxtcur = NULL;
+    int     first       = 0;
+    int     grow        = 0;    /* expand existing character sequence */
+    KEYENT  *cur        = NULL;
+    KEYENT  *nxtcur     = NULL;
+    KEYENT  *lastmatch  = NULL;
 
     /* Skip on null sequences or single character sequences. */
     if ( seq == NULL || STRLEN( (char *)seq ) < 2 )
@@ -618,7 +701,7 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
     TRC(("addkey(): seq = <%s>", (char *)seq));
 #  endif
     /* If no keys defined, go directly to insert mode */
-    first = 1;
+    first = !0;
     if ( nxtkey != keymap ) {
         /* Start at top of key map */
         cur = keymap;
@@ -627,20 +710,41 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
         while ( *seq ) {
             /* Do we match current character */
             if ( *seq == cur->ch ) {
+                first = 0;
+                lastmatch = cur;
                 /* Advance to next level */
                 seq++;
-                cur = cur->nxtlvl;
-                first = 0;
+                /* Try next character on next level */
+                nxtcur = cur->nxtlvl;
+
+                /* Stop if no more */
+                if ( nxtcur ) {
+                    cur = nxtcur;
+                } else        {
+                    grow = !0;  /* expand existing entry  */
+                    break;
+                }
             } else {
                 /* Try next character on same level */
                 nxtcur = cur->samlvl;
 
                 /* Stop if no more */
-                if ( nxtcur )
+                if ( nxtcur ) {
                     cur = nxtcur;
-                else
+                } else        {
                     break;
+                }
             }
+        }
+
+        /* truncate or update existing character sequence: */
+        if ( !*seq )  {
+            /* lastmatch is .NE. NULL because seq got only updated if
+             * there was a match. */
+            lastmatch->code   = fn;
+            lastmatch->nxtlvl = NULL;
+
+            return TRUE;
         }
     }
 
@@ -656,21 +760,23 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
         keyseq[*seq] = 1;
 
     /* If characters are left over, insert them into list */
-    for ( first = 1; *seq; first = 0 ) {
+    for ( first = !0; *seq; first = 0 ) {
         /* Make new entry */
         nxtkey->ch = *seq++;
         nxtkey->code = fn;
 
         /* If root, nothing to do */
         if ( nxtkey != keymap ) {
+            /* In this case cur is .NE. NULL. */
             /* Set first to samlvl, others to nxtlvl */
-            if ( first )
+            if ( first && !grow )
                 cur->samlvl = nxtkey;
             else
                 cur->nxtlvl = nxtkey;
         }
 
         /* Advance to next key */
+        ASRT(nxtkey - keymap < NELEM(keymap));
         cur = nxtkey++;
     }
 
