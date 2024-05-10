@@ -26,8 +26,9 @@ Documentation:
   called "Documentation Updates".
 
 * For platform specific instructions see
-  (`$ find ue500 -type f \(-name 'Readme*' -or -name 'Install*' \)`):
+  (`$ find ue500 -type f \( -name 'Readme*' -or -name 'Install*' \)`):
 
+  - ue500/vms/Readme.txt
   - ue500/djgpp/Readme.txt
   - ue500/cygwin/Readme.txt
   - ue500/linux/termcap/Install
@@ -38,7 +39,7 @@ Documentation:
 
 ## Some history:
 
-* I enjoyed MicroEMACS since the 1994 --- then version 3.12 for MS-DOS;
+* I enjoyed MicroEMACS since 1994 --- then version 3.12 for MS-DOS;
   used it to type in the TeX code of my thesis.
 
 * Daniel Michael Lawrence worked on MicroEMACS until 2009. His version
@@ -68,7 +69,6 @@ Documentation:
   - Delete "memacs.git" on GitHub
 
 
-
 ## Branches:
 
 * *master*:   Tested
@@ -76,6 +76,8 @@ Documentation:
 * *fixes*:    Compiles and runs
 
 * *current*:  Need not even compile --- *Not testet*
+
+* *archive*:  Frozen (Aug 6, 2021) state of the copy of Peter Chapman's repository
 
 
 ## Pull requests
