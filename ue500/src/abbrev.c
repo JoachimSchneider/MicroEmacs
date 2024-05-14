@@ -58,10 +58,10 @@ VOID PASCAL NEAR ab_expand P0_()
     }
 
     /* is the current buffer a symbol in the abbreviation table?  */
-    if ( ( exp = (ab_full || ab_quick)?
-                  ab_taillookup(ab_word)
-                    :
-                  ab_lookup(ab_word) ) != NULL )  {
+    if ( ( exp = ab_full?
+                    ab_taillookup(ab_word)
+                      :
+                    ab_lookup(ab_word) ) != NULL )  {
         TRC(("`%s' ===> `%s'", ab_word, exp));
 
         /* backwards delete the symbol */
@@ -406,10 +406,6 @@ char *PASCAL NEAR ab_taillookup P1_(CONST char *, sym)
 {
     if ( ! sym && *sym )  {
         return NULL;
-    }
-
-    if ( ! ab_full )  {
-        return ab_lookup(sym);
     }
 
     {

@@ -870,12 +870,18 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
                 status = linsert(n, c);
         }
 
-        /* In ABBREV mode, if we are doing aggressive expansion and the current
-         * buffer is a symbol in the abbreviation table:  */
-        if ( (curbp->b_mode & MDABBR) != 0  &&
-              (ab_full || ab_quick)         &&
-              ab_taillookup(ab_word) != NULL )  {
-            ab_expand();
+        /* In ABBREV mode, if we are doing full / aggressive expansion
+         * and the current buffer is a symbol in the abbrev. table: */
+        if ( (curbp->b_mode & MDABBR) != 0  ) {
+            if        ( ab_full  )  {
+                if ( ab_taillookup(ab_word) != NULL ) {
+                    ab_expand();
+                }
+            } else if ( ab_quick )  {
+                if ( ab_lookup(ab_word)     != NULL ) {
+                    ab_expand();
+                }
+            }
         }
 
         /* check for CMODE fence matching */

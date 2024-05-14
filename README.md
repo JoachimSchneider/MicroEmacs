@@ -277,6 +277,10 @@ modern Linux and FreeBSD systems:
 * VMS: $ssave defaults to FALSE now: This way the VMS versions work out
   of the box.
 
+* Setting $abfull TRUE enables full --- i.e. substrings in words ---
+  expansion of abbreviations. This is a stronger form of the $abquick
+  sub mode.
+
 
 ## TODO
 - Compile on Windows:

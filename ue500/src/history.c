@@ -2599,6 +2599,9 @@
  *      07 May 2024 Joachim Schneider
  *      - It's possible now to modify entries in John Gamble's (1995)
  *        keymap; until now it was only possible to create new ones.
+ *      14 May 2024 Joachim Schneider
+ *      - Setting $abfull TRUE enables full --- i.e. substrings in
+ *        words --- expansion of abbreviations.
  *====================================================================*/
 
 /*====================================================================*/
