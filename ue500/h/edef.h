@@ -216,6 +216,7 @@ DCLDEF NOSHARE UTABLE         *uv_global;         /* global variable table      
 DCLDEF NOSHARE ABBREV         *ab_head;           /* head of the abbreviation list          */
 DCLDEF NOSHARE int            ab_bell;            /* are we ringing the bell on completion? */
 DCLDEF NOSHARE int            ab_cap;             /* match capatilization on expansion?     */
+DCLDEF NOSHARE int            ab_full;            /* full expansion? (exceeds ab_quick)?    */
 DCLDEF NOSHARE int            ab_quick;           /* aggressive completion enabled?         */
 DCLDEF NOSHARE char           ab_word[NSTRING];   /* current word being typed               */
 DCLDEF NOSHARE char           *ab_pos;            /* current place in ab_word               */

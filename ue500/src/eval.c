@@ -524,6 +524,9 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
     case EVABCAP:
         RETURN ( ltos(ab_cap) );
 
+    case EVABFULL:
+        RETURN ( ltos(ab_full) );
+
     case EVABQUICK:
         RETURN ( ltos(ab_quick) );
 
@@ -1252,6 +1255,10 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 
         case EVABCAP:
             ab_cap = stol(valueL);
+            break;
+
+        case EVABFULL:
+            ab_full = stol(valueL);
             break;
 
         case EVABQUICK:

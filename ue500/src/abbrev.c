@@ -48,39 +48,46 @@ VOID PASCAL NEAR ab_save P1_(char, c)
 
 VOID PASCAL NEAR ab_expand P0_()
 {
-    char *exp;          /* expansion of current symbol */
-    char c;             /* current character to insert */
+    char  *exp  = NULL;   /* expansion of current symbol */
+    char  c     = '\0';   /* current character to insert */
 
     /* only in ABBREV mode, never in VIEW mode */
-    if ( (curbp->b_mode & MDABBR) == 0 ||(curbp->b_mode & MDVIEW) == MDVIEW )
+    if ( (curbp->b_mode & MDABBR) == 0      ||
+         (curbp->b_mode & MDVIEW) == MDVIEW     ) {
         return;
+    }
 
-    /* is the current buffer a symbol in the abbreviation table? */
-    if ( ( exp = ab_lookup(ab_word) ) != NULL ) {
+    /* is the current buffer a symbol in the abbreviation table?  */
+    if ( ( exp = (ab_full || ab_quick)?
+                  ab_taillookup(ab_word)
+                    :
+                  ab_lookup(ab_word) ) != NULL )  {
+        TRC(("`%s' ===> `%s'", ab_word, exp));
 
         /* backwards delete the symbol */
         ldelete(-( (long)STRLEN(ab_word) ), FALSE);
 
         /* and insert its expansion */
         while ( *exp ) {
-
             c = *exp++;
-
             /*
              * If a space was typed, fill column is defined, the argument is
              * non-negative, wrap mode is enabled, and we are now past fill
              * column, perform word wrap.
              */
-            if ( c == ' ' && (curwp->w_bufp->b_mode & MDWRAP) &&fillcol > 0 &&
-                 getccol(FALSE) > fillcol )
+            if ( c == ' '                         &&
+                 (curwp->w_bufp->b_mode & MDWRAP) &&
+                 fillcol > 0                      &&
+                 getccol(FALSE) > fillcol )           {
                 execkey(&wraphook, FALSE, 1);
-
+            }
             linsert(1, c);
         }
 
         /* ring the bell */
-        if ( ab_bell )
+        if ( ab_bell )  {
             TTbeep();
+        }
     }
 
     /* reset the word buffer */
@@ -281,12 +288,15 @@ int PASCAL NEAR def_abbrevs P2_(int, f, int, n)
  */
 VOID PASCAL NEAR ab_init P0_()
 {
-    ab_head = (ABBREV *)NULL;     /* abbreviation list empty */
-    ab_bell = FALSE;            /* no ringing please! */
-    ab_cap = FALSE;             /* don't match capatilization on expansion */
-    ab_quick = FALSE;           /* no aggressive expansion */
-    ab_pos = ab_word;           /* no word accumulated yet */
-    ab_end = &ab_word[NSTRING - 1];     /* ptr to detect end of this buffer */
+    ab_head   = (ABBREV *)NULL;         /* abbreviation list empty */
+    ab_bell   = FALSE;                  /* no ringing please! */
+    ab_cap    = FALSE;                  /* don't match capatilization on
+                                         * expansion */
+    ab_full   = FALSE;                  /* no full expansion */
+    ab_quick  = FALSE;                  /* no aggressive expansion */
+    ab_pos    = ab_word;                /* no word accumulated yet */
+    ab_end    = &ab_word[NSTRING - 1];  /* ptr to detect end of this
+                                         * buffer */
 }
 
 /* AB_INSERT:
@@ -369,22 +379,59 @@ int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
 char *PASCAL NEAR ab_lookup P1_(CONST char *, sym)
 /* sym: Name of the symbol to look up */
 {
-
-    ABBREV *cur_node;           /* ptr to look through list */
+    ABBREV  *cur_node = NULL; /* ptr to look through list */
 
     /* starting at the head, step through the list */
     cur_node = ab_head;
     while ( cur_node != NULL ) {
-
         /* if there is a match, return the expansion */
         if ( strcmp(sym, cur_node->ab_sym) == 0 ) {
             return (cur_node->ab_exp);
         }
-        cur_node=cur_node->ab_next;
+        cur_node = cur_node->ab_next;
     }
 
     /* at the end, return NULL */
     return (NULL);
+}
+
+/* AB_TAILLOOKUP:
+ *
+ * Look up and return the expansion of tails of <sym>. Return a NULL
+ * if there is no match: In sym try matches starting from 0 to
+ * STRLEN(sym) - 1.
+ */
+char *PASCAL NEAR ab_taillookup P1_(CONST char *, sym)
+/* sym: Name of the symbol to look up */
+{
+    if ( ! sym && *sym )  {
+        return NULL;
+    }
+
+    if ( ! ab_full )  {
+        return ab_lookup(sym);
+    }
+
+    {
+        int         l     = 0;
+        int         i     = 0;
+        char        *exp  = NULL;
+        static char rcbuf[NSTRING];
+
+        ZEROMEM(rcbuf);
+
+        l = STRLEN(sym);
+        for (i = 0; i < l; i++) {
+            if ( NULL != (exp = ab_lookup(sym + i)) ) {
+                xstrlcpy(rcbuf, sym, MIN2(SIZEOF(rcbuf), i + 1));
+                xstrlcat(rcbuf, exp, SIZEOF(rcbuf));
+
+                return rcbuf;
+            }
+        }
+
+        return NULL;
+    }
 }
 
 /* AB_DELETE:

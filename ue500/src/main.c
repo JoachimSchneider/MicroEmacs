@@ -765,7 +765,6 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
     /* if the keystroke is a bound function...do it */
     key = getbind(c);
     if ( key != NULL ) {
-
         /* before a command, we attempt to expand abbreviations */
         ab_expand();
 
@@ -783,12 +782,13 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
     }
 
     /* since the keystroke is not a command, */
-    if ( isinword(c) )
+    if ( isinword(c) )  {
         /* in a word, we save it */
         ab_save(c);
-    else
+    } else              {
         /* not in a word, we attempt an expansion */
         ab_expand();
+    }
 
     /*
      * If a space was typed, fill column is defined, the argument is non-
@@ -871,10 +871,12 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
         }
 
         /* In ABBREV mode, if we are doing aggressive expansion and the current
-        * buffer is a symbol in the abbreviation table */
-        if ( ( (curbp->b_mode & MDABBR) != 0 ) &&
-             ( ab_quick && (ab_lookup(ab_word) != NULL) ) )
+         * buffer is a symbol in the abbreviation table:  */
+        if ( (curbp->b_mode & MDABBR) != 0  &&
+              (ab_full || ab_quick)         &&
+              ab_taillookup(ab_word) != NULL )  {
             ab_expand();
+        }
 
         /* check for CMODE fence matching */
         if ( (c == '}' || c == ')' || c == ']') &&
