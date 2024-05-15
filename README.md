@@ -93,7 +93,7 @@ Please use the *fixes* branch for pull requests.
 [2024-05-02.00]
  * Startup file won't be loaded from current directory any more:
    It is a security hole.
- * VMS: Lookup startup file first in SYS$STARTUP, then
+ * VMS: Lookup startup file first in SYS$LOGIN, then
    in MICROEMACS$LIB.
 
 [2024-04-18.00]
@@ -269,7 +269,7 @@ modern Linux and FreeBSD systems:
 * The startup file (.emacsrc, emacs.rc, ...) is not searched in the
   current directory any more; this obviously was a security hole.
 
-* VMS: emacs.rc is first searched in SYS$STARTUP and then in
+* VMS: emacs.rc is first searched in SYS$LOGIN and then in
   MICROEMACS$LIB.
 
 * VMS: $ssave defaults to FALSE now: This way the VMS versions work out
