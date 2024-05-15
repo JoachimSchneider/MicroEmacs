@@ -427,7 +427,7 @@ int PASCAL NEAR ttopen P0_()
     tyout = 0;
     tylen = 0;
     tymax = SIZEOF(tybuf);
-    status = LIB$ASN_WTH_MBX(   /* Create a new PY/TW pair */
+    status = lib$asn_wth_mbx(   /* Create a new PY/TW pair */
                              descptr("SYS$OUTPUT:"),
                              &mbmsg_size,
                              &mbmsg_size,
