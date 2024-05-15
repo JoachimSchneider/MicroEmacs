@@ -56,7 +56,7 @@ static VOID next_read P1_(int, flag);
 #endif
 
 /*
-        These are the LIB$SPAWN mode flags.  There's no .h for
+        These are the lib$spawn mode flags.  There's no .h for
         them in VAX C V2.4.
 */
 #ifdef NEED_CLIDEF
@@ -72,7 +72,7 @@ static VOID next_read P1_(int, flag);
 /*
         test macro is used to signal errors from system services
 */
-#define test(s) do { int st; st = (s); if ((st&1)==0) LIB$SIGNAL( st); } while ( 0 )
+#define test(s) do { int st; st = (s); if ((st&1)==0) lib$signal( st); } while ( 0 )
 
 /*
         This routine returns a pointer to a descriptor of the supplied
@@ -227,7 +227,7 @@ static VOID readast P0_()
             /* Got some data, adjust input queue parameters */
             tylen += ttiosb.len;
             tyin += ttiosb.len;
-            test(SYS$WAKE(0, 0));
+            test(sys$wake(0, 0));
             next_read(1);
         } else {
             /*
@@ -238,7 +238,7 @@ static VOID readast P0_()
                 next_read(0);
         }
     } else if (ttiosb.status != SS$_ABORT)
-        LIB$SIGNAL(ttiosb.status);
+        lib$signal(ttiosb.status);
 }
 
 /*
@@ -265,7 +265,7 @@ static VOID next_read P1_(int, flag)
 
         if (size >= MINREAD) {
             /* Only read if there is enough room */
-            test(SYS$QIO(0, vms_iochan,
+            test(sys$qio(0, vms_iochan,
                          flag ?
                          IO$_READVBLK | IO$M_NOECHO | IO$M_TRMNOECHO |
                          IO$M_NOFILTR | IO$M_TIMED
@@ -369,7 +369,7 @@ static VOID chkbrdcst P0_()
     if (newbrdcst) {
         int       oldrow = ttrow, oldcol = ttcol;
 
-        SYS$SETAST(0);
+        sys$setast(0);
 
         msgbuf = bfind("[-messages-]", TRUE, BFINVS);
 
@@ -381,7 +381,7 @@ static VOID chkbrdcst P0_()
         newbrdcst = FALSE;
         movecursor(oldrow, oldcol);
         TTmove(oldrow, oldcol);
-        SYS$SETAST(1);
+        sys$setast(1);
     }
 }
 
@@ -406,13 +406,13 @@ static VOID mbreadast P0_()
         } else {
           /**EMPTY**/
         }
-        test(SYS$QIO(           /* Post a new read to the associated mailbox */
+        test(sys$qio(           /* Post a new read to the associated mailbox */
                      0, mbchan, IO$_READVBLK, &mbiosb,
                      mbreadast, 0, &mbmsg, SIZEOF(mbmsg),
                      0, 0, 0, 0
                      ));
     } else if (mbiosb.status != SS$_ABORT)
-        LIB$SIGNAL(mbiosb.status);
+        lib$signal(mbiosb.status);
 }
 
 int PASCAL NEAR ttopen P0_()
@@ -437,15 +437,15 @@ int PASCAL NEAR ttopen P0_()
         /* The assign channel failed, was it because of the mailbox? */
         if (status == SS$_DEVACTIVE) {
             /* We've been called from NOTES, so we can't use the mailbox */
-            test(SYS$ASSIGN(descptr("SYS$OUTPUT:"), &vms_iochan, 0, 0));
+            test(sys$assign(descptr("SYS$OUTPUT:"), &vms_iochan, 0, 0));
             mbchan = 0;
         } else
-            LIB$SIGNAL(status);
+            lib$signal(status);
     }
     waiting = 0;                /* Block unsolicited input from issuing read */
     stalled = 0;                /* Don't start stalled */
     if (mbchan)
-        test(SYS$QIO(           /* Post a read to the associated mailbox */
+        test(sys$qio(           /* Post a read to the associated mailbox */
                      0, mbchan, IO$_READVBLK, &mbiosb,
                      mbreadast, 0, &mbmsg, SIZEOF(mbmsg),
                      0, 0, 0, 0
@@ -453,7 +453,7 @@ int PASCAL NEAR ttopen P0_()
 /*
         Fetch the characteristics and adjust ourself for proper operation.
 */
-    test(SYS$QIOW(0, vms_iochan, IO$_SENSEMODE, &orgttiosb,
+    test(sys$qiow(0, vms_iochan, IO$_SENSEMODE, &orgttiosb,
                   0, 0, &orgchar, SIZEOF(orgchar), 0, 0, 0, 0));
     newchar = orgchar;
     newchar.tt2 |= TT2$M_PASTHRU;       /* Gives us back ^U, ^X, ^C, and ^Y. */
@@ -507,14 +507,14 @@ int PASCAL NEAR ttopen P0_()
 /*
         Set these new characteristics
 */
-    test(SYS$QIOW(0, vms_iochan, IO$_SETMODE, 0,
+    test(sys$qiow(0, vms_iochan, IO$_SETMODE, 0,
                   0, 0, &newchar, SIZEOF(newchar), 0, 0, 0, 0));
 /*
         For some unknown reason, if I don't post this read (which will
         likely return right away) then I don't get started properly.
         It has something to do with priming the unsolicited input system.
 */
-    test(SYS$QIO(0, vms_iochan,
+    test(sys$qio(0, vms_iochan,
                  IO$_READVBLK | IO$M_NOECHO | IO$M_TRMNOECHO |
                  IO$M_NOFILTR | IO$M_TIMED,
                  &ttiosb, readast, 0, tybuf, SIZEOF(tybuf),
@@ -536,16 +536,16 @@ int PASCAL NEAR ttclose P0_()
 {
     if (tolen > 0) {
         /* Buffer not empty, flush out last stuff */
-        test(SYS$QIOW(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
+        test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
                       0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
         tolen = 0;
     }
-    test(SYS$CANCEL(vms_iochan));       /* Cancel any pending read */
-    test(SYS$QIOW(0, vms_iochan, IO$_SETMODE, 0,
+    test(sys$cancel(vms_iochan));       /* Cancel any pending read */
+    test(sys$qiow(0, vms_iochan, IO$_SETMODE, 0,
                   0, 0, &orgchar, SIZEOF(orgchar), 0, 0, 0, 0));
     if (mbchan)
-        test(SYS$DASSGN(mbchan));
-    test(SYS$DASSGN(vms_iochan));
+        test(sys$dassgn(mbchan));
+    test(sys$dassgn(vms_iochan));
 
     return 0;
 }
@@ -555,7 +555,7 @@ int PASCAL NEAR ttputc P1_(int, c)
     tobuf[tolen++] = c;
     if (tolen >= SIZEOF(tobuf)) {
         /* Buffer is full, send it out */
-        test(SYS$QIOW(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
+        test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
                       0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
         tolen = 0;
     }
@@ -573,7 +573,7 @@ int PASCAL NEAR ttflush P0_()
     if (tylen == 0) {
         if (tolen != 0) {
             /* No typeahead, send it out */
-            test(SYS$QIOW(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
+            test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
                           0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
             tolen = 0;
         }
@@ -598,8 +598,8 @@ unsigned char PASCAL NEAR grabnowait P0_()
 {
     if (tylen == 0) {
         /* Nothing immediately available, hibernate for a short time */
-        test(SYS$SCHDWK(0, 0, short_time, 0));
-        test(SYS$HIBER());
+        test(sys$schdwk(0, 0, short_time, 0));
+        test(sys$hiber());
     }
 
     return ((tylen == 0) ? grabnowait_TIMEOUT : grabwait());
@@ -613,14 +613,14 @@ unsigned char PASCAL NEAR grabwait P0_()
     while (tylen == 0) {
         /* Nothing to send, wait for something interesting */
         ttflush();
-        test(SYS$HIBER());
+        test(sys$hiber());
         chkbrdcst();
     }
 
     /*
      * Got something, return it.
      */
-    SYS$SETAST(0);
+    sys$setast(0);
     ret = tybuf[tyout++];
 
     if (tyout >= tymax) {
@@ -631,10 +631,10 @@ unsigned char PASCAL NEAR grabwait P0_()
     tylen--;                    /* Should be ADD_INTERLOCKED */
 
     if (stalled && (tylen < 2 * MINREAD)) {
-        test(SYS$DCLAST(next_read, 1, 0));
+        test(sys$dclast(next_read, 1, 0));
     }
 
-    SYS$SETAST(1);
+    sys$setast(1);
 
     return (ret);
 }
@@ -753,7 +753,7 @@ int PASCAL NEAR spawncli P2_(int, f, int, n)
         return (resterr());
     movecursor(term.t_nrow, 0); /* Seek to last line.   */
     TTclose();                  /* stty to old settings */
-    test(LIB$SPAWN(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
+    test(lib$spawn(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0));
     sgarbf = TRUE;
     TTopen();
 
@@ -862,7 +862,7 @@ int PASCAL NEAR pipecmd P2_(int, f, int, n)
     TTflush();
     TTclose();                  /* stty to old modes    */
 
-    test(LIB$SPAWN(descptr(line), DESCPTR("NL:"), descptr(filnam),
+    test(lib$spawn(descptr(line), DESCPTR("NL:"), descptr(filnam),
                    0, 0, 0, 0, 0, 0, 0, 0));
     TTopen();
     TTflush();
@@ -934,7 +934,7 @@ int PASCAL NEAR f_filter P2_(int, f, int, n)
     TTclose();                  /* stty to old modes    */
     s = 1;
 
-    test(LIB$SPAWN(descptr(line), descptr(filnam1), descptr(filnam2),
+    test(lib$spawn(descptr(line), descptr(filnam1), descptr(filnam2),
                    0, 0, 0, &s, 0, 0, 0, 0));
     TTopen();
     TTflush();
@@ -1053,9 +1053,9 @@ char * PASCAL NEAR  getffile P1_(char *, fspec)
     rbuf_desc.dsc$b_dtype = DSC$K_DTYPE_T;
     rbuf_desc.dsc$b_class = DSC$K_CLASS_S;
 
-    LIB$FIND_FILE_END(&ctxtp);
+    lib$find_file_end(&ctxtp);
     ctxtp = NULL;
-    if (LIB$FIND_FILE(&pat_desc, &rbuf_desc, &ctxtp) != RMS$_SUC)
+    if (lib$find_file(&pat_desc, &rbuf_desc, &ctxtp) != RMS$_SUC)
         return (NULL);
 
     /*
@@ -1079,7 +1079,7 @@ char * PASCAL NEAR  getnfile P0_()
 
     /* and call for the next file */
     for (cp = rbuf; cp != rbuf + NFILEN; *cp++ = ' ');
-    if (LIB$FIND_FILE(&pat_desc, &rbuf_desc, &ctxtp) != RMS$_SUC)
+    if (lib$find_file(&pat_desc, &rbuf_desc, &ctxtp) != RMS$_SUC)
         return (NULL);
 
     /*
@@ -1194,24 +1194,24 @@ int PASCAL NEAR bktoshell P2_(int, f, int, n)
     movecursor(term.t_nrow, 0);
     TTclose();
 
-    test(LIB$DELETE_LOGICAL(DESCPTR("MICROEMACS$PARENT"),
+    test(lib$delete_logical(DESCPTR("MICROEMACS$PARENT"),
                             DESCPTR("LNM$JOB")));
-    test(LIB$GETJPI(&jpi_pid, 0, 0, &pid, 0, 0));
-    test(LIB$SET_LOGICAL(DESCPTR("MICROEMACS$PROCESS"),
+    test(lib$getjpi(&jpi_pid, 0, 0, &pid, 0, 0));
+    test(lib$set_logical(DESCPTR("MICROEMACS$PROCESS"),
                          descptr(int_asc(pid)),
                          DESCPTR("LNM$JOB")));
     pid = asc_int(env);
-    test(SYS$WAKE(&pid, 0));
+    test(sys$wake(&pid, 0));
 
     for (;;) {
         /* Hibernate until MICROEMACS$COMMAND is defined */
-        test(SYS$HIBER());
+        test(sys$hiber());
         env = getenv("MICROEMACS$COMMAND");     /* Command line arguments */
         if (env != NULL)
             break;              /* Winter is over */
     }
 
-    test(LIB$DELETE_LOGICAL(DESCPTR("MICROEMACS$COMMAND"),
+    test(lib$delete_logical(DESCPTR("MICROEMACS$COMMAND"),
                             DESCPTR("LNM$JOB")));
 
     TTopen();
@@ -1232,13 +1232,13 @@ int PASCAL NEAR bktoshell P2_(int, f, int, n)
 /*
         First parameter is default device
 */
-    test(LIB$SET_LOGICAL(DESCPTR("SYS$DISK"),
+    test(lib$set_logical(DESCPTR("SYS$DISK"),
                          descptr(argv[0]),
                          0));
 /*
         Second argument is default directory
 */
-    test(SYS$SETDDIR(descptr(argv[1]), 0, 0));
+    test(sys$setddir(descptr(argv[1]), 0, 0));
 /*
         Remaining came from command line
 */
@@ -1279,7 +1279,7 @@ int PASCAL NEAR ffropen P1_(CONST char *, fn)
     rab.rab$l_fab = &fab;
     rab.rab$l_rop = RAB$M_RAH;  /* read-ahead for multibuffering */
 
-    status = SYS$OPEN(&fab);
+    status = sys$open(&fab);
     if (status == RMS$_FLK) {
         /*
          * File locking problem:
@@ -1290,12 +1290,12 @@ int PASCAL NEAR ffropen P1_(CONST char *, fn)
          * eliminates the read-ahead
          */
         fab.fab$b_shr |= FAB$M_SHRPUT;
-        status = SYS$OPEN(&fab);
+        status = sys$open(&fab);
     }
 
     if (successful(status)) {
-        if (unsuccessful(SYS$CONNECT(&rab))) {
-            SYS$CLOSE(&fab);
+        if (unsuccessful(sys$connect(&rab))) {
+            sys$close(&fab);
             return (FIOFNF);
         }
     } else
@@ -1331,19 +1331,19 @@ int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
     if (*mode == 'a') {
         /* append mode */
         rab.rab$l_rop = RAB$M_EOF;
-        status = SYS$OPEN(&fab);
+        status = sys$open(&fab);
         if (status == RMS$_FNF)
-            status = SYS$CREATE(&fab);
+            status = sys$create(&fab);
     } else {                    /* *mode == 'w' */
         /* write mode */
         fab.fab$l_fop |= FAB$M_MXV;     /* always make a new version */
-        status = SYS$CREATE(&fab);
+        status = sys$create(&fab);
     }
 
     if (successful(status)) {
-        status = SYS$CONNECT(&rab);
+        status = sys$connect(&rab);
         if (unsuccessful(status))
-            SYS$CLOSE(&fab);
+            sys$close(&fab);
     }
 
     if (unsuccessful(status)) {
@@ -1368,11 +1368,11 @@ int PASCAL NEAR ffclose P0_()
         fline = NULL;
     }
 
-    status = SYS$DISCONNECT(&rab);
+    status = sys$disconnect(&rab);
     if (successful(status))
-        status = SYS$CLOSE(&fab);
+        status = sys$close(&fab);
     else
-        SYS$CLOSE(&fab);
+        sys$close(&fab);
 
     if (unsuccessful(status)) {
         mlwrite(TEXT156);
@@ -1420,7 +1420,7 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
     rab.rab$l_rbf = obuf;
     rab.rab$w_rsz = nbuf;
 
-    if (unsuccessful(SYS$PUT(&rab))) {
+    if (unsuccessful(sys$put(&rab))) {
         mlwrite(TEXT157);
 /*                      "Write I/O error" */
         return (FIOERR);
@@ -1449,7 +1449,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
     rab.rab$l_ubf = fline;
     rab.rab$w_usz = flen;
 
-    status = SYS$GET(&rab);
+    status = sys$get(&rab);
     *nbytes = rab.rab$w_rsz;
     if (status == RMS$_EOF)
         return (FIOEOF);
@@ -1518,10 +1518,10 @@ VOID PASCAL NEAR  expandargs P2_(int *, pargc, char ***, pargv)
         if (**argv != '-' && (strchr(*argv, '%') || strchr(*argv, '*') ||
                               strstr(*argv, "..."))) {
             /* search for all matching filenames */
-            while ((LIB$FIND_FILE(&filespec, &result_filespec, &context)) & 1) {
+            while ((lib$find_file(&filespec, &result_filespec, &context)) & 1) {
                 int       i;
 
-                /* LIB$FIND_FILE returns uppercase. Lowercase it */
+                /* lib$find_file returns uppercase. Lowercase it */
                 for (i = 0; i < result_filespec.dsc$w_length; i++)
                     if (is_upper(result_filespec.dsc$a_pointer[i]))
                         result_filespec.dsc$a_pointer[i] = tolower(result_filespec.dsc$a_pointer[i]);
@@ -1531,12 +1531,12 @@ VOID PASCAL NEAR  expandargs P2_(int *, pargc, char ***, pargv)
         } else
             addspec(filespec, &nargc, &nargv, &nargcapacity);
 
-        LIB$FIND_FILE_END(&context);
+        lib$find_file_end(&context);
 
         argv++;
     }
 
-    STR$FREE1_DX(&result_filespec);
+    str$free1_dx(&result_filespec);
 
     *pargc = nargc;
     *pargv = nargv;
