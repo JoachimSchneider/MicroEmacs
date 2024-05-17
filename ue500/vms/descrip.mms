@@ -30,11 +30,11 @@ MMS$ARCH_NAME = VAX
 
 SRC=[-.SRC]
 INC=[-.H]
-LIS=[.LIS_$(MMS$ARCH_NAME)]
+LIS=[.BUILD.LIS_$(MMS$ARCH_NAME)]
 .ifdef DEBUG
-BLD = [.BINDBG_$(MMS$ARCH_NAME)]
+BLD = [.BUILD.BINDBG_$(MMS$ARCH_NAME)]
 .else
-BLD = [.BIN_$(MMS$ARCH_NAME)]
+BLD = [.BUILD.BIN_$(MMS$ARCH_NAME)]
 .endif
 
 .IFDEF DEBUG
@@ -132,12 +132,12 @@ omodules= -
        WORD=$(BLD)word.obj
 
 .first :
-        @ IF F$SEARCH("BIN_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
-                CREATE/DIRECTORY [.BIN_$(MMS$ARCH_NAME)]
-        @ IF F$SEARCH("BINDBG_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
-                CREATE/DIRECTORY [.BINDBG_$(MMS$ARCH_NAME)]
-        @ IF F$SEARCH("LIS_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
-                CREATE/DIRECTORY [.LIS_$(MMS$ARCH_NAME)]
+        @ IF F$SEARCH("[.BUILD]BIN_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
+                CREATE/DIRECTORY [.BUILD.BIN_$(MMS$ARCH_NAME)]
+        @ IF F$SEARCH("[.BUILD]BINDBG_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
+                CREATE/DIRECTORY [.BUILD.BINDBG_$(MMS$ARCH_NAME)]
+        @ IF F$SEARCH("[.BUILD]LIS_$(MMS$ARCH_NAME).DIR") .EQS. "" THEN -
+                CREATE/DIRECTORY [.BUILD.LIS_$(MMS$ARCH_NAME)]
 
 all : $(BLD)meshr.exe, $(BLD)me.exe
 	@ write sys$output "All done."

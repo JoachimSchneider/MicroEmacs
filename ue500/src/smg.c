@@ -542,7 +542,7 @@ int smgmove P2_(int, row, int, column)
     arg[2] = column + 1;
 
     /* Call to SMG for the sequence */
-    status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
+    status = smg$get_term_data(&termtype, &code, &len, &rlen, buffer, arg);
     if (SUCCESS(status)) {
         buffer[rlen] = '\0';
         smgputs(buffer);
@@ -680,10 +680,10 @@ char *smggetstr P1_(int, code)
     static int arg[2] = {1, 1};
 
     /* Get sequence with one parameter */
-    status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
+    status = smg$get_term_data(&termtype, &code, &len, &rlen, buffer, arg);
     if (FAILURE(status)) {
         /* Try again with zero parameters */
-        status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer);
+        status = smg$get_term_data(&termtype, &code, &len, &rlen, buffer);
         if (FAILURE(status))
             return NULL;
     }
@@ -714,7 +714,7 @@ int smggetnum P1_(int, code)
     int       status, result;
 
     /* Call SMG for code translation */
-    status = SMG$GET_NUMERIC_DATA(&termtype, &code, &result);
+    status = smg$get_numeric_data(&termtype, &code, &result);
     return FAILURE(status) ? -1 : result;
 }
 
@@ -743,7 +743,7 @@ int smgcap P0_()
     int       status;
 
     /* Start SMG package */
-    status = SMG$INIT_TERM_TABLE_BY_TYPE(&orgchar.type, &termtype);
+    status = smg$init_term_table_by_type(&orgchar.type, &termtype);
     if (FAILURE(status)) {
         printf(TEXT189);
 /*                     "Cannot find entry for terminal type.\n" */
