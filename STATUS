@@ -996,12 +996,9 @@ the keymap via emacs.rc possible.
 - Linux ANSI does use one column less then possible on the screen.
 - After `Ctrl-X,C' screen-resizing does not work any more.
 - Modify PROMPT for the `Ctrl-X,C'-shell.
-- Move the (duplicated) qin(), qrep() functions into keyboard.c
-- list-keymappings is not available on FeeBSD but on VMS
-- set `$palette KEYMAP' does *not* overwrite existing entries.
-- VMS-SMG has a lot of exiting entries
-- VMS-ANSI has none.
-
+- Move the (duplicated) qin(), qrep() functions into keyboard.c.
+- VMS: test __NEW_STARLET feature.
+- Do a `git bisect' to find out why we substituted `CTRF' for `CTRL'.
 
 
 # EOF
