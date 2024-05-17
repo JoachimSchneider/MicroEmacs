@@ -1804,6 +1804,7 @@ EXTERN int PASCAL NEAR          undo_delete DCL((int f, int n));
 EXTERN int PASCAL NEAR          undo_list DCL((int f, int n));
 EXTERN int PASCAL NEAR          ab_insert DCL((char *sym, CONST char *expansion));
 EXTERN char *PASCAL NEAR        ab_lookup DCL((CONST char *sym));
+EXTERN char *PASCAL NEAR        ab_taillookup DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_delete DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_clean DCL((void));
 EXTERN BUFFER *PASCAL NEAR      bfind DCL((CONST char *bname, int cflag, int bflag));

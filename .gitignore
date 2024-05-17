@@ -44,5 +44,6 @@
 /mswin/msc/obj.c7
 
 # Microsoft MASM Files
-*.lst
+# The *.lst type is also used for other purposes.
+#*.lst
 *.sbr

@@ -21,8 +21,8 @@ $ !
 $	set default 'medir'
 $	delete *.OBJ;*
 $       delete *.EXE;*
-$       copy /REPLACE [-.-.SRC]*.* *.*
-$       copy /REPLACE [-.-.H]*.*   *.*
+$       copy /REPLACE [--.SRC]*.*  *.*
+$       copy /REPLACE [--.H]*.*    *.*
 $	copy /REPLACE [-]*.h       *.*
 $	copy /REPLACE [-]*.opt     *.*
 $ !

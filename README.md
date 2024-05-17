@@ -26,8 +26,9 @@ Documentation:
   called "Documentation Updates".
 
 * For platform specific instructions see
-  (`$ find ue500 -type f \(-name 'Readme*' -or -name 'Install*' \)`):
+  (`$ find ue500 -type f \( -name 'Readme*' -or -name 'Install*' \)`):
 
+  - ue500/vms/Readme.txt
   - ue500/djgpp/Readme.txt
   - ue500/cygwin/Readme.txt
   - ue500/linux/termcap/Install
@@ -38,7 +39,7 @@ Documentation:
 
 ## Some history:
 
-* I enjoyed MicroEMACS since the 1994 --- then version 3.12 for MS-DOS;
+* I enjoyed MicroEMACS since 1994 --- then version 3.12 for MS-DOS;
   used it to type in the TeX code of my thesis.
 
 * Daniel Michael Lawrence worked on MicroEMACS until 2009. His version
@@ -68,7 +69,6 @@ Documentation:
   - Delete "memacs.git" on GitHub
 
 
-
 ## Branches:
 
 * *master*:   Tested
@@ -76,6 +76,8 @@ Documentation:
 * *fixes*:    Compiles and runs
 
 * *current*:  Need not even compile --- *Not testet*
+
+* *archive*:  Frozen (Aug 6, 2021) state of the copy of Peter Chapman's repository
 
 
 ## Pull requests
@@ -274,6 +276,55 @@ modern Linux and FreeBSD systems:
 
 * VMS: $ssave defaults to FALSE now: This way the VMS versions work out
   of the box.
+
+* Setting $abfull TRUE enables full --- i.e. substrings in words ---
+  expansion of abbreviations. This is a stronger form of the $abquick
+  sub mode:
+
+  Example use of these flags when in ABBREV mode:
+
+  Assume the abbreviations
+
+    Aa  Alpha
+    Xx  X-Ray
+
+  are defined
+
+  - $abfull == FALSE, $abquick == FALSE
+
+    Then only the *isolated* words Aa or Xx will be substituted by
+    `Alpha' and 'X-Ray' during typing:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AaXx"
+    ```
+
+  - $abfull == FALSE, $abquick == TRUE
+
+    Aa and Xx will be substituted as soon as the appear at the
+    beginning of words or follow another substitution:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AlphaX-Ray"
+    "yAaXx"     ===>    "yAaXx"
+    ```
+
+  - $abfull == TRUE ($abquick setting doesn't matter):
+
+    Every occurence of Aa and Xx will be substituted as soon as they
+    are typed in:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AlphaX-Ray"
+    "yAaXx"     ===>    "yAlphaX-Ray"
+    "yAaXxu"    ===>    "yAlphaX-Rayu"
+    ```
+
+  So indeed the the $abfull somehow improves $abquick's behaviour
+  which we keep here for compatibility.
 
 
 ## TODO

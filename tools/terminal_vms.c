@@ -348,8 +348,7 @@ static int  TerminalRead(const terminal_t *tp, char *buf, int bufsiz, int read_e
   int                     status        = 0;
   xiosb_t                 iosb;
   const int               noterm[]      = {0, 0}; /* Terminator list of NONE */
-  /* `static': Here only to avoid increasing the stack size too much  */
-  static char             tmp_buf[TT_READ_BUFSZ];
+  char                    tmp_buf[TT_READ_BUFSZ];
 
   ZEROMEM(iosb);
   ZEROMEM(tmp_buf);
