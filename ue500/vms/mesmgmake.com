@@ -21,13 +21,14 @@ $ !
 $	set default 'medir'
 $	delete *.OBJ;*
 $       delete *.EXE;*
-$       copy /REPLACE [-.-.SRC]*.* *.*
-$       copy /REPLACE [-.-.H]*.*   *.*
+$       copy /REPLACE [--.SRC]*.*  *.*
+$       copy /REPLACE [--.H]*.*    *.*
 $	copy /REPLACE [-]*.h       *.*
 $	copy /REPLACE [-]*.opt     *.*
 $ !
 $ !
 $	cc_cmd abbrev
+$ !	cc_cmd ansi
 $	cc_cmd basic
 $	cc_cmd bind
 $	cc_cmd buffer

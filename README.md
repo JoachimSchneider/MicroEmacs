@@ -279,7 +279,52 @@ modern Linux and FreeBSD systems:
 
 * Setting $abfull TRUE enables full --- i.e. substrings in words ---
   expansion of abbreviations. This is a stronger form of the $abquick
-  sub mode.
+  sub mode:
+
+  Example use of these flags when in ABBREV mode:
+
+  Assume the abbreviations
+
+    Aa  Alpha
+    Xx  X-Ray
+
+  are defined
+
+  - $abfull == FALSE, $abquick == FALSE
+
+    Then only the *isolated* words Aa or Xx will be substituted by
+    `Alpha' and 'X-Ray' during typing:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AaXx"
+    ```
+
+  - $abfull == FALSE, $abquick == TRUE
+
+    Aa and Xx will be substituted as soon as the appear at the
+    beginning of words or follow another substitution:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AlphaX-Ray"
+    "yAaXx"     ===>    "yAaXx"
+    ```
+
+  - $abfull == TRUE ($abquick setting doesn't matter):
+
+    Every occurence of Aa and Xx will be substituted as soon as they
+    are typed in:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AlphaX-Ray"
+    "yAaXx"     ===>    "yAlphaX-Ray"
+    "yAaXxu"    ===>    "yAlphaX-Rayu"
+    ```
+
+  So indeed the the $abfull somehow improves $abquick's behaviour
+  which we keep here for compatibility.
 
 
 ## TODO
