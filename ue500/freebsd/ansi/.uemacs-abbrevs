@@ -1,13 +1,14 @@
 ; SOF(Abbreviations for uemacs)
 
 
-add-abbrev 'a   "&auml;"
-add-abbrev 'o   "&ouml;"
-add-abbrev 'u   "&uuml;"
-add-abbrev 'A   "&Auml;"
-add-abbrev 'O   "&Ouml;"
-add-abbrev 'U   "&Uuml;"
-add-abbrev 's   "&szlig;"
+; LaTeX like German Umlauts (`~"': `~' must be used to escape `"'):
+add-abbrev "~"a"    "&auml;"
+add-abbrev "~"o"    "&ouml;"
+add-abbrev "~"u"    "&uuml;"
+add-abbrev "~"A"    "&Auml;"
+add-abbrev "~"O"    "&Ouml;"
+add-abbrev "~"U"    "&Uuml;"
+add-abbrev "~"s"    "&szlig;"
 
 
 

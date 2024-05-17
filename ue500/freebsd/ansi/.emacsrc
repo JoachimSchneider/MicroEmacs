@@ -87,8 +87,8 @@ set $posflag TRUE
 ;;
 ;
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
-; Added `\', "'" to wchars because they may be used for uemacs abbrevs while `@' may not.
-set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]|;:\'"
+; Added "\~"$^{}[]" to $wchars: `~x' is `x'.
+set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_\~"$^{}[]"
 set $abfull TRUE
 ; Default paragraph indent used with fill-*
 set $parindent 0

@@ -782,10 +782,10 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
     }
 
     /* since the keystroke is not a command, */
-    if ( isinword(c) )  {
+    if ( ab_full || isinword(c) ) {
         /* in a word, we save it */
         ab_save(c);
-    } else              {
+    } else                        {
         /* not in a word, we attempt an expansion */
         ab_expand();
     }
