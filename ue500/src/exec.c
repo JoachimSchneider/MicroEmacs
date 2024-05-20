@@ -251,7 +251,7 @@ char *PASCAL NEAR token P3_(
                 break;
 
             default:
-                c = *(src-1);
+                c = *(src - 1);
             }
             if ( --size > 0 ) {
                 *tok++ = c;

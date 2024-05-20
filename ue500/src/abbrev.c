@@ -24,7 +24,7 @@
 VOID PASCAL NEAR ab_save P1_(char, c)
 /* c: character to add to current word buffer */
 {
-    char *s;            /* ptr to cycle chars */
+    char  *s  = NULL;   /* ptr to cycle chars */
 
     /* only in ABBREV mode */
     if ( (curbp->b_mode & MDABBR) == 0 )
@@ -44,6 +44,7 @@ VOID PASCAL NEAR ab_save P1_(char, c)
     /* add the character */
     *ab_pos++ = c;
     *ab_pos = 0;
+    TRC(("ab_save(): <== `%c'", c));
 }
 
 VOID PASCAL NEAR ab_expand P0_()
@@ -62,7 +63,7 @@ VOID PASCAL NEAR ab_expand P0_()
                     ab_taillookup(ab_word)
                       :
                     ab_lookup(ab_word) ) != NULL )  {
-        TRC(("`%s' ===> `%s'", ab_word, exp));
+        TRC(("ab_expand(): `%s' ===> `%s'", ab_word, exp));
 
         /* backwards delete the symbol */
         ldelete(-( (long)STRLEN(ab_word) ), FALSE);
@@ -295,8 +296,8 @@ VOID PASCAL NEAR ab_init P0_()
     ab_full   = FALSE;                  /* no full expansion */
     ab_quick  = FALSE;                  /* no aggressive expansion */
     ab_pos    = ab_word;                /* no word accumulated yet */
-    ab_end    = &ab_word[NSTRING - 1];  /* ptr to detect end of this
-                                         * buffer */
+    ab_end    = &ab_word[NELEM(ab_word) - 1]; /* ptr to detect end of
+                                               * this buffer  */
 }
 
 /* AB_INSERT:

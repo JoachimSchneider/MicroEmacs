@@ -326,6 +326,49 @@ modern Linux and FreeBSD systems:
   So indeed the the $abfull somehow improves $abquick's behaviour
   which we keep here for compatibility.
 
+  A more realistc examle: Suppose you need to use the HTML commands for
+  german umlauts. To simplify this task you decide to use MicroEMACS
+  abreviations which let you type the umlauts in the LaTeX style:
+
+  * Create the file `.uemacs-abbrevs` in your HOME directory:
+    ```
+    ; SOF(Abbreviations for uemacs)
+
+
+    ; LaTeX like German Umlauts (`~"': `~' must be used to escape `"'):
+    add-abbrev "~"a"    "&auml;"
+    add-abbrev "~"o"    "&ouml;"
+    add-abbrev "~"u"    "&uuml;"
+    add-abbrev "~"A"    "&Auml;"
+    add-abbrev "~"O"    "&Ouml;"
+    add-abbrev "~"U"    "&Uuml;"
+    add-abbrev "~"s"    "&szlig;"
+
+
+
+    ; EOF(Abbreviations for uemacs)
+    ```
+
+    In your `.emacsrc` add the lines
+
+    ```
+    ...
+    store-procedure get-abbrevs
+            !if &seq &find .uemacs-abbrevs ""
+                    write-message "[Can not find .uemacs-abbrevs]"
+                    !return
+            !endif
+            execute-file .uemacs-abbrevs
+    !endm
+    execute-procedure get-abbrevs
+    ...
+    set $abfull TRUE
+    ...
+    ```
+
+    Then you simply type M"archen which will expand to M&auml;rchen
+    *while* you are typing.
+
 
 ## TODO
 - Compile on Windows:

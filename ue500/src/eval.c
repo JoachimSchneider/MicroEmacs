@@ -2459,9 +2459,15 @@ VOID PASCAL NEAR pad P2_(char *, s, int, len)
 /* s:   String to add spaces to */
 /* len: Wanted length of string */
 {
-    while ( STRLEN(s) < len ) {
-        XSTRCAT(s, "          ");
-        s[len] = 0;
+    int l = 0;
+
+    ASRT(NULL != s);
+
+    if ( len > (l = STRLEN(s)) )  {
+        for ( ; l < len; l++ )  {
+            s[l]  = ' ';
+        }
+        s[l]  = '\0';
     }
 }
 

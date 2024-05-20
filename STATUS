@@ -999,6 +999,7 @@ the keymap via emacs.rc possible.
 - Move the (duplicated) qin(), qrep() functions into keyboard.c.
 - VMS: test __NEW_STARLET feature.
 - Do a `git bisect' to find out why we substituted `CTRF' for `CTRL'.
+- The variable $abcap :<==>: ab_cap is ignored.
 
 
 # EOF
