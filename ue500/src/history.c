@@ -2602,6 +2602,11 @@
  *      14 May 2024 Joachim Schneider
  *      - Setting $abfull TRUE enables full --- i.e. substrings in
  *        words --- expansion of abbreviations.
+ *      23 May 2024 Joachim Schneider
+ *      - added new escape character flag `~x':
+ *        Exactly two hexadecimal digits following `~x' are
+ *        evaluated to a character code:
+ *        ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
  *====================================================================*/
 
 /*====================================================================*/
