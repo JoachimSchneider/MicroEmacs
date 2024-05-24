@@ -398,7 +398,7 @@ static VOID mbreadast P0_()
             /* Got broadcast, get it */
             /* Hard-coding the mbmsg.brdcnt to 511 is a temp solution. */
             mbmsg.brdcnt = 511;
-            memcpy(brdcstbuf, mbmsg.message, 511);
+            umc_memcpy(brdcstbuf, mbmsg.message, 511);
             brdcstbuf[511] = 0;
 
             RemoveEscapes(brdcstbuf);
@@ -706,6 +706,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
+# if    BEGIN_COMMENT_
 int ttgetc_nowait P0_()
 {
     int ch  = 0;
@@ -732,6 +733,23 @@ int ttgetc_nowait P0_()
 # endif
     return (ch);
 }
+# endif /*END_COMMENT*/
+
+/* QGET:
+ *
+ * Get characters pending in input queue:
+ * - *lp:     Number of characters in queue
+ * - Result:  Pointer to int array
+ */
+CONST int *qget P1_(int *, lp)
+{
+    ASRT(NULL != lp);
+
+    *lp = inbuft - inbufh;
+
+    return (CONST int *)inbufh;
+}
+
 
 /*
  * Typahead - any characters pending?
@@ -1406,7 +1424,7 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
         }
 
         /* copy data */
-        memcpy(fline, buf, nbuf);
+        umc_memcpy(fline, buf, nbuf);
 
         /* encrypt it */
         ecrypt(fline, nbuf);
@@ -1515,8 +1533,8 @@ VOID PASCAL NEAR  expandargs P2_(int *, pargc, char ***, pargv)
         unsigned long context = 0;
 
         /* should check for wildcards: %, *, and "..." */
-        if (**argv != '-' && (strchr(*argv, '%') || strchr(*argv, '*') ||
-                              strstr(*argv, "..."))) {
+        if (**argv != '-' && (umc_strchr(*argv, '%') || umc_strchr(*argv, '*')
+                                                     || strstr(*argv, "..."))) {
             /* search for all matching filenames */
             while ((lib$find_file(&filespec, &result_filespec, &context)) & 1) {
                 int       i;

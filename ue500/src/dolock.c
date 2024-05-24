@@ -18,8 +18,30 @@
 #include "estruct.h"
 #include "eproto.h"
 #include "elang.h"
-#if  ( IS_UNIX() )
-# include <unistd.h>
+#if  ( b_IS_UNIX )
+# if ( !b_IS_ANCIENT_UNIX )
+#  include <unistd.h>
+# else
+   EXTERN int getpid      DCL((void));
+#  ifdef GETHOSTNAME_AVAILABLE
+   EXTERN int gethostname DCL((char *name, int len));
+#  else
+#   define  MYHOSTNAME_   "darkstar"
+
+   static int gethostname P2_(char *, name, int, len)
+   {
+     int                i       = 0;
+
+     for ( i = 0; i < MIN2(SIZEOF(MYHOSTNAME_), len) - 1; i++ ) {
+       name[i]  = MYHOSTNAME_[i];
+     }
+     name[i]  = '\0';
+
+     return 0;
+   }
+#   undef   MYHOSTNAME_
+#  endif
+# endif
 #endif
 
 #if ( FILOCK && WMCS )
@@ -72,18 +94,25 @@ char *undolock P1_(CONST char *, fname)
 }
 
 
-#elif ( FILOCK && ( IS_UNIX() || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
-
-# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) || IS_UNIX() )
+#else
+#if ( FILOCK && ( b_IS_UNIX || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
+/* b_IS_UNIX: `sys/types.h' and `sys/stat.h' already included
+ * in `eproto.h':
+ */
+# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) )
 #  include     <sys/types.h>
 # endif
-# include       <sys/stat.h>
+# if ( ! b_IS_UNIX )
+#   include       <sys/stat.h>
+# endif
 # include       <errno.h>
 # if  ( MSDOS && TURBO )
 #  include     <dir.h>
 # endif
-# if  ( IS_UNIX() )
-#  include     <dirent.h>
+# if  ( b_IS_UNIX )
+#  if ( !b_IS_ANCIENT_UNIX )
+#   include     <dirent.h>
+#  endif
 #  include     <signal.h>
 # endif
 
@@ -91,8 +120,6 @@ char *undolock P1_(CONST char *, fname)
 #  include <direct.h>
 #  define chdir        _chdir
 #  define getcwd       _getcwd
-#  define mkdir        _mkdir
-#  define rmdir        _rmdir
 # endif
 
 # if  ( !OS2 )
@@ -240,9 +267,9 @@ char *dolock P1_(CONST char *, filespec)
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
     long proc_id;               /* process id from lock file */
-#if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     int rc;                     /* syscall return code */
-#endif
+# endif
     char filename[NFILEN];      /* name of file to lock */
     char pathname[NFILEN];      /* path leading to file to lock */
     char drivename[NFILEN];     /* drive for file to lock */
@@ -253,7 +280,7 @@ char *dolock P1_(CONST char *, filespec)
     static char result[NSTRING]; /* error return string */
 
     /* separate filespec into components */
-#if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     {
         char  new_filespec[NFILEN];
 
@@ -264,11 +291,11 @@ char *dolock P1_(CONST char *, filespec)
         XSTRCPY( pathname, parse_path(new_filespec) );
         XSTRCPY( drivename, parse_drive(new_filespec) );
     }
-#else
+# else
     XSTRCPY( filename, parse_name(filespec) );
     XSTRCPY( pathname, parse_path(filespec) );
     XSTRCPY( drivename, parse_drive(filespec) );
-#endif
+# endif
     if ( pathname[0] == 0 )
         XSTRCPY(pathname, ".");
 
@@ -281,7 +308,7 @@ char *dolock P1_(CONST char *, filespec)
     tgetc();
 # endif
 
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
     /* check to see if we can access the path */
     if ( (rc = umc_stat(pathname, &sb)) != 0 )  {
 #  if  LOCKDEBUG
@@ -293,13 +320,13 @@ char *dolock P1_(CONST char *, filespec)
 
         return (result);
     }
-    if ( (sb.st_mode & S_IFDIR) == 0 ) {
+    if ( !S_ISDIR(sb.st_mode) ) {
         XSTRCPY(result, LOCKMSG);
         XSTRCAT(result, "Illegal Path");
 
         return (result);
     }
-# endif /* IS_UNIX()  */
+# endif /* b_IS_UNIX  */
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
@@ -316,11 +343,7 @@ char *dolock P1_(CONST char *, filespec)
         printf("MKDIR(%s)\n", lockpath);
         tgetc();
 # endif
-# if  ( IS_UNIX() )
-        if ( mkdir(lockpath, 0777) != 0 ) {
-# else
-        if ( mkdir(lockpath) != 0 ) {
-# endif
+        if ( umc_mkdir(lockpath) != 0 ) {
             XSTRCPY(result, LOCKMSG);
             switch ( errno ) {
 
@@ -335,7 +358,7 @@ char *dolock P1_(CONST char *, filespec)
 
             return (result);
         }
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         chmod(lockpath, 01777);
 # endif
     }
@@ -364,7 +387,7 @@ char *dolock P1_(CONST char *, filespec)
         }
 
         /* and output the info needed */
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         fprintf( fp, "%lu\n", (long int)getpid() );
 # else
         fprintf(fp, "%lu\n", 0ul); /* process ID */
@@ -382,7 +405,7 @@ char *dolock P1_(CONST char *, filespec)
         if ( getenv("HOST") )
             fprintf( fp, "%s\n", getenv("HOST") );
         else {
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
             ZEROMEM(buf);
             gethostname(buf, SIZEOF(buf) - 1);
             fprintf(fp, "%s\n", buf);
@@ -421,7 +444,7 @@ char *dolock P1_(CONST char *, filespec)
         term_trim(buf);
         XSTRCAT(result, buf);
 
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         /* is it the current host? */
         ZEROMEM(host);
         gethostname(host, SIZEOF(host) - 1);
@@ -474,7 +497,7 @@ char *undolock P1_(CONST char *, filespec)
     static char result[NSTRING];    /* error return string */
 
     /* separate filespec into components */
-#if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     {
         char  new_filespec[NFILEN];
 
@@ -485,11 +508,11 @@ char *undolock P1_(CONST char *, filespec)
         XSTRCPY( pathname, parse_path(new_filespec) );
         XSTRCPY( drivename, parse_drive(new_filespec) );
     }
-#else
+# else
     XSTRCPY( filename, parse_name(filespec) );
     XSTRCPY( pathname, parse_path(filespec) );
     XSTRCPY( drivename, parse_drive(filespec) );
-#endif
+# endif
     if ( pathname[0] == 0 )
         XSTRCPY(pathname, ".");
 
@@ -523,7 +546,7 @@ char *undolock P1_(CONST char *, filespec)
 
         return (result);
     } else {
-        rmdir(lockpath); /* this will work only if dir is empty */
+        umc_rmdir(lockpath);  /* this will work only if dir is empty */
 
         return (NULL);
     }
@@ -532,11 +555,12 @@ char *undolock P1_(CONST char *, filespec)
 
 #else
 
-VOID dohello P0_()
+VOID dolockhello P0_()
 {
 }
 
 #endif
+#endif  /* ( FILOCK && WMCS ) */
 
 
 

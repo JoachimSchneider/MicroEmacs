@@ -14,11 +14,12 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include "estruct.h"
-#if IS_UNIX() /**CYGWIN**/
-# include <unistd.h>
+#if b_IS_UNIX /**CYGWIN**/
+# if ( !b_IS_ANCIENT_UNIX )
+#  include <unistd.h>
+# endif
 #endif
 #include "eproto.h"
 #include "edef.h"
@@ -330,7 +331,7 @@ int PASCAL NEAR quote P2_(int, f, int, n)
     REGISTER int ec;            /* current extended key fetched     */
     REGISTER int c;             /* current ascii key fetched        */
     REGISTER int status;        /* return value to hold from linstr */
-    char key_name[10];          /* name of a keystroke for quoting  */
+    char key_name[C_18];        /* name of a keystroke for quoting  */
 
     if ( curbp->b_mode & MDVIEW )   /* don't allow this command if  */
         return ( rdonly() );        /* we are in read only mode     */
@@ -347,7 +348,7 @@ int PASCAL NEAR quote P2_(int, f, int, n)
 
     /* if this is a mouse event or function key, put its name in */
     if ( (ec & MOUS) || (ec & SPEC) ) {
-        cmdstr(ec, key_name);
+        getecnam(ec, key_name, SIZEOF(key_name));
         while ( n-- ) {
             status = linstr(key_name);
             if ( status != TRUE )
@@ -1113,31 +1114,31 @@ int PASCAL NEAR adjustmode P2_(int, kind, int, global)
         uppercase( (unsigned char *) scan++ );
 
     /* test it first against the colors we know */
-    if ( ( i = lookup_color(cbuf) ) != -1 ) {
+    if ( ( i = lkp_color(cbuf) ) != -1 ) {
 
 #if     COLOR
         /* finding the match, we set the color */
         if ( global ) {
             if ( uflag ) {
                 gfcolor = i;
-                TRC( ("Globally setting foreground color to %s/%d",
-                      (char *)cbuf, (int)i) );
+                TRC(("Globally setting foreground color to %s/%d",
+                     (char *)cbuf, (int)i));
             } else {
                 gbcolor = i;
-                TRC( ("Globally setting background color to %s/%d",
-                      (char *)cbuf, (int)i) );
+                TRC(("Globally setting background color to %s/%d",
+                     (char *)cbuf, (int)i));
             }
 # if     WINDOW_TEXT & 0
-            refresh_screen(first_screen);
+            rdw_screen(first_screen);
 # endif
         } else if ( uflag ) {
             curwp->w_fcolor = i;
-            TRC( ("Locally setting foreground color to %s/%d", (char *)cbuf,
-                  (int)i) );
+            TRC(("Locally setting foreground color to %s/%d", (char *)cbuf,
+                 (int)i));
         } else {
             curwp->w_bcolor = i;
-            TRC( ("Locally setting background color to %s/%d", (char *)cbuf,
-                  (int)i) );
+            TRC(("Locally setting background color to %s/%d", (char *)cbuf,
+                 (int)i));
         }
 
         curwp->w_flag |= WFCOLR;
@@ -1499,9 +1500,11 @@ int PASCAL NEAR ovstring P2_(int, f, int, n)
     return (status);
 }
 
-/* LOOKUP_COLOR:
+/* LKP_COLOR:
+ *
+ *  lookup color
  */
-int PASCAL NEAR lookup_color P1_(char *, sp)
+int PASCAL NEAR lkp_color P1_(char *, sp)
 /* sp:  Name to look up */
 {
     REGISTER int i;             /* index into color list */
@@ -1525,9 +1528,79 @@ int PASCAL NEAR lookup_color P1_(char *, sp)
  * functions therefor we use the following construct:
  */
 #ifdef NDEBUG
-# define  NDEBUF_WAS_DEFINED_
+# define  NDEBUG_WAS_DEFINED_
 # undef   NDEBUG
 #endif
+
+
+/*======================================================================
+ * Some library functions not available everywhere:
+ *====================================================================*/
+/* UMC_MEMSET:
+ */
+VOIDP umc_memset  P3_(VOIDP, dest, int, c, unsigned long, n)
+{
+    assert(NULL != dest);
+
+#if b_IS_ANCIENT_UNIX
+    {
+        unsigned char *x  = (unsigned char*)dest;
+        int           i   = 0;
+
+        for ( i = 0; i < (long)n; i++ ) {
+            x[i] = c;
+        }
+    }
+#else
+    memset(dest, c, n);
+#endif
+
+    return dest;
+}
+
+/* UMC_MEMCPY:
+ *
+ * We use this also when there is a native implementation:
+ * This one may also copy overlapping regions of memory.
+ */
+VOIDP umc_memcpy  P3_(VOIDP, dest, CONST VOIDP, src, unsigned long, n)
+{
+    unsigned char *x  = (unsigned char*)dest;
+    unsigned char *y  = (unsigned char*)src;
+    int           i   = 0;
+
+    assert(NULL != dest);
+    assert(NULL != src);
+
+    if ( x < y )  {
+        for ( i = 0; i < (long)n; i++ ) {
+            x[i] = y[i];
+        }
+    } else        {
+        for ( i = (long)n - 1; i >= 0 ; i-- ) {
+            x[i] = y[i];
+        }
+    }
+
+    return dest;
+}
+
+char  *umc_strchr P2_(CONST char *, s, int, c)
+{
+    if ( !s || !*s )  {
+        return NULL;
+    }
+
+    do  {
+        if ( c == *s )  {
+            return (char *)s;
+        }
+    } while ( *++s );
+
+    return NULL;
+}
+/*====================================================================*/
+
 
 /* XSTRCPY:
  *
@@ -1762,8 +1835,8 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
  *                 a warning message.
  */
 char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
-                                const char *, src,
-                                const char *, file, int, line)
+                                CONST char *, src,
+                                CONST char *, file, int, line)
 {
     if        ( 2 <= dst_size ) {
         xstrlcpy(dst, src, dst_size);
@@ -1785,8 +1858,8 @@ char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
  *                 warning message.
  */
 char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
-                                const char *, src,
-                                const char *, file, int, line)
+                                CONST char *, src,
+                                CONST char *, file, int, line)
 {
     if        ( 2 <= dst_size ) {
         xstrlcat(dst, src, dst_size);
@@ -1803,7 +1876,7 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
 
 FILE *uetmpfile_ P1_(int, delmode)
 {
-# if !IS_UNIX() /**!CYGWIN**/
+# if !b_IS_UNIX /**!CYGWIN**/
     return tmpfile();
 # else
 /* `tmpfile()' does *not* work with cygwin in the windows console!    */
@@ -1849,15 +1922,9 @@ FILE *uetmpfile_ P1_(int, delmode)
                  * take care of non standard realloc() behaviour:
                  */
                 if ( NULL == fname_list ) {
-                    ASRT( NULL != (fname_list =
-                            (CONST char **)calloc(fname_list_len,
-                                                  SIZEOF(*fname_list)))
-                        );
+                    ASRT( NULL != (fname_list = (CONST char **)calloc(fname_list_len, SIZEOF(*fname_list))));
                 } else                    {
-                    ASRT(NULL != (fname_list =
-                            (CONST char **)realloc(fname_list,
-                                fname_list_len * SIZEOF(*fname_list)))
-                        );
+                    ASRT(NULL != (fname_list = (CONST char **)realloc(fname_list, fname_list_len * SIZEOF(*fname_list))));
                 }
             }
             fname_list[fname_list_pos++]  = xstrdup(fname);
@@ -1892,10 +1959,9 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
 {
     int         rc  = 0;            /* Final return code  */
     int         nn  = n;            /* Want a signed value */
-    int         sc  = 0;            /* Ret code of intermediate calls */
     int         nr  = 0;            /* Number of chars to read */
     static FILE *fp = NULL;
-    static char buf[BUFSIZ];
+    static char buf[BUFSIZ];  /* MUST USE BUFSIZ from <stdio.h> */
 
     ASRT(0    <= nn);
     ASRT(NULL != fmt);
@@ -1904,6 +1970,8 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
          /* ANSI C: fp should be opened in wb+ mode */
 # if ( 0 )
         if ( NULL == ( fp = uetmpfile() ) ) {
+            TRC(("xvsnprintf(): %s", "Cannot create a tmpfile"));
+
             return (-1);
         }
 # else
@@ -1913,23 +1981,30 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
          * Buffering: No real IO for not too large junks
          *
          * `setvbuf(fp, NULL, _IOFBF, 0)' does not work everywhere,
-         * e.g. not with DJGPP_DOS.
+         * e.g. not with DJGPP_DOS. No setvbuf() for ANCIENT_UNIX.
          */
-        if ( 0 != (sc = setvbuf(fp, buf, _IOFBF, SIZEOF(buf))) )  {
-            int errno_sv  = 0;
-
-            errno_sv  = errno;
-            TRC(("xvsnprintf: setvbuf(), sc = %d, errno = %d: %s",
-                 sc, errno_sv, strerror(errno_sv)));
-
-            return (-2);
-        }
+        setbuf(fp, buf);
     }
 
-    rewind(fp);
-    if ( 0 > ( rc = vfprintf(fp, fmt, ap) ) ) {
+#ifndef SEEK_SET
+# define SEEK_SET (0)
+#endif
+    /* Use `fseek' instead of `rewind':
+     * - `rewind' did not work on 4.2 BSD
+     * - rewind gives no return code to check.
+     */
+    if ( 0 > fseek(fp, 0L, SEEK_SET) )  {
+        TRC(("xvsnprintf(): %s", "fseek returned .LT. 0"));
+
+        return (-2);
+    }
+    RC_VFPRINTF(rc, fp, fmt, ap);
+    if ( 0 > rc ) {
+        TRC(("xvsnprintf(): RC_VFPRINTF returned %d", rc));
+
         return (-3);
     }
+    TRC(("xvsnprintf(): RC_VFPRINTF returned %d", rc));
 
     if ( 0 == nn ) {
         /*
@@ -1945,17 +2020,41 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
         if ( 0 == rc ) {
             s[0] = '\0';
         } else {                /* Read back characters written: */
-            rewind(fp);
-            nr = MIN2(rc, nn - 1);
-            if ( 1 != fread(s, nr, 1, fp) ) {
+            if ( 0 > fseek(fp, 0L, SEEK_SET) )  {
+                TRC(("xvsnprintf(): %s", "fseek returned .LT. 0"));
+
                 return (-4);
             }
+            nr = MIN2(rc, nn - 1);
+            TRC(("xvsnprintf(): nr = %d", nr));
+#if ( 1 )
+            if ( 1 != fread(s, nr, 1, fp) ) {
+                TRC(("xvsnprintf(): %s", "fread did not return 1"));
+
+                return (-5);
+            }
+#else
+            {
+                int i   = 0;
+                int ch  = '\0';
+
+                for ( i = 0; i < nr; i++ )  {
+                    if ( EOF == (ch = getc(fp)) ) {
+                        s[i]  = '\0';
+                        TRC(("xvsnprintf(): EOF from getc() --- i = %d, got `%s'", i, s));
+
+                        return (-5);
+                    }
+                    ((unsigned char *)s)[i] = ch;
+                }
+            }
+#endif
             s[nr] = '\0';
         }
     }
 
     if ( 0 < nn ) {
-        TRC(("xvsnprintf: %s", s));
+        TRC(("xvsnprintf(): `%s'", s));
     }
 
     return rc;
@@ -1973,7 +2072,7 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
 int CDECL NEAR  xsnprintf (va_alist)
     va_dcl
 #else
-int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
+int CDECL NEAR  xsnprintf V3_(char *, s, size_t, n, CONST char *, fmt)
 #endif
 {
     int         rc    = 0;
@@ -2048,7 +2147,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 int CDECL NEAR  xasprintf (va_alist)
     va_dcl
 #else
-int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
+int CDECL NEAR  xasprintf V2_(char **, ret, CONST char *, fmt)
 #endif
 #if ( 0 ) /* Version if xvasprintf() is available */
 {
@@ -2265,12 +2364,12 @@ int PASCAL NEAR strcasestart P2_(CONST char *, start, CONST char *, test)
 /*====================================================================*/
 
 
-/* ASTRCATC:
+/* ACHRCAT:
  *
  * Concatenate character c to string str and malloc the result.
  * Input string must either be NULL or malloced.
  */
-char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
+char *PASCAL NEAR achrcat P2_(CONST char *, str, CONST char, c)
 {
     char  *nstr = NULL;
     int   len   = 0;
@@ -2313,12 +2412,102 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
     return nstr;
 }
 
+/* CMKVIS:
+ *
+ * Display character in a visible form.
+ */
+CONST char *cmkvis P1_(char, c)
+{
+    static char   res[NSTRING];
+    unsigned char uc  = (unsigned char)c;
+
+    CASRT(SIZEOF("\\x%XX") <= SIZEOF(res));
+
+    ZEROMEM(res);
+
+    switch (c)  {
+        case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':
+        case 'G':  case 'H':  case 'I':  case 'J':  case 'K':  case 'L':
+        case 'M':  case 'N':  case 'O':  case 'P':  case 'Q':  case 'R':
+        case 'S':  case 'T':  case 'U':  case 'V':  case 'W':  case 'X':
+        case 'Y':  case 'Z':
+        case 'a':  case 'b':  case 'c':  case 'd':  case 'e':  case 'f':
+        case 'g':  case 'h':  case 'i':  case 'j':  case 'k':  case 'l':
+        case 'm':  case 'n':  case 'o':  case 'p':  case 'q':  case 'r':
+        case 's':  case 't':  case 'u':  case 'v':  case 'w':  case 'x':
+        case 'y':  case 'z':
+        case '0':  case '1':  case '2':  case '3':  case '4':  case '5':
+        case '6':  case '7':  case '8':  case '9':
+        case '!':  case '@':  case '#':  case '$':  case '%':  case '^':
+        case '&':  case '*':  case '(':  case ')':  case '-':  case '_':
+        case '=':  case '+':  case '[':  case '{':  case ']':  case '}':
+        case '\\': case '|':  case ';':  case ':':  case '\'': case '"':
+        case ',':  case '<':  case '.':  case '/':  case '?':  case '`':
+        case '~':
+#if     BEGIN_COMMENT
+        case ' ':  case '\t': case '\n': case '\r':
+#endif  /*END_COMMENT*/
+
+            res[0]  = c;
+            break;
+
+        default:
+            assert(0 <= uc);
+            assert(uc <= 0xFF);
+            sprintf(res, "\\x%02X", (unsigned int)uc);
+            break;
+    }
+
+    return res;
+}
+
+/* SMKVIS:
+ *
+ * Display character string in a visible form.
+ */
+CONST char *smkvis P1_(CONST char *, s)
+{
+    static char   res[NSTRING];
+
+    ZEROMEM(res);
+
+    if ( s )  {
+        while ( *s )  {
+            xstrlcat(res, cmkvis(*s), SIZEOF(res));
+            s++;
+        }
+    }
+
+    return res;
+}
+
+/* BMKVIS:
+ *
+ * Display character buffer in a visible form.
+ */
+CONST char *bmkvis P2_(CONST char *, s, int, l)
+{
+    static char   res[NSTRING];
+
+    ZEROMEM(res);
+
+    if ( s )  {
+        while ( 0 < l-- )   {
+            xstrlcat(res, cmkvis(*s), SIZEOF(res));
+            s++;
+        }
+    }
+
+    return res;
+}
+
+
 /* We want to use a working `assert' inside of some of these
  * functions therefor we use the following construct:
  */
-#ifdef NDEBUF_WAS_DEFINED_
-# define  NDEBUF
-# undef   NDEBUF_WAS_DEFINED_
+#ifdef NDEBUG_WAS_DEFINED_
+# define  NDEBUG
+# undef   NDEBUG_WAS_DEFINED_
 #endif
 
 /*====================================================================*/
@@ -2403,7 +2592,7 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
 FILE *PASCAL NEAR GetTrcFP P0_()
 {
-    static int  FirstCall = !0;
+    static int  FirstCall = 1;
     static FILE *TrcFP    = NULL;
 
     if ( FirstCall )  {
@@ -2433,7 +2622,7 @@ CONST char  *DebugMessage_fname_  = (CONST char *)"";
 int CDECL NEAR  DebugMessage (va_alist)
     va_dcl
 #else
-int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
+int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 #endif
 {
     int         rc    = 0;
@@ -2454,7 +2643,7 @@ int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
 #else
       va_start(ap, fmt);
 #endif
-      rc = vfprintf(TFP, fmt, ap);
+      RC_VFPRINTF(rc, TFP, fmt, ap);
       va_end(ap);
       fprintf(TFP, "%s", "\n");
       fflush(TFP);
@@ -2487,7 +2676,7 @@ char PASCAL NEAR  lputc_ P5_(LINE *, lp, int, n, char, c,
 
 #undef  FUNC_
 #define FUNC_ lgetc_
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
                                     fnam, int, lno)
 #else
@@ -2695,7 +2884,7 @@ int PASCAL NEAR FUNC_ P4_(BUFFER *, bp, int, doto,
 /*====================================================================*/
 
 
-int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
+int PASCAL NEAR TfmRegion P2_(filter_func_T, filter, VOIDP, argp)
 {
     LINE    *linep  = NULL;
     int     loffs   = 0;
@@ -2716,15 +2905,15 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     loffs = region.r_offset;                    /* Current offset.  */
     rsize = region.r_size;
     for (  i = 0; i < loffs; i++ )  {
-        rstart  = astrcatc(rstart, lgetc(linep, i));
+        rstart  = achrcat(rstart, lgetc(linep, i));
     }
     while ( rsize-- ) {
         if ( loffs == get_lused(linep) ) {      /* End of line.         */
-            rtext = astrcatc(rtext, '\r');
+            rtext = achrcat(rtext, '\r');
             linep = lforw(linep);
             loffs = 0;
         } else {                                /* Middle of line.  */
-            rtext = astrcatc(rtext, lgetc(linep, loffs));
+            rtext = achrcat(rtext, lgetc(linep, loffs));
             ++loffs;
         }
     }
@@ -2758,7 +2947,7 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     return TRUE;
 }
 
-int PASCAL NEAR TransformParagraph P2_(filter_func_T, filter,
+int PASCAL NEAR TfmParagraph P2_(filter_func_T, filter,
                                        VOIDP, argp)
 {
     /* make sure the cursor gets back to the right place on an undo */
@@ -2775,10 +2964,10 @@ int PASCAL NEAR TransformParagraph P2_(filter_func_T, filter,
     gotobop(FALSE, 1);
     set_w_doto(curwp, 0); /* force us to the beginning of line */
 
-    return TransformRegion(filter, argp);
+    return TfmRegion(filter, argp);
 }
 
-int PASCAL NEAR TransformBuffer P2_(filter_func_T, filter, VOIDP, argp)
+int PASCAL NEAR TfmBuffer P2_(filter_func_T, filter, VOIDP, argp)
 {
     /* make sure the cursor gets back to the right place on an undo */
     undo_insert(OP_CPOS, 0L, obj);
@@ -2794,7 +2983,7 @@ int PASCAL NEAR TransformBuffer P2_(filter_func_T, filter, VOIDP, argp)
     gotobob(FALSE, 1);
     set_w_doto(curwp, 0); /* force us to the beginning of line */
 
-    return TransformRegion(filter, argp);
+    return TfmRegion(filter, argp);
 }
 
 
@@ -2904,19 +3093,19 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
     }
     col = slen;
 
-    if ( NULL == (cp = (char *)strchr(ip, ' ')) ) {
+    if ( NULL == (cp = umc_strchr(ip, ' ')) ) {
         for ( i = 0; i < parindent; i++ ) {
-            res = astrcatc(res, ' ');
+            res = achrcat(res, ' ');
         }
 
         return  astrcat(res, ip);
     } else {
         for ( i = 0; i < parindent; i++ ) {
-            res = astrcatc(res, ' ');
+            res = achrcat(res, ' ');
             col++;
         }
         for (; ip < cp; ip++ )  {
-            res = astrcatc(res, *ip);
+            res = achrcat(res, *ip);
             col++;
         }
         while ( ' ' == *ip )  ip++;   /* Skip space */
@@ -2926,18 +3115,18 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
     for ( ;; )  {
         int ncol  = col;  /* Column of character before next space  */
 
-        if ( NULL != (cp  = (char *)strchr(ip, ' ')) )  {
+        if ( NULL != (cp  = umc_strchr(ip, ' ')) )  {
             ncol  += ((CONST char *)cp - ip) + 1;
         } else {
             ncol  += STRLEN(ip) + 1;
         }
 
         if ( fcol <= ncol ) {
-            res = astrcatc(res, '\r');
+            res = achrcat(res, '\r');
             res = astrcat(res, start);
             col = slen;
         } else {
-            res = astrcatc(res, ' ');
+            res = achrcat(res, ' ');
             col++;
         }
 
@@ -2945,7 +3134,7 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
             return  astrcat(res, ip);
         } else {
             for (; ip < cp; ip++ )  {
-                res = astrcatc(res, *ip);
+                res = achrcat(res, *ip);
                 col++;
             }
             while ( ' ' == *ip )  ip++;   /* Skip space */
@@ -3041,7 +3230,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
 
         start = xstrdup("");
         while ( '\0' != (c = text[i]) && ISSPACE(c) )   {
-            start = astrcatc(start, c);
+            start = achrcat(start, c);
             i++;
         }
         tpos  +=  i;
@@ -3064,7 +3253,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
                         nsp++;
                         state = IS_SPACE;
                     } else {
-                        pptext  = astrcatc(pptext, c);
+                        pptext  = achrcat(pptext, c);
                     }
                     break;
                 case IS_SPACE:
@@ -3075,18 +3264,18 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
                         nsp++;
                     } else {
                         if ( 2 <= ncr ) {
-                            pptext  = astrcatc(pptext, '\r');
+                            pptext  = achrcat(pptext, '\r');
                         } else if ( 0 < nsp ) {
-                            pptext  = astrcatc(pptext, ' ');
+                            pptext  = achrcat(pptext, ' ');
                         }
                         ncr = 0;
                         nsp = 0;
-                        pptext  = astrcatc(pptext, c);
+                        pptext  = achrcat(pptext, c);
                         state = IS_TEXT;
                     }
                     break;
                 default:
-                    ASRT(!"IMPOSSIBLE");
+                    ASRT(IMPOSSIBLE);
                     break;
             }
         }
@@ -3094,7 +3283,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
 
 
     while ( 0 < nbef-- )  {
-        res = astrcatc(res, '\r');
+        res = achrcat(res, '\r');
     }
 
     lptr  = xstrtok_r(pptext, "\r", &context);  /* .NE. NULL  */
@@ -3119,7 +3308,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
     }
 
     while ( 0 < naft-- )  {
-        res = astrcatc(res, '\r');
+        res = achrcat(res, '\r');
     }
 
 
@@ -3160,10 +3349,10 @@ static char *PASCAL NEAR  filter_indent P3_(CONST char *, rstart,
                     int i_ = 0;                                     \
                                                                     \
                     for ( i_ = 0; i_ < stabsize; i_++ ) {           \
-                        res = astrcatc(res, ' ');                   \
+                        res = achrcat(res, ' ');                    \
                     }                                               \
                 } else {                                            \
-                    res = astrcatc(res, '\t');                      \
+                    res = achrcat(res, '\t');                       \
                 }                                                   \
             }                                                       \
         }                                                           \
@@ -3188,7 +3377,7 @@ static char *PASCAL NEAR  filter_indent P3_(CONST char *, rstart,
         filter_indent_do_indent_(cp);
     }
     for ( ; *cp; cp++ ) {
-        res = astrcatc(res, *cp);
+        res = achrcat(res, *cp);
 
         if ( '\r' == *cp )  {
             filter_indent_do_indent_(cp);
@@ -3255,7 +3444,7 @@ static char *PASCAL NEAR  filter_undent P3_(CONST char *, rstart,
         filter_undent_do_undent_(&cp);
     }
     while ( *cp ) {
-        res = astrcatc(res, *cp);
+        res = achrcat(res, *cp);
 
         if ( '\r' == *cp++ )  {
             filter_undent_do_undent_(&cp);
@@ -3292,7 +3481,7 @@ int PASCAL NEAR trRegFill P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformRegion(&filter_fill, &n);
+    return TfmRegion(&filter_fill, &n);
 }
 
 int PASCAL NEAR trRegIndent P2_(int, f, int, n)
@@ -3315,7 +3504,7 @@ int PASCAL NEAR trRegIndent P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformRegion(&filter_indent, &n);
+    return TfmRegion(&filter_indent, &n);
 }
 
 int PASCAL NEAR trRegUndent P2_(int, f, int, n)
@@ -3338,7 +3527,7 @@ int PASCAL NEAR trRegUndent P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformRegion(&filter_undent, &n);
+    return TfmRegion(&filter_undent, &n);
 }
 
 int PASCAL NEAR trRegTest_ P2_(int, f, int, n)
@@ -3357,7 +3546,7 @@ int PASCAL NEAR trRegTest_ P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformRegion(&filter_test, NULL);
+    return TfmRegion(&filter_test, NULL);
 }
 
 int PASCAL NEAR trParTest_ P2_(int, f, int, n)
@@ -3376,7 +3565,7 @@ int PASCAL NEAR trParTest_ P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformParagraph(&filter_test, NULL);
+    return TfmParagraph(&filter_test, NULL);
 }
 
 int PASCAL NEAR trParFill P2_(int, f, int, n)
@@ -3400,7 +3589,7 @@ int PASCAL NEAR trParFill P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformParagraph(&filter_fill, &n);
+    return TfmParagraph(&filter_fill, &n);
 }
 
 int PASCAL NEAR trBufFill P2_(int, f, int, n)
@@ -3424,7 +3613,7 @@ int PASCAL NEAR trBufFill P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformBuffer(&filter_fill, &n);
+    return TfmBuffer(&filter_fill, &n);
 }
 
 int PASCAL NEAR trBufTest_ P2_(int, f, int, n)
@@ -3443,7 +3632,7 @@ int PASCAL NEAR trBufTest_ P2_(int, f, int, n)
     thisflag |= CFKILL;
     /*===============================================================*/
 
-    return TransformBuffer(&filter_test, NULL);
+    return TfmBuffer(&filter_test, NULL);
 }
 
 

@@ -48,9 +48,24 @@
 #define PROGNAME        "MicroEMACS"
 #define VERSION         "5.00"
 
-/*      Machine/OS definitions                                        */
-/*===== [Set one of these!!] ======================================== */
 
+/*====================================================================*/
+/* Old cpp programs sometimes have very limited space for macro       */
+/* definitions. When macro space overflows you get i.e. messages      */
+/* like `too much defining'.                                          */
+/*                                                                    */
+/* To save macro space we use the fact that an undefined macro in a   */
+/* cpp if-clause is handled as if it were defined to `0', which means */
+/* that it is allowed to ommit every macro that is defined as `0' and */
+/* subsequently is only used in cpp if-clauses.                       */
+/*====================================================================*/
+#define BEGIN_COMMENT_  ( 0 )
+/*====================================================================*/
+
+
+/*      Machine/OS definitions                                        */
+/*===== [Set one of these!!] =========================================*/
+#if BEGIN_COMMENT_
 #define AMIGA       0                 /* AmigaDOS                     */
 #define AOSVS       0                 /* Data General AOS/VS          */
 #define AUX         0                 /* Apple UNIX for Macintosh     */
@@ -62,7 +77,9 @@
 #define DJGPP_DOS   0                 /* Unix emulation on MS DOS     */
 #define FINDER      0                 /* Macintosh OS                 */
 #define FREEBSD     0                 /* FREEBSD 386 version 2 or +   */
+#endif  /*END_COMMENT_*/
 #define LINUX       1                 /* Linux                        */
+#if     BEGIN_COMMENT_
 #define HPUX8       0                 /* HPUX HP 9000 ver 8 or less   */
 #define HPUX9       0                 /* HPUX HP 9000 ver 9           */
 #define MPE         0                 /* HP MPE/XL                    */
@@ -74,6 +91,7 @@
 #define SOLARIS     0                 /* SUN Solaris (SYSV)           */
 #define SUN         0                 /* SUN v4.0                     */
 #define TOS         0                 /* ST520, TOS                   */
+#define UNIX_ANC    0                 /* Post UNIX V7 (.GE. BSD 4.1)  */
 #define USG         0                 /* UNIX system V                */
 #define VAT         0                 /* Related to XENIX (???)       */
 #define VMS         0                 /* VAX/VMS                      */
@@ -81,28 +99,38 @@
 #define WINXP       0                 /* Windows XP/Visual studio 2008*/
 #define WMCS        0                 /* Wicat's MCS                  */
 #define XENIX       0                 /* IBM-PC SCO XENIX             */
+#endif  /*END_COMMENT_*/
 
 
-#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD         \
+#define b_IS_UNIX       ( AIX || AIX5 || AUX || AVIION || BSD         \
                           || CYGWIN || DJGPP_DOS || FREEBSD || HPUX8  \
                           || HPUX9 || LINUX || OPENBSD || SMOS        \
-                          || SOLARIS || SUN || USG || XENIX )
-#define IS_POSIX_UNIX() ( IS_UNIX()                                   \
-                          && !( USG || AIX || AUX || SMOS || HPUX8    \
-                                || HPUX9 || SUN || XENIX ) )
-#if defined (__STDC__) || defined(__cplusplus)
-# define IS_ANSI_C()  (1)
-#else
-# define IS_ANSI_C()  (0)
+                          || SOLARIS || SUN || UNIX_ANC || USG || XENIX )
+#define b_IS_POSIX_UNIX ( b_IS_UNIX                                   \
+                          && !( AIX || AUX || HPUX8 || HPUX9 || SMOS  \
+                                || SUN || UNIX_ANC || USG || XENIX ) )
+#define b_IS_ANCIENT_UNIX ( b_IS_UNIX && !b_IS_POSIX_UNIX             \
+                            && ( UNIX_ANC || XENIX ) )
+#ifndef b_IS_ANSI_C
+# if  defined (__STDC__) || defined(__cplusplus)
+#  define b_IS_ANSI_C   (1)
+# else
+#  define b_IS_ANSI_C   (0)
+# endif
 #endif
+/* Substitute of `#error' directive for Pre ANSI C-Compilers: */
+#define CRASH(x)  (0 = 0)
 
 
 /*      Compiler definitions                                          */
-/*===== [Set one of these!!] ======================================== */
+/*===== [Set one of these!!] =========================================*/
+#if BEGIN_COMMENT_
 #define ALCYON  0         /* ALCYON Atari ST compiler                 */
 #define AZTEC   0         /* Aztec C 4.00e ONLY for the amiga now...  */
 #define DGC     0         /* Data General AOS/VS C...                 */
+#endif  /*END_COMMENT_*/
 #define GCC     1         /* the GNU C compiler                       */
+#if BEGIN_COMMENT_
 #define IC      0         /* Rational Systems Instant C               */
 #define LATTICE 0         /* Lattice 2.14 through 3.0 compilers       */
 #define MSC     0         /* MicroSoft C compile version 3 and up     */
@@ -110,25 +138,30 @@
 #define TURBO   0         /* Turbo C and Borland C++ under MSDOS      */
 #define UNIX    0         /* a standard UNIX compiler (cc)            */
 #define ZTC     0         /* Zortech C/C++ 1.02 thru 2.10 under MSDOS */
+#endif  /*END_COMMENT_*/
 
 /*      Machine stack growth direction.                               */
-/*===== [Set one of these!!] ======================================== */
+/*===== [Set one of these!!] =========================================*/
 /*      data general mv/eclipse series stack grows up.                */
 /*      dec vax series stack grows down... got it???                  */
 
 #define STACK_GROWS_UP  0
 
 /*      Debugging options                                             */
+#if BEGIN_COMMENT_
 #define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
 #define RAMSHOW         0 /* auto dynamic RAM reporting               */
 #define RAMTRCK         0 /* send debug info to MALLOC.DAT            */
 #define DEBUG_SEARCH    0 /* pop some search info on patterns         */
+#endif  /*END_COMMENT_*/
 
 /*      Special keyboard/network definitions                          */
-
+#if BEGIN_COMMENT_
 #define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
 #define WANGPC  0     /* WangPC - mostly escape sequences             */
+#endif  /*END_COMMENT_*/
 #define VT100   1     /* Handle VT100 style keypad - NOT VMS.         */
+#if BEGIN_COMMENT_
 #define KEYPAD  0     /* VMS - turn on and off application            */
                       /* keypad automatically                         */
 #define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
@@ -136,12 +169,13 @@
                       /* use RMS directly                             */
 #define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
                       /* but more efficient memory allocator          */
+#endif  /*END_COMMENT_*/
 
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
-
+#if BEGIN_COMMENT_
 #define ANSI    0           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
@@ -161,7 +195,7 @@
 #define XPCON   0           /* windows XP console app                 */
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
-
+#endif  /*END_COMMENT_*/
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
 #define UNIX_READ_TOUT  (4)
@@ -174,8 +208,10 @@
 #define WINDOW_X        0   /* X/Unix                                 */
 
 /*      Language text options   (pick one)                            */
-
+#if BEGIN_COMMENT_
+#endif  /*END_COMMENT_*/
 #define ENGLISH 1           /* [default]                              */
+#if BEGIN_COMMENT_
 #define FRENCH  0
 #define SPANISH 0
 #define GERMAN  0
@@ -183,6 +219,7 @@
 #define PLATIN  0           /* Pig Latin                              */
 #define JAPAN   0
 #define LATIN   0           /* real Latin                             */
+#endif  /*END_COMMENT_*/
 
 /*      Configuration options                                         */
 
@@ -215,23 +252,25 @@
 #endif
 
 /*      Character set options                                         */
-/*===== [Set one of these!!] ======================================== */
+/*===== [Set one of these!!] =========================================*/
 #define ASCII   1   /* always using ASCII char sequences for now      */
+#if BEGIN_COMMENT_
 #define EBCDIC  0   /* later IBM mainfraim versions will use EBCDIC   */
+#endif  /*END_COMMENT_*/
 
 /*      Settings related to tracing/debugging MicroEmacs              */
 /*====================================================================*/
 /* Fix overwrites of the line data instead of bailing out:            */
 /* -- All errors in the line code seem to be fixed now (2023-07-25),  */
 /* -- but if you want to find new errors set this to `0'.             */
-#define REPAIR_CODE_LINE      (!0)
+#define REPAIR_CODE_LINE      (1)
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
-#define UEMACS_TRC            (!0)
+#define UEMACS_TRC            (1)
 #define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
 
 
-/*=================================================================== */
+/*====================================================================*/
 
 
 /*===== handle constant and voids properly ===========================*/
@@ -246,15 +285,17 @@
 # define VOIDCAST   (void)
   typedef void *    voidp_;
 # define NOSHARE    noshare
-#elif   AOSVS
+#else
+#if   AOSVS
 # define CONST      $shared $align(1)   /* fake a  const */
 # define VOID
 # define VOIDCAST
   typedef char *    voidp_;
   /* attempt to optimize read/write vars. */
 # define NOSHARE    $low32k $align(1)
-#elif  IS_ANSI_C() || IS_UNIX() || MSC || TURBO || GCC   \
-  || (AMIGA && LATTICE) || VMS
+#else
+#if  b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX ) || MSC  \
+  || TURBO || GCC || (AMIGA && LATTICE) || VMS
 # define CONST      const
 # define VOID       void
 # define VOIDCAST   (void)
@@ -272,7 +313,18 @@
 # endif
 # define NOSHARE
 #endif
+#endif
+#endif
 #define VOIDP voidp_
+
+
+/*===== global includes to get some constants ========================*/
+#include <stdio.h>
+#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
+    || GCC || VMS || b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX )
+# include <limits.h>
+#endif
+/*====================================================================*/
 
 
 /*===== System dep. library redefinitions, structures and includes ===*/
@@ -294,9 +346,8 @@
 
 /*      Can we catch the SIGWINCH (the window size change signal)? */
 
-#if     IS_UNIX()
-/* We could maybee also check for `# ifdef TIOCGWINSZ' here:  */
-# if DJGPP_DOS
+#if     b_IS_UNIX
+# if ( b_IS_ANCIENT_UNIX || DJGPP_DOS )
 #   define HANDLE_WINCH    0
 # else
 #   define HANDLE_WINCH    1
@@ -305,19 +356,20 @@
 # define HANDLE_WINCH    0
 #endif
 
-/*      Prototypes in use?      */
-
-#if     MSC || TURBO || IC || VMS || GCC || ZTC
-# define PROTO   1
-#else
-# define PROTO   0
+/* Prototypes in use? */
+#ifndef PROTO
+# if  ( MSC || TURBO || IC || VMS || GCC || ZTC )
+#  define PROTO   1
+# else
+#  define PROTO   0
+# endif
 #endif
 
 /*
  *      the following define allows me to initialize unions...
  *      otherwise we make them structures (like the keybinding table)
  */
-#if     IS_ANSI_C() || MSC || TURBO || IC || ZTC
+#if     b_IS_ANSI_C || MSC || TURBO || IC || ZTC
 # define ETYPE   union
 #else
 # define ETYPE   struct
@@ -359,7 +411,6 @@
 # endif
 # if     NTCON
 #  include <WinCon.h>
-#  include <stdio.h>
 #  include <dos.h>
 # endif
 
@@ -394,10 +445,12 @@
 #  define CALLED  1 /* under MS Windows, "main" resides in the sys driver */
 #  if     WINNT || WINXP
 #   define EXPORT /* Windows NT doesn't like this */
-#  elif   MSC
+#  else
+#  if   MSC
 #   define EXPORT  __export
 #  else
 #   define EXPORT  _export/* Fine for TURBO and ZTC */
+#  endif
 #  endif
 # endif
 
@@ -490,7 +543,7 @@ struct SREGS {
 
 
 /*====================================================================*/
-#define movmem(a, b, c) memcpy( (b), (a), (c) )
+#define movmem(a, b, c) umc_memcpy( (b), (a), (c) )
 /*====================================================================*/
 
 
@@ -535,9 +588,11 @@ union REGS {
 #if     VMS
 # define getname xgetname
 # ifdef __cplusplus
-#   define umc_unlink(a)       remove(a)
+#   define unlink(a)       remove(a)
 # else
-#   define umc_unlink(a)       delete(a)  /* Won't compile with C++ */
+    /* `With Compaq C 6.4 `delete' needs `#include <unixio.h>':       */
+#   /*define unlink(a)       delete(a)  /o Won't compile with C++ o/  */
+#   define unlink(a)       remove(a)
 # endif
 #endif
 
@@ -555,7 +610,7 @@ union REGS {
 #endif
 
 
-#if ( IS_UNIX() || MSDOS || WINNT || WINXP || OS2 || (TOS && MWC) || WMCS  || \
+#if ( b_IS_UNIX || MSDOS || WINNT || WINXP || OS2 || (TOS && MWC) || WMCS  || \
     MPE )
 # define ENVFUNC 1
 #else
@@ -648,13 +703,23 @@ execl(va_alist)
 /*====================================================================*/
 
 #if     VARARG
-# if ( (GCC == 0 ) && ( IS_UNIX() || MPE) )
-#  define VARG    1
-#  include        <varargs.h>
-# else
+# ifndef  USE_STDARG
+#  if   ( !GCC && ( b_IS_UNIX || MPE) )
+#   define  USE_STDARG  0
+#  else
+#   define  USE_STDARG  1
+#  endif
+# endif
+
+# if USE_STDARG
 #  define VARG    0
 #  include        <stdarg.h>
+# else
+#  define VARG    1
+#  include        <varargs.h>
 # endif
+#else
+  CRASH(Cannot compile without varargs or stdarg support);
 #endif
 
 #if ZTC
@@ -662,8 +727,58 @@ execl(va_alist)
 #endif
 
 
-/*===== global includes to get some constants ========================*/
-#include <limits.h>
+/*===== Macro implementing ANSI-C vfprintf() functionality ===========*/
+#if b_IS_UNIX
+# if b_IS_ANCIENT_UNIX
+#  define  RC_VFPRINTF(rc, fp, format, argp)  do {            \
+      /* Valid e.g. for BSD 4.1, 4.2, SunOS 5.7:  */          \
+      extern VOID _doprnt DCL((CONST CHAR *, VOIDP, FILE *)); \
+                                                              \
+      int   *rcp_ = &(rc);                                    \
+      int   rc_   = 0;                                        \
+      FILE  *fp_  = (fp);                                     \
+      long  end_  = 0;                                        \
+      long  beg_  = 0;                                        \
+                                                              \
+      beg_  = ftell(fp_);                                     \
+      _doprnt(format, argp, fp_);                             \
+      rc_   = ferror(fp_)? (-1) : 0;                          \
+      if ( 0 <= rc_ ) {                                       \
+          end_  = ftell(fp_);                                 \
+          *rcp_ = end_ - beg_;                                \
+      } else          {                                       \
+          *rcp_ = rc_;                                        \
+      }                                                       \
+  } while ( 0 )
+# else
+#  define  RC_VFPRINTF(rc, fp, format, argp)  do {  \
+      int   *rcp_ = &(rc);                          \
+      int   rc_   = 0;                              \
+      FILE  *fp_  = (fp);                           \
+      long  end_  = 0;                              \
+      long  beg_  = 0;                              \
+                                                    \
+      beg_  = ftell(fp_);                           \
+      rc_   = vfprintf(fp_, format, argp);          \
+      if ( 0 <= rc_ ) {                             \
+          end_  = ftell(fp_);                       \
+          *rcp_ = end_ - beg_;                      \
+      } else          {                             \
+          *rcp_ = rc_;                              \
+      }                                             \
+  } while ( 0 )
+# endif
+#else
+#if b_IS_ANSI_C
+# define  RC_VFPRINTF(rc, fp, format, argp) do  { \
+      int *rcp_ = &(rc);                          \
+                                                  \
+      *rcp_ = vfprintf(fp, format, argp);         \
+  } while ( 0 )
+#else
+  CRASH(Cannot compile without vfprintf() functionality);
+#endif
+#endif
 /*====================================================================*/
 
 
@@ -678,19 +793,28 @@ execl(va_alist)
 #define NBINDS  300                     /* max # of bound keys        */
 #if ( defined( PATH_MAX) )
 # define NFILEN (PATH_MAX + 1)
-#elif ( defined( MAXPATHLEN) )
+#else
+#if ( defined( MAXPATHLEN) )
 # define NFILEN (MAXPATHLEN + 1)
-#elif ( defined( _POSIX_PATH_MAX) )
+#else
+#if ( defined( _POSIX_PATH_MAX) )
 # define NFILEN (_POSIX_PATH_MAX + 1)
 #else
-# if ( AOSVS || VMS || WINNT || WINXP || OS2 || IS_UNIX() )
+# if ( AOSVS || VMS || WINNT || WINXP || OS2 || b_IS_UNIX )
 #  define NFILEN  256
 # else
 #  define NFILEN  80            /* # of bytes, file name              */
 # endif
 #endif
+#endif
+#endif
 #define NBUFN   128             /* # of bytes, buffer name            */
-#ifdef MSDOS  /* Reduce sizes to UE312 vals --- else `stack overflow' */
+#if MSDOS     /* Reduce sizes to UE312 vals --- else `stack overflow' */
+# define NLINE   256            /* # of bytes, input line             */
+# define NSTRING 128            /* # of bytes, string buffers         */
+# define NPAT    128            /* # of bytes, pattern                */
+#else
+#if b_IS_ANCIENT_UNIX
 # define NLINE   256            /* # of bytes, input line             */
 # define NSTRING 128            /* # of bytes, string buffers         */
 # define NPAT    128            /* # of bytes, pattern                */
@@ -698,6 +822,7 @@ execl(va_alist)
 # define NLINE   512            /* # of bytes, input line             */
 # define NSTRING 512            /* # of bytes, string buffers         */
 # define NPAT    512            /* # of bytes, pattern                */
+#endif
 #endif
 #define NKBDM   4096            /* # of strokes, keyboard macro       */
 #define HUGENUM 1000            /* Huge number                        */
@@ -797,7 +922,7 @@ execl(va_alist)
 #define BELL    0x07                /* a bell character               */
 #define TAB     0x09                /* a tab character                */
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 # define PATHCHR ':'
 #else
 # if  ( WMCS || MPE )

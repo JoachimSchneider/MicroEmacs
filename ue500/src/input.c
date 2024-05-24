@@ -58,7 +58,7 @@
 #include        "edef.h"
 #include        "elang.h"
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 # include       <pwd.h>
 /*
  * Defined in <pwd.h>:
@@ -68,6 +68,9 @@
  * EXTERN struct passwd *getpwnam DCL((CONST char *login));
  ***********************************************************************
  */
+# if ( b_IS_ANCIENT_UNIX )
+EXTERN struct passwd *getpwnam DCL((CONST char *login));
+# endif
 #endif
 
 
@@ -887,7 +890,7 @@ int PASCAL NEAR getstring P3_(unsigned char *, buf, int, nbuf, int, eolchar)
         /* if it is from the mouse, or is a function key, insert it's name since
          * it was quoted */
         if ( (ec & MOUS) || (ec & SPEC) ) {
-            cmdstr(ec, key_name);
+            getecnam(ec, key_name, SIZEOF(key_name));
             kp = key_name;
             while ( *kp ) {
                 if ( cpos < nbuf - 1 ) {
@@ -996,7 +999,7 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, CONST char *, dflt,
         break;
 
     default:
-        mlputs( cmdstr(iterm, buf) );
+        mlputs( getecnam(iterm, buf, SIZEOF(buf)) );
         tcol += STRLEN(buf) + 4;
     }
     mlputs(">: ");
@@ -1096,7 +1099,7 @@ static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
     char          user_name[NSTRING];   /* user name for directory          */
     static char   buf[NSTRING];         /* buffer to hold tentative name:
                                          * Its addr (or NULL) is returned   */
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
     struct passwd *pwd      = NULL;             /* password structure */
 #endif
 
@@ -1209,7 +1212,7 @@ static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
                 --ttcol;
             }
 
-# if ( IS_UNIX() )
+# if ( b_IS_UNIX )
             /* lookup someone else's home directory! */
             if ( user_name[0] != 0 ) {
                 pwd = getpwnam(user_name);

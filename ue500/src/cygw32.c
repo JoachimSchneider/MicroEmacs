@@ -46,7 +46,7 @@ EXTERN const char *cygpwd_(void)
 
     int rc  = 0;
 
-    memset(res, 0, sizeof(res));
+    umc_memset(res, 0, sizeof(res));
 
     rc  = GetCurrentDirectoryA(sizeof(res), res);
     /* Return values:

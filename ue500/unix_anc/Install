@@ -1,0 +1,84 @@
+How to install the MicroEmacs on a BSD 4.1 System emulated by SimH:
+
+(1) on your Linux Box:
+
+    $ git clone https://github.com/JoachimSchneider/MicroEmacs
+    $ git switch current
+    $ cd MicroEmacs/ue500
+    $ tar -H v7 -c -f /tmp/ue.tar h src cmd unx_anc
+    $ gcc -o /tmp/simhtap ../tools/simhtap.c
+    # Create a SimH format tape file
+    $ /tmp/simhtap /tmp/ue.tar 20 > /tmp/ue.tar.tap
+
+(2) We won't describe setting up BSD 4.1 in SimH here: There are
+    several guides available in the net.
+
+    Mount /tmp/ue.tar.tap as tape in SimH
+
+(3) In BSD 4.1 (logged on as a non-root-user):
+
+    We first build MicroEmacs
+
+    $ cd
+    $ mkdir UE
+    $ cd UE
+    $ tar xbf 20 /dev/rmt12
+    $ cd unc_anc
+    $ make -f makefile.bsd41 clean
+    # This essentially calls `make -f makefile.bsd41' and filters out
+    # those warnings which are expected. These warnings are caused e.g.
+    # by the IS_ARRAY macro which uses the fact that for a C array
+    # &array == &array[0].
+    $ ./make_bsd41.sh
+
+    Then we install it assuming that the current user is in the "users" group:
+
+    $ su  root
+
+    # mkdir           /usr/local
+    # chgrp users /usr/local
+    # chmod 0775 /usr/local
+    # exit
+
+    $ mkdir           /usr/local/pkg
+    $ mkdir           /usr/local/pkg/MicroEmacs
+    $ mkdir           /usr/local/pkg/MicroEmacs/bin
+    $ mkdir           /usr/local/pkg/MicroEmacs/cmd
+    $ mkdir           /usr/local/pkg/MicroEmacs/doc
+    $ cp -p emacs     /usr/local/pkg/MicroEmacs/bin
+    $ cp -p .emacsrc  /usr/local/pkg/MicroEmacs/bin/
+    $ cd ../cmd/
+    $ tar -cpf - . | (cd /usr/local/pkg/MicroEmacs/cmd && tar -xpf -)
+
+    $ cat runemacs
+    #!/bin/sh -
+    ## CHANGE THIS TO YOUR NEEDS:
+    mybas=/usr/local/pkg/MicroEmacs
+    ##
+    mybin="${mybas}/bin"
+    mycmd="${mybas}/cmd"
+    PATH="${mybin}:${mycmd}:${PATH}"
+    export PATH
+    exec "${mybin}/emacs" $@
+    # EOF
+
+    $ cp runemacs /usr/local/pkg/MicroEmacs/bin/
+
+    Then link /usr/local/pkg/MicroEmacs/bin/runemacs to your prefered
+    directory, e.g. ~/bin/ or /usr/bin (or /usr/local/bin). Yet no symbolic
+    links on BSD 4.1:
+
+    $ su root
+    # ln /usr/local/pkg/MicroEmacs/bin/runemacs /usr/bin/uemacs
+    # exit
+
+    The file .emacsrc may be moved to your HOME directory.
+
+(4) Done ... This document was written with MicroEmacs on BSD 4.1
+    emulated by SimH.
+
+    Joachim Schneider April 2025
+
+
+
+# EOF
