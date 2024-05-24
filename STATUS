@@ -1000,6 +1000,18 @@ the keymap via emacs.rc possible.
 - VMS: test __NEW_STARLET feature.
 - Do a `git bisect' to find out why we substituted `CTRF' for `CTRL'.
 - The variable $abcap :<==>: ab_cap is ignored.
+- At some places the code depends on one's complement representation of
+  characters and/or integers, e.g. when using
+
+    (unsigned char)(-1) + 1
+
+  as the total number of characters (e.g. 256):
+
+  + Either introduce a CASRT for One-Complement, or
+  + use other constructs.
+
+  Of course this is relevant only for platforms we currently
+  cannot test.
 
 
 # EOF
