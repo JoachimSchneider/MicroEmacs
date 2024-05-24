@@ -87,6 +87,18 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2024-05-23.00]
+  * New escape character flag `~x' will be recognized im MicroEMACS
+    macro language:
+
+    Exactly two hexadecimal digits following `~x' are
+    evaluated to a character code:
+    ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
+
+[2024-05-14.00]
+  * Setting $abfull TRUE enables full --- i.e. substrings in
+    words --- expansion of abbreviations in ABBREV mode.
+
 [2024-05-08.00]
   * It's possible now to *update* the keymap (it was only possible to
     create new entries before). This affects `set $palette KEYMAP ...'
@@ -277,6 +289,13 @@ modern Linux and FreeBSD systems:
 * VMS: $ssave defaults to FALSE now: This way the VMS versions work out
   of the box.
 
+* Escape character flag `~x' will be recognized im MicroEMACS
+  macro language:
+
+  Exactly two hexadecimal digits following `~x' are
+  evaluated to a character code:
+  ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
+
 * Setting $abfull TRUE enables full --- i.e. substrings in words ---
   expansion of abbreviations. This is a stronger form of the $abquick
   sub mode:
@@ -325,6 +344,88 @@ modern Linux and FreeBSD systems:
 
   So indeed the the $abfull somehow improves $abquick's behaviour
   which we keep here for compatibility.
+
+  A more realistc examle: Suppose you need to use the HTML commands for
+  german umlauts. To simplify this task you decide to use MicroEMACS
+  abreviations which let you type the umlauts in the LaTeX style:
+
+  * Create the file `.uemacs-abbrevs` in your HOME directory:
+    ```
+    ; SOF(Abbreviations for uemacs)
+
+
+    ; LaTeX like German Umlauts (`~"': `~' must be used to escape `"'):
+    add-abbrev "~"a"    "&auml;"
+    add-abbrev "~"o"    "&ouml;"
+    add-abbrev "~"u"    "&uuml;"
+    add-abbrev "~"A"    "&Auml;"
+    add-abbrev "~"O"    "&Ouml;"
+    add-abbrev "~"U"    "&Uuml;"
+    add-abbrev "~"s"    "&szlig;"
+
+
+
+    ; EOF(Abbreviations for uemacs)
+    ```
+
+    In your `.emacsrc` add the lines
+
+    ```
+    ...
+    store-procedure get-abbrevs
+            !if &seq &find .uemacs-abbrevs ""
+                    write-message "[Can not find .uemacs-abbrevs]"
+                    !return
+            !endif
+            execute-file .uemacs-abbrevs
+    !endm
+    execute-procedure get-abbrevs
+    ...
+    set $abfull TRUE
+    ...
+    ```
+
+    Then you simply type M"archen which will expand to M&auml;rchen
+    *while* you are typing.
+
+    You may even extend this to type LATIN1 or UTF8 charcters for the Umlauts:
+
+    ```
+    ; SOF(Abbreviations for uemacs)
+
+
+    ; LaTeX like German Umlauts as HTML escapes (the `"' needs to be escaped
+    ; by `~'):
+    add-abbrev "~"a"    "&auml;"
+    add-abbrev "~"o"    "&ouml;"
+    add-abbrev "~"u"    "&uuml;"
+    add-abbrev "~"A"    "&Auml;"
+    add-abbrev "~"O"    "&Ouml;"
+    add-abbrev "~"U"    "&Uuml;"
+    add-abbrev "~"s"    "&szlig;"
+
+    ; German Umlauts as LATIN1 (`~xUV': Character with code 0xUV):
+    add-abbrev "'a"    "~xe4"
+    add-abbrev "'o"    "~xf6"
+    add-abbrev "'u"    "~xfc"
+    add-abbrev "'A"    "~xc4"
+    add-abbrev "'O"    "~xd6"
+    add-abbrev "'U"    "~xdc"
+    add-abbrev "'s"    "~xdf"
+
+    ; German Umlauts as UTF8 (`~xUV': Character with code 0xUV):
+    add-abbrev "''a"    "~xc3~xa4"
+    add-abbrev "''o"    "~xc3~xb6"
+    add-abbrev "''u"    "~xc3~xbc"
+    add-abbrev "''A"    "~xc3~x84"
+    add-abbrev "''O"    "~xc3~x96"
+    add-abbrev "''U"    "~xc3~x9c"
+    add-abbrev "''s"    "~xc3~x9f"
+
+
+
+    ; EOF(Abbreviations for uemacs)
+    ```
 
 
 ## TODO

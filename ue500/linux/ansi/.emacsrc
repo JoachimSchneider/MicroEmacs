@@ -50,9 +50,8 @@ set $palette "KEYMAP FN7 ~e[18~~"
 set $palette "KEYMAP FN8 ~e[19~~"
 set $palette "KEYMAP FN9 ~e[20~~"
 set $palette "KEYMAP FN0 ~e[21~~"
-; HOME on FreeBSD terminal
-;set $palette "KEYMAP FN< ~e[7~~"
-; HOME on Linux terminal
+; HOME
+set $palette "KEYMAP FN< ~e[7~~"
 set $palette "KEYMAP FN< ~e[H"
 ;;
 set $palette "KEYMAP S-FN1 ~e[25;2~~"
@@ -88,8 +87,9 @@ set $posflag TRUE
 ;;
 ;
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
-;set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
-set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
+; Added "\~"$^{}[]" to $wchars: `~x' is `x'.
+set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_\~"$^{}[]"
+set $abfull TRUE
 ; Default paragraph indent used with fill-*
 set $parindent 0
 ; Default is " \t" which means that indents are recognized as BOP.
@@ -100,6 +100,8 @@ set $paralead ""
 
 ;add-global-mode "blue"
 ;add-global-mode "WHITE"
+; Do not `add-global-mode "MAGIC"' as it will destroy the help facility
+add-mode "MAGIC"
 ;bind-to-key meta-prefix `      ;for annoying keyboards with ` at the top left
 
 ;       Toggle function key window display
@@ -339,6 +341,15 @@ bind-to-key exit-emacs                  FN0
 ;===============================================================================
 ; Local additions
 ;===============================================================================
+store-procedure get-abbrevs
+        !if &seq &find .uemacs-abbrevs ""
+                write-message "[Can not find .uemacs-abbrevs]"
+                !return
+        !endif
+        execute-file .uemacs-abbrevs
+!endm
+execute-procedure get-abbrevs
+
 store-procedure redraw-screen
         clear-and-redraw
         execute-procedure toggle-fkeys
@@ -352,11 +363,15 @@ store-procedure out-tab
 ; ^T was originally bound to transpose-characters
 macro-to-key out-tab ^T
 
+; M-e was originally bound to set-encryption-key
+bind-to-key end-of-word M-e
+
 2 handle-tab
 set $softtab 2
 set $hardtab 8
 bind-to-key set-mark ^@
 set $dispundo TRUE
+set $disphigh TRUE
 ; turn off highlighting:
 set $hilight 255
 ;===============================================================================
@@ -406,6 +421,19 @@ store-procedure german-umlaut-Ue
         insert-string "Ü"
 !endm
 macro-to-key german-umlaut-Ue M-^U
+
+;-------------------------------------------------------------------------------
+; Was bound to add-global-mode
+bind-to-key goto-matching-fence M-m
+
+store-procedure start-search
+        add-mode "MAGIC"
+        !force execute-named-command query-replace-string
+!endm
+; Was bound to replace-string
+macro-to-key start-search M-r
+
+
 ;===============================================================================
 
 

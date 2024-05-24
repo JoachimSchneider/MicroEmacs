@@ -196,6 +196,57 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
     return (status);
 }
 
+/* GETHEXDIGVAL:
+ *
+ * Get the value of a hexadecimal digit or return .LT. 0 if not a
+ * hexadecimal digit.
+ *
+ * Used by TOKEN()
+ */
+static int  GetHexDigVal(char d)
+{
+    static int  FirstCall = !0;
+    static int  digtab[(int)(unsigned char)(-1) + 1];
+# define SET_DIG_VAL_(d, v) digtab[(int)(unsigned char) (d)]  = (v)
+
+    if ( FirstCall )  {
+        int i = 0;
+
+        for ( i = 0; i < NELEM(digtab); i++ ) {
+            digtab[i] = (-1) * C_1;
+        }
+	SET_DIG_VAL_('0', 0);
+	SET_DIG_VAL_('1', 1);
+	SET_DIG_VAL_('2', 2);
+	SET_DIG_VAL_('3', 3);
+	SET_DIG_VAL_('4', 4);
+	SET_DIG_VAL_('5', 5);
+	SET_DIG_VAL_('6', 6);
+	SET_DIG_VAL_('7', 7);
+	SET_DIG_VAL_('8', 8);
+	SET_DIG_VAL_('9', 9);
+
+	SET_DIG_VAL_('a', 10);
+	SET_DIG_VAL_('b', 11);
+	SET_DIG_VAL_('c', 12);
+	SET_DIG_VAL_('d', 13);
+	SET_DIG_VAL_('e', 14);
+	SET_DIG_VAL_('f', 15);
+
+	SET_DIG_VAL_('A', 10);
+	SET_DIG_VAL_('B', 11);
+	SET_DIG_VAL_('C', 12);
+	SET_DIG_VAL_('D', 13);
+	SET_DIG_VAL_('E', 14);
+	SET_DIG_VAL_('F', 15);
+
+        FirstCall = 0;
+    }
+
+    return digtab[(unsigned char)d];
+#undef  SET_DIG_VAL_
+}
+
 /* TOKEN:
  *
  * Chop a token off a string return a pointer past the token.
@@ -250,8 +301,30 @@ char *PASCAL NEAR token P3_(
                 c = 27;
                 break;
 
+            case 'x':
+                {
+                    /* Exactly two hexadecimal digits following `~x' are
+                     * evaluated to the character code:
+                     * ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
+                     */
+                    int d0  = 0;
+                    int d1  = 0;
+
+                    if ( 0 <= (d0 = GetHexDigVal(*src)) &&
+                         0 <= (d1 = GetHexDigVal(*(src + 1))) ) {
+                        unsigned char val = 0;
+
+                        val = C_16 * d0 + d1;
+                        c   = *(char *)&val;
+                        src  += 2;
+                    } else                                      {
+                        c = *(src - 1);
+                    }
+                }
+                break;
+
             default:
-                c = *(src-1);
+                c = *(src - 1);
             }
             if ( --size > 0 ) {
                 *tok++ = c;

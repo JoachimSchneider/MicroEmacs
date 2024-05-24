@@ -87,8 +87,8 @@ set $posflag TRUE
 ;;
 ;
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
-; Added `\', "'" to wchars because they may be used for uemacs abbrevs while `@' may not.
-set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]|;:\'"
+; Added "\~"$^{}[]" to $wchars: `~x' is `x'.
+set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_\~"$^{}[]"
 set $abfull TRUE
 ; Default paragraph indent used with fill-*
 set $parindent 0
@@ -421,6 +421,19 @@ store-procedure german-umlaut-Ue
         insert-string "Ü"
 !endm
 macro-to-key german-umlaut-Ue M-^U
+
+;-------------------------------------------------------------------------------
+; Was bound to add-global-mode
+bind-to-key goto-matching-fence M-m
+
+store-procedure start-search
+        add-mode "MAGIC"
+        !force execute-named-command query-replace-string
+!endm
+; Was bound to replace-string
+macro-to-key start-search M-r
+
+
 ;===============================================================================
 
 
