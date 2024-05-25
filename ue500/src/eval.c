@@ -49,7 +49,7 @@ VOID PASCAL NEAR varinit P0_()
 {
     /* allocate the global user variable table */
     uv_global = uv_head =
-        (UTABLE *)room( SIZEOF (UTABLE) + MAXVARS * SIZEOF (UVAR) );
+        (UTABLE *)ROOM( SIZEOF (UTABLE) + MAXVARS * SIZEOF (UVAR) );
 
     /* and set up its fields */
     uv_head->next = (UTABLE *)NULL;
@@ -70,8 +70,7 @@ VOID PASCAL NEAR uv_clean P1_(UTABLE *, ut)
     /* now clear the entries in this one */
     for ( i=0; i < ut->size; i++ )
         if ( ut->uv[i].u_name[0] != 0 )
-            free(ut->uv[i].u_value);
-
+            CLROOM(ut->uv[i].u_value);
 }
 
 /* VARCLEAN:
@@ -89,7 +88,7 @@ VOID PASCAL NEAR varclean P1_(UTABLE *, ut)
     uv_clean(ut);
 
     /* and then deallocate the this table itself */
-    free(ut);
+    CLROOM(ut);
 }
 
 /* GTFUN:
@@ -128,11 +127,11 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
     if ( fnum == -1 ) {
         mlwrite(TEXT244, fnameL);
 /*          "%%No such function as '%s'" */
-        free(fnameL);
+        CLROOM(fnameL);
 
         RETURN ( errorm );
     }
-    free(fnameL);
+    CLROOM(fnameL);
 
     /* if needed, retrieve the first argument */
     if ( funcs[fnum].f_type >= MONAMIC ) {
@@ -241,7 +240,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
         RETURN ( ltos( fexist(arg1) ) );
 
     case UFFIND:
-        RETURN ( fixnull( flook(arg1, TRUE) ) );
+        RETURN ( fixnull( flook(arg1, TRUE, TRUE) ) );
 
     case UFGREATER:
         RETURN ( ltos( asc_int(arg1) > asc_int(arg2) ) );
@@ -423,7 +422,7 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 
             /* is this the one? */
             if ( strcmp(vnameL, ut->uv[vnum].u_name) == 0 ) {
-                FREE(vnameL);
+                CLROOM(vnameL);
                 /* return its value..... */
                 vptr = ut->uv[vnum].u_value;
                 if ( vptr )
@@ -438,7 +437,7 @@ next_ut:
     }
 
     /* return errorm if we run off the end */
-    FREE(vnameL);
+    CLROOM(vnameL);
 
     return (errorm);
 }
@@ -524,6 +523,9 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
 
     case EVABCAP:
         RETURN ( ltos(ab_cap) );
+
+    case EVABFULL:
+        RETURN ( ltos(ab_full) );
 
     case EVABQUICK:
         RETURN ( ltos(ab_quick) );
@@ -1236,7 +1238,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
     status  = TRUE;
     switch ( vtype ) {
     case TKVAR:     /* set a user variable */
-        FREE(vut->uv[vnum].u_value);
+        CLROOM(vut->uv[vnum].u_value);
         vut->uv[vnum].u_value = xstrdup(valueL);
 
         /* setting a variable to error stops macro execution */
@@ -1253,6 +1255,10 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 
         case EVABCAP:
             ab_cap = stol(valueL);
+            break;
+
+        case EVABFULL:
+            ab_full = stol(valueL);
             break;
 
         case EVABQUICK:
@@ -1416,8 +1422,8 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 
         case EVHILITE:
             hilite = asc_int(valueL);
-            if ( hilite > NMARKS )
-                hilite = 255;
+            if ( !hilite_IsValid() )
+                hilite_InValidate();
             break;
 
         case EVHJUMP:
@@ -1676,7 +1682,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
     }
 
 
-    FREE(valueL);
+    CLROOM(valueL);
 
     return (status);
 }
@@ -2453,9 +2459,15 @@ VOID PASCAL NEAR pad P2_(char *, s, int, len)
 /* s:   String to add spaces to */
 /* len: Wanted length of string */
 {
-    while ( STRLEN(s) < len ) {
-        XSTRCAT(s, "          ");
-        s[len] = 0;
+    int l = 0;
+
+    ASRT(NULL != s);
+
+    if ( len > (l = STRLEN(s)) )  {
+        for ( ; l < len; l++ )  {
+            s[l]  = ' ';
+        }
+        s[l]  = '\0';
     }
 }
 

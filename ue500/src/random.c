@@ -1,6 +1,6 @@
 /*======================================================================
- * This file contains the command processing functions for a number of random
- * commands. There is no functional grouping here, for sure.
+ * This file contains the command processing functions for a number of
+ * random commands. There is no functional grouping here, for sure.
  *====================================================================*/
 
 /*====================================================================*/
@@ -15,9 +15,11 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdarg.h>
 #include <assert.h>
 #include "estruct.h"
+#if IS_UNIX() /**CYGWIN**/
+# include <unistd.h>
+#endif
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
@@ -1539,10 +1541,10 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
     ASRT(NULL != s1);
     ASRT(NULL != s2);
 
-    ASRT(NULL != (s = (char *)calloc(STRLEN(s2) + 1, SIZEOF (char))));
+    ASRT(NULL != (s = ROOM((STRLEN(s2) + 1) * SIZEOF(char))));
     strcpy(s, s2);
     strcpy(s1, s);
-    FREE(s);
+    CLROOM(s);
 
     return s1;
 }
@@ -1603,12 +1605,12 @@ char *PASCAL NEAR xstrncpy P3_(char *, s1, CONST char *, s2, int, n)
 
     l2  = STRLEN(s2);
     l2  = MAX2(l2, n);
-    ASRT(NULL !=(s  = (char *)calloc( l2 + 1, SIZEOF (char) )));
+    ASRT(NULL != (s = ROOM((l2 + 1) * SIZEOF(char))));
     strncpy(s, s2, n);  /* This will always succedd and result in
                          * a '\0'-terminated s. */
 
     strncpy(s1, s, n);
-    FREE(s);
+    CLROOM(s);
 
     return s1;
 }
@@ -1799,6 +1801,84 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
     return dst;
 }
 
+FILE *uetmpfile_ P1_(int, delmode)
+{
+# if !IS_UNIX() /**!CYGWIN**/
+    return tmpfile();
+# else
+/* `tmpfile()' does *not* work with cygwin in the windows console!    */
+/* We use our own implementation also on UNIX: On e.g. OpenBSD        */
+/* `tmpfile()' evaluates the `TMPDIR' environment variable --- might  */
+/* no be what we want. Our implementation evaluates (via              */
+/* `gettmpfname()') the `UETMPDIR' environmant variable.              */
+    {
+        static CONST char **fname_list    = NULL;
+        static int        fname_list_pos  = 0;
+        static int        fname_list_len  = 0;
+
+        if ( !delmode ) {
+            CONST char  *fname  = NULL;
+            FILE        *fp     = NULL;
+
+            if ( NULL == (fname = gettmpfname("t")) ) {
+                TRC(("%s", "uetmpfile(): gettmpfname() failed"));
+
+                return NULL;
+            }
+            if ( NULL == (fp = fopen(fname, "wb+")) ) {
+                TRC(("uetmpfile(): fopen(\"%s\") failed", fname));
+
+                return NULL;
+            }
+
+            TRC(("uetmpfile(): Created \"%s\"", fname));
+#  if ( 0 )
+            /* Silly delete might not work if not on UNIX
+             * (e.g. on DJGPP)
+             */
+            umc_unlink(fname);  /* ``Silly delete'' */
+#  else
+            if ( fname_list_pos >= fname_list_len )  {
+                if ( 0 >= fname_list_len )  {
+                    fname_list_len  = 1;
+                }
+                while ( fname_list_pos >= fname_list_len )  {
+                    fname_list_len  *= 2;
+                }
+                /* Avoid REROOM() in this very low level function and
+                 * take care of non standard realloc() behaviour:
+                 */
+                if ( NULL == fname_list ) {
+                    ASRT( NULL != (fname_list =
+                            (CONST char **)calloc(fname_list_len,
+                                                  SIZEOF(*fname_list)))
+                        );
+                } else                    {
+                    ASRT(NULL != (fname_list =
+                            (CONST char **)realloc(fname_list,
+                                fname_list_len * SIZEOF(*fname_list)))
+                        );
+                }
+            }
+            fname_list[fname_list_pos++]  = xstrdup(fname);
+#  endif
+
+            return fp;
+        } else {
+            int i = 0;
+
+            for ( i = 0; i < fname_list_pos; i++ )  {
+                umc_unlink(fname_list[i]);
+                FREE_(fname_list[i]);
+            }
+            FREE_(fname_list);
+
+            return NULL;
+        }
+    }
+# endif
+}
+
 /* XVSNPRINTF:
  *
  * An unelegant but portable version of C99 vsnprintf():
@@ -1810,22 +1890,38 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
 int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
                                va_list, ap)
 {
-    int nn  = n;                /* Want a signed value */
-    int rc  = 0;
-    int nr  = 0;                /* Number of chars to read */
+    int         rc  = 0;            /* Final return code  */
+    int         nn  = n;            /* Want a signed value */
+    int         sc  = 0;            /* Ret code of intermediate calls */
+    int         nr  = 0;            /* Number of chars to read */
     static FILE *fp = NULL;
+    static char buf[BUFSIZ];
 
     ASRT(0    <= nn);
     ASRT(NULL != fmt);
 
     if ( NULL == fp ) {           /* One-time initialization */
-        if ( NULL == ( fp = tmpfile() ) ) { /* ANSI C: Opened in wb+ mode */
+         /* ANSI C: fp should be opened in wb+ mode */
+# if ( 0 )
+        if ( NULL == ( fp = uetmpfile() ) ) {
             return (-1);
         }
+# else
+        ASRT( NULL != ( fp = uetmpfile() ) );
+# endif
         /*
          * Buffering: No real IO for not too large junks
+         *
+         * `setvbuf(fp, NULL, _IOFBF, 0)' does not work everywhere,
+         * e.g. not with DJGPP_DOS.
          */
-        if ( 0 != setvbuf(fp, NULL, _IOFBF, 0) ) {
+        if ( 0 != (sc = setvbuf(fp, buf, _IOFBF, SIZEOF(buf))) )  {
+            int errno_sv  = 0;
+
+            errno_sv  = errno;
+            TRC(("xvsnprintf: setvbuf(), sc = %d, errno = %d: %s",
+                 sc, errno_sv, strerror(errno_sv)));
+
             return (-2);
         }
     }
@@ -1873,21 +1969,39 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
  * Returns the number of characters (not including the trailing '\0')
  * that would have been written if n were large enough.
  */
+#if VARG
+int CDECL NEAR  xsnprintf (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
+#endif
 {
-    int     rc  = 0;
-    va_list ap;
+    int         rc    = 0;
+    va_list     ap;
+#if VARG
+    char        *s    = NULL;
+    size_t      n     = 0;
+    CONST char  *fmt  = NULL;
+#endif
 
     ZEROMEM(ap);
-    ASRT(NULL != fmt);
 
+#if VARG
+    va_start(ap);
+    s   = va_arg(ap, char *);
+    n   = va_arg(ap, size_t);
+    fmt = va_arg(ap, CONST char *);
+#else
     va_start(ap, fmt);
+#endif
+    ASRT(NULL != fmt);
     rc = xvsnprintf(s, n, fmt, ap);
     va_end(ap);
 
     return rc;
 }
 
+#if UEMACS_FEATURE_USE_VA_COPY
 /* XVASPRINTF:
  *
  * Like GNU C vasprintf:
@@ -1912,16 +2026,17 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
         return len;
     }
     len += 1;
-    ASRT(NULL != (cp = (char *)calloc(len, SIZEOF(char))));
+    ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
 
     if ( 0 > (rc  = xvsnprintf(cp, len, fmt, aq)) ) {
-        FREE(cp);
+        CLROOM(cp);
     }
     VA_END(aq);
-    *ret  = cp;
+    *ret  = cp;   /* NULL on error, see above */
 
     return rc;
 }
+#endif    /* UEMACS_FEATURE_USE_VA_COPY */
 
 /* XASPRINTF:
  *
@@ -1929,21 +2044,102 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
  * Allocate (using malloc()) a string large enough to hold the
  * resulting string.
  */
+#if VARG
+int CDECL NEAR  xasprintf (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
+#endif
+#if ( 0 ) /* Version if xvasprintf() is available */
 {
     int     rc  = 0;
     va_list ap;
+# if VARG
+    char        **ret = NULL;
+    CONST char  *fmt  = NULL;
+# endif
 
     ZEROMEM(ap);
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
     ASRT(NULL != ret);
     ASRT(NULL != fmt);
 
-    va_start(ap, fmt);
     rc = xvasprintf(ret, fmt, ap);
     va_end(ap);
 
     return rc;
 }
+#else
+{
+    int     rc  = 0;
+    int     len = 0;
+    char    *cp = NULL;
+    va_list ap;
+# if VARG
+    char        **ret = NULL;
+    CONST char  *fmt  = NULL;
+# endif
+
+    ZEROMEM(ap);
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    len = xvsnprintf(NULL, 0, fmt, ap);
+
+    va_end(ap);
+
+
+    if ( 0 > len )  {
+        *ret  = NULL;
+
+        return len;
+    }
+    len += 1;
+    ASRT(NULL != (cp = ROOM(len * SIZEOF(char))));
+
+
+# if VARG
+    va_start(ap);
+    ret = va_arg(ap, char **);
+    fmt = va_arg(ap, CONST char *);
+# else
+    va_start(ap, fmt);
+# endif
+
+    ASRT(NULL != ret);
+    ASRT(NULL != fmt);
+
+    rc  = xvsnprintf(cp, len, fmt, ap);
+
+    va_end(ap);
+
+
+    if ( 0 > rc ) {
+        CLROOM(cp);
+    }
+
+    *ret  = cp;   /* NULL on error, see above */
+
+    return rc;
+}
+#endif  /* Version if xvasprintf() is available */
 
 /* XSTRTOK_R:
  */
@@ -1982,6 +2178,89 @@ char *PASCAL NEAR xstrtok_r P3_(char *, str, CONST char *, sep,
     return  res;
 }
 
+/* XSTRCASECMP:
+ */
+int PASCAL NEAR xstrcasecmp P2_(CONST char *, s1, CONST char *, s2)
+{
+    REGISTER int  i = 0;
+
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+
+# define us1_ ( (unsigned char *)s1 )
+# define us2_ ( (unsigned char *)s2 )
+
+    for ( i = 0; ; i++ )  {
+        REGISTER int  c1  = '\0';
+        REGISTER int  c2  = '\0';
+        REGISTER int  lc1 = '\0';
+        REGISTER int  lc2 = '\0';
+
+        c1  = us1_[i];
+        c2  = us2_[i];
+        lc1 = tolower(c1);
+        lc2 = tolower(c2);
+        if ( '\0' == c1 || '\0' == c2 || lc1 != lc2 ) {
+            return ( lc1 - lc2 );
+        }
+    }
+# undef us1_
+# undef us2_
+}
+
+/* XSTRNCASECMP:
+ */
+int PASCAL NEAR xstrncasecmp P3_(CONST char *, s1, CONST char *, s2, int, len)
+{
+    REGISTER int  i = 0;
+
+    ASRT(NULL != s1);
+    ASRT(NULL != s2);
+    ASRT(0    <= len);
+
+# define us1_ ( (unsigned char *)s1 )
+# define us2_ ( (unsigned char *)s2 )
+
+    for ( i = 0; i < len; i++ ) {
+        REGISTER int  c1  = '\0';
+        REGISTER int  c2  = '\0';
+        REGISTER int  lc1 = '\0';
+        REGISTER int  lc2 = '\0';
+
+        c1  = us1_[i];
+        c2  = us2_[i];
+        lc1 = tolower(c1);
+        lc2 = tolower(c2);
+        if ( '\0' == c1 || '\0' == c2 || lc1 != lc2 ) {
+            return ( lc1 - lc2 );
+        }
+    }
+
+    return ( 0 );
+# undef us1_
+# undef us2_
+}
+
+/* STRCASESTART:
+ */
+int PASCAL NEAR strcasestart P2_(CONST char *, start, CONST char *, test)
+{
+    REGISTER int  slen  = 0;
+    REGISTER int  tlen  = 0;
+
+    ASRT(NULL != start);
+    ASRT(NULL != test);
+
+    slen  = strlen(start);
+    tlen  = strlen(test);
+
+    if ( tlen < slen )  {
+        return ( 0 );
+    } else              {
+        return ( 0 == xstrncasecmp(start, test, slen) );
+    }
+}
+
 
 /*====================================================================*/
 
@@ -1998,10 +2277,10 @@ char *PASCAL NEAR astrcatc P2_(CONST char *, str, CONST char, c)
 
     if ( NULL == str ) {
         len = 1 + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
+        ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
     } else {
         len = STRLEN(str) + 1 + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
+        ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
     }
     nstr[len - 2]  = c;
     nstr[len - 1]  = '\0';
@@ -2023,11 +2302,11 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 
     if ( NULL == str ) {
         len = slen + 1;
-        ASRT(NULL != (nstr = (char *)calloc(len, SIZEOF(char))));
+        ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
         strcpy(nstr, xs);
     } else {
         len = STRLEN(str) + slen + 1;
-        ASRT(NULL != (nstr = (char *)realloc((VOIDP)str, len * SIZEOF(char))));
+        ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
         strcat(nstr, xs);
     }
 
@@ -2066,11 +2345,11 @@ VOIDP  NewStack P2_(int, stacksize, int, len)
     ASRT(0 < stacksize);
     ASRT(0 < len);
 
-    ASRT(NULL != (stack = (STACK_T_ *)calloc(1, SIZEOF(*stack))));
+    ASRT(NULL != (stack = (STACK_T_ *)ROOM(SIZEOF(*stack))));
     stack->stacksize = stacksize;
     stack->len       = len;
     stack->sp        = (-1);
-    ASRT(NULL != (stack->arr = (char *)calloc(stacksize, len)));
+    ASRT(NULL != (stack->arr = ROOM(stacksize * len)));
 
     return (VOIDP)stack;
 }
@@ -2114,8 +2393,8 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
     ASRT(NULL != stk);
 
-    FREE(stk->arr);
-    FREE(stk);
+    CLROOM(stk->arr);
+    CLROOM(stk);
 }
 #endif
 
@@ -2124,44 +2403,57 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
 FILE *PASCAL NEAR GetTrcFP P0_()
 {
-  static int  FirstCall = !0;
-  static FILE *TrcFP    = NULL;
+    static int  FirstCall = !0;
+    static FILE *TrcFP    = NULL;
 
-  if ( FirstCall )  {
-    FirstCall = 0;
+    if ( FirstCall )  {
+        FirstCall = 0;
 
-    {
-      char *fname  = getenv(TRC_FILE_ENVVAR);
+        {
+            char *fname  = getenv(TRC_FILE_ENVVAR);
 
-      if ( NULL == fname ) {
-        TrcFP = NULL;
-      } else {
-        if ( NULL != (TrcFP = fopen(fname, "a")) )  {
-          setbuf(TrcFP, NULL);
-        } else {
-          TrcFP = stderr;
+            if ( NULL == fname ) {
+                TrcFP = NULL;
+            } else {
+                if ( NULL != (TrcFP = fopen(fname, "a")) )  {
+                    setbuf(TrcFP, NULL);
+                } else {
+                    TrcFP = stderr;
+                }
+            }
         }
-      }
     }
-  }
 
-  return TrcFP;
+    return TrcFP;
 }
 
 int          DebugMessage_lnno_   = 0;
 CONST char  *DebugMessage_fname_  = (CONST char *)"";
+#if VARG
+int CDECL NEAR  DebugMessage (va_alist)
+    va_dcl
+#else
 int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
+#endif
 {
-    int     rc    = 0;
-    va_list ap;
-    FILE    *TFP  = GetTrcFP();
+    int         rc    = 0;
+    va_list     ap;
+#if VARG
+    CONST char  *fmt  = NULL;
+#endif
+    FILE        *TFP  = GetTrcFP();
 
     ZEROMEM(ap);
 
     if ( TFP )  {
       fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
               DebugMessage_lnno_);
+#if VARG
+      va_start(ap);
+      fmt = va_arg(ap, CONST char *);
+#else
       va_start(ap, fmt);
+#endif
       rc = vfprintf(TFP, fmt, ap);
       va_end(ap);
       fprintf(TFP, "%s", "\n");
@@ -2215,8 +2507,10 @@ unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
     if ( n == lp->l_used_ ) {
+#if ( 0 )
         TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
               FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
+#endif
 
         if ( n == lp->l_size_ ) {
             return ( '\0' );
@@ -2244,10 +2538,12 @@ char *PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
 #endif
     ASRTK((0 <= n) && (n <= lp->l_used_), fnam, lno);
 
+#if ( 0 )
     if ( n == lp->l_used_ ) {
         TRCK(("%s(): Read at Buffer Boundry: l_size_ = %d, l_used_ = %d, l_text_[%d] = '%c'",
               FSTR_, (int)lp->l_size_, n, n, lp->l_text_[n]), fnam, lno);
     }
+#endif
 
     return ( &(lp->l_text_[n]) );
 }
@@ -2441,8 +2737,8 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     set_w_doto(curwp, region.r_offset);
 
     if ( TRUE != ldelete(region.r_size, TRUE) ) {
-        FREE(rstart);
-        FREE(rtext);
+        CLROOM(rstart);
+        CLROOM(rtext);
 
         return FALSE;
     }
@@ -2453,10 +2749,10 @@ int PASCAL NEAR TransformRegion P2_(filter_func_T, filter, VOIDP, argp)
     /*===============================================================*/
     {
         char  *outline  = (*filter)(rstart, rtext, argp);
-        FREE(rstart);
-        FREE(rtext);
+        CLROOM(rstart);
+        CLROOM(rtext);
         linstr(outline);
-        FREE(outline);
+        CLROOM(outline);
     }
 
     return TRUE;
@@ -2524,7 +2820,7 @@ static char *PASCAL NEAR  filter_test_00 P3_(CONST char *, rstart,
     }
 
     xasprintf(&res, "<%s><%s>", str, rtext);
-    FREE(str);
+    CLROOM(str);
 
     return res;
 }
@@ -2808,7 +3104,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
 
         sflag = FALSE;
         res = astrcat(res, para);
-        FREE(para);
+        CLROOM(para);
         res = astrcat(res, "\r\r");
 
         if ( NULL == (lptr  = xstrtok_r(NULL, "\r", &context)) )  {
@@ -2827,9 +3123,9 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
     }
 
 
-    FREE(pptext);
-    FREE(text);
-    FREE(start);
+    CLROOM(pptext);
+    CLROOM(text);
+    CLROOM(start);
 
     return res;
 }

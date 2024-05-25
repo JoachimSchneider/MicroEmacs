@@ -241,8 +241,7 @@ qprompt:
             lastline = lback(curwp->w_dotp);
         }
 
-        /* Delete the sucker, and insert its replacement.
-         */
+        /* Delete the sucker, and insert its replacement. */
 #if     MAGIC
         status = delins(matchlen, (char *)&rpat[0], rmagical);
 #else
@@ -273,14 +272,14 @@ qprompt:
             lastoff = get_w_doto(curwp);
             oldmatchlen = matchlen;             /* Save the length for un-do.*/
 
-            if ( ( oldpatmatch = reroom(oldpatmatch, matchlen + 1) ) == NULL ) {
+            if ( ( oldpatmatch = REROOM(oldpatmatch, matchlen + 1) ) == NULL ) {
                 mlabort(TEXT94);
 /*                  "%%Out of memory" */
                 mmove_flag = TRUE;
 
                 return (ABORT);
             }
-            XSTRCPY(oldpatmatch, patmatch);
+            xstrlcpy(oldpatmatch, patmatch, matchlen + 1);
         } else if ( matchlen == 0 ) {
             mlwrite(TEXT91);
 /*              "Empty string replaced, stopping." */
@@ -346,16 +345,15 @@ VOID PASCAL NEAR mlrquery P0_()
  */
 int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
 {
-    REGISTER int status;
-    REGISTER CONST char     *rstr;
+    REGISTER int        status  = 0;
+    REGISTER CONST char *rstr   = NULL;
 #if     MAGIC
-    REGISTER RMC        *rmcptr;
+    REGISTER RMC        *rmcptr = NULL;
 #endif
 
     replen = 0;
 
-    /* Zap what we gotta, and insert its replacement.
-     */
+    /* Zap what we gotta, and insert its replacement. */
     if ( ( status = ldelete( (long) dlength, FALSE ) ) != TRUE )
         mlwrite(TEXT93);
 /*          "%%ERROR while deleting" */
@@ -376,8 +374,13 @@ int PASCAL NEAR delins P3_(int, dlength, char *, instr, int, use_rmc)
     } else
 #endif
     {
-        status = linstr(instr);
-        replen = STRLEN(instr);
+        if ( instr && *instr )  {
+            status = linstr(instr);
+            replen = STRLEN(instr);
+        } else {
+            status = TRUE;
+            replen = 0;
+        }
     }
 
     return (status);
@@ -415,7 +418,7 @@ int PASCAL NEAR rmcstr P0_()
              */
             if ( mj != 0 ) {
                 rmcptr->mc_type = LITSTRING;
-                if ( ( rmcptr->u.rstr = room(mj + 1) ) == NULL ) {
+                if ( ( rmcptr->u.rstr = ROOM(mj + 1) ) == NULL ) {
                     mlabort(TEXT94);
 /*                          "%%Out of memory" */
                     status = FALSE;
@@ -435,7 +438,7 @@ int PASCAL NEAR rmcstr P0_()
             if ( pchr <= '9' && pchr >= '1' ) {
                 if ( mj != 0 ) {
                     rmcptr->mc_type = LITSTRING;
-                    if ( ( rmcptr->u.rstr = room(mj + 1) ) == NULL ) {
+                    if ( ( rmcptr->u.rstr = ROOM(mj + 1) ) == NULL ) {
                         mlabort(TEXT94);
 /*                          "%%Out of memory" */
                         status = FALSE;
@@ -454,7 +457,7 @@ int PASCAL NEAR rmcstr P0_()
                 /* We room mj plus two here, instead of one, because we have to
                  * count the current character.
                  */
-                if ( ( rmcptr->u.rstr = room(mj + 2) ) == NULL ) {
+                if ( ( rmcptr->u.rstr = ROOM(mj + 2) ) == NULL ) {
                     mlabort(TEXT94);
 /*                      "%%Out of memory" */
                     status = FALSE;
@@ -486,7 +489,7 @@ int PASCAL NEAR rmcstr P0_()
 
     if ( rmagical && mj > 0 ) {
         rmcptr->mc_type = LITSTRING;
-        if ( ( rmcptr->u.rstr = room(mj + 1) ) == NULL ) {
+        if ( ( rmcptr->u.rstr = ROOM(mj + 1) ) == NULL ) {
             mlabort(TEXT94);
 /*              "%%Out of memory" */
             status = FALSE;
@@ -515,15 +518,13 @@ VOID PASCAL NEAR rmcclear P0_()
 
     while ( rmcptr->mc_type != MCNIL ) {
         if ( rmcptr->mc_type == LITSTRING )
-            free(rmcptr->u.rstr);
+            CLROOM(rmcptr->u.rstr);
         rmcptr++;
     }
 
     rmcpat[0].mc_type = MCNIL;
     rmagical = FALSE;
-    if ( oldpatmatch != NULL )
-        free(oldpatmatch);
-    oldpatmatch = NULL;
+    CLROOM(oldpatmatch);
 }
 
 #endif  /* MAGIC  */

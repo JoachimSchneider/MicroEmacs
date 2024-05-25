@@ -133,7 +133,7 @@ static VOID PASCAL  PushMLHist (void)
     /* e = index of the last non-space char */
     if ( e < 0 ) return;
 
-    if ( ( ml = MLHistory[MLHistNew] = room (e + 2) ) != NULL ) {
+    if ( ( ml = MLHistory[MLHistNew] = ROOM (e + 2) ) != NULL ) {
         for ( i = 0; i <= e; i++ ) *ml++ = MLBuf[i];
         *ml = '\0';     /* terminate the string */
         MLHistNew = (MLHistNew + 1) & MLHISTMASK;
@@ -246,7 +246,7 @@ static int PASCAL mswopen ()
         eolexist = TRUE;
         xstrcpy (sres, "MSWIN");                /* $SRES emacs variable */
         xstrcpy(os, "MSWIN");           /* $OS emacs variable */
-        MLBuf = (char*)room(MLSIZE);
+        MLBuf = (char*)ROOM(MLSIZE);
         for ( x = 0; x < MLSIZE; ) MLBuf[x++] = ' ';
         FirstTime = FALSE;
     }

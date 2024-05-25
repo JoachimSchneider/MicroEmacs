@@ -1,11 +1,13 @@
 # MicroEMACS
 
+
 This is an unofficial repository for the MicroEMACS Editor by Daniel M. Lawrence.
 
 Its purpose is to keep this wonderful editor usable and alive by doing
-necessary source code maintenance (currently for some Unix operating
-systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, for MSDOS and
---- thanks to the contribution of Martin --- for OpenVMS):
+necessary source code maintenance. Currently it works on some Unix
+operating systems, e.g. AIX, FreeBSD, OpenBSD, Linux and Solaris, on
+MSDOS (using Turbo C or DJGPP), on Windows (XP up to 11) with CygWin
+and --- thanks to the contribution of Martin Vorlaender --- on OpenVMS:
 
 * Bug fixing,
 * porting to current operating systems and
@@ -15,12 +17,29 @@ It started as a *copy* of Peter Chapman's repository
 <https://github.com/pmachapman/memacs>. I've frozen the state at the
 time of the copy (Aug 6, 2021) in the *archive* branch.
 
-Documentation: See `ue500/doc/emacs.pdf`.
+Documentation:
+
+* See `ue500/doc/emacs.pdf` for the original documentation of MicroEMACS.
+
+* Necessary changes and updates to this documentation caused by bug
+  fixes and new features will be desribed in *this* file in the section
+  called "Documentation Updates".
+
+* For platform specific instructions see
+  (`$ find ue500 -type f \( -name 'Readme*' -or -name 'Install*' \)`):
+
+  - ue500/vms/Readme.txt
+  - ue500/djgpp/Readme.txt
+  - ue500/cygwin/Readme.txt
+  - ue500/linux/termcap/Install
+  - ue500/linux/ansi/Install
+  - ue500/aix5/Install
+  - ue500/freebsd/ansi/Install
 
 
 ## Some history:
 
-* I enjoyed MicroEMACS since the 1994 --- then version 3.12 for MS-DOS;
+* I enjoyed MicroEMACS since 1994 --- then version 3.12 for MS-DOS;
   used it to type in the TeX code of my thesis.
 
 * Daniel Michael Lawrence worked on MicroEMACS until 2009. His version
@@ -40,6 +59,26 @@ Documentation: See `ue500/doc/emacs.pdf`.
   Schneider). First purpose was to get Daniels MicroEMACS running again
   on Linux and OpenBSD.
 
+  Steps used to copy:
+
+  - Fork of Peter Chapmans repository to "memacs".
+  - Create Repository "MicroEmacs" on GitHub.
+  - `git clone --bare https://github.com/JoachimSchneider/memacs.git`
+  - `cd memacs.git`
+  - `git push --mirror https://github.com/JoachimSchneider/MicroEmacs.git`
+  - Delete "memacs.git" on GitHub
+
+
+## Branches:
+
+* *master*:   Tested
+
+* *fixes*:    Compiles and runs
+
+* *current*:  Need not even compile --- *Not testet*
+
+* *archive*:  Frozen (Aug 6, 2021) state of the copy of Peter Chapman's repository
+
 
 ## Pull requests
 
@@ -47,6 +86,65 @@ Please use the *fixes* branch for pull requests.
 
 
 ## Change Log
+
+[2024-05-23.00]
+  * New escape character flag `~x' will be recognized im MicroEMACS
+    macro language:
+
+    Exactly two hexadecimal digits following `~x' are
+    evaluated to a character code:
+    ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
+
+[2024-05-14.00]
+  * Setting $abfull TRUE enables full --- i.e. substrings in
+    words --- expansion of abbreviations in ABBREV mode.
+
+[2024-05-08.00]
+  * It's possible now to *update* the keymap (it was only possible to
+    create new entries before). This affects `set $palette KEYMAP ...'
+    and `add-keymap'.
+
+[2024-05-02.00]
+ * Startup file won't be loaded from current directory any more:
+   It is a security hole.
+ * VMS: Lookup startup file first in SYS$LOGIN, then
+   in MICROEMACS$LIB.
+
+[2024-04-18.00]
+* VAX (ANSI/SMG): Enabled keymap reconfiguration via
+  `set $palette KEYMAP <keybinding> <escape-sequence>'.
+
+[2024-03-01.01]
+* MicroEMACAS compiles and runs with DJGPP: Testet on MS-DOS 6.22 in
+  Linux DOSEMU, DOSBox with cwsdpmi, Windows 2000 and Windows XP. See
+  ue500/djgpp/Readme.txt.
+
+  It runs standalone (outside of a DJGPP environment) if a DPMI server
+  (e.g. cwsdpmi or the built-in Windows DPMI) is available.
+
+[2024-03-01.00]
+* MicroEMACAS compiles and runs with CygWin: Testet on Windows XP,
+  Windows 10 and Windows 11. See ue500/cygwin/Readme.txt.
+
+  It runs standalone (outside of a CygWin environment) if the
+  cygwin1.dll is located in the Windows search Path.
+
+[2023-10-03.00]
+* Enabled ANSI terminal driver for UNIX
+
+[2023-09-27.00]
+* pcdos/ansi build works (Uses ANSI escape sequences for screen control).
+
+[2023-09-20.01]
+* Use room/reroom *everywhere*.
+* Use CLROOM() insted of free().
+
+[2023-09-20.00]
+* Modified the source to compile in a pre-ANSI, and varargs.h
+  environment.
+
+* Checked the *old* (pre-ANSI, varargs.h) `PROTO == 0, VARG == 1`
+  settings on Solaris 5.7: It works.
 
 [2023-09-07.00]
 * On the UNIX platforms and on MSDOS it compiles *without warnings*
@@ -146,7 +244,7 @@ modern Linux and FreeBSD systems:
     xstrdup().
 
 
-## New features
+## Documentation Updates
 
 * New user functions (efunc.h) fill-buffer and fill-region. With fill-region
   if the region starts in the middle of a line the start of the line will be
@@ -182,20 +280,167 @@ modern Linux and FreeBSD systems:
        text text text text text text text text text text text text text
   ```
 
+* The startup file (.emacsrc, emacs.rc, ...) is not searched in the
+  current directory any more; this obviously was a security hole.
+
+* VMS: emacs.rc is first searched in SYS$LOGIN and then in
+  MICROEMACS$LIB.
+
+* VMS: $ssave defaults to FALSE now: This way the VMS versions work out
+  of the box.
+
+* Escape character flag `~x' will be recognized im MicroEMACS
+  macro language:
+
+  Exactly two hexadecimal digits following `~x' are
+  evaluated to a character code:
+  ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
+
+* Setting $abfull TRUE enables full --- i.e. substrings in words ---
+  expansion of abbreviations. This is a stronger form of the $abquick
+  sub mode:
+
+  Example use of these flags when in ABBREV mode:
+
+  Assume the abbreviations
+
+    Aa  Alpha
+    Xx  X-Ray
+
+  are defined
+
+  - $abfull == FALSE, $abquick == FALSE
+
+    Then only the *isolated* words Aa or Xx will be substituted by
+    `Alpha' and 'X-Ray' during typing:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AaXx"
+    ```
+
+  - $abfull == FALSE, $abquick == TRUE
+
+    Aa and Xx will be substituted as soon as the appear at the
+    beginning of words or follow another substitution:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AlphaX-Ray"
+    "yAaXx"     ===>    "yAaXx"
+    ```
+
+  - $abfull == TRUE ($abquick setting doesn't matter):
+
+    Every occurence of Aa and Xx will be substituted as soon as they
+    are typed in:
+
+    ```
+    "Aa Xx "    ===>    "Alpha X-Ray "
+    "AaXx"      ===>    "AlphaX-Ray"
+    "yAaXx"     ===>    "yAlphaX-Ray"
+    "yAaXxu"    ===>    "yAlphaX-Rayu"
+    ```
+
+  So indeed the the $abfull somehow improves $abquick's behaviour
+  which we keep here for compatibility.
+
+  A more realistc examle: Suppose you need to use the HTML commands for
+  german umlauts. To simplify this task you decide to use MicroEMACS
+  abreviations which let you type the umlauts in the LaTeX style:
+
+  * Create the file `.uemacs-abbrevs` in your HOME directory:
+    ```
+    ; SOF(Abbreviations for uemacs)
+
+
+    ; LaTeX like German Umlauts (`~"': `~' must be used to escape `"'):
+    add-abbrev "~"a"    "&auml;"
+    add-abbrev "~"o"    "&ouml;"
+    add-abbrev "~"u"    "&uuml;"
+    add-abbrev "~"A"    "&Auml;"
+    add-abbrev "~"O"    "&Ouml;"
+    add-abbrev "~"U"    "&Uuml;"
+    add-abbrev "~"s"    "&szlig;"
+
+
+
+    ; EOF(Abbreviations for uemacs)
+    ```
+
+    In your `.emacsrc` add the lines
+
+    ```
+    ...
+    store-procedure get-abbrevs
+            !if &seq &find .uemacs-abbrevs ""
+                    write-message "[Can not find .uemacs-abbrevs]"
+                    !return
+            !endif
+            execute-file .uemacs-abbrevs
+    !endm
+    execute-procedure get-abbrevs
+    ...
+    set $abfull TRUE
+    ...
+    ```
+
+    Then you simply type M"archen which will expand to M&auml;rchen
+    *while* you are typing.
+
+    You may even extend this to type LATIN1 or UTF8 charcters for the Umlauts:
+
+    ```
+    ; SOF(Abbreviations for uemacs)
+
+
+    ; LaTeX like German Umlauts as HTML escapes (the `"' needs to be escaped
+    ; by `~'):
+    add-abbrev "~"a"    "&auml;"
+    add-abbrev "~"o"    "&ouml;"
+    add-abbrev "~"u"    "&uuml;"
+    add-abbrev "~"A"    "&Auml;"
+    add-abbrev "~"O"    "&Ouml;"
+    add-abbrev "~"U"    "&Uuml;"
+    add-abbrev "~"s"    "&szlig;"
+
+    ; German Umlauts as LATIN1 (`~xUV': Character with code 0xUV):
+    add-abbrev "'a"    "~xe4"
+    add-abbrev "'o"    "~xf6"
+    add-abbrev "'u"    "~xfc"
+    add-abbrev "'A"    "~xc4"
+    add-abbrev "'O"    "~xd6"
+    add-abbrev "'U"    "~xdc"
+    add-abbrev "'s"    "~xdf"
+
+    ; German Umlauts as UTF8 (`~xUV': Character with code 0xUV):
+    add-abbrev "''a"    "~xc3~xa4"
+    add-abbrev "''o"    "~xc3~xb6"
+    add-abbrev "''u"    "~xc3~xbc"
+    add-abbrev "''A"    "~xc3~x84"
+    add-abbrev "''O"    "~xc3~x96"
+    add-abbrev "''U"    "~xc3~x9c"
+    add-abbrev "''s"    "~xc3~x9f"
+
+
+
+    ; EOF(Abbreviations for uemacs)
+    ```
+
 
 ## TODO
 - Compile on Windows:
   + Borland C++
-  + CygWin
   + MSC
 - UTF-8 support
-- Try to compile on *really old* compilers:
-  + Provide a `stdarg.h' *and* `varargs.h` version for all functions
-    whit variable argumebnt lists.
+- Try to compile on *really old* compilers (Pre-ANSI-C with varargs.h
+  only --- set VARG to TRUE in eproto.h). First (successful) tests were
+  done on AIX5.
 
 
 
-# For completeness I quote Peter Chapman's README.md here:
+## For completeness I quote Peter Chapman's README.md here:
+
 ```
 ## Introduction
 I have found it hard to track down the source code for MicroEMACS,
@@ -213,3 +458,7 @@ This code retains the copyright Daniel placed on this work (refer to [LICENSE.md
 
 I will endeavour to respect this, and request that you do the same, until notified otherwise.
 ```
+
+
+
+# EOF

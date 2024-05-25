@@ -298,7 +298,7 @@ checkmouse()
     if ( sstate & (4|32|64) )           /* shifted? */
         etype |= (SHFT >> 8);
     if ( sstate & 16 )                  /* controled? */
-        etype |= (CTRL >> 8);
+        etype |= (CTRF >> 8);
 
     /* no buttons changes */
     if ( oldbut == newbut ) {
@@ -569,7 +569,7 @@ int f, n;
     }
 
     /* and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (TRUE);
 }
@@ -629,8 +629,8 @@ int f, n;
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
         xstrcpy(bp->b_fname, tmpnam);
-        unlink(filnam1);
-        unlink(filnam2);
+        umc_unlink(filnam1);
+        umc_unlink(filnam2);
 
         return (s);
     }
@@ -640,8 +640,8 @@ int f, n;
     bp->b_flag |= BFCHG;                /* flag it as changed */
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     return (TRUE);
 }
@@ -746,10 +746,10 @@ char *cmd;      /*  Incoming command line to execute  */
     xstrcat(&tail[1], "\r");
 
     /* look up the program on the path trying various extentions */
-    if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
+        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE, TRUE) ) == NULL )  {
             xstrcpy(&prog[STRLEN(prog)-4], ".com");
-            if ( ( sp = flook(prog, TRUE) ) == NULL )
+            if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
                 return (FALSE);
         }
     xstrcpy(prog, sp);

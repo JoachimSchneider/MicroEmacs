@@ -151,7 +151,8 @@ int main P2_(int, argc, char **, argv)
         fix(argv[carg]);
         ++carg;
     }
-    exit(0);
+
+    return (0);
 }
 
 int PASCAL fix P1_(char *, fname)
@@ -267,7 +268,7 @@ int PASCAL fix P1_(char *, fname)
     /* close the files */
     fclose(infile);
     fclose(outfile);
-    unlink("tempfile");
+    umc_unlink("tempfile");
 
     /* and report */
     printf("[%u keys fixed in %s]\n", nseq, fname);

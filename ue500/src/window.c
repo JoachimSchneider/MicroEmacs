@@ -219,10 +219,10 @@ int PASCAL NEAR mvupwind P2_(int, f, int, n)
 int PASCAL NEAR onlywind P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER EWINDOW *wp;
-    REGISTER LINE   *lp;
-    REGISTER int i;
-    int cmark;                  /* current mark */
+    EWINDOW       *wp   = NULL;
+    REGISTER LINE *lp   = NULL;
+    REGISTER int  i     = 0;
+    int           cmark = 0;    /* current mark */
 
     while ( wheadp != curwp ) {
         wp = wheadp;
@@ -236,7 +236,7 @@ int PASCAL NEAR onlywind P2_(int, f, int, n)
             }
             wp->w_bufp->b_fcol  = wp->w_fcol;
         }
-        free( (char *) wp );
+        CLROOM(wp);
     }
     while ( curwp->w_wndp != NULL ) {
         wp = curwp->w_wndp;
@@ -250,7 +250,7 @@ int PASCAL NEAR onlywind P2_(int, f, int, n)
             }
             wp->w_bufp->b_fcol  = wp->w_fcol;
         }
-        free( (char *) wp );
+        CLROOM(wp);
     }
     lp = curwp->w_linep;
     i  = curwp->w_toprow;
@@ -342,7 +342,7 @@ int PASCAL NEAR delwind P2_(int, f, int, n)
         first_screen->s_first_window = wheadp = curwp->w_wndp;
     else
         lwp->w_wndp = curwp->w_wndp;
-    free( (char *)curwp );
+    CLROOM(curwp);
     curwp = wp;
     wp->w_flag |= WFHARD;
     curbp = wp->w_bufp;
@@ -381,7 +381,7 @@ int PASCAL NEAR splitwind P2_(int, f, int, n)
 /*          "Cannot split a %d line window" */
         return (FALSE);
     }
-    if ( ( wp = (EWINDOW *)room( SIZEOF (EWINDOW) ) ) == NULL ) {
+    if ( ( wp = (EWINDOW *)ROOM( SIZEOF (EWINDOW) ) ) == NULL ) {
         mlabort(TEXT94);
 
 /*          "%%Out of memory" */
@@ -801,9 +801,8 @@ int PASCAL NEAR newsize P2_(int, f, int, n)
                 if ( lastwp != NULL )
                     lastwp->w_wndp = NULL;
 
-                /* free the structure */
-                free( (char *)wp );
-                wp = NULL;
+                /* Free the structure */
+                CLROOM(wp);
 
             } else {
                 /* need to change this window size? */

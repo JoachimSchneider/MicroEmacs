@@ -195,7 +195,7 @@ PASCAL NEAR pipecmd(f, n)
     sgarbf = TRUE;
 
     /* did the output file get generated? */
-    if ( access(filnam, 0) != 0 )
+    if ( umc_access(filnam, 0) != 0 )
         return (FALSE);
 
     /* split the current window to make room for the command output */
@@ -217,7 +217,7 @@ PASCAL NEAR pipecmd(f, n)
     }
 
     /* and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (TRUE);
 }
@@ -300,8 +300,8 @@ PASCAL NEAR f_filter(f, n)
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
         xstrcpy(bp->b_fname, tmpnam);
-        unlink(filnam1);
-        unlink(filnam2);
+        umc_unlink(filnam1);
+        umc_unlink(filnam2);
 
         return (s);
     }
@@ -311,8 +311,8 @@ PASCAL NEAR f_filter(f, n)
     bp->b_flag |= BFCHG;                /* flag it as changed */
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     return (TRUE);
 }
@@ -372,8 +372,8 @@ execprog(char *cmd)
 
 
     /* look up the program on the path, trying various extentions */
-    if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
+        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE, TRUE) ) == NULL )  {
             return (FALSE);
         }
     xstrcpy(prog, sp);

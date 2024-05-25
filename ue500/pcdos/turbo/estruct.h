@@ -51,42 +51,44 @@
 /*      Machine/OS definitions                                        */
 /*===== [Set one of these!!] ======================================== */
 
-#define AMIGA   0                     /* AmigaDOS                     */
-#define AOSVS   0                     /* Data General AOS/VS          */
-#define AUX     0                     /* Apple UNIX for Macintosh     */
-#define AIX     0                     /* IBM UNIX for various machines*/
-#define AIX5    0                     /* IBM UNIX newer rs6000        */
-#define AVIION  0                     /* Data General AViiON          */
-#define BSD     0                     /* UNIX BSD 4.2 and ULTRIX      */
-#define FINDER  0                     /* Macintosh OS                 */
-#define FREEBSD 0                     /* FREEBSD 386 version 2 or +   */
-#define LINUX   0                     /* Linux                        */
-#define HPUX8   0                     /* HPUX HP 9000 ver 8 or less   */
-#define HPUX9   0                     /* HPUX HP 9000 ver 9           */
-#define MPE     0                     /* HP MPE/XL                    */
-#define MSDOS   1                     /* MS-DOS                       */
-#define MV_UX   0                     /* Data General MV/UX (Eclipse) */
-#define OPENBSD 0                     /* OPENBSD 386                  */
-#define OS2     0                     /* Microsoft or IBM OS/2        */
-#define SMOS    0                     /* Supermax UNIX System V       */
-#define SOLARIS 0                     /* SUN Solaris (SYSV)           */
-#define SUN     0                     /* SUN v4.0                     */
-#define TOS     0                     /* ST520, TOS                   */
-#define USG     0                     /* UNIX system V                */
-#define VAT     0                     /* Related to XENIX (???)       */
-#define VMS     0                     /* VAX/VMS                      */
-#define WINNT   0                     /* MS-Win NT                    */
-#define WINXP   0                     /* Windows XP/Visual studio 2008*/
-#define WMCS    0                     /* Wicat's MCS                  */
-#define XENIX   0                     /* IBM-PC SCO XENIX             */
+#define AMIGA       0                 /* AmigaDOS                     */
+#define AOSVS       0                 /* Data General AOS/VS          */
+#define AUX         0                 /* Apple UNIX for Macintosh     */
+#define AIX         0                 /* IBM UNIX for various machines*/
+#define AIX5        0                 /* IBM UNIX newer rs6000        */
+#define AVIION      0                 /* Data General AViiON          */
+#define BSD         0                 /* UNIX BSD 4.2 and ULTRIX      */
+#define CYGWIN      0                 /* Unix emulation on MS Windows */
+#define DJGPP_DOS   0                 /* Unix emulation on MS DOS     */
+#define FINDER      0                 /* Macintosh OS                 */
+#define FREEBSD     0                 /* FREEBSD 386 version 2 or +   */
+#define LINUX       0                 /* Linux                        */
+#define HPUX8       0                 /* HPUX HP 9000 ver 8 or less   */
+#define HPUX9       0                 /* HPUX HP 9000 ver 9           */
+#define MPE         0                 /* HP MPE/XL                    */
+#define MSDOS       1                 /* MS-DOS                       */
+#define MV_UX       0                 /* Data General MV/UX (Eclipse) */
+#define OPENBSD     0                 /* OPENBSD 386                  */
+#define OS2         0                 /* Microsoft or IBM OS/2        */
+#define SMOS        0                 /* Supermax UNIX System V       */
+#define SOLARIS     0                 /* SUN Solaris (SYSV)           */
+#define SUN         0                 /* SUN v4.0                     */
+#define TOS         0                 /* ST520, TOS                   */
+#define USG         0                 /* UNIX system V                */
+#define VAT         0                 /* Related to XENIX (???)       */
+#define VMS         0                 /* VAX/VMS                      */
+#define WINNT       0                 /* MS-Win NT                    */
+#define WINXP       0                 /* Windows XP/Visual studio 2008*/
+#define WMCS        0                 /* Wicat's MCS                  */
+#define XENIX       0                 /* IBM-PC SCO XENIX             */
 
 
-#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD       \
-                          || FREEBSD || HPUX8 || HPUX9 || LINUX     \
-                          || OPENBSD || SMOS || SOLARIS || SUN      \
-                          || USG || XENIX )
-#define IS_POSIX_UNIX() ( IS_UNIX()                                 \
-                          && !( USG || AIX || AUX || SMOS || HPUX8  \
+#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD         \
+                          || CYGWIN || DJGPP_DOS || FREEBSD || HPUX8  \
+                          || HPUX9 || LINUX || OPENBSD || SMOS        \
+                          || SOLARIS || SUN || USG || XENIX )
+#define IS_POSIX_UNIX() ( IS_UNIX()                                   \
+                          && !( USG || AIX || AUX || SMOS || HPUX8    \
                                 || HPUX9 || SUN || XENIX ) )
 #if defined (__STDC__) || defined(__cplusplus)
 # define IS_ANSI_C()  (1)
@@ -137,6 +139,8 @@
 
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
+/*      It is possible to use the ANSI terminal with UNIX:  No        */
+/*      termcap/curses library needed with this setup.                */
 
 #define ANSI    0           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
@@ -157,6 +161,10 @@
 #define XPCON   0           /* windows XP console app                 */
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
+
+/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
+
+#define UNIX_READ_TOUT  (4)
 
 /*      Windowing system style (pick one)                             */
 
@@ -199,6 +207,7 @@
 #define CTAGS   1   /* include vi-like tagging?                       */
 #define SPEECH  0   /* spoken EMACS, for the sight impared [not ready]*/
 #define VARARG  1   /* use varargs.h/stdarg.h for mlwrite()           */
+                    /* JES: 0 == VARARG is not supported any more.    */
 
 #if     XVT
 # undef  COLOR
@@ -286,7 +295,12 @@
 /*      Can we catch the SIGWINCH (the window size change signal)? */
 
 #if     IS_UNIX()
-# define HANDLE_WINCH    1
+/* We could maybee also check for `# ifdef TIOCGWINSZ' here:  */
+# if DJGPP_DOS
+#   define HANDLE_WINCH    0
+# else
+#   define HANDLE_WINCH    1
+# endif
 #else
 # define HANDLE_WINCH    0
 #endif
@@ -524,9 +538,9 @@ union REGS {
 #if     VMS
 # define getname xgetname
 # ifdef __cplusplus
-#   define unlink(a)       remove(a)
+#   define umc_unlink(a)       remove(a)
 # else
-#   define unlink(a)       delete(a)  /* Won't compile with C++ */
+#   define umc_unlink(a)       delete(a)  /* Won't compile with C++ */
 # endif
 #endif
 
@@ -590,43 +604,45 @@ union REGS {
 #define MAXargs 31
 int execl (const char *path, ...)
 {
-   va_list Argp;
-   char *array [MAXargs];
-   int argno=0;
-   va_start (Argp, path);
-   while ((array[argno++] = va_arg(Argp, char*)) != (char*)0)
-           ;
-   va_end(Argp);
-   return(execv(path, array));
+    va_list ap;
+    char *args[MAXargs];
+    int argno=0;
+    va_start (ap, path);
+    while ((args[argno++] = va_arg(ap, char*)) != (char*)0)
+        ;
+    va_end(ap);
 
+    return(execv(path, args));
 }
 main()
 {
-   execl("/usr/bin/echo", "ArgV[0]", "This", "Is", "A", "Test", "\0");
-   /* ArguementV[0] will be discarded by the execv in main(): */
-   /* by convention ArgV[0] should be a copy of path parameter */
+    execl("/usr/bin/echo", "ArgV[0]", "This", "Is", "A", "Test",      "\0");
+    /* ArguementV[0] will be discarded by the execv in main(): */
+    /* by convention ArgV[0] should be a copy of path parameter */
 }
 
 /*....................................................................*/
 
 #include <varargs.h>
-#define MAXargS 100
+#define MAXargs 100
 /*
 **  execl is called by
-**  execl(file, arg1, arg2, . . . , (char *) 0);
+**  execl(path, arg1, arg2, . . . , (char *) 0);
 */
 execl(va_alist)
-   va_dcl
-{  va_list ap;
-   char *file;
-   char *args[MAXargS];
-   int argno = 0;
-   va_start(ap);
-   file = va_arg(ap, char *);
-   while ((args[argno++] = va_arg(ap, char *)) != (char *) 0)
-      ;   /* Empty loop body */
-   va_end(ap);
-   return (execv(file, args));
+    va_dcl
+{
+    va_list ap;
+    char *path;
+    char *args[MAXargs];
+    int argno = 0;
+    va_start(ap);
+    path = va_arg(ap, char *);
+    while ((args[argno++] = va_arg(ap, char *)) != (char *) 0)
+        ;   /* Empty loop body */
+    va_end(ap);
+
+    return (execv(path, args));
 }
 
 /*....................................................................*/
@@ -637,11 +653,9 @@ execl(va_alist)
 #if     VARARG
 # if ( (GCC == 0 ) && ( IS_UNIX() || MPE) )
 #  define VARG    1
-#  define SARG    0
 #  include        <varargs.h>
 # else
 #  define VARG    0
-#  define SARG    1
 #  include        <stdarg.h>
 # endif
 #endif
@@ -700,7 +714,7 @@ execl(va_alist)
 #define MAXSYM  32              /* max # chars in symbol to expand    */
 #define MINFLEN 3               /* min # chars to match &func         */
 
-#define CTRL    0x0100          /* Control flag, or'ed in             */
+#define CTRF    0x0100          /* Control flag, or'ed in             */
 #define META    0x0200          /* Meta flag, or'ed in                */
 #define CTLX    0x0400          /* ^X flag, or'ed in                  */
 #define SPEC    0x0800          /* special key (function keys)        */

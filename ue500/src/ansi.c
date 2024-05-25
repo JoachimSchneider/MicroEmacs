@@ -1,7 +1,7 @@
 /*======================================================================
- * The routines in this file provide support for ANSI style terminals over a
- * serial line. The serial I/O services are provided by routines in termio.c. It
- * compiles into nothing if not an ANSI device.
+ * The routines in this file provide support for ANSI style terminals
+ * over a serial line. The serial I/O services are provided by routines
+ * in termio.c. It compiles into nothing if not an ANSI device.
  *====================================================================*/
 
 /*====================================================================*/
@@ -19,87 +19,146 @@
 
 #include        <stdio.h>
 #include        "estruct.h"
+#if IS_UNIX()
+# include <sys/ioctl.h>                 /* I/O control definitions  */
+# if ( !IS_POSIX_UNIX() )
+#  include <termio.h>
+# else
+#  include <termios.h>
+# endif /* !IS_POSIX_UNIX() */
+#endif  /* IS_UNIX() */
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
 
 #if     ANSI
 
-EXTERN int PASCAL NEAR fnclabel DCL((int f, int n));
-EXTERN int PASCAL NEAR readparam DCL((int *v));
-EXTERN VOID PASCAL NEAR dobbnmouse DCL((void));
-EXTERN VOID PASCAL NEAR docsi DCL((int oh));
-EXTERN VOID PASCAL NEAR ttputs DCL((char *string));
+/*==============================================================*/
+/* FEATURES                                                     */
+/*==============================================================*/
+/* ( IS_UNIX() || VMS || MPE ): `addkey()' works                */
+/*..............................................................*/
+#if    ( IS_UNIX() )
+# define USE_PALETTE ( !0 )
+#elif  ( VMS )
+# define USE_PALETTE ( !0 )
+#elif  ( MPE )
+# define USE_PALETTE ( !0 )
+#else
+# define USE_PALETTE ( 0 )    /* DON'T CHANGE */
+  CASRT( !USE_PALETTE );
+#endif /* IS_UNIX() */
+/*..............................................................*/
+/* USE_COOKED_ code only works on UNIX and VMS (`ttgetc()'      */
+/* cookes) and it gives sense there only if USE_PALETTE:        */
+/*..............................................................*/
+#if ( IS_UNIX() || VMS )
+# if ( USE_PALETTE )
+#  define USE_COOKED_    ( !0 )
+# else
+#  define USE_COOKED_    (  0 )
+# endif
+#else
+# define USE_COOKED_    (  0 )
+#endif
+/*==============================================================*/
+
+EXTERN int  PASCAL NEAR fnclabel    DCL((int f, int n));
+EXTERN int  PASCAL NEAR readparam   DCL((int *v));
+EXTERN VOID PASCAL NEAR dobbnmouse  DCL((void));
+EXTERN VOID PASCAL NEAR docsi       DCL((int oh));
+EXTERN VOID PASCAL NEAR ttputs      DCL((CONST char *string));
 
 # if VMS
-#  include ttdef
-#  include tt2def
+#  include <ttdef.h>
+#  include <tt2def.h>
 
 /*
- *       This structure, along with ttdef.h, is good for manipulating terminal
- * characteristics.
+ * This structure, along with ttdef.h, is good for manipulating
+ * terminal characteristics.
  */
-typedef struct {/* Terminal characteristics buffer */
-    unsigned char class, type;
-    unsigned short width;
-    unsigned tt1 : 24;
-    unsigned char page;
-    unsigned long tt2;
+typedef struct {
+    /* Terminal characteristics buffer */
+    unsigned char   catgy;  /* Renamed from `class' to allow C++ compile  */
+    unsigned char   type;
+    unsigned short  width;
+    unsigned int    tt1 : 24;
+    unsigned char   page;
+    unsigned long   tt2;
 } TTCHAR;
-COMMON NOSHARE TTCHAR orgchar;                  /* Original characteristics */
+COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
+# endif /* VMS */
+
+/* --- See also vt52.c --- */
+# define NROW       25    /* Screen size.                   */
+# define NCOL       80    /* Edit if you want to.           */
+# if DJGPP_DOS
+/* DJGPP needs term.t_ncol == 79: Otherwise we get --- at least
+ * since DJDEV204 a SIGSEGV in vbios_write_ch() (DJGPP runtime).
+ */
+#  undef  NCOL
+#  define NCOL      79
+CASRT(1 <= NCOL && NCOL < 80);
 # endif
 
-# define NROW    25                     /* Screen size.                 */
-# define NCOL    80                     /* Edit if you want to.         */
-# define NPAUSE  100                    /* # times thru update to pause */
-# define MARGIN  8                      /* size of minimim margin and   */
-# define SCRSIZ  64                     /* scroll size for extended lines */
-# define BEL     0x07                   /* BEL character.               */
-# define ESC     0x1B                   /* ESC character.               */
+
+# if HANDLE_WINCH
+#  define NROW_MAX 120    /* .............................. */
+#  define NCOL_MAX 132    /* .............................. */
+# else
+#  define NROW_MAX NROW   /* .............................. */
+#  define NCOL_MAX NCOL   /* .............................. */
+# endif
+# define NPAUSE     100   /* # times thru update to pause   */
+# define MARGIN       8   /* size of minimim margin and     */
+# define SCRSIZ      64   /* scroll size for extended lines */
+# define BEL        0x07  /* BEL character.                 */
+# define ESC        0x1B  /* ESC character.                 */
 
 /* Forward references.          */
-EXTERN int PASCAL NEAR ansimove();
-EXTERN int PASCAL NEAR ansieeol();
-EXTERN int PASCAL NEAR ansieeop();
-EXTERN int PASCAL NEAR ansibeep();
-EXTERN int PASCAL NEAR ansiopen();
-EXTERN int PASCAL NEAR ansirev();
-EXTERN int PASCAL NEAR ansiclose();
-EXTERN int PASCAL NEAR ansikopen();
-EXTERN int PASCAL NEAR ansikclose();
-EXTERN int PASCAL NEAR ansicres();
-EXTERN int PASCAL NEAR ansiparm();
-EXTERN int PASCAL NEAR ansigetc();
+static int  PASCAL NEAR ansimove    DCL((int row, int col));
+static int  PASCAL NEAR ansieeol    DCL((void));
+static int  PASCAL NEAR ansieeop    DCL((void));
+static int  PASCAL NEAR ansibeep    DCL((void));
+static int  PASCAL NEAR ansiopen    DCL((void));
+static int  PASCAL NEAR ansirev     DCL((int state));
+static int  PASCAL NEAR ansiclose   DCL((void));
+static int  PASCAL NEAR ansikopen   DCL((void));
+static int  PASCAL NEAR ansikclose  DCL((void));
+static int  PASCAL NEAR ansicres    DCL((char * dummy));
+static VOID PASCAL NEAR ansiparm    DCL((int n));
+static int  PASCAL NEAR ansigetc    DCL((void));
 
 # if     COLOR
-EXTERN int PASCAL NEAR ansifcol();
-EXTERN int PASCAL NEAR ansibcol();
+static int  PASCAL NEAR ansifcol    DCL((int color));
+static int  PASCAL NEAR ansibcol    DCL((int color));
 static int rev_state = FALSE;
 
 static int cfcolor = -1;        /* current foreground color */
 static int cbcolor = -1;        /* current background color */
 
 #  if     AMIGA
-/* Apparently the AMIGA does not follow the ANSI standards as regards to
- * colors....maybe because of the default pallette settings?  Color translation
- * table needed.
+/*
+ * Apparently the AMIGA does not follow the ANSI standards as regards
+ * to colors....maybe because of the default pallette settings? Color
+ * translation table needed.
  */
 
 int coltran[16] =
 {
     2, 3, 5, 7, 0, 4, 6, 1, 8, 12, 10, 14, 9, 13, 11, 15
 };
-#  endif
-# endif
+#  endif  /* AMIGA */
+# endif /* COLOR */
 
 /*
- * Standard terminal interface dispatch table. Most of the fields point into
- * "termio" code.
+ * Standard terminal interface dispatch table. Most of the fields point
+ * into "termio" code.
  */
 NOSHARE TERM term = {
-    NROW-1,
-    NROW-1,
-    NCOL,
+    NROW_MAX - 1,
+    NROW - 1,
+    NCOL_MAX,
     NCOL,
     0, 0,
     MARGIN,
@@ -122,17 +181,19 @@ NOSHARE TERM term = {
 # if    COLOR
     , ansifcol,
     ansibcol
-#endif
+# endif /* COLOR */
 };
 
 # if    COLOR
-PASCAL NEAR ansifcol(color)             /* set the current output color */
-
-int color;      /* color to set */
-
+/* ANSIFCOL:
+ *
+ * Set the current output color
+ */
+static int PASCAL NEAR ansifcol P1_(int, color)
+/* color: Color to set  */
 {
     if ( color == cfcolor )
-        return;
+        return 0;
 
     ttputc(ESC);
     ttputc('[');
@@ -153,19 +214,23 @@ int color;      /* color to set */
     ansiparm(coltran[color]+30);
 #   else
     ansiparm(color+30);
-#   endif
-#  endif
+#   endif /* AMIGA */
+#  endif  /* MSDOS */
     ttputc('m');
     cfcolor = color;
+
+    return 0;
 }
 
-PASCAL NEAR ansibcol(color)             /* set the current background color */
-
-int color;      /* color to set */
-
+/* ANSIBCOL:
+ *
+ * Set the current background color
+ */
+static int PASCAL NEAR ansibcol P1_(int, color)
+/* color: Color to set  */
 {
     if ( color == cbcolor )
-        return;
+        return 0;
 
     ttputc(ESC);
     ttputc('[');
@@ -173,13 +238,15 @@ int color;      /* color to set */
     ansiparm(coltran[color]+40);
 #  else
     ansiparm( (color&7)+40 );
-#  endif
+#  endif  /* AMIGA */
     ttputc('m');
     cbcolor = color;
-}
-# endif
 
-PASCAL NEAR ansimove(row, col)
+    return 0;
+}
+# endif /* COLOR */
+
+static int PASCAL NEAR ansimove P2_(int, row, int, col)
 {
     ttputc(ESC);
     ttputc('[');
@@ -187,34 +254,44 @@ PASCAL NEAR ansimove(row, col)
     ttputc(';');
     ansiparm(col+1);
     ttputc('H');
+
+    return 0;
 }
 
-PASCAL NEAR ansieeol()
+static int PASCAL NEAR ansieeol P0_()
 {
     ttputc(ESC);
     ttputc('[');
     ttputc('K');
+
+    return 0;
 }
 
-PASCAL NEAR ansieeop()
+static int PASCAL NEAR ansieeop P0_()
 {
 # if     COLOR
     ansifcol(gfcolor);
     ansibcol(gbcolor);
-# endif
+# endif /* COLOR */
     ttputc(ESC);
     ttputc('[');
     ttputc('0');
     ttputc('J');
+
+    return 0;
 }
 
-PASCAL NEAR ansirev(state)              /* change reverse video state */
-
-int state;      /* TRUE = reverse, FALSE = normal */
-
+/* ANSIREV:
+ *
+ * Change reverse video state
+ */
+static int PASCAL NEAR ansirev P1_(int, state)
+/* state: TRUE = reverse, FALSE = normal  */
 {
 # if     COLOR
-    int ftmp, btmp;             /* temporaries for colors */
+    /* temporaries for colors:  */
+    int ftmp  = 0;
+    int btmp  = 0;
 
     if ( state != rev_state ) {
         ftmp = cfcolor;
@@ -230,29 +307,93 @@ int state;      /* TRUE = reverse, FALSE = normal */
     ttputc('[');
     ttputc(state ? '7': '0');
     ttputc('m');
-# endif
+# endif /* COLOR */
+
+    return 0;
 }
 
-PASCAL NEAR ansicres()  /* change screen resolution */
+/* ANSICRES:
+ *
+ * Change screen resolution
+ */
+static int PASCAL NEAR ansicres P1_(char *, dummy)
 {
     return (TRUE);
 }
 
-PASCAL NEAR spal P1_(char *, dummy) /* change pallette settings */
+/* SPAL:
+ *
+ * Change pallette settings
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
+ */
+int PASCAL NEAR spal P1_(char *, cmd)
+/* cmd: Palette command */
 {
-    /* none for now */
+# if ( USE_PALETTE )
+    int   code      = 0;
+    int   dokeymap  = 0;
+    char  *cp       = NULL;
+
+#  if ( 0 )
+    TRC(("spal(%s)", cmd));
+#  endif
+    /* Check for keymapping command */
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
+        dokeymap = !0;
+    } else                                        {
+        return (0);
+    }
+
+    cmd += 7;
+
+    /* Look for space */
+    for ( cp = cmd; *cp == ' '; cp++ );
+    for (; *cp != '\0'; cp++ )
+        if ( *cp == ' ' ) {
+            *cp++ = '\0';
+            break;
+        }
+    if ( *cp == '\0' )
+        return (1);
+
+    for (; *cp == ' '; cp++ );
+
+    /* Perform operation */
+    if        ( dokeymap )  {
+        /* Convert to keycode */
+#  if ( 0 )
+        TRC(("cp = <%s>, cmd = <%s>", cp, cmd));
+#  endif
+        code = stock(cmd);
+#  if ( 0 )
+        TRC(("code = <%d>, cmd = <%s>", code, cmd));
+#  endif
+
+        /* Add to tree */
+        addkey((unsigned char *)cp, code);
+    } else                  {
+        /**EMPTY**/
+    }
+# endif /* USE_PALETTE */
+
+    return (0);
 }
 
-PASCAL NEAR ansibeep()
+static int PASCAL NEAR ansibeep P0_()
 {
     ttputc(BEL);
     ttflush();
+
+    return 0;
 }
 
-PASCAL NEAR ansiparm(n)
-REGISTER int n;
+static VOID PASCAL NEAR ansiparm P1_(int, n)
 {
-    REGISTER int q, r;
+    REGISTER int  q = 0;
+    REGISTER int  r = 0;
 
     q = n/10;
     if ( q != 0 ) {
@@ -265,41 +406,75 @@ REGISTER int n;
     ttputc( (n%10) + '0' );
 }
 
-PASCAL NEAR ansiopen()
+static int PASCAL NEAR ansiopen P0_()
 {
-# if     USG | AIX | AUX | HPUX8 | HPUX9 | BSD | SUN | XENIX
-    REGISTER char *cp;
+# if     IS_UNIX()
+    REGISTER char *cp = NULL;
+#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+    struct winsize win;
+
+    ZEROMEM(win);
+#  endif
 
     if ( ( cp = getenv("TERM") ) == NULL ) {
         puts(TEXT4);
+        TRC(("%s", TEXT4));
 /*                   "Shell variable TERM not defined!" */
+#  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
         meexit(1);
-    }
-    if ( strcmp(cp,
-                "vt100") != 0 &&
-         strcmp(cp, "vt200") != 0 &&strcmp(cp, "vt300") != 0 ) {
-        puts(TEXT5);
+#  endif
+    } else {
+        if ( strcmp(cp, "vt100") != 0 &&
+             strcmp(cp, "vt200") != 0 &&
+             strcmp(cp, "vt300") != 0 ) {
+            puts(TEXT5);
+            TRC(("%s", TEXT5));
 /*                   "Terminal type not 'vt100'!" */
+#  if ( 0 )   /* All terminals should support ANSI escape sequences!  */
         meexit(1);
+#  endif
+        }
     }
-# endif
-# if     MOUSE & (USG | AIX | AUX | HPUX8 | HPUX9 | BSD | SUN | XENIX | VMS)
+#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+    if ( 0 == ioctl(fileno(stdin), TIOCGWINSZ, &win) )  {
+        /* REPAIR(): Sometimes --- e.g. with `qterminal -e emacs <args>'
+         *           the ioctl() called at *this* point gives wrong
+         *           results.
+         */
+        term.t_nrow = win.ws_row - 1;
+        REPAIR(term.t_nrow >= 1,  term.t_nrow = NROW - 1);
+        term.t_ncol = win.ws_col;
+        REPAIR(term.t_ncol >= 1,  term.t_ncol = NCOL);
+    } else {
+        term.t_nrow = NROW - 1;
+        term.t_ncol = NCOL;
+    }
+#  else
+    term.t_nrow = NROW - 1;
+    term.t_ncol = NCOL;
+#  endif  /* !DJGPP_DOS */
+#  if ( !0 )
+    term.t_mrow = term.t_nrow;
+    term.t_mcol = term.t_ncol;
+#  endif
+# endif /* IS_UNIX() */
+# if     MOUSE && (IS_UNIX() || VMS)
    /*
-    *   If this is an ansi terminal of at least DEC level
-    *   2 capability, some terminals of this level, such as the "Whack"
-    *   emulator, the VWS terminal emulator, and some versions of XTERM,
-    *   support access to the workstation mouse via escape sequences.  In
-    *   addition, any terminal that conforms to level 2 will, at very least,
-    *   IGNORE the escape sequences for the mouse.
+    * If this is an ansi terminal of at least DEC level 2 capability,
+    * some terminals of this level, such as the "Whack" emulator, the
+    * VWS terminal emulator, and some versions of XTERM, support access
+    * to the workstation mouse via escape sequences. In addition, any
+    * terminal that conforms to level 2 will, at very least, IGNORE the
+    * escape sequences for the mouse.
     */
     {
-        char *s;
+        CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_ENABLE");
         if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
         ttputs(s);
     }
-# endif
+# endif /* MOUSE && (IS_UNIX() || VMS) */
     xstrcpy(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
@@ -307,18 +482,20 @@ PASCAL NEAR ansiopen()
 # if     KEYPAD
     ttputc(ESC);
     ttputc('=');
-# endif
+# endif /* KEYPAD */
+
+    return 0;
 }
 
-PASCAL NEAR ansiclose()
+static int PASCAL NEAR ansiclose P0_()
 {
 # if     COLOR
     ansifcol(7);
     ansibcol(0);
-# endif
-# if     MOUSE & (USG | AIX | AUX | HPUX8 | HPUX9 | BSD | SUN | XENIX | VMS)
+# endif /* COLOR */
+# if     MOUSE && (IS_UNIX() || VMS)
     {
-        char *s;
+        CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_DISABLE");
 
@@ -326,40 +503,51 @@ PASCAL NEAR ansiclose()
             s = "\033[0'{\033[0;0'z";
         ttputs(s);
     }
-# endif
+# endif /* MOUSE && (IS_UNIX() || VMS) */
 # if     KEYPAD
 #  if     VMS
     if ( (orgchar.tt2 & TT2$M_APP_KEYPAD)==0 )
-#  endif
+#  endif  /* VMS */
     {
         ttputc(ESC);
         ttputc('>');
     }
-# endif
+# endif /* KEYPAD */
     ttclose();
+
+    return 0;
 }
 
-PASCAL NEAR ansikopen() /* open the keyboard (a noop here) */
+/* ANSIKOPEN:
+ *
+ * Open the keyboard (a noop here)
+ */
+static int PASCAL NEAR ansikopen P0_()
 {
+    return 0;
 }
 
-PASCAL NEAR ansikclose()        /* close the keyboard (a noop here) */
+/* ANSIKCLOSE:
+ *
+ * close the keyboard (a noop here)
+ */
+static int PASCAL NEAR ansikclose P0_()
 {
+    return 0;
 }
 
-# if   USG | AIX | AUX | HPUX8 | HPUX9 | BSD | SUN | XENIX | VMS
+# if   IS_UNIX() || VMS
 /***
  *  ttputs  -  Send a string to ttputc
  *
  *  Nothing returned
  ***/
-VOID PASCAL NEAR ttputs(string)
-char * string;                          /* String to write      */
+VOID PASCAL NEAR ttputs P1_(CONST char *, string)
+/* string:  String to write */
 {
     if ( string )
         while ( *string != '\0' )
             ttputc(*string++);
-
 }
 
 /*
@@ -368,33 +556,44 @@ char * string;                          /* String to write      */
  * conversion from VT100/VT200 style function keys into the Emacs
  * standard key sequence form.
  */
-static unsigned char inbuffer[ 10];
-static int inpos=0;
-static int inlen=0;
+static unsigned char  inbuffer[10];
+static int            inpos = 0;
+static int            inlen = 0;
 
-NOSHARE int mouserow, mousecol;
+static NOSHARE int  mouserow;
+static NOSHARE int  mousecol;
 
-int PASCAL NEAR readparam(v)    /* Read an ansi parameter */
-int *v; /* Place to put parameter value */
+/* READPARAM:
+ *
+ * Read an ansi parameter
+ */
+int PASCAL NEAR readparam P1_(int *, v)
+/* v: Place to put parameter value  */
 {
-    int ch;
+    int ch  = 0;
 
     *v = 0;
-    for (;; ) { /* Read in a number */
+    for (;;)  { /* Read in a number */
+#  if USE_COOKED_
         ch = ttgetc();
-        if ( ch>='0' && ch<='9' ) *v = 10 * *v + (ch - '0');
-        else return ( ch);
+#  else
+        ch = grabwait();
+#  endif
+        if ( ch >= '0' && ch <= '9' ) *v = 10 * *v + (ch - '0');
+        else return ( ch );
     }
 }
 
-/*
- * Handle the CSI (<esc>[) and SS3 (<esc>O) sequences. Static arrays are set up
- * to translate the ANSI escape sequence into the MicroEMACS keycode.
+/* DOCSI:
  *
- * The 'x' in the arrays keypad[] and dec_fnkey[] are merely placeholders.
+ * Handle the CSI (<esc>[) and SS3 (<esc>O) sequences. Static arrays
+ * are set up to translate the ANSI escape sequence into the MicroEMACS
+ * keycode.
+ *
+ * The 'x' in the arrays keypad[] and dec_fnkey[] are merely
+ * placeholders.
  */
-VOID PASCAL NEAR docsi(oh)
-int oh;
+VOID PASCAL NEAR docsi P1_(int, oh)
 {
     static char crsr[4] = { 'P', 'N', 'F', 'B' };
     static char keypad[14] =
@@ -409,167 +608,189 @@ int oh;
         '7', '8', '9', '0',
     };
 
-    unsigned int params[ 5];
-    int i;
-    unsigned int ch;
+    int params[5];
+    int i   = 0;
+    int ch  = 0;
 
-    params[ 0] = params[ 1] = params[ 2] = params[ 3] = params[ 4] = 0;
-    for ( i=0;; ) {
-        ch = readparam(&params[ i]);
+    ZEROMEM(params);
+
+    for ( i = 0 ;; )  {
+        ch = readparam(&params[i]);
         if ( ch >= '@' ) { /* This ends the sequence, check for the ones we care
                             * about */
-            mousecol = params[ 0];
-            mouserow = params[ 1];
+            mousecol = params[0];
+            mouserow = params[1];
             if ( ch == 'R' && oh != 'O' ) { /* Cursor pos report */
-                inbuffer[ inlen++] = 0x0;
-                inbuffer[ inlen++] = MOUS>>8;
-                inbuffer[ inlen++] = mouserow;
-                inbuffer[ inlen++] = mousecol;
-                inbuffer[ inlen++] = '1';
+                inbuffer[inlen++] = 0x0;
+                inbuffer[inlen++] = MOUS>>8;
+                inbuffer[inlen++] = mouserow;
+                inbuffer[inlen++] = mousecol;
+                inbuffer[inlen++] = '1';
             } else if ( ch == '~' ) {/* LK201 function key */
-                inbuffer[ inlen++] = 0x0;
+                inbuffer[inlen++] = 0x0;
                 if ( params[0] > 8 ) params[0] -= 3;
                 if ( params[0] > 18 )
-                    inbuffer[ inlen++] = (SHFT|SPEC)>>8;
+                    inbuffer[inlen++] = (SHFT|SPEC)>>8;
                 else
-                    inbuffer[ inlen++] = SPEC>>8;
-                inbuffer[ inlen++] = dec_fnkey[ params[ 0]];
+                    inbuffer[inlen++] = SPEC>>8;
+                inbuffer[inlen++] = dec_fnkey[params[0]];
             } else if ( ch == 'w' && oh != 'O' ) { /* mouse report */
-                mousecol = params[ 3]-1;
-                mouserow = params[ 2]-1;
-                inbuffer[ inlen++] = 0x0;
-                inbuffer[ inlen++] = MOUS>>8;
-                inbuffer[ inlen++] = mousecol;
-                inbuffer[ inlen++] = mouserow;
-                inbuffer[ inlen++] = ('a'-2)+params[ 0];
+                mousecol = params[3]-1;
+                mouserow = params[2]-1;
+                inbuffer[inlen++] = 0x0;
+                inbuffer[inlen++] = MOUS>>8;
+                inbuffer[inlen++] = mousecol;
+                inbuffer[inlen++] = mouserow;
+                inbuffer[inlen++] = ('a'-2)+params[0];
             } else if ( ch == 'd' && oh != 'O' ) { /* Pixette mouse report */
-                mousecol = params[ 0]-1;
-                mouserow = params[ 1]-1;
-                inbuffer[ inlen++] = 0x0;
-                inbuffer[ inlen++] = MOUS>>8;
-                inbuffer[ inlen++] = mousecol;
-                inbuffer[ inlen++] = mouserow;
-                inbuffer[ inlen++] = ('a'-2)+params[ 2];
+                mousecol = params[0]-1;
+                mouserow = params[1]-1;
+                inbuffer[inlen++] = 0x0;
+                inbuffer[inlen++] = MOUS>>8;
+                inbuffer[inlen++] = mousecol;
+                inbuffer[inlen++] = mouserow;
+                inbuffer[inlen++] = ('a'-2)+params[2];
             } else { /* Ordinary keypad or arrow key */
-                inbuffer[ inlen++] = 0x0;
+                inbuffer[inlen++] = 0x0;
                 if ( ch <= 'D' && ch >= 'A' ) { /* Arrow keys.*/
-                    inbuffer[ inlen++] = (SPEC)>>8;
-                    inbuffer[ inlen++] = crsr[ ch - 'A'];
+                    inbuffer[inlen++] = (SPEC)>>8;
+                    inbuffer[inlen++] = crsr[ch - 'A'];
                 } else if ( ch <= 'S' && ch >= 'P' ) { /* PF keys.*/
-                    inbuffer[ inlen++] = (SPEC|CTRL)>>8;
-                    inbuffer[ inlen++] = ch - ('P' - '1');
+                    inbuffer[inlen++] = (SPEC|CTRF)>>8;
+                    inbuffer[inlen++] = ch - ('P' - '1');
                 } else {
-                    inbuffer[ inlen++] = (ALTD)>>8;
+                    inbuffer[inlen++] = (ALTD)>>8;
                     if ( ch == 'M' )
-                        inbuffer[ inlen++] = 'E';
+                        inbuffer[inlen++] = 'E';
                     else
-                        inbuffer[ inlen++] = keypad[ ch - 'l'];
+                        inbuffer[inlen++] = keypad[ch - 'l'];
                 }
             }
 
             return;
         }
-        if ( i<5 ) i++;
+        if ( i < NELEM(params) ) i++;
     }
 }
 
-VOID PASCAL NEAR dobbnmouse()
+VOID PASCAL NEAR dobbnmouse P0_()
 {
-    int params[ 5];
-    int i, ch;
-    static char prev = 0;
-    int event, flags;
+    int params[5];
+    int i     = 0;
+    int ch    = 0;
+    int event = 0;
+    int flags = 0;
+    static char prev  = 0;
 
-    params[ 0] = 0;
-    params[ 1] = 0;
-    params[ 2] = 0;
-    params[ 3] = 0;
-    params[ 4] = 0;
+    params[0] = 0;
+    params[1] = 0;
+    params[2] = 0;
+    params[3] = 0;
+    params[4] = 0;
     for ( i=0;; ) {
-        /* Is the sequence finished?
+        /*
+         * Is the sequence finished?
          * check for the ones we care about.
          */
-        if ( ( ch = readparam(&params[ i]) ) >= '@' ) {
-            mousecol = (params[ 1]+4)/9;
-            mouserow = (1015-params[ 2])/16;
-            flags = params[ 3] & 7;
+        if ( ( ch = readparam(&params[i]) ) >= '@' ) {
+            mousecol = (params[1]+4)/9;
+            mouserow = (1015-params[2])/16;
+            flags = params[3] & 7;
             event = flags ^ prev;
             prev = flags;
             flags = ( (flags & event) == 0 );
             event = flags + ( 6 - (event & 6) );
             if ( ch == 'c' ) {  /* Cursor pos report */
-                inbuffer[ inlen++] = 0x0;
-                inbuffer[ inlen++] = MOUS>>8;
-                inbuffer[ inlen++] = mousecol;
-                inbuffer[ inlen++] = mouserow;
-                inbuffer[ inlen++] = ('a'-2)+event;
+                inbuffer[inlen++] = 0x0;
+                inbuffer[inlen++] = MOUS>>8;
+                inbuffer[inlen++] = mousecol;
+                inbuffer[inlen++] = mouserow;
+                inbuffer[inlen++] = ('a'-2)+event;
             }
 
             return;
         }
-        if ( i<5 ) i++;
+        if ( i < 5 ) i++;
     }
 }
 
-/*
- *  Read a keystroke from the terminal.  Interpret escape sequences that come
- * from function keys, mouse reports, and cursor location reports, and return
- * them using Emacs's coding of these events.
+/* ANSIGETC:
+ *
+ * Read a keystroke from the terminal. Interpret escape sequences that
+ * come from function keys, mouse reports, and cursor location reports,
+ * and return them using Emacs's coding of these events.
  */
-PASCAL NEAR ansigetc()
+static int PASCAL NEAR ansigetc P0_()
 {
-    int ch;
+    int ch  = 0;
 
-    for (;; ) {/* Until we get a character to return */
-        if ( inpos < inlen ) { /* Working out a multi-byte input sequence */
-            return ( inbuffer[ inpos++]);
+    for (;;)  { /* Until we get a character to return */
+        if ( inpos < inlen )  {
+            /* Working out a multi-byte input sequence  */
+
+            return ( inbuffer[inpos++]);
         }
         inpos = 0;
         inlen = 0;
+#  if USE_COOKED_
         ch = ttgetc();
-        if ( ch == 27 ) { /* ESC, see if sequence follows */
-/*
- *       If the "terminator" is ESC, and if we are currently reading a string
- * where the terminator is ESC, then return the ESC and do not allow function
- * keys or mouse to operate properly.  This makes VT100 users much happier.
- */
+#  else
+        ch = grabwait();
+#  endif
+        if ( ch == 27 ) {   /* ESC, see if sequence follows */
+            /*
+             * If the "terminator" is ESC, and if we are currently
+             * reading a string where the terminator is ESC, then
+             * return the ESC and do not allow function keys or mouse
+             * to operate properly. This makes VT100 users much
+             * happier.
+             */
+#  if USE_COOKED_
+            ch = ttgetc_nowait();
+#  else
             ch = grabnowait();
-            if ( ch < 0 ) return ( 27); /* Wasn't a function key */
+#  endif
+            if ( grabnowait_TIMEOUT == ch ) return ( 27); /* Wasn't a function key  */
 
-            if ( ch == '[' ) docsi(ch);
+            if ( ch == '[' )      docsi(ch);
             else if ( ch == ':' ) dobbnmouse();
             else if ( ch == 'O' ) docsi(ch);
-            else { /* This isn't an escape sequence, return it unmodified */
-                inbuffer[ inlen++] = ch;
+            else {  /* This isn't an escape sequence, return it unmodified  */
+                inbuffer[inlen++] = ch;
 
                 return ( 27);
             }
-        } else if ( ch == 27+128 ) docsi(ch);
-        else return ( ch);
+        } else if ( ch == 27 + 128 )  {
+            docsi(ch);
+        } else                        {
+            return (ch);
+        }
     }
 }
 # else
-PASCAL NEAR  ansigetc()
+static int PASCAL NEAR ansigetc P0_()
 {
     return ( ttgetc() );
 }
-# endif
+# endif /* IS_UNIX() || VMS */
 
 # if     FLABEL
-int PASCAL NEAR fnclabel(f, n)          /* label a function key */
-
-int f, n;        /* default flag, numeric argument [unused] */
-
+/* FNCLABEL:
+ *
+ * Label a function key
+ */
+int PASCAL NEAR fnclabel P2_(int, f, int, n)
+/* f, n:  Default flag, numeric argument [unused] */
 {
     /* on machines with no function keys...don't bother */
     return (TRUE);
 }
-# endif
+# endif /* FLABEL */
 #else
-ansihello()
+VOID ansihello P0_()
 {
 }
-#endif
+#endif  /* ANSI */
 
 
 

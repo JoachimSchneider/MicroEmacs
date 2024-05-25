@@ -113,7 +113,11 @@ DCLDEF NOSHARE int            hscroll             INIT_(TRUE);          /* horiz
 DCLDEF NOSHARE int            hscrollbar          INIT_(TRUE);          /* horizontal scroll bar flag       */
 DCLDEF NOSHARE int            vscrollbar          INIT_(TRUE);          /* vertical scroll bar flag         */
 DCLDEF NOSHARE int            hjump               INIT_(1);             /* horizontal jump size             */
+#if VMS /* Per default don't use $ssave as it disables VMS file versions: */
+DCLDEF NOSHARE int            ssave               INIT_(FALSE);         /* safe save flag                   */
+#else
 DCLDEF NOSHARE int            ssave               INIT_(TRUE);          /* safe save flag                   */
+#endif
 DCLDEF NOSHARE struct BUFFER *bstore              INIT_(NULL);          /* buffer to store macro text to    */
 DCLDEF NOSHARE int            vtrow               INIT_(0);             /* Row location of SW cursor        */
 DCLDEF NOSHARE int            vtcol               INIT_(0);             /* Column location of SW cursor     */
@@ -123,16 +127,16 @@ DCLDEF NOSHARE int            lbound              INIT_(0);             /* leftm
 DCLDEF NOSHARE int            taboff              INIT_(0);             /* tab offset for display           */
 DCLDEF NOSHARE int            tabsize             INIT_(8);             /* current hard tab size            */
 DCLDEF NOSHARE int            stabsize            INIT_(0);             /* current soft tab size (0: use hard tabs) */
-DCLDEF NOSHARE int            reptc               INIT_(CTRL | 'U');    /* current universal repeat char    */
-DCLDEF NOSHARE int            abortc              INIT_(CTRL | 'G');    /* current abort command char       */
-DCLDEF NOSHARE int            sterm               INIT_(CTRL | '[');    /* search terminating character     */
-DCLDEF NOSHARE int            isterm              INIT_(CTRL | '[');    /* incremental-search terminating char  */
+DCLDEF NOSHARE int            reptc               INIT_(CTRF | 'U');    /* current universal repeat char    */
+DCLDEF NOSHARE int            abortc              INIT_(CTRF | 'G');    /* current abort command char       */
+DCLDEF NOSHARE int            sterm               INIT_(CTRF | '[');    /* search terminating character     */
+DCLDEF NOSHARE int            isterm              INIT_(CTRF | '[');    /* incremental-search terminating char  */
 DCLDEF NOSHARE int            searchtype          INIT_(SRNORM);        /* current search style             */
 DCLDEF NOSHARE int            yankflag            INIT_(FALSE);         /* current yank style               */
 DCLDEF NOSHARE int            prefix              INIT_(0);             /* currently pending prefix bits    */
 DCLDEF NOSHARE int            prenum              INIT_(0);             /*     "       "     numeric arg    */
 DCLDEF NOSHARE int            predef              INIT_(TRUE);          /*     "       "     default flag   */
-DCLDEF NOSHARE int            quotec              INIT_(CTRL | 'Q');    /* quote char during mlreply()      */
+DCLDEF NOSHARE int            quotec              INIT_(CTRF | 'Q');    /* quote char during mlreply()      */
 DCLDEF NOSHARE CONST char     *cname[NOSZ_]                             /* names of colors                  */
     INIT_({
         "BLACK" _K_ "RED" _K_ "GREEN" _K_ "YELLOW" _K_ "BLUE" _K_ "MAGENTA" _K_ "CYAN" _K_ "GREY" _K_
@@ -179,6 +183,9 @@ DCLDEF NOSHARE int            notquiescent        INIT_(1);             /* <=0 o
 DCLDEF NOSHARE int            fbusy               INIT_(FALSE);         /* indicates file activity if FREADING or FWRITING.
                                                                          * Used by abort mechanism          */
 DCLDEF NOSHARE int            hilite              INIT_(10);            /* current region to highlight (255 if none)  */
+#define hilite_IsValid()      ( 0 <= hilite && hilite < NMARKS - 1 )
+#define hilite_InValidate()   ( hilite = 0xFF )
+CASRT(NMARKS -1 <= 0xFF);
 
 
 /* uninitialized global definitions */
@@ -209,6 +216,7 @@ DCLDEF NOSHARE UTABLE         *uv_global;         /* global variable table      
 DCLDEF NOSHARE ABBREV         *ab_head;           /* head of the abbreviation list          */
 DCLDEF NOSHARE int            ab_bell;            /* are we ringing the bell on completion? */
 DCLDEF NOSHARE int            ab_cap;             /* match capatilization on expansion?     */
+DCLDEF NOSHARE int            ab_full;            /* full expansion? (exceeds ab_quick)?    */
 DCLDEF NOSHARE int            ab_quick;           /* aggressive completion enabled?         */
 DCLDEF NOSHARE char           ab_word[NSTRING];   /* current word being typed               */
 DCLDEF NOSHARE char           *ab_pos;            /* current place in ab_word               */

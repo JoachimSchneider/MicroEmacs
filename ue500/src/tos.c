@@ -292,7 +292,7 @@ pipecmd(f, n)
     upmode();
 
     /* and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (TRUE);
 }
@@ -349,8 +349,8 @@ f_filter(f, n)
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
         xstrcpy(bp->b_fname, tmpnam);
-        unlink(filnam1);
-        unlink(filnam2);
+        umc_unlink(filnam1);
+        umc_unlink(filnam2);
 
         return (s);
     }
@@ -361,8 +361,8 @@ f_filter(f, n)
     upmode();
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     return (TRUE);
 }

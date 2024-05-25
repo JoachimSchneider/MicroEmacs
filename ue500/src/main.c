@@ -1,12 +1,12 @@
 /*======================================================================
- *	MicroEMACS 5.00
- *		written by Daniel M. Lawrence
- *		based on code by Dave G. Conroy.
+ *      MicroEMACS 5.00
+ *              written by Daniel M. Lawrence
+ *              based on code by Dave G. Conroy.
  *
- *	(C)Copyright 1988-2009 by Daniel M. Lawrence
- *	MicroEMACS 5.00 can be copied and distributed freely for any
- *	non-commercial purposes. MicroEMACS 5.00 can only be incorporated
- *	into commercial software with the permission of the current author.
+ *      (C)Copyright 1988-2009 by Daniel M. Lawrence
+ *      MicroEMACS 5.00 can be copied and distributed freely for any
+ *      non-commercial purposes. MicroEMACS 5.00 can only be incorporated
+ *      into commercial software with the permission of the current author.
  *
  * This file contains the main driving routine, and some keyboard processing
  * code, for the MicroEMACS screen editor.
@@ -76,9 +76,11 @@ COMMON unsigned int _stklen = 10000;
 #endif
 
 /*
- * Systems that handle window size changes via signals.
+ * HANDLE_WINCH:  Systems that handle window size changes via signals.
+ * DJGPP_DOS:     Need to disable SIGINT (Ctrl-X,Ctrl-C (exit-emacs)
+ *                sometimes did not work on windows 2000)
  */
-#if HANDLE_WINCH
+#if ( HANDLE_WINCH || DJGPP_DOS )
 # include <signal.h>
 #endif
 
@@ -116,9 +118,12 @@ int main P2_(int, argc, char **, argv)
 #if HANDLE_WINCH
     signal(SIGWINCH, winch_changed);
 #endif
+#if DJGPP_DOS
+    signal(SIGINT, SIG_IGN);
+#endif
 
     /* the room mechanism would deallocate undo info no failure....
-     *  its not set up yet, so make sure it doesn't try until the editor is
+     * its not set up yet, so make sure it doesn't try until the editor is
      * initialized */
     bheadp = (BUFFER *) NULL;
 
@@ -166,6 +171,7 @@ abortrun:
 #if CLEAN
     clean();
 #endif
+    clntmpfls();
 
 #if CALLED
     return (status);
@@ -215,10 +221,7 @@ int PASCAL NEAR clean P0_()
     mcclear();
     rmcclear();
 # endif
-    if ( patmatch != NULL ) {
-        free(patmatch);
-        patmatch = NULL;
-    }
+    CLROOM(patmatch);
 
     /* dump the abbreviation list */
     ab_clean();
@@ -556,7 +559,10 @@ loop:
      * Did our window get resized?
      */
 #if HANDLE_WINCH
-    if ( winch_flag ) winch_new_size();
+    if ( winch_flag ) {
+        /* `winch_flag  = 0': Already done in `winch_new_size()'  */
+        winch_new_size();
+    }
 #endif
     /* Fix up the screen    */
     update(FALSE);
@@ -759,7 +765,6 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
     /* if the keystroke is a bound function...do it */
     key = getbind(c);
     if ( key != NULL ) {
-
         /* before a command, we attempt to expand abbreviations */
         ab_expand();
 
@@ -777,12 +782,13 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
     }
 
     /* since the keystroke is not a command, */
-    if ( isinword(c) )
+    if ( ab_full || isinword(c) ) {
         /* in a word, we save it */
         ab_save(c);
-    else
+    } else                        {
         /* not in a word, we attempt an expansion */
         ab_expand();
+    }
 
     /*
      * If a space was typed, fill column is defined, the argument is non-
@@ -864,11 +870,19 @@ int PASCAL NEAR execute P3_(int, c /* key to execute */,
                 status = linsert(n, c);
         }
 
-        /* In ABBREV mode, if we are doing aggressive expansion and the current
-        * buffer is a symbol in the abbreviation table */
-        if ( ( (curbp->b_mode & MDABBR) != 0 ) &&
-             ( ab_quick && (ab_lookup(ab_word) != NULL) ) )
-            ab_expand();
+        /* In ABBREV mode, if we are doing full / aggressive expansion
+         * and the current buffer is a symbol in the abbrev. table: */
+        if ( (curbp->b_mode & MDABBR) != 0  ) {
+            if        ( ab_full  )  {
+                if ( ab_taillookup(ab_word) != NULL ) {
+                    ab_expand();
+                }
+            } else if ( ab_quick )  {
+                if ( ab_lookup(ab_word)     != NULL ) {
+                    ab_expand();
+                }
+            }
+        }
 
         /* check for CMODE fence matching */
         if ( (c == '}' || c == ')' || c == ']') &&
@@ -1185,7 +1199,7 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
     /* make room!
      * Bail out on error: Old version returned NULL.
      */
-    ASRT(NULL !=(dp = room(STRLEN(sp) + 1)));
+    ASRT(NULL !=(dp = ROOM(STRLEN(sp) + 1)));
     strcpy(dp, sp);   /**UNSAFE_OK**/
 
     return (dp);
@@ -1220,7 +1234,6 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
 char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
 {
     char *mp;           /* ptr returned from malloc */
-    char *malloc();
     FILE *track;        /* malloc track file */
 
     mp = malloc(nbytes);
@@ -1269,7 +1282,7 @@ Erelease P1_(char *, mp /* chunk of RAM to release */)
 # else
         envram -= 1;
 # endif
-        free(mp);
+        CLROOM(mp);
 # if     RAMSHOW
         dspram();
 # endif

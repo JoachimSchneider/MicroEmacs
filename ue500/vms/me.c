@@ -24,6 +24,7 @@
 #include <iodef.h>
 #include <accdef.h>
 #include <clidef.h>
+#include <namdef.h>
 
 /*                                                                          */
 /*  $SETDDIR                                                                */
@@ -100,12 +101,18 @@ void me_exited(void)
    test( sys$wake( 0, 0));
    }
 
+#ifdef NAML$C_MAXRSS
+# define MAXRSS NAML$C_MAXRSS
+#else
+# define MAXRSS NAM$C_MAXRSS
+#endif
+
 void start_microemacs(
   int argc,
   char *argv[]
 )
     {
-    char scrap[ 512], imagename[ 256], *i;
+    char scrap[ 2*MAXRSS], imagename[ MAXRSS], *i;
     int a;
     unsigned spawn_flags = CLI$M_NOWAIT;
 

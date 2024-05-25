@@ -344,7 +344,7 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
 #if ( IS_UNIX() )
     /* if we don't have write priviledges, make this in VIEW mode */
     if ( s !=FIOERR && s != FIOFNF ) {
-        if ( access(fname, 2 /* W_OK*/) != 0 )
+        if ( umc_access(fname, 2 /* W_OK*/) != 0 )
             curbp->b_mode |= MDVIEW;
     }
 #endif
@@ -405,11 +405,12 @@ out:    TTkopen();      /* open the keyboard again */
  */
 CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
 {
-    REGISTER char       *fnameA = xstrdup(fname);
-    REGISTER CONST char *cp1;
-    REGISTER char       *cp2;
-    REGISTER CONST char *pathp;
+    char                *fnameA = NULL;
+    REGISTER CONST char *cp1    = NULL;
+    REGISTER char       *cp2    = NULL;
+    REGISTER CONST char *pathp  = NULL;
 
+    fnameA  = xstrdup(fname);
 #if     AOSVS | MV_UX
     resolve_full_pathname(fnameA, fnameA);
     mklower(fnameA);       /* aos/vs not case sensitive */
@@ -461,7 +462,7 @@ CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
         *cp2++ = *cp1++;
     *cp2 = 0;
 
-    free(fnameA);
+    CLROOM(fnameA);
 
     return (pathp);
 }
@@ -709,11 +710,11 @@ int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
         if ( sflag ) {
 #if ( IS_UNIX() )
             /* get the permisions on the original file */
-            stat(fn, &st);
+            umc_stat(fn, &st);
 #endif
             /* erase original file */
             /* rename temporary file to original name */
-            if ( unlink(fn) == 0 && rename(tname, fn) == 0 ) {
+            if ( umc_unlink(fn) == 0 && umc_rename(tname, fn) == 0 ) {
 #if ( IS_UNIX() )
                 chown(fn, (int)st.st_uid, (int)st.st_gid);
                 chmod(fn, (int)st.st_mode);

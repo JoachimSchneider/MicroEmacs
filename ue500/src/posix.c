@@ -36,7 +36,7 @@ int scnothing()
 #include "elang.h"                      /* Language definitions     */
 
 /** Kill predefined **/
-#undef CTRL                             /* Problems with CTRL       */
+#undef CTRF                             /* Problems with CTRF       */
 
 /** Overall include files **/
 #include <sys/types.h>                  /* System type definitions  */
@@ -54,8 +54,8 @@ int scnothing()
 #define DIRENTRY        dirent
 
 /** Restore predefined definitions **/
-#undef CTRL                             /* Restore CTRL         */
-#define CTRL 0x0100
+#undef CTRF                             /* Restore CTRF         */
+#define CTRF 0x0100
 
 /** Parameters **/
 #define NKEYENT         300             /* Number of keymap entries */
@@ -67,7 +67,6 @@ int scnothing()
 #define MAXVTIME        1               /* x/10s max time for i/o delay */
 
 /** CONSTANTS **/
-#define TIMEOUT         255             /* No character available   */
 
 /** Type definitions **/
 struct keyent {                         /* Key mapping entry        */
@@ -303,7 +302,7 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
-unsigned char grabnowait()
+unsigned char PASCAL NEAR grabnowait()
 {
     int count;
     unsigned char ch;
@@ -322,7 +321,7 @@ unsigned char grabnowait()
         exit(1);
     }
     if ( count == 0 )
-        return (TIMEOUT);
+        return (grabnowait_TIMEOUT);
 
     /* Return new character */
     return (ch);
@@ -382,7 +381,7 @@ VOID cook()
 
                 /* Get next character, timed */
                 ch = grabnowait();
-                if ( ch == TIMEOUT )
+                if ( ch == grabnowait_TIMEOUT )
                     return;
 
                 /* Queue character */
@@ -431,7 +430,7 @@ int typahead()
 
     ch= grabnowait();
 
-    if ( ch==TIMEOUT )
+    if ( ch==grabnowait_TIMEOUT )
         return 0;
 
     qin (ch);
@@ -632,7 +631,7 @@ int n;                                  /* Argument count */
     }
 
     /* ...and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (1);
 }
@@ -694,8 +693,8 @@ int n;                                  /* Argument count */
     xstrcpy(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     /* Show status */
     if ( !s )
@@ -764,7 +763,7 @@ char *getnfile()
         /* Check to make sure we skip all weird entries except directories */
         xstrcpy(nameptr, dp->d_name);
 
-    } while ( stat(rbuf,
+    } while ( umc_stat(rbuf,
                    &fstat) ||
               !( S_ISDIR(fstat.st_mode) !!S_ISREG(fstat.st_mode) ) );
 
@@ -775,6 +774,8 @@ char *getnfile()
     /* Return the next file name! */
     return (rbuf);
 }
+
+#endif  /* ANSI */
 
 
 

@@ -57,8 +57,8 @@ int PASCAL NEAR usebuffer P2_(int, f, int, n)
 int PASCAL NEAR nextbuffer P2_(int, f, int, n)
 /* f, n:  Default flag, numeric argument  */
 {
-    REGISTER BUFFER *bp;        /* current eligable buffer */
-    REGISTER int status;
+    REGISTER BUFFER *bp     = NULL;   /* current eligable buffer */
+    REGISTER int    status  = 0;
 
     /* make sure the arg is legit */
     if ( f == FALSE )
@@ -237,10 +237,10 @@ BUFFER *PASCAL NEAR getdefb P0_()
  */
 int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
 {
-    REGISTER BUFFER *bp1;
-    REGISTER BUFFER *bp2;
-    REGISTER int result;
-    REGISTER PARG *tmp_arg;
+    REGISTER BUFFER *bp1      = NULL;
+    REGISTER BUFFER *bp2      = NULL;
+    REGISTER int    result    = 0;
+    PARG            *tmp_arg  = NULL;
 
     /* we can not kill a displayed buffer */
     if ( bp->b_nwnd != 0 ) {
@@ -262,7 +262,7 @@ int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
     while ( bp->b_args ) {
         tmp_arg = bp->b_args;
         bp->b_args = bp->b_args->next;
-        free(tmp_arg);
+        CLROOM(tmp_arg);
     }
 
     /* if anything is bound to the buffer, unbind them */
@@ -274,7 +274,7 @@ int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
     if ( ( result = bclear(bp) ) != TRUE )      /* Blow text away.  */
         return (result);
 
-    free( (char *) bp->b_linep );               /* Release header line. */
+    CLROOM(bp->b_linep);                        /* Release header line. */
     bp1 = NULL;                                 /* Find the header. */
     bp2 = bheadp;
     while ( bp2 != bp ) {
@@ -286,7 +286,7 @@ int PASCAL NEAR zotbuf P1_(BUFFER *, bp)
         bheadp = bp2;
     else
         bp1->b_bufp = bp2;
-    free( (char *) bp );                        /* Release buffer block */
+    CLROOM(bp);                                 /* Release buffer block */
 
     return (TRUE);
 }
@@ -332,7 +332,7 @@ ask:    if ( mlreply(TEXT29, bufn, NBUFN) != TRUE )
 int PASCAL NEAR listbuffers P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER int status;        /* stutus return */
+    REGISTER int status;        /* status return */
 
     if ( ( status = makelist(f) ) != TRUE )
         return (status);
@@ -532,10 +532,10 @@ BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
 /* cflag: Create it if not found?       */
 /* bflag: Bit settings for a new buffer */
 {
-    REGISTER BUFFER *bp;
-    REGISTER BUFFER *sb;        /* buffer to insert after */
-    REGISTER LINE   *lp;
-    int cmark;                  /* current mark */
+    BUFFER          *bp   = NULL;
+    REGISTER BUFFER *sb   = NULL;   /* buffer to insert after */
+    REGISTER LINE   *lp   = NULL;
+    int             cmark = 0;      /* current mark */
 
     bp = bheadp;
     while ( bp != NULL ) {
@@ -549,11 +549,11 @@ BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
     if ( cflag != FALSE ) {
 
         /* allocate the needed memory */
-        if ( ( bp=(BUFFER *)room( SIZEOF (BUFFER) ) ) == NULL )
+        if ( ( bp=(BUFFER *)ROOM( SIZEOF (BUFFER) ) ) == NULL )
             return (NULL);
 
         if ( ( lp=lalloc(0) ) == NULL ) {
-            free( (char *) bp );
+            CLROOM(bp);
 
             return (NULL);
         }

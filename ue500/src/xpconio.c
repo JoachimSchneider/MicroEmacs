@@ -309,7 +309,7 @@ static VOID near MouseEvent(void)
         etype |= (SHFT >> 8);
     if ( (sstate & RIGHT_CTRL_PRESSED) ||(sstate & LEFT_CTRL_PRESSED) )
         /* controled? */
-        etype |= (CTRL >> 8);
+        etype |= (CTRF >> 8);
 
     /* no buttons changes */
     if ( oldbut == newbut ) {
@@ -516,7 +516,7 @@ pastothers:     /* shifted special key? */
             c = c - 'a' + 'A';
     }
     if ( ( state & (RIGHT_CTRL_PRESSED | LEFT_CTRL_PRESSED) ) && c > 31 )
-        prefix |= CTRL;
+        prefix |= CTRF;
 
     /* if there is a prefix, insert it in the input stream */
     if ( prefix != 0 ) {

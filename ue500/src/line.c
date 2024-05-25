@@ -30,7 +30,15 @@
 #include        "edef.h"
 #include        "elang.h"
 
-#define BSIZE(a)        (a + NBLOCK - 1) & ( ~(NBLOCK - 1) )
+/*
+ * First version *only* works when NBLOCK -1 matches ^0*1*$, i.e when
+ * NBLOCK is a power of 2.
+ */
+#if ( 0 )
+# define BSIZE(a)   ( ((a) + NBLOCK - 1) & ( ~(NBLOCK - 1) ) )
+#else
+# define BSIZE(a)   ( ((a) + NBLOCK - 1) / NBLOCK * NBLOCK )
+#endif
 
 static long last_size = -1L;    /* last # of bytes yanked */
 
@@ -45,10 +53,10 @@ LINE *PASCAL NEAR lalloc P1_(REGISTER int, used)
 {
     REGISTER LINE *lp = NULL;
 
-    if ( ( lp = (LINE *)room( SIZEOF (LINE) + used ) ) == NULL ) {
+    if ( ( lp = (LINE *)ROOM( SIZEOF (LINE) + used ) ) == NULL ) {
         mlabort(TEXT94);
-
 /*                      "%%Out of memory" */
+
         return (NULL);
     }
     lp->l_size_ = used;
@@ -75,7 +83,7 @@ LINE *PASCAL NEAR lalloc P1_(REGISTER int, used)
  * be in. Release the memory. The buffers are updated too; the magic conditions
  * described in the above comments don't hold here.
  */
-int PASCAL NEAR lfree P1_(REGISTER LINE *, lp)
+int PASCAL NEAR lfree P1_(LINE *, lp)
 {
     REGISTER BUFFER   *bp     = NULL;
     SCREEN_T          *scrp   = NULL; /* screen to fix pointers in  */
@@ -124,7 +132,7 @@ int PASCAL NEAR lfree P1_(REGISTER LINE *, lp)
     }
     lp->l_bp->l_fp = lp->l_fp;
     lp->l_fp->l_bp = lp->l_bp;
-    free( (char *) lp );
+    CLROOM(lp);
 #if     WINDOW_MSWIN
     {
         static int o = 0;
@@ -240,7 +248,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
 {
     REGISTER char     *cp1  = NULL;
     REGISTER char     *cp2  = NULL;
-    REGISTER LINE     *lp1  = NULL;
+    LINE              *lp1  = NULL;
     REGISTER LINE     *lp2  = NULL;
     REGISTER LINE     *lp3  = NULL;
     REGISTER int      doto  = 0;
@@ -267,20 +275,20 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     /* mark the current window's buffer as changed */
     lchange(WFEDIT);
 
-    lp1 = curwp->w_dotp;                        /* Current line     */
-    if ( lp1 == curbp->b_linep ) {              /* At the end: special  */
+    lp1 = curwp->w_dotp;                          /* Current line         */
+    if ( lp1 == curbp->b_linep ) {                /* At the end: special  */
         if ( get_w_doto(curwp) != 0 ) {
             mlwrite(TEXT170);
-
 /*                              "bug: linsert" */
+
             return (FALSE);
         }
-        if ( ( lp2=lalloc( BSIZE(n) ) ) == NULL )       /* Allocate new line    */
+        if ( ( lp2 = lalloc(BSIZE(n)) ) == NULL ) /* Allocate new line    */
             return (FALSE);
 
         set_lused(lp2, n);
-        lp3 = lp1->l_bp;                        /* Previous line    */
-        lp3->l_fp = lp2;                        /* Link in      */
+        lp3 = lp1->l_bp;                          /* Previous line        */
+        lp3->l_fp = lp2;                          /* Link in              */
         lp2->l_fp = lp1;
         lp1->l_bp = lp2;
         lp2->l_bp = lp3;
@@ -291,9 +299,9 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
 
         return (TRUE);
     }
-    doto = get_w_doto(curwp);                         /* Save for later.  */
-    if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate */
-        if ( ( lp2=lalloc( BSIZE(get_lused(lp1) + n) ) ) == NULL )
+    doto = get_w_doto(curwp);                     /* Save for later.      */
+    if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate     */
+        if ( ( lp2 = lalloc(BSIZE(get_lused(lp1) + n)) ) == NULL )
             return (FALSE);
 
         set_lused(lp2, get_lused(lp1) + n);
@@ -308,28 +316,28 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         lp2->l_fp = lp1->l_fp;
         lp1->l_fp->l_bp = lp2;
         lp2->l_bp = lp1->l_bp;
-        free( (char *) lp1 );
-    } else {                                    /* Easy: in place   */
-        lp2 = lp1;                              /* Pretend new line */
+        /** DO NOT USE CLROOM(), DON'T CHANGE lp1: IT'S USED BELOW --- BAD STYLE **/
+        DEROOM(lp1);
+    } else {                                      /* Easy: in place       */
+        lp2 = lp1;                                /* Pretend new line     */
         set_lused(lp2, get_lused(lp2) + n);
         cp2 = lgetcp(lp1, get_lused(lp1));
-        cp1 = cp2-n;
+        cp1 = cp2 - n;
         while ( cp1 > lgetcp(lp1, doto) )
             *--cp2 = *--cp1;
     }
-    for ( i = 0; i < n; ++i )                   /* Add the characters   */
+    for ( i = 0; i < n; ++i )                     /* Add the characters   */
         lputc(lp2, doto + i, c);
     /* in all screens.... */
     scrp = first_screen;
     while ( scrp ) {
-
         wp = scrp->s_first_window;
         while ( wp != NULL ) {
             if ( wp->w_linep == lp1 )
                 wp->w_linep = lp2;
             if ( wp->w_dotp == lp1 ) {
                 wp->w_dotp = lp2;
-                if ( wp==curwp || get_w_doto(wp) > doto )
+                if ( wp == curwp || get_w_doto(wp) > doto )
                     set_w_doto(wp, get_w_doto(wp) + n);
             }
             for ( cmark = 0; cmark < NMARKS; cmark++ ) {
@@ -345,6 +353,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         /* next screen! */
         scrp = scrp->s_next_screen;
     }
+    /**lp1 = NULL;**/
 
     return (TRUE);
 }
@@ -768,8 +777,8 @@ int PASCAL NEAR ldelnewline P0_()
 {
     REGISTER char     *cp1  = NULL;
     REGISTER char     *cp2  = NULL;
-    REGISTER LINE     *lp1  = NULL;
-    REGISTER LINE     *lp2  = NULL;
+    LINE              *lp1  = NULL;
+    LINE              *lp2  = NULL;
     REGISTER LINE     *lp3  = NULL;
     REGISTER EWINDOW  *wp   = NULL;
     SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
@@ -824,7 +833,7 @@ int PASCAL NEAR ldelnewline P0_()
         set_lused(lp1, get_lused(lp1) + get_lused(lp2));
         lp1->l_fp = lp2->l_fp;
         lp2->l_fp->l_bp = lp1;
-        free( (char *) lp2 );
+        CLROOM(lp2);
 
         return (TRUE);
     }
@@ -872,8 +881,8 @@ int PASCAL NEAR ldelnewline P0_()
         scrp = scrp->s_next_screen;
     }
 
-    free( (char *) lp1 );
-    free( (char *) lp2 );
+    CLROOM(lp1);
+    CLROOM(lp2);
 
     return (TRUE);
 }
@@ -931,7 +940,7 @@ VOID PASCAL NEAR kdelete P0_()
         kbufp[kill_index] = kbufh[kill_index];
         while ( kbufp[kill_index] != NULL ) {
             kp = kbufp[kill_index]->d_next;
-            free( (char *)kbufp[kill_index] );
+            CLROOM(kbufp[kill_index]);
             kbufp[kill_index] = kp;
 #if     WINDOW_MSWIN
             {
@@ -980,13 +989,12 @@ int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to inse
     KILL  *nchunk = NULL;   /* ptr to newly roomed chunk */
 
     if ( direct == FORWARD ) {
-
         /* check to see if we need a new chunk */
         if ( kused[kill_index] >= KBLOCK ) {
-            if ( ( nchunk = (KILL *)room( SIZEOF (KILL) ) ) == NULL ) {
+            if ( ( nchunk = (KILL *)ROOM( SIZEOF (KILL) ) ) == NULL ) {
                 mlwrite(TEXT94);
-
 /*                  "%%Out of memory" */
+
                 return (FALSE);
             }
             if ( kbufh[kill_index] == NULL )            /* set head ptr if first
@@ -1016,7 +1024,7 @@ int PASCAL NEAR kinsert P2_(int,  direct, /* direction (FORWARD/REVERSE) to inse
         /* REVERSE */
         /* check to see if we need a new chunk */
         if ( kskip[kill_index] == 0 ) {
-            if ( ( nchunk = (KILL *)room( SIZEOF (KILL) ) ) == NULL ) {
+            if ( ( nchunk = (KILL *)ROOM( SIZEOF (KILL) ) ) == NULL ) {
                 mlwrite(TEXT94);
 
 /*                  "%%Out of memory" */

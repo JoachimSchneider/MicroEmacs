@@ -580,7 +580,7 @@ int f, n;
     }
 
     /* and get rid of the temporary file */
-    unlink(filnam);
+    umc_unlink(filnam);
 
     return (TRUE);
 }
@@ -640,8 +640,8 @@ int f, n;
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
         xstrcpy(bp->b_fname, tmpnam);
-        unlink(filnam1);
-        unlink(filnam2);
+        umc_unlink(filnam1);
+        umc_unlink(filnam2);
 
         return (s);
     }
@@ -651,8 +651,8 @@ int f, n;
     bp->b_flag |= BFCHG;                /* flag it as changed */
 
     /* and get rid of the temporary file */
-    unlink(filnam1);
-    unlink(filnam2);
+    umc_unlink(filnam1);
+    umc_unlink(filnam2);
 
     return (TRUE);
 }
@@ -757,10 +757,10 @@ char *cmd;      /*  Incoming command line to execute  */
     xstrcat(&tail[1], "\r");
 
     /* look up the program on the path trying various extentions */
-    if ( ( sp = flook(prog, TRUE) ) == NULL )
-        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE) ) == NULL ) {
+    if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
+        if ( ( sp = flook(xstrcat(prog, ".exe"), TRUE, TRUE) ) == NULL )  {
             xstrcpy(&prog[STRLEN(prog)-4], ".com");
-            if ( ( sp = flook(prog, TRUE) ) == NULL )
+            if ( ( sp = flook(prog, TRUE, TRUE) ) == NULL )
                 return (FALSE);
         }
     xstrcpy(prog, sp);
@@ -878,10 +878,10 @@ unsigned c;     /* byte following a zero extended char byte */
 
     /* control function keys */
     if ( c >= 94 && c < 103 )
-        return (SPEC | CTRL | c - 93 + '0');
+        return (SPEC | CTRF | c - 93 + '0');
 
     if ( c == 103 )
-        return (SPEC | CTRL | '0');
+        return (SPEC | CTRF | '0');
 
     /* ALTed function keys */
     if ( c >= 104 && c < 113 )
@@ -900,7 +900,7 @@ unsigned c;     /* byte following a zero extended char byte */
     /* some others as well */
     switch (c) {
         case 3:         return(0);                      /* null */
-        case 15:        return(SHFT | CTRL | 'I');      /* backtab */
+        case 15:        return(SHFT | CTRF | 'I');      /* backtab */
 
         case 16:        return(ALTD | 'Q');
         case 17:        return(ALTD | 'W');
@@ -941,12 +941,12 @@ unsigned c;     /* byte following a zero extended char byte */
         case 81:        return(SPEC | 'V');             /* page down */
         case 82:        return(SPEC | 'C');             /* insert */
         case 83:        return(SPEC | 'D');             /* delete */
-        case 115:       return(SPEC | CTRL | 'B');      /* control left */
-        case 116:       return(SPEC | CTRL | 'F');      /* control right */
-        case 117:       return(SPEC | CTRL | '>');      /* control END */
-        case 118:       return(SPEC | CTRL | 'V');      /* control page down */
-        case 119:       return(SPEC | CTRL | '<');      /* control HOME */
-        case 132:       return(SPEC | CTRL | 'Z');      /* control page up */
+        case 115:       return(SPEC | CTRF | 'B');      /* control left */
+        case 116:       return(SPEC | CTRF | 'F');      /* control right */
+        case 117:       return(SPEC | CTRF | '>');      /* control END */
+        case 118:       return(SPEC | CTRF | 'V');      /* control page down */
+        case 119:       return(SPEC | CTRF | '<');      /* control HOME */
+        case 132:       return(SPEC | CTRF | 'Z');      /* control page up */
     }
 
     return (ALTD | c);

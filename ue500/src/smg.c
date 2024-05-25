@@ -68,6 +68,18 @@
  *      11-dec-89:      Kevin A. Mitchell
  *              Don't restore numeric keypad if the user had it set that way
  *              in DCL.
+ *      18-apr-24:      Joachim Schneider
+ *              Enabled keymap reconfiguration like in unix.c:
+ *              ```
+ *              ... Additional keymapping entries can be made from the
+ *              command language by issuing a 'set $palette xxx'.  The
+ *              format of xxx is a string as follows:
+ *                      "KEYMAP keybinding escape-sequence".
+ *              To add "<ESC><[><A>" as a keybinding of FNN, issue:
+ *                      "KEYMAP FNN ~e[A".
+ *              Note that the "~e" sequence represents the escape
+ *              character in the MicroEMACS command language.
+ *              ```
  *====================================================================*/
 
 /*====================================================================*/
@@ -109,6 +121,9 @@ int smg_noop1 P1_(int, param)
 #include <ttdef.h>
 #include <tt2def.h>
 #include <smg$routines.h>
+
+
+#define USE_PALETTE ( !0 )
 
 #ifdef NEED_SMGTRMPTR
 /*
@@ -527,7 +542,7 @@ int smgmove P2_(int, row, int, column)
     arg[2] = column + 1;
 
     /* Call to SMG for the sequence */
-    status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
+    status = smg$get_term_data(&termtype, &code, &len, &rlen, buffer, arg);
     if (SUCCESS(status)) {
         buffer[rlen] = '\0';
         smgputs(buffer);
@@ -665,10 +680,10 @@ char *smggetstr P1_(int, code)
     static int arg[2] = {1, 1};
 
     /* Get sequence with one parameter */
-    status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer, arg);
+    status = smg$get_term_data(&termtype, &code, &len, &rlen, buffer, arg);
     if (FAILURE(status)) {
         /* Try again with zero parameters */
-        status = SMG$GET_TERM_DATA(&termtype, &code, &len, &rlen, buffer);
+        status = smg$get_term_data(&termtype, &code, &len, &rlen, buffer);
         if (FAILURE(status))
             return NULL;
     }
@@ -699,7 +714,7 @@ int smggetnum P1_(int, code)
     int       status, result;
 
     /* Call SMG for code translation */
-    status = SMG$GET_NUMERIC_DATA(&termtype, &code, &result);
+    status = smg$get_numeric_data(&termtype, &code, &result);
     return FAILURE(status) ? -1 : result;
 }
 
@@ -728,7 +743,7 @@ int smgcap P0_()
     int       status;
 
     /* Start SMG package */
-    status = SMG$INIT_TERM_TABLE_BY_TYPE(&orgchar.type, &termtype);
+    status = smg$init_term_table_by_type(&orgchar.type, &termtype);
     if (FAILURE(status)) {
         printf(TEXT189);
 /*                     "Cannot find entry for terminal type.\n" */
@@ -787,10 +802,10 @@ int smgcap P0_()
     smgaddkey(SMG$K_KEY_RIGHT_ARROW, SPEC | 'F');
     smgaddkey(SMG$K_KEY_UP_ARROW, SPEC | 'P');
 
-    smgaddkey(SMG$K_KEY_PF1, CTRL | SPEC | '1');
-    smgaddkey(SMG$K_KEY_PF2, CTRL | SPEC | '2');
-    smgaddkey(SMG$K_KEY_PF3, CTRL | SPEC | '3');
-    smgaddkey(SMG$K_KEY_PF4, CTRL | SPEC | '4');
+    smgaddkey(SMG$K_KEY_PF1, CTRF | SPEC | '1');
+    smgaddkey(SMG$K_KEY_PF2, CTRF | SPEC | '2');
+    smgaddkey(SMG$K_KEY_PF3, CTRF | SPEC | '3');
+    smgaddkey(SMG$K_KEY_PF4, CTRF | SPEC | '4');
 
     smgaddkey(SMG$K_KEY_0, ALTD | '0');
     smgaddkey(SMG$K_KEY_1, ALTD | '1');
@@ -971,19 +986,63 @@ int smggetc P0_()
 }
 
 /***
- *  spal  -  Set palette type
+ * SPAL:
  *
+ * Change pallette settings
+ *
+ * Not implemented (Color settings):
  *  spal sets the palette colors for the 8 colors available.  Currently,
  *  there is nothing here, but some DEC terminals, (VT240 and VT340) have
  *  a color palette which is available under the graphics modes.
  *  Further, a foreign terminal could also change color registers.
  *
- *  Nothing returned
+ *
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
  ***/
-int PASCAL NEAR spal P1_(char *, pstr)
+int PASCAL NEAR spal P1_(char *, cmd)
+/* cmd: Palette command */
 {
-    /* Nothing */
-    return 1;
+# if ( USE_PALETTE )
+    int   code      = 0;
+    int   dokeymap  = 0;
+    char  *cp       = NULL;
+
+    /* Check for keymapping command */
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
+        dokeymap = !0;
+    } else                                        {
+        return (0);
+    }
+
+    cmd += 7;
+
+    /* Look for space */
+    for ( cp = cmd; *cp == ' '; cp++ );
+    for (; *cp != '\0'; cp++ )
+        if ( *cp == ' ' ) {
+            *cp++ = '\0';
+            break;
+        }
+    if ( *cp == '\0' )
+        return (1);
+
+    for (; *cp == ' '; cp++ );
+
+    /* Perform operation */
+    if        ( dokeymap )  {
+        /* Convert to keycode */
+        code = stock(cmd);
+
+        /* Add to tree */
+        addkey((unsigned char *)cp, code);
+    } else                  {
+        /**EMPTY**/
+    }
+# endif /* USE_PALETTE */
+
+    return (0);
 }
 
 #if FLABEL

@@ -218,7 +218,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
             if ( FullCmd[0] == '\0' ) {   /* try to find it on the "path" */
                 char    *s;
 
-                if ( ( s = flook ("DOSEXEC.PIF", TRUE) ) != NULL ) {
+                if ( ( s = flook ("DOSEXEC.PIF", TRUE, TRUE) ) != NULL )  {
                     xstrcpy (FullCmd, s);
                 }
             }
@@ -234,7 +234,7 @@ static BOOL PASCAL  LaunchPrg (char *Cmd,
             if ( FullCmd[0] == '\0' ) {   /* try to find it on the "path" */
                 char    *s;
 
-                if ( ( s = flook ("DOSBOX.PIF", TRUE) ) != NULL ) {
+                if ( ( s = flook ("DOSBOX.PIF", TRUE, TRUE) ) != NULL ) {
                     xstrcpy (FullCmd, s);
                 } else xstrcpy (FullCmd, "command.com");
             }
@@ -441,7 +441,7 @@ PASCAL pipecmd (int f, int n)
     if ( Result == FAILD ) {
         mlwrite (TEXT3);
         /* [execution failed] */
-        unlink (OutFile);
+        umc_unlink (OutFile);
     } else {
         if ( Result == TRUE ) {
             BUFFER  *temp_bp;
@@ -463,7 +463,7 @@ PASCAL pipecmd (int f, int n)
                 bp->b_flag = bflag;
                 swbuffer (temp_bp);
             }
-            unlink (OutFile);
+            umc_unlink (OutFile);
             /* note that the file is not deleted if the wait was cancelled */
         }
     }
@@ -515,13 +515,13 @@ PASCAL f_filter (int f, int n)
         if ( Result == FAILD ) {
             mlwrite (TEXT3);
             /* [execution failed] */
-            unlink (OutFile);
-            unlink (InFile);
+            umc_unlink (OutFile);
+            umc_unlink (InFile);
         } else {
             if ( Result == TRUE ) {
                 Result = readin (OutFile, FALSE);
-                unlink (OutFile);
-                unlink (InFile);
+                umc_unlink (OutFile);
+                umc_unlink (InFile);
             }
             /* note that he files are not deleted if the wait was cancelled */
             if ( Result == TRUE ) {

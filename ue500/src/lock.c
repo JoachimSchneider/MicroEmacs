@@ -67,7 +67,7 @@ int lockchk P1_(CONST char *, fname /* file to check for a lock */)
         return (TRUE);
 
     /* we have now locked it, add it to our table */
-    lname[++numlocks - 1] = (char *)room(STRLEN(fname) + 1);
+    lname[++numlocks - 1] = (char *)ROOM(STRLEN(fname) + 1);
     if ( lname[numlocks - 1] == NULL ) {        /* room failure */
         undolock(fname);                        /* free the lock */
         mlwrite(TEXT174);
@@ -96,7 +96,7 @@ int lockrel P0_()
     while ( numlocks-- > 0 ) {
         if ( ( s = xunlock(lname[numlocks]) ) != TRUE )
             status = s;
-        free(lname[numlocks]);
+        CLROOM(lname[numlocks]);
     }
 
     return (status);

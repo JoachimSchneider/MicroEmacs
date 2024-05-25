@@ -364,12 +364,12 @@ fubar: mlwrite(TEXT155);
 }
 
 /*
- * unlink() - delete a file - called from  writeout()  in  file.c
+ * umc_unlink() - delete a file - called from  writeout()  in  file.c
  *
  * This routine replaces the DG supplied  unlink()  since we don't use the
  * link() unlink() combination to rename files.  Saves some memory.
  */
-int unlink(del_fnam)
+int umc_unlink(del_fnam)
 
 char *del_fnam;        /* name of file to delete */
 {
@@ -843,11 +843,11 @@ int pipecmd(f, n)
     }
 
     /* and get rid of the temporary file */
-    unlink(pipecmd_filnam);
+    umc_unlink(pipecmd_filnam);
 
     return (TRUE);
 
-fubar: unlink(pipecmd_filnam);
+fubar: umc_unlink(pipecmd_filnam);
 
     return (FALSE);
 }

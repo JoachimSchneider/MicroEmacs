@@ -27,9 +27,9 @@ NOSHARE KEYTAB keytab[NBINDS] =
 
 #if     MOUSE
     { MOUS|'m',           BINDFNC, { mmove } },
-    { MOUS|CTRL|'m',      BINDFNC, { mmove } },
+    { MOUS|CTRF|'m',      BINDFNC, { mmove } },
     { MOUS|SHFT|'m',      BINDFNC, { mmove } },
-    { MOUS|CTRL|SHFT|'m', BINDFNC, { mmove } },
+    { MOUS|CTRF|SHFT|'m', BINDFNC, { mmove } },
     { MOUS|'a',           BINDFNC, { movemd } },
     { MOUS|'b',           BINDFNC, { movemu } },
     { MOUS|'e',           BINDFNC, { mregdown } },
@@ -38,58 +38,58 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { MOUS|'2',           BINDFNC, { resizm2 } },
 #endif
 
-    { CTRL|'A',           BINDFNC, { gotobol } },
-    { CTRL|'B',           BINDFNC, { backchar } },
-    { CTRL|'C',           BINDFNC, { insspace } },
-    { CTRL|'D',           BINDFNC, { forwdel } },
-    { CTRL|'E',           BINDFNC, { gotoeol } },
-    { CTRL|'F',           BINDFNC, { forwchar } },
-    { CTRL|'G',           BINDFNC, { ctrlg } },
-    { CTRL|'H',           BINDFNC, { backdel } },
-    { CTRL|'I',           BINDFNC, { tab } },
-    { CTRL|'J',           BINDFNC, { indent } },
-    { CTRL|'K',           BINDFNC, { killtext } },
-    { CTRL|'L',           BINDFNC, { refresh } },
-    { CTRL|'M',           BINDFNC, { newline } },
-    { CTRL|'N',           BINDFNC, { forwline } },
-    { CTRL|'O',           BINDFNC, { openline } },
-    { CTRL|'P',           BINDFNC, { backline } },
-    { CTRL|'Q',           BINDFNC, { quote } },
-    { CTRL|'R',           BINDFNC, { backsearch } },
-    { CTRL|'S',           BINDFNC, { forwsearch } },
-    { CTRL|'T',           BINDFNC, { twiddle } },
-    { CTRL|'U',           BINDFNC, { unarg } },
-    { CTRL|'V',           BINDFNC, { forwpage } },
-    { CTRL|'W',           BINDFNC, { killregion } },
-    { CTRL|'X',           BINDFNC, { cex } },
-    { CTRL|'Y',           BINDFNC, { yank } },
-    { CTRL|'Z',           BINDFNC, { backpage } },
-    { CTRL|'[',           BINDFNC, { f_meta } },
-    { CTRL|'\\',          BINDFNC, { forwsearch } },
-    { CTRL|'^',           BINDFNC, { quote } },
-    { CTRL|'_',           BINDFNC, { undo } },
-    { CTLX|CTRL|'A',      BINDFNC, { fileapp } },
-    { CTLX|CTRL|'B',      BINDFNC, { listbuffers } },
-    { CTLX|CTRL|'C',      BINDFNC, { quit } },
-    { CTLX|CTRL|'D',      BINDFNC, { detab } },
-    { CTLX|CTRL|'E',      BINDFNC, { entab } },
-    { CTLX|CTRL|'F',      BINDFNC, { filefind } },
-    { CTLX|CTRL|'I',      BINDFNC, { insfile } },
-    { CTLX|CTRL|'K',      BINDFNC, { macrotokey } },
-    { CTLX|CTRL|'L',      BINDFNC, { lowerregion } },
-    { CTLX|CTRL|'M',      BINDFNC, { delmode } },
-    { CTLX|CTRL|'N',      BINDFNC, { mvdnwind } },
-    { CTLX|CTRL|'O',      BINDFNC, { deblank } },
-    { CTLX|CTRL|'P',      BINDFNC, { mvupwind } },
-    { CTLX|CTRL|'R',      BINDFNC, { fileread } },
-    { CTLX|CTRL|'S',      BINDFNC, { filesave } },
-    { CTLX|CTRL|'T',      BINDFNC, { trim } },
-    { CTLX|CTRL|'U',      BINDFNC, { upperregion } },
-    { CTLX|CTRL|'V',      BINDFNC, { viewfile } },
-    { CTLX|CTRL|'W',      BINDFNC, { filewrite } },
-    { CTLX|CTRL|'X',      BINDFNC, { swapmark } },
-    { CTLX|CTRL|'Z',      BINDFNC, { shrinkwind } },
-    { CTLX|CTRL|'\\',     BINDFNC, { filesave } },
+    { CTRF|'A',           BINDFNC, { gotobol } },
+    { CTRF|'B',           BINDFNC, { backchar } },
+    { CTRF|'C',           BINDFNC, { insspace } },
+    { CTRF|'D',           BINDFNC, { forwdel } },
+    { CTRF|'E',           BINDFNC, { gotoeol } },
+    { CTRF|'F',           BINDFNC, { forwchar } },
+    { CTRF|'G',           BINDFNC, { ctrlg } },
+    { CTRF|'H',           BINDFNC, { backdel } },
+    { CTRF|'I',           BINDFNC, { tab } },
+    { CTRF|'J',           BINDFNC, { indent } },
+    { CTRF|'K',           BINDFNC, { killtext } },
+    { CTRF|'L',           BINDFNC, { refresh } },
+    { CTRF|'M',           BINDFNC, { newline } },
+    { CTRF|'N',           BINDFNC, { forwline } },
+    { CTRF|'O',           BINDFNC, { openline } },
+    { CTRF|'P',           BINDFNC, { backline } },
+    { CTRF|'Q',           BINDFNC, { quote } },
+    { CTRF|'R',           BINDFNC, { backsearch } },
+    { CTRF|'S',           BINDFNC, { forwsearch } },
+    { CTRF|'T',           BINDFNC, { twiddle } },
+    { CTRF|'U',           BINDFNC, { unarg } },
+    { CTRF|'V',           BINDFNC, { forwpage } },
+    { CTRF|'W',           BINDFNC, { killregion } },
+    { CTRF|'X',           BINDFNC, { cex } },
+    { CTRF|'Y',           BINDFNC, { yank } },
+    { CTRF|'Z',           BINDFNC, { backpage } },
+    { CTRF|'[',           BINDFNC, { f_meta } },
+    { CTRF|'\\',          BINDFNC, { forwsearch } },
+    { CTRF|'^',           BINDFNC, { quote } },
+    { CTRF|'_',           BINDFNC, { undo } },
+    { CTLX|CTRF|'A',      BINDFNC, { fileapp } },
+    { CTLX|CTRF|'B',      BINDFNC, { listbuffers } },
+    { CTLX|CTRF|'C',      BINDFNC, { quit } },
+    { CTLX|CTRF|'D',      BINDFNC, { detab } },
+    { CTLX|CTRF|'E',      BINDFNC, { entab } },
+    { CTLX|CTRF|'F',      BINDFNC, { filefind } },
+    { CTLX|CTRF|'I',      BINDFNC, { insfile } },
+    { CTLX|CTRF|'K',      BINDFNC, { macrotokey } },
+    { CTLX|CTRF|'L',      BINDFNC, { lowerregion } },
+    { CTLX|CTRF|'M',      BINDFNC, { delmode } },
+    { CTLX|CTRF|'N',      BINDFNC, { mvdnwind } },
+    { CTLX|CTRF|'O',      BINDFNC, { deblank } },
+    { CTLX|CTRF|'P',      BINDFNC, { mvupwind } },
+    { CTLX|CTRF|'R',      BINDFNC, { fileread } },
+    { CTLX|CTRF|'S',      BINDFNC, { filesave } },
+    { CTLX|CTRF|'T',      BINDFNC, { trim } },
+    { CTLX|CTRF|'U',      BINDFNC, { upperregion } },
+    { CTLX|CTRF|'V',      BINDFNC, { viewfile } },
+    { CTLX|CTRF|'W',      BINDFNC, { filewrite } },
+    { CTLX|CTRF|'X',      BINDFNC, { swapmark } },
+    { CTLX|CTRF|'Z',      BINDFNC, { shrinkwind } },
+    { CTLX|CTRF|'\\',     BINDFNC, { filesave } },
     { CTLX|'?',           BINDFNC, { deskey } },
     { CTLX|'!',           BINDFNC, { spawn } },
     { CTLX|'@',           BINDFNC, { pipecmd } },
@@ -108,7 +108,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { CTLX|'A',           BINDFNC, { setvar } },
     { CTLX|'B',           BINDFNC, { usebuffer } },
     { CTLX|'C',           BINDFNC, { spawncli } },
-#if ( IS_UNIX() || VMS )
+#if ( IS_UNIX() && !DJGPP_DOS || VMS )
     { CTLX|'D',           BINDFNC, { bktoshell } },
 #endif
     { CTLX|'E',           BINDFNC, { ctlxe } },
@@ -127,24 +127,24 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { CTLX|'X',           BINDFNC, { nextbuffer } },
     { CTLX|'Y',           BINDFNC, { cycle_ring } },
     { CTLX|'Z',           BINDFNC, { enlargewind } },
-    { META|CTRL|'C',      BINDFNC, { wordcount } },
-    { META|CTRL|'E',      BINDFNC, { execproc } },
-    { META|CTRL|'F',      BINDFNC, { getfence } },
-    { META|CTRL|'G',      BINDFNC, { gotomark } },
-    { META|CTRL|'H',      BINDFNC, { delbword } },
-    { META|CTRL|'K',      BINDFNC, { unbindkey } },
-    { META|CTRL|'L',      BINDFNC, { reposition } },
-    { META|CTRL|'M',      BINDFNC, { delgmode } },
-    { META|CTRL|'N',      BINDFNC, { namebuffer } },
-    { META|CTRL|'R',      BINDFNC, { qreplace } },
-    { META|CTRL|'S',      BINDFNC, { execfile } },
-    { META|CTRL|'V',      BINDFNC, { nextdown } },
-    { META|CTRL|'U',      BINDFNC, { undo_delete } },
-    { META|CTRL|'W',      BINDFNC, { killpara } },
-    { META|CTRL|'X',      BINDFNC, { execcmd } },
-    { META|CTRL|'Y',      BINDFNC, { clear_ring } },
-    { META|CTRL|'Z',      BINDFNC, { nextup } },
-    { META|CTRL|'\\',     BINDFNC, { execfile } },
+    { META|CTRF|'C',      BINDFNC, { wordcount } },
+    { META|CTRF|'E',      BINDFNC, { execproc } },
+    { META|CTRF|'F',      BINDFNC, { getfence } },
+    { META|CTRF|'G',      BINDFNC, { gotomark } },
+    { META|CTRF|'H',      BINDFNC, { delbword } },
+    { META|CTRF|'K',      BINDFNC, { unbindkey } },
+    { META|CTRF|'L',      BINDFNC, { reposition } },
+    { META|CTRF|'M',      BINDFNC, { delgmode } },
+    { META|CTRF|'N',      BINDFNC, { namebuffer } },
+    { META|CTRF|'R',      BINDFNC, { qreplace } },
+    { META|CTRF|'S',      BINDFNC, { execfile } },
+    { META|CTRF|'V',      BINDFNC, { nextdown } },
+    { META|CTRF|'U',      BINDFNC, { undo_delete } },
+    { META|CTRF|'W',      BINDFNC, { killpara } },
+    { META|CTRF|'X',      BINDFNC, { execcmd } },
+    { META|CTRF|'Y',      BINDFNC, { clear_ring } },
+    { META|CTRF|'Z',      BINDFNC, { nextup } },
+    { META|CTRF|'\\',     BINDFNC, { execfile } },
     { META|' ',           BINDFNC, { setmark } },
     { META|'?',           BINDFNC, { help } },
     { META|'!',           BINDFNC, { reposition } },
@@ -170,7 +170,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { META|'P',           BINDFNC, { gotobop } },
     { META|'Q',           BINDFNC, { trParFill } },
     { META|'R',           BINDFNC, { sreplace } },
-#if ( IS_UNIX() || VMS )
+#if ( IS_UNIX() && !DJGPP_DOS || VMS )
     { META|'S',           BINDFNC, { bktoshell } },
 #endif
     { META|'U',           BINDFNC, { upperword } },
@@ -179,7 +179,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { META|'X',           BINDFNC, { namedcmd } },
     { META|'Y',           BINDFNC, { yank_pop } },
     { META|'Z',           BINDFNC, { quickexit } },
- /**{ META|CTRL|'?',      BINDFNC, { delbword} } },**/  /*???*/
+ /**{ META|CTRF|'?',      BINDFNC, { delbword} } },**/  /*???*/
     { ALTD|'B',           BINDFNC, { list_screens } },
     { ALTD|'C',           BINDFNC, { cycle_screens } },
     { ALTD|'D',           BINDFNC, { delete_screen } },
@@ -201,13 +201,13 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { SPEC|'C',           BINDFNC, { insspace } },          /* Ins */
     { SPEC|'D',           BINDFNC, { forwdel } },           /* Del */
 
-    { SPEC|CTRL|'B',      BINDFNC, { backword } },          /* ctrl left */
-    { SPEC|CTRL|'F',      BINDFNC, { forwword } },          /* ctrl right */
-    { SPEC|CTRL|'Z',      BINDFNC, { gotobop } },           /* ctrl PgUp */
-    { SPEC|CTRL|'V',      BINDFNC, { gotoeop } },           /* ctrl PgDn */
+    { SPEC|CTRF|'B',      BINDFNC, { backword } },          /* ctrl left */
+    { SPEC|CTRF|'F',      BINDFNC, { forwword } },          /* ctrl right */
+    { SPEC|CTRF|'Z',      BINDFNC, { gotobop } },           /* ctrl PgUp */
+    { SPEC|CTRF|'V',      BINDFNC, { gotoeop } },           /* ctrl PgDn */
 
 #if     WINDOW_MSWIN    /* IBM-CUA clipboard bindings */
-    { SPEC|CTRL|'C',      BINDFNC, { clipregion } },        /* ctrl Ins */
+    { SPEC|CTRF|'C',      BINDFNC, { clipregion } },        /* ctrl Ins */
     { SPEC|SHFT|'C',      BINDFNC, { insertclip } },        /* shift Ins */
     { SPEC|SHFT|'D',      BINDFNC, { cutregion } },         /* shift Del */
 #endif
@@ -234,10 +234,10 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { SPEC|'k',           BINDFNC, { forwdel } },           /* grey Del */
     { SPEC|':',           BINDFNC, { execcmd } },           /* pause */
 
-    { SPEC|CTRL|'c',      BINDFNC, { gotobop } },           /* ctrl grey PgUp */
-    { SPEC|CTRL|'d',      BINDFNC, { backword } },          /* ctrl grey left */
-    { SPEC|CTRL|'f',      BINDFNC, { forwword } },          /* ctrl grey right */
-    { SPEC|CTRL|'i',      BINDFNC, { gotoeop } },           /* ctrl grey PgDn */
+    { SPEC|CTRF|'c',      BINDFNC, { gotobop } },           /* ctrl grey PgUp */
+    { SPEC|CTRF|'d',      BINDFNC, { backword } },          /* ctrl grey left */
+    { SPEC|CTRF|'f',      BINDFNC, { forwword } },          /* ctrl grey right */
+    { SPEC|CTRF|'i',      BINDFNC, { gotoeop } },           /* ctrl grey PgDn */
 
 #endif
 
@@ -286,7 +286,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
 #endif
 
 #if     TOS
-    { SPEC|CTRL|'5',      BINDFNC, { help } },
+    { SPEC|CTRF|'5',      BINDFNC, { help } },
 #endif
 
 #if  WANGPC
@@ -354,7 +354,7 @@ NOSHARE KEYTAB keytab[NBINDS] =
     { SPEC|0x9F,          BINDFNC, { usebuffer } },         /* ^GoTo */
 #endif
 
-    { CTRL|'?',           BINDFNC, { backdel } },
+    { CTRF|'?',           BINDFNC, { backdel } },
     { 0,                  BINDNUL, { NULL } }
 };
 

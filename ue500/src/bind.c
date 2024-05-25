@@ -31,13 +31,13 @@
 int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 {
     REGISTER BUFFER *bp     = NULL;   /* buffer pointer to help */
-    CONST char      *fname  = NULL;     /* file name of help file */
+    CONST char      *fname  = NULL;   /* file name of help file */
 
     /* first check if we are already here */
     bp = bfind("emacs.hlp", FALSE, BFINVS);
 
     if ( bp == NULL ) {
-        fname = flook(pathname[1], FALSE);
+        fname = flook(pathname[1], FALSE, TRUE);
         if ( fname == NULL ) {
             mlwrite(TEXT12);
 
@@ -614,20 +614,24 @@ unsigned int PASCAL NEAR getckey P1_(int, mflag)
 int PASCAL NEAR startup P1_(CONST char *, sfname)
 /* sfname:  Name of startup file (null if default)  */
 {
-    CONST char  *fname;             /* resulting file name to execute */
-    char name[NSTRING];                 /* name with extention */
+    CONST char  *fname  = NULL;   /* resulting file name to execute */
+    char        name[NSTRING];    /* name with extention */
+
+    ZEROMEM(name);
+    ASRT(NULL != sfname);
 
     /* look up the startup file */
-    if ( *sfname != 0 ) {
-
+    if ( *sfname )  {
         /* default the extention */
         XSTRCPY(name, sfname);
         if ( sindex(name, ".") == 0 )
             XSTRCAT(name, ".cmd");
 
-        fname = flook(name, TRUE);
-    } else
-        fname = flook(pathname[0], TRUE);
+        fname = flook(name, TRUE, TRUE);
+    } else          {
+        /* DON'T AUTOMATICALLY LOAD STARTUP FROM CURRENT DIRECTORY: */
+        fname = flook(pathname[0], TRUE, FALSE);
+    }
 
     /* if it isn't around, don't sweat it */
     if ( fname == NULL )
@@ -654,21 +658,40 @@ int PASCAL NEAR startup P1_(CONST char *, sfname)
  *                 all directories along PATH environment
  *                 directories in table from EPATH.H
  */
-CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
+CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
 /* fname: Base file name to search for                  */
 /* hflag: Look in the HOME environment variable first?  */
+/* cflag: Use current directory?                        */
 {
-    REGISTER char       *home;          /* path to home directory */
-    REGISTER char       *path;          /* environmental PATH variable */
-    REGISTER CONST char *cp;            /* temp pointer CONST str */
-    REGISTER char       *sp;            /* pointer into path spec */
-    REGISTER int i;                 /* index */
-    static char fspec[NFILEN];          /* full path spec to search */
+    REGISTER char       *home = NULL;   /* path to home directory   */
+    REGISTER char       *path = NULL;   /* environmental PATH var   */
+    REGISTER CONST char *cp   = NULL;   /* temp pointer CONST str   */
+    REGISTER char       *sp   = NULL;   /* pointer into path spec   */
+    REGISTER int        i     = 0;      /* index                    */
+    static char         fspec[NFILEN];  /* full path spec to search */
 
-    /* if we have an absolute path.. check only there! */
+    ZEROMEM(fspec);
+    ASRT(NULL != fname);
+
+    /* If we have a qualified path.. check only there!  */
     cp = fname;
     while ( *cp ) {
-        if ( *cp == ':' || *cp == '\\' || *cp == '/' ) {
+#if     AMIGA
+        if ( *cp == ':' || *cp == '/' )
+elif    AOSVS | MV_UX
+        if ( *cp == ':' )
+#elif   VMS
+        if ( *cp == ':' || *cp == ']' )
+#elif   TOS
+        if ( *cp == ':' || *cp == '\\' )
+#elif   IS_UNIX()
+        if ( *cp == '/' )
+#elif   WMCS
+        if ( *cp == '_' || *cp == '/' )
+#else /* e.g. MSDOS | OS2 | WINNT | WINXP | FINDER  */
+        if ( *cp == ':' || *cp == '\\' || *cp == '/' )
+#endif
+        {
             if ( ffropen(fname) == FIOSUC ) {
                 ffclose();
 
@@ -679,7 +702,7 @@ CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
         ++cp;
     }
 
-#if     ENVFUNC
+#if ENVFUNC
 
     if ( hflag ) {
 # if WMCS
@@ -705,16 +728,19 @@ CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
             }
         }
     }
-#endif
+#endif  /* ENVFUNC */
 
-    /* current directory now overides everything except HOME var */
-    if ( ffropen(fname) == FIOSUC ) {
-        ffclose();
+    /* If cflag is set current directory overides everything except
+     * HOME var */
+    if ( cflag )  {
+        if ( ffropen(fname) == FIOSUC ) {
+            ffclose();
 
-        return (fname);
+            return (fname);
+        }
     }
 
-#if     ENVFUNC
+#if ENVFUNC
     /* get the PATH variable */
 # if WMCS
     path = getenv("OPT$PATH");
@@ -727,7 +753,6 @@ CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
 # endif
     if ( path != NULL )
         while ( *path ) {
-
             /* build next possible file spec */
             sp = fspec;
 # if     TOS
@@ -757,10 +782,13 @@ CONST char *PASCAL NEAR flook P2_(CONST char *, fname, int, hflag)
 # endif
                 ++path;
         }
-#endif
+#endif  /* ENVFUNC */
 
     /* look it up via the old table method */
-    for ( i=2; i < NPNAMES; i++ ) {
+    for ( i = 2; i < NPNAMES; i++ ) {
+        if ( !*pathname[i] && !cflag )  {
+            continue;
+        }
         XSTRCPY(fspec, pathname[i]);
         XSTRCAT(fspec, fname);
 
@@ -825,7 +853,7 @@ char *PASCAL NEAR cmdstr P2_(int , c, char *, seq)
     }
 
     /* apply control sequence if needed */
-    if ( c & CTRL ) {
+    if ( c & CTRF ) {
 
         /* non normal spaces look like @ */
         if ( ptr == seq && ( (c & 255) == ' ' ) )
@@ -1006,7 +1034,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     /* a control char?  (NOT Always upper case anymore) */
     if ( *keynamePtr == '^' && *(keynamePtr+1) != 0 ) {
-        c |= CTRL;
+        c |= CTRF;
         ++keynamePtr;
         if ( *keynamePtr == '@' )
             *keynamePtr = ' ';
@@ -1014,7 +1042,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     /* A literal control character? (Boo, hiss) */
     if ( *keynamePtr < 32 ) {
-        c |= CTRL;
+        c |= CTRF;
         *keynamePtr += '@';
     }
 
@@ -1029,7 +1057,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
 
     /* the final sequence... */
     c |= *keynamePtr;
-    free(keynameA);
+    CLROOM(keynameA);
 
     return (c);
 }
