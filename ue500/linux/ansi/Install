@@ -1,30 +1,30 @@
 # This simple session script shows how to install
-# the MicroEmacs:
+# the MicroEMACS:
 
-$ git clone https://github.com/JoachimSchneider/MicroEmacs
+$ git clone https://github.com/JoachimSchneider/MicroEMACS
 $ git switch current
-$ cd MicroEmacs/ue500/linux
+$ cd MicroEMACS/ue500/linux
 
 
 $ vi makefile
 $ make clean
 $ make
 $ ./emacs
-$ mkdir -p        /usr/loc/pkg/MicroEmacs
-$ mkdir           /usr/loc/pkg/MicroEmacs/bin
-$ mkdir           /usr/loc/pkg/MicroEmacs/cmd
-$ mkdir           /usr/loc/pkg/MicroEmacs/doc
-$ cp -p emacs     /usr/loc/pkg/MicroEmacs/bin
-$ cp -p .emacsrc  /usr/loc/pkg/MicroEmacs/bin/
+$ mkdir -p        /usr/loc/pkg/MicroEMACS
+$ mkdir           /usr/loc/pkg/MicroEMACS/bin
+$ mkdir           /usr/loc/pkg/MicroEMACS/cmd
+$ mkdir           /usr/loc/pkg/MicroEMACS/doc
+$ cp -p emacs     /usr/loc/pkg/MicroEMACS/bin
+$ cp -p .emacsrc  /usr/loc/pkg/MicroEMACS/bin/
 $ cd ../cmd/
-$ tar -cpf - . | (cd /usr/loc/pkg/MicroEmacs/cmd && tar -xpf -)
+$ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/cmd && tar -xpf -)
 $ cd ../doc/
-$ tar -cpf - . | (cd /usr/loc/pkg/MicroEmacs/doc && tar -xpf -)
+$ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/doc && tar -xpf -)
 $ cd ../linux/
 $ cat runemacs
 #!/bin/sh -
 ## CHANGE THIS TO YOUR NEEDS:
-mybas=/usr/loc/pkg/MicroEmacs
+mybas=/usr/loc/pkg/MicroEMACS
 ##
 mybin="${mybas}/bin"
 mycmd="${mybas}/cmd"
@@ -32,9 +32,9 @@ export PATH="${mybin}:${mycmd}:${PATH}"
 exec "${mybin}/emacs" "$@"
 # EOF
 
-$ cp -p runemacs /usr/loc/pkg/MicroEmacs/bin/
+$ cp -p runemacs /usr/loc/pkg/MicroEMACS/bin/
 
-Then link /usr/loc/pkg/MicroEmacs/bin/runemacs to your prefered
+Then link /usr/loc/pkg/MicroEMACS/bin/runemacs to your prefered
 directory, e.g. ~/bin/ or /usr/local/bin/
 
 The file .emacsrc may be moved to your HOME directory.

@@ -985,6 +985,608 @@ Implemented spal() in smg.c (like in ansi.c): This makes adaptions of
 the keymap via emacs.rc possible.
 
 
+[2024-05-26.00]
+Ideas for UTF8-Support:
+- A modified form of the DBCS code could be a first proof of concept
+  supporting the subset of UTF8 consisting of one and two byte
+  characters.
+- See also the handling of
+  + $disphigh
+  + OVER and REP modes
+
+
+[2024-05-28.00]
+Die Warnungen ueber die gtfun()-Funktion im untenstehenden Text beachten!
+
+  <http://www.geonius.com/software/uemacs/index.html>
+
+  MicroEMAC 3.9e Editor (DEC EDT Version)
+  Introduction & Background
+  Changes & Enhancements
+  Mapping the PC/AT Keypad to the VT100 Keypad
+  Files & Directories
+  My .emacsrc File
+
+  (Also see the original MicroEMACS 3.9e documents in the help directory;
+  emacs-doc.txt is the full reference manual.)
+
+  Download (uemacs-2021.tgz, 738K  -  uemacs-2021.zip, 814K)
+
+  Last Update: Thu Nov 23 21:38:04 2023
+  Introduction & Background
+
+  This was MicroEMACS 3.9, written by Dave G. Conroy and substantially
+  modified by Daniel M. Lawrence (with contributions from others). The
+  last entry in the change log is dated November 4, 1987. The software
+  was frozen for the version 3.9e USENET release according to the last
+  log entry.
+
+  In September 1987, I moved from 5 years of heavy VAX/VMS experience to
+  a small prototype project using an early Sun M68K Unix workstation. One
+  person used the workstation, two others used their PCs connected via
+  serial lines, and I naturally gravitated to a DEC VT220 terminal (also
+  connected via a serial line).
+
+  I initially configured vi(1) to work like DEC's EDT editor (Wikipedia),
+  mapping the VT220 keypad escape sequences to commands that would take
+  VI out of insert mode if necessary and perform the commands equivalent
+  to EDT's keypad functions. This made VI workable for me, but it still
+  was just not the same as my heavily customized EDT (and then TPU in the
+  last couple of VMS years).
+
+  Note: I originally included the following paragraph here, but I just
+  happened upon a comment dated January 4, 1988 about a change I made in
+  estruct.h, so I must have downloaded MicroEMACS before getting a
+  short-lived copy of UniPress EMACS. My memory is playing tricks on me!
+
+  "As a subcontractor, I somehow convinced our contractor manager to buy
+  a copy of UniPress EMACS. However, he was only willing to buy the
+  binary for $300 and wouldn't splurge on the source code for $600 total.
+  I went to town with EMACS Lisp and soon had my beloved editing
+  environment once again. And then we got the first Sun SPARC workstation
+  Goodbye, M68K EMACS!"
+
+  Somehow I heard of MicroEMACS and downloaded the source code from
+  Quantum Link's CP/M archive for the Commodore 128 or from GEnie
+  (General Electric Network for Information Exchange).
+
+  Quantum Link eventually became AOL. Speaking of the old pre-internet
+  days, should I call EMACS by its original moniker, EMACS, or should I
+  follow the not-so-new fad of calling it Emacs? UNIX Unix? FORTRAN
+  Fortran? SNOBOL Spitbol? You tell me!
+
+  I figure it cost me over $40 to obtain MicroEMACS. Both Q-Link and
+  GEnie were run on corporate computers and hourly rates went up after
+  7:00 or 8:00 in the morning. My 1200 baud download took longer than
+  expected and I got socked with that $40 charge!
+
+  Anyway, with some tweaking, I built MicroEMACS on our SPARCstation and
+  I was back in business. As a result I've been using a heavily
+  customized EDT editor since 1982, beginning with the EDIT/EDT editor
+  itself and, since 1987, continuing with MicroEMACS!
+
+  Customized how? I have included my EDT initialization file, edtini.edt,
+  and my TPU file, eveini.tpu. The files have December 1993 dates
+  because, in 1992-1993, I worked on a project for which we ported our
+  SunOS software to VAX/VMS and I got to use EDT and TPU again.
+
+  When I moved from EDT to TPU (in 1985?), I found DEC's TPU version of
+  EDT too limited, so I instead used TPU's EVE editor with my own
+  EDT-inspired customizations.
+
+  When recently checking my MicroEMACS version of EDT against the DEC EDT
+  reference manual (downloaded from the internet), I was struck by how
+  incredibly awkward EDT's keypad method of substitution using "GOLD
+  ENTER" was. Early on, I must have implemented my "GOLD s" method
+  (possibly learned from another more experienced developer).
+
+  HTML/PDF versions of the EDT, TPU, and EVE reference manuals can be
+  found at https://www.digiater.nl/openvms/doc/alpha-v8.3/ (EDT's is PDF
+  only).
+
+  If you're reading this and using GNU Emacs, you might be interested in
+  GNU's "Emacs EDT emulation" and/or tpu-edt.el. These seem to postdate
+  my need for MicroEMACS (and would not have been easily accessible at
+  the time in any case). Changes & Enhancements
+
+  I added the following new macro commands:
+
+      alx-center-line
+      edt-delete-char
+      edt-undelete-char
+      edt-delete-bol
+      edt-delete-eol
+      edt-delete-line
+      edt-undelete-line
+      edt-delete-word
+      edt-undelete-word
+      edt-next-word
+
+  I added the following function:
+
+  &DRS wildcardFileSpec index
+
+      Returns the I-th (1..N) file name that matches the wildcard file
+      specification. Wildcards can only appear in the file name and not
+      in the preceding directory names, if any. A blank string, "", is
+      returned if no file names are matched or if the index is out of
+      range.
+
+      The result is stored locally in alx_drs() (found in alex.c), so it
+      is a good idea to not use &DRS more than once in an expression. The
+      result is stored as a dynamically allocated string, so there is no
+      length limit as seen with the built-in ampersand string functions
+      (see "Warnings About the Macro Language" below).
+
+      (I originally modified the various file input functions in
+      MicroEMACS's file.c to perform the wildcard matching internally.
+      Circa 2001, I added the same functionality to JASSPA MicroEMACS for
+      Windows by implementing the &DRS function. In June 2023, I figured
+      I might as well use the same technique in this MicroEMACS.)
+
+  I modified the following function:
+
+  &CHR number
+
+      Returns the character whose code is the specified number. This
+      modification allows numbers to be specified in decimal, hexadecimal
+      ("0x..."), and octal ("0...").
+
+  I added the following macro environment variable:
+
+  $curoff
+
+      Byte offset (0..N-1) in the line of the current cursor position.
+      Note that this is different than "$curcol", which takes into
+      account tab settings and returns the cursor column as rendered on a
+      virtual screen. For example, if the cursor is positioned on "a" in
+      a line beginning with "^Iabc...", $curcol of "a" is 9 (its column
+      on the screen) and $curoff is 1 (the offset in the line of "a"
+      following the tab character). [READ ONLY]
+
+  Additional software changes included bug fixes, expansion of predefined size limits, use of the termios(3) subsystem instead of the obsolete termio(7) subsystem, clean-up of some of the code, ...
+  Warnings About the Macro Language
+
+  My efforts debugging a somewhat complex "!if" expression revealed two
+  implementation details of the MicroEMACS ampersand string functions
+  that the user should be aware of:
+
+      The ampersand string functions that manipulate and return strings
+      store their results in the same, statically allocated buffer,
+      result, in eval.c's gtfun() function. If more than one function
+      using the result buffer appears in an expression, then the buffer
+      will be unwittingly overwritten by intermediate values. The
+      functions in question are:
+
+      &CAT    &CHR    &GTK    &IND    &LEFT    &MID    &RIGHT
+
+      To avoid conflicts, break the expression into smaller pieces and
+      store intermediate values in user variables ("%name"). MicroEMACS
+      stores the value of user variables in dynamically allocated
+      strings. (The storage will be freed and allocated anew the next
+      time the expression is evaluated.)
+
+      The result buffer in gtfun() is of a fixed size, 2048 (2*NSTRING,
+      where NSTRING is defined in estruct.h). Consequently, the results
+      of the ampersand string functions are limited to 2047 characters.
+      Exceeding this limit is entirely possible; for example, when
+      manipulating a long line of text. (I have modified the functions to
+      truncate results and not write past the end of the buffer.)
+
+  Debug Output
+
+  I added the ability to generate debug output to a file. First, the
+  following global variables were added to edef.h:
+
+      int  dbgIsOn ;  - 0 = debug off, ~0 = debug on
+      FILE  *dbgFile ;  - Debug file, opened in mesetup() in "main.c"
+
+  Second, the following command-line option was added to main.c:
+
+      -dfile    - Enable debug and open "file" for debug output
+
+  Debug output can then be generated wherever desired with:
+
+      if (dbgIsOn)  fprintf (dbgFile, ...) ;
+
+  Mapping the IBM PC/AT Keypad to the DEC VT100 Keypad
+
+  My MicroEMACS configuration file, .emacsrc, currently depends on DEC
+  VT1xx/VT2xx application mode keypad escape sequences. Ways to get these
+  escape sequences from an IBM PC/AT keypad include:
+
+      Under Windows, I use Tera Term to access (i) Cygwin on the host
+      machine and (ii) Linux/BSD on a remote machine. The Tera Term
+      keyboard setup file I use to map the PC keypad presses to VT escape
+      sequences is:
+
+      VT-ibm-keypad-teraterm-AlexEdt-CNF.txt
+
+      Note that keycodes in the setup file are not Windows keycodes, but
+      the values displayed by the keycode.exe program included in the
+      Tera Term distribution. (See Tera Term Keyboard Setup for more
+      information.)
+
+      The connection to Cygwin on the host machine is accomplished using
+      Tera Term's cygterm+ program in conjunction with Tera Term. See the
+      "Command line" and "Setup files" entries in Tera Term's Help Index.
+
+      I used to use an AutoHotkey script with Cygwin's mintty(1) terminal
+      program under Windows 7 (and possibly under Windows XP before
+      that?), but at some point it stopped working. I have included the
+      AutoHotkey script in case someone else prefers to use it and can
+      figure out the problem:
+
+      VT-ibm-keypad-mintty-autohotkey.txt
+
+      Under X Windows in Linux or BSD, I use xterm(1) and this xmodmap(1)
+      keypad map file:
+
+      VT-ibm-keypad-xterm-xmodmaprc.txt
+
+      (The Xterm FAQ has more information.)
+
+  With either of the two methods above, the VT keypad PF2 key is dropped
+  and the PC keypad is mapped to the VT keypad as follows:
+
+      Num Lock  ->  PF1 (the GOLD key!)
+      /   ->  PF3
+      *   ->  PF4
+      -   ->  Keypad "-"
+      +   ->  Keypad ","
+      Enter ->  Keypad Enter
+      .   ->  Keypad "."
+      0 .. 9  ->  Keypad digits
+
+  (PF2 in the EDT editor was the "help" key, which I never used.)
+
+  Visually, the VT keypad keys are laid out on the PC keypad like this:
+
+          .=====.=====.=====.=====.
+          | PF1 | PF3 | PF4 |  -  |
+          +=====+=====+=====+=====+
+          |  7  |  8  |  9  |     |
+          +=====+=====+=====+     |
+          |  4  |  5  |  6  |  ,  |
+          +=====+=====+=====+=====+
+          |  1  |  2  |  3  |     |
+          +=====+=====+=====+     |
+          |  0        |  .  | Ent |
+          `===========^=====^=====+
+
+  In years long past, I did use other non-PC/AT keyboards on PCs and Unix
+  computers and I successfully managed to mimic VT-style keypad use, even
+  when there was no keypad! (You can see remnants of the handling of
+  these keyboards in my .emacsrc file; I should probably clean that up
+  someday.)
+
+  Files & Directories
+
+  README.txt
+
+  .emacsrc    - My MicroEMACS configuration file, which depends on ...
+
+        - ...  (See keypad section above)
+  VT-ibm-keypad-mintty-autohotkey.txt
+  VT-ibm-keypad-teraterm-AlexEdt-CNF.txt
+  VT-ibm-keypad-xterm-xmodmaprc.txt
+
+  VT-edtini-edt.txt - My EDT initialization file ("edtini.edt").
+  VT-eveini-tpu.txt - My TPU initialization file ("eveini.tpu").
+
+  Makefiles ("Using on ..." as of June 2023)
+
+  Makefile.bsd    - Using on FreeBSD 13.2
+  Makefile.cygwin   - Using on Cygwin64 (Windows 10)
+  Makefile.linux    - Using on Linux Mint 20
+
+  Files I Added to MicroEMACS Proper
+
+  alex.c      - Original, c. 1988 EDT functions.
+
+  eprotos.h   - ANSI C prototypes for all MicroEMACS C functions.
+
+  Directory:  orig  - Original source for modified MicroEMACS files.
+  Directory:  ots - on-the-shelf MicroEMACS code; i.e., not used.
+
+  Files from My CSOFT LIBGPL Library
+
+  These files are largely used to support my &drs function. Circa 1990,
+  this functionality was implemented using only a few files, but this
+  changed over the years as I reworked the code to be more generalized
+  and more robust. Not to mention the fact that I ported MicroEMACS,
+  again over the years, to UNIX (SunOS, HP/UX, Solaris, etc.), Linux,
+  BSD, and Cygwin platforms. The LIBGPL code itself is portable to
+  various systems including VAX/VMS and Windows Visual Studio 2022.
+
+  pragmatics.h    - The hand-crafted equivalent of an autoconfig file.
+  iel_util.h    - Simple debug logging and error reporting.
+  aperror.c
+  aperror.h
+
+  drs_util.c    - Directory scanning package, which requires the
+  drs_util.h      source files below, including the REX parser
+  get_util.c      down through the UTF package.
+  get_util.h
+  meo_util.c
+  meo_util.h
+  nnl_util.c
+  nnl_util.h
+
+  rex_util_y.bison  - Regular expression parser and lexer for reference.
+  rex_util_y.c    - Bisonized C code for the parser.
+  rex_internals.c
+  rex_internals.h
+  rex_tokens.h
+  rex_util.c    - Actual matching/sustitution code.
+  rex_util.h
+
+  sdx_util.c    - Handles dynamically growing strings in sustitution.
+  sdx_util.h
+
+  sto_util.c    - Length-limited S-to-N functions for the parser.
+  sto_util.h
+  sto_util_template.h
+
+  str_util.c    - String manipulation functions.
+  str_util.h
+  utf_util.c    - UTF-8, -16, and -32 conversion functoins.
+  utf_util.h
+
+  MicroEMACS 3.9e Source Files (some have been modified)
+
+  These files were part of the original MicroEMACS 3.9e distribution.
+
+  Directory:  cmd - command stuff.
+  Directory:  help  - help information.
+
+  basic.c
+  bind.c
+  buffer.c
+  crypt.c
+  display.c
+  ebind.h
+  edef.h
+  efunc.h
+  epath.h
+  estruct.h
+  eval.c
+  evar.h
+  exec.c
+  file.c
+  fileio.c
+  input.c
+  isearch.c
+  line.c
+  main.c
+  random.c
+  region.c
+  search.c
+  spawn.c
+  tcap.c
+  termio.c
+  window.c
+  word.c
+
+  My .emacsrc File
+  Variables
+
+      %edt-advance-forward  - Direction of EDT "next" movements:
+            forward (TRUE) or reverse (FALSE).
+      %edt-mark-is-active   - Is EDT's mark active?  (This is independent
+            of the always active MicroEMACS mark.)
+      %edt-paste-was-appended - Set to FALSE by EDT cut; set to TRUE by
+            subsequent EDT replace(s).  Affects deletion
+            of previous characters in append and paste.
+
+      %edt-search-mode    - Cursor position after successful, forward
+            EDT FIND/FNDNXT commands.  The default for
+            MicroEMACS is to place the cursor after the
+            last character in the match.  By setting
+            this variable to "BEGIN", the cursor will
+            be backed up to the beginning of the match.
+            (The cursor will be advanced one character
+            before searching for the next match.)
+
+      %edt-name-buffer    - Names of various buffers.
+      %my-name[-number]-buffer
+      ...
+
+  Named Buffers
+
+      EDT-PASTE - EDT cut text is copied here for subsequent EDT pasting.
+      EDT-DELETE  - Replaced text is copied here during EDT replace.
+
+      ALTERNATE - Temporary buffers for whatever use by typist ...
+      ALTERNATE/4
+      ALTERNATE/5
+      ALTERNATE/6
+      ALTERNATE/7
+      ALTERNATE/8
+      ALTERNATE/9
+
+  PC Keypad Key Bindings
+
+  For completeness, in 2023, I added EDT functions RESET (GOLD DOT),
+  APPEND (KP9), REPLACE (GOLD KP9), CTRL/U (delete to BOL), DEL EOL (GOLD
+  KP2), LINE (KP0), and OPEN LINE (GOLD KP0). Since I have no memory of
+  using these functions before, I implemented and tested them based
+  solely on the descriptions in the EDT Reference Manual. I suggest you
+  check them out to be sure they behave as you expect. I have not
+  implemented SUBST (GOLD ENTER). (Yet, maybe?)
+
+  Naming convention:
+
+      GOLD  - PC NumLock, VT PF1 key
+      PF3   - PC keypad "/"
+      PF4   - PC keypad "*"
+      MINUS - PC keypad "-"
+      COMMA - PC keypad "+"
+      ENTER - PC keypad "Enter"
+      DOT   - PC keypad "."
+      KP0..KP9  - PC keypad digits
+
+  Actions (ordered by top row, right column, digits 7-9, 4-6, 1-3, and
+  0). Actions tagged with "[DIRECTION]" work forwards or backwards
+  depending on the %advance-forward setting, which is set/reset with
+  KP4/KP5:
+
+      GOLD PF3  - EDT prompt and search (FIND)
+      PF3   - EDT search next (FNDNXT)
+
+      PF4   - EDT delete line (DEL L)
+      GOLD PF4  - EDT undelete line (UND L)
+
+      MINUS - EDT delete word (DEL W)
+      GOLD MINUS  - EDT undelete word (UND W)
+
+      COMMA - EDT delete character (DEL C)
+      GOLD COMMA  - EDT undelete character (UND C)
+
+      ENTER - (Unimplemented: EDT ENTER)  Use keyboard's regular
+        "Enter"/"Return" key to finish EDT FNDNXT and
+        COMMAND (GOLD KP7) prompts.
+      GOLD ENTER  - (Unimplemented: EDT SUBST)  I use "GOLD s",
+        described below, to invoke MicroEMACS's own
+        query-replace-string command.
+
+      DOT   - EDT begin/cancel selection of text (SELECT)
+        (Selected text is NOT highlighted.)
+      GOLD DOT  - EDT reset selection and direction (RESET)
+
+      KP7   - EDT next page (next form feed) (PAGE) [DIRECTION]
+      GOLD KP7  - Prompt for and execute MicroEMACS named command.
+
+      KP8   - EDT next section (scroll) (SECT) [DIRECTION]
+      GOLD KP8  - EDT fill paragraph (FILL)
+
+      KP9   - EDT append selection to paste buffer (APPEND)
+      GOLD KP9  - EDT replace selection with paste buffer (REPLACE)
+
+      KP4   - EDT set forward direction (ADVANCE)
+      GOLD KP4  - EDT move to bottom of file (BOTTOM)
+
+      KP5   - EDT set backward direction (BACKUP)
+      GOLD KP5  - EDT move to top of file (TOP)
+
+      KP6   - EDT cut selected text to PASTE buffer (CUT)
+      GOLD KP6  - EDT paste text from PASTE buffer (PASTE)
+
+      KP1   - EDT next word (but always move forward) (WORD)
+        My variant.  Explanation by example:
+        Given "while ((i > 0) && ...", the next word
+        after "while" is the first left parenthesis,
+        not "i".  And the next word after that is "i",
+        not the second left parenthesis.
+      GOLD KP1  - (Unimplemented: EDT change case in region)
+
+      KP2   - EDT next line (but always move forward) (EOL)
+      GOLD KP2  - EDT delete to end-of-line (DEL EOL)
+
+      KP3   - EDT next character (but always move forward) (CHAR)
+      GOLD KP3  - EDT insert special character (SPECINS)
+
+      KP0   - EDT next beginning of line (LINE) [DIRECTION]
+      GOLD KP0  - EDT open line (OPEN LINE)
+
+  Non-Keypad Key Bindings
+
+      GOLD k  - Begin keyboard macro
+      ^K    - End keyboard macro
+      ^E    - Execute keyboard macro
+
+      ^A    - Insert line of asterisks
+
+      ^I    - Insert 4 spaces (NOT a tab)
+      GOLD t  - Insert genuine tab character
+
+      ^L    - EDT insert form feed (CTRL/L)
+      ^N    - Insert number line (useful for positioning text)
+      ^R    - EDT refresh editor screen (CTRL/R)
+
+      ^U    - Use "GOLD u" for EDT CTRL/U (delete from beginning-of-line)
+
+      GOLD m  - Switch to main buffer
+      GOLD p  - Switch to EDT CUT's "PASTE" buffer
+      GOLD D  - Switch to EDT REPLACE's "DELETE" buffer.
+      GOLD a  - Switch to "ALTERNATE" buffer
+      GOLD 4  - Switch to "ALTERNATE/4" buffer
+      GOLD 5  - Switch to "ALTERNATE/5" buffer
+      GOLD 6  - Switch to "ALTERNATE/6" buffer
+      GOLD 7  - Switch to "ALTERNATE/7" buffer
+      GOLD 8  - Switch to "ALTERNATE/8" buffer
+      GOLD 9  - Switch to "ALTERNATE/9" buffer
+
+      GOLD 1  - Return to one window in editor
+      GOLD 2  - Split current window vertically
+      GOLD `  - Switch cursor to next window
+
+      GOLD "  - Convert smart quotes, etc. to ASCII characters
+      GOLD M  - Convert CR/LF to LF (CR=^M)
+
+      GOLD b  - Bottom of buffer
+      GOLD B  - Prompt for and switch to another buffer
+
+      GOLD c  - Prompt for and insert control (A-Z) character
+      GOLD C  - Center current line
+
+      GOLD d  - Delete (not cut) current selection
+      GOLD D  - Generate directory listing
+
+      GOLD e  - Save file and exit MicroEMACS
+      GOLD q  - Quit MicroEMACS without saving
+
+      GOLD f  - Go to matching fence (e.g., braces, brackets, etc.)
+      GOLD F  - Prompt for and set fill paragraph width
+
+      GOLD g  - Prompt for and go to line in file
+      GOLD G  - Get (open) another file for editing
+
+      GOLD i  - Prompt for and insert contents of a file
+      GOLD I  - Toggle insert mode
+
+      GOLD j  - Join paragraph (multi-line to single-line)
+
+      GOLD l  - Display current line number
+      GOLD L  - Prompt for and execute MicroEMACS command file
+
+      GOLD r  - Prompt/interactive substitution (with regular expression)
+      GOLD s  - Prompt/interactive substitution (without regular expression)
+
+      GOLD T  - Trim trailing blanks from all lines in buffer
+
+      GOLD u  - EDT delete from beginning-of-line (CTRL/U)
+
+      GOLD U  - Expand tabs to 4 spaces
+
+      GOLD w  - Prompt for and write current buffer to file
+
+      GOLD x  - Prompt for and edit one or more shell commands.
+        When the commands are ready, press "GOLD x" again
+        to execute the shell commands and then switch to
+        the shell output buffer.
+
+      GOLD X  - Creates and drops you into a shell subprocess.
+        This is NOT in an editor window.  Enter shell
+        command "exit" to return back to the editor.
+
+      GOLD z  - Insert 3-byte UTF-8 BOM
+      GOLD Z  - Remove 3-byte UTF-8 BOM
+
+  Alex Measday  /  E-mail
+
+
+[2024-10-06.00]
+
+This Repository contains a MicroMemacs which compiles and runs un
+UNIX-V7:
+
+  https://github.com/athornton/microemacs-v7.git
+
+Use it to compile this version on V7.
+
+
+
 #============================== TODO LIST ==============================
 
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.c
