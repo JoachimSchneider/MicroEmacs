@@ -1346,11 +1346,11 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
             break;
 
         case EVDESKCLR:
-            c = lookup_color( mkupper(valueL) );
+            c = lkp_color( mkupper(valueL) );
             if ( c != -1 ) {
                 deskcolor = c;
 #if     WINDOW_TEXT
-                refresh_screen(first_screen);
+                rdw_screen(first_screen);
 #endif
             }
             break;
@@ -1574,7 +1574,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
             break;
 
         case EVSCRNAME:
-            select_screen(lookup_screen(valueL), TRUE);
+            select_screen(lkp_screen(valueL), TRUE);
             break;
 
         case EVSEARCH:

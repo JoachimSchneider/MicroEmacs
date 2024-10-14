@@ -36,13 +36,13 @@ static VIDEO   **pscreen;                      /* Physical screen. */
 /*  some local function declarations    */
 
 #if     MEMMAP
-EXTERN VOID PASCAL NEAR update_line DCL((int row, struct VIDEO *vp1));
+EXTERN VOID PASCAL NEAR upt_line DCL((int row, struct VIDEO *vp1));
 #else
-EXTERN VOID PASCAL NEAR update_line DCL((int          row,
+EXTERN VOID PASCAL NEAR upt_line DCL((int          row,
                                          struct VIDEO *vp1,
                                          struct VIDEO *vp2));
 #endif
-EXTERN VOID PASCAL NEAR update_hilite DCL((void));
+EXTERN VOID PASCAL NEAR upt_hilite DCL((void));
 
 
 /* VTINIT:
@@ -484,7 +484,7 @@ VOID PASCAL NEAR update P1_(int, force)
     curwp->w_flag = 0;
 
     /* highlight region in the current window if needed */
-    update_hilite();
+    upt_hilite();
 
 #if     WINDOW_MSWIN
 }
@@ -633,7 +633,7 @@ VOID PASCAL NEAR reframe P1_(EWINDOW *, wp)
  * In the current window, marks 10 and 11 are set and the area between
  * them is on screen, hilite that area
  */
-VOID PASCAL NEAR update_hilite P0_()
+VOID PASCAL NEAR upt_hilite P0_()
 {
     int   first_line  = 0;      /* first screen line to highlight */
     short first_pos   = 0;      /* position in that line */
@@ -1010,7 +1010,7 @@ VOID PASCAL NEAR updgar P0_()
  * the following things:
  */
 
-VOID PASCAL NEAR update_size P0_()
+VOID PASCAL NEAR upt_size P0_()
 {
     /* if we need the size update */
     if ( (first_screen->s_roworg !=
@@ -1146,9 +1146,9 @@ VOID PASCAL NEAR updupd P1_(int, force)
 
 #endif
 #if     MEMMAP
-            update_line(i, vp1);
+            upt_line(i, vp1);
 #else
-            update_line(i, vp1, pscreen[i]);
+            upt_line(i, vp1, pscreen[i]);
 #endif
         }
     }
@@ -1188,7 +1188,7 @@ VOID PASCAL NEAR updext P0_()
     vscreen[currow]->v_text[0] = '$';
 }
 
-/* UPDATE_LINE:
+/* UPT_LINE:
  *
  * Update a single line. This does not know how to use insert or delete
  * character sequences; we are using VT52 functionality. Update the physical row
@@ -1198,7 +1198,7 @@ VOID PASCAL NEAR updext P0_()
 #if     MEMMAP
 /* specific code for memory mapped displays */
 
-VOID PASCAL NEAR update_line P2_(int , row, struct VIDEO *, vp)
+VOID PASCAL NEAR upt_line P2_(int , row, struct VIDEO *, vp)
 /* row: Row of screen to update */
 /* vp:  Virtual screen image    */
 {
@@ -1220,7 +1220,7 @@ VOID PASCAL NEAR update_line P2_(int , row, struct VIDEO *, vp)
 
 #else
 
-VOID PASCAL NEAR update_line P3_(int, row, struct VIDEO *, vp,
+VOID PASCAL NEAR upt_line P3_(int, row, struct VIDEO *, vp,
                                  struct VIDEO *, pp)
 /* row: Row of screen to update */
 /* vp:  Virtual screen image    */

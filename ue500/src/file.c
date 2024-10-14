@@ -249,7 +249,7 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
      * Check $newscreen, see if we make a new screen for the new file.
      */
     if ( newscreenflag ) {
-        sp = lookup_screen(bname);
+        sp = lkp_screen(bname);
         if ( sp == (SCREEN_T *)NULL ) {
             /* screen does not exist, create it */
             sp = init_screen(bname, bp);

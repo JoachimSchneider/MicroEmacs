@@ -1130,7 +1130,7 @@
  *      - added -i command line switch to initialize a variable's value
  *        for example:  emacs -i$sres VGA
  *      26-aug-88
- *      - changed code in update_line() in display.c to remove reliance
+ *      - changed code in upt_line() in display.c to remove reliance
  *        on well behaved pointer subtraction (submitted by Kenneth Sloan)
  *      - fixed potential bug in fileio.c in ffgetline()
  *        (submitted by John Owens)
@@ -1916,7 +1916,7 @@
  *      17 Nov 92 Daniel Lawrence
  *      - rewrote scwrite() in IBMPC.C to handle 2 new args to define the
  *        beginning and end of a hilight region. Rewrote the MEMMAP version
- *        of update_line() in display.c to use this. Added 4 new fields to
+ *        of upt_line() in display.c to use this. Added 4 new fields to
  *        the VIDEO structure to specify current and requested left and
  *        right ends of the hilighted region.
  *      - Officially dumped all DEC RAINBOW specific code. It can run ok
@@ -1975,7 +1975,7 @@
  *        Changed it to line_bytes.
  *      - refolded loop in bytecopy() in main.c to prevent memory references
  *        past the end of the source string
- *      - in update_line() in display.c, initialized local non_blanks to
+ *      - in upt_line() in display.c, initialized local non_blanks to
  *        TRUE. It was not initialized in some cases
  *      - cleaned up error returns in dobuf() in exec.c to make sure to
  *        free einit all the time. Memory was being orphaned on errors.
@@ -2017,7 +2017,7 @@
  *        pointer under TURBO C using the DOS16M realloc(). Changed the
  *        #ifdefs to not do this when DOS16M is TRUE
  *      19 Feb 93
- *      - moved refresh_screen() from mouse.c to screen.c were it belongs.
+ *      - moved rdw_screen() from mouse.c to screen.c were it belongs.
  *      - fixed a mixup in the TERM initializer order in unix.c
  *        (these two above were suggested by Ed M Van Gasteren)
  *      - a delicate rearrangement of the code in dobuf which scanned

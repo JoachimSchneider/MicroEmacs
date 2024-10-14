@@ -531,7 +531,7 @@ int PASCAL NEAR spawncli P2_(int, f, int, n)
     TTkclose();
     shellprog("");
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     sgarbf = TRUE;
@@ -576,7 +576,7 @@ int PASCAL NEAR spawn P2_(int, f, int, n)
         tgetc();
     }
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     sgarbf = TRUE;
 
@@ -608,7 +608,7 @@ int PASCAL NEAR execprg P2_(int, f, int, n)
     TTkclose();
     execprog(line);
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     /* if we are interactive, pause here */
@@ -681,7 +681,7 @@ int PASCAL NEAR pipecmd P2_(int, f, int, n)
     TTkclose();
     shellprog(line);
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     sgarbf = TRUE;
@@ -762,7 +762,7 @@ int PASCAL NEAR f_filter P2_(int, f, int, n)
     TTkclose();
     shellprog(line);
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     sgarbf = TRUE;

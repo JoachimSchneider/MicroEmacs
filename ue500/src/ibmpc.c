@@ -652,7 +652,7 @@ int PASCAL NEAR screen_init P2_(int, dtype, int, type)
     }
 
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
 
     return (TRUE);
