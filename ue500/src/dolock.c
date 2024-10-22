@@ -19,7 +19,9 @@
 #include "eproto.h"
 #include "elang.h"
 #if  ( IS_UNIX() )
-# include <unistd.h>
+# if ( !IS_ANCIENT_UNIX() )
+#  include <unistd.h>
+# endif
 #endif
 
 #if ( FILOCK && WMCS )

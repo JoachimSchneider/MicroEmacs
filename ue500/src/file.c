@@ -24,7 +24,9 @@
 #if ( IS_UNIX() )
 # include <sys/types.h>
 # include <sys/stat.h>
-# include <unistd.h>
+# if ( !IS_ANCIENT_UNIX() )
+#  include <unistd.h>
+# endif
 #endif
 
 /* FILEREAD:

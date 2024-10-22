@@ -20,6 +20,9 @@
 #include        <stdio.h>
 #include        "estruct.h"
 #if IS_UNIX()
+# if ( !IS_ANCIENT_UNIX() )
+#  include <unistd.h>                   /* ioctl()                  */
+# endif
 # include <sys/ioctl.h>                 /* I/O control definitions  */
 #endif
 #include        "eproto.h"

@@ -208,7 +208,9 @@ int scnothing P1_(char *, s)
 # include <sys/param.h>
 # include <sys/ioctl.h>                 /* I/O control definitions  */
 # include <signal.h>                    /* Signal definitions       */
-# include <unistd.h>
+# if ( !IS_ANCIENT_UNIX() )
+#  include <unistd.h>
+# endif
 
 # if   ( USE_SGTTY )
 #  include <sgtty.h>                    /* stty() / gtty()          */

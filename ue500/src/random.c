@@ -18,7 +18,9 @@
 #include <assert.h>
 #include "estruct.h"
 #if IS_UNIX() /**CYGWIN**/
-# include <unistd.h>
+# if ( !IS_ANCIENT_UNIX() )
+#  include <unistd.h>
+# endif
 #endif
 #include "eproto.h"
 #include "edef.h"
