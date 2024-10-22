@@ -8,9 +8,9 @@
 # object file directory
 OBJD = .
 # source file directory
-SRCD = ../src
+SRCD = ../../src
 # header file directory
-HDIR = ../h
+HDIR = ../../h
 
 # options and arguments to the C compiler
 #
@@ -18,17 +18,22 @@ HDIR = ../h
 # - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
 #
 ##
-#CFLAGS = -I. -I$(HDIR) -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
-#CFLAGS = -I. -I$(HDIR)
+#WARNFLAGS = -Wall
+ WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
-CFLAGS = -I. -I$(HDIR) -O
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DTERMINAL_NOBLOCK_READ=3
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)
 ##
 
+# Where to find the termcap/cureses library:
+#LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
+#LIB_TERMCAP = -L/usr/lib64/termcap -ltermcap    # SLES 15
+#LIB_TERMCAP = -ltermcap
+#LIB_TERMCAP = -lncurses
+#LIB_TERMCAP = -lcurses
 
 # list of header files
 

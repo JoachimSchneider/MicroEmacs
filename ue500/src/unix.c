@@ -504,7 +504,20 @@ char *reset = (char*) NULL;             /* reset string kjc           */
 # if   ( USE_SGTTY )
 static struct sgttyb  curterm;          /* Current modes              */
 static struct sgttyb  oldterm;          /* Original modes             */
-static struct tchars  curtchars = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+/*======================================================================
+/o
+ o List of special characters
+ o/
+struct tchars {
+        char    t_intrc;        /o interrupt o/
+        char    t_quitc;        /o quit o/
+        char    t_startc;       /o start output o/
+        char    t_stopc;        /o stop output o/
+        char    t_eofc;         /o end-of-file o/
+        char    t_brkc;         /o input delimiter (like nl) o/
+};
+======================================================================*/
+static struct tchars  curtchars = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 static struct tchars  oldtchars;	/* Org terminal special chars */
 # elif ( USE_TERMIO_IOCTL )
 static struct termio curterm;           /* Current modes              */

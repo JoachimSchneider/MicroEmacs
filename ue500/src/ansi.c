@@ -21,14 +21,7 @@
 #include        "estruct.h"
 #if IS_UNIX()
 # include <sys/ioctl.h>                 /* I/O control definitions  */
-# if ( !IS_ANCIENT_UNIX() )
-#  if ( !IS_POSIX_UNIX() )
-#   include <termio.h>
-#  else
-#   include <termios.h>
-#  endif /* !IS_POSIX_UNIX() */
-# endif /* !IS_ANCIENT_UNIX() */
-#endif  /* IS_UNIX() */
+#endif
 #include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
@@ -412,7 +405,7 @@ static int PASCAL NEAR ansiopen P0_()
 {
 # if     IS_UNIX()
     REGISTER char *cp = NULL;
-#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+#  ifdef TIOCGWINSZ /* Previously `if !DJGPP_DOS' */
     struct winsize win;
 
     ZEROMEM(win);
@@ -437,7 +430,7 @@ static int PASCAL NEAR ansiopen P0_()
 #  endif
         }
     }
-#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+#  ifdef TIOCGWINSZ /* Previously: `if !DJGPP_DOS'  */
     if ( 0 == ioctl(fileno(stdin), TIOCGWINSZ, &win) )  {
         /* REPAIR(): Sometimes --- e.g. with `qterminal -e emacs <args>'
          *           the ioctl() called at *this* point gives wrong
@@ -454,7 +447,7 @@ static int PASCAL NEAR ansiopen P0_()
 #  else
     term.t_nrow = NROW - 1;
     term.t_ncol = NCOL;
-#  endif  /* !DJGPP_DOS */
+#  endif  /* TIOCGWINSZ */
 #  if ( !0 )
     term.t_mrow = term.t_nrow;
     term.t_mcol = term.t_ncol;
