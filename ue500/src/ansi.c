@@ -21,11 +21,13 @@
 #include        "estruct.h"
 #if IS_UNIX()
 # include <sys/ioctl.h>                 /* I/O control definitions  */
-# if ( !IS_POSIX_UNIX() )
-#  include <termio.h>
-# else
-#  include <termios.h>
-# endif /* !IS_POSIX_UNIX() */
+# if ( !IS_ANCIENT_UNIX() )
+#  if ( !IS_POSIX_UNIX() )
+#   include <termio.h>
+#  else
+#   include <termios.h>
+#  endif /* !IS_POSIX_UNIX() */
+# endif /* !IS_ANCIENT_UNIX() */
 #endif  /* IS_UNIX() */
 #include        "eproto.h"
 #include        "edef.h"

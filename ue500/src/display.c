@@ -1913,7 +1913,7 @@ va_dcl
 #   if PROTO
 VOID CDECL NEAR mlwrite(CONST char *fmt, ...)
 #   else
-VOID CDECL NEAR mlwrite()
+VOID CDECL NEAR mlwrite(fmt)
     CONST char  *fmt;
 #   endif
 /* Variable argument list:                */

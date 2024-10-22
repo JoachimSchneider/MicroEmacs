@@ -74,7 +74,7 @@
 #define SOLARIS     0                 /* SUN Solaris (SYSV)           */
 #define SUN         0                 /* SUN v4.0                     */
 #define TOS         0                 /* ST520, TOS                   */
-#define UNIX_V7     0                 /* UNIX version 7               */
+#define UNIX_V7     1                 /* UNIX version 7               */
 #define USG         0                 /* UNIX system V                */
 #define VAT         0                 /* Related to XENIX (???)       */
 #define VMS         0                 /* VAX/VMS                      */
@@ -111,7 +111,7 @@
 #define MSC     0         /* MicroSoft C compile version 3 and up     */
 #define MWC     0         /* Mark Williams C                          */
 #define TURBO   0         /* Turbo C and Borland C++ under MSDOS      */
-#define UNIX    0         /* a standard UNIX compiler (cc)            */
+#define UNIX    1         /* a standard UNIX compiler (cc)            */
 #define ZTC     0         /* Zortech C/C++ 1.02 thru 2.10 under MSDOS */
 
 /*      Machine stack growth direction.                               */
@@ -145,7 +145,7 @@
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
 
-#define ANSI    0           /* ANSI escape sequences                  */
+#define ANSI    1           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */

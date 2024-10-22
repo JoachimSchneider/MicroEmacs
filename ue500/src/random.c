@@ -1975,7 +1975,7 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
 int CDECL NEAR  xsnprintf (va_alist)
     va_dcl
 #else
-int CDECL NEAR  xsnprintf (char *s, size_t n, CONST char *fmt, ...)
+int CDECL NEAR  xsnprintf V3_(char *, s, size_t, n, CONST char *, fmt)
 #endif
 {
     int         rc    = 0;
@@ -2050,7 +2050,7 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 int CDECL NEAR  xasprintf (va_alist)
     va_dcl
 #else
-int CDECL NEAR  xasprintf (char **ret, CONST char *fmt, ...)
+int CDECL NEAR  xasprintf V2_(char **, ret, CONST char *, fmt)
 #endif
 #if ( 0 ) /* Version if xvasprintf() is available */
 {
@@ -2435,7 +2435,7 @@ CONST char  *DebugMessage_fname_  = (CONST char *)"";
 int CDECL NEAR  DebugMessage (va_alist)
     va_dcl
 #else
-int CDECL NEAR  DebugMessage (CONST char *fmt, ...)
+int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 #endif
 {
     int         rc    = 0;

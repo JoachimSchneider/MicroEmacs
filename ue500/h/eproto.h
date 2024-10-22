@@ -149,43 +149,70 @@ CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
 # define P0_()                          (void)
 # define P1_(t1, x1)                                                                  \
   (t1 x1)
+# define V1_(t1, x1)                                                                  \
+  (t1 x1, ...)
 # define P2_(t1, x1, t2, x2)                                                          \
   (t1 x1, t2 x2)
+# define V2_(t1, x1, t2, x2)                                                          \
+  (t1 x1, t2 x2, ...)
 # define P3_(t1, x1, t2, x2, t3, x3)                                                  \
   (t1 x1, t2 x2, t3 x3)
+# define V3_(t1, x1, t2, x2, t3, x3)                                                  \
+  (t1 x1, t2 x2, t3 x3, ...)
 # define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
   (t1 x1, t2 x2, t3 x3, t4 x4)
+# define V4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, ...)
 # define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5)
+# define V5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, ...)
 # define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6)
+# define V6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, ...)
 # define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7)
+# define V7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, ...)
 # define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8)
+# define V8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, ...)
 # define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
   (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
+# define V9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
+  (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9, ...)
 # define DCL(args)                      args
 #else
 # define P0_()                          ()
 # define P1_(t1, x1)                                                                  \
   (x1)                                  t1 x1;
+# define V1_  P1_
 # define P2_(t1, x1, t2, x2)                                                          \
   (x1, x2)                              t1 x1; t2 x2;
+# define V2_  P2_
 # define P3_(t1, x1, t2, x2, t3, x3)                                                  \
   (x1, x2, x3)                          t1 x1; t2 x2; t3 x3;
+# define V3_  P3_
 # define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
   (x1, x2, x3, x4)                      t1 x1; t2 x2; t3 x3; t4 x4;
+# define V4_  P4_
 # define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
   (x1, x2, x3, x4, x5)                  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5;
+# define V5_  P5_
 # define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
   (x1, x2, x3, x4, x5, x6)              t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6;
+# define V6_  P6_
 # define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
   (x1, x2, x3, x4, x5, x6, x7)          t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7;
+# define V7_  P7_
 # define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
   (x1, x2, x3, x4, x5, x6, x7, x8)      t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8;
+# define V8_  P8_
 # define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
   (x1, x2, x3, x4, x5, x6, x7, x8, x9)  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8; t9 x9;
+# define V9_  P9_
 # define DCL(args)                      ()
 #endif
 /**********************************************************************/
@@ -804,7 +831,7 @@ EXTERN VOID PASCAL NEAR ASRT_WriteStr_  DCL((CONST char *s));
 #define asrs_(s)      ASRT_WriteStr_((s))
 #define asri_(i)      asrs_(ui2s10_memacs((unsigned int)(i)))
 #ifdef MAIN_C_
-VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *s, )
+VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *, s)
 {
     trcs_(s);
     VOIDCAST fputs(s, stderr);

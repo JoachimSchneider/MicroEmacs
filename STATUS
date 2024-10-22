@@ -1586,6 +1586,32 @@ UNIX-V7:
 Use it to compile this version on V7.
 
 
+[2024-10-22.00]
+
+* In UNIX V7 we don't have read() with timeouts (no solect(), no
+  VMIN/VTIME terminal attributes) which is needed for grabnowait():
+  Therefore we should try 2.11 BSD:
+
+  joachim@entropy:~/WRK/JOB/SAP/Data/D029037/BOX/ptf/PDP-11/finsler.math.uoa.gr/unix/PDP-11/Boot_Images/2.11_on_Simh/
+
+* Or we re-implement grab(no|)wait() in a way, thet the reads are feed out of a ringbuffer, i.e.
+  read()    --->  readx()
+  select()  --->  nread()
+
+  and
+
+  * One readx call returns the next character in the buffer
+    or --- if the buffer is empty fills the buffer and then returns the
+    next chracter
+
+    The buffer must be so large (e.g. 256 bytes), that we always have
+    short reads.
+
+  * The nread() call gives the number of characters available in the buffer.
+
+===> DONE
+
+
 
 #============================== TODO LIST ==============================
 
@@ -1614,6 +1640,7 @@ Use it to compile this version on V7.
 
   Of course this is relevant only for platforms we currently
   cannot test.
+
 
 
 # EOF

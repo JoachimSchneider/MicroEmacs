@@ -12,17 +12,26 @@ SRCD = ../../src
 # header file directory
 HDIR = ../../h
 
+
+CC=pcc
+LINK=gcc
+
+
 # options and arguments to the C compiler
 #
 # - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
 # - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
 #
 ##
-#WARNFLAGS = -Wall
- WARNFLAGS = -Wall -Wno-unused-local-typedefs
+WARNFLAGS = -Wall
+#WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
- CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DTERMINAL_NOBLOCK_READ=3
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC
+##
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DPROTO=0
+CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DPROTO=1
+##
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)
@@ -56,7 +65,7 @@ all:	emacs
 OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
 
 emacs:	$(OFILES)
-	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
+	$(LINK) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c

@@ -94,10 +94,16 @@
 /* for terminal control, but obviously they aren't used here    */
 /* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
-#if ( !IS_POSIX_UNIX() )
+#if ( IS_ANCIENT_UNIX() )
+# define USE_SGTTY              ( 1 )
+# define USE_TERMIO_IOCTL       ( 0 )
+# define USE_TERMIOS_TCXX       ( 0 )
+#elif ( !IS_POSIX_UNIX() )
+# define USE_SGTTY              ( 0 )
 # define USE_TERMIO_IOCTL       ( 1 )
 # define USE_TERMIOS_TCXX       ( 0 )
 #else
+# define USE_SGTTY              ( 0 )
 # define USE_TERMIO_IOCTL       ( 0 )
 # define USE_TERMIOS_TCXX       ( 1 )
 #endif
@@ -128,18 +134,38 @@
 # endif
 #endif
 
-/* Use select instead of VMIN/VTIME setting of the terminal attributes.
- * This *must* be used with CygWin or DJGPP s setting VMIN/VTIME won't
- * work with CygWin or DJGPP.
+
+/* Several different methods to do noblocking read from a terminal:
  *
- * If VMIN/VTIME setting do not work terminating search strings
- * with <META> is not working (two <META>s needed).
+ * - VMIN/VTIME setting of the terminal attributes.
+ * - The `select()' system call:
+ *   This *must* be used with CygWin or DJGPP's setting VMIN/VTIME won't
+ *   work with CygWin or DJGPP.
+ * - As a substitute one may try the readx() implemented here.
+ *
+ * If these settings do not work properly the  termination of search
+ * strings with <META> is not working (two <META>s needed).
  */
-#define USE_TERMINAL_SELECT     ( 1 )
-#if ( CYGWIN || DJGPP_DOS )
-# undef USE_TERMINAL_SELECT
-# define USE_TERMINAL_SELECT    ( 1 )
+#define USE_TERMINAL_VTIME  (1)
+#define USE_TERMINAL_SELECT (2)
+#define USE_TERMINAL_READX  (3)
+
+#ifndef TERMINAL_NOBLOCK_READ
+# if    ( CYGWIN || DJGPP_DOS )
+#  define TERMINAL_NOBLOCK_READ USE_TERMINAL_SELECT
+# elif  ( IS_ANCIENT_UNIX() )
+#  define TERMINAL_NOBLOCK_READ USE_TERMINAL_READX
+# else
+#  define TERMINAL_NOBLOCK_READ USE_TERMINAL_SELECT
+# endif
 #endif
+#if   ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+#elif ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+#elif ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+#else
+# error Invalid value for TERMINAL_NOBLOCK_READ
+#endif
+
 
 #if ( DJGPP_DOS )
 /* Use spawn() or DJGPP's smart system() for `dossystem()': */
@@ -162,7 +188,7 @@ int scnothing P1_(char *, s)
 # include <time.h>              /* time(), ...              */
 # include <errno.h>             /* errno, ...               */
 # include <sys/stat.h>          /* stat(), ...              */
-# if USE_TERMINAL_SELECT
+# if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 #  if ( !DJGPP_DOS )  /* select() prototype in time.h */
 #   include <sys/select.h>
 #  endif
@@ -184,7 +210,9 @@ int scnothing P1_(char *, s)
 # include <signal.h>                    /* Signal definitions       */
 # include <unistd.h>
 
-# if   ( USE_TERMIO_IOCTL )
+# if   ( USE_SGTTY )
+#  include <sgtty.h>                    /* stty() / gtty()          */
+# elif ( USE_TERMIO_IOCTL )
 #  include <termio.h>                   /* Terminal I/O definitions */
 # elif ( USE_TERMIOS_TCXX )
 #  include <termios.h>                  /* Terminal I/O definitions */
@@ -246,7 +274,12 @@ EXTERN const char *cygpwd_      DCL((void));
 /*====================================================================*/
 /* Static functions declared here:                                    */
 /*====================================================================*/
-static int IsExecutable DCL((CONST char * file));
+static int  IsExecutable  DCL((CONST char * file));
+#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+static int  rdstdin       DCL((int getnread));
+# define nread()  ( rdstdin(!0) )
+# define readx()  ( rdstdin(0)  )
+#endif
 /*====================================================================*/
 
 
@@ -468,7 +501,12 @@ char *reset = (char*) NULL;             /* reset string kjc           */
 # endif
 
 /** Local variables **/
-# if ( USE_TERMIO_IOCTL )
+# if   ( USE_SGTTY )
+static struct sgttyb  curterm;          /* Current modes              */
+static struct sgttyb  oldterm;          /* Original modes             */
+static struct tchars  curtchars = { 0xff, 0xff, 0xff, 0xff, 0xff, 0xff };
+static struct tchars  oldtchars;	/* Org terminal special chars */
+# elif ( USE_TERMIO_IOCTL )
 static struct termio curterm;           /* Current modes              */
 static struct termio oldterm;           /* Original modes             */
 # elif ( USE_TERMIOS_TCXX )
@@ -695,7 +733,15 @@ static int hpterm =0;           /* global flag braindead HP-terminal  */
 int ttopen P0_()
 {
     XSTRCPY(os, "UNIX");
-# if ( USE_TERMIO_IOCTL )
+# if    ( USE_SGTTY )
+    gtty(0, &oldterm);
+    curterm = oldterm;
+    curterm.sg_flags |= RAW;
+    curterm.sg_flags &= ~(ECHO|CRMOD);
+    stty(0, &curterm);
+    ioctl(0, TIOCGETC, &oldtchars);
+    ioctl(0, TIOCSETC, &curtchars);
+# elif  ( USE_TERMIO_IOCTL )
 
 #  if SMOS
     /* Extended settings; 890619mhs A3 */
@@ -746,7 +792,7 @@ int ttopen P0_()
 
         return (-1);
     }
-# elif ( USE_TERMIOS_TCXX )
+# elif  ( USE_TERMIOS_TCXX )
     /* Get modes */
     if ( tcgetattr(0, &oldterm) ) {
         perror("Cannot tcgetattr");
@@ -776,7 +822,7 @@ int ttopen P0_()
 
         return (-1);
     }
-# elif ( USE_CURSES )
+# elif  ( USE_CURSES )
     /* ? */
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
@@ -795,7 +841,10 @@ int ttclose P0_()
         write( 1, reset, STRLEN(reset) );
 # endif
 
-# if ( USE_TERMIO_IOCTL )
+# if    ( USE_SGTTY )
+  stty(0, &oldterm);
+  ioctl(0, TIOCSETC, &oldtchars);
+# elif  ( USE_TERMIO_IOCTL )
 #  if SMOS
     /* Extended settings; 890619mhs A3 */
     set_parm(0, -1, -1);
@@ -803,14 +852,14 @@ int ttclose P0_()
     if ( ioctl(0, TCSETA, &oldterm) )
         return (-1);
 
-# elif ( USE_TERMIOS_TCXX )
+# elif  ( USE_TERMIOS_TCXX )
     /* Set tty mode */
     if ( tcsetattr(0, TCSANOW, &oldterm) ) {
         perror("Cannot tcsetattr");
 
         return (-1);
     }
-# elif ( USE_CURSES )
+# elif  ( USE_CURSES )
     /* ? */
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
@@ -869,44 +918,67 @@ int ttputc P1_(int, ch)
 unsigned char grabwait()
 {
     unsigned char ch  = '\0';
+# if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+    int           rv  = 0;
+# endif
 
+# if ( USE_SGTTY )
+# else
     /* Change mode, if necessary */
     if ( curterm.c_cc[VTIME] ) {
         curterm.c_cc[VMIN] = 1;
         curterm.c_cc[VTIME] = 0;
-# if   ( USE_TERMIOS_TCXX )
+#  if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
-# elif ( USE_TERMIO_IOCTL )
+#  elif ( USE_TERMIO_IOCTL )
         ioctl(0, TCSETA, &curterm);
-# elif ( USE_CURSES )
+#  elif ( USE_CURSES )
         /* ? */
-# else
-#  error MISSING TERMINAL CONTROL DEFINITION
-# endif
+#  else
+#  endif
     }
+# endif
 
+# if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
     /* Perform read */
-# if HANDLE_WINCH
+#  if HANDLE_WINCH
+    while ( ( rv = readx() ) < 0 )  {
+            if ( winch_flag )
+                return 0;
+    }
+#  else
+    rv  = readx();
+    if ( 0 > rv ) {
+        puts("** Horrible read error occured **");
+        exit(1);
+    }
+#  endif
+    ch  = rv;
+# else
+    /* Perform read */
+#  if HANDLE_WINCH
     while ( read(0, &ch, 1) != 1 ) {
         if ( winch_flag )
             return 0;
     }
-# else
+#  else
     if ( read(0, &ch, 1) != 1 ) {
         puts("** Horrible read error occured **");
         exit(1);
     }
+#  endif
 # endif
 
     /* Return new character */
 # if ( 0 )
     TRC(("grabwait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
 # endif
+
     return (ch);
 }
 
 /** Grab input characters, short wait **/
-# if ( USE_TERMINAL_SELECT )
+# if    ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     fd_set          rfds;
@@ -961,7 +1033,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
         return (ch);
     }
 }
-# else
+# elif  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     int           count = 0;
@@ -1005,7 +1077,39 @@ unsigned char PASCAL NEAR grabnowait P0_()
 #  endif
     return (ch);
 }
-# endif /* USE_TERMINAL_SELECT */
+# elif  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+unsigned char PASCAL NEAR grabnowait P0_()
+{
+    if ( 0 >= nread() ) {
+        return (grabnowait_TIMEOUT);
+    } else              { /* data available */
+        int           rv  = 0;
+        unsigned char ch  = '\0';
+
+        /* Perform read */
+#  if HANDLE_WINCH
+        while ( ( rv = readx() ) < 0 )  {
+            if ( winch_flag )
+                return 0;
+        }
+#  else
+        rv  = readx();
+        if ( 0 > rv ) {
+            puts("** Horrible read error occured **");
+            exit(1);
+        }
+#  endif
+        /* Return new character */
+        ch  = rv;
+#  if ( 0 )
+        TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+#  endif
+        return (ch);
+    }
+}
+# else
+#   error IMPOSSIBLE
+# endif /* TERMINAL_NOBLOCK_READ */
 
 /* QIN:
  *
@@ -2988,10 +3092,66 @@ static int IsAccessable P2_(CONST char *, d, CONST char *, mode)
     }
 }
 
-static int IsExecutable P1_(CONST char *, file)
+static int  IsExecutable P1_(CONST char *, file)
 {
     return ( IsFil(file) && IsAccessable(file, "rx") );
 }
+
+#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+static int  rdstdin P1_(int, getnread)
+{
+# define BUFSZ_rdstdin_   (64)
+# define INC_rdstdin_(x)  do {                  \
+    if ( (BUFSZ_rdstdin_ - 1) == (x) )  {       \
+        (x) = 0;                                \
+    } else {                                    \
+        (x)++;                                  \
+    }                                           \
+} while ( 0 )
+# define NREAD_rdstdin_   ( ((wpos) >= (rpos))? \
+    ((wpos) - (rpos))                           \
+        :                                       \
+    (BUFSZ_rdstdin_ - (rpos) + (wpos))          \
+)
+    static unsigned char ringbuf[BUFSZ_rdstdin_];
+    static unsigned char readbuf[BUFSZ_rdstdin_];
+    static int  wpos  = 0;
+    static int  rpos  = 0;
+
+    int retval  = '\0';
+    int rc      = 0;
+
+    if ( getnread ) {
+        return NREAD_rdstdin_;
+    }
+
+    if ( 0 < NREAD_rdstdin_ )  {
+        retval  = ringbuf[rpos];
+        INC_rdstdin_(rpos);
+
+        return retval;
+    }
+
+    if ( 0 >= (rc  = read(0, readbuf, BUFSZ_rdstdin_)) ) {
+        return (-1);
+    } else                                      {
+        int i = 0;
+
+        for ( i = 0; i < rc; i++ )  {
+            ringbuf[wpos] = readbuf[i];
+            INC_rdstdin_(wpos);
+        }
+
+        retval  = ringbuf[rpos];
+        INC_rdstdin_(rpos);
+
+        return retval;
+    }
+# undef NREAD_rdstdin_
+# undef INC_rdstdin_
+# undef BUFSZ_rdstdin_
+}
+#endif  /* TERMINAL_NOBLOCK_READ */
 
 /* Get a directory for temporary files: Cannot fail.  */
 static char *gettmpdir P0_()

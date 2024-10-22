@@ -8,9 +8,9 @@
 # object file directory
 OBJD = .
 # source file directory
-SRCD = ../../src
+SRCD = ../src
 # header file directory
-HDIR = ../../h
+HDIR = ../h
 
 # options and arguments to the C compiler
 #
@@ -22,7 +22,12 @@ HDIR = ../../h
  WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
- CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DTERMINAL_NOBLOCK_READ=3
+##
+CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DPROTO=1 -DUSE_STDARG=1
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DPROTO=1 -DUSE_STDARG=0
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=1
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
+##
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)

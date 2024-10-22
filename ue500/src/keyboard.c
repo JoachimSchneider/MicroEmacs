@@ -676,11 +676,6 @@ int PASCAL NEAR rec_seq P3_(char *, buf, char *, bufstart, KEYENT *, node)
     x;    /o Resulting keycode            o/
   }
 
- Overwriting does currently not work:
- - Longer sequences tries to override a shorther one:
-   `if ( *seq == cur->ch )' chrashes because NULL == cur, which was set
-   as `cur = cur->nxtlvl;' in the previous step.
- - Shorter sequences cannot overwrite longer ones.
  *======================================================================
  *
  * seq - character sequence fn  - Resulting keycode
