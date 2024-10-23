@@ -256,8 +256,8 @@
   typedef char *    voidp_;
   /* attempt to optimize read/write vars. */
 # define NOSHARE    $low32k $align(1)
-#elif  IS_ANSI_C() || IS_UNIX() || MSC || TURBO || GCC   \
-  || (AMIGA && LATTICE) || VMS
+#elif  IS_ANSI_C() || ( IS_UNIX() && !IS_ANCIENT_UNIX() ) || MSC  \
+  || TURBO || GCC || (AMIGA && LATTICE) || VMS
 # define CONST      const
 # define VOID       void
 # define VOIDCAST   (void)

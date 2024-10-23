@@ -19,9 +19,12 @@
 
 #include        <stdio.h>
 #include        "estruct.h"
+#include        "eproto.h"
 #if IS_UNIX()
 # if ( !IS_ANCIENT_UNIX() )
 #  include <unistd.h>                   /* ioctl()                  */
+# else
+   EXTERN int ioctl DCL((int, int, ...));
 # endif
 # include <sys/ioctl.h>                 /* I/O control definitions  */
 #endif

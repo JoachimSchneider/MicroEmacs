@@ -26,6 +26,8 @@
 # include <sys/stat.h>
 # if ( !IS_ANCIENT_UNIX() )
 #  include <unistd.h>
+# else
+   EXTERN int chown   DCL((CONST char *, int, int));
 # endif
 #endif
 

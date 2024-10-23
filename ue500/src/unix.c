@@ -210,6 +210,14 @@ int scnothing P1_(char *, s)
 # include <signal.h>                    /* Signal definitions       */
 # if ( !IS_ANCIENT_UNIX() )
 #  include <unistd.h>
+# else
+   EXTERN int           getpid  DCL((void));
+   EXTERN int           ioctl   DCL((int, int, ...));
+   EXTERN unsigned int  sleep   DCL((unsigned int));
+   EXTERN int           unlink  DCL((CONST char *));
+   EXTERN int           read    DCL((int, char *, int));
+   EXTERN int           write   DCL((int, CONST char *, int));
+   EXTERN int           access  DCL((CONST char *, int));
 # endif
 
 # if   ( USE_SGTTY )

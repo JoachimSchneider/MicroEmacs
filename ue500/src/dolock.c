@@ -21,6 +21,21 @@
 #if  ( IS_UNIX() )
 # if ( !IS_ANCIENT_UNIX() )
 #  include <unistd.h>
+# else
+   EXTERN int getpid  DCL((void));
+   EXTERN int rmdir   DCL((CONST char *));
+   static int gethostname P2_(char *, name, int, len)
+   {
+     static CONST char  mname[] = "darkstar";
+     int                i       = 0;
+
+     for ( i = 0; i < MIN2(SIZEOF(mname), len) - 1; i++ ) {
+       name[i]  = mname[i];
+     }
+     name[i]  = '\0';
+
+     return 0;
+   }
 # endif
 #endif
 
