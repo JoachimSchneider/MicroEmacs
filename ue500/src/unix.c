@@ -3090,14 +3090,57 @@ static int IsAccessable P2_(CONST char *, d, CONST char *, mode)
         return TRUE;
     }
 
+    /*==================================================================
+    ACCESS(2)           UNIX Programmer's Manual            ACCESS(2)
+
+
+
+    NAME
+        access - determine accessibility of file
+
+    SYNOPSIS
+        access(name, mode)
+        char *name;
+
+    DESCRIPTION
+        Access checks the given file name for accessibility accord-
+        ing to mode, which is 4 (read), 2 (write) or 1 (execute) or
+        a combination thereof.  Specifying mode 0 tests whether the
+        directories leading to the file can be searched and the file
+        exists.
+
+        An appropriate error indication is returned if name cannot
+        be found or if any of the desired access modes would not be
+        granted.  On disallowed accesses -1 is returned and the
+        error code is in errno . 0 is returned from successful
+        tests.
+
+        The user and group IDs with respect to which permission is
+        checked are the real UID and GID of the process, so this
+        call is useful to set-UID programs.
+
+        Notice that it is only access bits that are checked.  A
+        directory may be announced as writable by access, but an
+        attempt to open it for writing will fail (although files may
+        be created there); a file may look executable, but exec will
+        fail unless it is in proper format.
+
+    SEE ALSO
+        stat(2)
+
+    ASSEMBLER
+        (access = 33.)
+        sys access; name; mode
+    ==================================================================*/
+
     if ( strchr(mode, 'r') || strchr(mode, 'R') ) {
-        mflag |= R_OK;
+        mflag |= 4/*R_OK*/;
     }
     if ( strchr(mode, 'w') || strchr(mode, 'W') ) {
-        mflag |= W_OK;
+        mflag |= 2/*W_OK*/;
     }
     if ( strchr(mode, 'x') || strchr(mode, 'X') ) {
-        mflag |= X_OK;
+        mflag |= 1/*X_OK*/;
     }
 
     if ( 0 == umc_access(d, mflag) )  {

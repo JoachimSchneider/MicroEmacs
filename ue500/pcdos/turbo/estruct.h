@@ -544,8 +544,8 @@ union REGS {
 # ifdef __cplusplus
 #   define unlink(a)       remove(a)
 # else
-    /* `With Compaq C 6.4 `delete' needs `#include <unixio.h>':     */
-#   /*define unlink(a)       delete(a)  /o Won't compile with C++ o/*/
+    /* `With Compaq C 6.4 `delete' needs `#include <unixio.h>':       */
+#   /*define unlink(a)       delete(a)  /o Won't compile with C++ o/  */
 #   define unlink(a)       remove(a)
 # endif
 #endif
