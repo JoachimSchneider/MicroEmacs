@@ -298,8 +298,7 @@
 /*      Can we catch the SIGWINCH (the window size change signal)? */
 
 #if     IS_UNIX()
-/* We could maybee also check for `# ifdef TIOCGWINSZ' here:  */
-# if DJGPP_DOS
+# if ( IS_ANCIENT_UNIX() || DJGPP_DOS )
 #   define HANDLE_WINCH    0
 # else
 #   define HANDLE_WINCH    1

@@ -206,7 +206,6 @@ int scnothing P1_(char *, s)
 # include <sys/stat.h>                  /* File status definitions  */
 # include <sys/time.h>
 # include <sys/param.h>
-# include <sys/ioctl.h>                 /* I/O control definitions  */
 # include <signal.h>                    /* Signal definitions       */
 # if ( !IS_ANCIENT_UNIX() )
 #  include <unistd.h>
@@ -232,6 +231,8 @@ int scnothing P1_(char *, s)
 # else
 #  error MISSING TERMINAL CONTROL DEFINITION
 # endif
+/* Include it *after* sgtty.h to make it compilable on Solaris 7:   */
+# include <sys/ioctl.h>                 /* I/O control definitions  */
 
 /** Completion include files **/
 /** Directory accessing: Try and figure this out... if you can! **/
@@ -515,6 +516,7 @@ char *reset = (char*) NULL;             /* reset string kjc           */
 static struct sgttyb  curterm;          /* Current modes              */
 static struct sgttyb  oldterm;          /* Original modes             */
 /*======================================================================
+UNIX V7:
 /o
  o List of special characters
  o/
@@ -527,8 +529,30 @@ struct tchars {
         char    t_brkc;         /o input delimiter (like nl) o/
 };
 ======================================================================*/
-static struct tchars  curtchars = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
-static struct tchars  oldtchars;	/* Org terminal special chars */
+/* Define your own structure to make it compilable on e.g. Solaris 7: */
+struct xtchars  {
+        char    t_intrc;        /* interrupt */
+        char    t_quitc;        /* quit */
+        char    t_startc;       /* start output */
+        char    t_stopc;        /* stop output */
+        char    t_eofc;         /* end-of-file */
+        char    t_brkc;         /* input delimiter (like nl) */
+};
+/*====================================================================*/
+/* Define your own constants to make it compilable on e.g. Solaris 7: */
+#define TERM_IOC_  ('t'<<8)
+
+#ifndef   TIOCSETC
+# define TIOCSETC  (TERM_IOC_|17)
+#endif
+#ifndef  TIOCGETC
+# define TIOCGETC  (TERM_IOC_|18)
+#endif
+/*====================================================================*/
+
+
+static struct xtchars curtchars = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+static struct xtchars oldtchars;        /* Org terminal special chars */
 # elif ( USE_TERMIO_IOCTL )
 static struct termio curterm;           /* Current modes              */
 static struct termio oldterm;           /* Original modes             */
