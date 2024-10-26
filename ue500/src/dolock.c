@@ -257,9 +257,9 @@ char *dolock P1_(CONST char *, filespec)
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
     long proc_id;               /* process id from lock file */
-#if ( IS_UNIX() )
+# if ( IS_UNIX() )
     int rc;                     /* syscall return code */
-#endif
+# endif
     char filename[NFILEN];      /* name of file to lock */
     char pathname[NFILEN];      /* path leading to file to lock */
     char drivename[NFILEN];     /* drive for file to lock */
@@ -270,7 +270,7 @@ char *dolock P1_(CONST char *, filespec)
     static char result[NSTRING]; /* error return string */
 
     /* separate filespec into components */
-#if ( IS_UNIX() )
+# if ( IS_UNIX() )
     {
         char  new_filespec[NFILEN];
 
@@ -281,11 +281,11 @@ char *dolock P1_(CONST char *, filespec)
         XSTRCPY( pathname, parse_path(new_filespec) );
         XSTRCPY( drivename, parse_drive(new_filespec) );
     }
-#else
+# else
     XSTRCPY( filename, parse_name(filespec) );
     XSTRCPY( pathname, parse_path(filespec) );
     XSTRCPY( drivename, parse_drive(filespec) );
-#endif
+# endif
     if ( pathname[0] == 0 )
         XSTRCPY(pathname, ".");
 
@@ -491,7 +491,7 @@ char *undolock P1_(CONST char *, filespec)
     static char result[NSTRING];    /* error return string */
 
     /* separate filespec into components */
-#if ( IS_UNIX() )
+# if ( IS_UNIX() )
     {
         char  new_filespec[NFILEN];
 
@@ -502,11 +502,11 @@ char *undolock P1_(CONST char *, filespec)
         XSTRCPY( pathname, parse_path(new_filespec) );
         XSTRCPY( drivename, parse_drive(new_filespec) );
     }
-#else
+# else
     XSTRCPY( filename, parse_name(filespec) );
     XSTRCPY( pathname, parse_path(filespec) );
     XSTRCPY( drivename, parse_drive(filespec) );
-#endif
+# endif
     if ( pathname[0] == 0 )
         XSTRCPY(pathname, ".");
 
@@ -549,7 +549,7 @@ char *undolock P1_(CONST char *, filespec)
 
 #else
 
-VOID dohello P0_()
+VOID dolockhello P0_()
 {
 }
 

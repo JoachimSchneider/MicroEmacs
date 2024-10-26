@@ -1887,15 +1887,11 @@ EXTERN int PASCAL NEAR          upperc DCL((char ch));
 EXTERN ue_fnc_T                 fncmatch DCL((CONST char *fname));
 EXTERN ue_fnc_T                 getname DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR          asc_int DCL((CONST char *st));
-EXTERN VOID                     dohello DCL((void));
 EXTERN int                      dspram DCL((void));
 EXTERN VOID                     lckerror DCL((char *errstr));
-EXTERN VOID                     lckhello DCL((void));
 EXTERN int                      xlock DCL((CONST char *fname));
 EXTERN int                      lockchk DCL((CONST char *fname));
 EXTERN int                      lockrel DCL((void));
-EXTERN int                      mousehello DCL((void));
-EXTERN int                      nocrypt DCL((void));
 EXTERN int PASCAL NEAR          absv DCL((int x));
 EXTERN int PASCAL NEAR          add_abbrev DCL((int f, int n));
 EXTERN int PASCAL NEAR          del_abbrev DCL((int f, int n));
@@ -2369,6 +2365,16 @@ EXTERN int PASCAL NEAR         tagword DCL((int f, int n));   /* vi-like tagging
 EXTERN int PASCAL NEAR         retagword DCL((int f, int n)); /* Try again (if redefined) */
 EXTERN int PASCAL NEAR         backtagword DCL((int f, int n)); /* return from tagged word */
 #endif
+
+/*====================================================================*/
+/* Dummy Functions to avoid empty compilation unit warnings           */
+/*====================================================================*/
+EXTERN VOID                     crypthello DCL((void));
+EXTERN VOID                     dolockhello DCL((void));
+EXTERN VOID                     lockhello DCL((void));
+EXTERN VOID                     mousehello DCL((void));
+EXTERN VOID                     tagshello DCL((void));
+/*====================================================================*/
 /**********************************************************************/
 
 

@@ -188,7 +188,7 @@ VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 
 #else
 
-VOID lckhello P0_()   /* dummy function */
+VOID lockhello P0_()
 {
 }
 
