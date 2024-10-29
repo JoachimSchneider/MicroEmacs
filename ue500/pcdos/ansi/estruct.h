@@ -681,7 +681,10 @@ execl(va_alist)
 
 
 /*===== global includes to get some constants ========================*/
-#include <limits.h>
+#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
+    || GCC || VMS || IS_ANSI_C() || ( IS_UNIX() && !IS_ANCIENT_UNIX() )
+# include <limits.h>
+#endif
 /*====================================================================*/
 
 

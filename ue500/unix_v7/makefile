@@ -54,67 +54,67 @@ emacs:	$(OFILES)
 	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c
+	$(CC) $(CFLAGS) -c $(SRCD)/abbrev.c
 $(OBJD)/ansi.o: $(SRCD)/ansi.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/ansi.o $(SRCD)/ansi.c
+	$(CC) $(CFLAGS) -c $(SRCD)/ansi.c
 $(OBJD)/basic.o: $(SRCD)/basic.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/basic.o $(SRCD)/basic.c
+	$(CC) $(CFLAGS) -c $(SRCD)/basic.c
 $(OBJD)/bind.o: $(SRCD)/bind.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/bind.o $(SRCD)/bind.c
+	$(CC) $(CFLAGS) -c $(SRCD)/bind.c
 $(OBJD)/buffer.o: $(SRCD)/buffer.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/buffer.o $(SRCD)/buffer.c
+	$(CC) $(CFLAGS) -c $(SRCD)/buffer.c
 $(OBJD)/char.o: $(SRCD)/char.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/char.o $(SRCD)/char.c
+	$(CC) $(CFLAGS) -c $(SRCD)/char.c
 $(OBJD)/crypt.o: $(SRCD)/crypt.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/crypt.o $(SRCD)/crypt.c
+	$(CC) $(CFLAGS) -c $(SRCD)/crypt.c
 $(OBJD)/cmdfix.o: $(SRCD)/cmdfix.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/cmdfix.o $(SRCD)/cmdfix.c
+	$(CC) $(CFLAGS) -c $(SRCD)/cmdfix.c
 $(OBJD)/display.o: $(SRCD)/display.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/display.o $(SRCD)/display.c
+	$(CC) $(CFLAGS) -c $(SRCD)/display.c
 $(OBJD)/dolock.o: $(SRCD)/dolock.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/dolock.o $(SRCD)/dolock.c
+	$(CC) $(CFLAGS) -c $(SRCD)/dolock.c
 $(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.h
-	$(CC) $(CFLAGS) -c -o $(OBJD)/eval.o $(SRCD)/eval.c
+	$(CC) $(CFLAGS) -c $(SRCD)/eval.c
 $(OBJD)/exec.o: $(SRCD)/exec.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/exec.o $(SRCD)/exec.c
+	$(CC) $(CFLAGS) -c $(SRCD)/exec.c
 $(OBJD)/file.o: $(SRCD)/file.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/file.o $(SRCD)/file.c
+	$(CC) $(CFLAGS) -c $(SRCD)/file.c
 $(OBJD)/fileio.o: $(SRCD)/fileio.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/fileio.o $(SRCD)/fileio.c
+	$(CC) $(CFLAGS) -c $(SRCD)/fileio.c
 $(OBJD)/input.o: $(SRCD)/input.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/input.o $(SRCD)/input.c
+	$(CC) $(CFLAGS) -c $(SRCD)/input.c
 $(OBJD)/isearch.o: $(SRCD)/isearch.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/isearch.o $(SRCD)/isearch.c
+	$(CC) $(CFLAGS) -c $(SRCD)/isearch.c
 $(OBJD)/keyboard.o: $(SRCD)/keyboard.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/keyboard.o $(SRCD)/keyboard.c
+	$(CC) $(CFLAGS) -c $(SRCD)/keyboard.c
 $(OBJD)/line.o: $(SRCD)/line.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/line.o $(SRCD)/line.c
+	$(CC) $(CFLAGS) -c $(SRCD)/line.c
 $(OBJD)/lock.o: $(SRCD)/lock.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/lock.o $(SRCD)/lock.c
+	$(CC) $(CFLAGS) -c $(SRCD)/lock.c
 $(OBJD)/main.o: $(SRCD)/main.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
+	$(CC) $(CFLAGS) -c $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c
+	$(CC) $(CFLAGS) -c $(SRCD)/mouse.c
 $(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
+	$(CC) $(CFLAGS) -c $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/region.o $(SRCD)/region.c
+	$(CC) $(CFLAGS) -c $(SRCD)/region.c
 $(OBJD)/screen.o: $(SRCD)/screen.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/screen.o $(SRCD)/screen.c
+	$(CC) $(CFLAGS) -c $(SRCD)/screen.c
 $(OBJD)/search.o: $(SRCD)/search.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/search.o $(SRCD)/search.c
+	$(CC) $(CFLAGS) -c $(SRCD)/search.c
 $(OBJD)/replace.o: $(SRCD)/replace.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/replace.o $(SRCD)/replace.c
+	$(CC) $(CFLAGS) -c $(SRCD)/replace.c
 $(OBJD)/tags.o: $(SRCD)/tags.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/tags.o $(SRCD)/tags.c
+	$(CC) $(CFLAGS) -c $(SRCD)/tags.c
 $(OBJD)/undo.o: $(SRCD)/undo.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/undo.o $(SRCD)/undo.c
+	$(CC) $(CFLAGS) -c $(SRCD)/undo.c
 $(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
+	$(CC) $(CFLAGS) -c $(SRCD)/unix.c
 $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
+	$(CC) $(CFLAGS) -c $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/word.o $(SRCD)/word.c
+	$(CC) $(CFLAGS) -c $(SRCD)/word.c
 
 
 clean:

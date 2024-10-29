@@ -22,7 +22,6 @@
 #include <errno.h>
 #include <ctype.h>
 /***#include <string.h>***/
-#include <limits.h>
 #include <time.h>
 /**********************************************************************/
 
@@ -220,7 +219,7 @@ CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
 
 /*....................................................................*/
 #if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
-    || GCC || VMS || IS_UNIX()
+    || GCC || VMS || IS_ANSI_C() || ( IS_UNIX() && !IS_ANCIENT_UNIX() )
 # include <stdlib.h>
 # include <string.h>
 #else

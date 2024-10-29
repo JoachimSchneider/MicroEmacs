@@ -22,20 +22,26 @@
 # if ( !IS_ANCIENT_UNIX() )
 #  include <unistd.h>
 # else
-   EXTERN int getpid  DCL((void));
-   EXTERN int rmdir   DCL((CONST char *));
+   EXTERN int getpid      DCL((void));
+   EXTERN int rmdir       DCL((CONST char *));
+#  ifdef GETHOSTNAME_AVAILABLE
+   EXTERN int gethostname DCL((char *name, int len));
+#  else
+#   define  MYHOSTNAME_   "darkstar"
+
    static int gethostname P2_(char *, name, int, len)
    {
-     static CONST char  mname[] = "darkstar";
      int                i       = 0;
 
-     for ( i = 0; i < MIN2(SIZEOF(mname), len) - 1; i++ ) {
-       name[i]  = mname[i];
+     for ( i = 0; i < MIN2(SIZEOF(MYHOSTNAME_), len) - 1; i++ ) {
+       name[i]  = MYHOSTNAME_[i];
      }
      name[i]  = '\0';
 
      return 0;
    }
+#   undef   MYHOSTNAME_
+#  endif
 # endif
 #endif
 
