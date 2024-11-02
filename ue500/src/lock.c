@@ -21,7 +21,7 @@
 
 #if     FILOCK
 
-# if ( IS_UNIX() || WMCS )
+# if ( b_IS_UNIX || WMCS )
 #  include <string.h>
 #  include <sys/errno.h>
 # endif
@@ -172,7 +172,7 @@ VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 
     XSTRCPY(obuf, errstr);
     XSTRCAT(obuf, " - ");
-# if ( IS_UNIX() || WMCS )
+# if ( b_IS_UNIX || WMCS )
     if ( sys_errstr && *sys_errstr )
         XSTRCAT(obuf, sys_errstr);
     else

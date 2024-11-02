@@ -21,10 +21,10 @@
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 # include <sys/types.h>
 # include <sys/stat.h>
-# if ( !IS_ANCIENT_UNIX() )
+# if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
 # else
    EXTERN int chown   DCL((CONST char *, int, int));
@@ -345,7 +345,7 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
     }
     ffclose();                                  /* Ignore errors.   */
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
     /* if we don't have write priviledges, make this in VIEW mode */
     if ( s !=FIOERR && s != FIOFNF ) {
         if ( umc_access(fname, 2 /* W_OK*/) != 0 )
@@ -448,7 +448,7 @@ CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
     while ( cp1!=&fnameA[0] && cp1[-1]!=':' && cp1[-1]!='\\'&&cp1[-1]!='/' )
         --cp1;
 #endif
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
     while ( cp1!=&fnameA[0] && cp1[-1]!='/' )
         --cp1;
 #endif
@@ -631,7 +631,7 @@ int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
     int sflag;                  /* are we safe saving? */
     char tname[NSTRING];        /* temporary file name */
     char buf[NSTRING];          /* message buffer */
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
     struct stat st;             /* we need info about the file permisions */
 #endif
 
@@ -712,14 +712,14 @@ int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
             XSTRCAT(buf, "s");
 
         if ( sflag ) {
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
             /* get the permisions on the original file */
             umc_stat(fn, &st);
 #endif
             /* erase original file */
             /* rename temporary file to original name */
             if ( umc_unlink(fn) == 0 && umc_rename(tname, fn) == 0 ) {
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
                 chown(fn, (int)st.st_uid, (int)st.st_gid);
                 chmod(fn, (int)st.st_mode);
 #else

@@ -16,7 +16,6 @@
 
 
 #include        <stdio.h>
-#include        <stdlib.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
@@ -1396,7 +1395,7 @@ VOID PASCAL NEAR upt_line P3_(int, row, struct VIDEO *, vp,
             old_rev_state = new_rev_state;
         }
 
-# if ( IS_UNIX() )
+# if ( b_IS_UNIX )
         /* TERMCAP does not tell us if the current terminal propagates the
         * current attributes to the end of the line when an erase to end of line
         * sequence is sent. Don't let TERMCAP use EEOL if in a reverse video

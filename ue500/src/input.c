@@ -58,7 +58,7 @@
 #include        "edef.h"
 #include        "elang.h"
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 # include       <pwd.h>
 /*
  * Defined in <pwd.h>:
@@ -1096,7 +1096,7 @@ static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
     char          user_name[NSTRING];   /* user name for directory          */
     static char   buf[NSTRING];         /* buffer to hold tentative name:
                                          * Its addr (or NULL) is returned   */
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
     struct passwd *pwd      = NULL;             /* password structure */
 #endif
 
@@ -1209,7 +1209,7 @@ static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
                 --ttcol;
             }
 
-# if ( IS_UNIX() )
+# if ( b_IS_UNIX )
             /* lookup someone else's home directory! */
             if ( user_name[0] != 0 ) {
                 pwd = getpwnam(user_name);

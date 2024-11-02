@@ -84,20 +84,24 @@
 #define XENIX       0                 /* IBM-PC SCO XENIX             */
 
 
-#define IS_UNIX()       ( AIX || AIX5 || AUX || AVIION || BSD         \
+#define b_IS_UNIX       ( AIX || AIX5 || AUX || AVIION || BSD         \
                           || CYGWIN || DJGPP_DOS || FREEBSD || HPUX8  \
                           || HPUX9 || LINUX || OPENBSD || SMOS        \
                           || SOLARIS || SUN || UNIX_V7 || USG || XENIX )
-#define IS_POSIX_UNIX() ( IS_UNIX()                                   \
+#define b_IS_POSIX_UNIX ( b_IS_UNIX                                   \
                           && !( AIX || AUX || HPUX8 || HPUX9 || SMOS  \
                                 || SUN || UNIX_V7 || USG || XENIX ) )
-#define IS_ANCIENT_UNIX() ( IS_UNIX() && !IS_POSIX_UNIX()             \
+#define b_IS_ANCIENT_UNIX ( b_IS_UNIX && !b_IS_POSIX_UNIX             \
                           && ( UNIX_V7 ) )
-#if defined (__STDC__) || defined(__cplusplus)
-# define IS_ANSI_C()  (1)
-#else
-# define IS_ANSI_C()  (0)
+#ifndef b_IS_ANSI_C
+# if  defined (__STDC__) || defined(__cplusplus)
+#  define b_IS_ANSI_C  (1)
+# else
+#  define b_IS_ANSI_C  (0)
+# endif
 #endif
+/* Substitute of `#error' directive for Pre ANSI C-Compilers: */
+#define CRASH(x)  (0 = 0)
 
 
 /*      Compiler definitions                                          */
@@ -249,14 +253,16 @@
 # define VOIDCAST   (void)
   typedef void *    voidp_;
 # define NOSHARE    noshare
-#elif   AOSVS
+#else
+#if   AOSVS
 # define CONST      $shared $align(1)   /* fake a  const */
 # define VOID
 # define VOIDCAST
   typedef char *    voidp_;
   /* attempt to optimize read/write vars. */
 # define NOSHARE    $low32k $align(1)
-#elif  IS_ANSI_C() || ( IS_UNIX() && !IS_ANCIENT_UNIX() ) || MSC  \
+#else
+#if  b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX ) || MSC  \
   || TURBO || GCC || (AMIGA && LATTICE) || VMS
 # define CONST      const
 # define VOID       void
@@ -274,6 +280,8 @@
     typedef char *  voidp_;
 # endif
 # define NOSHARE
+#endif
+#endif
 #endif
 #define VOIDP voidp_
 
@@ -297,8 +305,8 @@
 
 /*      Can we catch the SIGWINCH (the window size change signal)? */
 
-#if     IS_UNIX()
-# if ( IS_ANCIENT_UNIX() || DJGPP_DOS )
+#if     b_IS_UNIX
+# if ( b_IS_ANCIENT_UNIX || DJGPP_DOS )
 #   define HANDLE_WINCH    0
 # else
 #   define HANDLE_WINCH    1
@@ -320,7 +328,7 @@
  *      the following define allows me to initialize unions...
  *      otherwise we make them structures (like the keybinding table)
  */
-#if     IS_ANSI_C() || MSC || TURBO || IC || ZTC
+#if     b_IS_ANSI_C || MSC || TURBO || IC || ZTC
 # define ETYPE   union
 #else
 # define ETYPE   struct
@@ -400,10 +408,12 @@
                      * driver */
 #  if     WINNT || WINXP
 #   define EXPORT /* Windows NT doesn't like this */
-#  elif   MSC
+#  else
+#  if   MSC
 #   define EXPORT  __export
 #  else
 #   define EXPORT  _export/* Fine for TURBO and ZTC */
+#  endif
 #  endif
 # endif
 
@@ -563,7 +573,7 @@ union REGS {
 #endif
 
 
-#if ( IS_UNIX() || MSDOS || WINNT || WINXP || OS2 || (TOS && MWC) ||  \
+#if ( b_IS_UNIX || MSDOS || WINNT || WINXP || OS2 || (TOS && MWC) ||  \
       WMCS  || MPE )
 # define ENVFUNC 1
 #else
@@ -657,7 +667,7 @@ execl(va_alist)
 
 #if     VARARG
 # ifndef  USE_STDARG
-#  if   ( !GCC && ( IS_UNIX() || MPE) )
+#  if   ( !GCC && ( b_IS_UNIX || MPE) )
 #   define  USE_STDARG  0
 # else
 #   define  USE_STDARG  1
@@ -672,7 +682,7 @@ execl(va_alist)
 #  include        <varargs.h>
 # endif
 #else
-# error Cannot compile without varargs or stdarg support
+  CRASH(Cannot compile without varargs or stdarg support);
 #endif
 
 #if ZTC
@@ -682,7 +692,7 @@ execl(va_alist)
 
 /*===== global includes to get some constants ========================*/
 #if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
-    || GCC || VMS || IS_ANSI_C() || ( IS_UNIX() && !IS_ANCIENT_UNIX() )
+    || GCC || VMS || b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX )
 # include <limits.h>
 #endif
 /*====================================================================*/
@@ -699,16 +709,20 @@ execl(va_alist)
 #define NBINDS  300                     /* max # of bound keys        */
 #if ( defined( PATH_MAX) )
 # define NFILEN (PATH_MAX + 1)
-#elif ( defined( MAXPATHLEN) )
+#else
+#if ( defined( MAXPATHLEN) )
 # define NFILEN (MAXPATHLEN + 1)
-#elif ( defined( _POSIX_PATH_MAX) )
+#else
+#if ( defined( _POSIX_PATH_MAX) )
 # define NFILEN (_POSIX_PATH_MAX + 1)
 #else
-# if ( AOSVS || VMS || WINNT || WINXP || OS2 || IS_UNIX() )
+# if ( AOSVS || VMS || WINNT || WINXP || OS2 || b_IS_UNIX )
 #  define NFILEN  256
 # else
 #  define NFILEN  80            /* # of bytes, file name              */
 # endif
+#endif
+#endif
 #endif
 #define NBUFN   128             /* # of bytes, buffer name            */
 #ifdef MSDOS  /* Reduce sizes to UE312 vals --- else `stack overflow' */
@@ -818,7 +832,7 @@ execl(va_alist)
 #define BELL    0x07                /* a bell character               */
 #define TAB     0x09                /* a tab character                */
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 # define PATHCHR ':'
 #else
 # if  ( WMCS || MPE )

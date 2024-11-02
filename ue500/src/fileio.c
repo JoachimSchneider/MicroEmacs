@@ -120,7 +120,7 @@ int PASCAL NEAR ffclose P0_()
     putc(26, ffp);              /* add a ^Z at the end of the file */
 # endif
 
-# if ( IS_UNIX() || WMCS || VMS || (MSDOS && ( LATTICE || MSC || TURBO || IC || \
+# if ( b_IS_UNIX || WMCS || VMS || (MSDOS && ( LATTICE || MSC || TURBO || IC || \
                                                ZTC) ) || WINNT || WINXP || \
     OS2 | ( TOS && MWC) )
     if ( fclose(ffp) != FALSE ) {

@@ -457,7 +457,7 @@ int PASCAL NEAR extcode P1_(unsigned, c)
 # endif
 #endif
 
-#if ( IS_UNIX() || VMS  || MPE )
+#if ( b_IS_UNIX || VMS  || MPE )
 
 # define NKEYSEQ  (300) /* Number of keymap entries */
 
@@ -897,7 +897,7 @@ int cook_nowait P0_()
 
     return TRUE;
 }
-#endif  /* ( IS_UNIX() || VMS || MPE ) */
+#endif  /* ( b_IS_UNIX || VMS || MPE ) */
 
 
 

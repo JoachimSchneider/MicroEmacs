@@ -14,11 +14,10 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
 #include <assert.h>
 #include "estruct.h"
-#if IS_UNIX() /**CYGWIN**/
-# if ( !IS_ANCIENT_UNIX() )
+#if b_IS_UNIX /**CYGWIN**/
+# if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
 # endif
 #endif
@@ -1807,7 +1806,7 @@ char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
 
 FILE *uetmpfile_ P1_(int, delmode)
 {
-# if !IS_UNIX() /**!CYGWIN**/
+# if !b_IS_UNIX /**!CYGWIN**/
     return tmpfile();
 # else
 /* `tmpfile()' does *not* work with cygwin in the windows console!    */
@@ -2491,7 +2490,7 @@ char PASCAL NEAR  lputc_ P5_(LINE *, lp, int, n, char, c,
 
 #undef  FUNC_
 #define FUNC_ lgetc_
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
                                     fnam, int, lno)
 #else

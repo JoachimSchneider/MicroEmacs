@@ -18,8 +18,8 @@
 #include "estruct.h"
 #include "eproto.h"
 #include "elang.h"
-#if  ( IS_UNIX() )
-# if ( !IS_ANCIENT_UNIX() )
+#if  ( b_IS_UNIX )
+# if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
 # else
    EXTERN int getpid      DCL((void));
@@ -95,9 +95,10 @@ char *undolock P1_(CONST char *, fname)
 }
 
 
-#elif ( FILOCK && ( IS_UNIX() || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
+#else
+#if ( FILOCK && ( b_IS_UNIX || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
 
-# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) || IS_UNIX() )
+# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) || b_IS_UNIX )
 #  include     <sys/types.h>
 # endif
 # include       <sys/stat.h>
@@ -105,7 +106,7 @@ char *undolock P1_(CONST char *, fname)
 # if  ( MSDOS && TURBO )
 #  include     <dir.h>
 # endif
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
 #  include     <dirent.h>
 #  include     <signal.h>
 # endif
@@ -263,7 +264,7 @@ char *dolock P1_(CONST char *, filespec)
     struct stat sb;             /* stat buffer for info on files/dirs */
     FILE *fp;                   /* ptr to lock file */
     long proc_id;               /* process id from lock file */
-# if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     int rc;                     /* syscall return code */
 # endif
     char filename[NFILEN];      /* name of file to lock */
@@ -276,7 +277,7 @@ char *dolock P1_(CONST char *, filespec)
     static char result[NSTRING]; /* error return string */
 
     /* separate filespec into components */
-# if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     {
         char  new_filespec[NFILEN];
 
@@ -304,7 +305,7 @@ char *dolock P1_(CONST char *, filespec)
     tgetc();
 # endif
 
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
     /* check to see if we can access the path */
     if ( (rc = umc_stat(pathname, &sb)) != 0 )  {
 #  if  LOCKDEBUG
@@ -322,7 +323,7 @@ char *dolock P1_(CONST char *, filespec)
 
         return (result);
     }
-# endif /* IS_UNIX()  */
+# endif /* b_IS_UNIX  */
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
@@ -339,7 +340,7 @@ char *dolock P1_(CONST char *, filespec)
         printf("MKDIR(%s)\n", lockpath);
         tgetc();
 # endif
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         if ( mkdir(lockpath, 0777) != 0 ) {
 # else
         if ( mkdir(lockpath) != 0 ) {
@@ -358,7 +359,7 @@ char *dolock P1_(CONST char *, filespec)
 
             return (result);
         }
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         chmod(lockpath, 01777);
 # endif
     }
@@ -387,7 +388,7 @@ char *dolock P1_(CONST char *, filespec)
         }
 
         /* and output the info needed */
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         fprintf( fp, "%lu\n", (long int)getpid() );
 # else
         fprintf(fp, "%lu\n", 0ul); /* process ID */
@@ -405,7 +406,7 @@ char *dolock P1_(CONST char *, filespec)
         if ( getenv("HOST") )
             fprintf( fp, "%s\n", getenv("HOST") );
         else {
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
             ZEROMEM(buf);
             gethostname(buf, SIZEOF(buf) - 1);
             fprintf(fp, "%s\n", buf);
@@ -444,7 +445,7 @@ char *dolock P1_(CONST char *, filespec)
         term_trim(buf);
         XSTRCAT(result, buf);
 
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         /* is it the current host? */
         ZEROMEM(host);
         gethostname(host, SIZEOF(host) - 1);
@@ -497,7 +498,7 @@ char *undolock P1_(CONST char *, filespec)
     static char result[NSTRING];    /* error return string */
 
     /* separate filespec into components */
-# if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     {
         char  new_filespec[NFILEN];
 
@@ -560,6 +561,7 @@ VOID dolockhello P0_()
 }
 
 #endif
+#endif  /* ( FILOCK && WMCS ) */
 
 
 

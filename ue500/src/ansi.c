@@ -20,8 +20,8 @@
 #include        <stdio.h>
 #include        "estruct.h"
 #include        "eproto.h"
-#if IS_UNIX()
-# if ( !IS_ANCIENT_UNIX() )
+#if b_IS_UNIX
+# if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>                   /* ioctl()                  */
 # else
    EXTERN int ioctl DCL((int, int, ...));
@@ -37,23 +37,27 @@
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
-/* ( IS_UNIX() || VMS || MPE ): `addkey()' works                */
+/* ( b_IS_UNIX || VMS || MPE ): `addkey()' works                */
 /*..............................................................*/
-#if    ( IS_UNIX() )
+#if    ( b_IS_UNIX )
 # define USE_PALETTE ( !0 )
-#elif  ( VMS )
+#else
+#if  ( VMS )
 # define USE_PALETTE ( !0 )
-#elif  ( MPE )
+#else
+#if  ( MPE )
 # define USE_PALETTE ( !0 )
 #else
 # define USE_PALETTE ( 0 )    /* DON'T CHANGE */
   CASRT( !USE_PALETTE );
-#endif /* IS_UNIX() */
+#endif
+#endif
+#endif /* b_IS_UNIX */
 /*..............................................................*/
 /* USE_COOKED_ code only works on UNIX and VMS (`ttgetc()'      */
 /* cookes) and it gives sense there only if USE_PALETTE:        */
 /*..............................................................*/
-#if ( IS_UNIX() || VMS )
+#if ( b_IS_UNIX || VMS )
 # if ( USE_PALETTE )
 #  define USE_COOKED_    ( !0 )
 # else
@@ -409,7 +413,7 @@ static VOID PASCAL NEAR ansiparm P1_(int, n)
 
 static int PASCAL NEAR ansiopen P0_()
 {
-# if     IS_UNIX()
+# if     b_IS_UNIX
     REGISTER char *cp = NULL;
 #  ifdef TIOCGWINSZ /* Previously `if !DJGPP_DOS' */
     struct winsize win;
@@ -458,8 +462,8 @@ static int PASCAL NEAR ansiopen P0_()
     term.t_mrow = term.t_nrow;
     term.t_mcol = term.t_ncol;
 #  endif
-# endif /* IS_UNIX() */
-# if     MOUSE && (IS_UNIX() || VMS)
+# endif /* b_IS_UNIX */
+# if     MOUSE && (b_IS_UNIX || VMS)
    /*
     * If this is an ansi terminal of at least DEC level 2 capability,
     * some terminals of this level, such as the "Whack" emulator, the
@@ -475,7 +479,7 @@ static int PASCAL NEAR ansiopen P0_()
         if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
         ttputs(s);
     }
-# endif /* MOUSE && (IS_UNIX() || VMS) */
+# endif /* MOUSE && (b_IS_UNIX || VMS) */
     xstrcpy(sres, "NORMAL");
     revexist = TRUE;
     ttopen();
@@ -494,7 +498,7 @@ static int PASCAL NEAR ansiclose P0_()
     ansifcol(7);
     ansibcol(0);
 # endif /* COLOR */
-# if     MOUSE && (IS_UNIX() || VMS)
+# if     MOUSE && (b_IS_UNIX || VMS)
     {
         CONST char  *s  = NULL;
 
@@ -504,7 +508,7 @@ static int PASCAL NEAR ansiclose P0_()
             s = "\033[0'{\033[0;0'z";
         ttputs(s);
     }
-# endif /* MOUSE && (IS_UNIX() || VMS) */
+# endif /* MOUSE && (b_IS_UNIX || VMS) */
 # if     KEYPAD
 #  if     VMS
     if ( (orgchar.tt2 & TT2$M_APP_KEYPAD)==0 )
@@ -537,7 +541,7 @@ static int PASCAL NEAR ansikclose P0_()
     return 0;
 }
 
-# if   IS_UNIX() || VMS
+# if   b_IS_UNIX || VMS
 /***
  *  ttputs  -  Send a string to ttputc
  *
@@ -773,7 +777,7 @@ static int PASCAL NEAR ansigetc P0_()
 {
     return ( ttgetc() );
 }
-# endif /* IS_UNIX() || VMS */
+# endif /* b_IS_UNIX || VMS */
 
 # if     FLABEL
 /* FNCLABEL:

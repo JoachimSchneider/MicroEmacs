@@ -18,7 +18,6 @@
 
 
 #include        <stdio.h>
-#include        <stdlib.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"
@@ -141,7 +140,7 @@ VOID PASCAL NEAR initchars P0_()
         lowcase[index] = index ^ DIFCASE;
         upcase[index ^ DIFCASE] = index;
     }
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
     /* and for those international characters! */
     for ( index = (unsigned char)'\340';
           index <= (unsigned char)'\375'; index++ ) {

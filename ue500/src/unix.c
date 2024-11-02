@@ -94,11 +94,12 @@
 /* for terminal control, but obviously they aren't used here    */
 /* correctly: It seems, that someone started it but didn't end. */
 #define USE_CURSES              ( 0 )   /* NOT WORKING */
-#if ( IS_ANCIENT_UNIX() )
+#if ( b_IS_ANCIENT_UNIX )
 # define USE_SGTTY              ( 1 )
 # define USE_TERMIO_IOCTL       ( 0 )
 # define USE_TERMIOS_TCXX       ( 0 )
-#elif ( !IS_POSIX_UNIX() )
+#else
+#if ( !b_IS_POSIX_UNIX )
 # define USE_SGTTY              ( 0 )
 # define USE_TERMIO_IOCTL       ( 1 )
 # define USE_TERMIOS_TCXX       ( 0 )
@@ -106,6 +107,7 @@
 # define USE_SGTTY              ( 0 )
 # define USE_TERMIO_IOCTL       ( 0 )
 # define USE_TERMIOS_TCXX       ( 1 )
+#endif
 #endif
 /* Enable/disable XON/XOFF: We want to use ^S/^Q. I do not believe the flow
  * control settings of the OS should be diddled by an application program. But
@@ -153,17 +155,23 @@
 #ifndef TERMINAL_NOBLOCK_READ
 # if    ( CYGWIN || DJGPP_DOS )
 #  define TERMINAL_NOBLOCK_READ USE_TERMINAL_SELECT
-# elif  ( IS_ANCIENT_UNIX() )
+# else
+# if  ( b_IS_ANCIENT_UNIX )
 #  define TERMINAL_NOBLOCK_READ USE_TERMINAL_READX
 # else
 #  define TERMINAL_NOBLOCK_READ USE_TERMINAL_SELECT
 # endif
+# endif
 #endif
 #if   ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
-#elif ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
-#elif ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
 #else
-# error Invalid value for TERMINAL_NOBLOCK_READ
+#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+#else
+#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+#else
+  CRASH(Invalid value for TERMINAL_NOBLOCK_READ);
+#endif
+#endif
 #endif
 
 
@@ -181,10 +189,9 @@ int scnothing P1_(char *, s)
 }
 
 /** Only compile for UNIX machines **/
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 
 /** Include files **/
-# include <stdlib.h>            /* getenv()                 */
 # include <time.h>              /* time(), ...              */
 # include <errno.h>             /* errno, ...               */
 # include <sys/stat.h>          /* stat(), ...              */
@@ -207,7 +214,7 @@ int scnothing P1_(char *, s)
 # include <sys/time.h>
 # include <sys/param.h>
 # include <signal.h>                    /* Signal definitions       */
-# if ( !IS_ANCIENT_UNIX() )
+# if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
 # else
    EXTERN int           getpid  DCL((void));
@@ -221,15 +228,21 @@ int scnothing P1_(char *, s)
 
 # if   ( USE_SGTTY )
 #  include <sgtty.h>                    /* stty() / gtty()          */
-# elif ( USE_TERMIO_IOCTL )
+# else
+# if ( USE_TERMIO_IOCTL )
 #  include <termio.h>                   /* Terminal I/O definitions */
-# elif ( USE_TERMIOS_TCXX )
+# else
+# if ( USE_TERMIOS_TCXX )
 #  include <termios.h>                  /* Terminal I/O definitions */
-# elif ( USE_CURSES )
+# else
+# if ( USE_CURSES )
 #  include <curses.h>                   /* Curses screen output     */
 #  undef WINDOW                         /* Oh no!                   */
 # else
-#  error MISSING TERMINAL CONTROL DEFINITION
+   CRASH(error MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
 # endif
 /* Include it *after* sgtty.h to make it compilable on Solaris 7:   */
 # include <sys/ioctl.h>                 /* I/O control definitions  */
@@ -433,13 +446,13 @@ static int cygdrive_len_ P0_()
     return len;
 }
 
-#if ( !0 )
-# define CYGDRIVE_      ( cygdrive_() )
-# define CYGDRIVE_LEN_  ( cygdrive_len_() )
-#else
-# define CYGDRIVE_      "/cygdrive/"
-# define CYGDRIVE_LEN_  ( SIZEOF(CYGDRIVE_) - 1 )
-#endif
+#  if ( !0 )
+#   define CYGDRIVE_      ( cygdrive_() )
+#   define CYGDRIVE_LEN_  ( cygdrive_len_() )
+#  else
+#   define CYGDRIVE_      "/cygdrive/"
+#   define CYGDRIVE_LEN_  ( SIZEOF(CYGDRIVE_) - 1 )
+#  endif
 
 #  define NormalizePathUNX(path)  do  {                     \
     char  *cp_  = (path);                                   \
@@ -460,7 +473,8 @@ static int cygdrive_len_ P0_()
     MkDOSDirSep_(cp_);                                      \
 } while ( 0 )
 #  define NULL_DEVICE             "NUL"
-# elif ( DJGPP_DOS )
+# else
+# if ( DJGPP_DOS )
 #  define NormalizePathUNX(path)  do  {                     \
     char  *cp_  = (path);                                   \
                                                             \
@@ -480,6 +494,7 @@ static int cygdrive_len_ P0_()
 #  define NormalizePathDOS(path)  VOIDCAST(0)
 #  define NULL_DEVICE             "/dev/null"
 # endif
+# endif /* CYGWIN */
 /*==============================================================*/
 
 
@@ -540,28 +555,34 @@ struct xtchars  {
 };
 /*====================================================================*/
 /* Define your own constants to make it compilable on e.g. Solaris 7: */
-#define TERM_IOC_  ('t'<<8)
+#  define TERM_IOC_  ('t'<<8)
 
-#ifndef   TIOCSETC
-# define TIOCSETC  (TERM_IOC_|17)
-#endif
-#ifndef  TIOCGETC
-# define TIOCGETC  (TERM_IOC_|18)
-#endif
+#  ifndef   TIOCSETC
+#   define TIOCSETC  (TERM_IOC_|17)
+#  endif
+#  ifndef  TIOCGETC
+#   define TIOCGETC  (TERM_IOC_|18)
+#  endif
 /*====================================================================*/
 
 
 static struct xtchars curtchars = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
 static struct xtchars oldtchars;        /* Org terminal special chars */
-# elif ( USE_TERMIO_IOCTL )
+# else
+# if ( USE_TERMIO_IOCTL )
 static struct termio curterm;           /* Current modes              */
 static struct termio oldterm;           /* Original modes             */
-# elif ( USE_TERMIOS_TCXX )
+# else
+# if ( USE_TERMIOS_TCXX )
 static struct termios curterm;          /* Current modes              */
 static struct termios oldterm;          /* Original modes             */
-# elif ( USE_CURSES )
 # else
-#  error MISSING TERMINAL CONTROL DEFINITION
+# if ( USE_CURSES )
+# else
+   CRASH(MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
 # endif
 # if !ANSI
 static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
@@ -788,7 +809,8 @@ int ttopen P0_()
     stty(0, &curterm);
     ioctl(0, TIOCGETC, &oldtchars);
     ioctl(0, TIOCSETC, &curtchars);
-# elif  ( USE_TERMIO_IOCTL )
+# else
+# if  ( USE_TERMIO_IOCTL )
 
 #  if SMOS
     /* Extended settings; 890619mhs A3 */
@@ -839,7 +861,8 @@ int ttopen P0_()
 
         return (-1);
     }
-# elif  ( USE_TERMIOS_TCXX )
+# else
+# if  ( USE_TERMIOS_TCXX )
     /* Get modes */
     if ( tcgetattr(0, &oldterm) ) {
         perror("Cannot tcgetattr");
@@ -869,10 +892,14 @@ int ttopen P0_()
 
         return (-1);
     }
-# elif  ( USE_CURSES )
+# else
+# if  ( USE_CURSES )
     /* ? */
 # else
-#  error MISSING TERMINAL CONTROL DEFINITION
+   CRASH(error MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
 # endif
 
     /* Success */
@@ -891,7 +918,8 @@ int ttclose P0_()
 # if    ( USE_SGTTY )
   stty(0, &oldterm);
   ioctl(0, TIOCSETC, &oldtchars);
-# elif  ( USE_TERMIO_IOCTL )
+# else
+# if  ( USE_TERMIO_IOCTL )
 #  if SMOS
     /* Extended settings; 890619mhs A3 */
     set_parm(0, -1, -1);
@@ -899,17 +927,22 @@ int ttclose P0_()
     if ( ioctl(0, TCSETA, &oldterm) )
         return (-1);
 
-# elif  ( USE_TERMIOS_TCXX )
+# else
+# if  ( USE_TERMIOS_TCXX )
     /* Set tty mode */
     if ( tcsetattr(0, TCSANOW, &oldterm) ) {
         perror("Cannot tcsetattr");
 
         return (-1);
     }
-# elif  ( USE_CURSES )
+# else
+# if  ( USE_CURSES )
     /* ? */
 # else
-#  error MISSING TERMINAL CONTROL DEFINITION
+   CRASH(MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
 # endif
 
     /* Success */
@@ -977,11 +1010,15 @@ unsigned char grabwait()
         curterm.c_cc[VTIME] = 0;
 #  if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
-#  elif ( USE_TERMIO_IOCTL )
+#  else
+#  if ( USE_TERMIO_IOCTL )
         ioctl(0, TCSETA, &curterm);
-#  elif ( USE_CURSES )
+#  else
+#  if ( USE_CURSES )
         /* ? */
 #  else
+#  endif
+#  endif
 #  endif
     }
 # endif
@@ -1080,7 +1117,8 @@ unsigned char PASCAL NEAR grabnowait P0_()
         return (ch);
     }
 }
-# elif  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+# else
+# if  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     int           count = 0;
@@ -1092,12 +1130,16 @@ unsigned char PASCAL NEAR grabnowait P0_()
         curterm.c_cc[VTIME] = UNIX_READ_TOUT;
 #  if   ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
-#  elif ( USE_TERMIO_IOCTL )
+#  else
+#  if ( USE_TERMIO_IOCTL )
         ioctl(0, TCSETA, &curterm);
-#  elif ( USE_CURSES )
+#  else
+#  if ( USE_CURSES )
         /* ? */
 #  else
-#  error MISSING TERMINAL CONTROL DEFINITION
+    CRASH(MISSING TERMINAL CONTROL DEFINITION);
+#  endif
+#  endif
 #  endif
     }
 
@@ -1124,7 +1166,8 @@ unsigned char PASCAL NEAR grabnowait P0_()
 #  endif
     return (ch);
 }
-# elif  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+# else
+# if  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     if ( 0 >= nread() ) {
@@ -1155,7 +1198,9 @@ unsigned char PASCAL NEAR grabnowait P0_()
     }
 }
 # else
-#   error IMPOSSIBLE
+   CRASH(IMPOSSIBLE);
+# endif
+# endif
 # endif /* TERMINAL_NOBLOCK_READ */
 
 /* QIN:
@@ -1418,12 +1463,16 @@ int scopen P0_()
     /* Set speed for padding sequences */
 #  if   ( USE_TERMIOS_TCXX )
     ospeed = cfgetospeed(&curterm);
-#  elif ( USE_TERMIO_IOCTL )
+#  else
+#  if ( USE_TERMIO_IOCTL )
     ospeed = curterm.c_cflag & CBAUD;
-#  elif ( USE_CURSES )
+#  else
+#  if ( USE_CURSES )
     /* ? */
 #  else
-#   error MISSING TERMINAL CONTROL DEFINITION
+    CRASH(MISSING TERMINAL CONTROL DEFINITION);
+#  endif
+#  endif
 #  endif
 
     /* Send out initialization sequences */
@@ -1873,7 +1922,8 @@ static int  IsDOSPath P1_(CONST char *, path)
         )   {
         return (-1);
     }
-#  elif DJGPP_DOS /* /dev/c is C: */
+#  else
+#  if DJGPP_DOS /* /dev/c is C: */
 #   define DJGPPDRIVE_      "/dev/"
 #   define DJGPPDRIVE_LEN_  ( SIZEOF(DJGPPDRIVE_) - 1 )
     if ( strcasestart(DJGPPDRIVE_, path)                              &&
@@ -1885,6 +1935,7 @@ static int  IsDOSPath P1_(CONST char *, path)
     }
 #   undef DJGPPDRIVE_
 #   undef DJGPPDRIVE_LEN_
+#  endif
 #  endif
 
     pFSlash = strchr(path, '/');
@@ -2955,10 +3006,12 @@ int callout P1_(CONST char *, cmd)
     /* Do command */
 # if ( CYGWIN )
     status = winsystem(cmd) == 0;
-# elif ( DJGPP_DOS )
+# else
+# if ( DJGPP_DOS )
     status = dossystem(cmd) == 0;
 # else
     status = system(cmd) == 0;
+# endif
 # endif
 
     /* Restart system */
@@ -3000,11 +3053,14 @@ int spawncli P2_(int, f, int, n)
     } else                                {
 # if ( LINUX )
         sh = "/bin/bash";
-# elif ( SOLARIS )
+# else
+# if ( SOLARIS )
         sh = "/usr/bin/ksh";
-# elif ( CYGWIN )
+# else
+# if ( CYGWIN )
         sh = wingetshell();
-# elif ( DJGPP_DOS )
+# else
+# if ( DJGPP_DOS )
         /* First try Windows shell --- are we running in the 16-Bit
          * Windows subsystem?
          */
@@ -3013,6 +3069,9 @@ int spawncli P2_(int, f, int, n)
         }
 # else
         sh = "/bin/sh";
+# endif
+# endif
+# endif
 # endif /* LINUX */
     }
 
@@ -3188,6 +3247,21 @@ static int  IsExecutable P1_(CONST char *, file)
 }
 
 #if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+/*
+ * This function is used to implement non blocking reading on systems
+ * without the select() system call.
+ *
+ * 0 != getnread: Return the number of charcters that can be read
+ *                without blocking.
+ * 0 == getnread: Return the next character. This might block if
+ *                previously `0 == rdstdin(!0)'.
+ *
+ * This function is used to implement grab(no)wait() to read from the
+ * terminal: This will only work reliably if the character sequences
+ * send by any key will always be fetched with *one*
+ * `read(0, readbuf, BUFSZ_rdstdin_)'m i.e. never be split into two or
+ * more such reads.
+ */
 static int  rdstdin P1_(int, getnread)
 {
 # define BUFSZ_rdstdin_   (64)
@@ -3435,7 +3509,8 @@ static int LaunchPrg P4_(const char *,  Cmd,
     xsnprintf(FullCmd, SIZEOF (FullCmd),
               "%s < %s > %s 2>%s",
               Cmd, lInFile, lOutFile, lErrFile);
-# elif ( DJGPP_DOS )
+# else
+# if ( DJGPP_DOS )
     if ( NULL != wingetshell() )  {
         xsnprintf(FullCmd, SIZEOF (FullCmd),
                   "%s < %s > %s 2>%s",
@@ -3449,6 +3524,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
     xsnprintf(FullCmd, SIZEOF (FullCmd),
               "( %s ) < %s > %s 2>%s",
               Cmd, lInFile, lOutFile, lErrFile);
+# endif
 # endif
 
     return callout(FullCmd);
@@ -3688,12 +3764,14 @@ int pipecmd P2_(int, f, int, n)
 
 # if   ( 0 )    /* Activate multiple "command" buffers  */
     makename(bname, OutFile);           /* New buffer name. */
-# elif ( !0 )
+# else
+# if ( !0 )
     if ( !makecmdbname(bname, SIZEOF (bname), Command, "@Cmd") ) {
         umc_unlink(InFile);
 
         return FALSE;
     }
+# endif
 # endif
 
     /*-find the "command" buffer */
@@ -4153,7 +4231,7 @@ VOID winch_new_size P0_()
 
 # endif /* HANDLE_WINCH */
 
-#endif /* IS_UNIX() */
+#endif /* b_IS_UNIX */
 
 
 

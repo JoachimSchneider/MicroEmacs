@@ -16,7 +16,6 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
 #include "estruct.h"
 #include "eproto.h"
 #include "edef.h"
@@ -678,18 +677,28 @@ CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
     while ( *cp ) {
 #if     AMIGA
         if ( *cp == ':' || *cp == '/' )
-elif    AOSVS | MV_UX
+#else
+#if     AOSVS | MV_UX
         if ( *cp == ':' )
-#elif   VMS
+#else
+#if     VMS
         if ( *cp == ':' || *cp == ']' )
-#elif   TOS
+#else
+#if     TOS
         if ( *cp == ':' || *cp == '\\' )
-#elif   IS_UNIX()
+#else
+#if     b_IS_UNIX
         if ( *cp == '/' )
-#elif   WMCS
+#else
+#if     WMCS
         if ( *cp == '_' || *cp == '/' )
 #else /* e.g. MSDOS | OS2 | WINNT | WINXP | FINDER  */
         if ( *cp == ':' || *cp == '\\' || *cp == '/' )
+#endif
+#endif
+#endif
+#endif
+#endif
 #endif
         {
             if ( ffropen(fname) == FIOSUC ) {

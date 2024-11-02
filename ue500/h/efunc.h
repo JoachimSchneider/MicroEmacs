@@ -39,7 +39,7 @@ NOSHARE NBIND names[] =
     { "abort-command", ctrlg },
     { "add-abbrev", add_abbrev },
     { "add-global-mode", setgmode },
-#if IS_UNIX() || VMS || MPE
+#if b_IS_UNIX || VMS || MPE
     { "add-keymap", addkeymap },
 #endif
     { "add-mode", setmod },
@@ -158,7 +158,7 @@ NOSHARE NBIND names[] =
     { "label-function-key", fnclabel },
 #endif
     { "list-buffers", listbuffers },
-#if IS_UNIX() || VMS || MPE
+#if b_IS_UNIX || VMS || MPE
     { "list-keymappings", listkeymaps },
 #endif
     { "list-screens", list_screens },
@@ -243,7 +243,7 @@ NOSHARE NBIND names[] =
     { "source", execfile },
     { "split-current-window", splitwind },
     { "store-procedure", storeproc },
-#if ( IS_UNIX() && !DJGPP_DOS || VMS )
+#if ( b_IS_UNIX && !DJGPP_DOS || VMS )
     { "suspend-emacs", bktoshell },
 #endif
 #if     CTAGS

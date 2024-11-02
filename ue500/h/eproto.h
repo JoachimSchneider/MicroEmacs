@@ -48,44 +48,48 @@
 
 
 /**********************************************************************/
+#include "estruct.h"
+/*--------------------------------------------------------------------*/
+#if b_IS_ANSI_C
+/**********************************************************************/
 /* If possible use XCONCAT* below -- CONCAT* might result in          */
 /* undefined behaviour due to unspecified evaluation order for        */
 /* multiple '##' operators.                                           */
 /**********************************************************************/
-#define CONCAT2(x, y)                           \
+# define CONCAT2(x, y)                                  \
     x##y
-#define CONCAT3(x, y, z)                        \
+# define CONCAT3(x, y, z)                               \
     x##y##z
-#define CONCAT4(x1, x2, x3, x4)                 \
+# define CONCAT4(x1, x2, x3, x4)                        \
     x1##x2##x3##x4
-#define CONCAT5(x1, x2, x3, x4, x5)             \
+# define CONCAT5(x1, x2, x3, x4, x5)                    \
     x1##x2##x3##x4##x5
-#define CONCAT6(x1, x2, x3, x4, x5, x6)         \
+# define CONCAT6(x1, x2, x3, x4, x5, x6)                \
     x1##x2##x3##x4##x5##x6
-#define CONCAT7(x1, x2, x3, x4, x5, x6, x7)     \
+# define CONCAT7(x1, x2, x3, x4, x5, x6, x7)            \
     x1##x2##x3##x4##x5##x6##x7
-#define CONCAT8(x1, x2, x3, x4, x5, x6, x7, x8) \
+# define CONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)        \
     x1##x2##x3##x4##x5##x6##x7##x8
-#define CONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)     \
+# define CONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)    \
     x1##x2##x3##x4##x5##x6##x7##x8##x9
 /**********************************************************************/
 /* Expand argument macros, concatenate from left to right.            */
 /**********************************************************************/
-#define XCONCAT2(x, y)                          \
+# define XCONCAT2(x, y)                                 \
     CONCAT2(x, y)
-#define XCONCAT3(x, y, z)                       \
+# define XCONCAT3(x, y, z)                              \
     XCONCAT2(XCONCAT2(x, y), z)
-#define XCONCAT4(x1, x2, x3, x4)                \
+# define XCONCAT4(x1, x2, x3, x4)                       \
     XCONCAT2(XCONCAT3(x1, x2, x3), x4)
-#define XCONCAT5(x1, x2, x3, x4, x5)            \
+# define XCONCAT5(x1, x2, x3, x4, x5)                   \
     XCONCAT2(XCONCAT4(x1, x2, x3, x4), x5)
-#define XCONCAT6(x1, x2, x3, x4, x5, x6)        \
+# define XCONCAT6(x1, x2, x3, x4, x5, x6)               \
     XCONCAT2(XCONCAT5(x1, x2, x3, x4, x5), x6)
-#define XCONCAT7(x1, x2, x3, x4, x5, x6, x7)            \
+# define XCONCAT7(x1, x2, x3, x4, x5, x6, x7)           \
     XCONCAT2(XCONCAT6(x1, x2, x3, x4, x5, x6), x7)
-#define XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)        \
+# define XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)       \
     XCONCAT2(XCONCAT7(x1, x2, x3, x4, x5, x6, x7), x8)
-#define XCONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)            \
+# define XCONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)   \
     XCONCAT2(XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8), x9)
 /**********************************************************************/
 
@@ -99,30 +103,33 @@
  * structures against given needs.  Example: CASRT( SIZEOF(int) ==
  * SIZEOF(long) );
  */
-#define CASRT_0(condition)  typedef     int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
-#ifdef __cplusplus
-# define CASRT_1(condition) extern "C"  int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
-#else
-# define CASRT_1(condition) extern      int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
-#endif
+# define CASRT_0(condition)  typedef     int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+# ifdef __cplusplus
+#  define CASRT_1(condition) extern "C"  int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+# else
+#  define CASRT_1(condition) extern      int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+# endif
 /* CASRT_0 gives warnings about unused typedefs:
  * - FreeBSD clang version 13.0.0: `warning: unused typedef'
  * - gcc version 12.2.0: `warning: typedef ''dummy_805_'' locally defined but not used'
  * CASRT_1 gives warnings about unused variables:
  * - gcc version 12.2.0: `warning: unused variable ''dummy_2224_'''
  */
-#define CASRT CASRT_0
+# define  CASRT CASRT_0
+/**********************************************************************/
+#else
+/*....................................................................*/
+/* Does not work with non ANSI-C --- but it's syntactically correct.  */
+/*....................................................................*/
+# define  CASRT(x)    extern int  i_casrt_dummy_
+#endif  /* b_IS_ANSI_C  */
 /**********************************************************************/
 
-
 /**********************************************************************/
-#include "estruct.h"
+/* Check consistency of defines from estruct.h:                       */
 /*....................................................................*/
-/* Check consistency of defines:                                      */
-/*....................................................................*/
-CASRT(0 != VARARG);               /* VARARG needed in any case!     */
-CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
-/*....................................................................*/
+CASRT(0 != VARARG);                 /* VARARG needed in any case!     */
+CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 /**********************************************************************/
 
 
@@ -219,7 +226,7 @@ CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
 
 /*....................................................................*/
 #if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
-    || GCC || VMS || IS_ANSI_C() || ( IS_UNIX() && !IS_ANCIENT_UNIX() )
+    || GCC || VMS || b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX )
 # include <stdlib.h>
 # include <string.h>
 #else
@@ -239,9 +246,9 @@ EXTERN VOID free DCL((char *));
 EXTERN char *realloc DCL((char *block, int siz));
 # endif
 #endif  /* WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO)) \
-         * || GCC || VMS || IS_UNIX()
+         * || GCC || VMS || b_IS_UNIX
          */
-#if IS_UNIX()
+#if b_IS_UNIX
 # include <sys/stat.h>
 #endif
 /*....................................................................*/
@@ -495,15 +502,15 @@ extern int         DebugMessage_lnno_;
 extern CONST char *DebugMessage_fname_;
 EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #if UEMACS_TRC
-# define  TRC(arg)  do {                        \
-        DebugMessage_fname_ = __FILE__;         \
-        DebugMessage_lnno_ = __LINE__;          \
-        DebugMessage arg;                       \
+# define  TRC(arg)  do {                              \
+        DebugMessage_fname_ = (CONST char *)__FILE__; \
+        DebugMessage_lnno_ = __LINE__;                \
+        DebugMessage arg;                             \
     } while ( 0 )
-# define  TRCK(arg, file, line)  do {           \
-        DebugMessage_fname_ = (file);           \
-        DebugMessage_lnno_ = (line);            \
-        DebugMessage arg;                       \
+# define  TRCK(arg, file, line)  do {                 \
+        DebugMessage_fname_ = (CONST char *)(file);   \
+        DebugMessage_lnno_ = (line);                  \
+        DebugMessage arg;                             \
     } while ( 0 )
 #else
 # define  TRC(arg)              do {} while ( 0 )
@@ -525,8 +532,16 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #define MIN3(x, y, z) ( MIN2((x), MIN2((y), (z))) )
 #define MAX3(x, y, z) ( MAX2((x), MAX2((y), (z))) )
 /**********************************************************************/
-#define MKSTRING(t)       #t
+
+/**********************************************************************/
+#if b_IS_ANSI_C
+# define  MKSTRING(t)     #t
+#else
+# define  MKSTRING(t)     "t"
+#endif
 #define MKXSTRING(t)      MKSTRING(t)
+/**********************************************************************/
+
 /**********************************************************************/
 /*
  * This macro tests for pointer to something versus array of something.
@@ -643,23 +658,33 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #if ( 0 ) /* Don't use own implementation per default */
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( defined(va_copy) )  /* C99, i.e.: __STDC_VERSION__ >= 199901  */
+#else
+#if ( defined(va_copy) )  /* C99, i.e.: __STDC_VERSION__ >= 199901  */
 # define VA_COPY            va_copy
 # define VA_END             va_end
-#elif ( defined(__va_copy) )
+#else
+#if ( defined(__va_copy) )
 # define VA_COPY            __va_copy
 # define VA_END             va_end
 /* VMS on non X86_64 has __STDC_VERSION__ >= 199901 but no va_copy: */
-#elif VMS && (__DECC_VER < 70500000)
+#else
+#if VMS && (__DECC_VER < 70500000)
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( MSDOS && TURBO )
+#else
+#if ( MSDOS && TURBO )
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( UEMACS_FEATURE_USE_VA_COPY )
-# error CANNOT DEFINE VA_COPY
+#else
+#if ( UEMACS_FEATURE_USE_VA_COPY )
+  CRASH(CANNOT DEFINE VA_COPY);
 #else
 /**EMPTY**/
+#endif
+#endif
+#endif
+#endif
+#endif
 #endif
 #if ( !UEMACS_FEATURE_USE_VA_COPY )
 # undef VA_COPY
@@ -867,7 +892,7 @@ VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
     asrs_("File: "); asrs_(file); asrs_(", Line: ");
     asri_(line); asrs_("\n");
     asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
-    asrs_("OS: `"); asrs_(strerror(errno_sv_)); asrs_("'\n");
+    asrs_("OS ERRNO: "); asri_(errno_sv_); asrs_("\n");
     asrs_("--- abort ...\n");
     abort();
 }
@@ -887,7 +912,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
     asri_(line); asrs_("\n");
     asrs_("\t"); asrs_(msg); asrs_("\n");
     asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
-    asrs_("OS: `"); asrs_(strerror(errno_sv_)); asrs_("'\n");
+    asrs_("OS ERRNO: "); asri_(errno_sv_); asrs_("\n");
     asrs_("--- abort ...\n");
     abort();
 }
@@ -896,28 +921,28 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 #define ASRT(e) do {                                                    \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRT_Catch (__FILE__, __LINE__, #e);                        \
+            ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
 
 #define ASRTM(e, m) do {                                                \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRTM_Catch (__FILE__, __LINE__, #e, m);                    \
+            ASRTM_Catch (__FILE__, __LINE__, MKSTRING(e), m);           \
         }                                                               \
     } while (0)
 
 #define ASRTK(e, file, line) do {                                       \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRT_Catch (file, line, #e);                                \
+            ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
 
 #define ASRTMK(e, m, file, line) do {                                   \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRTM_Catch (file, line, #e, m);                            \
+            ASRTM_Catch (file, line, MKSTRING(e), m);                   \
         }                                                               \
     } while (0)
 
@@ -925,7 +950,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         if ( !(e) )                                                     \
         {                                                               \
             TRCK(a, __FILE__, __LINE__);                                \
-            ASRT_Catch (__FILE__, __LINE__, #e);                        \
+            ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
 
@@ -933,7 +958,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         if ( !(e) )                                                     \
         {                                                               \
             TRCK(a, file, line);                                        \
-            ASRT_Catch (file, line, #e);                                \
+            ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
 
@@ -950,10 +975,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                                                                         \
             trcs_("File: "); trcs_(__FILE__); trcs_(", Line: ");        \
             trci_(__LINE__); trcs_("\n");                               \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `");                                     \
+                trcs_(MKSTRING(e)); trcs_("' failed!\n");               \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -969,10 +995,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             trcs_("File: "); trcs_(__FILE__); trcs_(", Line: ");        \
             trci_(__LINE__); trcs_("\n");                               \
             trcs_("\t"); trcs_((m)); trcs_("\n");                       \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `"); trcs_(MKSTRING(e));                 \
+                trcs_("' failed!\n");                                   \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -987,10 +1014,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                                                                         \
             trcs_("File: "); trcs_((file)); trcs_(", Line: ");          \
             trci_((line)); trcs_("\n");                                 \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `"); trcs_(MKSTRING(e));                 \
+                 trcs_("' failed!\n");                                  \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -1006,10 +1034,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             trcs_("File: "); trcs_((file)); trcs_(", Line: ");          \
             trci_((line)); trcs_("\n");                                 \
             trcs_("\t"); trcs_((m)); trcs_("\n");                       \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `"); trcs_(MKSTRING(e));                 \
+                 trcs_("' failed!\n");                                  \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -1216,7 +1245,7 @@ EXTERN char PASCAL NEAR lputc_ DCL((LINE *lp, int n, char c,
                                     CONST char *fnam, int lno));
 #define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 EXTERN unsigned char PASCAL NEAR  lgetc_ DCL((LINE *lp, int n,
                                               CONST char *fnam, int lno));
 #else
@@ -2109,7 +2138,7 @@ EXTERN int PASCAL NEAR          getccol DCL((int bflg));
 EXTERN int PASCAL NEAR          getcmd DCL((void));
 EXTERN int PASCAL NEAR          getfence DCL((int f, int n));
 EXTERN int PASCAL NEAR          getfile DCL((CONST char *fname, int lockfl));
-#if IS_UNIX()
+#if b_IS_UNIX
 EXTERN CONST char *             gettmpfname DCL((CONST char *ident));
 #endif
 EXTERN int PASCAL NEAR          get_key DCL((void));
@@ -2248,14 +2277,14 @@ EXTERN int PASCAL NEAR          trim DCL((int f, int n));
 EXTERN int PASCAL NEAR          ttclose DCL((void));
 EXTERN int PASCAL NEAR          ttflush DCL((void));
 EXTERN int PASCAL NEAR          ttgetc DCL((void));
-#if ( IS_UNIX() || VMS )
+#if ( b_IS_UNIX || VMS )
 EXTERN int                      ttgetc_nowait DCL((void));
 #endif
 EXTERN int PASCAL NEAR          ttopen DCL((void));
 EXTERN int PASCAL NEAR          ttputc DCL((int c));
 EXTERN int PASCAL NEAR          twiddle DCL((int f, int n));
 EXTERN int PASCAL NEAR          typahead DCL((void));
-#if IS_UNIX()
+#if b_IS_UNIX
 /*======================================================================
  * CYGWIN/DJGPP_DOS need wrappers for some (but not all) functions with
  * file name arguments to be able to work with DOS and UNIX style file
@@ -2350,7 +2379,7 @@ EXTERN VOID PASCAL NEAR         varclean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         uv_init DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         uv_clean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         vtfree DCL((void));
-#if ( IS_UNIX() || VMS || MPE )
+#if ( b_IS_UNIX || VMS || MPE )
 EXTERN VOID                     cook        DCL((void));
 EXTERN int                      cook_nowait DCL((void));
 #endif
@@ -2380,7 +2409,7 @@ EXTERN VOID                     tagshello DCL((void));
 /**********************************************************************/
 /* MicroEMACS (umc_*) specific wrappers for some library functions:   */
 /**********************************************************************/
-#if IS_UNIX()
+#if b_IS_UNIX
 # define umc_access  unx_access_
 # define umc_rename  unx_rename_
 # define umc_stat    unx_stat_
@@ -2403,8 +2432,10 @@ EXTERN char *strrev DCL((char *));
 
 #if MWC | MSC | ZTC
 EXTERN char *ctime DCL((const char *));
-#elif IC  /* TURBO already has it defined */
+#else
+#if IC  /* TURBO already has it defined */
 EXTERN char *ctime DCL((const time_t *));
+#endif
 #endif
 /**********************************************************************/
 
