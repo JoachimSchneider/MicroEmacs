@@ -253,7 +253,9 @@ int scnothing P1_(char *, s)
 #  include <sys/ndir.h>                 /* Directory entry definitions  */
 #  define DIRENTRY       direct
 # else
-#  include <dirent.h>                   /* Directory entry definitions  */
+#  if ( !b_IS_ANCIENT_UNIX )
+#   include <dirent.h>                  /* Directory entry definitions  */
+#  endif
 #  define DIRENTRY       dirent
 # endif /* XENIX || VAT */
 
@@ -301,7 +303,7 @@ EXTERN const char *cygpwd_      DCL((void));
 static int  IsExecutable  DCL((CONST char * file));
 #if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
 static int  rdstdin       DCL((int getnread));
-# define nread()  ( rdstdin(!0) )
+# define nread()  ( rdstdin(1) )
 # define readx()  ( rdstdin(0)  )
 #endif
 /*====================================================================*/
@@ -346,7 +348,7 @@ static CONST char *cygdrive_ P0_()
 {
     static char       res[NFILEN];
     static CONST char *rc       = res;
-    static int        FirstCall = !0;
+    static int        FirstCall = 1;
 
     if ( FirstCall )  {
         CONST char  drives[]  = "CDEFGHIJKLMNOPQRSTUVWXYZAB";
@@ -428,7 +430,7 @@ end:
 
 static int cygdrive_len_ P0_()
 {
-    static int  FirstCall = !0;
+    static int  FirstCall = 1;
     static int  len       = (-1);
 
     if ( FirstCall )  {
@@ -712,6 +714,7 @@ static struct keybind keybind[] =       /* Keybinding list            */
 static int inbuf[NINCHAR];              /* Input buffer               */
 static int * inbufh = inbuf;            /* Head of input buffer       */
 static int * inbuft = inbuf;            /* Tail of input buffer       */
+#if ( 0 )
 #define PRINT_inbuf(where) do  {                                  \
     int i = 0;                                                    \
                                                                   \
@@ -723,6 +726,7 @@ static int * inbuft = inbuf;            /* Tail of input buffer       */
     }                                                             \
     fprintf(stderr, "0x%04X\n", inbuf[i]);                        \
 } while ( 0 )
+#endif
 static unsigned char outbuf[NOUTCHAR];  /* Output buffer              */
 static unsigned char * outbuft = outbuf;/* Output buffer tail         */
 
@@ -1738,10 +1742,10 @@ int PASCAL NEAR spal P1_(char *, cmd)
 
     /* Check for keymapping command */
     if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
-        dokeymap = !0;
+        dokeymap = 1;
 #  if COLOR
     } else if ( strncmp(cmd, "CLRMAP ", 7) == 0 ) {
-        doclrmap = !0;
+        doclrmap = 1;
 #  endif /* COLOR */
     } else                                        {
         return (0);
@@ -1964,7 +1968,7 @@ static int  IsDOSPath P1_(CONST char *, path)
 
 static CONST char *wingetshell P0_()
 {
-    static int        FirstCall = !0;
+    static int        FirstCall = 1;
     static CONST char *res      = NULL;
 
     if ( FirstCall )  {
@@ -2183,7 +2187,7 @@ static CONST char *cygenx2ads_ P1_(CONST char *, unx)
 /* Cannot fail  */
 static CONST char *cygrootads P0_()
 {
-    static int  FirstCall = !0;
+    static int  FirstCall = 1;
     static char res[NFILEN];
 
     if ( FirstCall )  {
@@ -2209,7 +2213,7 @@ static CONST char *cygrootads P0_()
 /* Cannot fail  */
 static CONST char *cygrootenx P0_()
 {
-    static int  FirstCall = !0;
+    static int  FirstCall = 1;
     static char res[NFILEN];
 
     if ( FirstCall )  {
@@ -2577,7 +2581,7 @@ static int xsystem P3_(CONST char *, shell, CONST char *, shell_flag, CONST char
         if ( NULL == shell )  {
             return ( 0 );
         } else                {
-            return ( !0 );
+            return ( 1 );
         }
     }
     for ( l = strlen(shell) - 1; l >= 0; l-- )  {
@@ -2779,7 +2783,7 @@ static CONST char *getdospath P1_(CONST char *, in)
 
 static CONST char *dosgetshell P0_()
 {
-    static int        FirstCall = !0;
+    static int        FirstCall = 1;
     static CONST char *res      = NULL;
     int               Drive     = '\0';
 
@@ -2886,7 +2890,7 @@ static int dossystem P1_(CONST char *, cmd)
     } else if ( dos_shell ) {
         TRC(("Executing <%s %s %s>", dos_shell, DOS_SHELL_C_, cmd));
     } else                  {
-        ASRT(!"IMPOSSIBLE");
+        ASRT(IMPOSSIBLE);
     }
 #   endif
     if        ( win_shell ) {
@@ -2896,7 +2900,7 @@ static int dossystem P1_(CONST char *, cmd)
         status    = spawnv(P_WAIT, dos_shell, dos_argv);
         errno_sv  = errno;
     } else                  {
-        ASRT(!"IMPOSSIBLE");
+        ASRT(IMPOSSIBLE);
     }
 
     if        ( 0 > status )        {
@@ -2907,7 +2911,7 @@ static int dossystem P1_(CONST char *, cmd)
             TRC(("Error executing <%s %s %s>, errno = %d: %s", dos_shell, DOS_SHELL_C_,
                  cmd, errno_sv, strerror(errno_sv)));
         } else                  {
-            ASRT(!"IMPOSSIBLE");
+            ASRT(IMPOSSIBLE);
         }
 
         return ( (-1) * errno_sv );
@@ -2924,7 +2928,7 @@ static int dossystem P1_(CONST char *, cmd)
                  dos_shell, DOS_SHELL_C_, cmd, signo, errno_sv,
                  strerror(errno_sv)));
         } else                  {
-            ASRT(!"IMPOSSIBLE");
+            ASRT(IMPOSSIBLE);
         }
 
         return ( (-1) * signo );
@@ -2936,7 +2940,7 @@ static int dossystem P1_(CONST char *, cmd)
             TRC(("RC <%s %s %s>: Status = %d",
                  dos_shell, DOS_SHELL_C_, cmd, status));
         } else                  {
-            ASRT(!"IMPOSSIBLE");
+            ASRT(IMPOSSIBLE);
         }
 
         return ( 0xFF & status );
@@ -3254,7 +3258,7 @@ static int  IsExecutable P1_(CONST char *, file)
  * 0 != getnread: Return the number of charcters that can be read
  *                without blocking.
  * 0 == getnread: Return the next character. This might block if
- *                previously `0 == rdstdin(!0)'.
+ *                previously `0 == rdstdin(1)'.
  *
  * This function is used to implement grab(no)wait() to read from the
  * terminal: This will only work reliably if the character sequences

@@ -426,7 +426,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
     UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free */
     UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
 
-    static int  firstcall = !0;
+    static int  firstcall = 1;
 
     if ( firstcall )  {
         firstcall = 0;

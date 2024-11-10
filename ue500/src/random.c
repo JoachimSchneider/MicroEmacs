@@ -1765,8 +1765,8 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
  *                 a warning message.
  */
 char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
-                                const char *, src,
-                                const char *, file, int, line)
+                                CONST char *, src,
+                                CONST char *, file, int, line)
 {
     if        ( 2 <= dst_size ) {
         xstrlcpy(dst, src, dst_size);
@@ -1788,8 +1788,8 @@ char *PASCAL NEAR sfstrcpy_ P5_(char *, dst, int, dst_size,
  *                 warning message.
  */
 char *PASCAL NEAR sfstrcat_ P5_(char *, dst, int, dst_size,
-                                const char *, src,
-                                const char *, file, int, line)
+                                CONST char *, src,
+                                CONST char *, file, int, line)
 {
     if        ( 2 <= dst_size ) {
         xstrlcat(dst, src, dst_size);
@@ -1852,15 +1852,9 @@ FILE *uetmpfile_ P1_(int, delmode)
                  * take care of non standard realloc() behaviour:
                  */
                 if ( NULL == fname_list ) {
-                    ASRT( NULL != (fname_list =
-                            (CONST char **)calloc(fname_list_len,
-                                                  SIZEOF(*fname_list)))
-                        );
+                    ASRT( NULL != (fname_list = (CONST char **)calloc(fname_list_len, SIZEOF(*fname_list))));
                 } else                    {
-                    ASRT(NULL != (fname_list =
-                            (CONST char **)realloc(fname_list,
-                                fname_list_len * SIZEOF(*fname_list)))
-                        );
+                    ASRT(NULL != (fname_list = (CONST char **)realloc(fname_list, fname_list_len * SIZEOF(*fname_list))));
                 }
             }
             fname_list[fname_list_pos++]  = xstrdup(fname);
@@ -2406,7 +2400,7 @@ VOID  DelStack P1_(CONST VOIDP, stack)
 
 FILE *PASCAL NEAR GetTrcFP P0_()
 {
-    static int  FirstCall = !0;
+    static int  FirstCall = 1;
     static FILE *TrcFP    = NULL;
 
     if ( FirstCall )  {
@@ -3089,7 +3083,7 @@ static char *PASCAL NEAR  filter_fill P3_(CONST char *, rstart,
                     }
                     break;
                 default:
-                    ASRT(!"IMPOSSIBLE");
+                    ASRT(IMPOSSIBLE);
                     break;
             }
         }

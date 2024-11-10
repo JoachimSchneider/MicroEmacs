@@ -29,7 +29,8 @@
  * "function (int,int) returning void",
  * which is not compatible with "function () returning int".'
  */
-# pragma message disable PTRMISMATCH
+/***# pragma message disable PTRMISMATCH***/
+/***HEREHEREHERE***/
 #endif
 
 #include "estruct.h"    /* global structures and defines */

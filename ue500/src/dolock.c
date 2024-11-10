@@ -107,7 +107,9 @@ char *undolock P1_(CONST char *, fname)
 #  include     <dir.h>
 # endif
 # if  ( b_IS_UNIX )
-#  include     <dirent.h>
+#  if ( !b_IS_ANCIENT_UNIX )
+#   include     <dirent.h>
+#  endif
 #  include     <signal.h>
 # endif
 

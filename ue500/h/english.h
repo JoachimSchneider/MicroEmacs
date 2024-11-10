@@ -15,298 +15,300 @@
 /*34567890123456789012345678901234567890123456789012345678901234567890*/
 /*====================================================================*/
 
+/**********************************************************************/
+#include "eproto.h"
+/**********************************************************************/
+
 
 #define OQUOTE_CHAR     34
 #define CQUOTE_CHAR     34
 
-#define TEXT1   "[Starting new CLI]"
-#define TEXT2   "[Cannot write filter file]"
-#define TEXT3   "[Execution failed]"
-#define TEXT4   "Shell variable TERM not defined!"
-#define TEXT5   "Terminal type not 'vt100'!"
-#define TEXT6   "\r\n\n[End]"
-#define TEXT7   "Line to GOTO: "
-#define TEXT8   "[Aborted]"
-#define TEXT9   "[Mark %d set]"
-#define TEXT10  "[Mark %d removed]"
-#define TEXT11  "No mark %d in this window"
-#define TEXT12  "[Help file is not online]"
-#define TEXT13  ": describe-key "
-#define TEXT14  "Not Bound"
-#define TEXT15  ": bind-to-key "
-#define TEXT16  "[No such function]"
-#define TEXT17  "Binding table FULL!"
-#define TEXT18  ": unbind-key "
-#define TEXT19  "[Key not bound]"
-#define TEXT20  "Apropos string: "
-#define TEXT21  "Binding list"
-#define TEXT22  "Can not display binding list"
-#define TEXT23  "[Building binding list]"
-#define TEXT24  "Use buffer"
-#define TEXT25  "Use buffer: "
-#define TEXT26  "Kill buffer"
-#define TEXT27  "Pop buffer"
-#define TEXT28  "Buffer is being displayed"
-#define TEXT29  "Change buffer name to: "
-#define TEXT30  "ACTN   Modes        Size Buffer          File"
-#define TEXT31  "         Global Modes"
-#define TEXT32  "Discard changes"
-#define TEXT33  "Encryption String: "
-#define TEXT34  "File: "
-#define TEXT35  "another user"
-#define TEXT36  "LOCK ERROR -- "
-#define TEXT37  "checking for existence of %s\n"
-#define TEXT38  "making directory %s\n"
-#define TEXT39  "creating %s\n"
-#define TEXT40  "could not create lock file"
-#define TEXT41  "pid is %ld\n"
-#define TEXT42  "reading lock file %s\n"
-#define TEXT43  "could not read lock file"
-#define TEXT44  "pid in %s is %ld\n"
-#define TEXT45  "signaling process %ld\n"
-#define TEXT46  "process exists"
-#define TEXT47  "kill was bad"
-#define TEXT48  "kill was good; process exists"
-#define TEXT49  "attempting to unlink %s\n"
-#define TEXT50  "could not remove lock file"
-#define TEXT51  "Variable to set: "
-#define TEXT52  "%%No such variable as '%s'"
-#define TEXT53  "Value: "
-#define TEXT54  "[Macro aborted]"
-#define TEXT55  "Variable to display: "
-#define TEXT56  "Variable list"
-#define TEXT57  "Can not display variable list"
-#define TEXT58  "[Building variable list]"
-#define TEXT59  UNUSED
-#define TEXT60  "Line %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x"
-#define TEXT61  "<Not Used>"
-#define TEXT62  "Global mode to "
-#define TEXT63  "Mode to "
-#define TEXT64  "add: "
-#define TEXT65  "delete: "
-#define TEXT66  "No such mode!"
-#define TEXT67  "Message to write: "
-#define TEXT68  "String to insert: "
-#define TEXT69  "String to overwrite: "
-#define TEXT70  "[region copied]"
-#define TEXT71  "%%This buffer is already narrowed"
-#define TEXT72  "%%Must narrow at least 1 full line"
-#define TEXT73  "[Buffer is narrowed]"
-#define TEXT74  "%%This buffer is not narrowed"
-#define TEXT75  "[Buffer is widened]"
-#define TEXT76  "No mark set in this window"
-#define TEXT77  "Bug: lost mark"
-#define TEXT78  "Search "
-#define TEXT79  "Not found "
-#define TEXT80  "No pattern set"
-#define TEXT81  "Reverse search "
-#define TEXT82  UNUSED
-#define TEXT83  UNUSED
-#define TEXT84  "Replace "
-#define TEXT85  "Query replace "
-#define TEXT86  "with "
-#define TEXT87  "Replace '"
-#define TEXT88  "' with '"
-#define TEXT89  "Aborted!"
-#define TEXT90  \
-    "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "
-#define TEXT91  "Empty string replaced, stopping."
-#define TEXT92  "%D substitutions"
-#define TEXT93  "%%ERROR while deleting"
-#define TEXT94  "%%Out of memory"
-#define TEXT95  "%%mceq: what is %d?"
-#define TEXT96  "%%No characters in character class"
-#define TEXT97  "%%Character class not ended"
-#define TEXT98  "No fill column set"
-#define TEXT99  "[OUT OF MEMORY]"               /* UNUSED */
-#define TEXT100 "Words %D Chars %D Lines %d Avg chars/word %f"
-#define TEXT101 "[Can not search and goto at the same time!]"
-#define TEXT102 "[Bogus goto argument]"
-#define TEXT103 "[Saving %s]"
-#define TEXT104 "Modified buffers exist. Leave anyway"
-#define TEXT105 "%%Macro already active"
-#define TEXT106 "[Start macro]"
-#define TEXT107 "%%Macro not active"
-#define TEXT108 "[End macro]"
-#define TEXT109 "[Key illegal in VIEW mode]"
-#define TEXT110 "[That command is RESTRICTED]"
-#define TEXT111 "No macro specified"
-#define TEXT112 "Macro number out of range"
-#define TEXT113 "Can not create macro"
-#define TEXT114 "Procedure name: "
-#define TEXT115 "Execute procedure: "
-#define TEXT116 "No such procedure"
-#define TEXT117 "Execute buffer: "
-#define TEXT118 "No such buffer"
-#define TEXT119 "%%Out of memory during while scan"
-#define TEXT120 "%%!BREAK outside of any !WHILE loop"
-#define TEXT121 "%%!ENDWHILE with no preceding !WHILE"
-#define TEXT122 "%%!WHILE with no matching !ENDWHILE"
-#define TEXT123 "%%Out of Memory during macro execution"
-#define TEXT124 "%%Unknown Directive"
-#define TEXT125 "Out of memory while storing macro"
-#define TEXT126 "%%Internal While loop error"
-#define TEXT127 "%%No such label"
-#define TEXT128 \
-    "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
-#define TEXT129 "File to execute: "
-#define TEXT130 "Macro not defined"
-#define TEXT131 "Read file"
-#define TEXT132 "Insert file"
-#define TEXT133 "Find file"
-#define TEXT134 "View file"
-#define TEXT135 "[Old buffer]"
-#define TEXT136 "Buffer name: "
-#define TEXT137 "Cannot create buffer"
-#define TEXT138 "[New file]"
-#define TEXT139 "[Reading file]"
-#define TEXT140 "Read "
-#define TEXT141 "I/O ERROR, "
-#define TEXT142 "OUT OF MEMORY, "
-#define TEXT143 " line"
-#define TEXT144 "Write file: "
-#define TEXT145 "No file name"
-#define TEXT146 "Truncated file..write it out"
-#define TEXT147 "Narrowed Buffer..write it out"
-#define TEXT148 "[Writing...]"
-#define TEXT149 "[Wrote "
-#define TEXT150 ", saved as "
-#define TEXT151 "Name: "
-#define TEXT152 "[No such file]"
-#define TEXT153 "[Inserting file]"
-#define TEXT154 "Inserted "
-#define TEXT155 "Cannot open file for writing"
-#define TEXT156 "Error closing file"
-#define TEXT157 "Write I/O error"
-#define TEXT158 "File read error"
-#define TEXT159 "%Need function key number"
-#define TEXT160 "%Function key number out of range"
-#define TEXT161 "Label contents: "
-#define TEXT162 " [y/n]? "
-#define TEXT163 "no default"
-#define TEXT164 "[search failed]"
-#define TEXT165 "ISearch: "
-#define TEXT166 "? Search string too long"
-#define TEXT167 "? command too long"
-#define TEXT168 "%%Can not insert string"
-#define TEXT169 "Inserted"      /* this not used anymore */
-#define TEXT170 "bug: linsert"
-#define TEXT171 "Replaced"      /* this not used anymore */
-#define TEXT172 "%%Out of memory while overwriting"
-#define TEXT173 "LOCK ERROR: Lock table full"
-#define TEXT174 "Cannot lock, out of memory"
-#define TEXT175 "LOCK"
-#define TEXT176 "File in use by "
-#define TEXT177 ", overide?"
-#define TEXT178 "[can not get system error message]"
-#define TEXT179 "  About MicroEmacs"
-#define TEXT180 "%%No such resolution"
-#define TEXT181 "%%Resolution illegal for this monitor"
-#define TEXT182 "Environment variable TERM not defined!"
-#define TEXT183 "Unknown terminal type %s!"
-#define TEXT184 "termcap entry incomplete (lines)"
-#define TEXT185 "Termcap entry incomplete (columns)"
-#define TEXT186 "Incomplete termcap entry\n"
-#define TEXT187 "Terminal description too big!\n"
-#define TEXT188 "[End]"
-#define TEXT189 "Cannot find entry for terminal type.\n"
-#define TEXT190 "Check terminal type with \"SHOW TERMINAL\" or\n"
-#define TEXT191 "try setting with \"SET TERMINAL/INQUIRE\"\n"
-#define TEXT192 "The terminal type does not have enough power to run\n"
-#define TEXT193 "MicroEMACS.  Try a different terminal or check\n"
-#define TEXT194 "type with \"SHOW TERMINAL\".\n"
-#define TEXT195 "Cannot open channel to terminal.\n"
-#define TEXT196 "Cannot obtain terminal settings.\n"
-#define TEXT197 "Cannot modify terminal settings.\n"
-#define TEXT198 "I/O error (%d,%d)\n"
-#define TEXT199 "[Starting DCL]\r\n"
-#define TEXT200 "[Calling DCL]\r\n"
-#define TEXT201 "[Not available yet under VMS]"
-#define TEXT202 "Terminal type not 'vt52'or 'z19' !"
-#define TEXT203 "Window number out of range"
-#define TEXT204 "Can not delete this window"
-#define TEXT205 "Cannot split a %d line window"
-#define TEXT206 "Only one window"
-#define TEXT207 "Impossible change"
-#define TEXT208 "[No such window exists]"
-#define TEXT209 "%%Screen size out of range"
-#define TEXT210 "%%Screen width out of range"
-#define TEXT211 "Function list"
-#define TEXT212 "Can not display function list"
-#define TEXT213 "[Building function list]"
-#define TEXT214 "%%No such file as %s"
-#define TEXT215 ": macro-to-key "
-#define TEXT216 "Cannot read/write directories!!!"
-#define TEXT217 "[Not available yet under AOS/VS]"
-#define TEXT218 "Append file: "
-#define TEXT219 "%%Macro Failed"
-#define TEXT220 "Line %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x%x"
-#define TEXT221 "Too many groups"
-#define TEXT222 "Group not ended"
-#define TEXT223 "%%Column origin out of range"
-#define TEXT224 "%%Row origin out of range"
-#define TEXT225 "[Switched to screen %s]"
-#define TEXT226 "%%Can not kill an executing buffer"
-#define TEXT227 "\n--- Press any key to Continue ---"
-#define TEXT228 "[Kill ring cleared]"
-#define TEXT229 " in < "
-#define TEXT230 "> at line "
-#define TEXT231 "Abbreviation to set: "
-#define TEXT232 "Abbreviation to delete: "
-#define TEXT233 "[Building Abbreviation list]"
-#define TEXT234 "Abbreviation list"
-#define TEXT235 "Can not display abbreviation list"
-#define TEXT236 "Define Abbreviations in buffer"
-#define TEXT240 "[No such screen]"
-#define TEXT241 "%%Can't delete current screen"
-#define TEXT242 "Find Screen: "
-#define TEXT243 "Delete Screen: "
-#define TEXT244 "%%No such function as '%s'"
-#define TEXT245 "%%Division by Zero is illegal"
-#define TEXT246 "%%Need function key number"
-#define TEXT247 "%%Function key number out of range"
-#define TEXT248 "Enter Label String: "
-#define TEXT249 "Global variable to declare: "
-#define TEXT250 "Local variable to declare: "
+DCLDEF NOSHARE char TEXT1[NOSZ_]    INIT_("[Starting new CLI]");
+DCLDEF NOSHARE char TEXT2[NOSZ_]    INIT_("[Cannot write filter file]");
+DCLDEF NOSHARE char TEXT3[NOSZ_]    INIT_("[Execution failed]");
+DCLDEF NOSHARE char TEXT4[NOSZ_]    INIT_("Shell variable TERM not defined!");
+DCLDEF NOSHARE char TEXT5[NOSZ_]    INIT_("Terminal type not 'vt100'!");
+DCLDEF NOSHARE char TEXT6[NOSZ_]    INIT_("\r\n\n[End]");
+DCLDEF NOSHARE char TEXT7[NOSZ_]    INIT_("Line to GOTO: ");
+DCLDEF NOSHARE char TEXT8[NOSZ_]    INIT_("[Aborted]");
+DCLDEF NOSHARE char TEXT9[NOSZ_]    INIT_("[Mark %d set]");
+DCLDEF NOSHARE char TEXT10[NOSZ_]   INIT_("[Mark %d removed]");
+DCLDEF NOSHARE char TEXT11[NOSZ_]   INIT_("No mark %d in this window");
+DCLDEF NOSHARE char TEXT12[NOSZ_]   INIT_("[Help file is not online]");
+DCLDEF NOSHARE char TEXT13[NOSZ_]   INIT_(": describe-key ");
+DCLDEF NOSHARE char TEXT14[NOSZ_]   INIT_("Not Bound");
+DCLDEF NOSHARE char TEXT15[NOSZ_]   INIT_(": bind-to-key ");
+DCLDEF NOSHARE char TEXT16[NOSZ_]   INIT_("[No such function]");
+DCLDEF NOSHARE char TEXT17[NOSZ_]   INIT_("Binding table FULL!");
+DCLDEF NOSHARE char TEXT18[NOSZ_]   INIT_(": unbind-key ");
+DCLDEF NOSHARE char TEXT19[NOSZ_]   INIT_("[Key not bound]");
+DCLDEF NOSHARE char TEXT20[NOSZ_]   INIT_("Apropos string: ");
+DCLDEF NOSHARE char TEXT21[NOSZ_]   INIT_("Binding list");
+DCLDEF NOSHARE char TEXT22[NOSZ_]   INIT_("Can not display binding list");
+DCLDEF NOSHARE char TEXT23[NOSZ_]   INIT_("[Building binding list]");
+DCLDEF NOSHARE char TEXT24[NOSZ_]   INIT_("Use buffer");
+DCLDEF NOSHARE char TEXT25[NOSZ_]   INIT_("Use buffer: ");
+DCLDEF NOSHARE char TEXT26[NOSZ_]   INIT_("Kill buffer");
+DCLDEF NOSHARE char TEXT27[NOSZ_]   INIT_("Pop buffer");
+DCLDEF NOSHARE char TEXT28[NOSZ_]   INIT_("Buffer is being displayed");
+DCLDEF NOSHARE char TEXT29[NOSZ_]   INIT_("Change buffer name to: ");
+DCLDEF NOSHARE char TEXT30[NOSZ_]   INIT_("ACTN   Modes        Size Buffer          File");
+DCLDEF NOSHARE char TEXT31[NOSZ_]   INIT_("         Global Modes");
+DCLDEF NOSHARE char TEXT32[NOSZ_]   INIT_("Discard changes");
+DCLDEF NOSHARE char TEXT33[NOSZ_]   INIT_("Encryption String: ");
+DCLDEF NOSHARE char TEXT34[NOSZ_]   INIT_("File: ");
+DCLDEF NOSHARE char TEXT35[NOSZ_]   INIT_("another user");
+DCLDEF NOSHARE char TEXT36[NOSZ_]   INIT_("LOCK ERROR -- ");
+DCLDEF NOSHARE char TEXT37[NOSZ_]   INIT_("checking for existence of %s\n");
+DCLDEF NOSHARE char TEXT38[NOSZ_]   INIT_("making directory %s\n");
+DCLDEF NOSHARE char TEXT39[NOSZ_]   INIT_("creating %s\n");
+DCLDEF NOSHARE char TEXT40[NOSZ_]   INIT_("could not create lock file");
+DCLDEF NOSHARE char TEXT41[NOSZ_]   INIT_("pid is %ld\n");
+DCLDEF NOSHARE char TEXT42[NOSZ_]   INIT_("reading lock file %s\n");
+DCLDEF NOSHARE char TEXT43[NOSZ_]   INIT_("could not read lock file");
+DCLDEF NOSHARE char TEXT44[NOSZ_]   INIT_("pid in %s is %ld\n");
+DCLDEF NOSHARE char TEXT45[NOSZ_]   INIT_("signaling process %ld\n");
+DCLDEF NOSHARE char TEXT46[NOSZ_]   INIT_("process exists");
+DCLDEF NOSHARE char TEXT47[NOSZ_]   INIT_("kill was bad");
+DCLDEF NOSHARE char TEXT48[NOSZ_]   INIT_("kill was good; process exists");
+DCLDEF NOSHARE char TEXT49[NOSZ_]   INIT_("attempting to unlink %s\n");
+DCLDEF NOSHARE char TEXT50[NOSZ_]   INIT_("could not remove lock file");
+DCLDEF NOSHARE char TEXT51[NOSZ_]   INIT_("Variable to set: ");
+DCLDEF NOSHARE char TEXT52[NOSZ_]   INIT_("%%No such variable as '%s'");
+DCLDEF NOSHARE char TEXT53[NOSZ_]   INIT_("Value: ");
+DCLDEF NOSHARE char TEXT54[NOSZ_]   INIT_("[Macro aborted]");
+DCLDEF NOSHARE char TEXT55[NOSZ_]   INIT_("Variable to display: ");
+DCLDEF NOSHARE char TEXT56[NOSZ_]   INIT_("Variable list");
+DCLDEF NOSHARE char TEXT57[NOSZ_]   INIT_("Can not display variable list");
+DCLDEF NOSHARE char TEXT58[NOSZ_]   INIT_("[Building variable list]");
+DCLDEF NOSHARE char TEXT59[NOSZ_]   INIT_("");                  /* UNUSED */
+DCLDEF NOSHARE char TEXT60[NOSZ_]   INIT_("Line %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x");
+DCLDEF NOSHARE char TEXT61[NOSZ_]   INIT_("<Not Used>");
+DCLDEF NOSHARE char TEXT62[NOSZ_]   INIT_("Global mode to ");
+DCLDEF NOSHARE char TEXT63[NOSZ_]   INIT_("Mode to ");
+DCLDEF NOSHARE char TEXT64[NOSZ_]   INIT_("add: ");
+DCLDEF NOSHARE char TEXT65[NOSZ_]   INIT_("delete: ");
+DCLDEF NOSHARE char TEXT66[NOSZ_]   INIT_("No such mode!");
+DCLDEF NOSHARE char TEXT67[NOSZ_]   INIT_("Message to write: ");
+DCLDEF NOSHARE char TEXT68[NOSZ_]   INIT_("String to insert: ");
+DCLDEF NOSHARE char TEXT69[NOSZ_]   INIT_("String to overwrite: ");
+DCLDEF NOSHARE char TEXT70[NOSZ_]   INIT_("[region copied]");
+DCLDEF NOSHARE char TEXT71[NOSZ_]   INIT_("%%This buffer is already narrowed");
+DCLDEF NOSHARE char TEXT72[NOSZ_]   INIT_("%%Must narrow at least 1 full line");
+DCLDEF NOSHARE char TEXT73[NOSZ_]   INIT_("[Buffer is narrowed]");
+DCLDEF NOSHARE char TEXT74[NOSZ_]   INIT_("%%This buffer is not narrowed");
+DCLDEF NOSHARE char TEXT75[NOSZ_]   INIT_("[Buffer is widened]");
+DCLDEF NOSHARE char TEXT76[NOSZ_]   INIT_("No mark set in this window");
+DCLDEF NOSHARE char TEXT77[NOSZ_]   INIT_("Bug: lost mark");
+DCLDEF NOSHARE char TEXT78[NOSZ_]   INIT_("Search ");
+DCLDEF NOSHARE char TEXT79[NOSZ_]   INIT_("Not found ");
+DCLDEF NOSHARE char TEXT80[NOSZ_]   INIT_("No pattern set");
+DCLDEF NOSHARE char TEXT81[NOSZ_]   INIT_("Reverse search ");
+DCLDEF NOSHARE char TEXT82[NOSZ_]   INIT_("");                  /* UNUSED */
+DCLDEF NOSHARE char TEXT83[NOSZ_]   INIT_("");                  /* UNUSED */
+DCLDEF NOSHARE char TEXT84[NOSZ_]   INIT_("Replace ");
+DCLDEF NOSHARE char TEXT85[NOSZ_]   INIT_("Query replace ");
+DCLDEF NOSHARE char TEXT86[NOSZ_]   INIT_("with ");
+DCLDEF NOSHARE char TEXT87[NOSZ_]   INIT_("Replace '");
+DCLDEF NOSHARE char TEXT88[NOSZ_]   INIT_("' with '");
+DCLDEF NOSHARE char TEXT89[NOSZ_]   INIT_("Aborted!");
+DCLDEF NOSHARE char TEXT90[NOSZ_]   INIT_("(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: ");
+DCLDEF NOSHARE char TEXT91[NOSZ_]   INIT_("Empty string replaced, stopping.");
+DCLDEF NOSHARE char TEXT92[NOSZ_]   INIT_("%D substitutions");
+DCLDEF NOSHARE char TEXT93[NOSZ_]   INIT_("%%ERROR while deleting");
+DCLDEF NOSHARE char TEXT94[NOSZ_]   INIT_("%%Out of memory");
+DCLDEF NOSHARE char TEXT95[NOSZ_]   INIT_("%%mceq: what is %d?");
+DCLDEF NOSHARE char TEXT96[NOSZ_]   INIT_("%%No characters in character class");
+DCLDEF NOSHARE char TEXT97[NOSZ_]   INIT_("%%Character class not ended");
+DCLDEF NOSHARE char TEXT98[NOSZ_]   INIT_("No fill column set");
+DCLDEF NOSHARE char TEXT99[NOSZ_]   INIT_("[OUT OF MEMORY]");   /* UNUSED */
+DCLDEF NOSHARE char TEXT100[NOSZ_]  INIT_("Words %D Chars %D Lines %d Avg chars/word %f");
+DCLDEF NOSHARE char TEXT101[NOSZ_]  INIT_("[Can not search and goto at the same time!]");
+DCLDEF NOSHARE char TEXT102[NOSZ_]  INIT_("[Bogus goto argument]");
+DCLDEF NOSHARE char TEXT103[NOSZ_]  INIT_("[Saving %s]");
+DCLDEF NOSHARE char TEXT104[NOSZ_]  INIT_("Modified buffers exist. Leave anyway");
+DCLDEF NOSHARE char TEXT105[NOSZ_]  INIT_("%%Macro already active");
+DCLDEF NOSHARE char TEXT106[NOSZ_]  INIT_("[Start macro]");
+DCLDEF NOSHARE char TEXT107[NOSZ_]  INIT_("%%Macro not active");
+DCLDEF NOSHARE char TEXT108[NOSZ_]  INIT_("[End macro]");
+DCLDEF NOSHARE char TEXT109[NOSZ_]  INIT_("[Key illegal in VIEW mode]");
+DCLDEF NOSHARE char TEXT110[NOSZ_]  INIT_("[That command is RESTRICTED]");
+DCLDEF NOSHARE char TEXT111[NOSZ_]  INIT_("No macro specified");
+DCLDEF NOSHARE char TEXT112[NOSZ_]  INIT_("Macro number out of range");
+DCLDEF NOSHARE char TEXT113[NOSZ_]  INIT_("Can not create macro");
+DCLDEF NOSHARE char TEXT114[NOSZ_]  INIT_("Procedure name: ");
+DCLDEF NOSHARE char TEXT115[NOSZ_]  INIT_("Execute procedure: ");
+DCLDEF NOSHARE char TEXT116[NOSZ_]  INIT_("No such procedure");
+DCLDEF NOSHARE char TEXT117[NOSZ_]  INIT_("Execute buffer: ");
+DCLDEF NOSHARE char TEXT118[NOSZ_]  INIT_("No such buffer");
+DCLDEF NOSHARE char TEXT119[NOSZ_]  INIT_("%%Out of memory during while scan");
+DCLDEF NOSHARE char TEXT120[NOSZ_]  INIT_("%%!BREAK outside of any !WHILE loop");
+DCLDEF NOSHARE char TEXT121[NOSZ_]  INIT_("%%!ENDWHILE with no preceding !WHILE");
+DCLDEF NOSHARE char TEXT122[NOSZ_]  INIT_("%%!WHILE with no matching !ENDWHILE");
+DCLDEF NOSHARE char TEXT123[NOSZ_]  INIT_("%%Out of Memory during macro execution");
+DCLDEF NOSHARE char TEXT124[NOSZ_]  INIT_("%%Unknown Directive");
+DCLDEF NOSHARE char TEXT125[NOSZ_]  INIT_("Out of memory while storing macro");
+DCLDEF NOSHARE char TEXT126[NOSZ_]  INIT_("%%Internal While loop error");
+DCLDEF NOSHARE char TEXT127[NOSZ_]  INIT_("%%No such label");
+DCLDEF NOSHARE char TEXT128[NOSZ_]  INIT_("(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug");
+DCLDEF NOSHARE char TEXT129[NOSZ_]  INIT_("File to execute: ");
+DCLDEF NOSHARE char TEXT130[NOSZ_]  INIT_("Macro not defined");
+DCLDEF NOSHARE char TEXT131[NOSZ_]  INIT_("Read file");
+DCLDEF NOSHARE char TEXT132[NOSZ_]  INIT_("Insert file");
+DCLDEF NOSHARE char TEXT133[NOSZ_]  INIT_("Find file");
+DCLDEF NOSHARE char TEXT134[NOSZ_]  INIT_("View file");
+DCLDEF NOSHARE char TEXT135[NOSZ_]  INIT_("[Old buffer]");
+DCLDEF NOSHARE char TEXT136[NOSZ_]  INIT_("Buffer name: ");
+DCLDEF NOSHARE char TEXT137[NOSZ_]  INIT_("Cannot create buffer");
+DCLDEF NOSHARE char TEXT138[NOSZ_]  INIT_("[New file]");
+DCLDEF NOSHARE char TEXT139[NOSZ_]  INIT_("[Reading file]");
+DCLDEF NOSHARE char TEXT140[NOSZ_]  INIT_("Read ");
+DCLDEF NOSHARE char TEXT141[NOSZ_]  INIT_("I/O ERROR, ");
+DCLDEF NOSHARE char TEXT142[NOSZ_]  INIT_("OUT OF MEMORY, ");
+DCLDEF NOSHARE char TEXT143[NOSZ_]  INIT_(" line");
+DCLDEF NOSHARE char TEXT144[NOSZ_]  INIT_("Write file: ");
+DCLDEF NOSHARE char TEXT145[NOSZ_]  INIT_("No file name");
+DCLDEF NOSHARE char TEXT146[NOSZ_]  INIT_("Truncated file..write it out");
+DCLDEF NOSHARE char TEXT147[NOSZ_]  INIT_("Narrowed Buffer..write it out");
+DCLDEF NOSHARE char TEXT148[NOSZ_]  INIT_("[Writing...]");
+DCLDEF NOSHARE char TEXT149[NOSZ_]  INIT_("[Wrote ");
+DCLDEF NOSHARE char TEXT150[NOSZ_]  INIT_(", saved as ");
+DCLDEF NOSHARE char TEXT151[NOSZ_]  INIT_("Name: ");
+DCLDEF NOSHARE char TEXT152[NOSZ_]  INIT_("[No such file]");
+DCLDEF NOSHARE char TEXT153[NOSZ_]  INIT_("[Inserting file]");
+DCLDEF NOSHARE char TEXT154[NOSZ_]  INIT_("Inserted ");
+DCLDEF NOSHARE char TEXT155[NOSZ_]  INIT_("Cannot open file for writing");
+DCLDEF NOSHARE char TEXT156[NOSZ_]  INIT_("Error closing file");
+DCLDEF NOSHARE char TEXT157[NOSZ_]  INIT_("Write I/O error");
+DCLDEF NOSHARE char TEXT158[NOSZ_]  INIT_("File read error");
+DCLDEF NOSHARE char TEXT159[NOSZ_]  INIT_("%Need function key number");
+DCLDEF NOSHARE char TEXT160[NOSZ_]  INIT_("%Function key number out of range");
+DCLDEF NOSHARE char TEXT161[NOSZ_]  INIT_("Label contents: ");
+DCLDEF NOSHARE char TEXT162[NOSZ_]  INIT_(" [y/n]? ");
+DCLDEF NOSHARE char TEXT163[NOSZ_]  INIT_("no default");
+DCLDEF NOSHARE char TEXT164[NOSZ_]  INIT_("[search failed]");
+DCLDEF NOSHARE char TEXT165[NOSZ_]  INIT_("ISearch: ");
+DCLDEF NOSHARE char TEXT166[NOSZ_]  INIT_("? Search string too long");
+DCLDEF NOSHARE char TEXT167[NOSZ_]  INIT_("? command too long");
+DCLDEF NOSHARE char TEXT168[NOSZ_]  INIT_("%%Can not insert string");
+DCLDEF NOSHARE char TEXT169[NOSZ_]  INIT_("Inserted");      /* this not used anymore */
+DCLDEF NOSHARE char TEXT170[NOSZ_]  INIT_("bug: linsert");
+DCLDEF NOSHARE char TEXT171[NOSZ_]  INIT_("Replaced");      /* this not used anymore */
+DCLDEF NOSHARE char TEXT172[NOSZ_]  INIT_("%%Out of memory while overwriting");
+DCLDEF NOSHARE char TEXT173[NOSZ_]  INIT_("LOCK ERROR: Lock table full");
+DCLDEF NOSHARE char TEXT174[NOSZ_]  INIT_("Cannot lock, out of memory");
+DCLDEF NOSHARE char TEXT175[NOSZ_]  INIT_("LOCK");
+DCLDEF NOSHARE char TEXT176[NOSZ_]  INIT_("File in use by ");
+DCLDEF NOSHARE char TEXT177[NOSZ_]  INIT_(", overide?");
+DCLDEF NOSHARE char TEXT178[NOSZ_]  INIT_("[can not get system error message]");
+DCLDEF NOSHARE char TEXT179[NOSZ_]  INIT_("  About MicroEmacs");
+DCLDEF NOSHARE char TEXT180[NOSZ_]  INIT_("%%No such resolution");
+DCLDEF NOSHARE char TEXT181[NOSZ_]  INIT_("%%Resolution illegal for this monitor");
+DCLDEF NOSHARE char TEXT182[NOSZ_]  INIT_("Environment variable TERM not defined!");
+DCLDEF NOSHARE char TEXT183[NOSZ_]  INIT_("Unknown terminal type %s!");
+DCLDEF NOSHARE char TEXT184[NOSZ_]  INIT_("termcap entry incomplete (lines)");
+DCLDEF NOSHARE char TEXT185[NOSZ_]  INIT_("Termcap entry incomplete (columns)");
+DCLDEF NOSHARE char TEXT186[NOSZ_]  INIT_("Incomplete termcap entry\n");
+DCLDEF NOSHARE char TEXT187[NOSZ_]  INIT_("Terminal description too big!\n");
+DCLDEF NOSHARE char TEXT188[NOSZ_]  INIT_("[End]");
+DCLDEF NOSHARE char TEXT189[NOSZ_]  INIT_("Cannot find entry for terminal type.\n");
+DCLDEF NOSHARE char TEXT190[NOSZ_]  INIT_("Check terminal type with \"SHOW TERMINAL\" or\n");
+DCLDEF NOSHARE char TEXT191[NOSZ_]  INIT_("try setting with \"SET TERMINAL/INQUIRE\"\n");
+DCLDEF NOSHARE char TEXT192[NOSZ_]  INIT_("The terminal type does not have enough power to run\n");
+DCLDEF NOSHARE char TEXT193[NOSZ_]  INIT_("MicroEMACS.  Try a different terminal or check\n");
+DCLDEF NOSHARE char TEXT194[NOSZ_]  INIT_("type with \"SHOW TERMINAL\".\n");
+DCLDEF NOSHARE char TEXT195[NOSZ_]  INIT_("Cannot open channel to terminal.\n");
+DCLDEF NOSHARE char TEXT196[NOSZ_]  INIT_("Cannot obtain terminal settings.\n");
+DCLDEF NOSHARE char TEXT197[NOSZ_]  INIT_("Cannot modify terminal settings.\n");
+DCLDEF NOSHARE char TEXT198[NOSZ_]  INIT_("I/O error (%d,%d)\n");
+DCLDEF NOSHARE char TEXT199[NOSZ_]  INIT_("[Starting DCL]\r\n");
+DCLDEF NOSHARE char TEXT200[NOSZ_]  INIT_("[Calling DCL]\r\n");
+DCLDEF NOSHARE char TEXT201[NOSZ_]  INIT_("[Not available yet under VMS]");
+DCLDEF NOSHARE char TEXT202[NOSZ_]  INIT_("Terminal type not 'vt52'or 'z19' !");
+DCLDEF NOSHARE char TEXT203[NOSZ_]  INIT_("Window number out of range");
+DCLDEF NOSHARE char TEXT204[NOSZ_]  INIT_("Can not delete this window");
+DCLDEF NOSHARE char TEXT205[NOSZ_]  INIT_("Cannot split a %d line window");
+DCLDEF NOSHARE char TEXT206[NOSZ_]  INIT_("Only one window");
+DCLDEF NOSHARE char TEXT207[NOSZ_]  INIT_("Impossible change");
+DCLDEF NOSHARE char TEXT208[NOSZ_]  INIT_("[No such window exists]");
+DCLDEF NOSHARE char TEXT209[NOSZ_]  INIT_("%%Screen size out of range");
+DCLDEF NOSHARE char TEXT210[NOSZ_]  INIT_("%%Screen width out of range");
+DCLDEF NOSHARE char TEXT211[NOSZ_]  INIT_("Function list");
+DCLDEF NOSHARE char TEXT212[NOSZ_]  INIT_("Can not display function list");
+DCLDEF NOSHARE char TEXT213[NOSZ_]  INIT_("[Building function list]");
+DCLDEF NOSHARE char TEXT214[NOSZ_]  INIT_("%%No such file as %s");
+DCLDEF NOSHARE char TEXT215[NOSZ_]  INIT_(": macro-to-key ");
+DCLDEF NOSHARE char TEXT216[NOSZ_]  INIT_("Cannot read/write directories!!!");
+DCLDEF NOSHARE char TEXT217[NOSZ_]  INIT_("[Not available yet under AOS/VS]");
+DCLDEF NOSHARE char TEXT218[NOSZ_]  INIT_("Append file: ");
+DCLDEF NOSHARE char TEXT219[NOSZ_]  INIT_("%%Macro Failed");
+DCLDEF NOSHARE char TEXT220[NOSZ_]  INIT_("Line %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x%x");
+DCLDEF NOSHARE char TEXT221[NOSZ_]  INIT_("Too many groups");
+DCLDEF NOSHARE char TEXT222[NOSZ_]  INIT_("Group not ended");
+DCLDEF NOSHARE char TEXT223[NOSZ_]  INIT_("%%Column origin out of range");
+DCLDEF NOSHARE char TEXT224[NOSZ_]  INIT_("%%Row origin out of range");
+DCLDEF NOSHARE char TEXT225[NOSZ_]  INIT_("[Switched to screen %s]");
+DCLDEF NOSHARE char TEXT226[NOSZ_]  INIT_("%%Can not kill an executing buffer");
+DCLDEF NOSHARE char TEXT227[NOSZ_]  INIT_("\n--- Press any key to Continue ---");
+DCLDEF NOSHARE char TEXT228[NOSZ_]  INIT_("[Kill ring cleared]");
+DCLDEF NOSHARE char TEXT229[NOSZ_]  INIT_(" in < ");
+DCLDEF NOSHARE char TEXT230[NOSZ_]  INIT_("> at line ");
+DCLDEF NOSHARE char TEXT231[NOSZ_]  INIT_("Abbreviation to set: ");
+DCLDEF NOSHARE char TEXT232[NOSZ_]  INIT_("Abbreviation to delete: ");
+DCLDEF NOSHARE char TEXT233[NOSZ_]  INIT_("[Building Abbreviation list]");
+DCLDEF NOSHARE char TEXT234[NOSZ_]  INIT_("Abbreviation list");
+DCLDEF NOSHARE char TEXT235[NOSZ_]  INIT_("Can not display abbreviation list");
+DCLDEF NOSHARE char TEXT236[NOSZ_]  INIT_("Define Abbreviations in buffer");
+DCLDEF NOSHARE char TEXT240[NOSZ_]  INIT_("[No such screen]");
+DCLDEF NOSHARE char TEXT241[NOSZ_]  INIT_("%%Can't delete current screen");
+DCLDEF NOSHARE char TEXT242[NOSZ_]  INIT_("Find Screen: ");
+DCLDEF NOSHARE char TEXT243[NOSZ_]  INIT_("Delete Screen: ");
+DCLDEF NOSHARE char TEXT244[NOSZ_]  INIT_("%%No such function as '%s'");
+DCLDEF NOSHARE char TEXT245[NOSZ_]  INIT_("%%Division by Zero is illegal");
+DCLDEF NOSHARE char TEXT246[NOSZ_]  INIT_("%%Need function key number");
+DCLDEF NOSHARE char TEXT247[NOSZ_]  INIT_("%%Function key number out of range");
+DCLDEF NOSHARE char TEXT248[NOSZ_]  INIT_("Enter Label String: ");
+DCLDEF NOSHARE char TEXT249[NOSZ_]  INIT_("Global variable to declare: ");
+DCLDEF NOSHARE char TEXT250[NOSZ_]  INIT_("Local variable to declare: ");
 
 /* some of these are just used in the microsoft windows version */
-#define TEXT300 "[Incorrect menu]"
-#define TEXT301 "[Too many nested popup menus]"
-#define TEXT302 "[Lack of resources]"
-#define TEXT303 "Menu: "
-#define TEXT304 "Function: "
-#define TEXT305 "Macro: "
-#define TEXT306 "Menu: "
-#define TEXT307 "Help file: "
-#define TEXT308 "Help key: "
-#define TEXT310 "Alt+"
-#define TEXT311 "Shift+"
-#define TEXT312 "BkSp"
-#define TEXT313 "Tab"
-#define TEXT314 "Enter"
-#define TEXT315 "Esc"
-#define TEXT316 "Ctrl+"
-#define TEXT317 "Home"
-#define TEXT318 "DownArrow"
-#define TEXT319 "UpArrow"
-#define TEXT320 "LeftArrow"
-#define TEXT321 "RightArrow"
-#define TEXT322 "End"
-#define TEXT323 "PageUp"
-#define TEXT324 "PageDown"
-#define TEXT325 "Ins"
-#define TEXT326 "Del"
-#define TEXT327 "F10"
+DCLDEF NOSHARE char TEXT300[NOSZ_]  INIT_("[Incorrect menu]");
+DCLDEF NOSHARE char TEXT301[NOSZ_]  INIT_("[Too many nested popup menus]");
+DCLDEF NOSHARE char TEXT302[NOSZ_]  INIT_("[Lack of resources]");
+DCLDEF NOSHARE char TEXT303[NOSZ_]  INIT_("Menu: ");
+DCLDEF NOSHARE char TEXT304[NOSZ_]  INIT_("Function: ");
+DCLDEF NOSHARE char TEXT305[NOSZ_]  INIT_("Macro: ");
+DCLDEF NOSHARE char TEXT306[NOSZ_]  INIT_("Menu: ");
+DCLDEF NOSHARE char TEXT307[NOSZ_]  INIT_("Help file: ");
+DCLDEF NOSHARE char TEXT308[NOSZ_]  INIT_("Help key: ");
+DCLDEF NOSHARE char TEXT310[NOSZ_]  INIT_("Alt+");
+DCLDEF NOSHARE char TEXT311[NOSZ_]  INIT_("Shift+");
+DCLDEF NOSHARE char TEXT312[NOSZ_]  INIT_("BkSp");
+DCLDEF NOSHARE char TEXT313[NOSZ_]  INIT_("Tab");
+DCLDEF NOSHARE char TEXT314[NOSZ_]  INIT_("Enter");
+DCLDEF NOSHARE char TEXT315[NOSZ_]  INIT_("Esc");
+DCLDEF NOSHARE char TEXT316[NOSZ_]  INIT_("Ctrl+");
+DCLDEF NOSHARE char TEXT317[NOSZ_]  INIT_("Home");
+DCLDEF NOSHARE char TEXT318[NOSZ_]  INIT_("DownArrow");
+DCLDEF NOSHARE char TEXT319[NOSZ_]  INIT_("UpArrow");
+DCLDEF NOSHARE char TEXT320[NOSZ_]  INIT_("LeftArrow");
+DCLDEF NOSHARE char TEXT321[NOSZ_]  INIT_("RightArrow");
+DCLDEF NOSHARE char TEXT322[NOSZ_]  INIT_("End");
+DCLDEF NOSHARE char TEXT323[NOSZ_]  INIT_("PageUp");
+DCLDEF NOSHARE char TEXT324[NOSZ_]  INIT_("PageDown");
+DCLDEF NOSHARE char TEXT325[NOSZ_]  INIT_("Ins");
+DCLDEF NOSHARE char TEXT326[NOSZ_]  INIT_("Del");
+DCLDEF NOSHARE char TEXT327[NOSZ_]  INIT_("F10");
 #define CHAR328 'F'
-#define TEXT329 "SpaceBar"
-#define TEXT330 " - Message history"
-#define TEXT331 "Global modes"
-#define TEXT332 "Modes for buffer: "
-#define TEXT333 "File write in progress. Quit later!"
-#define TEXT334 "[No such directory]"
-#define TEXT335 "Change screen name to: "
-#define TEXT336 "[Screen name already in use]"
-#define TEXT337 "cannot monitor external program"
+DCLDEF NOSHARE char TEXT329[NOSZ_]  INIT_("SpaceBar");
+DCLDEF NOSHARE char TEXT330[NOSZ_]  INIT_(" - Message history");
+DCLDEF NOSHARE char TEXT331[NOSZ_]  INIT_("Global modes");
+DCLDEF NOSHARE char TEXT332[NOSZ_]  INIT_("Modes for buffer: ");
+DCLDEF NOSHARE char TEXT333[NOSZ_]  INIT_("File write in progress. Quit later!");
+DCLDEF NOSHARE char TEXT334[NOSZ_]  INIT_("[No such directory]");
+DCLDEF NOSHARE char TEXT335[NOSZ_]  INIT_("Change screen name to: ");
+DCLDEF NOSHARE char TEXT336[NOSZ_]  INIT_("[Screen name already in use]");
+DCLDEF NOSHARE char TEXT337[NOSZ_]  INIT_("cannot monitor external program");
 
 
 

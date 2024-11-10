@@ -48,9 +48,24 @@
 #define PROGNAME        "MicroEMACS"
 #define VERSION         "5.00"
 
-/*      Machine/OS definitions                                        */
-/*===== [Set one of these!!] ======================================== */
 
+/*====================================================================*/
+/* Old cpp programs sometimes have very limited space for macro       */
+/* definitions. When macro space overflows you get i.e. messages      */
+/* like `too much defining'.                                          */
+/*                                                                    */
+/* To save macro space we use the fact that an undefined macro in a   */
+/* cpp if-clause is handled as if it were defined to `0', which means */
+/* that it is allowed to ommit every macro that is defined as `0' and */
+/* subsequently is only used in cpp if-clauses.                       */
+/*====================================================================*/
+#define BEGIN_COMMENT_  ( 0 )
+/*====================================================================*/
+
+
+/*      Machine/OS definitions                                        */
+/*===== [Set one of these!!] =========================================*/
+#if BEGIN_COMMENT_
 #define AMIGA       0                 /* AmigaDOS                     */
 #define AOSVS       0                 /* Data General AOS/VS          */
 #define AUX         0                 /* Apple UNIX for Macintosh     */
@@ -82,6 +97,7 @@
 #define WINXP       0                 /* Windows XP/Visual studio 2008*/
 #define WMCS        0                 /* Wicat's MCS                  */
 #define XENIX       0                 /* IBM-PC SCO XENIX             */
+#endif  /*END_COMMENT_*/
 
 
 #define b_IS_UNIX       ( AIX || AIX5 || AUX || AVIION || BSD         \
@@ -105,7 +121,8 @@
 
 
 /*      Compiler definitions                                          */
-/*===== [Set one of these!!] ======================================== */
+/*===== [Set one of these!!] =========================================*/
+#if BEGIN_COMMENT_
 #define ALCYON  0         /* ALCYON Atari ST compiler                 */
 #define AZTEC   0         /* Aztec C 4.00e ONLY for the amiga now...  */
 #define DGC     0         /* Data General AOS/VS C...                 */
@@ -117,22 +134,25 @@
 #define TURBO   0         /* Turbo C and Borland C++ under MSDOS      */
 #define UNIX    0         /* a standard UNIX compiler (cc)            */
 #define ZTC     0         /* Zortech C/C++ 1.02 thru 2.10 under MSDOS */
+#endif  /*END_COMMENT_*/
 
 /*      Machine stack growth direction.                               */
-/*===== [Set one of these!!] ======================================== */
+/*===== [Set one of these!!] =========================================*/
 /*      data general mv/eclipse series stack grows up.                */
 /*      dec vax series stack grows down... got it???                  */
 
 #define STACK_GROWS_UP  0
 
 /*      Debugging options                                             */
+#if BEGIN_COMMENT_
 #define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
 #define RAMSHOW         0 /* auto dynamic RAM reporting               */
 #define RAMTRCK         0 /* send debug info to MALLOC.DAT            */
 #define DEBUG_SEARCH    0 /* pop some search info on patterns         */
+#endif  /*END_COMMENT_*/
 
 /*      Special keyboard/network definitions                          */
-
+#if BEGIN_COMMENT_
 #define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
 #define WANGPC  0     /* WangPC - mostly escape sequences             */
 #define VT100   1     /* Handle VT100 style keypad - NOT VMS.         */
@@ -143,12 +163,13 @@
                       /* use RMS directly                             */
 #define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
                       /* but more efficient memory allocator          */
+#endif  /*END_COMMENT_*/
 
 /*      Terminal Output definitions                                   */
 /*===== [If not on UNIX: Set one of these!!] =========================*/
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
-
+#if BEGIN_COMMENT_
 #define ANSI    0           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
@@ -168,7 +189,7 @@
 #define XPCON   0           /* windows XP console app                 */
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
-
+#endif  /*END_COMMENT_*/
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
 #define UNIX_READ_TOUT  (4)
@@ -181,8 +202,8 @@
 #define WINDOW_X        0   /* X/Unix                                 */
 
 /*      Language text options   (pick one)                            */
-
-#define ENGLISH 1           /* [default]                              */
+#if BEGIN_COMMENT_
+#define ENGLISH 0           /* [default]                              */
 #define FRENCH  0
 #define SPANISH 0
 #define GERMAN  0
@@ -190,6 +211,7 @@
 #define PLATIN  0           /* Pig Latin                              */
 #define JAPAN   0
 #define LATIN   0           /* real Latin                             */
+#endif  /*END_COMMENT_*/
 
 /*      Configuration options                                         */
 
@@ -222,23 +244,25 @@
 #endif
 
 /*      Character set options                                         */
-/*===== [Set one of these!!] ======================================== */
+/*===== [Set one of these!!] =========================================*/
 #define ASCII   1   /* always using ASCII char sequences for now      */
+#if BEGIN_COMMENT_
 #define EBCDIC  0   /* later IBM mainfraim versions will use EBCDIC   */
+#endif  /*END_COMMENT_*/
 
 /*      Settings related to tracing/debugging MicroEmacs              */
 /*====================================================================*/
 /* Fix overwrites of the line data instead of bailing out:            */
 /* -- All errors in the line code seem to be fixed now (2023-07-25),  */
 /* -- but if you want to find new errors set this to `0'.             */
-#define REPAIR_CODE_LINE      (!0)
+#define REPAIR_CODE_LINE      (1)
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
-#define UEMACS_TRC            (!0)
+#define UEMACS_TRC            (1)
 #define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
 
 
-/*=================================================================== */
+/*====================================================================*/
 
 
 /*===== handle constant and voids properly ===========================*/

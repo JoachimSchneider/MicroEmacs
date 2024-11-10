@@ -17,6 +17,11 @@
 
 
 /**********************************************************************/
+#include "estruct.h"
+/**********************************************************************/
+
+
+/**********************************************************************/
 #include <stdio.h>
 /***#include <stdlib.h>***/
 #include <errno.h>
@@ -39,17 +44,17 @@
 #define C_30  30
 #define C_36  36
 #define C_40  40
+#if     BEGIN_COMMENT_
 #define C_50  50
 #define C_60  60
 #define C_70  70
 #define C_80  80
 #define C_90  90
+#endif  /*END_COMMENT_*/
 /**********************************************************************/
 
 
 /**********************************************************************/
-#include "estruct.h"
-/*--------------------------------------------------------------------*/
 #if b_IS_ANSI_C
 /**********************************************************************/
 /* If possible use XCONCAT* below -- CONCAT* might result in          */
@@ -149,6 +154,26 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 # define REGISTER     register
 #endif
 /**********************************************************************/
+#define _K_               ,     /* We need to marshall the `,'  */
+
+/* for MAIN.C:  */
+#ifdef  MAIN_C_
+# if defined(__cplusplus)
+/* C++ Needs this because all constants have *internal linkage* by default. */
+#   define CSTDEF         COMMON CONST
+# else
+#   define CSTDEF         CONST
+# endif
+# define DCLDEF
+# define INIT_(x)         = x
+# define NOSZ_
+#else
+# define CSTDEF           COMMON CONST
+# define DCLDEF           COMMON
+# define INIT_(x)
+# define NOSZ_            DUMMYSZ /* GRRR */
+#endif
+/**********************************************************************/
 
 /**********************************************************************/
 #if PROTO
@@ -177,6 +202,7 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6)
 # define V6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, ...)
+#if     BEGIN_COMMENT_
 # define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7)
 # define V7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
@@ -189,6 +215,7 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
   (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
 # define V9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
   (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9, ...)
+#endif  /*END_COMMENT_*/
 # define DCL(args)                      args
 #else
 # define P0_()                          ()
@@ -210,6 +237,7 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 # define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
   (x1, x2, x3, x4, x5, x6)              t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6;
 # define V6_  P6_
+#if     BEGIN_COMMENT_
 # define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
   (x1, x2, x3, x4, x5, x6, x7)          t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7;
 # define V7_  P7_
@@ -219,6 +247,7 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 # define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
   (x1, x2, x3, x4, x5, x6, x7, x8, x9)  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8; t9 x9;
 # define V9_  P9_
+#endif  /*END_COMMENT_*/
 # define DCL(args)                      ()
 #endif
 /**********************************************************************/
@@ -267,14 +296,14 @@ EXTERN char *realloc DCL((char *block, int siz));
 # ifdef NDEBUG
 #   define UEMACS_TRC          (0)
 # else
-#   define UEMACS_TRC         (!0)
+#   define UEMACS_TRC          (1)
 # endif
 #endif
 #ifndef TRC_FILE_ENVVAR
 # define TRC_FILE_ENVVAR  "UEMACS_TRC_FILE"
 #endif
 #ifndef REPAIR_CODE_LINE
-# define REPAIR_CODE_LINE     (!0)
+# define REPAIR_CODE_LINE     (1)
 #endif
 #ifndef DFT_STATIC_STACKSIZE
 # define DFT_STATIC_STACKSIZE (16)
@@ -285,7 +314,7 @@ EXTERN char *realloc DCL((char *block, int siz));
 /**********************************************************************/
 EXTERN FILE *uetmpfile_ DCL((int delmode));
 #define uetmpfile() ( uetmpfile_(0) )
-#define clntmpfls() ( uetmpfile_(!0)  )
+#define clntmpfls() ( uetmpfile_(1)  )
 
 /* strcpy() possibly overlapping regions:   */
 EXTERN char *PASCAL NEAR  xstrcpy DCL((char *s1, CONST char *s2));
@@ -459,8 +488,8 @@ RETURN_L:
             rc_ = xstrlcpy(STATIC_STR_RET_ARR_, STATIC_STR_RET_VAL_,  \
                            SIZEOF(STATIC_STR_RET_ARR_));              \
             if ( SIZEOF(STATIC_STR_RET_ARR_) <= rc_ ) {               \
-                TRC(("%s(): RVl truncated: SIZEOF(RVl) = %d <= rc"    \
-                    " = %d", #func, SIZEOF(STATIC_STR_RET_ARR_),      \
+                TRC(("%s(): RVl truncated: SIZEOF(RVl) = %d <= rc = %d",  \
+                    MKSTRING(func), SIZEOF(STATIC_STR_RET_ARR_),      \
                     rc_));                                            \
             }                                                         \
                                                                       \
@@ -529,8 +558,10 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #define MINIMUM(x, y) ( ((x) > (y))? (y) : (x) )
 #define MIN2(x, y)    ( MINIMUM((x), (y)) )
 #define MAX2(x, y)    ( MAXIMUM((x), (y)) )
+#if     BEGIN_COMMENT_
 #define MIN3(x, y, z) ( MIN2((x), MIN2((y), (z))) )
 #define MAX3(x, y, z) ( MAX2((x), MAX2((y), (z))) )
+#endif  /*END_COMMENT_*/
 /**********************************************************************/
 
 /**********************************************************************/
@@ -551,6 +582,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /**********************************************************************/
 
 /**********************************************************************/
+#if     BEGIN_COMMENT_
 /* With DJGPP_DOS (gcc version 4.0.1) and `-O2' this leads to the warning:
  *  `dereferencing type-punned pointer will break strict aliasing rules'
  * *and* to generation of wrong code!
@@ -563,6 +595,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
         *pp__ = NULL;                 \
     }                                 \
 } while ( 0 )
+#endif  /*END_COMMENT_*/
 
 #define FREE_(p)  do  {               \
     char  *z__  = (char *)&(p);       \
@@ -727,7 +760,7 @@ char *PASCAL NEAR ui2s10_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 3*SIZEOF(a)
      *
      ******************************************************************/
-    CONST char    tab[] = "0123456789";
+    static CONST char tab[] = "0123456789";
     CASRT(C_10 + 1 == SIZEOF(tab));
     static char buf[1 + 3*SIZEOF(i) + 1];
     int           pos   = SIZEOF(buf) - 2;
@@ -773,7 +806,7 @@ char *PASCAL NEAR ui2s16_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 2*SIZEOF(a)
      *
      ******************************************************************/
-    CONST char    tab[] = "0123456789abcdef";
+    static CONST char tab[] = "0123456789abcdef";
     CASRT(C_16 + 1 == SIZEOF(tab));
     static char   buf[1 + 2*SIZEOF(i) + 1];
     int           pos   = SIZEOF(buf) - 2;
@@ -821,7 +854,7 @@ char *PASCAL NEAR ui2s36_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 2*SIZEOF(a)
      *
      ******************************************************************/
-    CONST char    tab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
+    static CONST char tab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
     CASRT(C_36 + 1 == SIZEOF(tab));
     static char   buf[1 + 2*SIZEOF(i) + 1];
     int           pos   = SIZEOF(buf) - 2;
@@ -844,8 +877,10 @@ char *PASCAL NEAR ui2s36_memacs P1_(unsigned int, i)
 }
 #endif
 /* Non negative int to string:  */
+#if     BEGIN_COMMENT_
 #define nni2s10_(i)     ( ui2s10_memacs((unsigned int)(i)) )
 #define nni2s16_(i)     ( ui2s16_memacs((unsigned int)(i)) )
+#endif  /*END_COMMENT_*/
 #define nni2s36_(i)     ( ui2s36_memacs((unsigned int)(i)) )
 
 /**********************************************************************/
@@ -925,12 +960,14 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         }                                                               \
     } while (0)
 
+#if     BEGIN_COMMENT_
 #define ASRTM(e, m) do {                                                \
         if ( !(e) )                                                     \
         {                                                               \
             ASRTM_Catch (__FILE__, __LINE__, MKSTRING(e), m);           \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 
 #define ASRTK(e, file, line) do {                                       \
         if ( !(e) )                                                     \
@@ -939,13 +976,16 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         }                                                               \
     } while (0)
 
+#if     BEGIN_COMMENT_
 #define ASRTMK(e, m, file, line) do {                                   \
         if ( !(e) )                                                     \
         {                                                               \
             ASRTM_Catch (file, line, MKSTRING(e), m);                   \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 
+#if     BEGIN_COMMENT_
 #define ASRT_TRC(e, a) do {                                             \
         if ( !(e) )                                                     \
         {                                                               \
@@ -953,6 +993,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 
 #define ASRTK_TRC(e, a, file, line) do {                                \
         if ( !(e) )                                                     \
@@ -961,6 +1002,10 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
+
+/**********************************************************************/
+#define IMPOSSIBLE  ( 0 )
+/**********************************************************************/
 
 /**********************************************************************/
 /*
@@ -979,7 +1024,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                 trcs_(MKSTRING(e)); trcs_("' failed!\n");               \
             trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
+            trcs_("    `"); trcs_(MKSTRING(r)); trcs_("'\n");           \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -987,6 +1032,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         }                                                               \
     } while (0)
 
+#if     BEGIN_COMMENT_
 #define REPAIRM(e, m, r) do {                                           \
         if ( !(e) )                                                     \
         {                                                               \
@@ -999,7 +1045,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                 trcs_("' failed!\n");                                   \
             trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
+            trcs_("    `"); trcs(MKSTRING(r)); trcs_("'\n");            \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -1018,7 +1064,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                  trcs_("' failed!\n");                                  \
             trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
+            trcs_("    `"); trcs(MKSTRING(r)); trcs_("'\n");            \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -1038,19 +1084,20 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                  trcs_("' failed!\n");                                  \
             trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" MKSTRING(r) "'"); trcs_("\n");                \
+            trcs_("    `"); trcs(MKSTRING(r)); trcs_("'\n");            \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 /**********************************************************************/
 
 /**********************************************************************/
 /* Do something only *once*:  */
 #define BEGIN_DO_ONCE do {        \
-    static int  FirstCall_  = !0; \
+    static int  FirstCall_  = 1;  \
                                   \
     if ( FirstCall_ ) {           \
         FirstCall_  = 0;          \
@@ -2450,6 +2497,7 @@ EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
 EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
 
+#if     BEGIN_COMMENT_
 /* With DJGPP_DOS (gcc version 4.0.1) and `-O2' this leads to the warning:
  *  `dereferencing type-punned pointer will break strict aliasing rules'
  * *and* to generation of wrong code!
@@ -2462,6 +2510,7 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
         *pp_  = NULL;               \
     }                               \
 } while ( 0 )
+#endif  /*END_COMMENT_*/
 #define CLROOM(p) do  {                 \
     char  *z_ = (char *)&(p);           \
     char  *p_ = NULL;                   \
@@ -2480,19 +2529,21 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 /**********************************************************************/
 /* Some helper macros:                                                */
 /**********************************************************************/
-#define ISALNUM(x)  isalnum((unsigned char)(x))
-#define ISALPHA(x)  isalpha((unsigned char)(x))
-#define ISCNTRL(x)  iscntrl((unsigned char)(x))
 #define ISDIGIT(x)  isdigit((unsigned char)(x))
-#define ISGRAPH(x)  isgraph((unsigned char)(x))
 #define ISLOWER(x)  islower((unsigned char)(x))
+#define ISSPACE(x)  isspace((unsigned char)(x))
+#define ISALPHA(x)  isalpha((unsigned char)(x))
+#if     BEGIN_COMMENT_
+#define ISALNUM(x)  isalnum((unsigned char)(x))
+#define ISCNTRL(x)  iscntrl((unsigned char)(x))
+#define ISGRAPH(x)  isgraph((unsigned char)(x))
 #define ISPRINT(x)  isprint((unsigned char)(x))
 #define ISPUNCT(x)  ispunct((unsigned char)(x))
-#define ISSPACE(x)  isspace((unsigned char)(x))
 #define ISUPPER(x)  isupper((unsigned char)(x))
 #define ISXDIGIT(x) isxdigit((unsigned char)(x))
 #define ISASCII(x)  isascii((unsigned char)(x))
 #define ISBLANK(x)  isblank((unsigned char)(x))
+#endif  /*END_COMMENT*/
 /**********************************************************************/
 
 

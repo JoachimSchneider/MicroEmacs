@@ -17,6 +17,9 @@
 /*34567890123456789012345678901234567890123456789012345678901234567890*/
 /*====================================================================*/
 
+/**********************************************************************/
+#include "eproto.h"
+/**********************************************************************/
 
 /*====================================================================*/
 /* Define array lengths here: Avoid Literals!                         */
@@ -35,27 +38,6 @@ COMMON NOSHARE NBIND  names[DUMMYSZ]; /* main.c via efunc.h */
 COMMON NOSHARE TERM term; /* Terminal information.    */
 #endif
 /**********************************************************************/
-
-
-#define _K_               ,     /* We need to marshall the `,'  */
-
-/* for MAIN.C:  */
-#ifdef  MAIN_C_
-# if defined(__cplusplus)
-/* C++ Needs this because all constants have *internal linkage* by default. */
-#   define CSTDEF         COMMON CONST
-# else
-#   define CSTDEF         CONST
-# endif
-# define DCLDEF
-# define INIT_(x)         = x
-# define NOSZ_
-#else
-# define CSTDEF           COMMON CONST
-# define DCLDEF           COMMON
-# define INIT_(x)
-# define NOSZ_            DUMMYSZ /* GRRR */
-#endif
 
 
 /* initialized global definitions */
@@ -297,15 +279,6 @@ DCLDEF NOSHARE int            pending_msg         INIT_(FALSE);         /* Flag 
 #if     HANDLE_WINCH
 DCLDEF NOSHARE int            winch_flag          INIT_(0);             /* Window size changed flag         */
 #endif
-
-
-/*====================================================================*/
-#undef CSTDEF
-#undef DCLDEF
-#undef INIT_
-#undef _K_
-#undef NOSZ_
-/*====================================================================*/
 
 
 

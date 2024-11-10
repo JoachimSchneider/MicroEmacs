@@ -28,7 +28,6 @@
 # endif
 # include <sys/ioctl.h>                 /* I/O control definitions  */
 #endif
-#include        "eproto.h"
 #include        "edef.h"
 #include        "elang.h"
 
