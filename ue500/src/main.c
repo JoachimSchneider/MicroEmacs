@@ -35,7 +35,7 @@
 
 #include "estruct.h"    /* global structures and defines */
 #include "eproto.h"     /* variable prototype definitions */
-#include "efunc.h"      /* function declarations and name table */
+#include "efunc.inc"    /* function declarations and name table */
 #include "edef.h"       /* global definitions */
 #include "elang.h"      /* human language definitions */
 #include "ebind.h"      /* default key bindings */

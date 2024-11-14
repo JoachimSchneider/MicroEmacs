@@ -20,7 +20,7 @@
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
-#include "evar.h"
+#include "evar.inc"
 
 
 #define RETURN  STATIC_STR_RET_RETURN

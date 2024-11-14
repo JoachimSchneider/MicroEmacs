@@ -23,11 +23,10 @@
 
 /**********************************************************************/
 #include <stdio.h>
-/***#include <stdlib.h>***/
 #include <errno.h>
 #include <ctype.h>
-/***#include <string.h>***/
-#include <time.h>
+/*--------------------------------------------------------------------*/
+/* `stdlib.h' and `string.h' will be included below for newer systems */
 /**********************************************************************/
 
 
@@ -156,7 +155,6 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 /**********************************************************************/
 #define _K_               ,     /* We need to marshall the `,'  */
 
-/* for MAIN.C:  */
 #ifdef  MAIN_C_
 # if defined(__cplusplus)
 /* C++ Needs this because all constants have *internal linkage* by default. */
@@ -172,6 +170,14 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 # define DCLDEF           COMMON
 # define INIT_(x)
 # define NOSZ_            DUMMYSZ /* GRRR */
+#endif
+
+#ifdef  ELANG_C_
+# define TDCLDEF          NOSHARE
+# define TINIT_(x)        = x
+#else
+# define TDCLDEF          COMMON NOSHARE
+# define TINIT_(x)
 #endif
 /**********************************************************************/
 
@@ -278,6 +284,8 @@ EXTERN char *realloc DCL((char *block, int siz));
          * || GCC || VMS || b_IS_UNIX
          */
 #if b_IS_UNIX
+/* We need `struct stat': */
+# include <sys/types.h>
 # include <sys/stat.h>
 #endif
 /*....................................................................*/
@@ -2481,6 +2489,7 @@ EXTERN char *strrev DCL((char *));
 EXTERN char *ctime DCL((const char *));
 #else
 #if IC  /* TURBO already has it defined */
+# include <time.h>  /* time_t */
 EXTERN char *ctime DCL((const time_t *));
 #endif
 #endif

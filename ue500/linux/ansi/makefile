@@ -37,7 +37,9 @@ HDIR = ../../h
 
 # list of header files
 
-HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.h $(HDIR)/eproto.h
+HFILES = estruct.h $(HDIR)/ebind.h $(HDIR)/edef.h           \
+          $(HDIR)/elang.h $(HDIR)/epath.h $(HDIR)/eproto.h
+
 
 #list of object files
 
@@ -50,12 +52,13 @@ F5 = $(OBJD)/lock.o $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
 F6 = $(OBJD)/random.o $(OBJD)/region.o $(OBJD)/search.o $(OBJD)/replace.o
 F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unixsys.o $(OBJD)/unixterm.o \
       $(OBJD)/window.o $(OBJD)/word.o
+F8 = $(OBJD)/elang.o
 
 # product list
 
 all:	emacs
 
-OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
+OFILES =  $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
 
 emacs:	$(OFILES)
 	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
@@ -80,7 +83,9 @@ $(OBJD)/display.o: $(SRCD)/display.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/display.o $(SRCD)/display.c
 $(OBJD)/dolock.o: $(SRCD)/dolock.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/dolock.o $(SRCD)/dolock.c
-$(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.h
+$(OBJD)/elang.o: $(SRCD)/elang.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/elang.o $(SRCD)/elang.c
+$(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/eval.o $(SRCD)/eval.c
 $(OBJD)/exec.o: $(SRCD)/exec.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/exec.o $(SRCD)/exec.c
@@ -98,7 +103,7 @@ $(OBJD)/line.o: $(SRCD)/line.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/line.o $(SRCD)/line.c
 $(OBJD)/lock.o: $(SRCD)/lock.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/lock.o $(SRCD)/lock.c
-$(OBJD)/main.o: $(SRCD)/main.c $(HFILES)
+$(OBJD)/main.o: $(SRCD)/main.c $(HFILES) $(HDIR)/efunc.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c

@@ -316,6 +316,15 @@
 #define VOIDP voidp_
 
 
+/*===== global includes to get some constants ========================*/
+#include <stdio.h>
+#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
+    || GCC || VMS || b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX )
+# include <limits.h>
+#endif
+/*====================================================================*/
+
+
 /*===== System dep. library redefinitions, structures and includes ===*/
 
 /*===== multibyte character support? =================================*/
@@ -400,7 +409,6 @@
 # endif
 # if     NTCON
 #  include <WinCon.h>
-#  include <stdio.h>
 #  include <dos.h>
 # endif
 
@@ -752,7 +760,12 @@ execl(va_alist)
 #endif
 #endif
 #define NBUFN   128             /* # of bytes, buffer name            */
-#ifdef MSDOS  /* Reduce sizes to UE312 vals --- else `stack overflow' */
+#if MSDOS     /* Reduce sizes to UE312 vals --- else `stack overflow' */
+# define NLINE   256            /* # of bytes, input line             */
+# define NSTRING 128            /* # of bytes, string buffers         */
+# define NPAT    128            /* # of bytes, pattern                */
+#else
+#if b_IS_ANCIENT_UNIX
 # define NLINE   256            /* # of bytes, input line             */
 # define NSTRING 128            /* # of bytes, string buffers         */
 # define NPAT    128            /* # of bytes, pattern                */
@@ -760,6 +773,7 @@ execl(va_alist)
 # define NLINE   512            /* # of bytes, input line             */
 # define NSTRING 512            /* # of bytes, string buffers         */
 # define NPAT    512            /* # of bytes, pattern                */
+#endif
 #endif
 #define NKBDM   4096            /* # of strokes, keyboard macro       */
 #define HUGENUM 1000            /* Huge number                        */

@@ -84,8 +84,6 @@
 /*==============================================================*/
 /* Include files                                                */
 /*==============================================================*/
-#include <stdio.h>              /* Standard I/O definitions     */
-/*--------------------------------------------------------------*/
 #include "estruct.h"            /* Emacs definitions            */
 #include "eproto.h"             /* Function definitions         */
 #include "edef.h"               /* Global variable definitions  */
@@ -133,20 +131,19 @@ int unixsys0  P1_(char *, s)
 /*==============================================================*/
 /* Include files                                                */
 /*==============================================================*/
-# include <time.h>              /* time(), ...              */
-# include <errno.h>             /* errno, ...               */
+# include <time.h>              /* time(), ctime(), ...         */
+# include <errno.h>             /* errno, ...                   */
 
 /** Overall include files **/
 # include <sys/types.h>                 /* System type definitions  */
 # include <sys/stat.h>                  /* File status definitions  */
-# include <sys/time.h>
 # include <sys/param.h>
 # include <signal.h>                    /* Signal definitions       */
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
 # else
    EXTERN int           getpid  DCL((void));
-   EXTERN int           ioctl   DCL((int, int, ...));
+   EXTERN int           ioctl   DCL((int, unsigned long int, ...));
    EXTERN unsigned int  sleep   DCL((unsigned int));
    EXTERN int           unlink  DCL((CONST char *));
    EXTERN int           read    DCL((int, char *, int));
@@ -160,15 +157,18 @@ int unixsys0  P1_(char *, s)
 /*==============================================================*/
 
 /** Directory accessing: Try and figure this out... if you can! **/
-# if ( XENIX || VAT )
-#  include <sys/ndir.h>                 /* Directory entry definitions  */
-#  define DIRENTRY       direct
+# if  ( b_IS_ANCIENT_UNIX )
+#  include <sys/dir.h>              /* Directory entry definitions  */
+#  define DIRENTRY        direct
 # else
-#  if ( !b_IS_ANCIENT_UNIX )
-#   include <dirent.h>                  /* Directory entry definitions  */
-#  endif
-#  define DIRENTRY       dirent
-# endif /* XENIX || VAT */
+# if  ( XENIX || VAT )
+#  include <sys/ndir.h>             /* Directory entry definitions  */
+#  define DIRENTRY        direct
+# else
+#  include <dirent.h>               /* Directory entry definitions  */
+#  define DIRENTRY        dirent
+# endif
+# endif
 
 # if ( CYGWIN )
 #  if USE_CYGWIN_CONV_PATH
@@ -1902,11 +1902,13 @@ CONST char *gettmpfname P1_(CONST char *, ident)
     int         i     = 0;
     static int  seed  = 0;
     static char res[NFILEN];
-    char        l_ident[C_1 + 1]  = "x";
+    char        l_ident[C_1 + 1];
 
     ZEROMEM(str);
     ZEROMEM(res);
+    ZEROMEM(l_ident);
 
+    l_ident[0]  = 'x';
     xstrlcpy(str, gettmpdir(),                SIZEOF(str));
     /* The filename part should have DOS 6.0 format --- remind DOS's
      * 126 byte command line limit
@@ -1961,10 +1963,10 @@ CONST char *gettmpfname P1_(CONST char *, ident)
  * ErrFile is the name of the file where stderr is expected to be
  * redirected. If it is NULL or an empty string, stderr is not redirected.
 */
-static int LaunchPrg P4_(const char *,  Cmd,
-                         const char *,  InFile,
-                         const char *,  OutFile,
-                         const char *,  ErrFile)
+static int LaunchPrg P4_(CONST char *,  Cmd,
+                         CONST char *,  InFile,
+                         CONST char *,  OutFile,
+                         CONST char *,  ErrFile)
 {
     char  FullCmd[NLINE];
     char  lInFile[NFILEN];
@@ -2038,7 +2040,7 @@ static int LaunchPrg P4_(const char *,  Cmd,
 /* We do not want to use the ctype.h functions as they depend on the locale.   */
 /*=============================================================================*/
 
-static int IsIn P3_(const char, c, const char *, set, int, len)
+static int IsIn P3_(CONST char, c, CONST char *, set, int, len)
 {
     int i = 0;
 
@@ -2070,7 +2072,7 @@ static int IsIn P3_(const char, c, const char *, set, int, len)
 # define IsLetter(c)     ( IsUpper( (c) ) || IsLower( (c) ) )
 
 #if(0)/**NOT_USED**/
-static char ToUpper P1_(const char, c)
+static char ToUpper P1_(CONST char, c)
 {
     int i   = 0;
 
@@ -2083,7 +2085,7 @@ static char ToUpper P1_(const char, c)
     return c;
 }
 
-static char ToLower P1_(const char, c)
+static char ToLower P1_(CONST char, c)
 {
     int i   = 0;
 
@@ -2102,8 +2104,8 @@ static char ToLower P1_(const char, c)
 # if ( 0 )
 static int makecmdbname P4_(char *,       bname,
                             int,          size,
-                            const char *, cmd,
-                            const char *, tag)
+                            CONST char *, cmd,
+                            CONST char *, tag)
 /* Create a buffer name for the output of s shell command */
 {
     static int  seed = 0;
@@ -2150,8 +2152,8 @@ static int makecmdbname P4_(char *,       bname,
 # else
 static int makecmdbname P4_(char *,       bname,
                             int,          size,
-                            const char *, cmd,
-                            const char *, tag)
+                            CONST char *, cmd,
+                            CONST char *, tag)
 /* Create a buffer name for the output of s shell command */
 {
     static int seed    = 0;
@@ -2218,7 +2220,7 @@ int pipecmd P2_(int, f, int, n)
     char        tmpnam[NFILEN];
     char        InFile[NFILEN];
     char        OutFile[NFILEN];
-    char        bname[NFILEN]   = "command";
+    char        bname[NFILEN];
     CONST char  *cp             = NULL;
     BUFFER      *bp             = NULL;
 
@@ -2226,7 +2228,9 @@ int pipecmd P2_(int, f, int, n)
     ZEROMEM(tmpnam);
     ZEROMEM(InFile);
     ZEROMEM(OutFile);
+    ZEROMEM(bname);
 
+    XSTRCPY(bname, "command");
     /* Don't allow this command if restricted */
     if ( restflag ) {
         return resterr();

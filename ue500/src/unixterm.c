@@ -84,8 +84,6 @@
 /*==============================================================*/
 /* Include files                                                */
 /*==============================================================*/
-#include <stdio.h>              /* Standard I/O definitions     */
-/*--------------------------------------------------------------*/
 #include "estruct.h"            /* Emacs definitions            */
 #include "eproto.h"             /* Function definitions         */
 #include "edef.h"               /* Global variable definitions  */

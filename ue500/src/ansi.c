@@ -24,7 +24,7 @@
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>                   /* ioctl()                  */
 # else
-   EXTERN int ioctl DCL((int, int, ...));
+   EXTERN int ioctl DCL((int, unsigned long int, ...));
 # endif
 # include <sys/ioctl.h>                 /* I/O control definitions  */
 #endif
