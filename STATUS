@@ -1615,6 +1615,9 @@ Use it to compile this version on V7.
 
 #============================== TODO LIST ==============================
 
+- Windows and DJGPP emacs sets \\<host>\<share>\<file> arguments to read-only.
+- Allow empty replacement string on repeated query-replace.
+- Make 'Ctrl-X,#' (filter-buffer) redoable.
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.c
 - Check if Palette settings are applicable to ANSI.
 - grabnowait(): Change it to return int and return grabnowait_TIMEOUT == (-1) on

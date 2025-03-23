@@ -22,8 +22,6 @@
 #include "edef.h"
 #include "elang.h"
 #if ( b_IS_UNIX )
-# include <sys/types.h>
-# include <sys/stat.h>
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
 # else

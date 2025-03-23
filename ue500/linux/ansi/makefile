@@ -18,14 +18,15 @@ HDIR = ../../h
 # - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
 #
 ##
+OPTFLAGS = -fno-strict-aliasing
 #WARNFLAGS = -Wall
  WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC
- CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)     -DEMACS_TRC
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2 -DEMACS_TRC
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)
 ##
 
 # Where to find the termcap/cureses library:

@@ -1889,10 +1889,9 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
 {
     int         rc  = 0;            /* Final return code  */
     int         nn  = n;            /* Want a signed value */
-    int         sc  = 0;            /* Ret code of intermediate calls */
     int         nr  = 0;            /* Number of chars to read */
     static FILE *fp = NULL;
-    static char buf[BUFSIZ];
+    static char buf[BUFSIZ];  /* MUST USE BUFSIZ from <stdio.h> */
 
     ASRT(0    <= nn);
     ASRT(NULL != fmt);
@@ -1910,22 +1909,14 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
          * Buffering: No real IO for not too large junks
          *
          * `setvbuf(fp, NULL, _IOFBF, 0)' does not work everywhere,
-         * e.g. not with DJGPP_DOS.
+         * e.g. not with DJGPP_DOS. No setvbuf() for ANCIENT_UNIX.
          */
-        if ( 0 != (sc = setvbuf(fp, buf, _IOFBF, SIZEOF(buf))) )  {
-            int errno_sv  = 0;
-
-            errno_sv  = errno;
-            TRC(("xvsnprintf: setvbuf(), sc = %d, errno = %d: %s",
-                 sc, errno_sv, strerror(errno_sv)));
-
-            return (-2);
-        }
+        setbuf(fp, buf);
     }
 
     rewind(fp);
     if ( 0 > ( rc = vfprintf(fp, fmt, ap) ) ) {
-        return (-3);
+        return (-2);
     }
 
     if ( 0 == nn ) {
@@ -1945,7 +1936,7 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
             rewind(fp);
             nr = MIN2(rc, nn - 1);
             if ( 1 != fread(s, nr, 1, fp) ) {
-                return (-4);
+                return (-3);
             }
             s[nr] = '\0';
         }

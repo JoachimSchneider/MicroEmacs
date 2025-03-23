@@ -97,11 +97,15 @@ char *undolock P1_(CONST char *, fname)
 
 #else
 #if ( FILOCK && ( b_IS_UNIX || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
-
-# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) || b_IS_UNIX )
+/* b_IS_UNIX: `sys/types.h' and `sys/stat.h' already included
+ * in `eproto.h':
+ */
+# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) )
 #  include     <sys/types.h>
 # endif
-# include       <sys/stat.h>
+# if ( ! b_IS_UNIX )
+#   include       <sys/stat.h>
+# endif
 # include       <errno.h>
 # if  ( MSDOS && TURBO )
 #  include     <dir.h>

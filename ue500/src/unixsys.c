@@ -135,9 +135,10 @@ int unixsys0  P1_(char *, s)
 # include <errno.h>             /* errno, ...                   */
 
 /** Overall include files **/
+# if BEGIN_COMMENT_   /* Already included in `eproto.h' */
 # include <sys/types.h>                 /* System type definitions  */
 # include <sys/stat.h>                  /* File status definitions  */
-# include <sys/param.h>
+# endif  /*END_COMMENT_*/
 # include <signal.h>                    /* Signal definitions       */
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
@@ -384,9 +385,9 @@ static int cygdrive_len_ P0_()
 /*==============================================================*/
 
 
-static DIR *dirptr = NULL;              /* Current directory stream   */
-static char path[NFILEN];               /* Path of file to find       */
-static char rbuf[NFILEN];               /* Return file buffer         */
+static DIR *dirptr  = NULL;           /* Current directory stream     */
+static char path[NFILEN];             /* Path of file to find         */
+static char rbuf[NFILEN];             /* Return file buffer           */
 static char *nameptr;                 /* Ptr past end of path in rbuf */
 
 /** Get time of day **/

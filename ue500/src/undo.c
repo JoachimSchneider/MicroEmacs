@@ -22,12 +22,15 @@
 /*====================================================================*/
 
 
-#include        <stdio.h>
-#include        <string.h>
-#include        "estruct.h"
-#include        "eproto.h"
-#include        "edef.h"
-#include        "elang.h"
+/*==============================================================*/
+/* Include files                                                */
+/*==============================================================*/
+#include "estruct.h"            /* Emacs definitions            */
+#include "eproto.h"             /* Function definitions         */
+#include "edef.h"               /* Global variable definitions  */
+#include "elang.h"              /* Language definitions         */
+/*==============================================================*/
+
 
 /* UNDO_INSERT:
  *

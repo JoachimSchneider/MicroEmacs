@@ -473,7 +473,7 @@ EXTERN int PASCAL NEAR rec_seq DCL((char *buf, char *bufstart, KEYENT *node));
 
 /* some globals needed here */
 /*  Prefix escape sequence table:                                     */
-static unsigned char  keyseq[(int)(unsigned char)(-1) + 1];
+static unsigned char  keyseq[0xFF/***(int)(unsigned char)(-1)***/ + 1];
 static KEYENT         keymap[NKEYSEQ];  /* Key map                    */
 static KEYENT         *nxtkey = keymap; /* Next free key entry        */
 static BUFFER         *seqbuf;          /* For the pop-up buffer      */

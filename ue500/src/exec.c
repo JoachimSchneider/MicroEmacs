@@ -206,7 +206,7 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
 static int  GetHexDigVal P1_(char, d)
 {
     static int  FirstCall = 1;
-    static int  digtab[(int)(unsigned char)(-1) + 1];
+    static int  digtab[0xFF/***(int)(unsigned char)(-1)***/ + 1];
 # define SET_DIG_VAL_(d, v) digtab[(int)(unsigned char) (d)]  = (v)
 
     if ( FirstCall )  {

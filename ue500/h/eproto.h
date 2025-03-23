@@ -279,13 +279,18 @@ EXTERN char *malloc DCL((int));
 EXTERN VOID free DCL((char *));
 #  endif
 EXTERN char *realloc DCL((char *block, int siz));
+EXTERN int  errno;
 # endif
 #endif  /* WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO)) \
          * || GCC || VMS || b_IS_UNIX
          */
 #if b_IS_UNIX
 /* We need `struct stat': */
-# include <sys/types.h>
+# if b_IS_ANCIENT_UNIX
+#  include <sys/param.h>  /* Includes `sys/types.h' */
+# else
+#  include <sys/types.h>
+# endif
 # include <sys/stat.h>
 #endif
 /*....................................................................*/
