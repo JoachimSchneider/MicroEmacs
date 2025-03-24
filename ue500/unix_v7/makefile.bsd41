@@ -1,4 +1,4 @@
-#               Linux makefile for
+#               Makefile for
 #               MicroEMACS 4.00
 #               (C)Copyright 1995 by Daniel Lawrence
 #               all rights reserved
@@ -27,7 +27,13 @@ HDIR = ../h
 #CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC
 #CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
 #CFLAGS = -I. -I$(HDIR) -O
-CFLAGS = -w -I. -I$(HDIR) -O
+# These is the SunOS 5.7 command line:
+# To test on SunOS follow tehse steps:
+# $ mkdir sys
+# $ ln -s /usr/include/sys/dirent.h sys/dir.h
+CFLAGS = -Wall -I. -I$(HDIR) -O -Ddirect=dirent -DPROTO=0 -DUSE_STDARG=0
+# These is the BSD 4.1 command line
+#CFLAGS = -w -I. -I$(HDIR) -O
 ##
 
 

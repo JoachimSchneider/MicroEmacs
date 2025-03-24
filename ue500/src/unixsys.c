@@ -147,6 +147,8 @@ int unixsys0  P1_(char *, s)
    EXTERN int           ioctl   DCL((int, unsigned long int, ...));
    EXTERN unsigned int  sleep   DCL((unsigned int));
    EXTERN int           unlink  DCL((CONST char *));
+   EXTERN int           open    DCL((char *, int));
+   EXTERN int           close   DCL((int));
    EXTERN int           read    DCL((int, char *, int));
    EXTERN int           write   DCL((int, CONST char *, int));
    EXTERN int           access  DCL((CONST char *, int));
@@ -154,20 +156,35 @@ int unixsys0  P1_(char *, s)
 
 
 /*==============================================================*/
-/* Completion include files                                     */
+/* Complete including files                                     */
 /*==============================================================*/
 
 /** Directory accessing: Try and figure this out... if you can! **/
 # if  ( b_IS_ANCIENT_UNIX )
 #  include <sys/dir.h>              /* Directory entry definitions  */
-#  define DIRENTRY        direct
+#  define UMC_DIRENTRY    direct
+#  define USE_BSD_FFS_EARLY (1)
+#  define USE_BSD_FFS_LATE  (2)
+#  ifndef SWITCH_BSD_FFS
+#   define SWITCH_BSD_FFS USE_BSD_FFS_EARLY
+#  endif
+#  if ( SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
+    typedef struct bsd_ffs_early_dir_s_ {
+      int fd;
+    } bsd_ffs_early_dir_t_;
+#   define UMC_DIR        bsd_ffs_early_dir_t_
+#  else
+#   define UMC_DIR        DIR
+#  endif
 # else
 # if  ( XENIX || VAT )
 #  include <sys/ndir.h>             /* Directory entry definitions  */
-#  define DIRENTRY        direct
+#  define UMC_DIRENTRY    direct
+#  define UMC_DIR         DIR
 # else
 #  include <dirent.h>               /* Directory entry definitions  */
-#  define DIRENTRY        dirent
+#  define UMC_DIRENTRY    dirent
+#  define UMC_DIR         DIR
 # endif
 # endif
 
@@ -385,10 +402,108 @@ static int cygdrive_len_ P0_()
 /*==============================================================*/
 
 
-static DIR *dirptr  = NULL;           /* Current directory stream     */
-static char path[NFILEN];             /* Path of file to find         */
-static char rbuf[NFILEN];             /* Return file buffer           */
-static char *nameptr;                 /* Ptr past end of path in rbuf */
+/*==============================================================*/
+/* Implementation of or wrapper for opendir/readdir/closedir:   */
+/*==============================================================*/
+# if  ( b_IS_ANCIENT_UNIX && SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
+static int  readn P3_(int, fd, char *, buf, int, nbytes)
+{
+    char  *bp   = (char *)buf;
+    int   nleft = nbytes;
+    int   nread = 0;
+    int   n     = 0;
+
+    while ( 0 < nleft ) {
+        n = read(fd, bp, nleft);
+        if ( 0 > n )         { /* ERROR  */
+            return n;
+        } else if ( 0 == n)  { /* EOF    */
+            return nread;
+        } else   /* 0 < n */ {
+            nread += n;
+            nleft -= n;
+            bp    += n;
+        }
+    }
+
+    return nread;
+}
+# endif
+
+static UMC_DIR  *umc_opendir P1_(CONST char *, name)
+{
+# if  ( b_IS_ANCIENT_UNIX && SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
+#  ifndef   O_RDONLY
+#   define  O_RDONLY  (0)
+#  endif
+    int         rc  = 0;
+    int         fd  = 0;
+    struct stat sb;
+    UMC_DIR     *res  = NULL;
+
+    ZEROMEM(sb);
+    ASRT(NULL != name);
+
+    if        ( 0 > (rc = stat(name, &sb)) )              {
+        return NULL;
+    } else if ( (sb.st_mode & S_IFMT) != S_IFDIR )        {
+        return NULL;
+    } else if ( 0 > (fd = open(name, O_RDONLY)) )         {
+        return NULL;
+    } else if ( NULL == (res = calloc(1, SIZEOF(*res))) ) {
+        return NULL;
+    }
+
+    res->fd = fd;
+
+    return res;
+# else
+    return opendir(name);
+# endif
+}
+
+static struct UMC_DIRENTRY  *umc_readdir P1_(UMC_DIR *, dirp)
+{
+# if  ( b_IS_ANCIENT_UNIX && SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
+    static struct UMC_DIRENTRY  de;
+
+    ZEROMEM(de);
+    ASRT(NULL != dirp);
+
+    while ( SIZEOF(de) == readn(dirp->fd, &de, sizeof(de)) )  {
+        if ( 0 != de.d_ino )  {
+            return &de;
+        }
+    }
+
+    return NULL;
+# else
+    return readdir(dirp);
+# endif
+}
+
+static int  umc_closedir P1_(UMC_DIR *, dirp)
+{
+# if  ( b_IS_ANCIENT_UNIX && SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
+    ASRT(NULL != dirp);
+
+    if ( 0 != close(dirp->fd) ) {
+        return (-1);
+    }
+    free(dirp);
+
+    return 0;
+# else
+    return closedir(dirp);
+# endif
+}
+/*==============================================================*/
+
+
+static UMC_DIR  *dirptr  = NULL;      /* Current directory stream     */
+static char     path[NFILEN];         /* Path of file to find         */
+static char     rbuf[NFILEN];         /* Return file buffer           */
+static char     *nameptr;             /* Ptr past end of path in rbuf */
 
 /** Get time of day **/
 char * timeset P0_()
@@ -2466,11 +2581,11 @@ char *getffile P1_(char *, fspec)
 
     /* Open the directory pointer */
     if ( dirptr ) {
-        closedir(dirptr);
+        umc_closedir(dirptr);
         dirptr = NULL;
     }
 
-    dirptr = opendir( (path[0] == '\0') ? "./" : path );
+    dirptr = umc_opendir( (path[0] == '\0') ? "./" : path );
 
     if ( !dirptr )
         return (NULL);
@@ -2485,14 +2600,14 @@ char *getffile P1_(char *, fspec)
 /** Get next filename from pattern **/
 char *getnfile P0_()
 {
-    struct DIRENTRY *dp = NULL;
-    struct stat     fstat;
+    struct UMC_DIRENTRY *dp = NULL;
+    struct stat         fstat;
 
     ZEROMEM(fstat);
 
     /* ...and call for the next file */
     do {
-        if ( !(dp = readdir(dirptr)) )  {
+        if ( !(dp = umc_readdir(dirptr)) )  {
             return (NULL);
         }
 

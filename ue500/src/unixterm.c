@@ -140,24 +140,24 @@
 #define USE_TERMINAL_SELECT (2)
 #define USE_TERMINAL_READX  (3)
 
-#ifndef TERMINAL_NOBLOCK_READ
+#ifndef SWITCH_TERMINAL_NOBLOCK_READ
 # if    ( CYGWIN || DJGPP_DOS )
-#  define TERMINAL_NOBLOCK_READ USE_TERMINAL_SELECT
+#  define SWITCH_TERMINAL_NOBLOCK_READ  USE_TERMINAL_SELECT
 # else
 # if  ( b_IS_ANCIENT_UNIX )
-#  define TERMINAL_NOBLOCK_READ USE_TERMINAL_READX
+#  define SWITCH_TERMINAL_NOBLOCK_READ  USE_TERMINAL_READX
 # else
-#  define TERMINAL_NOBLOCK_READ USE_TERMINAL_SELECT
+#  define SWITCH_TERMINAL_NOBLOCK_READ  USE_TERMINAL_SELECT
 # endif
 # endif
 #endif
-#if   ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+#if   ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
 #else
-#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 #else
-#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
 #else
-  CRASH(Invalid value for TERMINAL_NOBLOCK_READ);
+  CRASH(Invalid value for SWITCH_TERMINAL_NOBLOCK_READ);
 #endif
 #endif
 #endif
@@ -179,7 +179,7 @@ int unixterm0 P1_(char *, s)
 /*==============================================================*/
 
 /*==============================================================*/
-# if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+# if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 #  if ( !DJGPP_DOS )  /* select() prototype in time.h */
 #   include <sys/select.h>
 #  endif
@@ -216,7 +216,11 @@ int unixterm0 P1_(char *, s)
    EXTERN int           ioctl   DCL((int, int, ...));
    EXTERN int           read    DCL((int, char *, int));
    EXTERN int           write   DCL((int, CONST char *, int));
+   EXTERN int           getpid  DCL((void));
+   EXTERN int           gtty    DCL((int, struct sgttyb *));
+   EXTERN int           stty    DCL((int, struct sgttyb *));
 # endif
+
 /*==============================================================*/
 
 /*==============================================================*/
@@ -244,7 +248,7 @@ EXTERN const char *cygpwd_      DCL((void));
 /*====================================================================*/
 /* Static functions declared here:                                    */
 /*====================================================================*/
-#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
 static int  rdstdin       DCL((int getnread));
 # define nread()  ( rdstdin(1) )
 # define readx()  ( rdstdin(0)  )
@@ -760,7 +764,7 @@ int ttputc P1_(int, ch)
 unsigned char grabwait()
 {
     unsigned char ch  = '\0';
-# if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+# if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
     int           rv  = 0;
 # endif
 
@@ -785,7 +789,7 @@ unsigned char grabwait()
     }
 # endif
 
-# if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+# if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
     /* Perform read */
 #  if HANDLE_WINCH
     while ( ( rv = readx() ) < 0 )  {
@@ -824,7 +828,7 @@ unsigned char grabwait()
 }
 
 /** Grab input characters, short wait **/
-# if    ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+# if    ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     fd_set          rfds;
@@ -880,7 +884,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
     }
 }
 # else
-# if  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+# if  ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     int           count = 0;
@@ -929,7 +933,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
     return (ch);
 }
 # else
-# if  ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+# if  ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     if ( 0 >= nread() ) {
@@ -963,7 +967,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
    CRASH(IMPOSSIBLE);
 # endif
 # endif
-# endif /* TERMINAL_NOBLOCK_READ */
+# endif /* SWITCH_TERMINAL_NOBLOCK_READ */
 
 /* QIN:
  *
@@ -1703,7 +1707,7 @@ VOID winch_new_size P0_()
 # endif /* HANDLE_WINCH */
 
 
-#if ( TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
 /*
  * This function is used to implement non blocking reading on systems
  * without the select() system call.
@@ -1772,7 +1776,7 @@ static int  rdstdin P1_(int, getnread)
 # undef INC_rdstdin_
 # undef BUFSZ_rdstdin_
 }
-#endif  /* TERMINAL_NOBLOCK_READ */
+#endif  /* SWITCH_TERMINAL_NOBLOCK_READ */
 
 
 
