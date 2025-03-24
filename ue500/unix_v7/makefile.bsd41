@@ -3,6 +3,9 @@
 #               (C)Copyright 1995 by Daniel Lawrence
 #               all rights reserved
 
+# This makefile is appropriate for *very early* UNIX systems like 4.1 BSD.
+# It is possible to test it on SunOS 5.7 (not an early UNIX) using the step described below.
+
 # modify the following lines with the proper relative directories
 
 # object file directory
@@ -27,13 +30,16 @@ HDIR = ../h
 #CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC
 #CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
 #CFLAGS = -I. -I$(HDIR) -O
-# These is the SunOS 5.7 command line:
-# To test on SunOS follow tehse steps:
+
+# This is the SunOS 5.7 command line:
+# To test on SunOS follow these steps:
 # $ mkdir sys
 # $ ln -s /usr/include/sys/dirent.h sys/dir.h
-CFLAGS = -Wall -I. -I$(HDIR) -O -Ddirect=dirent -DPROTO=0 -DUSE_STDARG=0
+#CFLAGS = -Wall -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent -DPROTO=0 -DUSE_STDARG=0
+# should be the same as
+#CFLAGS = -Wall -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent
 # These is the BSD 4.1 command line
-#CFLAGS = -w -I. -I$(HDIR) -O
+CFLAGS = -w -I. -I$(HDIR) -O
 ##
 
 

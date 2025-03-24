@@ -65,7 +65,7 @@
 
 /*      Machine/OS definitions                                        */
 /*===== [Set one of these!!] =========================================*/
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define AMIGA       0                 /* AmigaDOS                     */
 #define AOSVS       0                 /* Data General AOS/VS          */
 #define AUX         0                 /* Apple UNIX for Macintosh     */
@@ -91,7 +91,7 @@
 #define TOS         0                 /* ST520, TOS                   */
 #endif  /*END_COMMENT_*/
 #define UNIX_V7     1                 /* UNIX version 7               */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define USG         0                 /* UNIX system V                */
 #define VAT         0                 /* Related to XENIX (???)       */
 #define VMS         0                 /* VAX/VMS                      */
@@ -124,7 +124,7 @@
 
 /*      Compiler definitions                                          */
 /*===== [Set one of these!!] =========================================*/
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define ALCYON  0         /* ALCYON Atari ST compiler                 */
 #define AZTEC   0         /* Aztec C 4.00e ONLY for the amiga now...  */
 #define DGC     0         /* Data General AOS/VS C...                 */
@@ -136,7 +136,7 @@
 #define TURBO   0         /* Turbo C and Borland C++ under MSDOS      */
 #endif  /*END_COMMENT_*/
 #define UNIX    1         /* a standard UNIX compiler (cc)            */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define ZTC     0         /* Zortech C/C++ 1.02 thru 2.10 under MSDOS */
 #endif  /*END_COMMENT_*/
 
@@ -148,7 +148,7 @@
 #define STACK_GROWS_UP  0
 
 /*      Debugging options                                             */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
 #define RAMSHOW         0 /* auto dynamic RAM reporting               */
 #define RAMTRCK         0 /* send debug info to MALLOC.DAT            */
@@ -156,12 +156,12 @@
 #endif  /*END_COMMENT_*/
 
 /*      Special keyboard/network definitions                          */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
 #define WANGPC  0     /* WangPC - mostly escape sequences             */
 #endif  /*END_COMMENT_*/
 #define VT100   1     /* Handle VT100 style keypad - NOT VMS.         */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define KEYPAD  0     /* VMS - turn on and off application            */
                       /* keypad automatically                         */
 #define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
@@ -175,8 +175,10 @@
 /*===== [If not on UNIX: Set one of these!!] =========================*/
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
+#if BEGIN_COMMENT_
+#endif  /*END_COMMENT_*/
 #define ANSI    1           /* ANSI escape sequences                  */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */
@@ -208,8 +210,10 @@
 #define WINDOW_X        0   /* X/Unix                                 */
 
 /*      Language text options   (pick one)                            */
+#if BEGIN_COMMENT_
+#endif  /*END_COMMENT_*/
 #define ENGLISH 1           /* [default]                              */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define FRENCH  0
 #define SPANISH 0
 #define GERMAN  0
@@ -252,7 +256,7 @@
 /*      Character set options                                         */
 /*===== [Set one of these!!] =========================================*/
 #define ASCII   1   /* always using ASCII char sequences for now      */
-#if     BEGIN_COMMENT_
+#if BEGIN_COMMENT_
 #define EBCDIC  0   /* later IBM mainfraim versions will use EBCDIC   */
 #endif  /*END_COMMENT_*/
 
@@ -723,14 +727,6 @@ execl(va_alist)
 #if ZTC
 # include     <dos.h>
 #endif
-
-
-/*===== global includes to get some constants ========================*/
-#if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
-    || GCC || VMS || b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX )
-# include <limits.h>
-#endif
-/*====================================================================*/
 
 
 /*===== Emacs global flag bit definitions (for gflags) ===============*/
