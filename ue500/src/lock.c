@@ -168,7 +168,7 @@ int xunlock P1_(char *, fname /* file to unlock */)
 VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 {
     char obuf[NSTRING];   /* output buffer for error message */
-    char *sys_errstr = strerror(errno);
+    char *sys_errstr = umc_strerror(errno);
 
     XSTRCPY(obuf, errstr);
     XSTRCAT(obuf, " - ");

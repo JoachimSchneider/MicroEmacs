@@ -398,7 +398,7 @@ static VOID mbreadast P0_()
             /* Got broadcast, get it */
             /* Hard-coding the mbmsg.brdcnt to 511 is a temp solution. */
             mbmsg.brdcnt = 511;
-            memcpy(brdcstbuf, mbmsg.message, 511);
+            umc_memcpy(brdcstbuf, mbmsg.message, 511);
             brdcstbuf[511] = 0;
 
             RemoveEscapes(brdcstbuf);
@@ -1406,7 +1406,7 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
         }
 
         /* copy data */
-        memcpy(fline, buf, nbuf);
+        umc_memcpy(fline, buf, nbuf);
 
         /* encrypt it */
         ecrypt(fline, nbuf);

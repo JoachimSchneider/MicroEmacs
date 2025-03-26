@@ -1277,7 +1277,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
         return FALSE;
     }
 
-    memset(bmap, 0, BMAPSIZE);
+    umc_memset(bmap, 0, BMAPSIZE);
 
     mcptr->u.cclmap = bmap;
     patptr = *ppatptr;

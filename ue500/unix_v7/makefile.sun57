@@ -39,7 +39,7 @@ HDIR = ../h
 # should be the same as
 CFLAGS = -Wall -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent
 # These is the BSD 4.1 command line
-#CFLAGS = -w -I. -I$(HDIR) -O
+#CFLAGS = -I. -I$(HDIR) -O
 ##
 
 

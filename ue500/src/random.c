@@ -1528,9 +1528,64 @@ int PASCAL NEAR lkp_color P1_(char *, sp)
  * functions therefor we use the following construct:
  */
 #ifdef NDEBUG
-# define  NDEBUF_WAS_DEFINED_
+# define  NDEBUG_WAS_DEFINED_
 # undef   NDEBUG
 #endif
+
+
+/*======================================================================
+ * Some library functions not available everywhere:
+ *====================================================================*/
+/* UMC_MEMSET:
+ */
+VOIDP umc_memset  P3_(VOIDP, dest, int, c, unsigned long, n)
+{
+    assert(NULL != dest);
+
+#if b_IS_ANCIENT_UNIX
+    {
+        unsigned char *x  = (unsigned char*)dest;
+        int           i   = 0;
+
+        for ( i = 0; i < (long)n; i++ ) {
+            x[i] = c;
+        }
+    }
+#else
+    memset(dest, c, n);
+#endif
+
+    return dest;
+}
+
+/* UMC_MEMCPY:
+ *
+ * We use this also when there is a native implementation:
+ * This one may also copy overlapping regions of memory.
+ */
+VOIDP umc_memcpy  P3_(VOIDP, dest, CONST VOIDP, src, unsigned long, n)
+{
+    unsigned char *x  = (unsigned char*)dest;
+    unsigned char *y  = (unsigned char*)src;
+    int           i   = 0;
+
+    assert(NULL != dest);
+    assert(NULL != src);
+
+    if ( x < y )  {
+        for ( i = 0; i < (long)n; i++ ) {
+            x[i] = y[i];
+        }
+    } else        {
+        for ( i = (long)n - 1; i >= 0 ; i-- ) {
+            x[i] = y[i];
+        }
+    }
+
+    return dest;
+}
+/*====================================================================*/
+
 
 /* XSTRCPY:
  *
@@ -2304,9 +2359,9 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 /* We want to use a working `assert' inside of some of these
  * functions therefor we use the following construct:
  */
-#ifdef NDEBUF_WAS_DEFINED_
-# define  NDEBUF
-# undef   NDEBUF_WAS_DEFINED_
+#ifdef NDEBUG_WAS_DEFINED_
+# define  NDEBUG
+# undef   NDEBUG_WAS_DEFINED_
 #endif
 
 /*====================================================================*/

@@ -1188,7 +1188,7 @@ fvar:   vtype = -1;
         for ( vnum = 0; vnum < vut->size; vnum++ )
             if ( vut->uv[vnum].u_name[0] == 0 ) {
                 vtype = TKVAR;
-                memset( (char *)&vut->uv[vnum].u_name[0], '\0', NVSIZE );
+                umc_memset( (char *)&vut->uv[vnum].u_name[0], '\0', NVSIZE );
                 xstrncpy(vut->uv[vnum].u_name, &var[1], NVSIZE);
                 vut->uv[vnum].u_value = NULL;
                 break;

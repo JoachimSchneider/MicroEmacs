@@ -127,7 +127,7 @@ static int lookup P0_()
 # endif
         cp--;
 
-    memset(cpath, '\0', NFILEN);
+    umc_memset(cpath, '\0', NFILEN);
     if ( cp >= curbp->b_fname )
         xstrncpy( cpath, curbp->b_fname, (int) (cp - curbp->b_fname) );
     else

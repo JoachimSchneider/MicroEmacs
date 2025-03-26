@@ -78,7 +78,7 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
     if ( up == (UNDO_OBJ *)NULL )
         return;
 
-    memset(up, 0, undo_size);
+    umc_memset(up, 0, undo_size);
 
     /* update the buffer undo count */
     curwp->w_bufp->undo_count++;
@@ -445,7 +445,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
         /* attempt to allocate the memory */
         ptr = (char *)malloc(nbytes);
         if ( ptr != NULL )  {
-            memset(ptr, 0, nbytes);
+            umc_memset(ptr, 0, nbytes);
 
             return ptr;
         }

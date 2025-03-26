@@ -152,6 +152,7 @@ int unixsys0  P1_(char *, s)
    EXTERN int           read    DCL((int, char *, int));
    EXTERN int           write   DCL((int, CONST char *, int));
    EXTERN int           access  DCL((CONST char *, int));
+   EXTERN int           link    DCL((CONST char *, CONST char *));
 # endif
 
 
@@ -463,7 +464,7 @@ static VOIDP  umc_opendir P1_(CONST char *, name)
 
     if        ( 0 > (rc = stat(name, &sb)) )              {
         return NULL;
-    } else if ( (sb.st_mode & S_IFMT) != S_IFDIR )        {
+    } else if ( !S_ISDIR(sb.st_mode) )                    {
         return NULL;
     } else if ( 0 > (fd = open(name, O_RDONLY)) )         {
         return NULL;
@@ -1237,7 +1238,7 @@ static CONST char *getdospath P1_(CONST char *, in)
         int errno_sv  = errno;
 
         TRC(("cygwin_conv_path(%s) (==> DOS): %s", in,
-             strerror(errno_sv)));
+             unx_strerror_(errno_sv)));
         return "";
     }
 
@@ -1264,7 +1265,7 @@ static CONST char *getunxpath P1_(CONST char *, in)
         int errno_sv  = errno;
 
         TRC(("cygwin_conv_path(%s) (==> UNX): %s", in,
-             strerror(errno_sv)));
+             unx_strerror_(errno_sv)));
         return "";
     }
 
@@ -1450,7 +1451,7 @@ static int winsystem P1_(CONST char *, cmd)
     if ( 0 != posix_spawnp(&child_pid, shell, NULL, &attr, sargv, environ) )  {
         errno_sv  = errno;
         TRC(("Error executing <%s %s %s>, errno = %d: %s", shell, WIN_SHELL_C_,
-             cmd, errno_sv, strerror(errno_sv)));
+             cmd, errno_sv, unx_strerror_(errno_sv)));
     }
 
     /* Destroy any objects that we created earlier. */
@@ -1629,10 +1630,10 @@ static int dossystem P1_(CONST char *, cmd)
     if        ( 0 > status )        {
         if        ( win_shell ) {
             TRC(("Error executing <%s %s %s>, errno = %d: %s", win_shell, WIN_SHELL_C_,
-                 cmd, errno_sv, strerror(errno_sv)));
+                 cmd, errno_sv, unx_strerror_(errno_sv)));
         } else if ( dos_shell ) {
             TRC(("Error executing <%s %s %s>, errno = %d: %s", dos_shell, DOS_SHELL_C_,
-                 cmd, errno_sv, strerror(errno_sv)));
+                 cmd, errno_sv, unx_strerror_(errno_sv)));
         } else                  {
             ASRT(IMPOSSIBLE);
         }
@@ -1645,11 +1646,11 @@ static int dossystem P1_(CONST char *, cmd)
         if        ( win_shell ) {
             TRC(("RC <%s %s %s>: Got signal %d, errno = %d: %s",
                  win_shell, WIN_SHELL_C_, cmd, signo, errno_sv,
-                 strerror(errno_sv)));
+                 unx_strerror_(errno_sv)));
         } else if ( dos_shell ) {
             TRC(("RC <%s %s %s>: Got signal %d, errno = %d: %s",
                  dos_shell, DOS_SHELL_C_, cmd, signo, errno_sv,
-                 strerror(errno_sv)));
+                 unx_strerror_(errno_sv)));
         } else                  {
             ASRT(IMPOSSIBLE);
         }
@@ -2654,15 +2655,15 @@ char *getnfile P0_()
          */
     } while ( !( 0 == umc_stat(rbuf, &fstat) &&
                   (
-                    (fstat.st_mode & S_IFMT) == S_IFDIR
+                    S_ISDIR(fstat.st_mode)
                       ||
-                    (fstat.st_mode & S_IFMT) == S_IFREG
+                    S_ISREG(fstat.st_mode)
                   )
                )
             );
 
     /* if this entry is a directory name, say so */
-    if ( (fstat.st_mode & S_IFMT) == S_IFDIR )  {
+    if ( S_ISDIR(fstat.st_mode) ) {
         XSTRCAT(rbuf, DIRSEPSTR);
     }
 
@@ -2670,35 +2671,74 @@ char *getnfile P0_()
     return (rbuf);
 }
 
-
-# if XENIX && FILOCK
-
-int mkdir P2(char *, name, int , mode)
-/* name:  Name of directory to create                         */
-/* mode:  Umask for creation (which we blissfully ignore...)  */
+char  *unx_strerror_ P1_(int, num)
 {
-    char buf[80];
+# if b_IS_ANCIENT_UNIX
+    extern CONST char * CONST sys_errlist[];
+    extern int sys_nerr;
 
-    XSTRCPY(buf, "mkdir ");
-    XSTRCAT(buf, name);
-    XSTRCAT(buf, " > /dev/null 2>&1");
-
-    return ( system(buf) );
+    return (0 <= num && num < sys_nerr)?
+        (char *)sys_errlist[num] : (char *)"NIL";
+# else
+    return strerror(num);
+# endif
 }
 
-int rmdir P1_(char *, name)
-/* name:  Name of directory to delete */
+int unx_mkdir_ P1_(CONST char*, path)
 {
-    char buf[80];
+    char  new_path[NFILEN];
 
-    XSTRCPY(buf, "rmdir ");
-    XSTRCAT(buf, name);
-    XSTRCAT(buf, " > /dev/null 2>&1");
+    ZEROMEM(new_path);
 
-    return ( system(buf) );
+    xstrlcpy(new_path, GetPathUNX(path), SIZEOF(new_path));
+# if b_IS_ANCIENT_UNIX
+    {
+        int   rc  = 0;
+        char  buf[NFILEN];
+
+        ZEROMEM(buf);
+
+        /* TODO: Allow file names with quotes `''.  */
+        XSTRCPY(buf, "mkdir '");
+        XSTRCAT(buf, new_path);
+        XSTRCAT(buf, "' > /dev/null 2>&1");
+        rc  = system(buf);
+
+        return (rc == 0)? 0 : (-1);
+    }
+# else
+    return mkdir(new_path, 0777);
+# endif
 }
 
-# endif /* XENIX & FILOCK */
+int unx_rmdir_ P1_(CONST char*, path)
+{
+    char  new_path[NFILEN];
+
+    ZEROMEM(new_path);
+
+    xstrlcpy(new_path, GetPathUNX(path), SIZEOF(new_path));
+# if b_IS_ANCIENT_UNIX
+    {
+        int   rc  = 0;
+        char  buf[NFILEN];
+
+        ZEROMEM(buf);
+
+        /* TODO: Allow file names with quotes `''.  */
+        XSTRCPY(buf, "rmdir '");
+        XSTRCAT(buf, new_path);
+        XSTRCAT(buf, "' > /dev/null 2>&1");
+
+        rc  = system(buf);
+
+        return (rc == 0)? 0 : (-1);
+    }
+# else
+    return rmdir(new_path);
+# endif
+}
+
 
 /*======================================================================
  * CYGWIN, DJGPP_DOS need wrappers for some (but not all) functions with file
@@ -2741,7 +2781,45 @@ int unx_rename_ P2_(CONST char *, from, CONST char *, to)
     xstrlcpy(new_from, GetPathUNX(from), SIZEOF(new_from));
     xstrlcpy(new_to,   GetPathUNX(to),   SIZEOF(new_to));
 
+# if ( b_IS_ANCIENT_UNIX )
+    {
+        struct stat buf1;
+        struct stat buf2;
+
+        ZEROMEM(buf1);
+        ZEROMEM(buf2);
+
+        /* No good if source file doesn't exist */
+        if ( 0 != stat(new_from, &buf1) ) {
+            return (-1);
+        }
+
+        /* Check for target */
+        if ( 0 == stat(new_to, &buf2) ) {
+            /* See if file is the same */
+            if ( buf1.st_dev == buf2.st_dev &&
+                 buf1.st_ino == buf2.st_ino ) {
+
+                /* Not necessary to rename file */
+                return (0);
+            }
+        }
+
+        /* Get rid of target */
+        unlink(new_to);
+
+        /* Link two files together */
+        if ( 0 != link(new_from, new_to) )  {
+            return (-1);
+        }
+
+        /* Unlink original file */
+        return ( unlink(new_from) );
+    }
+# else
+
     return rename(new_from, new_to);
+# endif
 }
 
 int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
@@ -2752,6 +2830,22 @@ int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
      */
     return stat(GetPathUNX(path), sb);
 }
+
+# if    BEGIN_COMMENT_
+int unx_link_ P2_(CONST char *, from, CONST char *, to)
+{
+    char  new_from[NFILEN];
+    char  new_to[NFILEN];
+
+    ZEROMEM(new_from);
+    ZEROMEM(new_to);
+
+    xstrlcpy(new_from, GetPathUNX(from), SIZEOF(new_from));
+    xstrlcpy(new_to,   GetPathUNX(to),   SIZEOF(new_to));
+
+    return link(new_from, new_to);
+}
+# endif /*END_COMMENT_*/
 
 int unx_unlink_ P1_(CONST char *, path)
 {

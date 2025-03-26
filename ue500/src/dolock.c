@@ -23,7 +23,6 @@
 #  include <unistd.h>
 # else
    EXTERN int getpid      DCL((void));
-   EXTERN int rmdir       DCL((CONST char *));
 #  ifdef GETHOSTNAME_AVAILABLE
    EXTERN int gethostname DCL((char *name, int len));
 #  else
@@ -121,8 +120,6 @@ char *undolock P1_(CONST char *, fname)
 #  include <direct.h>
 #  define chdir        _chdir
 #  define getcwd       _getcwd
-#  define mkdir        _mkdir
-#  define rmdir        _rmdir
 # endif
 
 # if  ( !OS2 )
@@ -323,7 +320,7 @@ char *dolock P1_(CONST char *, filespec)
 
         return (result);
     }
-    if ( (sb.st_mode & S_IFDIR) == 0 ) {
+    if ( !S_ISDIR(sb.st_mode) ) {
         XSTRCPY(result, LOCKMSG);
         XSTRCAT(result, "Illegal Path");
 
@@ -346,11 +343,7 @@ char *dolock P1_(CONST char *, filespec)
         printf("MKDIR(%s)\n", lockpath);
         tgetc();
 # endif
-# if  ( b_IS_UNIX )
-        if ( mkdir(lockpath, 0777) != 0 ) {
-# else
-        if ( mkdir(lockpath) != 0 ) {
-# endif
+        if ( umc_mkdir(lockpath) != 0 ) {
             XSTRCPY(result, LOCKMSG);
             switch ( errno ) {
 
@@ -553,7 +546,7 @@ char *undolock P1_(CONST char *, filespec)
 
         return (result);
     } else {
-        rmdir(lockpath); /* this will work only if dir is empty */
+        umc_rmdir(lockpath);  /* this will work only if dir is empty */
 
         return (NULL);
     }

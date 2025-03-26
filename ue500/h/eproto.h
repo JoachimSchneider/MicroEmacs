@@ -123,9 +123,9 @@
 /**********************************************************************/
 #else
 /*....................................................................*/
-/* Does not work with non ANSI-C --- but it's syntactically correct.  */
+/* Might give only produce a warning for non ANSI-C.                  */
 /*....................................................................*/
-# define  CASRT(x)    extern int  i_casrt_dummy_
+# define CASRT(condition) extern int casrt_dummy_[(condition)?1:-1]
 #endif  /* b_IS_ANSI_C  */
 /**********************************************************************/
 
@@ -266,7 +266,6 @@ CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
 # include <string.h>
 #else
 EXTERN char *getenv DCL((CONST char *));
-EXTERN char *memcpy DCL((char *dst, CONST char *src, int len));
 EXTERN char *strcat DCL((char *, CONST char *));
 EXTERN char *strcpy DCL((char *, CONST char *));
 EXTERN int  strncmp DCL((CONST char *, CONST char *, int));
@@ -325,6 +324,14 @@ EXTERN int  errno;
 
 
 /**********************************************************************/
+
+/*======================================================================
+ * Some library functions not available everywhere:
+ *====================================================================*/
+EXTERN VOIDP  umc_memset  DCL((VOIDP dest, int c, unsigned long n));
+EXTERN VOIDP  umc_memcpy  DCL((VOIDP dest, CONST VOIDP src, unsigned long n));
+/*====================================================================*/
+
 EXTERN FILE *uetmpfile_ DCL((int delmode));
 #define uetmpfile() ( uetmpfile_(0) )
 #define clntmpfls() ( uetmpfile_(1)  )
@@ -566,7 +573,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #define NELEM(A)      ( SIZEOF ( (A) )/SIZEOF ( (A)[0] ) )
 #define SIZEOF(e)     ( (int)sizeof(e) )
 #define STRLEN(x)     ( (int)strlen((x)) )
-#define ZEROMEM(x)    ( memset(&(x), 0, SIZEOF((x))) )
+#define ZEROMEM(x)    ( umc_memset(&(x), 0, SIZEOF((x))) )
 #define MAXIMUM(x, y) ( ((x) < (y))? (y) : (x) )
 #define MINIMUM(x, y) ( ((x) > (y))? (y) : (x) )
 #define MIN2(x, y)    ( MINIMUM((x), (y)) )
@@ -610,17 +617,17 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 } while ( 0 )
 #endif  /*END_COMMENT_*/
 
-#define FREE_(p)  do  {               \
-    char  *z__  = (char *)&(p);       \
-    char  *p__  = NULL;               \
-    CASRT(sizeof(p) == sizeof(p__));  \
-                                      \
-    memcpy(&p__, z__, sizeof(p__));   \
-    if ( NULL != p__ )  {             \
-        free(p__);                    \
-        p__ = NULL;                   \
-        memcpy(z__, &p__, sizeof(p)); \
-    }                                 \
+#define FREE_(p)  do  {                   \
+    char  *z__  = (char *)&(p);           \
+    char  *p__  = NULL;                   \
+    CASRT(sizeof(p) == sizeof(p__));      \
+                                          \
+    umc_memcpy(&p__, z__, sizeof(p__));   \
+    if ( NULL != p__ )  {                 \
+        free(p__);                        \
+        p__ = NULL;                       \
+        umc_memcpy(z__, &p__, sizeof(p)); \
+    }                                     \
 } while ( 0 )
 
 /**********************************************************************/
@@ -691,11 +698,11 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #else /* Array or non-void pointer  */
-# define MY_VA_COPY(d, s)     (               \
-    IS_ARRAY((d))?                            \
-      memcpy((d), (s), SIZEOF((d)))           \
-        :                                     \
-      memcpy(&(d), &(s), SIZEOF((d)))         \
+# define MY_VA_COPY(d, s)     (                   \
+    IS_ARRAY((d))?                                \
+      umc_memcpy((d), (s), SIZEOF((d)))           \
+        :                                         \
+      umc_memcpy(&(d), &(s), SIZEOF((d)))         \
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #endif
@@ -965,6 +972,13 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
     abort();
 }
 #endif
+
+
+/*
+ * We MKSTRING() in the following macros to be able to use the same code
+ * for ANSI and pre-ANSI C-compilers. Unfortunately for ANSI-C compilers
+ * this results in an usually unwanted macro expansion of e.
+ */
 
 #define ASRT(e) do {                                                    \
         if ( !(e) )                                                     \
@@ -2353,12 +2367,19 @@ EXTERN int PASCAL NEAR          typahead DCL((void));
  *   work with UNIX style file names.
  * - fopen(), ... work with DOS and UNIX style file names.
  *====================================================================*/
-EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
-EXTERN int                      unx_access_ DCL((CONST char *path, int mode));
-EXTERN int                      unx_rename_ DCL((CONST char *from, CONST char *to));
-EXTERN int                      unx_stat_ DCL((CONST char *path, struct stat *sb));
-EXTERN int                      unx_unlink_ DCL((CONST char* path));
+EXTERN CONST char *             GetPathUNX    DCL((CONST char *path));
+EXTERN int                      unx_access_   DCL((CONST char *path, int mode));
+EXTERN int                      unx_rename_   DCL((CONST char *from, CONST char *to));
+EXTERN int                      unx_stat_     DCL((CONST char *path, struct stat *sb));
+# if      BEGIN_COMMENT_
+EXTERN int                      unx_link_     DCL((CONST char* from, CONST char *to));
+# endif /*END_COMMENT_*/
+EXTERN int                      unx_unlink_   DCL((CONST char* path));
+EXTERN int                      unx_mkdir_    DCL((CONST char* path));
+EXTERN int                      unx_rmdir_    DCL((CONST char* path));
+EXTERN char *                   unx_strerror_ DCL((int num));
 #endif
+/*====================================================================*/
 EXTERN int PASCAL NEAR          unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR          unbindchar DCL((int c));
 EXTERN int PASCAL NEAR          unbindkey DCL((int f, int n));
@@ -2467,18 +2488,46 @@ EXTERN VOID                     tagshello DCL((void));
 
 
 /**********************************************************************/
+/* Some STAT(2) related macros not found on every UNIX:               */
+/**********************************************************************/
+#if b_IS_UNIX
+# ifdef S_IFMT
+#  if ( !defined(S_ISDIR) && defined(S_IFDIR) )
+#   define S_ISDIR(x)   ((x) & S_IFMT) == S_IFDIR )
+#  endif
+#  if ( !defined(S_ISREG) && defined(S_IFREG) )
+#   define S_ISREG(x)   ((x) & S_IFMT) == S_IFREG )
+#  endif
+# endif
+#endif
+/**********************************************************************/
+
+
+/**********************************************************************/
 /* MicroEMACS (umc_*) specific wrappers for some library functions:   */
 /**********************************************************************/
 #if b_IS_UNIX
-# define umc_access  unx_access_
-# define umc_rename  unx_rename_
-# define umc_stat    unx_stat_
-# define umc_unlink  unx_unlink_
+# define umc_access   unx_access_
+# define umc_rename   unx_rename_
+# define umc_stat     unx_stat_
+# define umc_unlink   unx_unlink_
+# define umc_mkdir    unx_mkdir_
+# define umc_rmdir    unx_rmdir_
+# define umc_strerror unx_strerror_
 #else
-# define umc_access  access
-# define umc_rename  rename
-# define umc_stat    stat
-# define umc_unlink  unlink
+# define umc_access   access
+# define umc_rename   rename
+# define umc_stat     stat
+# define umc_unlink   unlink
+# if  ( (WINNT || WINXP ) && MSC )
+#  include <direct.h>
+#  define umc_mkdir   _mkdir
+#  define umc_rmdir   _rmdir
+# else
+#  define umc_mkdir   mkdir
+#  define umc_rmdir   rmdir
+# endif
+# define umc_strerror strerror
 #endif
 /**********************************************************************/
 
@@ -2525,17 +2574,17 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
     }                               \
 } while ( 0 )
 #endif  /*END_COMMENT_*/
-#define CLROOM(p) do  {                 \
-    char  *z_ = (char *)&(p);           \
-    char  *p_ = NULL;                   \
-    CASRT(sizeof(p) == sizeof(p_));     \
-                                        \
-    memcpy(&p_, z_, sizeof(p_));        \
-    if ( NULL != p_ )   {               \
-        DEROOM(p_);                     \
-        p_  = NULL;                     \
-        memcpy(z_, &p_, sizeof(p));     \
-    }                                   \
+#define CLROOM(p) do  {                     \
+    char  *z_ = (char *)&(p);               \
+    char  *p_ = NULL;                       \
+    CASRT(sizeof(p) == sizeof(p_));         \
+                                            \
+    umc_memcpy(&p_, z_, sizeof(p_));        \
+    if ( NULL != p_ )   {                   \
+        DEROOM(p_);                         \
+        p_  = NULL;                         \
+        umc_memcpy(z_, &p_, sizeof(p));     \
+    }                                       \
 } while ( 0 )
 /**********************************************************************/
 
