@@ -119,14 +119,22 @@
  * CASRT_1 gives warnings about unused variables:
  * - gcc version 12.2.0: `warning: unused variable ''dummy_2224_'''
  */
-# define  CASRT CASRT_0
+# if     BEGIN_COMMENT_
+#  define  CASRT       CASRT_0
+# endif  /*END_COMMENT*/
 /**********************************************************************/
 #else
+# if     BEGIN_COMMENT_
 /*....................................................................*/
 /* Might give only produce a warning for non ANSI-C.                  */
 /*....................................................................*/
-# define CASRT(condition) extern int casrt_dummy_[(condition)?1:-1]
+#  define CASRT(cond)  extern int casrt_dummy_[(cond)?1:-1]
+# endif  /*END_COMMENT*/
 #endif  /* b_IS_ANSI_C  */
+#define CASRT(cond)                         \
+  extern int casrt_dummy_x_[1];             \
+  extern int casrt_dummy_x_[(cond)? 1 : 2]
+/**END OF DEFINITION**/
 /**********************************************************************/
 
 /**********************************************************************/
@@ -269,7 +277,6 @@ EXTERN char *getenv DCL((CONST char *));
 EXTERN char *strcat DCL((char *, CONST char *));
 EXTERN char *strcpy DCL((char *, CONST char *));
 EXTERN int  strncmp DCL((CONST char *, CONST char *, int));
-EXTERN char *strchr DCL((CONST char *, int));
 EXTERN int  strcmp  DCL((CONST char *, CONST char *));
 # if     XVT == 0 || XVTDRIVER == 0
 EXTERN int  strlen DCL((CONST char *));
@@ -330,6 +337,7 @@ EXTERN int  errno;
  *====================================================================*/
 EXTERN VOIDP  umc_memset  DCL((VOIDP dest, int c, unsigned long n));
 EXTERN VOIDP  umc_memcpy  DCL((VOIDP dest, CONST VOIDP src, unsigned long n));
+EXTERN char   *umc_strchr DCL((CONST char *s, int c));
 /*====================================================================*/
 
 EXTERN FILE *uetmpfile_ DCL((int delmode));

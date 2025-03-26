@@ -1584,6 +1584,21 @@ VOIDP umc_memcpy  P3_(VOIDP, dest, CONST VOIDP, src, unsigned long, n)
 
     return dest;
 }
+
+char  *umc_strchr P2_(CONST char *, s, int, c)
+{
+    if ( !s || !*s )  {
+        return NULL;
+    }
+
+    do  {
+        if ( c == *s )  {
+            return (char *)s;
+        }
+    } while ( *++s );
+
+    return NULL;
+}
 /*====================================================================*/
 
 
@@ -2947,7 +2962,7 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
     }
     col = slen;
 
-    if ( NULL == (cp = (char *)strchr(ip, ' ')) ) {
+    if ( NULL == (cp = umc_strchr(ip, ' ')) ) {
         for ( i = 0; i < parindent; i++ ) {
             res = achrcat(res, ' ');
         }
@@ -2969,7 +2984,7 @@ static char *PASCAL NEAR  format_para P5_(CONST char *,  start,
     for ( ;; )  {
         int ncol  = col;  /* Column of character before next space  */
 
-        if ( NULL != (cp  = (char *)strchr(ip, ' ')) )  {
+        if ( NULL != (cp  = umc_strchr(ip, ' ')) )  {
             ncol  += ((CONST char *)cp - ip) + 1;
         } else {
             ncol  += STRLEN(ip) + 1;

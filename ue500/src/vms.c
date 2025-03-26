@@ -1515,8 +1515,8 @@ VOID PASCAL NEAR  expandargs P2_(int *, pargc, char ***, pargv)
         unsigned long context = 0;
 
         /* should check for wildcards: %, *, and "..." */
-        if (**argv != '-' && (strchr(*argv, '%') || strchr(*argv, '*') ||
-                              strstr(*argv, "..."))) {
+        if (**argv != '-' && (umc_strchr(*argv, '%') || umc_strchr(*argv, '*')
+                                                     || strstr(*argv, "..."))) {
             /* search for all matching filenames */
             while ((lib$find_file(&filespec, &result_filespec, &context)) & 1) {
                 int       i;

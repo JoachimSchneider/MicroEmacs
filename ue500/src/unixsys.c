@@ -666,8 +666,8 @@ static int  IsDOSPath P1_(CONST char *, path)
 #  endif
 #  endif
 
-    pFSlash = strchr(path, '/');
-    pBSlash = strchr(path, '\\');
+    pFSlash = umc_strchr(path, '/');
+    pBSlash = umc_strchr(path, '\\');
     if ( NULL == pFSlash  ) {
         if ( NULL == pBSlash )  {
             return ( 0 );
@@ -1952,13 +1952,13 @@ static int IsAccessable P2_(CONST char *, d, CONST char *, mode)
         sys access; name; mode
     ==================================================================*/
 
-    if ( strchr(mode, 'r') || strchr(mode, 'R') ) {
+    if ( umc_strchr(mode, 'r') || umc_strchr(mode, 'R') ) {
         mflag |= 4/*R_OK*/;
     }
-    if ( strchr(mode, 'w') || strchr(mode, 'W') ) {
+    if ( umc_strchr(mode, 'w') || umc_strchr(mode, 'W') ) {
         mflag |= 2/*W_OK*/;
     }
-    if ( strchr(mode, 'x') || strchr(mode, 'X') ) {
+    if ( umc_strchr(mode, 'x') || umc_strchr(mode, 'X') ) {
         mflag |= 1/*X_OK*/;
     }
 
@@ -2684,6 +2684,48 @@ char  *unx_strerror_ P1_(int, num)
 # endif
 }
 
+# if b_IS_ANCIENT_UNIX
+/* SHELLQUOTE:
+ *
+ * Protect string from Bourne Shell expansion
+ */
+static char *shellquote P1_(CONST char *, in)
+{
+#  define SQREP_            "'\"'\"'"
+#  define CHKRES_(j, incr)  ( (j) + (incr) <= NSTRING - 1 )
+    static char res[NSTRING];
+    int i = 0;
+    int j = 0;
+
+    ZEROMEM(res);
+    ASRT(NULL != in);
+
+    res[j++]  = '\'';
+    for ( ;; )  {
+        char  c = in[i];
+
+        if ( '\0' == c )        {
+            if ( ! CHKRES_(j, 1) )                  return NULL;
+            res[j++]  = '\'';
+            res[j++]  = c;
+
+            return res;
+        } else if ( '\'' != c ) {
+            if ( ! CHKRES_(j, 1) )                  return NULL;
+            res[j++]  = c;
+        } else                  {
+            /* res += SQREP_  */
+            if ( ! CHKRES_(j, SIZEOF(SQREP_) - 1) ) return NULL;
+            xstrcat(res + j, SQREP_);
+            j += SIZEOF(SQREP_) - 1;
+        }
+        i++;
+    }
+#  undef  SQREP_
+#  undef  CHKRES_
+}
+# endif
+
 int unx_mkdir_ P1_(CONST char*, path)
 {
     char  new_path[NFILEN];
@@ -2695,13 +2737,16 @@ int unx_mkdir_ P1_(CONST char*, path)
     {
         int   rc  = 0;
         char  buf[NFILEN];
+        char  *np = shellquote(new_path);
 
         ZEROMEM(buf);
 
-        /* TODO: Allow file names with quotes `''.  */
-        XSTRCPY(buf, "mkdir '");
-        XSTRCAT(buf, new_path);
-        XSTRCAT(buf, "' > /dev/null 2>&1");
+        if ( NULL == np ) {
+            return (-1);
+        }
+        XSTRCPY(buf, "mkdir ");
+        XSTRCAT(buf, np);
+        XSTRCAT(buf, " > /dev/null 2>&1");
         rc  = system(buf);
 
         return (rc == 0)? 0 : (-1);
@@ -2722,13 +2767,16 @@ int unx_rmdir_ P1_(CONST char*, path)
     {
         int   rc  = 0;
         char  buf[NFILEN];
+        char  *np = shellquote(new_path);
 
         ZEROMEM(buf);
 
-        /* TODO: Allow file names with quotes `''.  */
-        XSTRCPY(buf, "rmdir '");
-        XSTRCAT(buf, new_path);
-        XSTRCAT(buf, "' > /dev/null 2>&1");
+        if ( NULL == np ) {
+            return (-1);
+        }
+        XSTRCPY(buf, "rmdir ");
+        XSTRCAT(buf, np);
+        XSTRCAT(buf, " > /dev/null 2>&1");
 
         rc  = system(buf);
 

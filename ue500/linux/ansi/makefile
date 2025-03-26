@@ -20,7 +20,8 @@ HDIR = ../../h
 ##
 OPTFLAGS = -fno-strict-aliasing
 #WARNFLAGS = -Wall
- WARNFLAGS = -Wall -Wno-unused-local-typedefs
+WARNFLAGS = -Wall -Wno-unused-variable
+#WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)     -DEMACS_TRC

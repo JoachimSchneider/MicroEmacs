@@ -35,9 +35,9 @@ HDIR = ../h
 # To test on SunOS follow these steps:
 # $ mkdir sys
 # $ ln -s /usr/include/sys/dirent.h sys/dir.h
-#CFLAGS = -Wall -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent -DPROTO=0 -DUSE_STDARG=0
+#CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent -DPROTO=0 -DUSE_STDARG=0
 # should be the same as
-#CFLAGS = -Wall -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent
+#CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent
 # These is the BSD 4.1 command line
 CFLAGS = -I. -I$(HDIR) -O
 ##
