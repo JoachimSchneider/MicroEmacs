@@ -1612,6 +1612,15 @@ Use it to compile this version on V7.
 ===> DONE
 
 
+[2025-04-31.00]
+
+Compiles on
+- BSD 4.1
+  + Works without select as bad as vi
+- BSD 4.2:
+  + Uses select() but needs a `clear' (^[[;H^[[2J) afterwards.
+  + We should not use the old FFS-Code any more
+
 
 #============================== TODO LIST ==============================
 

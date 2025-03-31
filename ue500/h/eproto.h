@@ -106,6 +106,9 @@
  * error.  This is really useful, if you want to check e.g. sizes of
  * structures against given needs.  Example: CASRT( SIZEOF(int) ==
  * SIZEOF(long) );
+ *
+ * For Pre-ANSI-C only simple conditions (no '&&', no '||') are allowed:
+ * Try to reformalute conditions e.g. using `&' and `|'.
  */
 # define CASRT_0(condition)  typedef     int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
 # ifdef __cplusplus
@@ -141,7 +144,8 @@
 /* Check consistency of defines from estruct.h:                       */
 /*....................................................................*/
 CASRT(0 != VARARG);                 /* VARARG needed in any case!     */
-CASRT((VARG && !PROTO) || !VARG);   /* varargs.h only with Pre-ANSI C */
+/* To complicated for Pre-ANSI-C: `CASRT((VARG && !PROTO) || !VARG)'  */
+CASRT(0 == (VARG & PROTO));         /* varargs.h only with Pre-ANSI C */
 /**********************************************************************/
 
 
@@ -605,6 +609,17 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /*
  * This macro tests for pointer to something versus array of something.
  * It fails for the definition w. initialization `type *p = (type *)&p;'
+ *
+ * Remarks: * On some Pre-ANSI_C-Compilers (e.g. on BSD 4.1) this macro
+ *            produces this *warning":
+ *
+ *              warning: & before array or function: ignored
+ *
+ *          * This macro wrongly classifies x as array:
+ *
+ *            char  *x  = NULL;
+ *            x = (char *)&x;
+ *            IS_ARRAY(x);  /o Will report TRUE which is FALSE o/
  */
 #define IS_ARRAY(a) ( (char *)(&(a)) == (char *)(&((a)[0])) )
 /**********************************************************************/
@@ -2447,7 +2462,7 @@ EXTERN VOID PASCAL NEAR         pad DCL((char *s, int len));
 EXTERN VOID PASCAL NEAR         reeat DCL((int c));
 EXTERN VOID PASCAL NEAR         reframe DCL((EWINDOW *wp));
 EXTERN VOID PASCAL NEAR         rmcclear DCL((void));
-EXTERN VOID PASCAL NEAR         setbit DCL((int bc, EBITMAP cclmap));
+EXTERN VOID PASCAL NEAR         umc_setbit DCL((int bc, EBITMAP cclmap));
 EXTERN VOID PASCAL NEAR         setjtable DCL((void));
 EXTERN VOID PASCAL NEAR         unbind_buf DCL((BUFFER *bp));
 EXTERN VOID PASCAL NEAR         unqname DCL((char *name));
@@ -2501,10 +2516,10 @@ EXTERN VOID                     tagshello DCL((void));
 #if b_IS_UNIX
 # ifdef S_IFMT
 #  if ( !defined(S_ISDIR) && defined(S_IFDIR) )
-#   define S_ISDIR(x)   ((x) & S_IFMT) == S_IFDIR )
+#   define S_ISDIR(x)   ( ((x) & S_IFMT) == S_IFDIR )
 #  endif
 #  if ( !defined(S_ISREG) && defined(S_IFREG) )
-#   define S_ISREG(x)   ((x) & S_IFMT) == S_IFREG )
+#   define S_ISREG(x)   ( ((x) & S_IFMT) == S_IFREG )
 #  endif
 # endif
 #endif

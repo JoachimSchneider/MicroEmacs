@@ -131,7 +131,12 @@ int unixsys0  P1_(char *, s)
 /*==============================================================*/
 /* Include files                                                */
 /*==============================================================*/
-# include <time.h>              /* time(), ctime(), ...         */
+# if ( !b_IS_ANCIENT_UNIX )
+#  include <time.h>             /* time(), ctime(), ...         */
+# else
+   EXTERN long          time    DCL((long *));
+   EXTERN char          *ctime  DCL((long *));
+# endif
 # include <errno.h>             /* errno, ...                   */
 
 /** Overall include files **/
@@ -462,13 +467,13 @@ static VOIDP  umc_opendir P1_(CONST char *, name)
     ZEROMEM(sb);
     ASRT(NULL != name);
 
-    if        ( 0 > (rc = stat(name, &sb)) )              {
+    if        ( 0 > (rc = stat(name, &sb)) )                          {
         return NULL;
-    } else if ( !S_ISDIR(sb.st_mode) )                    {
+    } else if ( !S_ISDIR(sb.st_mode) )                                {
         return NULL;
-    } else if ( 0 > (fd = open(name, O_RDONLY)) )         {
+    } else if ( 0 > (fd = open(name, O_RDONLY)) )                     {
         return NULL;
-    } else if ( NULL == (res = calloc(1, SIZEOF(*res))) ) {
+    } else if ( NULL == (res = (UMC_DIR *)calloc(1, SIZEOF(*res))) )  {
         return NULL;
     }
 
@@ -2734,6 +2739,11 @@ int unx_mkdir_ P1_(CONST char*, path)
 
     xstrlcpy(new_path, GetPathUNX(path), SIZEOF(new_path));
 # if b_IS_ANCIENT_UNIX
+    /*==================================================================
+     * Very old Unix systems do not have a MKDIR(2) system call. Instead
+     * directories are created via MKNOD(2) a system call that is only
+     * allowed for root.
+     *================================================================*/
     {
         int   rc  = 0;
         char  buf[NFILEN];
@@ -2764,6 +2774,13 @@ int unx_rmdir_ P1_(CONST char*, path)
 
     xstrlcpy(new_path, GetPathUNX(path), SIZEOF(new_path));
 # if b_IS_ANCIENT_UNIX
+    /*==================================================================
+     * Very old Unix systems do not have a RMDIR(2) system call. Instead
+     * directories are removed via the seqence
+     * unlink `<dir>/..'
+     * unlink `<dir>/.'
+     * unlink `<dir>'
+     *================================================================*/
     {
         int   rc  = 0;
         char  buf[NFILEN];

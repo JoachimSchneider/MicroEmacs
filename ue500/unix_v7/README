@@ -78,9 +78,13 @@ bitsavers.
 
 (A) Create a Unix version 7 tar archive:
 
-    Chache to the ue500 directory and then:
+    Change to the ue500 directory and then:
 
     $ star artype=v7tar -c -f /tmp/xx.tar h src cmd unix_v7
+
+    or
+
+    $ tar -H v7 -cpf          /tmp/xx.tar h src cmd unix_v7
 
 
 (B) Create a simh tape file:

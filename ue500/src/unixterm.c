@@ -180,7 +180,16 @@ int unixterm0 P1_(char *, s)
 
 /*==============================================================*/
 # if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
-#  if ( !DJGPP_DOS )  /* select() prototype in time.h */
+#  if ( b_IS_ANCIENT_UNIX )
+#   ifndef FD_ZERO
+#    define FD_ZERO(x)    ( ZEROMEM(*(x)) )
+#   endif
+#   ifndef FD_SET
+#    define FD_SET(fd, x) ( (x)->fds_bits[0] |= (1<<(fd)) )
+#   endif
+#  endif
+   /* select() prototype in time.h: */
+#  if ( !DJGPP_DOS && !b_IS_ANCIENT_UNIX )
 #   include <sys/select.h>
 #  endif
 #  include <sys/time.h>

@@ -68,6 +68,9 @@
  * EXTERN struct passwd *getpwnam DCL((CONST char *login));
  ***********************************************************************
  */
+# if ( b_IS_ANCIENT_UNIX )
+EXTERN struct passwd *getpwnam DCL((CONST char *login));
+# endif
 #endif
 
 

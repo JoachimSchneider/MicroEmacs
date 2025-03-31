@@ -1985,7 +1985,8 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
     }
 
     rewind(fp);
-    if ( 0 > ( rc = vfprintf(fp, fmt, ap) ) ) {
+    RC_VFPRINTF(rc, fp, fmt, ap);
+    if ( 0 > rc ) {
         return (-2);
     }
 
@@ -2512,7 +2513,7 @@ int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 #else
       va_start(ap, fmt);
 #endif
-      rc = vfprintf(TFP, fmt, ap);
+      RC_VFPRINTF(rc, TFP, fmt, ap);
       va_end(ap);
       fprintf(TFP, "%s", "\n");
       fflush(TFP);

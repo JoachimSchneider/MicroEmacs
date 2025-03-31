@@ -721,6 +721,61 @@ execl(va_alist)
 #endif
 
 
+/*===== Macro implementing ANSI-C vfprintf() functionality ===========*/
+#if b_IS_UNIX
+# if b_IS_ANCIENT_UNIX
+#  define  RC_VFPRINTF(rc, fp, format, argp)  do {            \
+      /* Valid e.g. for BSD 4.1, 4.2, SunOS 5.7:  */          \
+      extern VOID _doprnt DCL((CONST CHAR *, VOIDP, FILE *)); \
+                                                              \
+      int   *rcp_ = &(rc);                                    \
+      int   rc_   = 0;                                        \
+      FILE  *fp_  = (fp);                                     \
+      long  end_  = 0;                                        \
+      long  beg_  = 0;                                        \
+                                                              \
+      beg_  = ftell(fp_);                                     \
+      _doprnt(format, argp, fp_);                             \
+      rc_   = ferror(fp_)? (-1) : 0;                          \
+      if ( 0 <= rc_ ) {                                       \
+          end_  = ftell(fp_);                                 \
+          *rcp_ = end_ - beg_;                                \
+      } else          {                                       \
+          *rcp_ = rc_;                                        \
+      }                                                       \
+  } while ( 0 )
+# else
+#  define  RC_VFPRINTF(rc, fp, format, argp)  do {  \
+      int   *rcp_ = &(rc);                          \
+      int   rc_   = 0;                              \
+      FILE  *fp_  = (fp);                           \
+      long  end_  = 0;                              \
+      long  beg_  = 0;                              \
+                                                    \
+      beg_  = ftell(fp_);                           \
+      rc_   = vfprintf(fp_, format, argp);          \
+      if ( 0 <= rc_ ) {                             \
+          end_  = ftell(fp_);                       \
+          *rcp_ = end_ - beg_;                      \
+      } else          {                             \
+          *rcp_ = rc_;                              \
+      }                                             \
+  } while ( 0 )
+# endif
+#else
+#if b_IS_ANSI_C
+# define  RC_VFPRINTF(rc, fp, format, argp) do  { \
+      int *rcp_ = &(rc);                          \
+                                                  \
+      *rcp_ = vfprintf(fp, format, argp);         \
+  } while ( 0 )
+#else
+  CRASH(Cannot compile without vfprintf() functionality);
+#endif
+#endif
+/*====================================================================*/
+
+
 /*===== Emacs global flag bit definitions (for gflags) ===============*/
 
 #define GFREAD  1       /* read first file in at startup              */

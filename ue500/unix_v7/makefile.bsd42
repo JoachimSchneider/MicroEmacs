@@ -37,9 +37,11 @@ HDIR = ../h
 # $ ln -s /usr/include/sys/dirent.h sys/dir.h
 #CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DEMACS_TRC -DUMC_DIRENTRY=dirent -DPROTO=0 -DUSE_STDARG=0
 # should be the same as
-CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DEMACS_TRC -DUMC_DIRENTRY=dirent
+#CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DEMACS_TRC -DUMC_DIRENTRY=dirent
 # These is the BSD 4.1 command line
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC
+#CFLAGS = -I. -I$(HDIR) -O                                  -DEMACS_TRC
+# These is the BSD 4.2 command line: It has select() available
+CFLAGS = -I. -I$(HDIR) -O -DSWITCH_TERMINAL_NOBLOCK_READ=2 -DEMACS_TRC
 ##
 
 
