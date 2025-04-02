@@ -44,6 +44,7 @@ COMMON NOSHARE TERM term; /* Terminal information.    */
 
 DCLDEF NOSHARE int            fillcol             INIT_(72);            /* Current fill column              */
 DCLDEF NOSHARE char           *execstr            INIT_(NULL);          /* pointer to string to execute     */
+DCLDEF NOSHARE char           *termreset          INIT_(NULL);          /* terminal reset string kjc        */
 DCLDEF NOSHARE char           golabel[NPAT]       INIT_("");            /* current line to go to            */
 DCLDEF NOSHARE char           paralead[NPAT]      INIT_(" \t");         /* paragraph leadin chars           */
 DCLDEF NOSHARE char           fmtlead[NPAT]       INIT_("");            /* format command leadin chars      */

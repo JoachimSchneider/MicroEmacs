@@ -93,6 +93,7 @@ typedef struct {
 COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 # endif /* VMS */
 
+
 /* --- See also vt52.c --- */
 # define NROW       25    /* Screen size.                   */
 # define NCOL       80    /* Edit if you want to.           */
@@ -118,6 +119,13 @@ CASRT(1 <= NCOL && NCOL < 80);
 # define SCRSIZ      64   /* scroll size for extended lines */
 # define BEL        0x07  /* BEL character.                 */
 # define ESC        0x1B  /* ESC character.                 */
+
+# define ANSI_RESET             "\033[;H\033[2J"
+# if ( !b_IS_ANCIENT_UNIX )
+#  define ANSI_TO_ALT_SCREEN    "\033[?1049h"
+#  define ANSI_FROM_ALT_SCREEN  "\033[?1049l"
+# endif
+
 
 /* Forward references.          */
 static int  PASCAL NEAR ansimove    DCL((int row, int col));
@@ -462,6 +470,10 @@ static int PASCAL NEAR ansiopen P0_()
     term.t_mcol = term.t_ncol;
 #  endif
 # endif /* b_IS_UNIX */
+# if ( !b_IS_ANCIENT_UNIX )
+    fputs(ANSI_TO_ALT_SCREEN, stdout);
+    fflush(stdout);
+# endif
 # if     MOUSE && (b_IS_UNIX || VMS)
    /*
     * If this is an ansi terminal of at least DEC level 2 capability,
@@ -475,12 +487,15 @@ static int PASCAL NEAR ansiopen P0_()
         CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_ENABLE");
-        if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
+        if ( !s ) {
+            s = "\033[1)u\033[1;3'{\033[1;2'z";
+        }
         ttputs(s);
     }
 # endif /* MOUSE && (b_IS_UNIX || VMS) */
     xstrcpy(sres, "NORMAL");
-    revexist = TRUE;
+    revexist  = TRUE;
+    termreset = ANSI_RESET;
     ttopen();
 
 # if     KEYPAD
@@ -518,6 +533,10 @@ static int PASCAL NEAR ansiclose P0_()
     }
 # endif /* KEYPAD */
     ttclose();
+# if ( !b_IS_ANCIENT_UNIX )
+    fputs(ANSI_FROM_ALT_SCREEN, stdout);
+    fflush(stdout);
+# endif
 
     return 0;
 }

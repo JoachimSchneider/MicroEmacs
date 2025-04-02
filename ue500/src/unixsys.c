@@ -92,6 +92,23 @@
 
 
 /*==============================================================*/
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_BSD_FFS=USE_BSD_FFS_LATE                       */
+/* for BSD 4.2 and later.                                       */
+/*==============================================================*/
+# if  ( b_IS_ANCIENT_UNIX )
+#  define USE_BSD_FFS_EARLY (1)
+#  define USE_BSD_FFS_LATE  (2)
+#  ifndef SWITCH_BSD_FFS
+#   define SWITCH_BSD_FFS USE_BSD_FFS_EARLY
+#  endif
+# endif
+/*==============================================================*/
+
+
+/*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
 #if ( CYGWIN )
@@ -177,8 +194,14 @@ int unixsys0  P1_(char *, s)
 #  ifndef UMC_DIRENTRY
 #   define UMC_DIRENTRY    direct
 #  endif
-/* No opendir()/closedir() available --- but see below              */
-/* for (umc_(open|close)dir().                                      */
+#  if ( SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
+    typedef struct bsd_ffs_early_dir_s_ {
+      int fd;
+    } bsd_ffs_early_dir_t_;
+#   define UMC_DIR        bsd_ffs_early_dir_t_
+#  else
+#   define UMC_DIR        DIR
+#  endif
 # else
 # if  ( XENIX || VAT )
 #  include <sys/ndir.h>             /* Directory entry definitions  */
@@ -412,20 +435,6 @@ static int cygdrive_len_ P0_()
 /*==============================================================*/
 /* Implementation of or wrapper for opendir/readdir/closedir:   */
 /*==============================================================*/
-# if  ( b_IS_ANCIENT_UNIX )
-#  define USE_BSD_FFS_EARLY (1)
-#  define USE_BSD_FFS_LATE  (2)
-#  ifndef SWITCH_BSD_FFS
-#   define SWITCH_BSD_FFS USE_BSD_FFS_EARLY
-#  endif
-#  if ( SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
-    typedef struct bsd_ffs_early_dir_s_ {
-      int fd;
-    } bsd_ffs_early_dir_t_;
-#   define UMC_DIR        bsd_ffs_early_dir_t_
-#  endif
-# endif
-
 # if  ( b_IS_ANCIENT_UNIX && SWITCH_BSD_FFS == USE_BSD_FFS_EARLY )
 /* Read avoiding "short reads", see Richard Stevens' books on   */
 /* UNIX programmin.                                             */
@@ -534,7 +543,13 @@ static int  umc_closedir P1_(VOIDP, dirp)
 
     return 0;
 # else
+# if  ( b_IS_ANCIENT_UNIX && SWITCH_BSD_FFS == USE_BSD_FFS_LATE )
+    closedir((UMC_DIR *)dirp);
+
+    return 0;
+# else
     return closedir((UMC_DIR *)dirp);
+# endif
 # endif
 }
 

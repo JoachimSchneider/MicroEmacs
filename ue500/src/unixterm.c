@@ -92,39 +92,12 @@
 
 
 /*==============================================================*/
-/* FEATURES                                                     */
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_TERMINAL_NOBLOCK_READ=USE_TERMINAL_SELECT      */
+/* for BSD 4.2 and later.                                       */
 /*==============================================================*/
-/* Accordung to R. Stevens curses should contain some functions */
-/* for terminal control, but obviously they aren't used here    */
-/* correctly: It seems, that someone started it but didn't end. */
-#define USE_CURSES              ( 0 )   /* NOT WORKING */
-#if ( b_IS_ANCIENT_UNIX )
-# define USE_SGTTY              ( 1 )
-# define USE_TERMIO_IOCTL       ( 0 )
-# define USE_TERMIOS_TCXX       ( 0 )
-#else
-#if ( !b_IS_POSIX_UNIX )
-# define USE_SGTTY              ( 0 )
-# define USE_TERMIO_IOCTL       ( 1 )
-# define USE_TERMIOS_TCXX       ( 0 )
-#else
-# define USE_SGTTY              ( 0 )
-# define USE_TERMIO_IOCTL       ( 0 )
-# define USE_TERMIOS_TCXX       ( 1 )
-#endif
-#endif
-/* Enable/disable XON/XOFF: We want to use ^S/^Q. I do not believe the flow
- * control settings of the OS should be diddled by an application program. But
- * if you do, change this 1 to a 0, but be warned, all sorts of terminals will
- * get grief with this
- */
-#if ( DJGPP_DOS )
-# define USE_CTL_SQ               ( 1 )
-#else
-# define USE_CTL_SQ               ( 0 )
-#endif
-
-
 /* Several different methods to do noblocking read from a terminal:
  *
  * - VMIN/VTIME setting of the terminal attributes.
@@ -164,6 +137,43 @@
 /*==============================================================*/
 
 
+/*==============================================================*/
+/* FEATURES                                                     */
+/*==============================================================*/
+/* Accordung to R. Stevens curses should contain some functions */
+/* for terminal control, but obviously they aren't used here    */
+/* correctly: It seems, that someone started it but didn't end. */
+#define USE_CURSES              ( 0 )   /* NOT WORKING */
+#if ( b_IS_ANCIENT_UNIX )
+# define USE_SGTTY              ( 1 )
+# define USE_TERMIO_IOCTL       ( 0 )
+# define USE_TERMIOS_TCXX       ( 0 )
+#else
+#if ( !b_IS_POSIX_UNIX )
+# define USE_SGTTY              ( 0 )
+# define USE_TERMIO_IOCTL       ( 1 )
+# define USE_TERMIOS_TCXX       ( 0 )
+#else
+# define USE_SGTTY              ( 0 )
+# define USE_TERMIO_IOCTL       ( 0 )
+# define USE_TERMIOS_TCXX       ( 1 )
+#endif
+#endif
+/* Enable/disable XON/XOFF: We want to use ^S/^Q. I do not believe the flow
+ * control settings of the OS should be diddled by an application program. But
+ * if you do, change this 1 to a 0, but be warned, all sorts of terminals will
+ * get grief with this
+ */
+#if ( DJGPP_DOS )
+# define USE_CTL_SQ               ( 1 )
+#else
+# define USE_CTL_SQ               ( 0 )
+#endif
+
+
+/*==============================================================*/
+
+
 /** Do nothing routine **/
 int unixterm0 P1_(char *, s)
 {
@@ -188,7 +198,7 @@ int unixterm0 P1_(char *, s)
 #    define FD_SET(fd, x) ( (x)->fds_bits[0] |= (1<<(fd)) )
 #   endif
 #  endif
-   /* select() prototype in time.h: */
+   /* select() prototype in time.h */
 #  if ( !DJGPP_DOS && !b_IS_ANCIENT_UNIX )
 #   include <sys/select.h>
 #  endif
@@ -300,9 +310,6 @@ struct keybind {                        /* Keybinding entry           */
     CONST char  *name;                  /* Termcap name               */
     int         value;                  /* Binding value              */
 };
-# if ( !AIX )
-char *reset = (char*) NULL;             /* reset string kjc           */
-# endif
 
 /** Local variables **/
 # if   ( USE_SGTTY )
@@ -684,23 +691,23 @@ int ttopen P0_()
 /** Close terminal device **/
 int ttclose P0_()
 {
-# if ( !AIX  )
     /* Restore original terminal modes */
-    if ( reset != (char*)NULL )
-        write( 1, reset, STRLEN(reset) );
-# endif
+    if ( termreset != (char*)NULL ) {
+        write( 1, termreset, STRLEN(termreset) );
+    }
 
 # if    ( USE_SGTTY )
-  stty(0, &oldterm);
-  ioctl(0, TIOCSETC, &oldtchars);
+    stty(0, &oldterm);
+    ioctl(0, TIOCSETC, &oldtchars);
 # else
 # if  ( USE_TERMIO_IOCTL )
 #  if SMOS
     /* Extended settings; 890619mhs A3 */
     set_parm(0, -1, -1);
 #  endif /* SMOS */
-    if ( ioctl(0, TCSETA, &oldterm) )
+    if ( ioctl(0, TCSETA, &oldterm) ) {
         return (-1);
+    }
 
 # else
 # if  ( USE_TERMIOS_TCXX )
@@ -1191,7 +1198,7 @@ int scopen P0_()
     cp = tcapbuf;
 
     /* Get the reset string */
-    reset = TGETSTR("is", &cp);
+    termreset = TGETSTR("is", &cp);
 
     /* Get the pad character */
     if ( TGETSTR("pc", &cp) )

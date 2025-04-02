@@ -41,7 +41,10 @@ HDIR = ../h
 # These is the BSD 4.1 command line
 #CFLAGS = -I. -I$(HDIR) -O                                  -DEMACS_TRC
 # These is the BSD 4.2 command line: It has select() available
-CFLAGS = -I. -I$(HDIR) -O -DSWITCH_TERMINAL_NOBLOCK_READ=2 -DEMACS_TRC
+CFLAGS = -I. -I$(HDIR) -O                             \
+  -DSWITCH_TERMINAL_NOBLOCK_READ=USE_TERMINAL_SELECT  \
+  -DSWITCH_BSD_FFS=USE_BSD_FFS_LATE                   \
+  -DEMACS_TRC
 ##
 
 
