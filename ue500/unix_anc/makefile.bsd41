@@ -21,25 +21,21 @@ HDIR = ../h
 # - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
 #
 ##
-#CFLAGS = -I. -I$(HDIR) -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
+#CFLAGS = -I. -I$(HDIR) -DPROTO=0 -DUSE_STDARG=0
 #CFLAGS = -I. -I$(HDIR)
 ##
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC -DPROTO=0 -DUSE_STDARG=0
+#CFLAGS = -I. -I$(HDIR) -O -DPROTO=0 -DUSE_STDARG=0
 #CFLAGS = -I. -I$(HDIR) -O
 
 # This is the SunOS 5.7 command line:
 # To test on SunOS follow these steps:
 # $ mkdir sys
 # $ ln -s /usr/include/sys/dirent.h sys/dir.h
-#CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DEMACS_TRC -DUMC_DIRENTRY=dirent -DPROTO=0 -DUSE_STDARG=0
+#CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent -DPROTO=0 -DUSE_STDARG=0
 # should be the same as
-CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DEMACS_TRC -DUMC_DIRENTRY=dirent
+#CFLAGS = -Wall -Wno-unused -I. -I$(HDIR) -O -DUMC_DIRENTRY=dirent
 # These is the BSD 4.1 command line
-#CFLAGS = -I. -I$(HDIR) -O -DEMACS_TRC
+CFLAGS = -I. -I$(HDIR) -O
 ##
 
 

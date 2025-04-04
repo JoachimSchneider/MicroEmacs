@@ -90,7 +90,7 @@
 #define SUN         0                 /* SUN v4.0                     */
 #define TOS         0                 /* ST520, TOS                   */
 #endif  /*END_COMMENT_*/
-#define UNIX_V7     1                 /* UNIX version 7               */
+#define UNIX_ANC    1                 /* Post UNIX V7 (.GE. BSD 4.1)  */
 #if BEGIN_COMMENT_
 #define USG         0                 /* UNIX system V                */
 #define VAT         0                 /* Related to XENIX (???)       */
@@ -105,12 +105,12 @@
 #define b_IS_UNIX       ( AIX || AIX5 || AUX || AVIION || BSD         \
                           || CYGWIN || DJGPP_DOS || FREEBSD || HPUX8  \
                           || HPUX9 || LINUX || OPENBSD || SMOS        \
-                          || SOLARIS || SUN || UNIX_V7 || USG || XENIX )
+                          || SOLARIS || SUN || UNIX_ANC || USG || XENIX )
 #define b_IS_POSIX_UNIX ( b_IS_UNIX                                   \
                           && !( AIX || AUX || HPUX8 || HPUX9 || SMOS  \
-                                || SUN || UNIX_V7 || USG || XENIX ) )
+                                || SUN || UNIX_ANC || USG || XENIX ) )
 #define b_IS_ANCIENT_UNIX ( b_IS_UNIX && !b_IS_POSIX_UNIX             \
-                          && ( UNIX_V7 ) )
+                            && ( UNIX_ANC || XENIX ) )
 #ifndef b_IS_ANSI_C
 # if  defined (__STDC__) || defined(__cplusplus)
 #  define b_IS_ANSI_C   (1)
@@ -545,7 +545,7 @@ struct SREGS {
 
 
 /*====================================================================*/
-#define movmem(a, b, c) memcpy( (b), (a), (c) )
+#define movmem(a, b, c) umc_memcpy( (b), (a), (c) )
 /*====================================================================*/
 
 

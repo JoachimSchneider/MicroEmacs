@@ -2077,8 +2077,10 @@ EXTERN int PASCAL NEAR          getkey DCL((void));
 EXTERN int PASCAL NEAR          getwpos DCL((void));
 EXTERN int PASCAL NEAR          get_char DCL((void));
 EXTERN int PASCAL NEAR          global_var DCL((int f, int n));
+#if     BEGIN_COMMENT_    /* *nowait input functions are obsolete now */
 EXTERN unsigned char PASCAL NEAR  grabnowait DCL((void));
 #define grabnowait_TIMEOUT  ( 0xFF )
+#endif  /*END_COMMENT*/
 EXTERN unsigned char PASCAL NEAR  grabwait DCL((void));
 #if DBCS
 EXTERN int PASCAL NEAR          is2byte DCL((char *sp, char *cp));

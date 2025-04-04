@@ -525,6 +525,7 @@ static int scclose  DCL((void));
 static int sceeol   DCL((void));
 static int sceeop   DCL((void));
 static int screv    DCL((int));
+static int scsetres DCL((char *));
 # if COLOR
 static int scfcol   DCL((int));
 static int scbcol   DCL((int));
@@ -562,7 +563,7 @@ TERM term =
     sceeop,                     /* Clear the desktop                  */
     scbeep,                     /* Beep! routine                      */
     screv,                      /* Set reverse video routine          */
-    scnothing,                  /* Set resolution routine             */
+    scsetres,                   /* Set resolution routine             */
 # if COLOR
     scfcol,                     /* Set forground color routine        */
     scbcol,                     /* Set background color routine       */
@@ -843,6 +844,7 @@ unsigned char grabwait()
     return (ch);
 }
 
+#if     BEGIN_COMMENT_    /* *nowait input functions are obsolete now */
 /** Grab input characters, short wait **/
 # if    ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 unsigned char PASCAL NEAR grabnowait P0_()
@@ -984,7 +986,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
 # endif
 # endif
 # endif /* SWITCH_TERMINAL_NOBLOCK_READ */
-
+#endif  /*END_COMMENT_*/  /* *nowait input functions are obsolete now */
 /* QIN:
  *
  * Queue in a character to the input buffer.
@@ -1406,6 +1408,14 @@ int screv P1_(int, state)
         standend();
 #  endif /* USE_CURSES */
 
+    /* Success */
+    return (0);
+}
+
+/** Change screen resolution **/
+int scsetres P1_(char *, x)
+{
+    /* Does nothing now */
     /* Success */
     return (0);
 }

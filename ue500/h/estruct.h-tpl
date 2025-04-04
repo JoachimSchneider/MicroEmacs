@@ -89,7 +89,7 @@
 #define SOLARIS     0                 /* SUN Solaris (SYSV)           */
 #define SUN         0                 /* SUN v4.0                     */
 #define TOS         0                 /* ST520, TOS                   */
-#define UNIX_V7     0                 /* UNIX version 7               */
+#define UNIX_ANC    0                 /* Post UNIX V7 (.GE. BSD 4.1)  */
 #define USG         0                 /* UNIX system V                */
 #define VAT         0                 /* Related to XENIX (???)       */
 #define VMS         0                 /* VAX/VMS                      */
@@ -103,12 +103,12 @@
 #define b_IS_UNIX       ( AIX || AIX5 || AUX || AVIION || BSD         \
                           || CYGWIN || DJGPP_DOS || FREEBSD || HPUX8  \
                           || HPUX9 || LINUX || OPENBSD || SMOS        \
-                          || SOLARIS || SUN || UNIX_V7 || USG || XENIX )
+                          || SOLARIS || SUN || UNIX_ANC || USG || XENIX )
 #define b_IS_POSIX_UNIX ( b_IS_UNIX                                   \
                           && !( AIX || AUX || HPUX8 || HPUX9 || SMOS  \
-                                || SUN || UNIX_V7 || USG || XENIX ) )
+                                || SUN || UNIX_ANC || USG || XENIX ) )
 #define b_IS_ANCIENT_UNIX ( b_IS_UNIX && !b_IS_POSIX_UNIX             \
-                            && ( UNIX_V7 || XENIX ) )
+                            && ( UNIX_ANC || XENIX ) )
 #ifndef b_IS_ANSI_C
 # if  defined (__STDC__) || defined(__cplusplus)
 #  define b_IS_ANSI_C   (1)

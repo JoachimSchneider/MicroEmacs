@@ -14,20 +14,14 @@ HDIR = ../../h
 
 # options and arguments to the C compiler
 #
-# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
-# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
-#
 ##
 OPTFLAGS = -fno-strict-aliasing
 #WARNFLAGS = -Wall
 WARNFLAGS = -Wall -Wno-unused-variable
 #WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)     -DEMACS_TRC
- CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2 -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2
 ##
 
 # Where to find the termcap/cureses library:

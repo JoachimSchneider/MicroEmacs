@@ -820,11 +820,15 @@ VOID cook P0_()
                 cur = cur->nxtlvl;
 
                 if ( ch == ectoc(terminchr) ) {
+#if     BEGIN_COMMENT_    /* *nowait input is obsolete now */
                     /* Get next character, timed */
                     ch = grabnowait();
                     if ( ch == grabnowait_TIMEOUT ) {
                         return;
                     }
+#else   /*END_COMMENT*/
+                    return;
+#endif
                 } else                        {
                     ch = grabwait();
                 }
