@@ -124,7 +124,7 @@
 # endif
 # endif
 #endif
-#if   ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
 #else
 #if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 #else
@@ -1050,6 +1050,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
+# if    BEGIN_COMMENT_
 int ttgetc_nowait P0_()
 {
     int ch  = 0;
@@ -1076,6 +1077,7 @@ int ttgetc_nowait P0_()
 # endif
     return (ch);
 }
+# endif /*END_COMMENT*/
 
 # if TYPEAH
 

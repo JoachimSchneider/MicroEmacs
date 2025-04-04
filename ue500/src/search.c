@@ -1453,7 +1453,7 @@ int PASCAL NEAR biteq P2_(int, bc, EBITMAP, cclmap)
     return ( ( *( cclmap + (bc >> 3) ) & BIT(bc & 7) )? TRUE: FALSE );
 }
 
-/* UMC_SETBIT:
+/* SETBIT:
  *
  * Set a bit (ON only) in the bitmap.
  */

@@ -79,6 +79,7 @@ DCLDEF NOSHARE int            gacount             INIT_(256);           /* count
 DCLDEF NOSHARE int            sgarbf              INIT_(TRUE);          /* TRUE if screen is garbage        */
 DCLDEF NOSHARE int            mpresf              INIT_(FALSE);         /* TRUE if message in last line     */
 DCLDEF NOSHARE int            clexec              INIT_(FALSE);         /* command line execution flag      */
+DCLDEF NOSHARE int            terminchr           INIT_('\0');          /* terminator character             */
 DCLDEF NOSHARE int            mstore              INIT_(FALSE);         /* storing text to macro flag       */
 DCLDEF NOSHARE int            discmd              INIT_(TRUE);          /* display command flag             */
 DCLDEF NOSHARE int            disinp              INIT_(TRUE);          /* display input characters         */

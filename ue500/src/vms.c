@@ -706,6 +706,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
+# if    BEGIN_COMMENT_
 int ttgetc_nowait P0_()
 {
     int ch  = 0;
@@ -732,6 +733,7 @@ int ttgetc_nowait P0_()
 # endif
     return (ch);
 }
+# endif /*END_COMMENT*/
 
 /*
  * Typahead - any characters pending?

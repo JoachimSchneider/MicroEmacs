@@ -729,7 +729,7 @@ static CONST char *wingetshell P0_()
         xsnprintf(WinCmd, SIZEOF(WinCmd), "%s\\system32\\cmd.exe", SystemRoot);
         if ( IsExecutable(WinCmd) ) {
             res = WinCmd;
-            TRC(("wingetshell(): %s", res));
+            TRC(("wingetshell(): `%s'", res));
         } else                      {
             res = NULL;
         }
@@ -1740,6 +1740,7 @@ static int dossystem P1_(CONST char *, cmd)
 int callout P1_(CONST char *, cmd)
 /* cmd: Command to execute  */
 {
+    int rc      = 0;
     int status  = 0;
 
     if ( NULL == cmd )  {
@@ -1753,15 +1754,15 @@ int callout P1_(CONST char *, cmd)
 
     /* Do command */
 # if ( CYGWIN )
-    status = winsystem(cmd) == 0;
+    status = (rc = winsystem(cmd)) == 0;
 # else
 # if ( DJGPP_DOS )
-    status = dossystem(cmd) == 0;
+    status = (rc = dossystem(cmd)) == 0;
 # else
-    status = system(cmd) == 0;
+    status = (rc = system(cmd))    == 0;
 # endif
 # endif
-
+    TRC(("callout(): system(%s) returned %d", cmd, rc));
     /* Restart system */
     sgarbf = TRUE;
     term.t_kopen();
@@ -1825,11 +1826,11 @@ int spawncli P2_(int, f, int, n)
 
     if ( IsExecutable(sh) ) {
         /* Do shell */
-        TRC(("spawncli: Opening `SHELL=%s'", sh));
+        TRC(("spawncli(): Opening `SHELL=%s'", sh));
 
         return ( callout(sh) );
     } else {
-        TRC(("spawncli: `SHELL=%s' is not executable", sh));
+        TRC(("spawncli(): `SHELL=%s' is not executable", sh));
 
         return FALSE;
     }
@@ -1855,6 +1856,7 @@ int spawn P2_(int, f, int, n)
         return (s);
 
     /* Perform the command */
+    TRC(("spawn(): excecuting `%s'", line));
     s = callout(line);
 
     /* if we are interactive, pause here */
@@ -2184,6 +2186,10 @@ static int LaunchPrg P4_(CONST char *,  Cmd,
 # endif
     }
 
+    TRC(("LaunchPrg(): Cmd:       `%s'", Cmd));
+    TRC(("LaunchPrg(): lInFile:   `%s'", lInFile));
+    TRC(("LaunchPrg(): lOutFile:  `%s'", lOutFile));
+    TRC(("LaunchPrg(): lErrFile:  `%s'", lErrFile));
 # if ( CYGWIN  )
     xsnprintf(FullCmd, SIZEOF (FullCmd),
               "%s < %s > %s 2>%s",
@@ -2205,6 +2211,7 @@ static int LaunchPrg P4_(CONST char *,  Cmd,
               Cmd, lInFile, lOutFile, lErrFile);
 # endif
 # endif
+    TRC(("LaunchPrg(): executing `%s'", FullCmd));
 
     return callout(FullCmd);
 } /* LaunchPrg */

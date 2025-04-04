@@ -86,6 +86,19 @@ COMMON unsigned int _stklen = 10000;
 #endif
 
 
+/*==============================================================*/
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_KEEP_TMPFLS=TRUE                               */
+/* to keep and investigate temporary files.                     */
+/*==============================================================*/
+#ifndef SWITCH_KEEP_TMPFLS
+# define SWITCH_KEEP_TMPFLS FALSE
+#endif
+/*==============================================================*/
+
+
 /* EMACS, CALLED_MAIN, MAIN:
  *
  * This is the primary entry point that is used by command line
@@ -172,7 +185,9 @@ abortrun:
 #if CLEAN
     clean();
 #endif
+#if ( SWITCH_KEEP_TMPFLS == FALSE )
     clntmpfls();
+#endif
 
 #if CALLED
     return (status);

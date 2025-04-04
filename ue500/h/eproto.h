@@ -2375,7 +2375,9 @@ EXTERN int PASCAL NEAR          ttclose DCL((void));
 EXTERN int PASCAL NEAR          ttflush DCL((void));
 EXTERN int PASCAL NEAR          ttgetc DCL((void));
 #if ( b_IS_UNIX || VMS )
+#if     BEGIN_COMMENT
 EXTERN int                      ttgetc_nowait DCL((void));
+#endif  /*END_COMMENT*/
 #endif
 EXTERN int PASCAL NEAR          ttopen DCL((void));
 EXTERN int PASCAL NEAR          ttputc DCL((int c));

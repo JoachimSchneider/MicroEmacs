@@ -1121,24 +1121,24 @@ int PASCAL NEAR adjustmode P2_(int, kind, int, global)
         if ( global ) {
             if ( uflag ) {
                 gfcolor = i;
-                TRC( ("Globally setting foreground color to %s/%d",
-                      (char *)cbuf, (int)i) );
+                TRC(("Globally setting foreground color to %s/%d",
+                     (char *)cbuf, (int)i));
             } else {
                 gbcolor = i;
-                TRC( ("Globally setting background color to %s/%d",
-                      (char *)cbuf, (int)i) );
+                TRC(("Globally setting background color to %s/%d",
+                     (char *)cbuf, (int)i));
             }
 # if     WINDOW_TEXT & 0
             rdw_screen(first_screen);
 # endif
         } else if ( uflag ) {
             curwp->w_fcolor = i;
-            TRC( ("Locally setting foreground color to %s/%d", (char *)cbuf,
-                  (int)i) );
+            TRC(("Locally setting foreground color to %s/%d", (char *)cbuf,
+                 (int)i));
         } else {
             curwp->w_bcolor = i;
-            TRC( ("Locally setting background color to %s/%d", (char *)cbuf,
-                  (int)i) );
+            TRC(("Locally setting background color to %s/%d", (char *)cbuf,
+                 (int)i));
         }
 
         curwp->w_flag |= WFCOLR;
@@ -1970,6 +1970,8 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
          /* ANSI C: fp should be opened in wb+ mode */
 # if ( 0 )
         if ( NULL == ( fp = uetmpfile() ) ) {
+            TRC(("xvsnprintf(): %s", "Cannot create a tmpfile"));
+
             return (-1);
         }
 # else
@@ -1984,11 +1986,25 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
         setbuf(fp, buf);
     }
 
-    rewind(fp);
-    RC_VFPRINTF(rc, fp, fmt, ap);
-    if ( 0 > rc ) {
+#ifndef SEEK_SET
+# define SEEK_SET (0)
+#endif
+    /* Use `fseek' instead of `rewind':
+     * - `rewind' did not work on 4.2 BSD
+     * - rewind gives no return code to check.
+     */
+    if ( 0 > fseek(fp, 0L, SEEK_SET) )  {
+        TRC(("xvsnprintf(): %s", "fseek returned .LT. 0"));
+
         return (-2);
     }
+    RC_VFPRINTF(rc, fp, fmt, ap);
+    if ( 0 > rc ) {
+        TRC(("xvsnprintf(): RC_VFPRINTF returned %d", rc));
+
+        return (-3);
+    }
+    TRC(("xvsnprintf(): RC_VFPRINTF returned %d", rc));
 
     if ( 0 == nn ) {
         /*
@@ -2004,17 +2020,41 @@ int PASCAL NEAR xvsnprintf P4_(char *, s, size_t, n, CONST char *, fmt,
         if ( 0 == rc ) {
             s[0] = '\0';
         } else {                /* Read back characters written: */
-            rewind(fp);
-            nr = MIN2(rc, nn - 1);
-            if ( 1 != fread(s, nr, 1, fp) ) {
-                return (-3);
+            if ( 0 > fseek(fp, 0L, SEEK_SET) )  {
+                TRC(("xvsnprintf(): %s", "fseek returned .LT. 0"));
+
+                return (-4);
             }
+            nr = MIN2(rc, nn - 1);
+            TRC(("xvsnprintf(): nr = %d", nr));
+#if ( 1 )
+            if ( 1 != fread(s, nr, 1, fp) ) {
+                TRC(("xvsnprintf(): %s", "fread did not return 1"));
+
+                return (-5);
+            }
+#else
+            {
+                int i   = 0;
+                int ch  = '\0';
+
+                for ( i = 0; i < nr; i++ )  {
+                    if ( EOF == (ch = getc(fp)) ) {
+                        s[i]  = '\0';
+                        TRC(("xvsnprintf(): EOF from getc() --- i = %d, got `%s'", i, s));
+
+                        return (-5);
+                    }
+                    ((unsigned char *)s)[i] = ch;
+                }
+            }
+#endif
             s[nr] = '\0';
         }
     }
 
     if ( 0 < nn ) {
-        TRC(("xvsnprintf: %s", s));
+        TRC(("xvsnprintf(): `%s'", s));
     }
 
     return rc;

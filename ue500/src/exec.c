@@ -390,13 +390,19 @@ int PASCAL NEAR nextarg P4_(
 
     /* if we are interactive, go get it! */
     if ( clexec == FALSE ) {
+        int rc  = 0;
+
         /* prompt the user for the input string */
         if ( discmd ) {
             if ( prompt ) mlwrite(prompt);
-        } else
+        } else        {
             movecursor(term.t_nrow, 0);
+        }
+        terminchr = terminator;
+        rc  = getstring((unsigned char *)buffer, size, terminator);
+        terminchr = '\0';
 
-        return ( getstring((unsigned char *)buffer, size, terminator) );
+        return rc;
     }
 
     /* grab token and advance past */

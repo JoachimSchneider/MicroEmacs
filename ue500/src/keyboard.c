@@ -819,10 +819,14 @@ VOID cook P0_()
                 /* Advance to next level */
                 cur = cur->nxtlvl;
 
-                /* Get next character, timed */
-                ch = grabnowait();
-                if ( ch == grabnowait_TIMEOUT ) {
-                    return;
+                if ( ch == ectoc(terminchr) ) {
+                    /* Get next character, timed */
+                    ch = grabnowait();
+                    if ( ch == grabnowait_TIMEOUT ) {
+                        return;
+                    }
+                } else                        {
+                    ch = grabwait();
                 }
 
                 /* Queue character */
@@ -839,6 +843,7 @@ VOID cook P0_()
  *
  * To use, we need a grabwait(), grabnowait(), qin() and qrep() function.
  */
+# if    BEGIN_COMMENT_
 int cook_nowait P0_()
 {
     REGISTER unsigned char  ch    = '\0';
@@ -897,6 +902,7 @@ int cook_nowait P0_()
 
     return TRUE;
 }
+# endif /*END_COMMENT*/
 #endif  /* ( b_IS_UNIX || VMS || MPE ) */
 
 

@@ -14,6 +14,9 @@
 /*====================================================================*/
 
 
+/*==============================================================*/
+/* Include files                                                */
+/*==============================================================*/
 #define termdef 1                       /* don't define term external */
 /* don't define term external */
 
@@ -30,8 +33,55 @@
 #endif
 #include        "edef.h"
 #include        "elang.h"
+/*==============================================================*/
+
 
 #if     ANSI
+
+
+/*==============================================================*/
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_BSD_FFS=USE_BSD_FFS_LATE                       */
+/* for BSD 4.2 and later.                                       */
+/*==============================================================*/
+# define ALT_SCREEN_NO    (1)
+# define ALT_SCREEN_XTERM (2)
+# ifndef SWITCH_ALT_SCREEN
+#  if ( b_IS_UNIX )
+#   if ( b_IS_ANCIENT_UNIX )
+#    define SWITCH_ALT_SCREEN ALT_SCREEN_NO
+#   else
+#    define SWITCH_ALT_SCREEN ALT_SCREEN_XTERM
+#   endif
+#  else
+#    define SWITCH_ALT_SCREEN ALT_SCREEN_NO
+#  endif
+# endif
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_NO )
+# else
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+# else
+  CRASH(Invalid value for SWITCH_ALT_SCREEN);
+# endif
+# endif
+
+/* Cooked input is only implemented for UNIX and VMS: */
+# if ( b_IS_UNIX || VMS )
+#  ifndef SWITCH_COOKED_INPUT
+#   define SWITCH_COOKED_INPUT  TRUE
+#  endif
+#  if ( SWITCH_COOKED_INPUT == TRUE )
+#  else
+#  if ( SWITCH_COOKED_INPUT == FALSE )
+#  else
+    CRASH(Invalid value for SWITCH_COOKED_INPUT);
+#  endif
+#  endif
+# endif
+/*==============================================================*/
+
 
 /*==============================================================*/
 /* FEATURES                                                     */
@@ -58,12 +108,12 @@
 /*..............................................................*/
 #if ( b_IS_UNIX || VMS )
 # if ( USE_PALETTE )
-#  define USE_COOKED_    ( !0 )
+#  define USE_COOKED_    SWITCH_COOKED_INPUT
 # else
-#  define USE_COOKED_    (  0 )
+#  define USE_COOKED_    FALSE
 # endif
 #else
-# define USE_COOKED_    (  0 )
+# define USE_COOKED_     FALSE
 #endif
 /*==============================================================*/
 
@@ -121,7 +171,7 @@ CASRT(1 <= NCOL && NCOL < 80);
 # define ESC        0x1B  /* ESC character.                 */
 
 # define ANSI_RESET             "\033[;H\033[2J"
-# if ( !b_IS_ANCIENT_UNIX )
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
 #  define ANSI_TO_ALT_SCREEN    "\033[?1049h"
 #  define ANSI_FROM_ALT_SCREEN  "\033[?1049l"
 # endif
@@ -470,9 +520,8 @@ static int PASCAL NEAR ansiopen P0_()
     term.t_mcol = term.t_ncol;
 #  endif
 # endif /* b_IS_UNIX */
-# if ( !b_IS_ANCIENT_UNIX )
-    fputs(ANSI_TO_ALT_SCREEN, stdout);
-    fflush(stdout);
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+  ttputs(ANSI_TO_ALT_SCREEN); ttflush();
 # endif
 # if     MOUSE && (b_IS_UNIX || VMS)
    /*
@@ -487,10 +536,8 @@ static int PASCAL NEAR ansiopen P0_()
         CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_ENABLE");
-        if ( !s ) {
-            s = "\033[1)u\033[1;3'{\033[1;2'z";
-        }
-        ttputs(s);
+        if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
+        ttputs(s); ttflush();
     }
 # endif /* MOUSE && (b_IS_UNIX || VMS) */
     xstrcpy(sres, "NORMAL");
@@ -501,6 +548,7 @@ static int PASCAL NEAR ansiopen P0_()
 # if     KEYPAD
     ttputc(ESC);
     ttputc('=');
+    ttflush();
 # endif /* KEYPAD */
 
     return 0;
@@ -520,7 +568,7 @@ static int PASCAL NEAR ansiclose P0_()
 
         if ( !s )               /* Regular DEC workstation */
             s = "\033[0'{\033[0;0'z";
-        ttputs(s);
+        ttputs(s); ttflush();
     }
 # endif /* MOUSE && (b_IS_UNIX || VMS) */
 # if     KEYPAD
@@ -530,12 +578,12 @@ static int PASCAL NEAR ansiclose P0_()
     {
         ttputc(ESC);
         ttputc('>');
+        ttflush();
     }
 # endif /* KEYPAD */
     ttclose();
-# if ( !b_IS_ANCIENT_UNIX )
-    fputs(ANSI_FROM_ALT_SCREEN, stdout);
-    fflush(stdout);
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+    ttputs(ANSI_FROM_ALT_SCREEN); ttflush();
 # endif
 
     return 0;
@@ -768,13 +816,15 @@ static int PASCAL NEAR ansigetc P0_()
              * to operate properly. This makes VT100 users much
              * happier.
              */
-#  if USE_COOKED_
-            ch = ttgetc_nowait();
-#  else
-            ch = grabnowait();
-#  endif
-            if ( grabnowait_TIMEOUT == ch ) return ( 27); /* Wasn't a function key  */
+            if ( ch == ectoc(terminchr) ) {
+                return ch;
+            }
 
+#  if USE_COOKED_
+            ch = ttgetc();
+#  else
+            ch = grabwait();
+#  endif
             if ( ch == '[' )      docsi(ch);
             else if ( ch == ':' ) dobbnmouse();
             else if ( ch == 'O' ) docsi(ch);
