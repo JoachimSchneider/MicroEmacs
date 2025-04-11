@@ -286,7 +286,7 @@ int PASCAL NEAR undo_list P2_(int, f, int, n)
 
 /* UNDOLIST:
  */
-int PASCAL NEAR undolist P0_()
+static int PASCAL NEAR undolist P0_()
 {
     /* scanning pointer into line to build:         */
     REGISTER char *cp1  = NULL;

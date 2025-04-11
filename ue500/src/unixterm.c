@@ -249,7 +249,7 @@ int unixterm0 P1_(char *, s)
 #  if !ANSI
 EXTERN int  tgetflag            DCL((char *id));
 EXTERN int  tgetnum             DCL((char *id));
-EXTERN int  tgetent             DCL((char *bp, const char *name));
+EXTERN int  tgetent             DCL((char *bp, CONST char *name));
 EXTERN char *tgetstr            DCL((char *, char **));
 EXTERN char *tgoto              DCL((CONST char *cap, int col, int row));
 EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
@@ -259,7 +259,7 @@ EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(in
 EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # endif /* ANSI */
 # if CYGWIN
-EXTERN const char *cygpwd_      DCL((void));
+EXTERN CONST char *cygpwd_      DCL((void));
 # endif /* CYGWIN */
 /*==============================================================*/
 
@@ -1042,7 +1042,7 @@ int PASCAL NEAR ttgetc P0_()
     {
         int       l     = 0;
         int       i     = 0;
-        const int *chp  = NULL;
+        CONST int *chp  = NULL;
 
         chp = qget(&l);
         TRC(("ttgetc(): %s[head = %d, tail = %d](%d)",

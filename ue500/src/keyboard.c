@@ -643,13 +643,13 @@ int PASCAL NEAR listkeymaps P2_(int, f, int, n)
     return FALSE;
 }
 
-/* recursively track through the tree, finding the escape sequences and their
- * function name equivalents.
+/* recursively track through the tree, finding the escape sequences and
+ * their function name equivalents.
  */
-int PASCAL NEAR rec_seq P4_(char *,   buf,
-                            char *,   bufstart,
-                            int,      bufstartsiz,
-                            KEYENT *, node)
+static int PASCAL NEAR rec_seq P4_(char *,   buf,
+                                   char *,   bufstart,
+                                   int,      bufstartsiz,
+                                   KEYENT *, node)
 {
     if ( node == NULL )
         return TRUE;
@@ -902,7 +902,7 @@ VOID cook P0_()
                 {
                     int       l     = 0;
                     int       i     = 0;
-                    const int *chp  = NULL;
+                    CONST int *chp  = NULL;
 
                     chp = qget(&l);
                     TRC(("cook(): %s(%d)", "BEGIN Match", __LINE__));
@@ -934,7 +934,7 @@ VOID cook P0_()
                     {
                         int       l     = 0;
                         int       i     = 0;
-                        const int *chp  = NULL;
+                        CONST int *chp  = NULL;
 
                         chp = qget(&l);
                         TRC(("cook(): %s(%d)", "BEGIN NoMatch", __LINE__));
@@ -963,7 +963,7 @@ VOID cook P0_()
     {
         int       l     = 0;
         int       i     = 0;
-        const int *chp  = NULL;
+        CONST int *chp  = NULL;
 
         chp = qget(&l);
         TRC(("cook(): %s(%d)", "BEGIN NoMatch", __LINE__));
