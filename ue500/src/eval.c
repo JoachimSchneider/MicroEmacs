@@ -262,7 +262,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 #endif
 
     case UFGTCMD:
-        RETURN ( cmdstr(getcmd(), result) );
+        RETURN ( getecnam(getcmd(), result, SIZEOF(result)) );
 
     case UFGTKEY:
         result[0] = tgetc();
@@ -638,7 +638,7 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
         RETURN ( ltos(hscroll) );
 
     case EVISTERM:
-        RETURN ( cmdstr(isterm, result) );
+        RETURN ( getecnam(isterm, result, SIZEOF(result)) );
 
     case EVKILL:
         RETURN ( getkill() );
@@ -768,7 +768,7 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
         RETURN ( ltos(cmdstatus) );
 
     case EVSTERM:
-        RETURN ( cmdstr(sterm, result) );
+        RETURN ( getecnam(sterm, result, SIZEOF(result)) );
 
     case EVTARGET:
         saveflag = lastflag;

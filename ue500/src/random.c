@@ -331,7 +331,7 @@ int PASCAL NEAR quote P2_(int, f, int, n)
     REGISTER int ec;            /* current extended key fetched     */
     REGISTER int c;             /* current ascii key fetched        */
     REGISTER int status;        /* return value to hold from linstr */
-    char key_name[10];          /* name of a keystroke for quoting  */
+    char key_name[C_18];        /* name of a keystroke for quoting  */
 
     if ( curbp->b_mode & MDVIEW )   /* don't allow this command if  */
         return ( rdonly() );        /* we are in read only mode     */
@@ -348,7 +348,7 @@ int PASCAL NEAR quote P2_(int, f, int, n)
 
     /* if this is a mouse event or function key, put its name in */
     if ( (ec & MOUS) || (ec & SPEC) ) {
-        cmdstr(ec, key_name);
+        getecnam(ec, key_name, SIZEOF(key_name));
         while ( n-- ) {
             status = linstr(key_name);
             if ( status != TRUE )
@@ -2411,6 +2411,96 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
 
     return nstr;
 }
+
+/* CMKVIS:
+ *
+ * Display character in a visible form.
+ */
+CONST char *cmkvis P1_(char, c)
+{
+    static char   res[NSTRING];
+    unsigned char uc  = (unsigned char)c;
+
+    CASRT(SIZEOF("\\x%XX") <= SIZEOF(res));
+
+    ZEROMEM(res);
+
+    switch (c)  {
+        case 'A':  case 'B':  case 'C':  case 'D':  case 'E':  case 'F':
+        case 'G':  case 'H':  case 'I':  case 'J':  case 'K':  case 'L':
+        case 'M':  case 'N':  case 'O':  case 'P':  case 'Q':  case 'R':
+        case 'S':  case 'T':  case 'U':  case 'V':  case 'W':  case 'X':
+        case 'Y':  case 'Z':
+        case 'a':  case 'b':  case 'c':  case 'd':  case 'e':  case 'f':
+        case 'g':  case 'h':  case 'i':  case 'j':  case 'k':  case 'l':
+        case 'm':  case 'n':  case 'o':  case 'p':  case 'q':  case 'r':
+        case 's':  case 't':  case 'u':  case 'v':  case 'w':  case 'x':
+        case 'y':  case 'z':
+        case '0':  case '1':  case '2':  case '3':  case '4':  case '5':
+        case '6':  case '7':  case '8':  case '9':
+        case '!':  case '@':  case '#':  case '$':  case '%':  case '^':
+        case '&':  case '*':  case '(':  case ')':  case '-':  case '_':
+        case '=':  case '+':  case '[':  case '{':  case ']':  case '}':
+        case '\\': case '|':  case ';':  case ':':  case '\'': case '"':
+        case ',':  case '<':  case '.':  case '/':  case '?':  case '`':
+        case '~':
+#if     BEGIN_COMMENT
+        case ' ':  case '\t': case '\n': case '\r':
+#endif  /*END_COMMENT*/
+
+            res[0]  = c;
+            break;
+
+        default:
+            assert(0 <= uc);
+            assert(uc <= 0xFF);
+            sprintf(res, "\\x%02X", (unsigned int)uc);
+            break;
+    }
+
+    return res;
+}
+
+/* SMKVIS:
+ *
+ * Display character string in a visible form.
+ */
+CONST char *smkvis P1_(CONST char *, s)
+{
+    static char   res[NSTRING];
+
+    ZEROMEM(res);
+
+    if ( s )  {
+        while ( *s )  {
+            xstrlcat(res, cmkvis(*s), SIZEOF(res));
+            s++;
+        }
+    }
+
+    return res;
+}
+
+/* BMKVIS:
+ *
+ * Display character buffer in a visible form.
+ */
+CONST char *bmkvis P2_(CONST char *, s, int, l)
+{
+    static char   res[NSTRING];
+
+    ZEROMEM(res);
+
+    if ( s )  {
+        while ( 0 < l-- )   {
+            xstrlcat(res, cmkvis(*s), SIZEOF(res));
+            s++;
+        }
+    }
+
+    return res;
+}
+
 
 /* We want to use a working `assert' inside of some of these
  * functions therefor we use the following construct:

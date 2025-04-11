@@ -498,16 +498,16 @@ static int inbuf[NINCHAR];              /* Input buffer               */
 static int * inbufh = inbuf;            /* Head of input buffer       */
 static int * inbuft = inbuf;            /* Tail of input buffer       */
 #if ( 0 )
-#define PRINT_inbuf(where) do  {                                  \
+#define TRACE_inbuf(where) do  {                                  \
     int i = 0;                                                    \
                                                                   \
-    fprintf(stderr, "%12s: inbuft = %d, inbufh = %d, inbuf = ",   \
-                    (char *)(where), (int)(inbuft - inbuf),       \
-                                     (int)(inbufh - inbuf));      \
+    TRC(("%12s: inbuft = %d, inbufh = %d, inbuf = ",              \
+          (char *)(where), (int)(inbuft - inbuf),                 \
+          (int)(inbufh - inbuf)));                                \
     for ( i = 0; i < NELEM(inbuf) - 1; i++ )  {                   \
-        fprintf(stderr, "0x%04X, ", inbuf[i]);                    \
+        TRC(("0x%04X, ", inbuf[i]));                              \
     }                                                             \
-    fprintf(stderr, "0x%04X\n", inbuf[i]);                        \
+    TRC(("0x%04X\n", inbuf[i]));                                  \
 } while ( 0 )
 #endif
 static unsigned char outbuf[NOUTCHAR];  /* Output buffer              */
@@ -788,10 +788,10 @@ unsigned char grabwait()
 # if ( USE_SGTTY )
 # else
     /* Change mode, if necessary */
-    if ( curterm.c_cc[VTIME] ) {
-        curterm.c_cc[VMIN] = 1;
+    if ( curterm.c_cc[VTIME] )  {
+        curterm.c_cc[VMIN]  = 1;
         curterm.c_cc[VTIME] = 0;
-#  if   ( USE_TERMIOS_TCXX )
+#  if ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
 #  else
 #  if ( USE_TERMIO_IOCTL )
@@ -804,7 +804,7 @@ unsigned char grabwait()
 #  endif
 #  endif
     }
-# endif
+# endif /*USE_SGTTY*/
 
 # if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
     /* Perform read */
@@ -994,7 +994,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
 VOID qin P1_(int, ch)
 {
 # if ( 0 )
-    PRINT_inbuf("BEGIN qin");
+    TRACE_inbuf("BEGIN qin");
 # endif
     /* Check for overflow */
     if ( inbuft == &inbuf[NELEM(inbuf)] ) {
@@ -1007,7 +1007,7 @@ VOID qin P1_(int, ch)
     /* Add character */
     *inbuft++ = ch;
 # if ( 0 )
-    PRINT_inbuf("  END qin");
+    TRACE_inbuf("  END qin");
 # endif
 }
 
@@ -1018,12 +1018,12 @@ VOID qin P1_(int, ch)
 VOID qrep P1_(int, ch)
 {
 # if ( 0 )
-    PRINT_inbuf("BEGIN qrep");
+    TRACE_inbuf("BEGIN qrep");
 # endif
     inbuft = inbuf;
     qin(ch);
 # if ( 0 )
-    PRINT_inbuf("  END qrep");
+    TRACE_inbuf("  END qrep");
 # endif
 }
 
@@ -1038,6 +1038,28 @@ int PASCAL NEAR ttgetc P0_()
         cook();
 
     /* Get input from buffer, now that it is available */
+#  if ( 1 )
+    {
+        int       l     = 0;
+        int       i     = 0;
+        const int *chp  = NULL;
+
+        chp = qget(&l);
+        TRC(("ttgetc(): %s[head = %d, tail = %d](%d)",
+             "BEGIN 'Get input from buffer'",
+             (int)(inbufh - inbuf),
+             (int)(inbuft - inbuf),
+             __LINE__));
+        for ( i = 0; i < l; i++ ) {
+            TRC(("ttgetc():     %s", ectostr(chp[i])));
+        }
+        TRC(("ttgetc(): %s[head = %d, tail = %d](%d)",
+             "  END 'Get input from buffer'",
+             (int)(inbufh - inbuf),
+             (int)(inbuft - inbuf),
+             __LINE__));
+    }
+#  endif
     ch = *inbufh++;
 
     /* reset us to the beginning of the buffer if there are no more pending
@@ -1080,6 +1102,22 @@ int ttgetc_nowait P0_()
     return (ch);
 }
 # endif /*END_COMMENT*/
+
+/* QGET:
+ *
+ * Get characters pending in input queue:
+ * - *lp:     Number of characters in queue
+ * - Result:  Pointer to int array
+ */
+CONST int *qget P1_(int *, lp)
+{
+    ASRT(NULL != lp);
+
+    *lp = inbuft - inbufh;
+
+    return (CONST int *)inbufh;
+}
+
 
 # if TYPEAH
 

@@ -735,6 +735,22 @@ int ttgetc_nowait P0_()
 }
 # endif /*END_COMMENT*/
 
+/* QGET:
+ *
+ * Get characters pending in input queue:
+ * - *lp:     Number of characters in queue
+ * - Result:  Pointer to int array
+ */
+CONST int *qget P1_(int *, lp)
+{
+    ASRT(NULL != lp);
+
+    *lp = inbuft - inbufh;
+
+    return (CONST int *)inbufh;
+}
+
+
 /*
  * Typahead - any characters pending?
  */

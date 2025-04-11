@@ -35,6 +35,76 @@
 #include "elang.h"
 
 
+#if     BEGIN_COMMENT
+/*
+ * In `input.c' the format of an EMACS Extended Character was descibed:
+ *======================================================================
+ * Bit     Usage
+ * ---     -----
+ * 0 -> 7  Standard 8 bit ascii character
+ * 8       Control key flag
+ * 9       META prefix flag
+ * 10      ^X prefix flag
+ * 11      Function key flag
+ * 12      Mouse prefix
+ * 13      Shifted flag (not needed on alpha shifted characters)
+ * 14      Alterate prefix (ALT key on PCs)
+ *======================================================================
+ */
+CONST char *ectostr P1_(int, ec)
+{
+    static char   res[NSTRING];
+
+    unsigned int  uc    = ec;
+    unsigned char b     = uc & 0xFF;
+    unsigned int  ctl   = uc & (1<<8);
+    unsigned int  meta  = uc & (1<<9);
+    unsigned int  ctlx  = uc & (1<<10);
+    unsigned int  fn    = uc & (1<<11);
+    unsigned int  ms    = uc & (1<<12);
+    unsigned int  shift = uc & (1<<13);
+    unsigned int  alt   = uc & (1<<14);
+    unsigned char bstr[2] = { b, '\0' };
+
+    ZEROMEM(res);
+
+    if ( shift )  {
+        XSTRCAT(res, "SHIFT+");
+    }
+    if ( ctl )    {
+        XSTRCAT(res, "CTL+");
+    }
+    if ( meta )   {
+        XSTRCAT(res, "META+");
+    }
+    if ( alt )    {
+        XSTRCAT(res, "ALT+");
+    }
+    if ( ctlx )   {
+        XSTRCAT(res, "^+");
+    }
+    if ( fn )     {
+        XSTRCAT(res, "FN-");
+    }
+    if ( ms )     {
+        XSTRCAT(res, "MOUSE-");
+    }
+    XSTRCAT(res, (char *)bstr);
+
+    return res;
+}
+#endif  /*END_COMMENT*/
+
+CONST char *ectostr P1_(int, ec)
+{
+    static char res[NSTRING];
+
+    ZEROMEM(res);
+
+    return getecnam(ec, res, SIZEOF(res));
+}
+
+
 #if ( MSDOS || OS2 )
 # if ( !HP150 )
 
@@ -469,7 +539,10 @@ typedef struct keyent {                 /* Key mapping entry          */
 } KEYENT;
 
 /* Needed Prototype */
-EXTERN int PASCAL NEAR rec_seq DCL((char *buf, char *bufstart, KEYENT *node));
+static int PASCAL NEAR rec_seq DCL((char    *buf,
+                                    char    *bufstart,
+                                    int     bufstartsiz,
+                                    KEYENT  *node));
 
 /* some globals needed here */
 /*  Prefix escape sequence table:                                     */
@@ -559,7 +632,8 @@ int PASCAL NEAR listkeymaps P2_(int, f, int, n)
      * Build the list, pop it if all went well.
      */
     *outseq = '"';
-    if ( rec_seq(outseq + 1, outseq, keymap) == TRUE ) {
+    if ( rec_seq(outseq + 1, outseq, SIZEOF(outseq), keymap)
+          == TRUE )                                           {
         wpopup(seqbuf);
         mlerase();
 
@@ -572,24 +646,32 @@ int PASCAL NEAR listkeymaps P2_(int, f, int, n)
 /* recursively track through the tree, finding the escape sequences and their
  * function name equivalents.
  */
-int PASCAL NEAR rec_seq P3_(char *, buf, char *, bufstart, KEYENT *, node)
+int PASCAL NEAR rec_seq P4_(char *,   buf,
+                            char *,   bufstart,
+                            int,      bufstartsiz,
+                            KEYENT *, node)
 {
     if ( node == NULL )
         return TRUE;
 
     *buf = node->ch;
 
-    if ( node->nxtlvl == NULL ) {
+    if        ( node->nxtlvl == NULL )  {
         *(buf + 1) = '"';
         *(buf + 2) = '\0';
         pad(bufstart, 20);
-        cmdstr(node->code, bufstart + 20);
-        if ( addline(seqbuf, bufstart) != TRUE )
-            return FALSE;
-    } else if ( rec_seq(buf + 1, bufstart, node->nxtlvl) != TRUE )
-        return FALSE;
+        getecnam(node->code, bufstart + 20, bufstartsiz - 20);
+        if ( addline(seqbuf, bufstart) != TRUE )  {
 
-    return ( rec_seq(buf, bufstart, node->samlvl) );
+            return FALSE;
+        }
+    } else if ( rec_seq(buf + 1, bufstart, bufstartsiz, node->nxtlvl)
+                  != TRUE )             {
+
+        return FALSE;
+    }
+
+    return ( rec_seq(buf, bufstart, bufstartsiz, node->samlvl) );
 }
 
 /* addkey --- Add key to key map
@@ -601,6 +683,10 @@ int PASCAL NEAR rec_seq P3_(char *, buf, char *, bufstart, KEYENT *, node)
  * find/select/do etc. are treated like function keys).
  *
  * Replaces code in SMG.C, MPE.C, POSIX.C, and UNIX.C Nothing returned
+ *
+ * Remark (Joachim Schneider, 04/2025): This is the "Trie-Algorithm"
+ * (in German "Praefix-Baum") invented by Edward Fredkin. See Donald
+ * Knuth: The Art of Computer Programming. Vol III, Chapter 6.3.
  *
  *======================================================================
   typedef struct keyent {             /o Key mapping entry            o/
@@ -692,8 +778,9 @@ int PASCAL NEAR addkey P2_(unsigned char *, seq, int, fn)
     if ( seq == NULL || STRLEN( (char *)seq ) < 2 )
         return FALSE;
 
-#  if ( 0 )
-    TRC(("addkey(): seq = <%s>", (char *)seq));
+#  if ( 1 )
+    TRC(("addkey(): seq = <%s>,\tCode = 0x%04X: %s",
+         smkvis((char *)seq), (unsigned int)fn, ectostr(fn)));
 #  endif
     /* If no keys defined, go directly to insert mode */
     first = !0;
@@ -811,6 +898,22 @@ VOID cook P0_()
         if ( cur->ch == ch ) {
             /* Is this the end */
             if ( cur->nxtlvl == NULL ) {
+#  if ( 1 )
+                {
+                    int       l     = 0;
+                    int       i     = 0;
+                    const int *chp  = NULL;
+
+                    chp = qget(&l);
+                    TRC(("cook(): %s(%d)", "BEGIN Match", __LINE__));
+                    for ( i = 0; i < l; i++ ) {
+                        TRC(("cook():     %s", ectostr(chp[i])));
+                    }
+                    TRC(("cook(): %s(%d)", "  END Match", __LINE__));
+                }
+                TRC(("cook(): Match: Code = 0x%04X: %s",
+                     (unsigned int)cur->code, ectostr(cur->code)));
+#  endif
                 /* Replace all characters with a new sequence */
                 qrep(cur->code);
 
@@ -827,6 +930,21 @@ VOID cook P0_()
                         return;
                     }
 #else   /*END_COMMENT*/
+#  if ( 1 )
+                    {
+                        int       l     = 0;
+                        int       i     = 0;
+                        const int *chp  = NULL;
+
+                        chp = qget(&l);
+                        TRC(("cook(): %s(%d)", "BEGIN NoMatch", __LINE__));
+                        for ( i = 0; i < l; i++ ) {
+                            TRC(("cook():     %s", ectostr(chp[i])));
+                        }
+                        TRC(("cook(): %s(%d)", "  END NoMatch", __LINE__));
+                    }
+#  endif
+
                     return;
 #endif
                 } else                        {
@@ -841,6 +959,22 @@ VOID cook P0_()
             cur = cur->samlvl;
         }
     }
+#  if ( 1 )
+    {
+        int       l     = 0;
+        int       i     = 0;
+        const int *chp  = NULL;
+
+        chp = qget(&l);
+        TRC(("cook(): %s(%d)", "BEGIN NoMatch", __LINE__));
+        for ( i = 0; i < l; i++ ) {
+            TRC(("cook():     %s", ectostr(chp[i])));
+        }
+        TRC(("cook(): %s(%d)", "  END NoMatch", __LINE__));
+    }
+#  endif
+
+    return;
 }
 
 /* Cook input characters, using the key sequences stored by addkey().

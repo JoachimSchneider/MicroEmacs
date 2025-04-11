@@ -35,10 +35,14 @@
 /**********************************************************************/
 /* No braces `()' here!                                               */
 #define C_1    1
+#define C_3    3
 #define C_4    4
+#define C_6    6
 #define C_7    7
+#define C_8    8
 #define C_10  10
 #define C_16  16
+#define C_18  18
 #define C_20  20
 #define C_30  30
 #define C_36  36
@@ -446,6 +450,16 @@ EXTERN char *PASCAL NEAR  achrcat DCL((CONST char *str, CONST char c));
 /* Input string must either be NULL or malloced.                */
 EXTERN char *PASCAL NEAR  astrcat DCL((CONST char *str, CONST char *s));
 
+/* Display character in a visible form.                         */
+EXTERN CONST char         *cmkvis DCL((char c));
+
+/* Display character string in a visible form.                  */
+EXTERN CONST char         *smkvis DCL((CONST char *s));
+
+/* Display character buffer in a visible form.                  */
+EXTERN CONST char         *bmkvis DCL((CONST char *s, int l));
+
+
 #if UEMACS_FEATURE_USE_STATIC_STACK
 /*--------------------------------------------------------------------*/
 /* A Stack ADT to be used for returning pointers to static variables  */
@@ -585,6 +599,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #define NELEM(A)      ( SIZEOF ( (A) )/SIZEOF ( (A)[0] ) )
 #define SIZEOF(e)     ( (int)sizeof(e) )
 #define STRLEN(x)     ( (int)strlen((x)) )
+#define SLTLEN(x)     ( SIZEOF((x)) - 1 ) /* strlen of a string literal */
 #define ZEROMEM(x)    ( umc_memset(&(x), 0, SIZEOF((x))) )
 #define MAXIMUM(x, y) ( ((x) < (y))? (y) : (x) )
 #define MINIMUM(x, y) ( ((x) > (y))? (y) : (x) )
@@ -1169,6 +1184,25 @@ BEGIN_DO_ONCE {
 #define C2I(c)  ( (int)(unsigned char)(c) )
 /* REMARK: Using integer promotion another (cryptic) way to achive    */
 /*         this would be: C2I(c) := ( (c) & 255 ).                    */
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* Bound checks when accessing buffer buf via index i or pointer cp:  */
+/* --- Arguments are evaluated multiple times ---                     */
+/*--------------------------------------------------------------------*/
+/* Assert that n items may be written at the indicated address:       */
+#define BNDCHK_IDXN(i, buf, n)  ( 0        <= (int)(i) &&             \
+                                  (int)(i) <= SIZEOF((buf)) - (int)(n) )
+#define BNDCHK_PTRN(cp, buf, n) ( (buf)    <= (cp) &&                 \
+                                  (cp)     <= (buf) + SIZEOF((buf))   \
+                                              - (int)(n) )
+/*--------------------------------------------------------------------*/
+/* Assert that *one* item may be written at the indicated address:    */
+#define BNDCHK_IDX(i, buf)  ( 0 <= (int)(i) && (int)(i)               \
+                              < SIZEOF((buf)) )
+#define BNDCHK_PTR(cp, buf) ( (buf) <= (cp) && (cp)                   \
+                              < (buf) + SIZEOF((buf)) )
 /**********************************************************************/
 
 
@@ -1973,7 +2007,8 @@ EXTERN VOID PASCAL NEAR         free_screen DCL((SCREEN_T *sp));
 EXTERN char *                   Eallocate DCL((unsigned nbytes));
 EXTERN char *                   dolock DCL((CONST char *fname));
 EXTERN char *PASCAL NEAR        bytecopy DCL((char *dst, CONST char *src, int maxlen));
-EXTERN char *PASCAL NEAR        cmdstr DCL((int c, char *seq));
+EXTERN char *PASCAL NEAR        getecnam DCL((int c, char *seq, int seqsiz));
+EXTERN CONST char *             ectostr DCL((int ec));
 EXTERN char *PASCAL NEAR        copystr DCL((CONST char *));
 EXTERN CONST char *PASCAL NEAR  envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR  fixnull DCL((CONST char *s));
@@ -2003,7 +2038,6 @@ EXTERN char *PASCAL NEAR        token DCL((char *src, char *tok, int size));
 EXTERN CONST char *PASCAL NEAR  transbind DCL((CONST char *skey));
 EXTERN char *PASCAL NEAR        trimstr DCL((char *s));
 EXTERN char *PASCAL NEAR        xlat DCL((char *source, char *lookup, char *trans));
-EXTERN int PASCAL NEAR          undolist DCL((void));
 EXTERN char *                   undolock DCL((CONST char *fname));
 EXTERN char *PASCAL NEAR        regtostr DCL((char *buf, REGION *region));
 EXTERN int PASCAL NEAR          lowerc DCL((char ch));
@@ -2490,9 +2524,11 @@ EXTERN VOID PASCAL NEAR         vtfree DCL((void));
 #if ( b_IS_UNIX || VMS || MPE )
 EXTERN VOID                     cook        DCL((void));
 EXTERN int                      cook_nowait DCL((void));
-#endif
-EXTERN VOID                     qin DCL((int ch));
+EXTERN VOID                     qin  DCL((int ch));
 EXTERN VOID                     qrep DCL((int ch));
+EXTERN CONST int *              qget DCL((int *lp));
+#endif
+
 EXTERN EWINDOW *PASCAL NEAR     mousewindow DCL((int row));
 EXTERN int PASCAL NEAR          wpopup DCL((BUFFER *popbuf));
 

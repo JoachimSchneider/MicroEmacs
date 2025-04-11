@@ -890,7 +890,7 @@ int PASCAL NEAR getstring P3_(unsigned char *, buf, int, nbuf, int, eolchar)
         /* if it is from the mouse, or is a function key, insert it's name since
          * it was quoted */
         if ( (ec & MOUS) || (ec & SPEC) ) {
-            cmdstr(ec, key_name);
+            getecnam(ec, key_name, SIZEOF(key_name));
             kp = key_name;
             while ( *kp ) {
                 if ( cpos < nbuf - 1 ) {
@@ -999,7 +999,7 @@ int PASCAL NEAR mlprompt P3_(CONST char *, prompt, CONST char *, dflt,
         break;
 
     default:
-        mlputs( cmdstr(iterm, buf) );
+        mlputs( getecnam(iterm, buf, SIZEOF(buf)) );
         tcol += STRLEN(buf) + 4;
     }
     mlputs(">: ");
