@@ -9,6 +9,7 @@
 # Be careful when using relative directories: FreeBSD make changes
 # directory to the target's directory --- HMM
 # ===> Only the setting `OBJD = .' semms to work in a *simple* way.
+
 # object file directory
 OBJD = .
 # source file directory
@@ -16,41 +17,57 @@ SRCD = ../src
 # header file directory
 HDIR = ../h
 
-
 # options and arguments to the C compiler
 #
-# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
-# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
-#
-#CFLAGS = -g -Wall -DJES_REPAIR_CODE -DEMACS_TRC -I. -I$(HDIR)
-CFLAGS = -g -Wall -O2 -I. -I$(HDIR)
+##
+OPTFLAGS = -fno-strict-aliasing
+#WARNFLAGS = -Wall
+WARNFLAGS = -Wall -Wno-unused-variable
+#WARNFLAGS = -Wall -Wno-unused-local-typedefs
+##
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2
+##
 
+# Where to find the termcap/cureses library:
+#LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
+#LIB_TERMCAP = -L/usr/lib64/termcap -ltermcap    # SLES 15
+#LIB_TERMCAP = -ltermcap
+#LIB_TERMCAP = -lncurses
+#LIB_TERMCAP = -lcurses
 
 # list of header files
 
-HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.h $(HDIR)/eproto.h
+HFILES = estruct.h $(HDIR)/ebind.h $(HDIR)/edef.h           \
+          $(HDIR)/elang.h $(HDIR)/epath.h $(HDIR)/eproto.h
 
-# list of object files
 
-F1 = $(OBJD)/abbrev.o $(OBJD)/basic.o $(OBJD)/bind.o $(OBJD)/buffer.o
+#list of object files
+
+F1 = $(OBJD)/abbrev.o $(OBJD)/ansi.o $(OBJD)/basic.o $(OBJD)/bind.o     \
+      $(OBJD)/buffer.o
 F2 = $(OBJD)/char.o $(OBJD)/crypt.o $(OBJD)/display.o $(OBJD)/dolock.o
 F3 = $(OBJD)/eval.o $(OBJD)/exec.o $(OBJD)/file.o $(OBJD)/fileio.o
 F4 = $(OBJD)/input.o $(OBJD)/isearch.o $(OBJD)/keyboard.o $(OBJD)/line.o
 F5 = $(OBJD)/lock.o $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
 F6 = $(OBJD)/random.o $(OBJD)/region.o $(OBJD)/search.o $(OBJD)/replace.o
-F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unix.o $(OBJD)/window.o $(OBJD)/word.o
+F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unixsys.o $(OBJD)/unixterm.o \
+      $(OBJD)/window.o $(OBJD)/word.o
+F8 = $(OBJD)/elang.o
 
 # product list
 
 all:	emacs
 
-OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
+OFILES =  $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
 
 emacs:	$(OFILES)
-		$(CC) $(CFLAGS) $(OFILES) -ltermcap -lc -o emacs
+	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
 
 $(OBJD)/abbrev.o: $(SRCD)/abbrev.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/abbrev.o $(SRCD)/abbrev.c
+$(OBJD)/ansi.o: $(SRCD)/ansi.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/ansi.o $(SRCD)/ansi.c
 $(OBJD)/basic.o: $(SRCD)/basic.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/basic.o $(SRCD)/basic.c
 $(OBJD)/bind.o: $(SRCD)/bind.c $(HFILES)
@@ -67,7 +84,9 @@ $(OBJD)/display.o: $(SRCD)/display.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/display.o $(SRCD)/display.c
 $(OBJD)/dolock.o: $(SRCD)/dolock.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/dolock.o $(SRCD)/dolock.c
-$(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.h
+$(OBJD)/elang.o: $(SRCD)/elang.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/elang.o $(SRCD)/elang.c
+$(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/eval.o $(SRCD)/eval.c
 $(OBJD)/exec.o: $(SRCD)/exec.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/exec.o $(SRCD)/exec.c
@@ -85,12 +104,10 @@ $(OBJD)/line.o: $(SRCD)/line.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/line.o $(SRCD)/line.c
 $(OBJD)/lock.o: $(SRCD)/lock.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/lock.o $(SRCD)/lock.c
-$(OBJD)/main.o: $(SRCD)/main.c $(HFILES)
+$(OBJD)/main.o: $(SRCD)/main.c $(HFILES) $(HDIR)/efunc.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c
-$(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
 $(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
@@ -105,6 +122,10 @@ $(OBJD)/tags.o: $(SRCD)/tags.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/tags.o $(SRCD)/tags.c
 $(OBJD)/undo.o: $(SRCD)/undo.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/undo.o $(SRCD)/undo.c
+$(OBJD)/unixsys.o: $(SRCD)/unixsys.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/unixsys.o $(SRCD)/unixsys.c
+$(OBJD)/unixterm.o: $(SRCD)/unixterm.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/unixterm.o $(SRCD)/unixterm.c
 $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
@@ -112,7 +133,7 @@ $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)
 
 
 clean:
-	rm -f $(OBJD)/*.o
+	rm -f *.o
 	rm -f emacs
 
 

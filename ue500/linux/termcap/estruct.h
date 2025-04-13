@@ -159,9 +159,6 @@
 #if BEGIN_COMMENT_
 #define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
 #define WANGPC  0     /* WangPC - mostly escape sequences             */
-#endif  /*END_COMMENT_*/
-#define VT100   1     /* Handle VT100 style keypad - NOT VMS.         */
-#if BEGIN_COMMENT_
 #define KEYPAD  0     /* VMS - turn on and off application            */
                       /* keypad automatically                         */
 #define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
@@ -198,7 +195,9 @@
 #endif  /*END_COMMENT_*/
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
+#if BEGIN_COMMENT_
 #define UNIX_READ_TOUT  (4)
+#endif  /*END_COMMENT_*/
 
 /*      Windowing system style (pick one)                             */
 

@@ -146,7 +146,7 @@ int unixsys0  P1_(char *, s)
 
 
 /*==============================================================*/
-/* Include files                                                */
+/* Include files and platform dependent declarations            */
 /*==============================================================*/
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <time.h>             /* time(), ctime(), ...         */
@@ -226,6 +226,7 @@ int unixsys0  P1_(char *, s)
 #   include <spawn.h>
 #  endif
 #  include <sys/wait.h>
+EXTERN CONST char *     cygpwd_ DCL((void));
 # endif /* CYGWIN */
 
 # if ( DJGPP_DOS )
@@ -822,15 +823,14 @@ static CONST char *cygads2enx_ P1_(CONST char *, dos)
                 return res;
             }
             res[j++]  = '/';
-            CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
             if ( '\\' == in[i] )  {
                 i++;
             }
             for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
                 if ( '\\' == in[i] )  {
-                    res[j]  = '/';
+                    xstrlccpy(res + j, '/',   SIZEOF(res) - j);
                 } else                {
-                    res[j]  = in[i];
+                    xstrlccpy(res + j, in[i], SIZEOF(res) - j);
                 }
             }
         } else                    {
@@ -2085,11 +2085,11 @@ CONST char *gettmpfname P1_(CONST char *, ident)
     ZEROMEM(l_ident);
 
     l_ident[0]  = 'x';
-    xstrlcpy(str, gettmpdir(),                SIZEOF(str));
+    xstrlcpy(str, gettmpdir(), SIZEOF(str));
     /* The filename part should have DOS 6.0 format --- remind DOS's
      * 126 byte command line limit
      */
-    xstrlcat(str, "/ue",                      SIZEOF(str));
+    xstrlcat(str, "/ue", SIZEOF(str));
     if ( NULL != ident )  {
         int i = 0;
 
@@ -2098,17 +2098,19 @@ CONST char *gettmpfname P1_(CONST char *, ident)
         }
         mklower(l_ident);
     }
-    xstrlcat(str, l_ident,                      SIZEOF(str));
-    xstrlcat(str, nni2s36_(getpid() % (C_36)),  SIZEOF(str));
+    xstrlcat(str, l_ident, SIZEOF(str));
+    xstrlcat(str, ui2s36_memacs((unsigned int)(getpid() % (C_36)), C_1,
+             FALSE), SIZEOF(str));
 
     for ( i = 0; i < (C_36 * C_36); i++ ) {
         struct stat sb;
 
         ZEROMEM(sb);
 
-        xstrlcpy(res, str,                      SIZEOF(res));
-        xstrlcat(res, nni2s36_((seed + i) % (C_36 * C_36)),
-                 SIZEOF(res));
+        xstrlcpy(res, str, SIZEOF(res));
+        xstrlcat(res, ui2s36_memacs(
+                 (unsigned int)((seed + i) % (C_36 * C_36)), C_2,
+                 FALSE),  SIZEOF(res));
         if ( 0 > umc_stat(res, &sb) ) {
             if ( ENOENT == errno ) {            /* found */
                 seed = (seed + i + 1) % (C_36 * C_36);

@@ -4,6 +4,8 @@
 ;                       Last Update: 11/13/93
 
 ;;
+; `set $palette "CLRMAP  ...' *doesn't* work with ANSI terminal driver.
+;;
 ; tput setf [1-7]
 ; tput setb [1-7]
 ;;
@@ -34,16 +36,23 @@
 ;;
 ; FN1 -- FN4 did not work with TERM=xterm and RXVT
 ;;
+set $palette "KEYMAP FN1 ~eOP"
+set $palette "KEYMAP FN2 ~eOQ"
+set $palette "KEYMAP FN3 ~eOR"
+set $palette "KEYMAP FN4 ~eOS"
 set $palette "KEYMAP FN1 ~e[11~~"
 set $palette "KEYMAP FN2 ~e[12~~"
 set $palette "KEYMAP FN3 ~e[13~~"
 set $palette "KEYMAP FN4 ~e[14~~"
 set $palette "KEYMAP FN5 ~e[15~~"
-set $palette "KEYMAP FN6 ~e[16~~"
-set $palette "KEYMAP FN7 ~e[17~~"
-set $palette "KEYMAP FN8 ~e[18~~"
-set $palette "KEYMAP FN9 ~e[19~~"
-set $palette "KEYMAP FN0 ~e[10~~"
+set $palette "KEYMAP FN6 ~e[17~~"
+set $palette "KEYMAP FN7 ~e[18~~"
+set $palette "KEYMAP FN8 ~e[19~~"
+set $palette "KEYMAP FN9 ~e[20~~"
+set $palette "KEYMAP FN0 ~e[21~~"
+; HOME
+set $palette "KEYMAP FN< ~e[7~~"
+set $palette "KEYMAP FN< ~e[H"
 ;;
 set $palette "KEYMAP S-FN1 ~e[25;2~~"
 set $palette "KEYMAP S-FN2 ~e[26;2~~"
@@ -78,7 +87,9 @@ set $posflag TRUE
 ;;
 ;
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
-set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
+; Added "\~"$^{}[]" to $wchars: `~x' is `x'.
+set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_\~"$^{}[]"
+set $abfull TRUE
 ; Default paragraph indent used with fill-*
 set $parindent 0
 ; Default is " \t" which means that indents are recognized as BOP.
@@ -89,6 +100,8 @@ set $paralead ""
 
 ;add-global-mode "blue"
 ;add-global-mode "WHITE"
+; Do not `add-global-mode "MAGIC"' as it will destroy the help facility
+add-mode "MAGIC"
 ;bind-to-key meta-prefix `      ;for annoying keyboards with ` at the top left
 
 ;       Toggle function key window display
@@ -249,6 +262,11 @@ macro-to-key mouse-clicks MSa
 
 ;       ***** Rebind the Function key group
 
+; ANSI gives FN^[1-4] ... instead of FN[1-4] ...: Remapped above
+;bind-to-key search-forward              FN^1
+;bind-to-key search-reverse              FN^2
+;bind-to-key hunt-forward                FN^3
+;bind-to-key hunt-backward               FN^4
 bind-to-key search-forward              FN1
 bind-to-key search-reverse              FN2
 bind-to-key hunt-forward                FN3
@@ -323,6 +341,15 @@ bind-to-key exit-emacs                  FN0
 ;===============================================================================
 ; Local additions
 ;===============================================================================
+store-procedure get-abbrevs
+        !if &seq &find .emacs-abbrevs ""
+                write-message "[Can not find .emacs-abbrevs]"
+                !return
+        !endif
+        execute-file .emacs-abbrevs
+!endm
+execute-procedure get-abbrevs
+
 store-procedure redraw-screen
         clear-and-redraw
         execute-procedure toggle-fkeys
@@ -336,11 +363,17 @@ store-procedure out-tab
 ; ^T was originally bound to transpose-characters
 macro-to-key out-tab ^T
 
+; M-e was originally bound to set-encryption-key
+bind-to-key end-of-word M-e
+
 2 handle-tab
 set $softtab 2
 set $hardtab 8
 bind-to-key set-mark ^@
 set $dispundo TRUE
+set $disphigh TRUE
+; turn off highlighting:
+set $hilight 255
 ;===============================================================================
 
 
@@ -388,6 +421,19 @@ store-procedure german-umlaut-Ue
         insert-string "Ü"
 !endm
 macro-to-key german-umlaut-Ue M-^U
+
+;-------------------------------------------------------------------------------
+; Was bound to add-global-mode
+bind-to-key goto-matching-fence M-m
+
+store-procedure start-search
+        add-mode "MAGIC"
+        !force execute-named-command query-replace-string
+!endm
+; Was bound to replace-string
+macro-to-key start-search M-r
+
+
 ;===============================================================================
 
 

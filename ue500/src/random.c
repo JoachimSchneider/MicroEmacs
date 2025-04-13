@@ -1634,14 +1634,13 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
             s1[i] = '\0';
         } else if ( s1 == s2 )  {
             /**EMPTY**/
-        } else if ( s1 >  s2 )  {
+        } else                  {
+            /* Should be `s1 >  s2', but must not, e.g. on OS/400 */
             int i = 0;
 
             for ( i = STRLEN(s2); i >= 0; i-- ) {
                 s1[i] = s2[i];
             }
-        } else                  { /* Possible on e.g. OS/400 */
-            strcpy(s1, s2);
         }
     } else if ( NULL == s1 )  {
         if ( '\0' != *s2 )  {
@@ -1810,6 +1809,19 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
     return l2;
 }
 
+/* XSTRLCCPY:
+ *
+ * Safe copy of character to string buffer of size n
+ * Equivalent semantics:
+ * l = snprintf(s1, n, "%c", c2);
+ */
+int PASCAL NEAR xstrlccpy P3_(char *, s1, CONST char, c2, int, n)
+{
+    CONST char  s2[]  = { c2, '\0' };
+
+    return xstrlcpy(s1, s2, n);
+}
+
 /* XSTRLCAT:
  *
  * Like FreeBSD's strlcat(): Equivalent semantics:
@@ -1826,6 +1838,17 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
     l = (NULL == s1)? 0 : STRLEN(s1);
 
     return xstrlcpy(s1 + l, s2, n - l) + l;
+}
+
+/* XSTRLCCAT:
+ *
+ * Safe append of character to string buffer of size n
+ */
+int PASCAL NEAR xstrlccat P3_(char *, s1, CONST char, c2, int, n)
+{
+    CONST char  s2[]  = { c2, '\0' };
+
+    return xstrlcat(s1, s2, n);
 }
 
 /* SFSTRCPY_:
@@ -2406,7 +2429,7 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
     } else {
         len = STRLEN(str) + slen + 1;
         ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
-        strcat(nstr, xs);
+        xstrcat(nstr, xs);  /**UNSAFE_OK**/
     }
 
     return nstr;
@@ -2454,7 +2477,15 @@ CONST char *cmkvis P1_(char, c)
         default:
             assert(0 <= uc);
             assert(uc <= 0xFF);
+#if     BEGIN_COMMENT
+            /* Would be safe beause of the asserts above: */
             sprintf(res, "\\x%02X", (unsigned int)uc);
+#else
+            xstrlcpy(res, "\\x", SIZEOF(res));
+            /* Won't truncate the number because of the asserts:  */
+            xstrlcat(res, ui2s16_memacs((unsigned int)uc, C_2, TRUE),
+                     SIZEOF(res));
+#endif  /*END_COMMENT*/
             break;
     }
 

@@ -35,6 +35,7 @@
 /**********************************************************************/
 /* No braces `()' here!                                               */
 #define C_1    1
+#define C_2    2
 #define C_3    3
 #define C_4    4
 #define C_6    6
@@ -366,7 +367,14 @@ EXTERN char *PASCAL NEAR  xstrcat DCL((char *s1, CONST char *s2));
  *  ---
  *  n = snprintf(dst, len, "%s", src);
  */
-EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
+EXTERN int PASCAL NEAR  xstrlcpy  DCL((char * s1, CONST char * s2, int n));
+/* XSTRLCCPY:
+ *
+ * Safe copy of character to string buffer of size n
+ * Equivalent semantics:
+ * l = snprintf(s1, n, "%c", c2);
+ */
+EXTERN int PASCAL NEAR  xstrlccpy DCL((char * s1, CONST char   c2, int n));
 
 /* Like FreeBSD's strlcat(): Equivalent semantics:
  *  n = strlcat(dst, src, len);
@@ -375,7 +383,12 @@ EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
  *  n = snprintf(dst, len, "%s%s", dup, src);
  *  free(dup);
  */
-EXTERN int PASCAL NEAR  xstrlcat DCL((char * s1, CONST char * s2, int n));
+EXTERN int PASCAL NEAR  xstrlcat  DCL((char * s1, CONST char * s2, int n));
+/* XSTRLCCAT:
+ *
+ * Safe append of character to string buffer of size n
+ */
+EXTERN int PASCAL NEAR  xstrlccat DCL((char * s1, CONST char   c2, int n));
 
 /* SFSTRCPY:
  *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, SIZEOF(dst))
@@ -790,11 +803,20 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 
 
 /**********************************************************************/
-EXTERN char *PASCAL NEAR  ui2s10_memacs DCL((unsigned int i));
-EXTERN char *PASCAL NEAR  ui2s16_memacs DCL((unsigned int i));
-EXTERN char *PASCAL NEAR  ui2s36_memacs DCL((unsigned int i));
+/* Unsigned int i to base 10, 16 or 36 strings:                       */
+/* - l if non-negative gives the desired zerp padded output wide      */
+/*   which might truncate the result(!); negative l doesn't truncate  */
+/*   the result und doesn't pad it with zeroes.                       */
+/* - u if TRUE gives an uppercase result.                             */
+/*--------------------------------------------------------------------*/
+EXTERN CONST char *PASCAL NEAR  ui2s10_memacs DCL((unsigned int i,
+                                                   int l));
+EXTERN CONST char *PASCAL NEAR  ui2s16_memacs DCL((unsigned int i,
+                                                   int l, int u));
+EXTERN CONST char *PASCAL NEAR  ui2s36_memacs DCL((unsigned int i,
+                                                   int l, int u));
 #ifdef MAIN_C_
-char *PASCAL NEAR ui2s10_memacs P1_(unsigned int, i)
+CONST char *PASCAL NEAR ui2s10_memacs P2_(unsigned int, i, int, l)
 {
     unsigned int  base  = C_10;
 
@@ -820,11 +842,13 @@ char *PASCAL NEAR ui2s10_memacs P1_(unsigned int, i)
      ******************************************************************/
     static CONST char tab[] = "0123456789";
     CASRT(C_10 + 1 == SIZEOF(tab));
-    static char buf[1 + 3*SIZEOF(i) + 1];
-    int           pos   = SIZEOF(buf) - 2;
-    unsigned int  rest  = 0;
+    static char buf[NSTRING];
+    CASRT(1 + 3 * SIZEOF(i) + 1 <= SIZEOF(buf));
+    int               pos   = SIZEOF(buf) - 2;
+    unsigned int      rest  = 0;
 
-    ZEROMEM(buf);
+    umc_memset(buf, '0', SLTLEN(buf));
+    buf[SIZEOF(buf) - 1]    = '\0';
 
     for (;;)
     {
@@ -837,10 +861,17 @@ char *PASCAL NEAR ui2s10_memacs P1_(unsigned int, i)
         }
     }
 
-    return buf + pos + 1;
+    if  ( l < 0 ) {
+        return buf + pos + 1;
+    } else        {
+        l = MIN2(l, SLTLEN(buf));
+
+        return buf + SLTLEN(buf) - l;
+    }
 }
 
-char *PASCAL NEAR ui2s16_memacs P1_(unsigned int, i)
+CONST char *PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
+                                          int, u)
 {
     unsigned int  base  = C_16;
 
@@ -864,13 +895,22 @@ char *PASCAL NEAR ui2s16_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 2*SIZEOF(a)
      *
      ******************************************************************/
-    static CONST char tab[] = "0123456789abcdef";
-    CASRT(C_16 + 1 == SIZEOF(tab));
-    static char   buf[1 + 2*SIZEOF(i) + 1];
-    int           pos   = SIZEOF(buf) - 2;
-    unsigned int  rest  = 0;
+    static CONST char tabl[]  = "0123456789abcdef";
+    static CONST char tabu[]  = "0123456789ABCDEF";
+    CASRT(C_16 + 1 == SIZEOF(tabl));
+    CASRT(C_16 + 1 == SIZEOF(tabu));
+    CONST char        *tab    = tabl;
+    static char buf[NSTRING];
+    CASRT(1 + 2 * SIZEOF(i) + 1 <= SIZEOF(buf));
+    int           pos         = SIZEOF(buf) - 2;
+    unsigned int  rest        = 0;
 
-    ZEROMEM(buf);
+    umc_memset(buf, '0', SLTLEN(buf));
+    buf[SIZEOF(buf) - 1]  = '\0';
+
+    if ( u )  {
+        tab = tabu;
+    }
 
     for (;;)
     {
@@ -883,10 +923,17 @@ char *PASCAL NEAR ui2s16_memacs P1_(unsigned int, i)
         }
     }
 
-    return buf + pos + 1;
+    if  ( l < 0 ) {
+        return buf + pos + 1;
+    } else        {
+        l = MIN2(l, SLTLEN(buf));
+
+        return buf + SLTLEN(buf) - l;
+    }
 }
 
-char *PASCAL NEAR ui2s36_memacs P1_(unsigned int, i)
+CONST char *PASCAL NEAR ui2s36_memacs P3_(unsigned int, i, int, l,
+                                          int, u)
 {
     unsigned int  base  = C_36;
 
@@ -912,13 +959,22 @@ char *PASCAL NEAR ui2s36_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 2*SIZEOF(a)
      *
      ******************************************************************/
-    static CONST char tab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    CASRT(C_36 + 1 == SIZEOF(tab));
-    static char   buf[1 + 2*SIZEOF(i) + 1];
-    int           pos   = SIZEOF(buf) - 2;
-    unsigned int  rest  = 0;
+    static CONST char tabl[]  = "0123456789abcdefghijklmnopqrstuvwxyz";
+    static CONST char tabu[]  = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    CASRT(C_36 + 1 == SIZEOF(tabu));
+    CASRT(C_36 + 1 == SIZEOF(tabl));
+    CONST char        *tab    = tabl;
+    static char buf[NSTRING];
+    CASRT(1 + 2 * SIZEOF(i) + 1 <= SIZEOF(buf));
+    int               pos     = SIZEOF(buf) - 2;
+    unsigned int      rest    = 0;
 
-    ZEROMEM(buf);
+    umc_memset(buf, '0', SLTLEN(buf));
+    buf[SIZEOF(buf) - 1]  = '\0';
+
+    if ( u )  {
+        tab = tabu;
+    }
 
     for (;;)
     {
@@ -931,22 +987,29 @@ char *PASCAL NEAR ui2s36_memacs P1_(unsigned int, i)
         }
     }
 
-    return buf + pos + 1;
+    if  ( l < 0 ) {
+        return buf + pos + 1;
+    } else        {
+        l = MIN2(l, SLTLEN(buf));
+
+        return buf + SLTLEN(buf) - l;
+    }
 }
 #endif
 /* Non negative int to string:  */
 #if     BEGIN_COMMENT_
-#define nni2s10_(i)     ( ui2s10_memacs((unsigned int)(i)) )
-#define nni2s16_(i)     ( ui2s16_memacs((unsigned int)(i)) )
+#define nni2s10_(i)     ( ui2s10_memacs((unsigned int)(i), (-1)) )
+#define nni2s16_(i)     ( ui2s16_memacs((unsigned int)(i), (-1), 0) )
+#define nni2S16_(i)     ( ui2s16_memacs((unsigned int)(i), (-1), 1) )
+#define nni2s36_(i)     ( ui2s36_memacs((unsigned int)(i), (-1), 0) )
 #endif  /*END_COMMENT_*/
-#define nni2s36_(i)     ( ui2s36_memacs((unsigned int)(i)) )
 
 /**********************************************************************/
 #define trcs_(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
-#define trci_(i)      trcs_(ui2s10_memacs((unsigned int)(i)))
+#define trci_(i)      trcs_(ui2s10_memacs((unsigned int)(i), (-1)))
 EXTERN VOID PASCAL NEAR ASRT_WriteStr_  DCL((CONST char *s));
 #define asrs_(s)      ASRT_WriteStr_((s))
-#define asri_(i)      asrs_(ui2s10_memacs((unsigned int)(i)))
+#define asri_(i)      asrs_(ui2s10_memacs((unsigned int)(i), (-1)))
 #ifdef MAIN_C_
 VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *, s)
 {
