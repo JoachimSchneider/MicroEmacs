@@ -2406,7 +2406,7 @@ char *PASCAL NEAR astrcat P2_(CONST char *, str, CONST char *, s)
     } else {
         len = STRLEN(str) + slen + 1;
         ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
-        strcat(nstr, xs);
+        xstrcat(nstr, xs);  /**UNSAFE_OK**/
     }
 
     return nstr;
@@ -2454,7 +2454,15 @@ CONST char *cmkvis P1_(char, c)
         default:
             assert(0 <= uc);
             assert(uc <= 0xFF);
+#if     BEGIN_COMMENT
+            /* Would be safe beause of the asserts above: */
             sprintf(res, "\\x%02X", (unsigned int)uc);
+#else
+            xstrlcpy(res, "\\x", SIZEOF(res));
+            /* Won't truncate the number because of the asserts:  */
+            xstrlcat(res, ui2s16_memacs((unsigned int)uc, C_2, TRUE),
+                     SIZEOF(res));
+#endif  /*END_COMMENT*/
             break;
     }
 

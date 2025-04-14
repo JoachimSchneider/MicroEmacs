@@ -1216,7 +1216,7 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
      * Bail out on error: Old version returned NULL.
      */
     ASRT(NULL !=(dp = ROOM(STRLEN(sp) + 1)));
-    strcpy(dp, sp);   /**UNSAFE_OK**/
+    xstrcpy(dp, sp);  /**UNSAFE_OK**/
 
     return (dp);
 }
