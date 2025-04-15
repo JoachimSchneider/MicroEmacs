@@ -1634,14 +1634,13 @@ char *PASCAL NEAR xstrcpy P2_(char *, s1, CONST char *, s2)
             s1[i] = '\0';
         } else if ( s1 == s2 )  {
             /**EMPTY**/
-        } else if ( s1 >  s2 )  {
+        } else                  {
+            /* Should be `s1 >  s2', but must not, e.g. on OS/400 */
             int i = 0;
 
             for ( i = STRLEN(s2); i >= 0; i-- ) {
                 s1[i] = s2[i];
             }
-        } else                  { /* Possible on e.g. OS/400 */
-            strcpy(s1, s2);
         }
     } else if ( NULL == s1 )  {
         if ( '\0' != *s2 )  {
