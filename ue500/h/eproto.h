@@ -367,7 +367,14 @@ EXTERN char *PASCAL NEAR  xstrcat DCL((char *s1, CONST char *s2));
  *  ---
  *  n = snprintf(dst, len, "%s", src);
  */
-EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
+EXTERN int PASCAL NEAR  xstrlcpy  DCL((char * s1, CONST char * s2, int n));
+/* XSTRLCCPY:
+ *
+ * Safe copy of character to string buffer of size n
+ * Equivalent semantics:
+ * l = snprintf(s1, n, "%c", c2);
+ */
+EXTERN int PASCAL NEAR  xstrlccpy DCL((char * s1, CONST char   c2, int n));
 
 /* Like FreeBSD's strlcat(): Equivalent semantics:
  *  n = strlcat(dst, src, len);
@@ -376,7 +383,12 @@ EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
  *  n = snprintf(dst, len, "%s%s", dup, src);
  *  free(dup);
  */
-EXTERN int PASCAL NEAR  xstrlcat DCL((char * s1, CONST char * s2, int n));
+EXTERN int PASCAL NEAR  xstrlcat  DCL((char * s1, CONST char * s2, int n));
+/* XSTRLCCAT:
+ *
+ * Safe append of character to string buffer of size n
+ */
+EXTERN int PASCAL NEAR  xstrlccat DCL((char * s1, CONST char   c2, int n));
 
 /* SFSTRCPY:
  *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, SIZEOF(dst))

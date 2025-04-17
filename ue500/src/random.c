@@ -1809,6 +1809,19 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
     return l2;
 }
 
+/* XSTRLCCPY:
+ *
+ * Safe copy of character to string buffer of size n
+ * Equivalent semantics:
+ * l = snprintf(s1, n, "%c", c2);
+ */
+int PASCAL NEAR xstrlccpy P3_(char *, s1, CONST char, c2, int, n)
+{
+    CONST char  s2[]  = { c2, '\0' };
+
+    return xstrlcpy(s1, s2, n);
+}
+
 /* XSTRLCAT:
  *
  * Like FreeBSD's strlcat(): Equivalent semantics:
@@ -1825,6 +1838,17 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
     l = (NULL == s1)? 0 : STRLEN(s1);
 
     return xstrlcpy(s1 + l, s2, n - l) + l;
+}
+
+/* XSTRLCCAT:
+ *
+ * Safe append of character to string buffer of size n
+ */
+int PASCAL NEAR xstrlccat P3_(char *, s1, CONST char, c2, int, n)
+{
+    CONST char  s2[]  = { c2, '\0' };
+
+    return xstrlcat(s1, s2, n);
 }
 
 /* SFSTRCPY_:

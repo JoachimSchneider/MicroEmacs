@@ -146,7 +146,7 @@ int unixsys0  P1_(char *, s)
 
 
 /*==============================================================*/
-/* Include files                                                */
+/* Include files and platform dependent declarations            */
 /*==============================================================*/
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <time.h>             /* time(), ctime(), ...         */
@@ -226,6 +226,7 @@ int unixsys0  P1_(char *, s)
 #   include <spawn.h>
 #  endif
 #  include <sys/wait.h>
+EXTERN CONST char *     cygpwd_ DCL((void));
 # endif /* CYGWIN */
 
 # if ( DJGPP_DOS )
@@ -822,15 +823,14 @@ static CONST char *cygads2enx_ P1_(CONST char *, dos)
                 return res;
             }
             res[j++]  = '/';
-            CASRT(SIZEOF(res) - 1 >= CYGDRIVE_LEN_ + 1 + 1);
             if ( '\\' == in[i] )  {
                 i++;
             }
             for ( ; i < len && j < SIZEOF(res) - 1; i++, j++ )  {
                 if ( '\\' == in[i] )  {
-                    res[j]  = '/';
+                    xstrlccpy(res + j, '/',   SIZEOF(res) - j);
                 } else                {
-                    res[j]  = in[i];
+                    xstrlccpy(res + j, in[i], SIZEOF(res) - j);
                 }
             }
         } else                    {

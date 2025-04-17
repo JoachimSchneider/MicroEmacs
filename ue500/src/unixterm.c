@@ -258,9 +258,6 @@ EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(in
 # if ANSI
 EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
 # endif /* ANSI */
-# if CYGWIN
-EXTERN CONST char *cygpwd_      DCL((void));
-# endif /* CYGWIN */
 /*==============================================================*/
 
 
