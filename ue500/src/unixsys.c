@@ -164,6 +164,7 @@ int unixsys0  P1_(char *, s)
 # include <signal.h>                    /* Signal definitions       */
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
+#  include <fcntl.h>
 # else
    EXTERN int           getpid  DCL((void));
    EXTERN int           ioctl   DCL((int, unsigned long int, ...));
@@ -2913,11 +2914,37 @@ int unx_rename_ P2_(CONST char *, from, CONST char *, to)
 
 int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
 {
+    int rc  = 0;
+
+    ASRT(NULL != path);
+    ASRT(NULL != sb);
+
     /* It is OK here to *not* immediatley copy GetPathUNX's internal
      * static buffer, because we *know* that `stat' won't call
      * GetPathUNX
      */
-    return stat(GetPathUNX(path), sb);
+    if ( 0 != (rc = stat(GetPathUNX(path), sb)) ) {
+        /* On CygWin, DJGPP and similar environments an `open()'
+         * might be possible for a *native* OS-path, like e.g an
+         * UNC-path (i.e. `\\<Server>\<path>') which is not (easily)
+         * convertable to some UNIX-path. The workaround here enables
+         * us to do a `stat()' also for such path's.
+         */
+        int fd  = open(path, O_RDONLY);
+
+        if ( 0 <= fd )  {
+            int rc  = fstat(fd, sb);
+
+            close(fd);
+
+            return rc;
+        } else          {
+            return (-1);
+        }
+
+    }
+
+    return  rc;
 }
 
 # if    BEGIN_COMMENT_
