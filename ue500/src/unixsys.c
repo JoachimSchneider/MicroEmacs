@@ -113,17 +113,17 @@
 /*==============================================================*/
 #if ( CYGWIN )
 /* Old CYGWIN Versions don't have these:  */
-# /**define  USE_CYGWIN_CONV_PATH    ( 1 )**/
-# define  USE_CYGWIN_CONV_PATH    ( 0 )
+# /**define  USE_CYGWIN_CONV_PATH        ( 1 )**/
+# define  USE_CYGWIN_CONV_PATH        ( 0 )
 /* On CygWin spawn is more reliable than fork/exec but it's not
  * available on older CygWin versions */
-# /**define  USE_CYGWIN_SPAWN        ( 1 )**/
-# define  USE_CYGWIN_SPAWN        ( 0 )
+# /**define  USE_CYGWIN_SPAWN           ( 1 )**/
+# define  USE_CYGWIN_SPAWN            ( 0 )
 # if ( 3 >= __GNUC__ )
 #  undef  USE_CYGWIN_CONV_PATH
 #  undef  USE_CYGWIN_SPAWN
-#  define USE_CYGWIN_CONV_PATH    ( 0 )
-#  define USE_CYGWIN_SPAWN        ( 0 )
+#  define USE_CYGWIN_CONV_PATH        ( 0 )
+#  define USE_CYGWIN_SPAWN            ( 0 )
 # endif
 #endif
 
@@ -164,6 +164,7 @@ int unixsys0  P1_(char *, s)
 # include <signal.h>                    /* Signal definitions       */
 # if ( !b_IS_ANCIENT_UNIX )
 #  include <unistd.h>
+#  include <fcntl.h>
 # else
    EXTERN int           getpid  DCL((void));
    EXTERN int           ioctl   DCL((int, unsigned long int, ...));
@@ -252,7 +253,7 @@ static int  IsExecutable  DCL((CONST char * file));
 
 /*==============================================================*/
 # define MkUNXDirSep_(path) do  {         \
-    char  *cp__ = (path);                 \
+    char  *cp__ = (char *)(path);         \
                                           \
     while ( *cp__ ) {                     \
         if ( '\\' == *cp__ )  {           \
@@ -263,7 +264,7 @@ static int  IsExecutable  DCL((CONST char * file));
 } while ( 0 )
 
 # define MkDOSDirSep_(path) do  {         \
-    char  *cp__ = (path);                 \
+    char  *cp__ = (char *)(path);         \
                                           \
     while ( *cp__ ) {                     \
         if ( '/' == *cp__ ) {             \
@@ -272,6 +273,7 @@ static int  IsExecutable  DCL((CONST char * file));
         cp__++;                           \
     }                                     \
 } while ( 0 )
+
 
 # if ( CYGWIN )
 
@@ -413,7 +415,7 @@ static int cygdrive_len_ P0_()
 #  define NormalizePathUNX(path)  do  {                     \
     char  *cp_  = (path);                                   \
                                                             \
-    MkUNXDirSep_(cp_);                                      \
+    xstrlcpy(cp_, getunxpath(cp_), SIZEOF(path));           \
 } while ( 0 )
 #  define NormalizePathDOS(path)  do  {                     \
     char  *cp_  = (path);                                   \
@@ -743,31 +745,18 @@ static CONST char *wingetshell P0_()
 
 # endif
 
+
+/*======================================================================
+ * Some naming conventions for the next lines of code:
+ *----------------------------------------------------------------------
+ * `unx':   Unix Path
+ * `enx':   Expanded Unix Path
+ * `ads':   Absolute DOS Path
+ * `cyg':   Cygwin specific function
+ *====================================================================*/
+
+
 # if ( CYGWIN )
-
-#  define TO_DOS_SEP_(x)  do  {                 \
-    unsigned char *cp__ = (unsigned char *)(x); \
-    unsigned char c__   = '\0';                 \
-                                                \
-    while ( ( c__ = *cp__) )  {                 \
-        if ( '/' == c__ ) {                     \
-            *cp__ = '\\';                       \
-        }                                       \
-        cp__++;                                 \
-    }                                           \
-} while ( 0 )
-
-#  define TO_UNX_SEP_(x)  do  {                 \
-    unsigned char *cp__ = (unsigned char *)(x); \
-    unsigned char c__   = '\0';                 \
-                                                \
-    while ( ( c__ = *cp__) )  {                 \
-        if ( '\\' == c__ )  {                   \
-            *cp__ = '/';                        \
-        }                                       \
-        cp__++;                                 \
-    }                                           \
-} while ( 0 )
 
 /* Cannot fail  */
 static CONST char *cygpwdads P0_()
@@ -807,7 +796,7 @@ static CONST char *cygads2enx_ P1_(CONST char *, dos)
     }
 
     xstrlcpy((char *)in, dos, SIZEOF(in));
-    TO_DOS_SEP_(in);
+    MkDOSDirSep_(in);
     len = strlen((CONST char *)in);
 
     if ( 2 <= len && ':' == in[1] && ISALPHA(drv = in[0]) ) {
@@ -877,7 +866,7 @@ static CONST char *cygenx2ads_ P1_(CONST char *, unx)
     }
 
     xstrlcpy((char *)in, unx, SIZEOF(in));
-    TO_UNX_SEP_(in);
+    MkUNXDirSep_(in);
     len = strlen((CONST char *)in);
     if ( NULL == CYGDRIVE_ )  {
         int i = 0;
@@ -1188,13 +1177,21 @@ static CONST char *cygdos2enx P1_(CONST char *, dos)
 #  endif
 
     xstrlcpy((char *)in, dos, SIZEOF(in));
-    TO_DOS_SEP_(in);
+    MkDOSDirSep_(in);
     len = strlen((CONST char *)in);
-    if ( 2 <= len       &&
-         ':' == in[1]   &&
-         ISALPHA(in[0]) &&
-         (NULL != CYGDRIVE_ || tolower(in[0]) == tolower(cygdrvdos()))
-        )   {
+    if        ( 5 <= len        &&    /* UNC-Path: \\<Server>\<Share> */
+                '\\' == in[0]   &&
+                '\\' == in[1]   &&
+                '\\' != in[2]   &&
+                NULL != umc_strchr(in + 2, '\\')
+              )   {
+        MkUNXDirSep_(in);
+        xstrlcpy(res, in, SIZEOF(res));
+    } else if ( 2 <= len        &&    /* <Drv>:<Path> <Drv>:\<Path>   */
+                ':' == in[1]    &&
+                ISALPHA(in[0])  &&
+                (NULL != CYGDRIVE_ || tolower(in[0]) == tolower(cygdrvdos()))
+              )   {
         CONST char  *cp = NULL;
 
         ASRT( NULL != (cp = cygads2enx_((CONST char *)in)) );
@@ -1523,6 +1520,44 @@ static CONST char *getdospath P1_(CONST char *, in)
     MkDOSDirSep_(full_dospath);
 
     return full_dospath;
+}
+
+/* Cannot fail  */
+static CONST char *getunxpath P1_(CONST char *, dos)
+{
+    char        in[NFILEN];
+    static char res[NFILEN];
+    int         len   = 0;
+    char        *inp  = NULL;
+
+    ZEROMEM(in);
+    ZEROMEM(res);
+
+#  if ( 0 )
+    ASRT(NULL != dos);
+#  else
+    if ( NULL == dos )  {
+        dos = "";
+    }
+#  endif
+
+    xstrlcpy(in, dos, SIZEOF(in));
+    MkDOSDirSep_(in);
+    len = strlen((CONST char *)in);
+    if        ( 5 <= len        &&    /* UNC-Path: \\<Server>\<Share> */
+                '\\' == in[0]   &&
+                '\\' == in[1]   &&
+                '\\' != in[2]   &&
+                NULL != (inp = umc_strchr(in + 2, '\\'))
+              )   {
+        /* DJGPP likes `\\<server>\<share>/<path>': */
+        MkUNXDirSep_(inp + 1);
+    } else        {
+        MkUNXDirSep_(in);
+    }
+    xstrlcpy(res, in, SIZEOF(res));
+
+    return res;
 }
 
 static CONST char *dosgetshell P0_()
@@ -2852,11 +2887,59 @@ CONST char *GetPathUNX P1_(CONST char *, path)
 
 int unx_access_ P2_(CONST char *, path, int, mode)
 {
+    int         rc      = 0;
+    CONST char  *upath  = NULL;
+
+    ASRT(NULL != path);
     /* It is OK here to *not* immediatley copy GetPathUNX's internal
      * static buffer, because we *know* that `access' won't call
      * GetPathUNX
      */
-    return access(GetPathUNX(path), mode);
+    rc = access(upath = GetPathUNX(path), mode);
+    TRC(("unx_access_(): upath = %s, path = %s", upath, path));
+    if ( 0 == rc) {
+        return 0;
+    }
+
+    /* On CygWin, DJGPP and similar environments there might exist
+     * path's which ar not (easily) convertable to some UNIX-path
+     * --- e.g an UNC-path (i.e. `\\<Server>\<Share>').
+     * The workaround here enables us to do an `access()' also for
+     * such path's. See also `unx_access_()'.
+     */
+    {
+        struct stat         sb;
+        unsigned int        fmode = 0;
+        int                 uid   = getuid();
+        int                 gid   = getgid();
+        CONST unsigned int  pmask = 0007;
+        unsigned int        pbits = 0;
+        unsigned int        umode = (unsigned int)mode;
+
+        ZEROMEM(sb);
+
+        if ( 0 != (rc  = unx_stat_(path, &sb)) )  {
+            return (-1);
+        }
+        fmode  = sb.st_mode & ~S_IFMT & 0777;
+        TRC(("unx_access_(): Mode of %s = 0%03o\n", path, fmode));
+
+        pbits = fmode & pmask;  /* Everyone has "world" permissions */
+        if ( gid == sb.st_gid ) {
+            pbits |= (fmode & (pmask << 3)) >> 3; /* Add group mode */
+            /* TODO: Add permissions resulting from secondary groups  */
+        }
+        if ( uid == sb.st_uid ) {
+            pbits |= (fmode & (pmask << 6)) >> 6; /* Add owner mode */
+        }
+        TRC(("unx_access_(): pbits = 0%o\n", pbits));
+
+        if ( (pbits & umode) == umode ) {
+            return 0;
+        } else                          {
+            return (-1);
+        }
+    }
 }
 
 int unx_rename_ P2_(CONST char *, from, CONST char *, to)
@@ -2913,11 +2996,46 @@ int unx_rename_ P2_(CONST char *, from, CONST char *, to)
 
 int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
 {
+    int         rc      = 0;
+    int         fd      = 0;
+    CONST char  *upath  = NULL;
+
+    ASRT(NULL != path);
+    ASRT(NULL != sb);
+
     /* It is OK here to *not* immediatley copy GetPathUNX's internal
      * static buffer, because we *know* that `stat' won't call
      * GetPathUNX
      */
-    return stat(GetPathUNX(path), sb);
+    rc  = stat(upath = GetPathUNX(path), sb);
+    TRC(("unx_stat_(): upath = %s, path = %s, stat rc: %d", upath, path, rc));
+    if ( 0 == rc )  {
+        return 0;
+    }
+
+    /* On CygWin, DJGPP and similar environments an `open()'
+     * might be possible for a *native* OS-path, like e.g an
+     * UNC-path (i.e. `\\<Server>\<Share>') which is not (easily)
+     * convertable to some UNIX-path. The workaround here enables
+     * us to do a `stat()' also for such path's.
+     */
+    fd  = open(path, O_RDONLY);
+
+    if ( 0 > fd ) {
+        int errno_sv  = errno;
+
+        TRC(("unx_stat_(): open(%s, O_RDONLY) failed, errno = %d: %s",
+             path, errno_sv, umc_strerror(errno_sv)));
+
+        return (-1);
+    }
+
+    rc  = fstat(fd, sb);
+    close(fd);
+    TRC(("unx_stat_(): stat(%s) failed, open(%s, O_RDONLY) gave %d and fstat() returned %d.",
+         upath, path, fd, rc));
+
+    return rc;
 }
 
 # if    BEGIN_COMMENT_

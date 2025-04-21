@@ -142,6 +142,7 @@
 #define CASRT(cond)                         \
   extern int casrt_dummy_x_[1];             \
   extern int casrt_dummy_x_[(cond)? 1 : 2]
+#define CASRTS(cond)  do { CASRT((cond)); } while ( 0 )
 /**END OF DEFINITION**/
 /**********************************************************************/
 
