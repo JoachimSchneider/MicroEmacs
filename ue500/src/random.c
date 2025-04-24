@@ -2475,8 +2475,9 @@ CONST char *cmkvis P1_(char, c)
             break;
 
         default:
-            assert(0 <= uc);
-            assert(uc <= 0xFF);
+            CASRTS((unsigned char)(-1) <= 0xFF);
+            /**assert(0 <= uc);**/    /* Always TRUE  */
+            /**assert(uc <= 0xFF);**/ /* Always TRUE  */
 #if     BEGIN_COMMENT
             /* Would be safe beause of the asserts above: */
             sprintf(res, "\\x%02X", (unsigned int)uc);
@@ -2656,28 +2657,29 @@ int CDECL NEAR  DebugMessage (va_alist)
 int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 #endif
 {
-    int         rc    = 0;
-    va_list     ap;
-#if VARG
-    CONST char  *fmt  = NULL;
-#endif
-    FILE        *TFP  = GetTrcFP();
-
-    ZEROMEM(ap);
+    int   rc    = 0;
+    FILE  *TFP  = GetTrcFP();
 
     if ( TFP )  {
-      fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
-              DebugMessage_lnno_);
+        va_list     ap;
 #if VARG
-      va_start(ap);
-      fmt = va_arg(ap, CONST char *);
-#else
-      va_start(ap, fmt);
+        CONST char  *fmt  = NULL;
 #endif
-      RC_VFPRINTF(rc, TFP, fmt, ap);
-      va_end(ap);
-      fprintf(TFP, "%s", "\n");
-      fflush(TFP);
+
+        ZEROMEM(ap);
+
+        fprintf(TFP, "%s (%s/%03d): ", "TRC", DebugMessage_fname_,
+                DebugMessage_lnno_);
+#if VARG
+        va_start(ap);
+        fmt = va_arg(ap, CONST char *);
+#else
+        va_start(ap, fmt);
+#endif
+        RC_VFPRINTF(rc, TFP, fmt, ap);
+        va_end(ap);
+        fprintf(TFP, "%s", "\n");
+        fflush(TFP);
     }
 
     return rc;

@@ -134,8 +134,8 @@ COMMON int errno;
 
 # define LOCKDIR    "_xlk"
 # define LOCKMSG    "LOCK ERROR -- "
-# define LOCKDEBUG  FALSE
-/**# define LOCKDEBUG TRUE**/
+/**# define LOCKDEBUG  FALSE**/
+# define LOCKDEBUG  TRUE
 
 
 /* PARSE_NAME:
@@ -304,16 +304,17 @@ char *dolock P1_(CONST char *, filespec)
     XSTRCPY(pathname, drivename);
 
 # if  LOCKDEBUG
-    printf("Locking [%s] [%s]\n", pathname, filename);
-    tgetc();
+    TRC(("Locking [%s] [%s]", pathname, filename));
 # endif
 
 # if  ( b_IS_UNIX )
     /* check to see if we can access the path */
     if ( (rc = umc_stat(pathname, &sb)) != 0 )  {
 #  if  LOCKDEBUG
-        printf("umc_stat() = %u   errno = %u\n", rc, errno);
-        tgetc();
+        int errno_sv  = errno;
+
+        TRC(("umc_stat() = %d, errno = %d: %s", rc, errno_sv,
+             umc_strerror(errno_sv)));
 #  endif
         XSTRCPY(result, LOCKMSG);
         XSTRCAT(result, "Path not found");
@@ -333,15 +334,13 @@ char *dolock P1_(CONST char *, filespec)
     XSTRCAT(lockpath, DIRSEPSTR);
     XSTRCAT(lockpath, LOCKDIR);
 # if  LOCKDEBUG
-    printf("Lockdir [%s]\n", lockpath);
-    tgetc();
+    TRC(("Lockdir [%s]", lockpath));
 # endif
 
     if ( umc_stat(lockpath, &sb) != 0 ) {
         /* create it! */
 # if  LOCKDEBUG
-        printf("MKDIR(%s)\n", lockpath);
-        tgetc();
+        TRC(("MKDIR(%s)", lockpath));
 # endif
         if ( umc_mkdir(lockpath) != 0 ) {
             XSTRCPY(result, LOCKMSG);
@@ -368,8 +367,7 @@ char *dolock P1_(CONST char *, filespec)
     XSTRCAT(lockfile, DIRSEPSTR);
     XSTRCAT(lockfile, filename);
 # if  LOCKDEBUG
-    printf("Lockfile [%s]\n", lockfile);
-    tgetc();
+    TRC(("Lockfile [%s]", lockfile));
 # endif
 
     if ( umc_stat(lockfile, &sb) != 0 ) {
@@ -379,8 +377,7 @@ char *dolock P1_(CONST char *, filespec)
             XSTRCPY(result, LOCKMSG);
             XSTRCAT(result, "Can not open lock file");
 # if  LOCKDEBUG
-            printf("Could not open lockfile [%s](%s)\n", lockfile, result);
-            tgetc();
+            TRC(("Could not open lockfile [%s](%s)", lockfile, result));
 # endif
 
             return (result);
@@ -468,8 +465,7 @@ char *dolock P1_(CONST char *, filespec)
         XSTRCAT(result, buf);
         fclose(fp);
 # if  LOCKDEBUG
-        printf("Could not get lock: (%s)\n", result);
-        tgetc();
+        TRC(("Could not get lock: (%s)", result));
 # endif
 
         return (result);
@@ -521,8 +517,7 @@ char *undolock P1_(CONST char *, filespec)
     XSTRCPY(pathname, drivename);
 
 # if  LOCKDEBUG
-    printf("\nUnLocking [%s] [%s]\n", pathname, filename);
-    tgetc();
+    TRC(("UnLocking [%s] [%s]", pathname, filename));
 # endif
 
     /* create the lock directory if it does not exist */
@@ -530,16 +525,14 @@ char *undolock P1_(CONST char *, filespec)
     XSTRCAT(lockpath, DIRSEPSTR);
     XSTRCAT(lockpath, LOCKDIR);
 # if  LOCKDEBUG
-    printf("Lockdir [%s]\n", lockpath);
-    tgetc();
+    TRC(("Lockdir [%s]", lockpath));
 # endif
     /* check for the existance of this lockfile */
     XSTRCPY(lockfile, lockpath);
     XSTRCAT(lockfile, DIRSEPSTR);
     XSTRCAT(lockfile, filename);
 # if  LOCKDEBUG
-    printf("Lockfile [%s]\n", lockfile);
-    tgetc();
+    TRC(("Lockfile [%s]", lockfile));
 # endif
     if ( umc_unlink(lockfile) ) {
         XSTRCAT(result, "could not remove lock file");
