@@ -1817,7 +1817,9 @@ int PASCAL NEAR xstrlcpy P3_(char *, s1, CONST char *, s2, int, n)
  */
 int PASCAL NEAR xstrlccpy P3_(char *, s1, CONST char, c2, int, n)
 {
-    CONST char  s2[]  = { c2, '\0' };
+    char  s2[]  = "#";
+
+    s2[0] = c2;
 
     return xstrlcpy(s1, s2, n);
 }
@@ -1846,7 +1848,9 @@ int PASCAL NEAR xstrlcat P3_(char *, s1, CONST char *, s2, int, n)
  */
 int PASCAL NEAR xstrlccat P3_(char *, s1, CONST char, c2, int, n)
 {
-    CONST char  s2[]  = { c2, '\0' };
+    char  s2[]  = "#";
+
+    s2[0] = c2;
 
     return xstrlcat(s1, s2, n);
 }
@@ -2475,7 +2479,6 @@ CONST char *cmkvis P1_(char, c)
             break;
 
         default:
-            CASRTS((unsigned char)(-1) <= 0xFF);
             /**assert(0 <= uc);**/    /* Always TRUE  */
             /**assert(uc <= 0xFF);**/ /* Always TRUE  */
 #if     BEGIN_COMMENT

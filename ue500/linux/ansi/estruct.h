@@ -157,15 +157,18 @@
 
 /*      Special keyboard/network definitions                          */
 #if BEGIN_COMMENT_
-#define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
-#define WANGPC  0     /* WangPC - mostly escape sequences             */
-#define KEYPAD  0     /* VMS - turn on and off application            */
+#define ATKBD     0   /* AT-style keyboard with F11, F12 & grey keys  */
+#define WANGPC    0   /* WangPC - mostly escape sequences             */
+#define KEYPAD    0   /* Turn on and off application                  */
                       /* keypad automatically                         */
-#define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
-#define RMSIO   0     /* VMS - skip the rotten C runtime and          */
-                      /* use RMS directly                             */
-#define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
-                      /* but more efficient memory allocator          */
+#endif  /*END_COMMENT_*/
+#if VMS               /* BEGIN: VMS specific settings                 */
+# define XONDATA  1   /* Set to force /NOTTSYNC/NOHOSTSY              */
+# define RMSIO    1   /* Skip the rotten C runtime: Use RMS directly. */
+# define OPTMEM   0   /* VMS 5.0 and up - use a less standard but     */
+                      /* more efficient memory allocator              */
+#endif  /* VMS */     /* END:   VMS specific settings                 */
+#if BEGIN_COMMENT_
 #endif  /*END_COMMENT_*/
 
 /*      Terminal Output definitions                                   */
@@ -195,11 +198,53 @@
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
 #endif  /*END_COMMENT_*/
-/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
-#if BEGIN_COMMENT_
-#define UNIX_READ_TOUT  (4)
-#endif  /*END_COMMENT_*/
+/*
+ * Non blocking read may be used on UNIX (implemented via the select()
+ * system call --- if available) and on VMS.
+ *
+ * They are used at exactly one place: If one enters a search string for
+ * one of the search-* functions it will be terminated by META which is
+ * the ESC-character. Now UNIX and VMS use "cooked" input functions,
+ * i.e. they pre-process character sequences from the terminal (e.g.
+ * ANSI-Escape sequences) into MicroEMACS' internal 2-byte character
+ * representation. As nearly all (or indeed all?) of these senquences
+ * start with the ESC-character there arises a problem: MicroEMACS must
+ * stop cooking when a search string is entered. Two possible solutions
+ * to this problem are:
+ *
+ * - If the read routine encounters an ESC-character issue a
+ *   non-blocking read to look if another character follows within
+ *   UNIX_READ_TOUT / 10 seconds:
+ *   + If YES:  Cook
+ *   + Of NO:   Stop cooking (user typed a single ESC possibly ending a
+ *              search string).
+ * - When reading a search string to be terminatd by ESC set the flag
+ *   terminchr (defined in edef.h). Evaluate this flag inside the
+ *   cook-routine in keyboard.
+ *
+ * The two solutions result in different behaviour when the user types
+ * a function key when entering a search string:
+ *
+ * - USE_NOBLOCK_READ == TRUE: It will be ignored silently (don't yet
+ *   understand why).
+ * - USE_NOBLOCK_READ == FALSE: The search string will be terminated
+ *   and the rest of the function key's escape sequence appears as
+ *   user input which is ugly --- but typing a function key when
+ *   entering a search string could be considered as user error.
+ *
+ * We default to USE_NOBLOCK_READ == FALSE (simply by not defining it)
+ * because in this way MicroEMACas may be used on early UNIX systems
+ * without select() system call --- e.g. BSD 4.1.
+ *
+ * Define it here or use `-DUSE_NOBLOCK_READ=1' on the compiler command
+ * line to activate it again.
+ */
+/**#define USE_NOBLOCK_READ  1**/
+#if USE_NOBLOCK_READ
+/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
+# define UNIX_READ_TOUT   (4)
+#endif  /*USE_NOBLOCK_READ*/
 
 /*      Windowing system style (pick one)                             */
 
@@ -210,16 +255,16 @@
 
 /*      Language text options   (pick one)                            */
 #if BEGIN_COMMENT_
-#endif  /*END_COMMENT_*/
-#define ENGLISH 1           /* [default]                              */
-#if BEGIN_COMMENT_
+#define ENGLISH 0           /* [default]                              */
 #define FRENCH  0
 #define SPANISH 0
 #define GERMAN  0
 #define DUTCH   0
 #define PLATIN  0           /* Pig Latin                              */
 #define JAPAN   0
-#define LATIN   0           /* real Latin                             */
+#endif  /*END_COMMENT_*/
+#define LATIN   1           /* real Latin                             */
+#if BEGIN_COMMENT_
 #endif  /*END_COMMENT_*/
 
 /*      Configuration options                                         */
@@ -240,7 +285,7 @@
 #define FLABEL  0   /* function key label code [HP150]                */
 #define CRYPT   1   /* file encryption enabled?                       */
 #define MAGIC   1   /* include regular expression matching?           */
-#define MOUSE   1   /* Include routines for mouse actions             */
+#define MOUSE   0   /* Include routines for mouse actions             */
 #define NOISY   1   /* Use a fancy BELL if it exists                  */
 #define CTAGS   1   /* include vi-like tagging?                       */
 #define SPEECH  0   /* spoken EMACS, for the sight impared [not ready]*/
@@ -770,7 +815,16 @@ execl(va_alist)
   } while ( 0 )
 # endif
 #else
-#if b_IS_ANSI_C
+/*======================================================================
+ * - For VAX/VMS see section 6-17 of:
+ *    VAX C Run-Time Library Reference Manual
+ *    Order Number: AI-JP84A-TE
+ *    March 1987
+ *    Operating System and Version: VMS Version 4.6 or higher, or MicroVMS
+ *    Version 4.6 or higher
+ *    Software Version: VAX C Version 2.3
+ *====================================================================*/
+#if ( b_IS_ANSI_C || TURBO || VMS )
 # define  RC_VFPRINTF(rc, fp, format, argp) do  { \
       int *rcp_ = &(rc);                          \
                                                   \

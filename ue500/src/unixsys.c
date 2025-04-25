@@ -1183,10 +1183,10 @@ static CONST char *cygdos2enx P1_(CONST char *, dos)
                 '\\' == in[0]   &&
                 '\\' == in[1]   &&
                 '\\' != in[2]   &&
-                NULL != umc_strchr(in + 2, '\\')
+                NULL != umc_strchr((CONST char *)(in + 2), '\\')
               )   {
         MkUNXDirSep_(in);
-        xstrlcpy(res, in, SIZEOF(res));
+        xstrlcpy(res, (CONST char *)in, SIZEOF(res));
     } else if ( 2 <= len        &&    /* <Drv>:<Path> <Drv>:\<Path>   */
                 ':' == in[1]    &&
                 ISALPHA(in[0])  &&

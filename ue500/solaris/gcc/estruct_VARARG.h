@@ -73,9 +73,7 @@
 #define AIX5        0                 /* IBM UNIX newer rs6000        */
 #define AVIION      0                 /* Data General AViiON          */
 #define BSD         0                 /* UNIX BSD 4.2 and ULTRIX      */
-#endif  /*END_COMMENT_*/
-#define CYGWIN      1                 /* Unix emulation on MS Windows */
-#if     BEGIN_COMMENT_
+#define CYGWIN      0                 /* Unix emulation on MS Windows */
 #define DJGPP_DOS   0                 /* Unix emulation on MS DOS     */
 #define FINDER      0                 /* Macintosh OS                 */
 #define FREEBSD     0                 /* FREEBSD 386 version 2 or +   */
@@ -88,7 +86,9 @@
 #define OPENBSD     0                 /* OPENBSD 386                  */
 #define OS2         0                 /* Microsoft or IBM OS/2        */
 #define SMOS        0                 /* Supermax UNIX System V       */
-#define SOLARIS     0                 /* SUN Solaris (SYSV)           */
+#endif  /*END_COMMENT_*/
+#define SOLARIS     1                 /* SUN Solaris (SYSV)           */
+#if BEGIN_COMMENT_
 #define SUN         0                 /* SUN v4.0                     */
 #define TOS         0                 /* ST520, TOS                   */
 #define UNIX_ANC    0                 /* Post UNIX V7 (.GE. BSD 4.1)  */
@@ -128,15 +128,15 @@
 #define ALCYON  0         /* ALCYON Atari ST compiler                 */
 #define AZTEC   0         /* Aztec C 4.00e ONLY for the amiga now...  */
 #define DGC     0         /* Data General AOS/VS C...                 */
-#endif  /*END_COMMENT_*/
-#define GCC     1         /* the GNU C compiler                       */
-#if BEGIN_COMMENT_
+#define GCC     0         /* the GNU C compiler                       */
 #define IC      0         /* Rational Systems Instant C               */
 #define LATTICE 0         /* Lattice 2.14 through 3.0 compilers       */
 #define MSC     0         /* MicroSoft C compile version 3 and up     */
 #define MWC     0         /* Mark Williams C                          */
 #define TURBO   0         /* Turbo C and Borland C++ under MSDOS      */
-#define UNIX    0         /* a standard UNIX compiler (cc)            */
+#endif  /*END_COMMENT_*/
+#define UNIX    1         /* a standard UNIX compiler (cc)            */
+#if BEGIN_COMMENT_
 #define ZTC     0         /* Zortech C/C++ 1.02 thru 2.10 under MSDOS */
 #endif  /*END_COMMENT_*/
 
@@ -157,18 +157,15 @@
 
 /*      Special keyboard/network definitions                          */
 #if BEGIN_COMMENT_
-#define ATKBD     0   /* AT-style keyboard with F11, F12 & grey keys  */
-#define WANGPC    0   /* WangPC - mostly escape sequences             */
-#define KEYPAD    0   /* Turn on and off application                  */
+#define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
+#define WANGPC  0     /* WangPC - mostly escape sequences             */
+#define KEYPAD  0     /* VMS - turn on and off application            */
                       /* keypad automatically                         */
-#endif  /*END_COMMENT_*/
-#if VMS               /* BEGIN: VMS specific settings                 */
-# define XONDATA  1   /* Set to force /NOTTSYNC/NOHOSTSY              */
-# define RMSIO    1   /* Skip the rotten C runtime: Use RMS directly. */
-# define OPTMEM   0   /* VMS 5.0 and up - use a less standard but     */
-                      /* more efficient memory allocator              */
-#endif  /* VMS */     /* END:   VMS specific settings                 */
-#if BEGIN_COMMENT_
+#define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
+#define RMSIO   0     /* VMS - skip the rotten C runtime and          */
+                      /* use RMS directly                             */
+#define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
+                      /* but more efficient memory allocator          */
 #endif  /*END_COMMENT_*/
 
 /*      Terminal Output definitions                                   */
@@ -176,9 +173,7 @@
 /*      It is possible to use the ANSI terminal with UNIX:  No        */
 /*      termcap/curses library needed with this setup.                */
 #if BEGIN_COMMENT_
-#endif  /*END_COMMENT_*/
-#define ANSI    1           /* ANSI escape sequences                  */
-#if BEGIN_COMMENT_
+#define ANSI    0           /* ANSI escape sequences                  */
 #define DASHER  0           /* DG Dasher 2xx/4xx crts                 */
 #define DG10    0           /* Data General system/10                 */
 #define FMR     0           /* Fujitsu FMR series driver              */
@@ -240,7 +235,7 @@
  * Define it here or use `-DUSE_NOBLOCK_READ=1' on the compiler command
  * line to activate it again.
  */
-/**#define USE_NOBLOCK_READ  1**/
+/**define USE_NOBLOCK_READ  1**/
 #if USE_NOBLOCK_READ
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 # define UNIX_READ_TOUT   (4)
@@ -285,7 +280,7 @@
 #define FLABEL  0   /* function key label code [HP150]                */
 #define CRYPT   1   /* file encryption enabled?                       */
 #define MAGIC   1   /* include regular expression matching?           */
-#define MOUSE   0   /* Include routines for mouse actions             */
+#define MOUSE   1   /* Include routines for mouse actions             */
 #define NOISY   1   /* Use a fancy BELL if it exists                  */
 #define CTAGS   1   /* include vi-like tagging?                       */
 #define SPEECH  0   /* spoken EMACS, for the sight impared [not ready]*/

@@ -923,14 +923,14 @@ VOID cook P0_()
                 cur = cur->nxtlvl;
 
                 if ( ch == ectoc(terminchr) ) {
-#if     BEGIN_COMMENT_    /* *nowait input is obsolete now */
+#  if USE_NOBLOCK_READ
                     /* Get next character, timed */
                     ch = grabnowait();
                     if ( ch == grabnowait_TIMEOUT ) {
                         return;
                     }
-#else   /*END_COMMENT*/
-#  if ( 1 )
+#  else
+#   if ( 1 )
                     {
                         int       l     = 0;
                         int       i     = 0;
@@ -943,10 +943,10 @@ VOID cook P0_()
                         }
                         TRC(("cook(): %s(%d)", "  END NoMatch", __LINE__));
                     }
-#  endif
+#   endif
 
                     return;
-#endif
+#  endif  /*USE_NOBLOCK_READ*/
                 } else                        {
                     ch = grabwait();
                 }
@@ -981,7 +981,7 @@ VOID cook P0_()
  *
  * To use, we need a grabwait(), grabnowait(), qin() and qrep() function.
  */
-# if    BEGIN_COMMENT_
+#  if USE_NOBLOCK_READ
 int cook_nowait P0_()
 {
     REGISTER unsigned char  ch    = '\0';
@@ -1040,7 +1040,7 @@ int cook_nowait P0_()
 
     return TRUE;
 }
-# endif /*END_COMMENT*/
+#  endif  /*USE_NOBLOCK_READ*/
 #endif  /* ( b_IS_UNIX || VMS || MPE ) */
 
 

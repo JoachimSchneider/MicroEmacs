@@ -159,15 +159,23 @@
 # define USE_TERMIOS_TCXX       ( 1 )
 #endif
 #endif
-/* Enable/disable XON/XOFF: We want to use ^S/^Q. I do not believe the flow
- * control settings of the OS should be diddled by an application program. But
- * if you do, change this 1 to a 0, but be warned, all sorts of terminals will
- * get grief with this
+/* Enable/disable XON/XOFF:
+ *
+ * Original comment:
+ *    I do not believe the flow control settings of the OS should be
+ *    diddled by an application program. But if you do, change this 1 to
+ *    a 0, but be warned, all sorts of terminals will get grief
+ *    with this.
+ *
+ * USE_CTL_SQ == 1: OS handles XON/XOFF MicroEMACS can't use ^S/^Q.
+ * USE_CTL_SQ == 0: No OS XON/XOFF, MicroEMACS can use ^S/^Q.
+ * *We* (i./e. MicroEMACS) want to use ^S/^Q (== XOFF/XON), therefor we
+ * set USE_CTL_SQ := 0.
  */
 #if ( DJGPP_DOS )
-# define USE_CTL_SQ               ( 1 )
+# define USE_CTL_SQ   ( 1 ) /* DJGPP doesn't know IXON/IXANY/IXOFF. */
 #else
-# define USE_CTL_SQ               ( 0 )
+# define USE_CTL_SQ   ( 0 )
 #endif
 
 
@@ -841,9 +849,9 @@ unsigned char grabwait()
     return (ch);
 }
 
-#if     BEGIN_COMMENT_    /* *nowait input functions are obsolete now */
+# if  USE_NOBLOCK_READ
 /** Grab input characters, short wait **/
-# if    ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+#  if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     fd_set          rfds;
@@ -874,32 +882,32 @@ unsigned char PASCAL NEAR grabnowait P0_()
         unsigned char ch    = '\0';
 
         /* Perform read */
-#  if HANDLE_WINCH
+#   if HANDLE_WINCH
         while ( ( count = read(0, &ch, 1) ) < 0 ) {
             if ( winch_flag )
                 return 0;
         }
-#  else
+#   else
         count = read(0, &ch, 1);
         if ( count < 0 ) {
             puts("** Horrible read error occured **");
             exit(1);
         }
-#  endif
+#   endif
         if ( count == 0 ) { /* Should not happen  */
             TRC(("grabnowait(): %s", "select .GT. 0 but no data"));
 
             return (grabnowait_TIMEOUT);
         }
         /* Return new character */
-#  if ( 0 )
+#   if ( 0 )
         TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
-#  endif
+#   endif
         return (ch);
     }
 }
-# else
-# if  ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+#  else
+#  if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     int           count = 0;
@@ -909,46 +917,46 @@ unsigned char PASCAL NEAR grabnowait P0_()
     if ( curterm.c_cc[VTIME] == 0 ) {
         curterm.c_cc[VMIN] = 0;
         curterm.c_cc[VTIME] = UNIX_READ_TOUT;
-#  if   ( USE_TERMIOS_TCXX )
+#   if ( USE_TERMIOS_TCXX )
         tcsetattr(0, TCSANOW, &curterm);
-#  else
-#  if ( USE_TERMIO_IOCTL )
+#   else
+#   if ( USE_TERMIO_IOCTL )
         ioctl(0, TCSETA, &curterm);
-#  else
-#  if ( USE_CURSES )
+#   else
+#   if ( USE_CURSES )
         /* ? */
-#  else
-    CRASH(MISSING TERMINAL CONTROL DEFINITION);
-#  endif
-#  endif
-#  endif
+#   else
+     CRASH(MISSING TERMINAL CONTROL DEFINITION);
+#   endif
+#   endif
+#   endif
     }
 
     /* Perform read */
-#  if HANDLE_WINCH
+#   if HANDLE_WINCH
     while ( ( count = read(0, &ch, 1) ) < 0 ) {
         if ( winch_flag )
             return 0;
     }
-#  else
+#   else
     count = read(0, &ch, 1);
     if ( count < 0 ) {
         puts("** Horrible read error occured **");
         exit(1);
     }
-#  endif
+#   endif
     if ( count == 0 ) {
         return (grabnowait_TIMEOUT);
     }
 
     /* Return new character */
-#  if ( 0 )
+#   if ( 0 )
     TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
-#  endif
+#   endif
     return (ch);
 }
-# else
-# if  ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+#  else
+#  if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
 unsigned char PASCAL NEAR grabnowait P0_()
 {
     if ( 0 >= nread() ) {
@@ -958,32 +966,32 @@ unsigned char PASCAL NEAR grabnowait P0_()
         unsigned char ch  = '\0';
 
         /* Perform read */
-#  if HANDLE_WINCH
+#   if HANDLE_WINCH
         while ( ( rv = readx() ) < 0 )  {
             if ( winch_flag )
                 return 0;
         }
-#  else
+#   else
         rv  = readx();
         if ( 0 > rv ) {
             puts("** Horrible read error occured **");
             exit(1);
         }
-#  endif
+#   endif
         /* Return new character */
         ch  = rv;
-#  if ( 0 )
+#   if ( 0 )
         TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
-#  endif
+#   endif
         return (ch);
     }
 }
-# else
-   CRASH(IMPOSSIBLE);
-# endif
-# endif
-# endif /* SWITCH_TERMINAL_NOBLOCK_READ */
-#endif  /*END_COMMENT_*/  /* *nowait input functions are obsolete now */
+#  else
+    CRASH(IMPOSSIBLE);
+#  endif
+#  endif
+#  endif /* SWITCH_TERMINAL_NOBLOCK_READ */
+# endif /*USE_NOBLOCK_READ*/
 /* QIN:
  *
  * Queue in a character to the input buffer.
@@ -1071,7 +1079,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
-# if    BEGIN_COMMENT_
+# if USE_NOBLOCK_READ
 int ttgetc_nowait P0_()
 {
     int ch  = 0;
@@ -1093,12 +1101,12 @@ int ttgetc_nowait P0_()
         inbufh = inbuft = inbuf;
 
     /* Return next character */
-# if ( 0 )
+#  if ( 0 )
     TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
-# endif
+#  endif
     return (ch);
 }
-# endif /*END_COMMENT*/
+# endif /*USE_NOBLOCK_READ*/
 
 /* QGET:
  *

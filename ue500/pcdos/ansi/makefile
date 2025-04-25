@@ -23,7 +23,7 @@ CFLAGS=-c -d -I. -I$(HDIR) -I$(INCD) -K -ml -N- -n$(OBJD) -O -r -v -w-par -y -Z
 
 # list of header files
 
-HFILES = ..\..\h\estruct.h ..\..\h\edef.h ..\..\h\efunc.h ..\..\h\epath.h ..\..\h\ebind.h ..\..\h\eproto.h
+HFILES = estruct.h ..\..\h\edef.h ..\..\h\efunc.inc ..\..\h\epath.h ..\..\h\ebind.h ..\..\h\eproto.h
 
 #list of source files
 
@@ -33,14 +33,15 @@ F3 = $(OBJD)\eval.obj $(OBJD)\exec.obj $(OBJD)\file.obj
 F4 = $(OBJD)\fileio.obj $(OBJD)\ansi.obj $(OBJD)\input.obj $(OBJD)\keyboard.obj
 F5 = $(OBJD)\isearch.obj $(OBJD)\line.obj $(OBJD)\lock.obj $(OBJD)\dolock.obj
 F6 = $(OBJD)\main.obj $(OBJD)\mouse.obj $(OBJD)\msdos.obj $(OBJD)\screen.obj
-F7 = $(OBJD)\random.obj $(OBJD)\region.obj $(OBJD)\search.obj $(OBJD)\replace.obj
-F8 = $(OBJD)\tags.obj $(OBJD)\window.obj $(OBJD)\word.obj  $(OBJD)\execpr.obj
+F7 = $(OBJD)\random.obj $(OBJD)\region.obj $(OBJD)\search.obj
+F8 = $(OBJD)\replace.obj $(OBJD)\tags.obj $(OBJD)\window.obj $(OBJD)\word.obj
+F9 = $(OBJD)\execpr.obj $(OBJD)\elang.obj
 
 # product list
 
 all:	bin\emacs.exe bin\cmdfix.exe
 
-bin\emacs.exe: $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
+bin\emacs.exe: $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8) $(F9)
 	tlink @emacs.lnk
 
 bin\cmdfix.exe: $(OBJD)\cmdfix.obj
@@ -64,7 +65,7 @@ $(OBJD)\cmdfix.obj: $(SRCD)\cmdfix.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\display.obj: $(SRCD)\display.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
-$(OBJD)\eval.obj: $(SRCD)\eval.c $(HFILES) $(HDIR)\evar.h
+$(OBJD)\eval.obj: $(SRCD)\eval.c $(HFILES) $(HDIR)\evar.inc
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\exec.obj: $(SRCD)\exec.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
@@ -116,6 +117,8 @@ $(OBJD)\word.obj: $(SRCD)\word.c $(HFILES)
 #	masm $(SRCD)\execpr.asm, $(OBJD)\execpr.obj, , ,
 $(OBJD)\execpr.obj: $(SRCD)\execpr.asm
 	tasm $(SRCD)\execpr.asm,$(OBJD)\execpr.obj
+$(OBJD)\elang.obj: $(SRCD)\elang.c $(HFILES)
+	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 
 
 clean:

@@ -4,6 +4,8 @@
 ;                       Last Update: 11/13/93
 
 ;;
+; CLRMAP is currently only supported on UNIX
+;;
 ; tput setf [1-7]
 ; tput setb [1-7]
 ;;
@@ -87,8 +89,8 @@ set $paralead ""
 
 ;       Set Default Global modes
 
-;add-global-mode "blue"
-;add-global-mode "WHITE"
+add-global-mode "blue"
+add-global-mode "WHITE"
 ;bind-to-key meta-prefix `      ;for annoying keyboards with ` at the top left
 
 ;       Toggle function key window display
@@ -107,7 +109,8 @@ store-procedure toggle-fkeys
         !if &not &sequal $cbufname "Function Keys"
                 1 split-current-window
                 1 select-buffer "Function Keys"
-                ;add-mode "red"
+                ; Comment this out if it is too much colour:
+                add-mode "red"
                 !force 5 resize-window
                 1 goto-line
         !endif

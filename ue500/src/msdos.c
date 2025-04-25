@@ -55,7 +55,7 @@ static int          nxtchar = -1; /* character held from type ahead */
 #  include        <process.h>
 # endif
 
-# if     IC
+# if     IC | TURBO
 #  include        <time.h>
 # endif
 
