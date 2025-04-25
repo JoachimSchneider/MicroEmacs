@@ -55,6 +55,7 @@
 #define C_80  80
 #define C_90  90
 #endif  /*END_COMMENT_*/
+#define C_95  95
 /**********************************************************************/
 
 
@@ -139,11 +140,17 @@
 #  define CASRT(cond)  extern int casrt_dummy_[(cond)?1:-1]
 # endif  /*END_COMMENT*/
 #endif  /* b_IS_ANSI_C  */
+
+/*....................................................................*/
+/* You may use                                                        */
+/* - `CASRT'  at places where a declaration is syntactically correct  */
+/* - `CASRTS' at places where a statement is syntactically correct    */
+/*....................................................................*/
 #define CASRT(cond)                         \
   extern int casrt_dummy_x_[1];             \
   extern int casrt_dummy_x_[(cond)? 1 : 2]
-#define CASRTS(cond)  do { CASRT((cond)); } while ( 0 )
 /**END OF DEFINITION**/
+#define CASRTS(cond)  do { CASRT((cond)); } while ( 0 )
 /**********************************************************************/
 
 /**********************************************************************/

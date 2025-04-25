@@ -2475,7 +2475,6 @@ CONST char *cmkvis P1_(char, c)
             break;
 
         default:
-            CASRTS((unsigned char)(-1) <= 0xFF);
             /**assert(0 <= uc);**/    /* Always TRUE  */
             /**assert(uc <= 0xFF);**/ /* Always TRUE  */
 #if     BEGIN_COMMENT
