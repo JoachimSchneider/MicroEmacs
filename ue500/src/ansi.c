@@ -523,7 +523,7 @@ static int PASCAL NEAR ansiopen P0_()
 # if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
   ttputs(ANSI_TO_ALT_SCREEN); ttflush();
 # endif
-# if     MOUSE && (b_IS_UNIX || VMS)
+# if MOUSE && (b_IS_UNIX || VMS)
    /*
     * If this is an ansi terminal of at least DEC level 2 capability,
     * some terminals of this level, such as the "Whack" emulator, the
@@ -816,15 +816,23 @@ static int PASCAL NEAR ansigetc P0_()
              * to operate properly. This makes VT100 users much
              * happier.
              */
+#  if USE_NOBLOCK_READ
+#   if USE_COOKED_
+            ch = ttgetc_nowait();
+#   else
+            ch = grabnowait();
+#   endif
+            if ( grabnowait_TIMEOUT == ch ) return ( 27); /* Wasn't a function key  */
+#  else
             if ( ch == ectoc(terminchr) ) {
                 return ch;
             }
-
-#  if USE_COOKED_
+#   if USE_COOKED_
             ch = ttgetc();
-#  else
+#   else
             ch = grabwait();
-#  endif
+#   endif
+#  endif  /*USE_NOBLOCK_READ*/
             if ( ch == '[' )      docsi(ch);
             else if ( ch == ':' ) dobbnmouse();
             else if ( ch == 'O' ) docsi(ch);

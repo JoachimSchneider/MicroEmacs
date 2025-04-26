@@ -2182,10 +2182,10 @@ EXTERN int PASCAL NEAR          getkey DCL((void));
 EXTERN int PASCAL NEAR          getwpos DCL((void));
 EXTERN int PASCAL NEAR          get_char DCL((void));
 EXTERN int PASCAL NEAR          global_var DCL((int f, int n));
-#if     BEGIN_COMMENT_    /* *nowait input functions are obsolete now */
+#if USE_NOBLOCK_READ
 EXTERN unsigned char PASCAL NEAR  grabnowait DCL((void));
 #define grabnowait_TIMEOUT  ( 0xFF )
-#endif  /*END_COMMENT*/
+#endif  /*USE_NOBLOCK_READ*/
 EXTERN unsigned char PASCAL NEAR  grabwait DCL((void));
 #if DBCS
 EXTERN int PASCAL NEAR          is2byte DCL((char *sp, char *cp));
@@ -2482,9 +2482,9 @@ EXTERN int PASCAL NEAR          ttclose DCL((void));
 EXTERN int PASCAL NEAR          ttflush DCL((void));
 EXTERN int PASCAL NEAR          ttgetc DCL((void));
 #if ( b_IS_UNIX || VMS )
-#if     BEGIN_COMMENT
+# if USE_NOBLOCK_READ
 EXTERN int                      ttgetc_nowait DCL((void));
-#endif  /*END_COMMENT*/
+# endif  /*USE_NOBLOCK_READ*/
 #endif
 EXTERN int PASCAL NEAR          ttopen DCL((void));
 EXTERN int PASCAL NEAR          ttputc DCL((int c));

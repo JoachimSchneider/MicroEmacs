@@ -582,6 +582,7 @@ int PASCAL NEAR ttflush P0_()
     return 0;
 }
 
+#if USE_NOBLOCK_READ
 /*
         grabnowait is a routine that tries to read another character,
         and if one doesn't come in as fast as we expect function keys
@@ -604,6 +605,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
 
     return ((tylen == 0) ? grabnowait_TIMEOUT : grabwait());
 }
+#endif  /*USE_NOBLOCK_READ*/
 
 unsigned char PASCAL NEAR grabwait P0_()
 {
@@ -706,7 +708,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
-# if    BEGIN_COMMENT_
+# if USE_NOBLOCK_READ
 int ttgetc_nowait P0_()
 {
     int ch  = 0;
@@ -728,12 +730,12 @@ int ttgetc_nowait P0_()
         inbufh = inbuft = inbuf;
 
     /* Return next character */
-# if ( 0 )
+#  if ( 0 )
     TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
-# endif
+#  endif
     return (ch);
 }
-# endif /*END_COMMENT*/
+# endif /*USE_NOBLOCK_READT*/
 
 /* QGET:
  *

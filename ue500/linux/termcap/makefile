@@ -16,7 +16,9 @@ HDIR = ../../h
 #
 CC = gcc
 WARNFLAGS = -Wall -Wno-unused-variable
-CFLAGS = -g $(WARNFLAGS) -O2 -I. -I$(HDIR)
+DEFINES   =
+#DEFINES   = -DUSE_NOBLOCK_READ=1
+CFLAGS = -g $(WARNFLAGS) -O2 -I. -I$(HDIR) $(DEFINES)
 
 # Where to find the termcap/cureses library:
 #LIB_TERMCAP = /usr/lib64/termcap/libtermcap.a   # SLES 15
