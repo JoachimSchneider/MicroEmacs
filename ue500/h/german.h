@@ -17,337 +17,349 @@
 /*34567890123456789012345678901234567890123456789012345678901234567890*/
 /*====================================================================*/
 
+/**********************************************************************/
+#include "eproto.h"
+/**********************************************************************/
+
 
 #define OQUOTE_CHAR     34
 #define CQUOTE_CHAR     34
 
-#define TEXT1   "[neuer Kommando-Interpreter wird gestartet]"
+TDCLDEF char TEXT1[NOSZ_]   TINIT_("[neuer Kommando-Interpreter wird gestartet]");
 /* if `CLI' is the Amiga-specific term, better keep the keyword: */
 /* #define TEXT1    "[neuer CLI wird gestartet]" */
 
-#define TEXT2   "[Kann Filter-Datei nicht schreiben]"
-#define TEXT3   "[Ausfuehrung schlug fehl]"
-#define TEXT4   "Shell-Variable TERM nicht definiert!"
-#define TEXT5   "Terminal ist kein 'vt100'!"
-#define TEXT6   "\r\n\n[Ende]"
-#define TEXT7   "Gehe zu Zeile: "
-#define TEXT8   "[abgebrochen]"
-#define TEXT9   "[Marke %d gesetzt]"
-#define TEXT10  "[Marke %d entfernt]"
-#define TEXT11  "Keine Marke %d in diesem Fenster"
-#define TEXT12  "['Hilfe'-Datei nicht gefunden]"
-#define TEXT13  ": zeige Tastenbelegung fuer "
+TDCLDEF char TEXT2[NOSZ_]   TINIT_("[Kann Filter-Datei nicht schreiben]");
+TDCLDEF char TEXT3[NOSZ_]   TINIT_("[Ausfuehrung schlug fehl]");
+TDCLDEF char TEXT4[NOSZ_]   TINIT_("Shell-Variable TERM nicht definiert!");
+TDCLDEF char TEXT5[NOSZ_]   TINIT_("Terminal ist kein 'vt100'!");
+TDCLDEF char TEXT6[NOSZ_]   TINIT_("\r\n\n[Ende]");
+TDCLDEF char TEXT7[NOSZ_]   TINIT_("Gehe zu Zeile: ");
+TDCLDEF char TEXT8[NOSZ_]   TINIT_("[abgebrochen]");
+TDCLDEF char TEXT9[NOSZ_]   TINIT_("[Marke %d gesetzt]");
+TDCLDEF char TEXT10[NOSZ_]  TINIT_("[Marke %d entfernt]");
+TDCLDEF char TEXT11[NOSZ_]  TINIT_("Keine Marke %d in diesem Fenster");
+TDCLDEF char TEXT12[NOSZ_]  TINIT_("['Hilfe'-Datei nicht gefunden]");
+TDCLDEF char TEXT13[NOSZ_]  TINIT_(": zeige Tastenbelegung fuer ");
 /* >    leave the colon here...(and elsewhere) it pretends to be a command
  * prompt
  */
-#define TEXT14  "ist nicht belegt"
-#define TEXT15  ": definiere Taste fuer Funktion "
-#define TEXT16  "[Keine solche Funktion]"
-#define TEXT17  "Definitions-Tabelle VOLL!"
-#define TEXT18  ": entferne Funktions-Definition fuer Taste "
-#define TEXT19  "[Taste hat keine Definition]"
-#define TEXT20  "Apropos zu Text: "
-#define TEXT21  "Definitions-Tabelle"
-#define TEXT22  "Kann Definitions-Tabelle nicht anzeigen"
-#define TEXT23  "[Defintions-Tabelle wird erstellt...]"
-#define TEXT24  "Wechsel zu Buffer"
-#define TEXT25  "Wechsel zu Buffer: "
-#define TEXT26  "Loesche Buffer"
-#define TEXT27  "Pop buffer"
-#define TEXT28  "Buffer wird gerade angezeigt"
-#define TEXT29  "Aendere Buffer-Namen zu: "
-#define TEXT30  "ACTN   Modi    Groesse Buffer          Datei"
+TDCLDEF char TEXT14[NOSZ_]  TINIT_("ist nicht belegt");
+TDCLDEF char TEXT15[NOSZ_]  TINIT_(": definiere Taste fuer Funktion ");
+TDCLDEF char TEXT16[NOSZ_]  TINIT_("[Keine solche Funktion]");
+TDCLDEF char TEXT17[NOSZ_]  TINIT_("Definitions-Tabelle VOLL!");
+TDCLDEF char TEXT18[NOSZ_]  TINIT_(": entferne Funktions-Definition fuer Taste ");
+TDCLDEF char TEXT19[NOSZ_]  TINIT_("[Taste hat keine Definition]");
+TDCLDEF char TEXT20[NOSZ_]  TINIT_("Apropos zu Text: ");
+TDCLDEF char TEXT21[NOSZ_]  TINIT_("Definitions-Tabelle");
+TDCLDEF char TEXT22[NOSZ_]  TINIT_("Kann Definitions-Tabelle nicht anzeigen");
+TDCLDEF char TEXT23[NOSZ_]  TINIT_("[Defintions-Tabelle wird erstellt...]");
+TDCLDEF char TEXT24[NOSZ_]  TINIT_("Wechsel zu Buffer");
+TDCLDEF char TEXT25[NOSZ_]  TINIT_("Wechsel zu Buffer: ");
+TDCLDEF char TEXT26[NOSZ_]  TINIT_("Loesche Buffer");
+TDCLDEF char TEXT27[NOSZ_]  TINIT_("Pop buffer");
+TDCLDEF char TEXT28[NOSZ_]  TINIT_("Buffer wird gerade angezeigt");
+TDCLDEF char TEXT29[NOSZ_]  TINIT_("Aendere Buffer-Namen zu: ");
+TDCLDEF char TEXT30[NOSZ_]  TINIT_("ACTN   Modi    Groesse Buffer          Datei");
 /* >   ^^^The spacing must match on this line. It is the header for the buffer
  * list.
  *  (I extended "size" to the left to make "Groesse" fit.)
  */
 
-#define TEXT31  "         Globale Modi"
-#define TEXT32  "Aenderungen wegwerfen"
-#define TEXT33  "Verschluesselungs-Text: "
-#define TEXT34  "Datei: "
-#define TEXT35  "ein anderer Benutzer"
+TDCLDEF char TEXT31[NOSZ_]  TINIT_("         Globale Modi");
+TDCLDEF char TEXT32[NOSZ_]  TINIT_("Aenderungen wegwerfen");
+TDCLDEF char TEXT33[NOSZ_]  TINIT_("Verschluesselungs-Text: ");
+TDCLDEF char TEXT34[NOSZ_]  TINIT_("Datei: ");
+TDCLDEF char TEXT35[NOSZ_]  TINIT_("ein anderer Benutzer");
 
 /* >The UNIX terms should stay the same in the next few entryies */
-#define TEXT36  "LOCK FEHLER -- "
-#define TEXT37  "Ueberpruefen der Existenz von %s\n"
-#define TEXT38  "Einrichten von directory %s\n"
-#define TEXT39  "erzeuge %s\n"
-#define TEXT40  "konnte \"lock\"-Datei nicht einrichten"
-#define TEXT41  "pid ist %ld\n"
-#define TEXT42  "lese lock-Datei %s\n"
-#define TEXT43  "konnte lock-Datei nicht lesen"
-#define TEXT44  "pid in %s ist %ld\n"
-#define TEXT45  "Benachrichtigung (`kill') an Prozess %ld\n"
-#define TEXT46  "Prozess beendet"
-#define TEXT47  "`kill' war nicht in Ordnung"
-#define TEXT48  "`kill' war OK; Prozess beendet"
-#define TEXT49  "Versuch: unlink %s\n"
-#define TEXT50  "konnte lock-Datei nicht loeschen"
-#define TEXT51  "zu setzende Variable: "
-#define TEXT52  "%%Keine solche Variable '%s'"
-#define TEXT53  "Wert: "
-#define TEXT54  "[Makro abgebrochen]"
-#define TEXT55  "anzuzeigende Variable: "
-#define TEXT56  "Variablen-Liste"
-#define TEXT57  "kann Variablen-Liste nicht anzeigen"
-#define TEXT58  "[Variablen-Liste wird aufgebaut...]"
-#define TEXT59  UNUSED
-#define TEXT60  "Zeile %D/%D Spalte %d/%d Zeichen %D/%D (%d%%) Zeichen = 0x%x"
-#define TEXT61  "<NOT USED>"
-#define TEXT62  "Globaler Modus, der "
-#define TEXT63  "Modus, der "
-#define TEXT64  "hinzugenommen werden soll: "
-#define TEXT65  "entfernt werden soll: "
-#define TEXT66  "Kein solcher Modus!"
-#define TEXT67  "Auszugebender Text: "
-#define TEXT68  "Einzufuegender Text: "
-#define TEXT69  "Zu ueberschreibender Text: "
-#define TEXT70  "[Region kopiert]"
-#define TEXT71  "%%Dieser Buffer ist bereits auf einen Bereich eingeschraenkt"
-#define TEXT72  "%%Bereich muss mind. eine ganze Zeile umfassen"
-#define TEXT73  "[Buffer ist auf Bereich eingeschraenkt]"
-#define TEXT74  "%%Dieser Buffer ist nicht eingeschraenkt."
-#define TEXT75  "[Buffer ist ohne Bereichs-Einschraenkung.]"
-#define TEXT76  "Keine Marke in diesem Fenster gesetzt"
-#define TEXT77  "Fehler: Marke verloren (nicht tragisch)"
-#define TEXT78  "Suche "
-#define TEXT79  "Nicht gefunden"
-#define TEXT80  "Kein Such-Muster gesetzt"
-#define TEXT81  "Rueckwaerts-Suche "
-#define TEXT82  UNUSED
-#define TEXT83  UNUSED
-#define TEXT84  "Ersetze "
-#define TEXT85  "Ersetze interaktiv "
-#define TEXT86  "durch "
-#define TEXT87  "Ersetzen von '"
-#define TEXT88  "' durch '"
-#define TEXT89  "Abgebrochen!"
+TDCLDEF char TEXT36[NOSZ_]  TINIT_("LOCK FEHLER -- ");
+TDCLDEF char TEXT37[NOSZ_]  TINIT_("Ueberpruefen der Existenz von %s\n");
+TDCLDEF char TEXT38[NOSZ_]  TINIT_("Einrichten von directory %s\n");
+TDCLDEF char TEXT39[NOSZ_]  TINIT_("erzeuge %s\n");
+TDCLDEF char TEXT40[NOSZ_]  TINIT_("konnte \"lock\"-Datei nicht einrichten");
+TDCLDEF char TEXT41[NOSZ_]  TINIT_("pid ist %ld\n");
+TDCLDEF char TEXT42[NOSZ_]  TINIT_("lese lock-Datei %s\n");
+TDCLDEF char TEXT43[NOSZ_]  TINIT_("konnte lock-Datei nicht lesen");
+TDCLDEF char TEXT44[NOSZ_]  TINIT_("pid in %s ist %ld\n");
+TDCLDEF char TEXT45[NOSZ_]  TINIT_("Benachrichtigung (`kill') an Prozess %ld\n");
+TDCLDEF char TEXT46[NOSZ_]  TINIT_("Prozess beendet");
+TDCLDEF char TEXT47[NOSZ_]  TINIT_("`kill' war nicht in Ordnung");
+TDCLDEF char TEXT48[NOSZ_]  TINIT_("`kill' war OK; Prozess beendet");
+TDCLDEF char TEXT49[NOSZ_]  TINIT_("Versuch: unlink %s\n");
+TDCLDEF char TEXT50[NOSZ_]  TINIT_("konnte lock-Datei nicht loeschen");
+TDCLDEF char TEXT51[NOSZ_]  TINIT_("zu setzende Variable: ");
+TDCLDEF char TEXT52[NOSZ_]  TINIT_("%%Keine solche Variable '%s'");
+TDCLDEF char TEXT53[NOSZ_]  TINIT_("Wert: ");
+TDCLDEF char TEXT54[NOSZ_]  TINIT_("[Makro abgebrochen]");
+TDCLDEF char TEXT55[NOSZ_]  TINIT_("anzuzeigende Variable: ");
+TDCLDEF char TEXT56[NOSZ_]  TINIT_("Variablen-Liste");
+TDCLDEF char TEXT57[NOSZ_]  TINIT_("kann Variablen-Liste nicht anzeigen");
+TDCLDEF char TEXT58[NOSZ_]  TINIT_("[Variablen-Liste wird aufgebaut...]");
+TDCLDEF char TEXT59[NOSZ_]  TINIT_("");                  /* UNUSED */
+TDCLDEF char TEXT60[NOSZ_]  TINIT_("Zeile %D/%D Spalte %d/%d Zeichen %D/%D (%d%%) Zeichen = 0x%x");
+TDCLDEF char TEXT61[NOSZ_]  TINIT_("<NOT USED>");
+TDCLDEF char TEXT62[NOSZ_]  TINIT_("Globaler Modus, der ");
+TDCLDEF char TEXT63[NOSZ_]  TINIT_("Modus, der ");
+TDCLDEF char TEXT64[NOSZ_]  TINIT_("hinzugenommen werden soll: ");
+TDCLDEF char TEXT65[NOSZ_]  TINIT_("entfernt werden soll: ");
+TDCLDEF char TEXT66[NOSZ_]  TINIT_("Kein solcher Modus!");
+TDCLDEF char TEXT67[NOSZ_]  TINIT_("Auszugebender Text: ");
+TDCLDEF char TEXT68[NOSZ_]  TINIT_("Einzufuegender Text: ");
+TDCLDEF char TEXT69[NOSZ_]  TINIT_("Zu ueberschreibender Text: ");
+TDCLDEF char TEXT70[NOSZ_]  TINIT_("[Region kopiert]");
+TDCLDEF char TEXT71[NOSZ_]  TINIT_("%%Dieser Buffer ist bereits auf einen Bereich eingeschraenkt");
+TDCLDEF char TEXT72[NOSZ_]  TINIT_("%%Bereich muss mind. eine ganze Zeile umfassen");
+TDCLDEF char TEXT73[NOSZ_]  TINIT_("[Buffer ist auf Bereich eingeschraenkt]");
+TDCLDEF char TEXT74[NOSZ_]  TINIT_("%%Dieser Buffer ist nicht eingeschraenkt.");
+TDCLDEF char TEXT75[NOSZ_]  TINIT_("[Buffer ist ohne Bereichs-Einschraenkung.]");
+TDCLDEF char TEXT76[NOSZ_]  TINIT_("Keine Marke in diesem Fenster gesetzt");
+TDCLDEF char TEXT77[NOSZ_]  TINIT_("Fehler: Marke verloren (nicht tragisch)");
+TDCLDEF char TEXT78[NOSZ_]  TINIT_("Suche ");
+TDCLDEF char TEXT79[NOSZ_]  TINIT_("Nicht gefunden");
+TDCLDEF char TEXT80[NOSZ_]  TINIT_("Kein Such-Muster gesetzt");
+TDCLDEF char TEXT81[NOSZ_]  TINIT_("Rueckwaerts-Suche ");
+TDCLDEF char TEXT82[NOSZ_]  TINIT_("");                  /* UNUSED */
+TDCLDEF char TEXT83[NOSZ_]  TINIT_("");                  /* UNUSED */
+TDCLDEF char TEXT84[NOSZ_]  TINIT_("Ersetze ");
+TDCLDEF char TEXT85[NOSZ_]  TINIT_("Ersetze interaktiv ");
+TDCLDEF char TEXT86[NOSZ_]  TINIT_("durch ");
+TDCLDEF char TEXT87[NOSZ_]  TINIT_("Ersetzen von '");
+TDCLDEF char TEXT88[NOSZ_]  TINIT_("' durch '");
+TDCLDEF char TEXT89[NOSZ_]  TINIT_("Abgebrochen!");
 /*
  * The following couldn't be translated without interferring with the expected
  * input characters, so I let it untouched.
  */
-#define TEXT90  \
-    "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "
+TDCLDEF char TEXT90[NOSZ_]  TINIT_("(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: ");
 /* >  ^^^^   make sure this is not longer than 72 characters */
 
-#define TEXT91  "leeren Text ersetzt, gestoppt."
-#define TEXT92  "%D Ersetzungen"
-#define TEXT93  "%%Fehler waehrend des Loeschens"
-#define TEXT94  "%%Kein Speicherplatz mehr frei"
-#define TEXT95  "%%mceq: Was ist %d?"
-#define TEXT96  "%%Keine Zeichen in Zeichenklasse"
-#define TEXT97  "%%Zeichenklasse nicht beendet"
-#define TEXT98  "Keine Spalte fuer Umbruch (fill-column) definiert"
-#define TEXT99  "[FREIER SPEICHERPLATZ AUFGEBRAUCHT]"
-#define TEXT100 "%D Worte, %D Zeichen, %d Zeilen, durchschn. Wortlaenge %f"
-#define TEXT101 "[kann nicht zugleich suchen und zu einer Zeile gehen!]"
-#define TEXT102 "[Unsinniges Argument fuer `goto']"
-#define TEXT103 "[Abspeichern von %s]"
-#define TEXT104 "Geaenderte Buffer existieren.  Trotzdem beenden"
-#define TEXT105 "%%Makro bereits aktiv"
-#define TEXT106 "[Anfang von Makro]"
-#define TEXT107 "%%Makro nicht aktiv"
-#define TEXT108 "[Ende von Makro]"
-#define TEXT109 "[Taste unzulaessig im VIEW-Modus]"
-#define TEXT110 "[Dieses Kommando ist nicht freigegeben!]"
-#define TEXT111 "Kein Makro angegeben"
-#define TEXT112 "Makro-Nummer ausserhalb des gueltigen Bereichs"
-#define TEXT113 "Kann Makro nicht erzeugen"
-#define TEXT114 "Prozedur-Name: "
-#define TEXT115 "Fuehre Prozedur aus: "
-#define TEXT116 "Keine solche Prozedur"
-#define TEXT117 "Fuehre Buffer aus: "
-#define TEXT118 "Kein solcher Buffer"
-#define TEXT119 "%%freier Speicher aufgebraucht waehrend `while-scan'"
+TDCLDEF char TEXT91[NOSZ_]  TINIT_("leeren Text ersetzt, gestoppt.");
+TDCLDEF char TEXT92[NOSZ_]  TINIT_("%D Ersetzungen");
+TDCLDEF char TEXT93[NOSZ_]  TINIT_("%%Fehler waehrend des Loeschens");
+TDCLDEF char TEXT94[NOSZ_]  TINIT_("%%Kein Speicherplatz mehr frei");
+TDCLDEF char TEXT95[NOSZ_]  TINIT_("%%mceq: Was ist %d?");
+TDCLDEF char TEXT96[NOSZ_]  TINIT_("%%Keine Zeichen in Zeichenklasse");
+TDCLDEF char TEXT97[NOSZ_]  TINIT_("%%Zeichenklasse nicht beendet");
+TDCLDEF char TEXT98[NOSZ_]  TINIT_("Keine Spalte fuer Umbruch (fill-column) definiert");
+TDCLDEF char TEXT99[NOSZ_]  TINIT_("[FREIER SPEICHERPLATZ AUFGEBRAUCHT]");
+TDCLDEF char TEXT100[NOSZ_] TINIT_("%D Worte, %D Zeichen, %d Zeilen, durchschn. Wortlaenge %f");
+TDCLDEF char TEXT101[NOSZ_] TINIT_("[kann nicht zugleich suchen und zu einer Zeile gehen!]");
+TDCLDEF char TEXT102[NOSZ_] TINIT_("[Unsinniges Argument fuer `goto']");
+TDCLDEF char TEXT103[NOSZ_] TINIT_("[Abspeichern von %s]");
+TDCLDEF char TEXT104[NOSZ_] TINIT_("Geaenderte Buffer existieren.  Trotzdem beenden");
+TDCLDEF char TEXT105[NOSZ_] TINIT_("%%Makro bereits aktiv");
+TDCLDEF char TEXT106[NOSZ_] TINIT_("[Anfang von Makro]");
+TDCLDEF char TEXT107[NOSZ_] TINIT_("%%Makro nicht aktiv");
+TDCLDEF char TEXT108[NOSZ_] TINIT_("[Ende von Makro]");
+TDCLDEF char TEXT109[NOSZ_] TINIT_("[Taste unzulaessig im VIEW-Modus]");
+TDCLDEF char TEXT110[NOSZ_] TINIT_("[Dieses Kommando ist nicht freigegeben!]");
+TDCLDEF char TEXT111[NOSZ_] TINIT_("Kein Makro angegeben");
+TDCLDEF char TEXT112[NOSZ_] TINIT_("Makro-Nummer ausserhalb des gueltigen Bereichs");
+TDCLDEF char TEXT113[NOSZ_] TINIT_("Kann Makro nicht erzeugen");
+TDCLDEF char TEXT114[NOSZ_] TINIT_("Prozedur-Name: ");
+TDCLDEF char TEXT115[NOSZ_] TINIT_("Fuehre Prozedur aus: ");
+TDCLDEF char TEXT116[NOSZ_] TINIT_("Keine solche Prozedur");
+TDCLDEF char TEXT117[NOSZ_] TINIT_("Fuehre Buffer aus: ");
+TDCLDEF char TEXT118[NOSZ_] TINIT_("Kein solcher Buffer");
+TDCLDEF char TEXT119[NOSZ_] TINIT_("%%freier Speicher aufgebraucht waehrend `while-scan'");
 
 /* > Directive names and keywords are not translated... */
-#define TEXT120 "%%!BREAK ausserhalb einer !WHILE-Schleife"
-#define TEXT121 "%%!ENDWHILE ohne vorausgegangenes !WHILE"
-#define TEXT122 "%%!WHILE ohne zugehoeriges !ENDWHILE"
-#define TEXT123 "%%freier Speicher waehrend Makroausfuehrung aufgebraucht"
-#define TEXT124 "%%Unbekannte Direktive"
-#define TEXT125 "freier Speicher beim Abspeichern eines Makros aufgebraucht"
-#define TEXT126 "%%interner Fehler bei While-Schleife"
-#define TEXT127 "%%Kein solches Label"
-#define TEXT128 "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug"
+TDCLDEF char TEXT120[NOSZ_] TINIT_("%%!BREAK ausserhalb einer !WHILE-Schleife");
+TDCLDEF char TEXT121[NOSZ_] TINIT_("%%!ENDWHILE ohne vorausgegangenes !WHILE");
+TDCLDEF char TEXT122[NOSZ_] TINIT_("%%!WHILE ohne zugehoeriges !ENDWHILE");
+TDCLDEF char TEXT123[NOSZ_] TINIT_("%%freier Speicher waehrend Makroausfuehrung aufgebraucht");
+TDCLDEF char TEXT124[NOSZ_] TINIT_("%%Unbekannte Direktive");
+TDCLDEF char TEXT125[NOSZ_] TINIT_("freier Speicher beim Abspeichern eines Makros aufgebraucht");
+TDCLDEF char TEXT126[NOSZ_] TINIT_("%%interner Fehler bei While-Schleife");
+TDCLDEF char TEXT127[NOSZ_] TINIT_("%%Kein solches Label");
+TDCLDEF char TEXT128[NOSZ_] TINIT_("(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop debug");
 /* > ^^^ No longer than 72 chars again
  * And, again too, no translation because of expected input characters
  */
-#define TEXT129 "Auszufuehrende Datei: "
-#define TEXT130 "Makro nicht definiert"
-#define TEXT131 "Einzulesende Datei"
-#define TEXT132 "Einzufuegende Datei"
-#define TEXT133 "Finde Datei"
-#define TEXT134 "Zu betrachtende Datei"
-#define TEXT135 "[alter Buffer]"
-#define TEXT136 "Buffer-Name: "
-#define TEXT137 "Kann Buffer nicht einrichten"
-#define TEXT138 "[neue Datei]"
-#define TEXT139 "[Einlesen von Datei]"
+TDCLDEF char TEXT129[NOSZ_] TINIT_("Auszufuehrende Datei: ");
+TDCLDEF char TEXT130[NOSZ_] TINIT_("Makro nicht definiert");
+TDCLDEF char TEXT131[NOSZ_] TINIT_("Einzulesende Datei");
+TDCLDEF char TEXT132[NOSZ_] TINIT_("Einzufuegende Datei");
+TDCLDEF char TEXT133[NOSZ_] TINIT_("Finde Datei");
+TDCLDEF char TEXT134[NOSZ_] TINIT_("Zu betrachtende Datei");
+TDCLDEF char TEXT135[NOSZ_] TINIT_("[alter Buffer]");
+TDCLDEF char TEXT136[NOSZ_] TINIT_("Buffer-Name: ");
+TDCLDEF char TEXT137[NOSZ_] TINIT_("Kann Buffer nicht einrichten");
+TDCLDEF char TEXT138[NOSZ_] TINIT_("[neue Datei]");
+TDCLDEF char TEXT139[NOSZ_] TINIT_("[Einlesen von Datei]");
 
-#define TEXT140 "Lese "
+TDCLDEF char TEXT140[NOSZ_] TINIT_("Lese ");
 /* probably a bad choice, has to be checked against its context. */
 
-#define TEXT141 "I/O FEHLER, "
-#define TEXT142 "FREIER SPEICHERPLATZ VERBRAUCHT, "
-#define TEXT143 " Zeile"
-#define TEXT144 "Abspeichern in Datei: "
-#define TEXT145 "Kein Dateiname"
+TDCLDEF char TEXT141[NOSZ_] TINIT_("I/O FEHLER, ");
+TDCLDEF char TEXT142[NOSZ_] TINIT_("FREIER SPEICHERPLATZ VERBRAUCHT, ");
+TDCLDEF char TEXT143[NOSZ_] TINIT_(" Zeile");
+TDCLDEF char TEXT144[NOSZ_] TINIT_("Abspeichern in Datei: ");
+TDCLDEF char TEXT145[NOSZ_] TINIT_("Kein Dateiname");
 /*
  * I wonder how the next two msgs are meant... I guess the user is encouraged
  * to do a write-file instead of a save-file.
  * #define      TEXT146 "Truncated file..write it out"
  * #define      TEXT147 "Narrowed Buffer..write it out"
  */
-#define TEXT146 "Unvollstaendige Datei; [`write-file' benutzen]"
-#define TEXT147 "Buffer auf Bereich eingeschraenkt; [`write-file' benutzen]"
+TDCLDEF char TEXT146[NOSZ_] TINIT_("Unvollstaendige Datei; [`write-file' benutzen]");
+TDCLDEF char TEXT147[NOSZ_] TINIT_("Buffer auf Bereich eingeschraenkt; [`write-file' benutzen]");
 
-#define TEXT148 "[Datei wird geschrieben...]"
-#define TEXT149 "[Datei geschrieben: "
-#define TEXT150 ", gespeichert als "
-#define TEXT151 "Name: "
-#define TEXT152 "[Keine solche Datei]"
-#define TEXT153 "[Datei wird eingefuegt]"
-#define TEXT154 "Eingefuegt: "
-#define TEXT155 "Kann Datei nicht zum Schreiben oeffnen"
-#define TEXT156 "Fehler beim Schliessen der Datei"
-#define TEXT157 "Schreib-I/O-Fehler"
-#define TEXT158 "Fehler beim Lesen der Datei"
-#define TEXT159 "%Brauche Funktionstasten-Nummer"
-#define TEXT160 "%Nummer fuer Funktionstaste ausserhalb vom gueltigen Bereich"
-#define TEXT161 "Label-Inhalt: "
+TDCLDEF char TEXT148[NOSZ_] TINIT_("[Datei wird geschrieben...]");
+TDCLDEF char TEXT149[NOSZ_] TINIT_("[Datei geschrieben: ");
+TDCLDEF char TEXT150[NOSZ_] TINIT_(", gespeichert als ");
+TDCLDEF char TEXT151[NOSZ_] TINIT_("Name: ");
+TDCLDEF char TEXT152[NOSZ_] TINIT_("[Keine solche Datei]");
+TDCLDEF char TEXT153[NOSZ_] TINIT_("[Datei wird eingefuegt]");
+TDCLDEF char TEXT154[NOSZ_] TINIT_("Eingefuegt: ");
+TDCLDEF char TEXT155[NOSZ_] TINIT_("Kann Datei nicht zum Schreiben oeffnen");
+TDCLDEF char TEXT156[NOSZ_] TINIT_("Fehler beim Schliessen der Datei");
+TDCLDEF char TEXT157[NOSZ_] TINIT_("Schreib-I/O-Fehler");
+TDCLDEF char TEXT158[NOSZ_] TINIT_("Fehler beim Lesen der Datei");
+TDCLDEF char TEXT159[NOSZ_] TINIT_("%Brauche Funktionstasten-Nummer");
+TDCLDEF char TEXT160[NOSZ_] TINIT_("%Nummer fuer Funktionstaste ausserhalb vom gueltigen Bereich");
+TDCLDEF char TEXT161[NOSZ_] TINIT_("Label-Inhalt: ");
 
 /* Again, unchanged due to expected characters: */
-#define TEXT162 " [y/n]? "
+TDCLDEF char TEXT162[NOSZ_] TINIT_(" [y/n]? ");
 
-#define TEXT163 "Kein Default"
-#define TEXT164 "[Suche erfolglos]"
-#define TEXT165 "inkrementelle Suche: "
-#define TEXT166 "? Suchtext zu lang"
-#define TEXT167 "? Kommando zu lang"
-#define TEXT168 "%%Kann Text nicht einfuegen"
-#define TEXT169 "Eingefuegt"
-#define TEXT170 "bug: linsert"
-#define TEXT171 "Ersetzt"
-#define TEXT172 "%%freier Speicherplatz beim Ueberschreiben verbraucht"
-#define TEXT173 "LOCK FEHLER: Lock-Tabelle voll"
-#define TEXT174 "Kann kein `LOCK' auf Datei legen, freier Speicherplatz verbraucht"
-#define TEXT175 "LOCK (Dateizugriff reserviert)"
+TDCLDEF char TEXT163[NOSZ_] TINIT_("Kein Default");
+TDCLDEF char TEXT164[NOSZ_] TINIT_("[Suche erfolglos]");
+TDCLDEF char TEXT165[NOSZ_] TINIT_("inkrementelle Suche: ");
+TDCLDEF char TEXT166[NOSZ_] TINIT_("? Suchtext zu lang");
+TDCLDEF char TEXT167[NOSZ_] TINIT_("? Kommando zu lang");
+TDCLDEF char TEXT168[NOSZ_] TINIT_("%%Kann Text nicht einfuegen");
+TDCLDEF char TEXT169[NOSZ_] TINIT_("Eingefuegt");
+TDCLDEF char TEXT170[NOSZ_] TINIT_("bug: linsert");
+TDCLDEF char TEXT171[NOSZ_] TINIT_("Ersetzt");
+TDCLDEF char TEXT172[NOSZ_] TINIT_("%%freier Speicherplatz beim Ueberschreiben verbraucht");
+TDCLDEF char TEXT173[NOSZ_] TINIT_("LOCK FEHLER: Lock-Tabelle voll");
+TDCLDEF char TEXT174[NOSZ_] TINIT_("Kann kein `LOCK' auf Datei legen, freier Speicherplatz verbraucht");
+TDCLDEF char TEXT175[NOSZ_] TINIT_("LOCK (Dateizugriff reserviert)");
 
 /* If ", override?" in TEXT177 refers to a lock and not to a file, better use
  * ", ignorieren?" (==ignore) or ", uebernehmen?" (==take over) instead.
  */
-#define TEXT176 "Datei wird benutzt von "
-#define TEXT177 ", ueberschreiben?"
+TDCLDEF char TEXT176[NOSZ_] TINIT_("Datei wird benutzt von ");
+TDCLDEF char TEXT177[NOSZ_] TINIT_(", ueberschreiben?");
 
-#define TEXT178 "[kann System-Fehlertext nicht herausfinden]"
-#define TEXT179 "  Ueber MicroEmacs"
-#define TEXT180 "%%Keine solche Aufloesung"
-#define TEXT181 "%%Aufloesung unzulaessig fuer diesen Bildschirm"
-#define TEXT182 "Environment-Variable TERM nicht definiert!"
-#define TEXT183 "Unbekannter Terminal-Typ %s!"
-#define TEXT184 "Termcap-Eintrag unvollstaendig (`lines')"
-#define TEXT185 "Termcap-Eintrag unvollstaendig (`columns')"
-#define TEXT186 "Unvollstaendiger Termcap-Eintrag\n"
-#define TEXT187 "Terminal-Beschreibung zu lang!\n"
-#define TEXT188 "[Ende]"
-#define TEXT189 "Kann Eintrag fuer Terminal-Typ nicht finden.\n"
+TDCLDEF char TEXT178[NOSZ_] TINIT_("[kann System-Fehlertext nicht herausfinden]");
+TDCLDEF char TEXT179[NOSZ_] TINIT_("  Ueber MicroEmacs");
+TDCLDEF char TEXT180[NOSZ_] TINIT_("%%Keine solche Aufloesung");
+TDCLDEF char TEXT181[NOSZ_] TINIT_("%%Aufloesung unzulaessig fuer diesen Bildschirm");
+TDCLDEF char TEXT182[NOSZ_] TINIT_("Environment-Variable TERM nicht definiert!");
+TDCLDEF char TEXT183[NOSZ_] TINIT_("Unbekannter Terminal-Typ %s!");
+TDCLDEF char TEXT184[NOSZ_] TINIT_("Termcap-Eintrag unvollstaendig (`lines')");
+TDCLDEF char TEXT185[NOSZ_] TINIT_("Termcap-Eintrag unvollstaendig (`columns')");
+TDCLDEF char TEXT186[NOSZ_] TINIT_("Unvollstaendiger Termcap-Eintrag\n");
+TDCLDEF char TEXT187[NOSZ_] TINIT_("Terminal-Beschreibung zu lang!\n");
+TDCLDEF char TEXT188[NOSZ_] TINIT_("[Ende]");
+TDCLDEF char TEXT189[NOSZ_] TINIT_("Kann Eintrag fuer Terminal-Typ nicht finden.\n");
 
 /* > Don't translate the VMS commands in the next 5 lines */
-#define TEXT190 "Ueberpruefe Terminal-Typ mit \"SHOW TERMINAL\" oder\n"
-#define TEXT191 "versuche eine Einstellung mit \"SET TERMINAL/INQUIRE\"\n"
-#define TEXT192 "Der Terminaltyp hat nicht genuegend Faehigkeiten fuer\n"
-#define TEXT193 "MicroEMACS.  Versuche ein anderes Terminal oder ueberpruefe\n"
-#define TEXT194 "den Typ mit \"SHOW TERMINAL\".\n"
+TDCLDEF char TEXT190[NOSZ_] TINIT_("Ueberpruefe Terminal-Typ mit \"SHOW TERMINAL\" oder\n");
+TDCLDEF char TEXT191[NOSZ_] TINIT_("versuche eine Einstellung mit \"SET TERMINAL/INQUIRE\"\n");
+TDCLDEF char TEXT192[NOSZ_] TINIT_("Der Terminaltyp hat nicht genuegend Faehigkeiten fuer\n");
+TDCLDEF char TEXT193[NOSZ_] TINIT_("MicroEMACS.  Versuche ein anderes Terminal oder ueberpruefe\n");
+TDCLDEF char TEXT194[NOSZ_] TINIT_("den Typ mit \"SHOW TERMINAL\".\n");
 
-#define TEXT195 "Kann Kanal zum Terminal nicht oeffnen.\n"
-#define TEXT196 "Kann Terminal-Einstellungen nicht herausfinden.\n"
-#define TEXT197 "Kann Terminal-Einstellungen nicht aendern.\n"
-#define TEXT198 "I/O error (%d,%d)\n"
-#define TEXT199 "[DCL wird gestartet]\r\n"
-#define TEXT200 "[DCL wird aufgerufen]\r\n"
-#define TEXT201 "[Noch nicht unter VMS verfuegbar]"
-#define TEXT202 "Terminal-Typ weder 'vt52' noch 'z19' !"
-#define TEXT203 "Fenster-Nummer ausserhalb des zulaessigen Bereichs"
-#define TEXT204 "Kann dieses Fenster nicht loeschen"
-#define TEXT205 "Kann ein %d-Zeilen-Fenster nicht weiter teilen"
-#define TEXT206 "Nur ein Fenster"
-#define TEXT207 "Unmoegliche Aenderung"
-#define TEXT208 "[Kein solches Fenster existiert]"
-#define TEXT209 "%%Bildschirmgroesse ausserhalb des gueltigen Bereichs"
-#define TEXT210 "%%Bildschirmbreite ausserhalb des gueltigen Bereichs"
-#define TEXT211 "Funktion-Liste"
-#define TEXT212 "kann Funktion-Liste nicht anzeigen"
-#define TEXT213 "[Funktion-Liste wird aufgebaut...]"
-#define TEXT214 "%%No such file as %s"
-#define TEXT215 ": definiere Makro fuer Funktion "
-#define TEXT216 "Cannot read/write directories!!!"
-#define TEXT217 "[Not available yet under AOS/VS]"
-#define TEXT218 "Append file: "
-#define TEXT219 "%%Macro Failed"
-#define TEXT220 "Line %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x%x"
-#define TEXT221 "Too many groups"
-#define TEXT222 "Group not ended"
-#define TEXT223 "%%Column origin out of range"
-#define TEXT224 "%%Row origin out of range"
-#define TEXT225 "[Switched to screen %s]"
-#define TEXT226 "%%Can not kill an executing buffer"
-#define TEXT227 "\n--- Press any key to Continue ---"
-#define TEXT228 "[Kill ring cleared]"
-#define TEXT229 " in < "
-#define TEXT230 "> at line "
+TDCLDEF char TEXT195[NOSZ_] TINIT_("Kann Kanal zum Terminal nicht oeffnen.\n");
+TDCLDEF char TEXT196[NOSZ_] TINIT_("Kann Terminal-Einstellungen nicht herausfinden.\n");
+TDCLDEF char TEXT197[NOSZ_] TINIT_("Kann Terminal-Einstellungen nicht aendern.\n");
+TDCLDEF char TEXT198[NOSZ_] TINIT_("I/O error (%d,%d)\n");
+TDCLDEF char TEXT199[NOSZ_] TINIT_("[DCL wird gestartet]\r\n");
+TDCLDEF char TEXT200[NOSZ_] TINIT_("[DCL wird aufgerufen]\r\n");
+TDCLDEF char TEXT201[NOSZ_] TINIT_("[Noch nicht unter VMS verfuegbar]");
+TDCLDEF char TEXT202[NOSZ_] TINIT_("Terminal-Typ weder 'vt52' noch 'z19' !");
+TDCLDEF char TEXT203[NOSZ_] TINIT_("Fenster-Nummer ausserhalb des zulaessigen Bereichs");
+TDCLDEF char TEXT204[NOSZ_] TINIT_("Kann dieses Fenster nicht loeschen");
+TDCLDEF char TEXT205[NOSZ_] TINIT_("Kann ein %d-Zeilen-Fenster nicht weiter teilen");
+TDCLDEF char TEXT206[NOSZ_] TINIT_("Nur ein Fenster");
+TDCLDEF char TEXT207[NOSZ_] TINIT_("Unmoegliche Aenderung");
+TDCLDEF char TEXT208[NOSZ_] TINIT_("[Kein solches Fenster existiert]");
+TDCLDEF char TEXT209[NOSZ_] TINIT_("%%Bildschirmgroesse ausserhalb des gueltigen Bereichs");
+TDCLDEF char TEXT210[NOSZ_] TINIT_("%%Bildschirmbreite ausserhalb des gueltigen Bereichs");
+TDCLDEF char TEXT211[NOSZ_] TINIT_("Funktion-Liste");
+TDCLDEF char TEXT212[NOSZ_] TINIT_("kann Funktion-Liste nicht anzeigen");
+TDCLDEF char TEXT213[NOSZ_] TINIT_("[Funktion-Liste wird aufgebaut...]");
+TDCLDEF char TEXT214[NOSZ_] TINIT_("%%No such file as %s");
+TDCLDEF char TEXT215[NOSZ_] TINIT_(": definiere Makro fuer Funktion ");
+TDCLDEF char TEXT216[NOSZ_] TINIT_("Cannot read/write directories!!!");
+TDCLDEF char TEXT217[NOSZ_] TINIT_("[Not available yet under AOS/VS]");
+TDCLDEF char TEXT218[NOSZ_] TINIT_("Append file: ");
+TDCLDEF char TEXT219[NOSZ_] TINIT_("%%Macro Failed");
+TDCLDEF char TEXT220[NOSZ_] TINIT_("Line %D/%D Col %d/%d Char %D/%D (%d%%) char = 0x%x%x");
+TDCLDEF char TEXT221[NOSZ_] TINIT_("Too many groups");
+TDCLDEF char TEXT222[NOSZ_] TINIT_("Group not ended");
+TDCLDEF char TEXT223[NOSZ_] TINIT_("%%Column origin out of range");
+TDCLDEF char TEXT224[NOSZ_] TINIT_("%%Row origin out of range");
+TDCLDEF char TEXT225[NOSZ_] TINIT_("[Switched to screen %s]");
+TDCLDEF char TEXT226[NOSZ_] TINIT_("%%Can not kill an executing buffer");
+TDCLDEF char TEXT227[NOSZ_] TINIT_("\n--- Press any key to Continue ---");
+TDCLDEF char TEXT228[NOSZ_] TINIT_("[Kill ring cleared]");
+TDCLDEF char TEXT229[NOSZ_] TINIT_(" in < ");
+TDCLDEF char TEXT230[NOSZ_] TINIT_("> at line ");
 
-#define TEXT240 "[No such screen]"
-#define TEXT241 "%%Can't delete current screen"
-#define TEXT242 "Find Screen: "
-#define TEXT243 "Delete Screen: "
-#define TEXT244 "%%Funktion '%s' ist nicht verfuegbar"
-#define TEXT245 "%%Division durch Null ist nicht moeglich"
-#define TEXT246 "%%Need function key number"
-#define TEXT247 "%%Function key number out of range"
-#define TEXT248 "Enter Label String: "
-#define TEXT249 "Global variable to declare: "
-#define TEXT250 "Local variable to declare: "
+/**TODO: Translate to German**/
+TDCLDEF char TEXT231[NOSZ_] TINIT_("Abbreviation to set: ");
+TDCLDEF char TEXT232[NOSZ_] TINIT_("Abbreviation to delete: ");
+TDCLDEF char TEXT233[NOSZ_] TINIT_("[Building Abbreviation list]");
+TDCLDEF char TEXT234[NOSZ_] TINIT_("Abbreviation list");
+TDCLDEF char TEXT235[NOSZ_] TINIT_("Can not display abbreviation list");
+TDCLDEF char TEXT236[NOSZ_] TINIT_("Define Abbreviations in buffer");
+/**=========================**/
+
+TDCLDEF char TEXT240[NOSZ_] TINIT_("[No such screen]");
+TDCLDEF char TEXT241[NOSZ_] TINIT_("%%Can't delete current screen");
+TDCLDEF char TEXT242[NOSZ_] TINIT_("Find Screen: ");
+TDCLDEF char TEXT243[NOSZ_] TINIT_("Delete Screen: ");
+TDCLDEF char TEXT244[NOSZ_] TINIT_("%%Funktion '%s' ist nicht verfuegbar");
+TDCLDEF char TEXT245[NOSZ_] TINIT_("%%Division durch Null ist nicht moeglich");
+TDCLDEF char TEXT246[NOSZ_] TINIT_("%%Need function key number");
+TDCLDEF char TEXT247[NOSZ_] TINIT_("%%Function key number out of range");
+TDCLDEF char TEXT248[NOSZ_] TINIT_("Enter Label String: ");
+TDCLDEF char TEXT249[NOSZ_] TINIT_("Global variable to declare: ");
+TDCLDEF char TEXT250[NOSZ_] TINIT_("Local variable to declare: ");
 
 /* some of these are just used in the microsoft windows version */
-#define TEXT300 "[Incorrect menu]"
-#define TEXT301 "[Too many nested popup menus]"
-#define TEXT302 "[Lack of resources]"
-#define TEXT303 "Menu: "
-#define TEXT304 "Function: "
-#define TEXT305 "Macro: "
-#define TEXT306 "Menu: "
-#define TEXT307 "Help file: "
-#define TEXT308 "Help key: "
-#define TEXT310 "Alt+"
-#define TEXT311 "Shift+"
-#define TEXT312 "BkSp"
-#define TEXT313 "Tab"
-#define TEXT314 "Enter"
-#define TEXT315 "Esc"
-#define TEXT316 "Ctrl+"
-#define TEXT317 "Home"
-#define TEXT318 "DownArrow"
-#define TEXT319 "UpArrow"
-#define TEXT320 "LeftArrow"
-#define TEXT321 "RightArrow"
-#define TEXT322 "End"
-#define TEXT323 "PageUp"
-#define TEXT324 "PageDown"
-#define TEXT325 "Ins"
-#define TEXT326 "Del"
-#define TEXT327 "F10"
+TDCLDEF char TEXT300[NOSZ_] TINIT_("[Incorrect menu]");
+TDCLDEF char TEXT301[NOSZ_] TINIT_("[Too many nested popup menus]");
+TDCLDEF char TEXT302[NOSZ_] TINIT_("[Lack of resources]");
+TDCLDEF char TEXT303[NOSZ_] TINIT_("Menu: ");
+TDCLDEF char TEXT304[NOSZ_] TINIT_("Function: ");
+TDCLDEF char TEXT305[NOSZ_] TINIT_("Macro: ");
+TDCLDEF char TEXT306[NOSZ_] TINIT_("Menu: ");
+TDCLDEF char TEXT307[NOSZ_] TINIT_("Help file: ");
+TDCLDEF char TEXT308[NOSZ_] TINIT_("Help key: ");
+TDCLDEF char TEXT310[NOSZ_] TINIT_("Alt+");
+TDCLDEF char TEXT311[NOSZ_] TINIT_("Shift+");
+TDCLDEF char TEXT312[NOSZ_] TINIT_("BkSp");
+TDCLDEF char TEXT313[NOSZ_] TINIT_("Tab");
+TDCLDEF char TEXT314[NOSZ_] TINIT_("Enter");
+TDCLDEF char TEXT315[NOSZ_] TINIT_("Esc");
+TDCLDEF char TEXT316[NOSZ_] TINIT_("Ctrl+");
+TDCLDEF char TEXT317[NOSZ_] TINIT_("Home");
+TDCLDEF char TEXT318[NOSZ_] TINIT_("DownArrow");
+TDCLDEF char TEXT319[NOSZ_] TINIT_("UpArrow");
+TDCLDEF char TEXT320[NOSZ_] TINIT_("LeftArrow");
+TDCLDEF char TEXT321[NOSZ_] TINIT_("RightArrow");
+TDCLDEF char TEXT322[NOSZ_] TINIT_("End");
+TDCLDEF char TEXT323[NOSZ_] TINIT_("PageUp");
+TDCLDEF char TEXT324[NOSZ_] TINIT_("PageDown");
+TDCLDEF char TEXT325[NOSZ_] TINIT_("Ins");
+TDCLDEF char TEXT326[NOSZ_] TINIT_("Del");
+TDCLDEF char TEXT327[NOSZ_] TINIT_("F10");
 #define CHAR328 'F'
-#define TEXT329 "SpaceBar"
-#define TEXT330 " - Message history"
-#define TEXT331 "Global modes"
-#define TEXT332 "Modes for buffer: "
-#define TEXT333 "File write in progress. Quit later!"
-#define TEXT334 "[No such directory]"
-#define TEXT335 "Change screen name to: "
-#define TEXT336 "[Screen name already in use]"
-#define TEXT337 "cannot monitor external program"
+TDCLDEF char TEXT329[NOSZ_] TINIT_("SpaceBar");
+TDCLDEF char TEXT330[NOSZ_] TINIT_(" - Message history");
+TDCLDEF char TEXT331[NOSZ_] TINIT_("Global modes");
+TDCLDEF char TEXT332[NOSZ_] TINIT_("Modes for buffer: ");
+TDCLDEF char TEXT333[NOSZ_] TINIT_("File write in progress. Quit later!");
+TDCLDEF char TEXT334[NOSZ_] TINIT_("[No such directory]");
+TDCLDEF char TEXT335[NOSZ_] TINIT_("Change screen name to: ");
+TDCLDEF char TEXT336[NOSZ_] TINIT_("[Screen name already in use]");
+TDCLDEF char TEXT337[NOSZ_] TINIT_("cannot monitor external program");
 
 
 

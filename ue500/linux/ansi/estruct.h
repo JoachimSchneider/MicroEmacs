@@ -252,16 +252,16 @@
 
 /*      Language text options   (pick one)                            */
 #if BEGIN_COMMENT_
-#endif  /*END_COMMENT_*/
-#define ENGLISH 1           /* [default]                              */
-#if BEGIN_COMMENT_
+#define ENGLISH 0           /* [default]                              */
 #define FRENCH  0
 #define SPANISH 0
 #define GERMAN  0
 #define DUTCH   0
 #define PLATIN  0           /* Pig Latin                              */
 #define JAPAN   0
-#define LATIN   0           /* real Latin                             */
+#endif  /*END_COMMENT_*/
+#define LATIN   1           /* real Latin                             */
+#if BEGIN_COMMENT_
 #endif  /*END_COMMENT_*/
 
 /*      Configuration options                                         */
