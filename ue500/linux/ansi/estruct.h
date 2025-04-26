@@ -195,7 +195,6 @@
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
 #endif  /*END_COMMENT_*/
-/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
 /*
  * Non blocking read may be used on UNIX (implemented via the select()
@@ -240,6 +239,7 @@
  */
 /**define USE_NOBLOCK_READ  1**/
 #if USE_NOBLOCK_READ
+/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 # define UNIX_READ_TOUT   (4)
 #endif  /*USE_NOBLOCK_READ*/
 

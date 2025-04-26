@@ -193,12 +193,53 @@
 #define XVT     0           /* XVT windowing system                   */
 #define Z309    0           /* Zenith 100 PC family driver            */
 #endif  /*END_COMMENT_*/
-/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 
-/* *nowait input functions are obsolete now:  */
-#if BEGIN_COMMENT_
-#define UNIX_READ_TOUT  (4)
-#endif  /*END_COMMENT_*/
+/*
+ * Non blocking read may be used on UNIX (implemented via the select()
+ * system call --- if available) and on VMS.
+ *
+ * They are used at exactly one place: If one enters a search string for
+ * one of the search-* functions it will be terminated by META which is
+ * the ESC-character. Now UNIX and VMS use "cooked" input functions,
+ * i.e. they pre-process character sequences from the terminal (e.g.
+ * ANSI-Escape sequences) into MicroEMACS' internal 2-byte character
+ * representation. As nearly all (or indeed all?) of these senquences
+ * start with the ESC-character there arises a problem: MicroEMACS must
+ * stop cooking when a search string is entered. Two possible solutions
+ * to this problem are:
+ *
+ * - If the read routine encounters an ESC-character issue a
+ *   non-blocking read to look if another character follows within
+ *   UNIX_READ_TOUT / 10 seconds:
+ *   + If YES:  Cook
+ *   + Of NO:   Stop cooking (user typed a single ESC possibly ending a
+ *              search string).
+ * - When reading a search string to be terminatd by ESC set the flag
+ *   terminchr (defined in edef.h). Evaluate this flag inside the
+ *   cook-routine in keyboard.
+ *
+ * The two solutions result in different behaviour when the user types
+ * a function key when entering a search string:
+ *
+ * - USE_NOBLOCK_READ == TRUE: It will be ignored silently (don't yet
+ *   understand why).
+ * - USE_NOBLOCK_READ == FALSE: The search string will be terminated
+ *   and the rest of the function key's escape sequence appears as
+ *   user input which is ugly --- but typing a function key when
+ *   entering a search string could be considered as user error.
+ *
+ * We default to USE_NOBLOCK_READ == FALSE (simply by not defining it)
+ * because in this way MicroEMACas may be used on early UNIX systems
+ * without select() system call --- e.g. BSD 4.1.
+ *
+ * Define it here or use `-DUSE_NOBLOCK_READ=1' on the compiler command
+ * line to activate it again.
+ */
+/**define USE_NOBLOCK_READ  1**/
+#if USE_NOBLOCK_READ
+/*      On UNIX only: Terminal read wait time (in 1/10 s)             */
+# define UNIX_READ_TOUT   (4)
+#endif  /*USE_NOBLOCK_READ*/
 
 /*      Windowing system style (pick one)                             */
 
