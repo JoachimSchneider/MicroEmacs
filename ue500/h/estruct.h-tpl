@@ -806,7 +806,16 @@ execl(va_alist)
   } while ( 0 )
 # endif
 #else
-#if b_IS_ANSI_C
+/*======================================================================
+ * - For VAX/VMS see section 6-17 of:
+ *    VAX C Run-Time Library Reference Manual
+ *    Order Number: AI-JP84A-TE
+ *    March 1987
+ *    Operating System and Version: VMS Version 4.6 or higher, or MicroVMS
+ *    Version 4.6 or higher
+ *    Software Version: VAX C Version 2.3
+ *====================================================================*/
+#if ( b_IS_ANSI_C || TURBO || VMS )
 # define  RC_VFPRINTF(rc, fp, format, argp) do  { \
       int *rcp_ = &(rc);                          \
                                                   \
