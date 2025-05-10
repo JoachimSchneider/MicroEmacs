@@ -159,15 +159,23 @@
 # define USE_TERMIOS_TCXX       ( 1 )
 #endif
 #endif
-/* Enable/disable XON/XOFF: We want to use ^S/^Q. I do not believe the flow
- * control settings of the OS should be diddled by an application program. But
- * if you do, change this 1 to a 0, but be warned, all sorts of terminals will
- * get grief with this
+/* Enable/disable XON/XOFF:
+ *
+ * Original comment:
+ *    I do not believe the flow control settings of the OS should be
+ *    diddled by an application program. But if you do, change this 1 to
+ *    a 0, but be warned, all sorts of terminals will get grief
+ *    with this.
+ *
+ * USE_CTL_SQ == 1: OS handles XON/XOFF MicroEMACS can't use ^S/^Q.
+ * USE_CTL_SQ == 0: No OS XON/XOFF, MicroEMACS can use ^S/^Q.
+ * *We* (i./e. MicroEMACS) want to use ^S/^Q (== XOFF/XON), therefor we
+ * set USE_CTL_SQ := 0.
  */
 #if ( DJGPP_DOS )
-# define USE_CTL_SQ               ( 1 )
+# define USE_CTL_SQ   ( 1 ) /* DJGPP doesn't know IXON/IXANY/IXOFF. */
 #else
-# define USE_CTL_SQ               ( 0 )
+# define USE_CTL_SQ   ( 0 )
 #endif
 
 

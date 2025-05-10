@@ -71,8 +71,15 @@ static VOID next_read P1_(int, flag);
 #endif
 /*
         test macro is used to signal errors from system services
-*/
-#define test(s) do { int st; st = (s); if ((st&1)==0) lib$signal( st); } while ( 0 )
+ */
+#define test(s) do {        \
+    int st_ = 0;            \
+                            \
+    st_ = (s);              \
+    if ( (st_ & 1) == 0 ) { \
+        lib$signal(st_);    \
+    }                       \
+} while ( 0 )
 
 /*
         This routine returns a pointer to a descriptor of the supplied
@@ -166,6 +173,8 @@ static int newbrdcst = FALSE;   /* Flag - is message in Emacs buffer yet. */
 #define TYPSIZE 1024            /* Typeahead buffer size, must be several
                                  * times MINREAD */
 
+static int  tt_is_open  = 0;            /* State variable   */
+
 static unsigned char tybuf[TYPSIZE];    /* Typeahead buffer */
 static unsigned tyin, tyout, tylen, tymax;      /* Inptr, outptr, and length */
 
@@ -212,10 +221,10 @@ static short called = 0;        /* TRUE if called from ME$EDIT */
 */
 static long short_time[2] = {-4000000, -1};
 
-static unsigned char tobuf[TYPSIZE];    /* Output buffer */
-static unsigned tolen;          /* Ammount used */
-NOSHARE   TTCHAR orgchar;       /* Original characteristics */
-static TTCHARIOSB orgttiosb;    /* Original IOSB characteristics */
+static unsigned char  tobuf[TYPSIZE]; /* Output buffer              */
+static unsigned       tolen;          /* Ammount used               */
+NOSHARE TTCHAR        orgchar;        /* Orig. characteristics      */
+static TTCHARIOSB     orgttiosb;      /* Orig. IOSB characteristics */
 
 static VOID readast P0_()
 {
@@ -422,6 +431,10 @@ int PASCAL NEAR ttopen P0_()
     char     *waitstr;
     size_t    mbmsg_size = sizeof(mbmsg);
 
+    if ( tt_is_open ) {
+        return 0;
+    }
+
     xstrcpy(os, "VMS");
     tyin = 0;
     tyout = 0;
@@ -528,12 +541,17 @@ int PASCAL NEAR ttopen P0_()
     waitstr = getenv("MICROEMACS$SHORTWAIT");
     if (waitstr)
         short_time[0] = -asc_int(waitstr);
+    tt_is_open  = 1;
 
     return 0;
 }
 
 int PASCAL NEAR ttclose P0_()
 {
+    if ( ! tt_is_open ) {
+        return 0;
+    }
+
     if (tolen > 0) {
         /* Buffer not empty, flush out last stuff */
         test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
@@ -546,6 +564,7 @@ int PASCAL NEAR ttclose P0_()
     if (mbchan)
         test(sys$dassgn(mbchan));
     test(sys$dassgn(vms_iochan));
+    tt_is_open  = 0;
 
     return 0;
 }
@@ -554,10 +573,14 @@ int PASCAL NEAR ttputc P1_(int, c)
 {
     tobuf[tolen++] = c;
     if (tolen >= SIZEOF(tobuf)) {
-        /* Buffer is full, send it out */
-        test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
-                      0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
-        tolen = 0;
+        if ( tt_is_open ) {
+            /* Buffer is full, send it out */
+            test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
+                          0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
+            tolen = 0;
+        } else              {
+            TRC(("ttputc(): Cannot write <%c> --- tt is not open", (char)c));
+        }
     }
 
     return 0;
@@ -565,6 +588,9 @@ int PASCAL NEAR ttputc P1_(int, c)
 
 int PASCAL NEAR ttflush P0_()
 {
+    if ( !tt_is_open )  {
+        return 0;
+    }
     /*
             I choose to ignore any flush requests if there is typeahead
             pending.  Speeds DECNet network operation by leaps and bounds
@@ -641,7 +667,7 @@ unsigned char PASCAL NEAR grabwait P0_()
     return (ret);
 }
 
-# if ( !SMG ) /* Has it's own qin()/qrep()  */
+# if ( !SMG ) /* Has it's own qin()/qrep()/qget() */
 /* QIN:
  *
  * Queue in a character to the input buffer.
@@ -737,6 +763,7 @@ int ttgetc_nowait P0_()
 }
 # endif /*USE_NOBLOCK_READT*/
 
+# if ( !SMG ) /* Has it's own qin()/qrep()/qget() */
 /* QGET:
  *
  * Get characters pending in input queue:
@@ -751,6 +778,7 @@ CONST int *qget P1_(int *, lp)
 
     return (CONST int *)inbufh;
 }
+# endif /* ( !SMG ) */
 
 
 /*

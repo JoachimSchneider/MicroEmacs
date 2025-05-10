@@ -240,7 +240,7 @@
  * Define it here or use `-DUSE_NOBLOCK_READ=1' on the compiler command
  * line to activate it again.
  */
-/**define USE_NOBLOCK_READ  1**/
+/**#define USE_NOBLOCK_READ  1**/
 #if USE_NOBLOCK_READ
 /*      On UNIX only: Terminal read wait time (in 1/10 s)             */
 # define UNIX_READ_TOUT   (4)
