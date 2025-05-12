@@ -153,15 +153,18 @@
 
 /*      Special keyboard/network definitions                          */
 #if BEGIN_COMMENT_
-#define ATKBD   0     /* AT-style keyboard with F11, F12 & grey keys  */
-#define WANGPC  0     /* WangPC - mostly escape sequences             */
-#define KEYPAD  0     /* VMS - turn on and off application            */
+#define ATKBD     0   /* AT-style keyboard with F11, F12 & grey keys  */
+#define WANGPC    0   /* WangPC - mostly escape sequences             */
+#define KEYPAD    0   /* Turn on and off application                  */
                       /* keypad automatically                         */
-#define XONDATA 0     /* VMS - set to force /NOTTSYNC/NOHOSTSY        */
-#define RMSIO   0     /* VMS - skip the rotten C runtime and          */
-                      /* use RMS directly                             */
-#define OPTMEM  0     /* VMS 5.0 and up - use a less standard         */
-                      /* but more efficient memory allocator          */
+#endif  /*END_COMMENT_*/
+#if VMS               /* BEGIN: VMS specific settings                 */
+# define XONDATA  1   /* Set to force /NOTTSYNC/NOHOSTSY              */
+# define RMSIO    1   /* Skip the rotten C runtime: Use RMS directly. */
+# define OPTMEM   0   /* VMS 5.0 and up - use a less standard but     */
+                      /* more efficient memory allocator              */
+#endif  /* VMS */     /* END:   VMS specific settings                 */
+#if BEGIN_COMMENT_
 #endif  /*END_COMMENT_*/
 
 /*      Terminal Output definitions                                   */
@@ -276,7 +279,7 @@
 #define FLABEL  0   /* function key label code [HP150]                */
 #define CRYPT   1   /* file encryption enabled?                       */
 #define MAGIC   1   /* include regular expression matching?           */
-#define MOUSE   1   /* Include routines for mouse actions             */
+#define MOUSE   0   /* Include routines for mouse actions             */
 #define NOISY   1   /* Use a fancy BELL if it exists                  */
 #define CTAGS   1   /* include vi-like tagging?                       */
 #define SPEECH  0   /* spoken EMACS, for the sight impared [not ready]*/

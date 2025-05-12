@@ -536,7 +536,9 @@ static int PASCAL NEAR ansiopen P0_()
         CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_ENABLE");
-        if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
+        if ( !s ) { /* Regular DEC workstation */
+            s = "\033[1)u\033[1;3'{\033[1;2'z";
+        }
         ttputs(s); ttflush();
     }
 # endif /* MOUSE && (b_IS_UNIX || VMS) */
@@ -561,13 +563,21 @@ static int PASCAL NEAR ansiclose P0_()
     ansibcol(0);
 # endif /* COLOR */
 # if     MOUSE && (b_IS_UNIX || VMS)
+   /*
+    * If this is an ansi terminal of at least DEC level 2 capability,
+    * some terminals of this level, such as the "Whack" emulator, the
+    * VWS terminal emulator, and some versions of XTERM, support access
+    * to the workstation mouse via escape sequences. In addition, any
+    * terminal that conforms to level 2 will, at very least, IGNORE the
+    * escape sequences for the mouse.
+    */
     {
         CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_DISABLE");
-
-        if ( !s )               /* Regular DEC workstation */
+        if ( !s ) { /* Regular DEC workstation */
             s = "\033[0'{\033[0;0'z";
+        }
         ttputs(s); ttflush();
     }
 # endif /* MOUSE && (b_IS_UNIX || VMS) */
