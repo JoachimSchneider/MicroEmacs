@@ -2,10 +2,16 @@
 # the MicroEMACS:
 
 $ git clone https://github.com/JoachimSchneider/MicroEMACS
-$ git switch current
-$ cd MicroEMACS/ue500/linux
+# git switch master
+# git switch fixes
+# git switch current
+$ cd MicroEMACS/ue500/linux/ansi
 
 
+# Maybee you should change the language (currently set to latin) to
+# e.g. english.
+$ vi estruct.h
+# If you need to adapt something else
 $ vi makefile
 $ make clean
 $ make
@@ -16,11 +22,11 @@ $ mkdir           /usr/loc/pkg/MicroEMACS/cmd
 $ mkdir           /usr/loc/pkg/MicroEMACS/doc
 $ cp -p emacs     /usr/loc/pkg/MicroEMACS/bin
 $ cp -p .emacsrc  /usr/loc/pkg/MicroEMACS/bin/
-$ cd ../cmd/
+$ cd ../../cmd/
 $ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/cmd && tar -xpf -)
 $ cd ../doc/
 $ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/doc && tar -xpf -)
-$ cd ../linux/
+$ cd ../linux/ansi
 $ cat runemacs
 #!/bin/sh -
 ## CHANGE THIS TO YOUR NEEDS:

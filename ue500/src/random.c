@@ -2469,8 +2469,8 @@ CONST char *cmkvis P1_(char, c)
         case '&':  case '*':  case '(':  case ')':  case '-':  case '_':
         case '=':  case '+':  case '[':  case '{':  case ']':  case '}':
         case '\\': case '|':  case ';':  case ':':  case '\'': case '"':
-        case ',':  case '<':  case '.':  case '/':  case '?':  case '`':
-        case '~':
+        case ',':  case '<':  case '>':  case '.':  case '/':  case '?':
+        case '`':  case '~':
 #if     BEGIN_COMMENT
         case ' ':  case '\t': case '\n': case '\r':
 #endif  /*END_COMMENT*/

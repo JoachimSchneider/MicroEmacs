@@ -1631,7 +1631,7 @@ Compiles on
 
 [2025-04-11.01]
 
-TODOs:
+TODOs:  (All done now --- 2025-06-08)
 - adapt the estruct.h files
 - Test compile on
   + FreeBSD
@@ -1644,7 +1644,7 @@ TODOs:
 
 #============================== TODO LIST ==============================
 
-- Windows and DJGPP emacs sets \\<host>\<share>\<file> arguments to read-only.
+- Windows and DJGPP emacs sets \\<host>\<share>\<file> arguments to read-only.  ===> DONE
 - Allow empty replacement string on repeated query-replace.
 - Make 'Ctrl-X,#' (filter-buffer) redoable.
 - Understand hilite/highlight Code in edef.h, display.c, eval.c mouse.c, search.c
