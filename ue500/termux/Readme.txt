@@ -1,6 +1,7 @@
 MicroEMACS for Termux on Android
 ================================
 
+
 * To compile one needs a Termux environment including gcc, git and make.
 
 * The estruct.h file simply masks Termux as FeeBSD.
@@ -13,6 +14,9 @@ MicroEMACS for Termux on Android
 * The .emacsrc provided here configures the M-<Number> keys instead of
   the FN<Number> keys which are used on Unix platforms: Android
   keyboards seem to provide no function keys.
+
+* TODOs:
+  - ...
 
 
 # EOF

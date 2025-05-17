@@ -273,7 +273,7 @@ bind-to-key hunt-forward                M-3
 bind-to-key hunt-backward               M-4
 macro-to-key toggle-fkeys               M-5
 macro-to-key get-help                   M-6
-bind-to-key next-window                 M-7
+bind-to-key find-file                   M-7
 macro-to-key get-page-loader            M-8
 bind-to-key save-file                   M-9
 bind-to-key exit-emacs                  M-0
@@ -282,11 +282,11 @@ bind-to-key exit-emacs                  M-0
 
         1 split-current-window
         1 select-buffer "Function Keys"
-        insert-string "M-1 search-> M-2 <-search |    MicroEMACS:  Text Editor~n"
-        insert-string "M-3 hunt->   M-4 <-hunt   | ~n"
-        insert-string "M-5 fkeys    M-6 help     |  Available function key Pages include:~n"
-        insert-string "M-7 nxt wind M-8 pg[    ] |    Word  Box  Emacs  Pascal  C  cObol Lisp~n"
-        insert-string "M-9 save     M-0 exit     |  [use the M-8 key to load Pages]~n"
+        insert-string "M1 search-> M2 <-search|  MicroEMACS:  Text Editor~n"
+        insert-string "M3 hunt->   M4 <-hunt  |~n"
+        insert-string "M5 fkeys    M6 help    |Available function key Pages:~n"
+        insert-string "M7 find-fil M8 pg[    ]| Word Emacs Pascal C cObol Lisp~n"
+        insert-string "M9 save     M0 exit    |[use the M8 key to load Pages]~n"
         unmark-buffer
         delete-window
         set %rcfkeys FALSE
