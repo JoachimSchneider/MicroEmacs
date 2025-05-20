@@ -71,10 +71,11 @@ int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 int PASCAL NEAR deskey P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER int        c;                /* key to describe                        */
-    REGISTER CONST char *ptr;             /* string pointer to scan output strings  */
+    REGISTER int        c     = '\0';     /* key to describe                        */
+    REGISTER CONST char *ptr  = NULL;     /* string pointer to scan output strings  */
     char                outseq[NSTRING];  /* output buffer for command sequence     */
 
+    ZEROMEM(outseq);
     /* prompt the user to type us a key to describe */
     mlwrite(TEXT13);
 /*      ": describe-key " */
