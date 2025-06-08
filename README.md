@@ -454,9 +454,6 @@ modern Linux and FreeBSD systems:
   + Borland C++
   + MSC
 - UTF-8 support
-- Try to compile on *really old* compilers (Pre-ANSI-C with varargs.h
-  only --- set VARG to TRUE in eproto.h). First (successful) tests were
-  done on AIX5.
 
 
 
