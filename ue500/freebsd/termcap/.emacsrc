@@ -80,7 +80,7 @@ set $posflag TRUE
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
 ;set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
 set $wchars "\\abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_"
-; Added `\' to wchars because it may be used for uemacs abbrevs while `@' may not.
+; Added `\' to wchars because it may be used for emacs abbrevs while `@' may not.
 ; Default paragraph indent used with fill-*
 set $parindent 0
 ; Default is " \t" which means that indents are recognized as BOP.
@@ -326,11 +326,11 @@ bind-to-key exit-emacs                  FN0
 ; Local additions
 ;===============================================================================
 store-procedure get-abbrevs
-        !if &seq &find .uemacs-abbrevs ""
-                write-message "[Can not find .uemacs-abbrevs]"
+        !if &seq &find .emacs-abbrevs ""
+                write-message "[Can not find .emacs-abbrevs]"
                 !return
         !endif
-        execute-file .uemacs-abbrevs
+        execute-file .emacs-abbrevs
 !endm
 execute-procedure get-abbrevs
 

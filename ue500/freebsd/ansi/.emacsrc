@@ -342,11 +342,11 @@ bind-to-key exit-emacs                  FN0
 ; Local additions
 ;===============================================================================
 store-procedure get-abbrevs
-        !if &seq &find .uemacs-abbrevs ""
-                write-message "[Can not find .uemacs-abbrevs]"
+        !if &seq &find .emacs-abbrevs ""
+                write-message "[Can not find .emacs-abbrevs]"
                 !return
         !endif
-        execute-file .uemacs-abbrevs
+        execute-file .emacs-abbrevs
 !endm
 execute-procedure get-abbrevs
 

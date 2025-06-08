@@ -47,11 +47,11 @@ VOID dumpscreens P1_(char *, msg)
 
 #if     WINDOW_TEXT
 
-/* refresh_screen:
+/* rdw_screen:
  *
  * Redraw given screen and all screens behind it
  */
-VOID PASCAL NEAR refresh_screen P1_(SCREEN_T *, sp)
+VOID PASCAL NEAR rdw_screen P1_(SCREEN_T *, sp)
 /* sp:  Screen image to refresh */
 {
     /* if we are suppressing redraws */
@@ -71,7 +71,7 @@ VOID PASCAL NEAR refresh_screen P1_(SCREEN_T *, sp)
 
     /* if there are others below, defer to them first */
     if ( sp->s_next_screen )
-        refresh_screen(sp->s_next_screen);
+        rdw_screen(sp->s_next_screen);
 
     select_screen(sp, FALSE);
     update(TRUE);
@@ -113,7 +113,7 @@ int PASCAL NEAR find_screen P2_(int, f, int, n)
         /* "Find Screen: " */
         return result;
     }
-    sp = lookup_screen(scr_name);
+    sp = lkp_screen(scr_name);
 
     if ( sp == (SCREEN_T *)NULL ) {
 
@@ -198,7 +198,7 @@ int PASCAL NEAR delete_screen P2_(int, f, int, n)
         /* "Delete Screen: " */
         return result;
     }
-    sp = lookup_screen(scr_name);
+    sp = lkp_screen(scr_name);
 
     /* make sure it exists... */
     if ( sp == (SCREEN_T *)NULL ) {
@@ -217,7 +217,7 @@ int PASCAL NEAR delete_screen P2_(int, f, int, n)
     unlist_screen(sp);
     free_screen(sp);
 #if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 #endif
 
     return (TRUE);
@@ -321,9 +321,11 @@ SCREEN_T *PASCAL NEAR init_screen P2_(CONST char *, scr_name,
     return (sp);
 }
 
-/* LOOKUP_SCREEN:
+/* LKP_SCREEN:
+ *
+ *  lookup screen
  */
-SCREEN_T *PASCAL NEAR lookup_screen P1_(CONST char *, scr_name)
+SCREEN_T *PASCAL NEAR lkp_screen P1_(CONST char *, scr_name)
 /* scr_name:  Named screen to find  */
 {
     SCREEN_T *result;
@@ -409,7 +411,7 @@ int PASCAL NEAR select_screen P2_(SCREEN_T *, sp, int, announce)
     curwp->w_flag |= WFMODE;
     update(FALSE);
 #else
-    update_size();
+    upt_size();
     upwind();
 #endif
     if ( announce ) {
@@ -535,7 +537,7 @@ int PASCAL NEAR rename_screen P2_(int, f, int, n)
         return (result);
     }
 
-    if ( lookup_screen(scr_name) != (SCREEN_T*)NULL ) {
+    if ( lkp_screen(scr_name) != (SCREEN_T*)NULL ) {
         mlwrite(TEXT336);
 
 /*          "[Screen name already in use]" */

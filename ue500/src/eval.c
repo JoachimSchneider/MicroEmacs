@@ -20,7 +20,7 @@
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
-#include "evar.h"
+#include "evar.inc"
 
 
 #define RETURN  STATIC_STR_RET_RETURN
@@ -262,7 +262,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 #endif
 
     case UFGTCMD:
-        RETURN ( cmdstr(getcmd(), result) );
+        RETURN ( getecnam(getcmd(), result, SIZEOF(result)) );
 
     case UFGTKEY:
         result[0] = tgetc();
@@ -638,7 +638,7 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
         RETURN ( ltos(hscroll) );
 
     case EVISTERM:
-        RETURN ( cmdstr(isterm, result) );
+        RETURN ( getecnam(isterm, result, SIZEOF(result)) );
 
     case EVKILL:
         RETURN ( getkill() );
@@ -768,7 +768,7 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
         RETURN ( ltos(cmdstatus) );
 
     case EVSTERM:
-        RETURN ( cmdstr(sterm, result) );
+        RETURN ( getecnam(sterm, result, SIZEOF(result)) );
 
     case EVTARGET:
         saveflag = lastflag;
@@ -1188,7 +1188,7 @@ fvar:   vtype = -1;
         for ( vnum = 0; vnum < vut->size; vnum++ )
             if ( vut->uv[vnum].u_name[0] == 0 ) {
                 vtype = TKVAR;
-                memset( (char *)&vut->uv[vnum].u_name[0], '\0', NVSIZE );
+                umc_memset( (char *)&vut->uv[vnum].u_name[0], '\0', NVSIZE );
                 xstrncpy(vut->uv[vnum].u_name, &var[1], NVSIZE);
                 vut->uv[vnum].u_value = NULL;
                 break;
@@ -1346,11 +1346,11 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
             break;
 
         case EVDESKCLR:
-            c = lookup_color( mkupper(valueL) );
+            c = lkp_color( mkupper(valueL) );
             if ( c != -1 ) {
                 deskcolor = c;
 #if     WINDOW_TEXT
-                refresh_screen(first_screen);
+                rdw_screen(first_screen);
 #endif
             }
             break;
@@ -1574,7 +1574,7 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
             break;
 
         case EVSCRNAME:
-            select_screen(lookup_screen(valueL), TRUE);
+            select_screen(lkp_screen(valueL), TRUE);
             break;
 
         case EVSEARCH:

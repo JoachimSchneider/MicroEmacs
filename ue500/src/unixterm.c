@@ -1,0 +1,1860 @@
+/*======================================================================
+ *      UNIX:   Unix specific terminal driver
+ *              for MicroEMACS 4.0
+ *      (C)Copyright 1995 D. Lawrence, C. Smith
+ *
+ *----------------------------------------------------------------------
+ *
+ *      New features: (as of version 3.10)
+ *
+ *      1. Timeouts waiting on a function key have been changed from
+ *      35000 to 500000 microseconds.
+ *
+ *      2. Additional keymapping entries can be made from the command
+ *      language by issuing a 'set $palette xxx'.  The format of
+ *      xxx is a string as follows:
+ *              "KEYMAP keybinding escape-sequence".
+ *      To add "<ESC><[><A>" as a keybinding of FNN, issue:
+ *              "KEYMAP FNN ~e[A".
+ *      Note that the "~e" sequence represents the escape character in
+ *      the MicroEMACS command language.
+ *
+ *      3. Colors are supported.  Under AIX the colors will be pulled
+ *      in automaticly.  For other environments, you can either add
+ *      the termcap entries, C0 to D7.  Or the colors may be defined
+ *      using the command language by issuing a 'set $palette xxx'
+ *      command.  The format of xxx is a string as follows:
+ *              "CLRMAP # escape-sequence".
+ *      The number is a number from 0 to 15, where 0 to 7 is the
+ *      foreground colors, and 8 to 15 as background colors.
+ *      To add foreground color 0 for ansi terminals, issue:
+ *              "CLRMAP 0 ~e[30m".
+ *
+ *      'Porting notes:
+ *
+ *      I have tried to create this file so that it should work
+ *      as well as possible without changes on your part.
+ *
+ *      However, if something does go wrong, read the following
+ *      helpful hints:
+ *
+ *      1. On SUN-OS4, there is a problem trying to include both
+ *      the termio.h and ioctl.h files.  I wish Sun would get their
+ *      act together.  Even though you get lots of redefined messages,
+ *      it shouldn't cause any problems with the final object.
+ *
+ *      2. In the type-ahead detection code, the individual UNIX
+ *      system either has a FIONREAD or a FIORDCHK ioctl call.
+ *      Hopefully, your system uses one of them and this be detected
+ *      correctly without any intervention.
+ *
+ *      3. Also lookout for directory handling.  The SCO Xenix system
+ *      is the weirdest I've seen, requiring a special load file
+ *      (see below).  Some machine call the result of a readdir() call
+ *      a "struct direct" or "struct dirent".  Includes files are
+ *      named differently depending of the O/S.  If your system doesn't
+ *      have an opendir()/closedir()/readdir() library call, then
+ *      you should use the public domain utility "ndir".
+ *
+ *      To compile:
+ *              Compile all files normally.
+ *      To link:
+ *              Select one of the following operating systems:
+ *                      SCO Xenix:
+ *                              use "-ltermcap" and "-lx";
+ *                      SUN 3 and 4:
+ *                              use "-ltermcap";
+ *                      IBM-RT, IBM-AIX, ATT UNIX, Altos UNIX, Interactive:
+ *                              use "-lcurses".
+ *
+ *      - 20 feb 95     New version 4.00 features
+ *        We added new code to implient a TERMIOS driver
+ *====================================================================*/
+
+/*====================================================================*/
+#define UNIXTERM_C_
+/*====================================================================*/
+
+/*====================================================================*/
+/*       1         2         3         4         5         6         7*/
+/*34567890123456789012345678901234567890123456789012345678901234567890*/
+/*====================================================================*/
+
+
+/*==============================================================*/
+/* Include files                                                */
+/*==============================================================*/
+#include "estruct.h"            /* Emacs definitions            */
+#include "eproto.h"             /* Function definitions         */
+#include "edef.h"               /* Global variable definitions  */
+#include "elang.h"              /* Language definitions         */
+/*==============================================================*/
+
+
+/*==============================================================*/
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_TERMINAL_NOBLOCK_READ=USE_TERMINAL_SELECT      */
+/* for BSD 4.2 and later.                                       */
+/*==============================================================*/
+/* Several different methods to do noblocking read from a terminal:
+ *
+ * - VMIN/VTIME setting of the terminal attributes.
+ * - The `select()' system call:
+ *   This *must* be used with CygWin or DJGPP's setting VMIN/VTIME won't
+ *   work with CygWin or DJGPP.
+ * - As a substitute one may try the readx() implemented here.
+ *
+ * If these settings do not work properly the  termination of search
+ * strings with <META> is not working (two <META>s needed).
+ */
+#define USE_TERMINAL_VTIME  (1)
+#define USE_TERMINAL_SELECT (2)
+#define USE_TERMINAL_READX  (3)
+
+#ifndef SWITCH_TERMINAL_NOBLOCK_READ
+# if    ( CYGWIN || DJGPP_DOS )
+#  define SWITCH_TERMINAL_NOBLOCK_READ  USE_TERMINAL_SELECT
+# else
+# if  ( b_IS_ANCIENT_UNIX )
+#  define SWITCH_TERMINAL_NOBLOCK_READ  USE_TERMINAL_READX
+# else
+#  define SWITCH_TERMINAL_NOBLOCK_READ  USE_TERMINAL_SELECT
+# endif
+# endif
+#endif
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+#else
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+#else
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+#else
+  CRASH(Invalid value for SWITCH_TERMINAL_NOBLOCK_READ);
+#endif
+#endif
+#endif
+/*==============================================================*/
+
+
+/*==============================================================*/
+/* FEATURES                                                     */
+/*==============================================================*/
+/* Accordung to R. Stevens curses should contain some functions */
+/* for terminal control, but obviously they aren't used here    */
+/* correctly: It seems, that someone started it but didn't end. */
+#define USE_CURSES              ( 0 )   /* NOT WORKING */
+#if ( b_IS_ANCIENT_UNIX )
+# define USE_SGTTY              ( 1 )
+# define USE_TERMIO_IOCTL       ( 0 )
+# define USE_TERMIOS_TCXX       ( 0 )
+#else
+#if ( !b_IS_POSIX_UNIX )
+# define USE_SGTTY              ( 0 )
+# define USE_TERMIO_IOCTL       ( 1 )
+# define USE_TERMIOS_TCXX       ( 0 )
+#else
+# define USE_SGTTY              ( 0 )
+# define USE_TERMIO_IOCTL       ( 0 )
+# define USE_TERMIOS_TCXX       ( 1 )
+#endif
+#endif
+/* Enable/disable XON/XOFF:
+ *
+ * Original comment:
+ *    I do not believe the flow control settings of the OS should be
+ *    diddled by an application program. But if you do, change this 1 to
+ *    a 0, but be warned, all sorts of terminals will get grief
+ *    with this.
+ *
+ * USE_CTL_SQ == 1: OS handles XON/XOFF MicroEMACS can't use ^S/^Q.
+ * USE_CTL_SQ == 0: No OS XON/XOFF, MicroEMACS can use ^S/^Q.
+ * *We* (i./e. MicroEMACS) want to use ^S/^Q (== XOFF/XON), therefor we
+ * set USE_CTL_SQ := 0.
+ */
+#if ( DJGPP_DOS )
+# define USE_CTL_SQ   ( 1 ) /* DJGPP doesn't know IXON/IXANY/IXOFF. */
+#else
+# define USE_CTL_SQ   ( 0 )
+#endif
+
+
+/*==============================================================*/
+
+
+/** Do nothing routine **/
+int unixterm0 P1_(char *, s)
+{
+    return (0);
+}
+
+/** Only compile for UNIX machines **/
+#if ( b_IS_UNIX )
+
+
+/*==============================================================*/
+/* Include files                                                */
+/*==============================================================*/
+
+/*==============================================================*/
+# if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+#  if ( b_IS_ANCIENT_UNIX )
+#   ifndef FD_ZERO
+#    define FD_ZERO(x)    ( ZEROMEM(*(x)) )
+#   endif
+#   ifndef FD_SET
+#    define FD_SET(fd, x) ( (x)->fds_bits[0] |= (1<<(fd)) )
+#   endif
+#  endif
+   /* select() prototype in time.h */
+#  if ( !DJGPP_DOS && !b_IS_ANCIENT_UNIX )
+#   include <sys/select.h>
+#  endif
+#  include <sys/time.h>
+# endif
+
+# if   ( USE_SGTTY )
+#  include <sgtty.h>                    /* stty() / gtty()          */
+# else
+# if ( USE_TERMIO_IOCTL )
+#  include <termio.h>                   /* Terminal I/O definitions */
+# else
+# if ( USE_TERMIOS_TCXX )
+#  include <termios.h>                  /* Terminal I/O definitions */
+# else
+# if ( USE_CURSES )
+#  include <curses.h>                   /* Curses screen output     */
+#  undef WINDOW                         /* Oh no!                   */
+# else
+   CRASH(error MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
+# endif
+/* Include it *after* sgtty.h to make it compilable on Solaris 7:   */
+# include <sys/ioctl.h>                 /* I/O control definitions  */
+/*==============================================================*/
+
+/*==============================================================*/
+# include <signal.h>                    /* Signal definitions       */
+# if ( !b_IS_ANCIENT_UNIX )
+#  include <unistd.h>
+# else
+   EXTERN int           ioctl   DCL((int, int, ...));
+   EXTERN int           read    DCL((int, char *, int));
+   EXTERN int           write   DCL((int, CONST char *, int));
+   EXTERN int           getpid  DCL((void));
+   EXTERN int           gtty    DCL((int, struct sgttyb *));
+   EXTERN int           stty    DCL((int, struct sgttyb *));
+# endif
+
+/*==============================================================*/
+
+/*==============================================================*/
+/* Found in `curses.h':                                         */
+/*==============================================================*/
+# if ( !USE_CURSES )
+#  if !ANSI
+EXTERN int  tgetflag            DCL((char *id));
+EXTERN int  tgetnum             DCL((char *id));
+EXTERN int  tgetent             DCL((char *bp, CONST char *name));
+EXTERN char *tgetstr            DCL((char *, char **));
+EXTERN char *tgoto              DCL((CONST char *cap, int col, int row));
+EXTERN int  tputs               DCL((CONST char *str, int affcnt, int (*putc)(int)));
+#  endif  /* !ANSI */
+# endif /* !USE_CURSES */
+# if ANSI
+EXTERN VOID PASCAL NEAR ttputs  DCL((CONST char *string));
+# endif /* ANSI */
+/*==============================================================*/
+
+
+/*====================================================================*/
+/* Static functions declared here:                                    */
+/*====================================================================*/
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+static int  rdstdin       DCL((int getnread));
+# define nread()  ( rdstdin(1) )
+# define readx()  ( rdstdin(0)  )
+#endif
+/*====================================================================*/
+
+
+/*==============================================================*/
+#define   TGETFLAG(x)     tgetflag((char *)(x))
+#define   TGETNUM(x)      tgetnum((char *)(x))
+# if VAT
+#  define TGETSTR(a, b)   tgetstr( (char *)(a), *(b) )
+# else
+#  define TGETSTR(a, b)   tgetstr( (char *)(a), (b) )
+# endif
+
+
+/*==============================================================*/
+/* Restore predefined definitions                               */
+/*--------------------------------------------------------------*/
+/* Kill predefined: Problems with CTRF                          */
+/*==============================================================*/
+# undef CTRF                            /* Restore CTRF               */
+# define CTRF 0x0100
+
+/** Parameters **/
+# define NINCHAR         64             /* Input buffer size          */
+# define NOUTCHAR        256            /* Output buffer size         */
+# define NCAPBUF         1024           /* Termcap storage size       */
+# define MARGIN          8              /* Margin size                */
+# define SCRSIZ          64             /* Scroll for margin          */
+# define NPAUSE          10           /* # times thru update to pause */
+
+/** Type definitions **/
+struct capbind {                        /* Capability binding entry   */
+    CONST char  *name;                  /* Termcap name               */
+    char        *store;                 /* Storage variable           */
+};
+struct keybind {                        /* Keybinding entry           */
+    CONST char  *name;                  /* Termcap name               */
+    int         value;                  /* Binding value              */
+};
+
+/** Local variables **/
+# if   ( USE_SGTTY )
+static struct sgttyb  curterm;          /* Current modes              */
+static struct sgttyb  oldterm;          /* Original modes             */
+/*======================================================================
+UNIX V7:
+/o
+ o List of special characters
+ o/
+struct tchars {
+        char    t_intrc;        /o interrupt o/
+        char    t_quitc;        /o quit o/
+        char    t_startc;       /o start output o/
+        char    t_stopc;        /o stop output o/
+        char    t_eofc;         /o end-of-file o/
+        char    t_brkc;         /o input delimiter (like nl) o/
+};
+======================================================================*/
+/* Define your own structure to make it compilable on e.g. Solaris 7: */
+struct xtchars  {
+        char    t_intrc;        /* interrupt */
+        char    t_quitc;        /* quit */
+        char    t_startc;       /* start output */
+        char    t_stopc;        /* stop output */
+        char    t_eofc;         /* end-of-file */
+        char    t_brkc;         /* input delimiter (like nl) */
+};
+/*====================================================================*/
+/* Define your own constants to make it compilable on e.g. Solaris 7: */
+#  define TERM_IOC_  ('t'<<8)
+
+#  ifndef   TIOCSETC
+#   define TIOCSETC  (TERM_IOC_|17)
+#  endif
+#  ifndef  TIOCGETC
+#   define TIOCGETC  (TERM_IOC_|18)
+#  endif
+/*====================================================================*/
+
+
+static struct xtchars curtchars = { 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF };
+static struct xtchars oldtchars;        /* Org terminal special chars */
+# else
+# if ( USE_TERMIO_IOCTL )
+static struct termio curterm;           /* Current modes              */
+static struct termio oldterm;           /* Original modes             */
+# else
+# if ( USE_TERMIOS_TCXX )
+static struct termios curterm;          /* Current modes              */
+static struct termios oldterm;          /* Original modes             */
+# else
+# if ( USE_CURSES )
+# else
+   CRASH(MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
+# endif
+# if !ANSI
+static char tcapbuf[NCAPBUF];           /* Termcap character storage  */
+# endif /* !ANSI */
+# define CAP_CL          0              /* Clear to end of page       */
+# define CAP_CM          1              /* Cursor motion              */
+# define CAP_CE          2              /* Clear to end of line       */
+# define CAP_SE          3              /* Standout ends              */
+# define CAP_SO          4              /* Standout (reverse video)   */
+# define CAP_IS          5              /* Initialize screen          */
+# define CAP_KS          6              /* Keypad mode starts         */
+# define CAP_KE          7              /* Keypad mode ends           */
+# define CAP_VB          8              /* Visible bell               */
+# if COLOR
+#  define CAP_C0          9             /* Foreground color #0        */
+#  define CAP_C1          10            /* Foreground color #1        */
+#  define CAP_C2          11            /* Foreground color #2        */
+#  define CAP_C3          12            /* Foreground color #3        */
+#  define CAP_C4          13            /* Foreground color #4        */
+#  define CAP_C5          14            /* Foreground color #5        */
+#  define CAP_C6          15            /* Foreground color #6        */
+#  define CAP_C7          16            /* Foreground color #7        */
+#  define CAP_D0          17            /* Background color #0        */
+#  define CAP_D1          18            /* Background color #1        */
+#  define CAP_D2          19            /* Background color #2        */
+#  define CAP_D3          20            /* Background color #3        */
+#  define CAP_D4          21            /* Background color #4        */
+#  define CAP_D5          22            /* Background color #5        */
+#  define CAP_D6          23            /* Background color #6        */
+#  define CAP_D7          24            /* Background color #7        */
+#  if ( USG || AIX || AUX )
+#   define CAP_SF          25           /* Set foreground color       */
+#   define CAP_SB          26           /* Set background color       */
+#  endif /* USG || AIX || AUX */
+# endif /* COLOR */
+# if !ANSI
+static struct capbind capbind[] =       /* Capability binding list    */
+{
+    { "cl" },                           /* Clear to end of page       */
+    { "cm" },                           /* Cursor motion              */
+    { "ce" },                           /* Clear to end of line       */
+    { "se" },                           /* Standout ends              */
+    { "so" },                           /* Standout (reverse video)   */
+    { "is" },                           /* Initialize screen          */
+    { "ks" },                           /* Keypad mode starts         */
+    { "ke" },                           /* Keypad mode ends           */
+    { "vb" },                           /* Visible bell               */
+# if COLOR
+    { "c0" },                           /* Foreground color #0        */
+    { "c1" },                           /* Foreground color #1        */
+    { "c2" },                           /* Foreground color #2        */
+    { "c3" },                           /* Foreground color #3        */
+    { "c4" },                           /* Foreground color #4        */
+    { "c5" },                           /* Foreground color #5        */
+    { "c6" },                           /* Foreground color #6        */
+    { "c7" },                           /* Foreground color #7        */
+    { "d0" },                           /* Background color #0        */
+    { "d1" },                           /* Background color #1        */
+    { "d2" },                           /* Background color #2        */
+    { "d3" },                           /* Background color #3        */
+    { "d4" },                           /* Background color #4        */
+    { "d5" },                           /* Background color #5        */
+    { "d6" },                           /* Background color #6        */
+    { "d7" },                           /* Background color #7        */
+#  if ( USG || AIX || AUX )
+    { "Sf" },                           /* Set foreground color       */
+    { "Sb" },                           /* Set background color       */
+#  endif /* USG || AIX || AUX */
+# endif /* COLOR */
+};
+
+# if COLOR
+static int cfcolor = -1;                /* Current forground color    */
+static int cbcolor = -1;                /* Current background color   */
+# endif /* COLOR */
+
+static struct keybind keybind[] =       /* Keybinding list            */
+{
+    { "bt", SHFT|CTRF|'i' },            /* Back-tab key               */
+    { "k1", SPEC|'1' },                 /* F1 key                     */
+    { "k2", SPEC|'2' },                 /* F2 key                     */
+    { "k3", SPEC|'3' },                 /* F3 key                     */
+    { "k4", SPEC|'4' },                 /* F4 key                     */
+    { "k5", SPEC|'5' },                 /* F5 key                     */
+    { "k6", SPEC|'6' },                 /* F6 key                     */
+    { "k7", SPEC|'7' },                 /* F7 key                     */
+    { "k8", SPEC|'8' },                 /* F8 key                     */
+    { "k9", SPEC|'9' },                 /* F9 key                     */
+    { "k0", SPEC|'0' },                 /* F0 or F10 key              */
+    { "k;", SPEC|'0' },                 /* F0 or F10 key    (kjc)     */
+    { "F1", SHFT|SPEC|'1' },            /* Shift-F1 or F11 key        */
+    { "F2", SHFT|SPEC|'2' },            /* Shift-F2 or F12 key        */
+    { "F3", SHFT|SPEC|'3' },            /* Shift-F3 or F13 key        */
+    { "F4", SHFT|SPEC|'4' },            /* Shift-F4 or F14 key        */
+    { "F5", SHFT|SPEC|'5' },            /* Shift-F5 or F15 key        */
+    { "F6", SHFT|SPEC|'6' },            /* Shift-F6 or F16 key        */
+    { "F7", SHFT|SPEC|'7' },            /* Shift-F7 or F17 key        */
+    { "F8", SHFT|SPEC|'8' },            /* Shift-F8 or F18 key        */
+    { "F9", SHFT|SPEC|'9' },            /* Shift-F9 or F19 key        */
+    { "FA", SHFT|SPEC|'0' },            /* Shift-F0 or F20 key        */
+    { "kA", CTRF|'O' },                 /* Insert line key            */
+    { "kb", CTRF|'H' },                 /* Backspace key              */
+    { "kC", CTRF|'L' },                 /* Clear screen key           */
+    { "kD", SPEC|'D' },                 /* Delete character key       */
+    { "kd", SPEC|'N' },                 /* Down arrow key             */
+    { "kE", CTRF|'K' },                 /* Clear to end of line key   */
+    { "kF", CTRF|'V' },                 /* Scroll forward key         */
+    { "kH", SPEC|'>' },                 /* Home down key              */
+    { "@7", SPEC|'>' },                 /* Home down key    (kjc)     */
+    { "kh", SPEC|'<' },                 /* Home key                   */
+    { "kI", SPEC|'C' },                 /* Insert character key       */
+    { "kL", CTRF|'K' },                 /* Delete line key            */
+    { "kl", SPEC|'B' },                 /* Left arrow key             */
+    { "kN", SPEC|'V' },                 /* Next page key              */
+    { "kP", SPEC|'Z' },                 /* Previous page key          */
+    { "kR", CTRF|'Z' },                 /* Scroll backward key        */
+    { "kr", SPEC|'F' },                 /* Right arrow key            */
+    { "ku", SPEC|'P' },                 /* Up arrow key               */
+    { "K1", SPEC|'<' },                 /* Keypad 7 -> Home           */
+    { "K2", SPEC|'V' },                 /* Keypad 9 -> Page Up        */
+    { "K3", ' ' },                      /* Keypad 5                   */
+    { "K4", SPEC|'>' },                 /* Keypad 1 -> End            */
+    { "K5", CTRF|'V' },                 /* Keypad 3 -> Page Down      */
+    { "kw", CTRF|'E' }                  /* End of line                */
+};
+# endif /* !ANSI */
+static int inbuf[NINCHAR];              /* Input buffer               */
+static int * inbufh = inbuf;            /* Head of input buffer       */
+static int * inbuft = inbuf;            /* Tail of input buffer       */
+#if ( 0 )
+#define TRACE_inbuf(where) do  {                                  \
+    int i = 0;                                                    \
+                                                                  \
+    TRC(("%12s: inbuft = %d, inbufh = %d, inbuf = ",              \
+          (char *)(where), (int)(inbuft - inbuf),                 \
+          (int)(inbufh - inbuf)));                                \
+    for ( i = 0; i < NELEM(inbuf) - 1; i++ )  {                   \
+        TRC(("0x%04X, ", inbuf[i]));                              \
+    }                                                             \
+    TRC(("0x%04X\n", inbuf[i]));                                  \
+} while ( 0 )
+#endif
+static unsigned char outbuf[NOUTCHAR];  /* Output buffer              */
+static unsigned char * outbuft = outbuf;/* Output buffer tail         */
+
+
+/** Terminal definition block **/
+# if !ANSI
+static int scmove   DCL((int, int));
+static int scbeep   DCL((void));
+static int sckclose DCL((void));
+static int sckopen  DCL((void));
+static int scopen   DCL((void));
+static int scclose  DCL((void));
+static int sceeol   DCL((void));
+static int sceeop   DCL((void));
+static int screv    DCL((int));
+static int scsetres DCL((char *));
+# if COLOR
+static int scfcol   DCL((int));
+static int scbcol   DCL((int));
+# endif /* COLOR */
+# endif /* ANSI */
+
+# if ( FLABEL )
+static VOID dis_sfk DCL((void));
+static VOID dis_ufk DCL((void));
+# endif
+
+# if  ANSI
+COMMON TERM term;
+# else
+TERM term =
+{
+    120,                        /* Maximum number of rows             */
+    0,                          /* Current number of rows             */
+    132,                        /* Maximum number of columns          */
+    0,                          /* Current number of columns          */
+    0, 0,                       /* upper left corner default screen   */
+    MARGIN,                     /* Margin for extending lines         */
+    SCRSIZ,                     /* Scroll size for extending          */
+    NPAUSE,                     /* # times thru update to pause       */
+    scopen,                     /* Open terminal routine              */
+    scclose,                    /* Close terminal routine             */
+    sckopen,                    /* Open keyboard routine              */
+    sckclose,                   /* Close keyboard routine             */
+    ttgetc,                     /* Get character routine              */
+    ttputc,                     /* Put character routine              */
+    ttflush,                    /* Flush output routine               */
+    scmove,                     /* Move cursor routine                */
+    sceeol,                     /* Erase to end of line routine       */
+    sceeop,                     /* Erase to end of page routine       */
+    sceeop,                     /* Clear the desktop                  */
+    scbeep,                     /* Beep! routine                      */
+    screv,                      /* Set reverse video routine          */
+    scsetres,                   /* Set resolution routine             */
+# if COLOR
+    scfcol,                     /* Set forground color routine        */
+    scbcol,                     /* Set background color routine       */
+# endif /* COLOR */
+# if     INSDEL
+    scinsline,                  /* insert a screen line               */
+    scdelline,                  /* delete a screen line               */
+# endif /* INSDEL */
+};
+# endif /* ANSI */
+
+# if !ANSI
+static int hpterm =0;           /* global flag braindead HP-terminal  */
+# endif
+
+
+/** Open terminal device **/
+int ttopen P0_()
+{
+    XSTRCPY(os, "UNIX");
+# if    ( USE_SGTTY )
+    gtty(0, &oldterm);
+    curterm = oldterm;
+    curterm.sg_flags |= RAW;
+    curterm.sg_flags &= ~(ECHO|CRMOD);
+    stty(0, &curterm);
+    ioctl(0, TIOCGETC, &oldtchars);
+    ioctl(0, TIOCSETC, &curtchars);
+# else
+# if  ( USE_TERMIO_IOCTL )
+
+#  if SMOS
+    /* Extended settings; 890619mhs A3 */
+    set_parm(0, -1, -1);
+#  endif /* SMOS */
+
+    /* Get modes */
+    if ( ioctl(0, TCGETA, &oldterm) ) {
+        perror("Cannot TCGETA");
+
+        return (-1);
+    }
+
+    /* Save to original mode variable */
+    curterm = oldterm;
+
+    /* Set new modes */
+#  if ( USE_CTL_SQ )
+    curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR);
+#  else
+    curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
+#  endif
+    curterm.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
+    curterm.c_cc[VMIN] = 1;
+    curterm.c_cc[VTIME] = 0;
+
+#  if SMOS
+    /****THIS IS A BIG GUESS ON MY PART... the code changed too much between
+     * versions for me to be sure this will work - DML */
+
+    /* Allow multiple (dual) sessions if already enabled */
+    curterm.c_lflag = oldterm.c_lflag & ISIG;
+
+    /* Use old SWTCH char if necessary */
+    if ( curterm.c_lflag != 0 )
+        curterm.c_cc[VSWTCH] = oldterm.c_cc[VSWTCH];
+
+    /* Copy VTI settings    */
+    curterm.c_cc[VTBIT] = oldterm.c_cc[VTBIT];
+
+    /* Extended settings; 890619mhs A3 */
+    set_parm(0, -1, -1);
+#  endif /* SMOS */
+
+    /* Set tty mode */
+    if ( ioctl(0, TCSETA, &curterm) ) {
+        perror("Cannot TCSETA");
+
+        return (-1);
+    }
+# else
+# if  ( USE_TERMIOS_TCXX )
+    /* Get modes */
+    if ( tcgetattr(0, &oldterm) ) {
+        perror("Cannot tcgetattr");
+
+        return (-1);
+    }
+
+    /* Save to original mode variable */
+    curterm = oldterm;
+
+    /* Set new modes */
+#  if ( USE_CTL_SQ )
+    curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR);
+#  else
+    curterm.c_iflag &= ~(INLCR|ICRNL|IGNCR|IXON|IXANY|IXOFF);
+#  endif
+    curterm.c_lflag &= ~(ICANON|ISIG|ECHO|IEXTEN);
+    curterm.c_cc[VMIN] = 1;
+    curterm.c_cc[VTIME] = 0;
+#  ifdef  VLNEXT
+    curterm.c_cc[VLNEXT] = -1;
+#  endif
+
+    /* Set tty mode */
+    if ( tcsetattr(0, TCSANOW, &curterm) ) {
+        perror("Cannot tcsetattr");
+
+        return (-1);
+    }
+# else
+# if  ( USE_CURSES )
+    /* ? */
+# else
+   CRASH(error MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
+# endif
+
+    /* Success */
+    return (0);
+}
+
+/** Close terminal device **/
+int ttclose P0_()
+{
+    /* Restore original terminal modes */
+    if ( termreset != (char*)NULL ) {
+        write( 1, termreset, STRLEN(termreset) );
+    }
+
+# if    ( USE_SGTTY )
+    stty(0, &oldterm);
+    ioctl(0, TIOCSETC, &oldtchars);
+# else
+# if  ( USE_TERMIO_IOCTL )
+#  if SMOS
+    /* Extended settings; 890619mhs A3 */
+    set_parm(0, -1, -1);
+#  endif /* SMOS */
+    if ( ioctl(0, TCSETA, &oldterm) ) {
+        return (-1);
+    }
+
+# else
+# if  ( USE_TERMIOS_TCXX )
+    /* Set tty mode */
+    if ( tcsetattr(0, TCSANOW, &oldterm) ) {
+        perror("Cannot tcsetattr");
+
+        return (-1);
+    }
+# else
+# if  ( USE_CURSES )
+    /* ? */
+# else
+   CRASH(MISSING TERMINAL CONTROL DEFINITION);
+# endif
+# endif
+# endif
+# endif
+
+    /* Success */
+    return (0);
+}
+
+/** Flush output buffer to display **/
+int ttflush P0_()
+{
+# if ( !USE_CURSES )
+    int len;
+
+    /* Compute length of write */
+    len = outbuft - outbuf;
+    if ( len == 0 )
+        return (0);
+
+    /* Reset buffer position */
+    outbuft = outbuf;
+
+    /* Perform write to screen */
+    return (write(1, outbuf, len) != len);
+
+# else
+    refresh();
+
+    return (0);
+
+# endif /* USE_CURSES */
+}
+
+/** Put character onto display **/
+int ttputc P1_(int, ch)
+/* ch:  Character to display                                        */
+/*      int will be converted to unsigned char like e.g. in fputc() */
+{
+# if ( !USE_CURSES )
+    /* Check for buffer full */
+    if ( outbuft == &outbuf[SIZEOF(outbuf)] )
+        ttflush();
+
+    /* Add to buffer */
+    *outbuft++ = ch;
+# else
+    /* Put character on screen */
+    addch(ch);
+# endif /* USE_CURSES */
+
+    return (0);
+}
+
+/** Grab input characters, with wait **/
+unsigned char grabwait()
+{
+    unsigned char ch  = '\0';
+# if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+    int           rv  = 0;
+# endif
+
+# if ( USE_SGTTY )
+# else
+    /* Change mode, if necessary */
+    if ( curterm.c_cc[VTIME] )  {
+        curterm.c_cc[VMIN]  = 1;
+        curterm.c_cc[VTIME] = 0;
+#  if ( USE_TERMIOS_TCXX )
+        tcsetattr(0, TCSANOW, &curterm);
+#  else
+#  if ( USE_TERMIO_IOCTL )
+        ioctl(0, TCSETA, &curterm);
+#  else
+#  if ( USE_CURSES )
+        /* ? */
+#  else
+#  endif
+#  endif
+#  endif
+    }
+# endif /*USE_SGTTY*/
+
+# if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+    /* Perform read */
+#  if HANDLE_WINCH
+    while ( ( rv = readx() ) < 0 )  {
+            if ( winch_flag )
+                return 0;
+    }
+#  else
+    rv  = readx();
+    if ( 0 > rv ) {
+        puts("** Horrible read error occured **");
+        exit(1);
+    }
+#  endif
+    ch  = rv;
+# else
+    /* Perform read */
+#  if HANDLE_WINCH
+    while ( read(0, &ch, 1) != 1 ) {
+        if ( winch_flag )
+            return 0;
+    }
+#  else
+    if ( read(0, &ch, 1) != 1 ) {
+        puts("** Horrible read error occured **");
+        exit(1);
+    }
+#  endif
+# endif
+
+    /* Return new character */
+# if ( 0 )
+    TRC(("grabwait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+# endif
+
+    return (ch);
+}
+
+# if  USE_NOBLOCK_READ
+/** Grab input characters, short wait **/
+#  if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_SELECT )
+unsigned char PASCAL NEAR grabnowait P0_()
+{
+    fd_set          rfds;
+    struct timeval  tv;
+    int             retval  = 0;
+
+    ZEROMEM(rfds);
+    ZEROMEM(tv);
+
+    /* Watch stdin (fd 0) to see when it has input. */
+
+    FD_ZERO(&rfds);
+    FD_SET(0, &rfds);
+
+    /* Wait up to UNIX_READ_TOUT * 1/10 seconds:  */
+    tv.tv_sec = UNIX_READ_TOUT / 10;
+    tv.tv_usec = 100000 * (UNIX_READ_TOUT % 10);
+
+    retval = select(1, &rfds, NULL, NULL, &tv);
+    if        ( 0 >  retval ) { /* error          */
+        TRC(("grabnowait(): %s", "select error"));
+
+        return (grabnowait_TIMEOUT);
+    } else if ( 0 == retval ) { /* timeout        */
+        return (grabnowait_TIMEOUT);
+    } else /* 0 < retval */   { /* data available */
+        int           count = 0;
+        unsigned char ch    = '\0';
+
+        /* Perform read */
+#   if HANDLE_WINCH
+        while ( ( count = read(0, &ch, 1) ) < 0 ) {
+            if ( winch_flag )
+                return 0;
+        }
+#   else
+        count = read(0, &ch, 1);
+        if ( count < 0 ) {
+            puts("** Horrible read error occured **");
+            exit(1);
+        }
+#   endif
+        if ( count == 0 ) { /* Should not happen  */
+            TRC(("grabnowait(): %s", "select .GT. 0 but no data"));
+
+            return (grabnowait_TIMEOUT);
+        }
+        /* Return new character */
+#   if ( 0 )
+        TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+#   endif
+        return (ch);
+    }
+}
+#  else
+#  if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_VTIME  )
+unsigned char PASCAL NEAR grabnowait P0_()
+{
+    int           count = 0;
+    unsigned char ch    = '\0';
+
+    /* Change mode, if necessary */
+    if ( curterm.c_cc[VTIME] == 0 ) {
+        curterm.c_cc[VMIN] = 0;
+        curterm.c_cc[VTIME] = UNIX_READ_TOUT;
+#   if ( USE_TERMIOS_TCXX )
+        tcsetattr(0, TCSANOW, &curterm);
+#   else
+#   if ( USE_TERMIO_IOCTL )
+        ioctl(0, TCSETA, &curterm);
+#   else
+#   if ( USE_CURSES )
+        /* ? */
+#   else
+     CRASH(MISSING TERMINAL CONTROL DEFINITION);
+#   endif
+#   endif
+#   endif
+    }
+
+    /* Perform read */
+#   if HANDLE_WINCH
+    while ( ( count = read(0, &ch, 1) ) < 0 ) {
+        if ( winch_flag )
+            return 0;
+    }
+#   else
+    count = read(0, &ch, 1);
+    if ( count < 0 ) {
+        puts("** Horrible read error occured **");
+        exit(1);
+    }
+#   endif
+    if ( count == 0 ) {
+        return (grabnowait_TIMEOUT);
+    }
+
+    /* Return new character */
+#   if ( 0 )
+    TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+#   endif
+    return (ch);
+}
+#  else
+#  if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX  )
+unsigned char PASCAL NEAR grabnowait P0_()
+{
+    if ( 0 >= nread() ) {
+        return (grabnowait_TIMEOUT);
+    } else              { /* data available */
+        int           rv  = 0;
+        unsigned char ch  = '\0';
+
+        /* Perform read */
+#   if HANDLE_WINCH
+        while ( ( rv = readx() ) < 0 )  {
+            if ( winch_flag )
+                return 0;
+        }
+#   else
+        rv  = readx();
+        if ( 0 > rv ) {
+            puts("** Horrible read error occured **");
+            exit(1);
+        }
+#   endif
+        /* Return new character */
+        ch  = rv;
+#   if ( 0 )
+        TRC(("grabnowait(): 0x%02X, <%c>", (unsigned int)(ch), (char)ch));
+#   endif
+        return (ch);
+    }
+}
+#  else
+    CRASH(IMPOSSIBLE);
+#  endif
+#  endif
+#  endif /* SWITCH_TERMINAL_NOBLOCK_READ */
+# endif /*USE_NOBLOCK_READ*/
+/* QIN:
+ *
+ * Queue in a character to the input buffer.
+ */
+VOID qin P1_(int, ch)
+{
+# if ( 0 )
+    TRACE_inbuf("BEGIN qin");
+# endif
+    /* Check for overflow */
+    if ( inbuft == &inbuf[NELEM(inbuf)] ) {
+        /* Annoy user */
+        term.t_beep();
+
+        return;
+    }
+
+    /* Add character */
+    *inbuft++ = ch;
+# if ( 0 )
+    TRACE_inbuf("  END qin");
+# endif
+}
+
+/* QREP:
+ *
+ * Replace a key sequence with a single character in the input buffer.
+ */
+VOID qrep P1_(int, ch)
+{
+# if ( 0 )
+    TRACE_inbuf("BEGIN qrep");
+# endif
+    inbuft = inbuf;
+    qin(ch);
+# if ( 0 )
+    TRACE_inbuf("  END qrep");
+# endif
+}
+
+/** Return cooked characters **/
+int PASCAL NEAR ttgetc P0_()
+{
+    int ch  = 0;
+
+    ttflush();
+    /* Loop until character is in input buffer */
+    while ( inbufh == inbuft )
+        cook();
+
+    /* Get input from buffer, now that it is available */
+#  if ( 1 )
+    {
+        int       l     = 0;
+        int       i     = 0;
+        CONST int *chp  = NULL;
+
+        chp = qget(&l);
+        TRC(("ttgetc(): %s[head = %d, tail = %d](%d)",
+             "BEGIN 'Get input from buffer'",
+             (int)(inbufh - inbuf),
+             (int)(inbuft - inbuf),
+             __LINE__));
+        for ( i = 0; i < l; i++ ) {
+            TRC(("ttgetc():     %s", ectostr(chp[i])));
+        }
+        TRC(("ttgetc(): %s[head = %d, tail = %d](%d)",
+             "  END 'Get input from buffer'",
+             (int)(inbufh - inbuf),
+             (int)(inbuft - inbuf),
+             __LINE__));
+    }
+#  endif
+    ch = *inbufh++;
+
+    /* reset us to the beginning of the buffer if there are no more pending
+     * characters */
+    if ( inbufh == inbuft )
+        inbufh = inbuft = inbuf;
+
+    /* Return next character */
+# if ( 0 )
+    TRC(("ttgetc(): 0x%04X", (unsigned int)ch));
+# endif
+    return (ch);
+}
+
+# if USE_NOBLOCK_READ
+int ttgetc_nowait P0_()
+{
+    int ch  = 0;
+
+    ttflush();
+    /* Loop until character is in input buffer */
+    while ( inbufh == inbuft )  {
+        if ( !cook_nowait() ) {
+            return grabnowait_TIMEOUT;
+        }
+    }
+
+    /* Get input from buffer, now that it is available */
+    ch = *inbufh++;
+
+    /* reset us to the beginning of the buffer if there are no more pending
+     * characters */
+    if ( inbufh == inbuft )
+        inbufh = inbuft = inbuf;
+
+    /* Return next character */
+#  if ( 0 )
+    TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
+#  endif
+    return (ch);
+}
+# endif /*USE_NOBLOCK_READ*/
+
+/* QGET:
+ *
+ * Get characters pending in input queue:
+ * - *lp:     Number of characters in queue
+ * - Result:  Pointer to int array
+ */
+CONST int *qget P1_(int *, lp)
+{
+    ASRT(NULL != lp);
+
+    *lp = inbuft - inbufh;
+
+    return (CONST int *)inbufh;
+}
+
+
+# if TYPEAH
+
+int typahead P0_()
+{
+#   if ( defined(FIONREAD) || ( !VAT && defined(FIORDCHK) ) )
+    int count = 0;
+#   endif
+
+    /* See if internal buffer is non-empty */
+    if ( inbufh != inbuft )
+        return (1);
+
+    /* Now check with system */
+#  ifdef FIONREAD /* Watch out!  This could bite you! */
+    /* Get number of pending characters */
+    if ( ioctl(0, FIONREAD, &count) )
+        return (0);
+
+    return (count);
+
+#  else /* not FIONREAD */
+#   if VAT
+
+    return (0);
+
+#   else /* not VAT */
+#    ifdef FIORDCHK
+    /* Ask hardware for count */
+    count = ioctl(0, FIORDCHK, 0);
+    if ( count < 0 )
+        return (0);
+
+    return (count);
+
+#    else
+
+    return (0);
+
+#    endif /* FIORDCHK */
+#   endif /* VAT */
+#  endif /* FIONREAD */
+}
+
+# endif /* TYPEAH */
+
+/** Put out sequence, with padding **/
+VOID putpad P1_(char *, seq)
+/* seq: Character sequence  */
+{
+    /* Check for null */
+    if ( !seq )
+        return;
+
+    /* Call on termcap to send sequence */
+# if ANSI
+    ttputs(seq);
+    TRC( ("ttputs(%s)", seq) );
+# else
+    tputs(seq, 1, ttputc);
+    TRC( ("tputs(%s, 1, ttputc)", seq) );
+# endif /* ANSI */
+}
+
+# if !ANSI
+/** Initialize screen package **/
+int scopen P0_()
+{
+    char * cp, tcbuf[1024];
+    int status;
+    struct capbind * cb;
+    struct keybind * kp;
+    char err_str[NSTRING];
+
+#  if ( HPUX8 || HPUX9 || VAT || AUX || AIX5 )
+    /* HP-UX, AUX and AIX5 doesn't seem to have these in the
+     * termcap library  */
+    char PC, * UP;
+    short ospeed;
+#  else /* not HPUX8 || HPUX9 || VAT || AUX */
+    COMMON char   PC;
+    COMMON char   *UP;
+    COMMON short  ospeed;
+#  endif /* HPUX8 || HPUX9 || VAT || AUX */
+
+    /* Get terminal type */
+    cp = getenv("TERM");
+    if ( !cp ) {
+        puts(TEXT182);
+/*      "Environment variable \"TERM\" not defined!" */
+        exit(1);
+    }
+
+    /* Try to load termcap */
+    status = tgetent(tcbuf, cp);
+    if ( status == -1 ) {
+        puts("Cannot open termcap file");
+        exit(1);
+    }
+    if ( status == 0 ) {
+        sprintf(err_str, TEXT183, cp);
+/*      "No entry for terminal type \"%s\"\n" */
+        puts(err_str);
+        exit(1);
+    }
+
+    /* Get size from termcap */
+    term.t_nrow = TGETNUM("li") - 1;
+    term.t_ncol = TGETNUM("co");
+    if ( term.t_nrow < 3 || term.t_ncol < 3 ) {
+        puts("Screen size is too small!");
+        exit(1);
+    }
+
+    /* initialize max number of rows and cols    */
+    term.t_mrow = term.t_nrow;
+    term.t_mcol = term.t_ncol;
+
+    /* Start grabbing termcap commands */
+    cp = tcapbuf;
+
+    /* Get the reset string */
+    termreset = TGETSTR("is", &cp);
+
+    /* Get the pad character */
+    if ( TGETSTR("pc", &cp) )
+        PC = tcapbuf[0];
+
+    /* Get up line capability */
+    UP = TGETSTR("up", &cp);
+
+    /* Get other capabilities */
+    cb = capbind;
+    while ( cb < &capbind[SIZEOF (capbind)/SIZEOF (*capbind)] ) {
+        cb->store = TGETSTR(cb->name, &cp);
+        cb++;
+    }
+
+    /* Check for minimum */
+    if ( !capbind[CAP_CL].store && (!capbind[CAP_CM].store || !UP) ) {
+        puts("This terminal doesn't have enough power to run microEmacs!");
+        exit(1);
+    }
+
+    /* Set reverse video and erase to end of line */
+    if ( capbind[CAP_SO].store && capbind[CAP_SE].store )
+        revexist = TRUE;
+    if ( !capbind[CAP_CE].store )
+        eolexist = FALSE;
+
+    /* Get keybindings */
+    kp = keybind;
+    while ( kp < &keybind[SIZEOF (keybind)/SIZEOF (*keybind)] ) {
+        addkey((unsigned char *)TGETSTR(kp->name, &cp), kp->value);
+        kp++;
+    }
+
+    /* check for HP-Terminal (so we can label its function keys) */
+    hpterm = TGETFLAG("xs");
+
+    /* Open terminal device */
+    if ( ttopen() ) {
+        puts("Cannot open terminal");
+        exit(1);
+    }
+
+    /* Set speed for padding sequences */
+#  if   ( USE_TERMIOS_TCXX )
+    ospeed = cfgetospeed(&curterm);
+#  else
+#  if ( USE_TERMIO_IOCTL )
+    ospeed = curterm.c_cflag & CBAUD;
+#  else
+#  if ( USE_CURSES )
+    /* ? */
+#  else
+    CRASH(MISSING TERMINAL CONTROL DEFINITION);
+#  endif
+#  endif
+#  endif
+
+    /* Send out initialization sequences */
+#  if ( !AIX )
+    putpad(capbind[CAP_IS].store);
+#  endif
+    putpad(capbind[CAP_KS].store);
+    sckopen();
+
+#  if ( USE_CURSES )
+    /* Initialize screen */
+    initscr();
+
+    /* Set size of screen */
+    term.t_nrow = LINES - 1;
+    term.t_ncol = COLS;
+
+    /* Open terminal device */
+    if ( ttopen() ) {
+        puts("Cannot open terminal");
+        exit(1);
+    }
+#  endif /* USE_CURSES */
+
+    /* Success */
+    return ( 0 );
+}
+
+/** Close screen package **/
+int scclose P0_()
+{
+    /* Turn off keypad mode */
+    putpad(capbind[CAP_KE].store);
+    sckclose();
+
+#  if ( USE_CURSES )
+    /* Turn off curses */
+    endwin();
+#  endif /* USE_CURSES */
+    /* Close terminal device */
+    ttflush();
+    ttclose();
+
+    /* Success */
+    return ( 0 );
+}
+
+/* open keyboard -hm */
+int sckopen P0_()
+{
+    putpad(capbind[CAP_KS].store);
+    ttflush();
+#  if     FLABEL
+    dis_ufk();
+#  endif
+
+    return ( 0 );
+}
+
+/* close keyboard -hm */
+int sckclose P0_()
+{
+    putpad(capbind[CAP_KE].store);
+    ttflush();
+#  if     FLABEL
+    dis_sfk();
+#  endif
+
+    return ( 0 );
+}
+
+/** Move cursor **/
+int scmove P2_(int, row, int, col)
+/* row: Row number    */
+/* col: Column number */
+{
+    /* Call on termcap to create move sequence */
+    putpad( tgoto(capbind[CAP_CM].store, col, row) );
+
+#  if ( USE_CURSES )
+    move(row, col);
+#  endif /* USE_CURSES */
+
+    /* Success */
+    return (0);
+}
+
+/** Erase to end of line **/
+int sceeol P0_()
+{
+    /* Send erase sequence */
+    putpad(capbind[CAP_CE].store);
+
+#  if ( USE_CURSES )
+    clrtoeol();
+#  endif /* USE_CURSES */
+
+    /* Success */
+    return (0);
+}
+
+/** Clear screen **/
+int sceeop P0_()
+{
+#  if COLOR
+    scfcol(gfcolor);
+    scbcol(gbcolor);
+#  endif /* COLOR */
+    /* Send clear sequence */
+    putpad(capbind[CAP_CL].store);
+
+#  if ( USE_CURSES )
+    erase();
+#  endif /* USE_CURSES */
+
+
+    /* Success */
+    return (0);
+}
+
+/** Set reverse video state **/
+int screv P1_(int, state)
+/* state: New state */
+{
+#  if COLOR
+    int ftmp, btmp;             /* temporaries for colors */
+#  endif /* COLOR */
+
+    /* Set reverse video state */
+    putpad(state ? capbind[CAP_SO].store : capbind[CAP_SE].store);
+
+#  if COLOR
+    if ( state == FALSE ) {
+        ftmp = cfcolor;
+        btmp = cbcolor;
+        cfcolor = -1;
+        cbcolor = -1;
+        scfcol(ftmp);
+        scbcol(btmp);
+    }
+#  endif /* COLOR */
+
+#  if ( USE_CURSES )
+    if ( state )
+        standout();
+    else
+        standend();
+#  endif /* USE_CURSES */
+
+    /* Success */
+    return (0);
+}
+
+/** Change screen resolution **/
+int scsetres P1_(char *, x)
+{
+    /* Does nothing now */
+    /* Success */
+    return (0);
+}
+
+/** Beep **/
+int scbeep P0_()
+{
+#  if !NOISY
+    /* Send out visible bell, if it exists */
+    if ( capbind[CAP_VB].store )
+        putpad(capbind[CAP_VB].store);
+    else
+#  endif /* not NOISY */
+    /* The old standby method */
+    ttputc('\7');
+
+#  if ( USE_CURSES )
+    addch('\7');                /* FIX THIS! beep() and flash comes up undefined
+                                 */
+#  endif /* USE_CURSES */
+
+    /* Success */
+    return (0);
+}
+
+#  if COLOR
+#   if USG || AUX
+static char cmap[8] = { 0, 4, 2, 6, 1, 5, 3, 7 };
+#   endif /* USG || AUX */
+
+/** Set foreground color **/
+int scfcol P1_(int, color)
+/* color: Color to set  */
+{
+    TRC( ("scfcol(%d)", (int) color) );
+    /* Skip if already the correct color */
+    if ( color == cfcolor )
+        return (0);
+
+    TRC( ("scfcol(): %s", "color != cfcolor") );
+
+    /* Send out color sequence */
+    TRC( ( "scfcol(): capbind[CAP_C0].store == 0x%lX",
+           (unsigned long int)(capbind[CAP_C0].store) ) );
+    if ( capbind[CAP_C0].store ) {
+        TRC( ( "scfcol(): capbind[CAP_C0 + (color & 7)].store = %s",
+               STR(capbind[CAP_C0 + (color & 7)].store) ) );
+        putpad(capbind[CAP_C0 + (color & 7)].store);
+        cfcolor = color;
+    }
+#   if USG || AUX
+    else if ( capbind[CAP_SF].store ) {
+        putpad( tparm(capbind[CAP_SF].store, cmap[color & 7]) );
+        cfcolor = color;
+    }
+#   endif /* USG || AUX */
+
+#   if ( USE_CURSES )
+    /* ? */
+#   endif /* USE_CURSES */
+
+    return (0);
+}
+
+/** Set background color **/
+int scbcol P1_(int, color)
+/* color: Color to set  */
+{
+    TRC( ("scbcol(%d)", (int) color) );
+    /* Skip if already the correct color */
+    if ( color == cbcolor )
+        return (0);
+
+    TRC( ("scbcol(): %s", "color != cbcolor") );
+
+    /* Send out color sequence */
+    TRC( ( "scbcol(): capbind[CAP_C0].store == 0x%lX",
+           (unsigned long int)(capbind[CAP_C0].store) ) );
+    if ( capbind[CAP_C0].store ) {
+        TRC( ( "scbcol(): capbind[CAP_D0 + (color & 7)].store = %s",
+               STR(capbind[CAP_D0 + (color & 7)].store) ) );
+        putpad(capbind[CAP_D0 + (color & 7)].store);
+        cbcolor = color;
+    }
+#   if USG || AUX
+    else if ( capbind[CAP_SB].store ) {
+        putpad( tparm(capbind[CAP_SB].store, cmap[color & 7]) );
+        cbcolor = color;
+    }
+#   endif /* USG || AUX */
+
+#   if ( USE_CURSES )
+    /* ? */
+#   endif /* USE_CURSES */
+
+    return (0);
+}
+#  endif /* COLOR */
+
+/** Set palette
+ * RC:
+ *  - 0: Success
+ *  - 1: Error
+ **/
+int PASCAL NEAR spal P1_(char *, cmd)
+/* cmd: Palette command */
+{
+    int   code      = 0;
+    int   dokeymap  = 0;
+#  if COLOR
+    int   doclrmap  = 0;
+#  endif /* COLOR */
+    char  *cp       = NULL;
+
+    /* Check for keymapping command */
+    if        ( strncmp(cmd, "KEYMAP ", 7) == 0 ) {
+        dokeymap = 1;
+#  if COLOR
+    } else if ( strncmp(cmd, "CLRMAP ", 7) == 0 ) {
+        doclrmap = 1;
+#  endif /* COLOR */
+    } else                                        {
+        return (0);
+    }
+
+    cmd += 7;
+
+    /* Look for space */
+    for ( cp = cmd; *cp == ' '; cp++ );
+    for (; *cp != '\0'; cp++ )
+        if ( *cp == ' ' ) {
+            *cp++ = '\0';
+            break;
+        }
+    if ( *cp == '\0' )
+        return (1);
+
+    for (; *cp == ' '; cp++ );
+
+    /* Perform operation */
+    if        ( dokeymap )  {
+        /* Convert to keycode */
+        code = stock(cmd);
+
+        /* Add to tree */
+        addkey((unsigned char *)cp, code);
+#  if COLOR
+    } else if ( doclrmap )  {
+        /* Convert to color number */
+        code = atoi(cmd);
+        if ( code < 0 || code > 15 )
+            return (1);
+
+        /* Move color code to capability structure */
+        capbind[CAP_C0 + code].store = ROOM(STRLEN(cp) + 1);
+        if ( capbind[CAP_C0 + code].store ) {
+            XSTRCPY(capbind[CAP_C0 + code].store, cp);
+            TRC( ( "capbind[CAP_C0 + %d].store = %s", (int)code,
+                  STR(capbind[CAP_C0 + code].store) ) );
+        }
+#  endif /* COLOR */
+    } else                  {
+        /**EMPTY**/
+    }
+
+    return (0);
+}
+# endif /* !ANSI */
+
+/* Surely more than just BSD systems do this: */
+
+# if ( !DJGPP_DOS )
+/** Perform a stop signal **/
+int bktoshell P2_(int, f, int, n)
+{
+    /* Reset the terminal and go to the last line */
+    vttidy();
+
+    /* Okay, stop... */
+    kill(getpid(), SIGTSTP);
+
+    /* We should now be back here after resuming */
+
+    /* Reopen the screen and redraw */
+    term.t_open();
+    curwp->w_flag = WFHARD;
+    sgarbf = TRUE;
+
+    /* Success */
+    return (0);
+}
+# endif
+
+
+# if FLABEL
+
+/*---------------------------------------------------------------------*
+ *
+ *     handle the function keys and function key labels on HP-Terminals
+ *     -----------------------------------------------------------------
+ *
+ *     Hellmuth Michaelis       e-mail: hm@hcshh.hcs.de
+ *
+ *--------------------------------------------------------------------*/
+
+static unsigned char flabstor[8][50];    /* label & xmit backup store */
+static char flabstof[8] = { 0,0,0,0,0,0,0,0 };  /* filled flag        */
+
+/* FNCLABEL:
+ *
+ * Label a function key
+ */
+int fnclabel P2_(int, f, int, n)
+/* f: Default argument                          */
+/* n: Function key number 1...8 on hp-terminals */
+{
+    char lbl[20];       /* label string buffer */
+    char xmit[5];       /* transmitted string ( ESC 'p'...'w' ) */
+    char buf[80];       /* writeout buffer */
+    int i;              /* general purpose index */
+    int status;         /* return status */
+
+    /* check if we are connected to an hp-terminal */
+    if ( !hpterm )
+        return (FALSE);
+
+    /* must be called with an argument */
+    if ( f == FALSE ) {
+        mlwrite(TEXT246);
+
+/*          "%%Need function key number"*/
+        return (FALSE);
+    }
+
+    /* and it must be a legal key number */
+    if ( n < 1 || n > 8 ) {
+        mlwrite(TEXT247);
+
+/*          "%%Function key number out of range"*/
+        return (FALSE);
+    }
+
+    /* get the string to send */
+    lbl[0] = '\0';      /* we don't now the label yet */
+
+    if ( ( status = mlreply(TEXT248, lbl, 19) ) != TRUE )
+/*                "Enter Label String: "*/
+        return (status);
+
+    lbl[16] = '\0';
+    i = STRLEN(lbl);
+
+    /* set up escape sequence to send to terminal */
+    xmit[0] = 0x1b;
+    xmit[1] = 'o' + n;
+    xmit[2] = '\0';
+
+    sprintf(flabstor[n-1], "%c&f0a%dk%dd2L%s%s", (char)0x1b, n, i, lbl, xmit);
+    write( 1, flabstor[n-1], STRLEN(flabstor[n-1]) );
+    flabstof[n-1] = 1;
+
+    sprintf(buf, "%c&jB", (char)0x1b);
+    write( 1, buf, STRLEN(buf) );
+
+    return (TRUE);
+}
+
+/* display user function key labels */
+static VOID dis_ufk P0_()
+{
+    int label_num;
+    char buf[6];
+
+    if ( !hpterm )
+        return;
+
+    for ( label_num = 0; label_num < 8; label_num++ )
+        if ( flabstof[label_num] )
+            write( 1, flabstor[label_num], STRLEN(flabstor[label_num]) );
+
+    sprintf(buf, "%c&jB", (char)0x1b);
+    write( 1, buf, STRLEN(buf) );
+}
+
+/* display system function key labels */
+static VOID dis_sfk P0_()
+{
+    char buf[6];
+
+    if ( !hpterm )
+        return;
+
+    sprintf(buf, "%c&jA", (char)0x1b);
+    write( 1, buf, STRLEN(buf) );
+}
+
+# endif /* FLABEL */
+
+
+# if HANDLE_WINCH
+/* Window size changes handled via signals. */
+
+VOID winch_new_size P0_()
+{
+    struct winsize win;
+
+    ZEROMEM(win);
+
+    winch_flag  = 0;
+    ioctl(fileno(stdin), TIOCGWINSZ, &win);
+    winch_vtresize(win.ws_row, win.ws_col);
+    onlywind(0, 0);
+    TTmove(0, 0);
+    TTeeop();
+}
+
+# endif /* HANDLE_WINCH */
+
+
+#if ( SWITCH_TERMINAL_NOBLOCK_READ == USE_TERMINAL_READX )
+/*
+ * This function is used to implement non blocking reading on systems
+ * without the select() system call.
+ *
+ * 0 != getnread: Return the number of charcters that can be read
+ *                without blocking.
+ * 0 == getnread: Return the next character. This might block if
+ *                previously `0 == rdstdin(1)'.
+ *
+ * This function is used to implement grab(no)wait() to read from the
+ * terminal: This will only work reliably if the character sequences
+ * send by any key will always be fetched with *one*
+ * `read(0, readbuf, BUFSZ_rdstdin_)'m i.e. never be split into two or
+ * more such reads.
+ */
+static int  rdstdin P1_(int, getnread)
+{
+# define BUFSZ_rdstdin_   (64)
+# define INC_rdstdin_(x)  do {                  \
+    if ( (BUFSZ_rdstdin_ - 1) == (x) )  {       \
+        (x) = 0;                                \
+    } else {                                    \
+        (x)++;                                  \
+    }                                           \
+} while ( 0 )
+# define NREAD_rdstdin_   ( ((wpos) >= (rpos))? \
+    ((wpos) - (rpos))                           \
+        :                                       \
+    (BUFSZ_rdstdin_ - (rpos) + (wpos))          \
+)
+    static unsigned char ringbuf[BUFSZ_rdstdin_];
+    static unsigned char readbuf[BUFSZ_rdstdin_];
+    static int  wpos  = 0;
+    static int  rpos  = 0;
+
+    int retval  = '\0';
+    int rc      = 0;
+
+    if ( getnread ) {
+        return NREAD_rdstdin_;
+    }
+
+    if ( 0 < NREAD_rdstdin_ )  {
+        retval  = ringbuf[rpos];
+        INC_rdstdin_(rpos);
+
+        return retval;
+    }
+
+    if ( 0 >= (rc  = read(0, readbuf, BUFSZ_rdstdin_)) ) {
+        return (-1);
+    } else                                      {
+        int i = 0;
+
+        for ( i = 0; i < rc; i++ )  {
+            ringbuf[wpos] = readbuf[i];
+            INC_rdstdin_(wpos);
+        }
+
+        retval  = ringbuf[rpos];
+        INC_rdstdin_(rpos);
+
+        return retval;
+    }
+# undef NREAD_rdstdin_
+# undef INC_rdstdin_
+# undef BUFSZ_rdstdin_
+}
+#endif  /* SWITCH_TERMINAL_NOBLOCK_READ */
+
+
+
+#endif /* b_IS_UNIX */
+
+
+
+/**********************************************************************/
+/* EOF                                                                */
+/**********************************************************************/

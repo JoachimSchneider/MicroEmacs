@@ -1,5 +1,5 @@
 /*======================================================================
- *      EFUNC.H:        MicroEMACS function declarations and names
+ *      EFUNC.INC:      MicroEMACS function declarations and names
  *
  *              This file list all the C code functions used by MicroEMACS
  *      and the names to use to bind keys to them. To add functions,
@@ -19,14 +19,17 @@
  *====================================================================*/
 
 /*====================================================================*/
-#ifndef EFUNC_H_
-#define EFUNC_H_
+#ifndef EFUNC_INC_
+#define EFUNC_INC_
 /*====================================================================*/
 
 /*====================================================================*/
 /*       1         2         3         4         5         6         7*/
 /*34567890123456789012345678901234567890123456789012345678901234567890*/
 /*====================================================================*/
+
+
+#ifdef MAIN_C_
 
 
 NOSHARE NBIND names[] =
@@ -39,7 +42,7 @@ NOSHARE NBIND names[] =
     { "abort-command", ctrlg },
     { "add-abbrev", add_abbrev },
     { "add-global-mode", setgmode },
-#if IS_UNIX() || VMS || MPE
+#if b_IS_UNIX || VMS || MPE
     { "add-keymap", addkeymap },
 #endif
     { "add-mode", setmod },
@@ -158,7 +161,7 @@ NOSHARE NBIND names[] =
     { "label-function-key", fnclabel },
 #endif
     { "list-buffers", listbuffers },
-#if IS_UNIX() || VMS || MPE
+#if b_IS_UNIX || VMS || MPE
     { "list-keymappings", listkeymaps },
 #endif
     { "list-screens", list_screens },
@@ -243,7 +246,7 @@ NOSHARE NBIND names[] =
     { "source", execfile },
     { "split-current-window", splitwind },
     { "store-procedure", storeproc },
-#if ( IS_UNIX() && !DJGPP_DOS || VMS )
+#if ( b_IS_UNIX && !DJGPP_DOS || VMS )
     { "suspend-emacs", bktoshell },
 #endif
 #if     CTAGS
@@ -277,9 +280,11 @@ NOSHARE NBIND names[] =
 #define NFUNCS  ( SIZEOF (names) / SIZEOF (names[0]) - 1 )
 
 
+#endif  /* MAIN_C_  */
+
 
 /*====================================================================*/
-#endif/**#ifndef EFUNC_H_**/
+#endif/**#ifndef EFUNC_INC_**/
 /*====================================================================*/
 
 /**********************************************************************/

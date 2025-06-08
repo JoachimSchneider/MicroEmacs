@@ -17,6 +17,9 @@
 /*34567890123456789012345678901234567890123456789012345678901234567890*/
 /*====================================================================*/
 
+/**********************************************************************/
+#include "eproto.h"
+/**********************************************************************/
 
 /*====================================================================*/
 /* Define array lengths here: Avoid Literals!                         */
@@ -37,31 +40,11 @@ COMMON NOSHARE TERM term; /* Terminal information.    */
 /**********************************************************************/
 
 
-#define _K_               ,     /* We need to marshall the `,'  */
-
-/* for MAIN.C:  */
-#ifdef  MAIN_C_
-# if defined(__cplusplus)
-/* C++ Needs this because all constants have *internal linkage* by default. */
-#   define CSTDEF         COMMON CONST
-# else
-#   define CSTDEF         CONST
-# endif
-# define DCLDEF
-# define INIT_(x)         = x
-# define NOSZ_
-#else
-# define CSTDEF           COMMON CONST
-# define DCLDEF           COMMON
-# define INIT_(x)
-# define NOSZ_            DUMMYSZ /* GRRR */
-#endif
-
-
 /* initialized global definitions */
 
 DCLDEF NOSHARE int            fillcol             INIT_(72);            /* Current fill column              */
 DCLDEF NOSHARE char           *execstr            INIT_(NULL);          /* pointer to string to execute     */
+DCLDEF NOSHARE char           *termreset          INIT_(NULL);          /* terminal reset string kjc        */
 DCLDEF NOSHARE char           golabel[NPAT]       INIT_("");            /* current line to go to            */
 DCLDEF NOSHARE char           paralead[NPAT]      INIT_(" \t");         /* paragraph leadin chars           */
 DCLDEF NOSHARE char           fmtlead[NPAT]       INIT_("");            /* format command leadin chars      */
@@ -96,6 +79,7 @@ DCLDEF NOSHARE int            gacount             INIT_(256);           /* count
 DCLDEF NOSHARE int            sgarbf              INIT_(TRUE);          /* TRUE if screen is garbage        */
 DCLDEF NOSHARE int            mpresf              INIT_(FALSE);         /* TRUE if message in last line     */
 DCLDEF NOSHARE int            clexec              INIT_(FALSE);         /* command line execution flag      */
+DCLDEF NOSHARE int            terminchr           INIT_('\0');          /* terminator character             */
 DCLDEF NOSHARE int            mstore              INIT_(FALSE);         /* storing text to macro flag       */
 DCLDEF NOSHARE int            discmd              INIT_(TRUE);          /* display command flag             */
 DCLDEF NOSHARE int            disinp              INIT_(TRUE);          /* display input characters         */
@@ -297,15 +281,6 @@ DCLDEF NOSHARE int            pending_msg         INIT_(FALSE);         /* Flag 
 #if     HANDLE_WINCH
 DCLDEF NOSHARE int            winch_flag          INIT_(0);             /* Window size changed flag         */
 #endif
-
-
-/*====================================================================*/
-#undef CSTDEF
-#undef DCLDEF
-#undef INIT_
-#undef _K_
-#undef NOSZ_
-/*====================================================================*/
 
 
 

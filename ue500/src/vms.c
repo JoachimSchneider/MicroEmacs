@@ -71,8 +71,15 @@ static VOID next_read P1_(int, flag);
 #endif
 /*
         test macro is used to signal errors from system services
-*/
-#define test(s) do { int st; st = (s); if ((st&1)==0) lib$signal( st); } while ( 0 )
+ */
+#define test(s) do {        \
+    int st_ = 0;            \
+                            \
+    st_ = (s);              \
+    if ( (st_ & 1) == 0 ) { \
+        lib$signal(st_);    \
+    }                       \
+} while ( 0 )
 
 /*
         This routine returns a pointer to a descriptor of the supplied
@@ -166,6 +173,8 @@ static int newbrdcst = FALSE;   /* Flag - is message in Emacs buffer yet. */
 #define TYPSIZE 1024            /* Typeahead buffer size, must be several
                                  * times MINREAD */
 
+static int  tt_is_open  = 0;            /* State variable   */
+
 static unsigned char tybuf[TYPSIZE];    /* Typeahead buffer */
 static unsigned tyin, tyout, tylen, tymax;      /* Inptr, outptr, and length */
 
@@ -212,10 +221,10 @@ static short called = 0;        /* TRUE if called from ME$EDIT */
 */
 static long short_time[2] = {-4000000, -1};
 
-static unsigned char tobuf[TYPSIZE];    /* Output buffer */
-static unsigned tolen;          /* Ammount used */
-NOSHARE   TTCHAR orgchar;       /* Original characteristics */
-static TTCHARIOSB orgttiosb;    /* Original IOSB characteristics */
+static unsigned char  tobuf[TYPSIZE]; /* Output buffer              */
+static unsigned       tolen;          /* Ammount used               */
+NOSHARE TTCHAR        orgchar;        /* Orig. characteristics      */
+static TTCHARIOSB     orgttiosb;      /* Orig. IOSB characteristics */
 
 static VOID readast P0_()
 {
@@ -398,7 +407,7 @@ static VOID mbreadast P0_()
             /* Got broadcast, get it */
             /* Hard-coding the mbmsg.brdcnt to 511 is a temp solution. */
             mbmsg.brdcnt = 511;
-            memcpy(brdcstbuf, mbmsg.message, 511);
+            umc_memcpy(brdcstbuf, mbmsg.message, 511);
             brdcstbuf[511] = 0;
 
             RemoveEscapes(brdcstbuf);
@@ -421,6 +430,10 @@ int PASCAL NEAR ttopen P0_()
     int       status;
     char     *waitstr;
     size_t    mbmsg_size = sizeof(mbmsg);
+
+    if ( tt_is_open ) {
+        return 0;
+    }
 
     xstrcpy(os, "VMS");
     tyin = 0;
@@ -528,12 +541,17 @@ int PASCAL NEAR ttopen P0_()
     waitstr = getenv("MICROEMACS$SHORTWAIT");
     if (waitstr)
         short_time[0] = -asc_int(waitstr);
+    tt_is_open  = 1;
 
     return 0;
 }
 
 int PASCAL NEAR ttclose P0_()
 {
+    if ( ! tt_is_open ) {
+        return 0;
+    }
+
     if (tolen > 0) {
         /* Buffer not empty, flush out last stuff */
         test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
@@ -546,6 +564,7 @@ int PASCAL NEAR ttclose P0_()
     if (mbchan)
         test(sys$dassgn(mbchan));
     test(sys$dassgn(vms_iochan));
+    tt_is_open  = 0;
 
     return 0;
 }
@@ -554,10 +573,14 @@ int PASCAL NEAR ttputc P1_(int, c)
 {
     tobuf[tolen++] = c;
     if (tolen >= SIZEOF(tobuf)) {
-        /* Buffer is full, send it out */
-        test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
-                      0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
-        tolen = 0;
+        if ( tt_is_open ) {
+            /* Buffer is full, send it out */
+            test(sys$qiow(0, vms_iochan, IO$_WRITEVBLK | IO$M_NOFORMAT,
+                          0, 0, 0, tobuf, tolen, 0, 0, 0, 0));
+            tolen = 0;
+        } else              {
+            TRC(("ttputc(): Cannot write <%c> --- tt is not open", (char)c));
+        }
     }
 
     return 0;
@@ -565,6 +588,9 @@ int PASCAL NEAR ttputc P1_(int, c)
 
 int PASCAL NEAR ttflush P0_()
 {
+    if ( !tt_is_open )  {
+        return 0;
+    }
     /*
             I choose to ignore any flush requests if there is typeahead
             pending.  Speeds DECNet network operation by leaps and bounds
@@ -582,6 +608,7 @@ int PASCAL NEAR ttflush P0_()
     return 0;
 }
 
+#if USE_NOBLOCK_READ
 /*
         grabnowait is a routine that tries to read another character,
         and if one doesn't come in as fast as we expect function keys
@@ -604,6 +631,7 @@ unsigned char PASCAL NEAR grabnowait P0_()
 
     return ((tylen == 0) ? grabnowait_TIMEOUT : grabwait());
 }
+#endif  /*USE_NOBLOCK_READ*/
 
 unsigned char PASCAL NEAR grabwait P0_()
 {
@@ -639,7 +667,7 @@ unsigned char PASCAL NEAR grabwait P0_()
     return (ret);
 }
 
-# if ( !SMG ) /* Has it's own qin()/qrep()  */
+# if ( !SMG ) /* Has it's own qin()/qrep()/qget() */
 /* QIN:
  *
  * Queue in a character to the input buffer.
@@ -706,6 +734,7 @@ int PASCAL NEAR ttgetc P0_()
     return (ch);
 }
 
+# if USE_NOBLOCK_READ
 int ttgetc_nowait P0_()
 {
     int ch  = 0;
@@ -727,11 +756,30 @@ int ttgetc_nowait P0_()
         inbufh = inbuft = inbuf;
 
     /* Return next character */
-# if ( 0 )
+#  if ( 0 )
     TRC(("ttgetc_nowait(): 0x%04X", (unsigned int)ch));
-# endif
+#  endif
     return (ch);
 }
+# endif /*USE_NOBLOCK_READT*/
+
+# if ( !SMG ) /* Has it's own qin()/qrep()/qget() */
+/* QGET:
+ *
+ * Get characters pending in input queue:
+ * - *lp:     Number of characters in queue
+ * - Result:  Pointer to int array
+ */
+CONST int *qget P1_(int *, lp)
+{
+    ASRT(NULL != lp);
+
+    *lp = inbuft - inbufh;
+
+    return (CONST int *)inbufh;
+}
+# endif /* ( !SMG ) */
+
 
 /*
  * Typahead - any characters pending?
@@ -1406,7 +1454,7 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
         }
 
         /* copy data */
-        memcpy(fline, buf, nbuf);
+        umc_memcpy(fline, buf, nbuf);
 
         /* encrypt it */
         ecrypt(fline, nbuf);
@@ -1515,8 +1563,8 @@ VOID PASCAL NEAR  expandargs P2_(int *, pargc, char ***, pargv)
         unsigned long context = 0;
 
         /* should check for wildcards: %, *, and "..." */
-        if (**argv != '-' && (strchr(*argv, '%') || strchr(*argv, '*') ||
-                              strstr(*argv, "..."))) {
+        if (**argv != '-' && (umc_strchr(*argv, '%') || umc_strchr(*argv, '*')
+                                                     || strstr(*argv, "..."))) {
             /* search for all matching filenames */
             while ((lib$find_file(&filespec, &result_filespec, &context)) & 1) {
                 int       i;

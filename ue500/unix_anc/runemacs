@@ -1,0 +1,10 @@
+#!/bin/sh -
+## CHANGE THIS TO YOUR NEEDS:
+mybas=/usr/local/pkg/MicroEmacs
+##
+mybin="${mybas}/bin"
+mycmd="${mybas}/cmd"
+PATH="${mybin}:${mycmd}:${PATH}"
+export PATH
+exec "${mybin}/emacs" $@
+# EOF

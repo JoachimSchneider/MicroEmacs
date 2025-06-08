@@ -8,9 +8,11 @@ Compiling and installing MicroEMACS on VMS:
   MicroEMACS:
   + If you want to build the ANSI version:
     o copy estruct_ansi.h to estruct.h and adapt it if needed.
+    o Set `medir' in meansimake.com
     o $ @meansimake
   + If you want to build the SMG version:
     o copy estruct_smg.h to estruct.h and adapt it if needed.
+    o Set `medir' in mesmgmake.com
     o $ @mesmgmake
 
 - Create a directory for the MicroEMACS binary
@@ -95,4 +97,4 @@ into SYS$MANAGER:SYSTARTUP_VMS.COM.
 
 
 
-# EOF(Readne.txt)
+# EOF(Readme.txt)

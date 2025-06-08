@@ -18,8 +18,30 @@
 #include "estruct.h"
 #include "eproto.h"
 #include "elang.h"
-#if  ( IS_UNIX() )
-# include <unistd.h>
+#if  ( b_IS_UNIX )
+# if ( !b_IS_ANCIENT_UNIX )
+#  include <unistd.h>
+# else
+   EXTERN int getpid      DCL((void));
+#  ifdef GETHOSTNAME_AVAILABLE
+   EXTERN int gethostname DCL((char *name, int len));
+#  else
+#   define  MYHOSTNAME_   "darkstar"
+
+   static int gethostname P2_(char *, name, int, len)
+   {
+     int                i       = 0;
+
+     for ( i = 0; i < MIN2(SIZEOF(MYHOSTNAME_), len) - 1; i++ ) {
+       name[i]  = MYHOSTNAME_[i];
+     }
+     name[i]  = '\0';
+
+     return 0;
+   }
+#   undef   MYHOSTNAME_
+#  endif
+# endif
 #endif
 
 #if ( FILOCK && WMCS )
@@ -29,14 +51,16 @@
 # include <stdio.h>
 # include <ctype.h>
 
-static CONST char mg[]  = TEXT35;
+static CONST char msg[] = TEXT35;
 /*           "another user" */
 
 /* DOLOCK:
  */
 char *dolock P1_(CONST char *, fname)
 {
-    int lun, status;
+    int lun     = 0;
+    int status  = 0;
+
     status = _open(fname, OPREADACC|OPWRITEACC|OPWRITELOCK, -1, &lun);
     if ( status == 133 || status == 0 ) return (NULL);
 
@@ -47,8 +71,15 @@ char *dolock P1_(CONST char *, fname)
  */
 char *undolock P1_(CONST char *, fname)
 {
-    int i, j, k, lun, status;
-    char xname[95], c;
+    int   i       = 0;
+    int   j       = 0;
+    int   k       = 0;
+    int   lun     = 0;
+    int   status  = 0;
+    char  c       = '\0';
+    char  xname[C_95];
+
+    ZEROMEM(xname);
 
     for ( lun=4; _getfnam(lun, xname) == 0; lun++ ) {
         for ( i=0; i<STRLEN(xname); i++ ) {
@@ -72,27 +103,32 @@ char *undolock P1_(CONST char *, fname)
 }
 
 
-#elif ( FILOCK && ( IS_UNIX() || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
-
-# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) || IS_UNIX() )
-#  include     <sys/types.h>
+#else
+#if ( FILOCK && ( b_IS_UNIX || MSDOS || WINNT || WINXP || OS2 || AMIGA) )
+/* b_IS_UNIX: `sys/types.h' and `sys/stat.h' already included
+ * in `eproto.h':
+ */
+# if  ( OS2 || ( ( MSDOS || WINNT || WINXP ) && MSC) )
+#  include    <sys/types.h>
 # endif
-# include       <sys/stat.h>
-# include       <errno.h>
+# if ( ! b_IS_UNIX )
+#   include   <sys/stat.h>
+# endif
+# include     <errno.h>
 # if  ( MSDOS && TURBO )
-#  include     <dir.h>
+#  include    <dir.h>
 # endif
-# if  ( IS_UNIX() )
-#  include     <dirent.h>
-#  include     <signal.h>
+# if  ( b_IS_UNIX )
+#  if ( !b_IS_ANCIENT_UNIX )
+#   include   <dirent.h>
+#  endif
+#  include    <signal.h>
 # endif
 
 # if  ( (WINNT || WINXP ) && MSC )
-#  include <direct.h>
-#  define chdir        _chdir
-#  define getcwd       _getcwd
-#  define mkdir        _mkdir
-#  define rmdir        _rmdir
+#  include    <direct.h>
+#  define chdir       _chdir
+#  define getcwd      _getcwd
 # endif
 
 # if  ( !OS2 )
@@ -107,8 +143,8 @@ COMMON int errno;
 
 # define LOCKDIR    "_xlk"
 # define LOCKMSG    "LOCK ERROR -- "
-# define LOCKDEBUG  FALSE
-/**# define LOCKDEBUG TRUE**/
+/**# define LOCKDEBUG  FALSE**/
+# define LOCKDEBUG  TRUE
 
 
 /* PARSE_NAME:
@@ -127,20 +163,25 @@ static CONST char *parse_name P1_(CONST char *, filespec)
         --rname;
     }
 
-    if ( rname >= filespec )
-
+    if ( rname >= filespec )  {
         return (rname);
-    else
-
+    } else                    {
         return (filespec);
+    }
 }
 
+/* Joachim Schneider, 2025-04-25:
+ * The original coding explicitely return a trailing slash --- why?
+ */
+# define  NO_TRAILING_SLASH (1)
 /* PARSE_PATH:
  */
 static char *parse_path P1_(CONST char *, filespec)
 {
     static char rbuff[NFILEN];
     char        *rname  = NULL;
+
+    ZEROMEM(rbuff);
 
     /* make a copy we can mung */
     XSTRCPY(rbuff, filespec);
@@ -150,29 +191,37 @@ static char *parse_path P1_(CONST char *, filespec)
 
     /* scan for a directory separator */
     while ( rname >= rbuff ) {
-        if ( *rname == DIRSEPCHAR )
+        if ( *rname == DIRSEPCHAR ) {
             break;
+        }
         --rname;
     }
 
     /* no path here! */
     if ( rname < rbuff ) {
         rbuff[0] = '.';
+# if ( NO_TRAILING_SLASH )
+        rbuff[1] = '\0';
+#else
         rbuff[1] = DIRSEPCHAR;
-        rbuff[2] = 0;
+        rbuff[2] = '\0';
+#endif
 
         return (rbuff);
     }
 
-    *(rname + 1) = '\0'; /* point just beyond slash */
+# if ( NO_TRAILING_SLASH )
+    *rname        = '\0'; /* No trailing slash        */
+# else
+    *(rname + 1)  = '\0'; /* point just beyond slash  */
+# endif
 
     /* no skip beyond any drive spec */
     rname = rbuff;
     while ( *rname ) {
-        if ( *rname == DRIVESEPCHAR )
-
+        if ( *rname == DRIVESEPCHAR ) {
             return (++rname);
-
+        }
         ++rname;
     }
 
@@ -186,6 +235,8 @@ static CONST char *parse_drive P1_(CONST char *, filespec)
 {
     static char rbuff[NFILEN];
     char        *rname  = NULL;
+
+    ZEROMEM(rbuff);
 
     /* search for a drive specifier */
     XSTRCPY(rbuff, filespec);
@@ -209,12 +260,12 @@ static CONST char *parse_drive P1_(CONST char *, filespec)
  */
 static VOID term_trim P1_(char *, buf)
 {
-    char *c;  /* ptr to current character to examine */
+    /* ptr to current character to examine: */
+    char  *c  = buf + STRLEN(buf) - 1;
 
-    c = buf + STRLEN(buf) - 1;
-    while ( (c >= buf) &&
-            ( (*c == '\r') || (*c == '\n') || (*c == ' ') || (*c == '\t') ) ) {
-        *c = 0;
+    while ( (c >= buf) && ( (*c == '\r') || (*c == '\n') || (*c == ' ')
+                                         || (*c == '\t') ) )  {
+        *c  = '\0';
         c--;
     }
 
@@ -231,96 +282,101 @@ static VOID term_trim P1_(char *, buf)
  *
  * if successful, returns NULL
  * if file locked, returns username of person locking the file
- * if other error, returns "LOCK ERROR: explanation"
+ * if other error, returns "LOCK ERROR -- explanation"
  *
  *********************/
 char *dolock P1_(CONST char *, filespec)
 /* filespec:  Full file spec of file to lock  */
 {
     struct stat sb;             /* stat buffer for info on files/dirs */
-    FILE *fp;                   /* ptr to lock file */
-    long proc_id;               /* process id from lock file */
-#if ( IS_UNIX() )
-    int rc;                     /* syscall return code */
-#endif
-    char filename[NFILEN];      /* name of file to lock */
-    char pathname[NFILEN];      /* path leading to file to lock */
-    char drivename[NFILEN];     /* drive for file to lock */
-    char lockpath[NFILEN];      /* lock directory name */
-    char lockfile[NFILEN];      /* lock file name */
-    char buf[NSTRING];          /* input buffer */
-    char host[NSTRING];         /* current host name */
-    static char result[NSTRING]; /* error return string */
+    FILE        *fp     = NULL;     /* ptr to lock file */
+    long        proc_id = 0;        /* process id from lock file */
+# if ( b_IS_UNIX )
+    int         rc      = 0;        /* syscall return code */
+# endif
+    char        filename[NFILEN];   /* name of file to lock */
+    char        pathname[NFILEN];   /* path leading to file to lock */
+    char        drivename[NFILEN];  /* drive for file to lock */
+    char        lockpath[NFILEN];   /* lock directory name */
+    char        lockfile[NFILEN];   /* lock file name */
+    char        buf[NSTRING];       /* input buffer */
+    char        host[NSTRING];      /* current host name */
+    static char result[NSTRING];    /* error return string */
+
+    ZEROMEM(sb);
+    ZEROMEM(filename);
+    ZEROMEM(pathname);
+    ZEROMEM(drivename);
+    ZEROMEM(lockpath);
+    ZEROMEM(lockfile);
+    ZEROMEM(buf);
+    ZEROMEM(host);
+    ZEROMEM(result);
 
     /* separate filespec into components */
-#if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     {
         char  new_filespec[NFILEN];
 
         ZEROMEM(new_filespec);
         xstrlcpy(new_filespec, GetPathUNX(filespec), SIZEOF(new_filespec));
 
-        XSTRCPY( filename, parse_name(new_filespec) );
-        XSTRCPY( pathname, parse_path(new_filespec) );
-        XSTRCPY( drivename, parse_drive(new_filespec) );
+        XSTRCPY(filename, parse_name(new_filespec));
+        XSTRCPY(pathname, parse_path(new_filespec));
+        XSTRCPY(drivename, parse_drive(new_filespec));
     }
-#else
-    XSTRCPY( filename, parse_name(filespec) );
-    XSTRCPY( pathname, parse_path(filespec) );
-    XSTRCPY( drivename, parse_drive(filespec) );
-#endif
-    if ( pathname[0] == 0 )
+# else
+    XSTRCPY(filename, parse_name(filespec));
+    XSTRCPY(pathname, parse_path(filespec));
+    XSTRCPY(drivename, parse_drive(filespec));
+# endif
+    if ( pathname[0] == 0 ) {
         XSTRCPY(pathname, ".");
+    }
 
+# if  LOCKDEBUG
+    TRC(("Locking [%s] [%s] [%s]", drivename, pathname, filename));
+# endif
     /* merge the drive into the pathname */
     XSTRCAT(drivename, pathname);
     XSTRCPY(pathname, drivename);
 
-# if  LOCKDEBUG
-    printf("Locking [%s] [%s]\n", pathname, filename);
-    tgetc();
-# endif
-
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
     /* check to see if we can access the path */
     if ( (rc = umc_stat(pathname, &sb)) != 0 )  {
 #  if  LOCKDEBUG
-        printf("umc_stat() = %u   errno = %u\n", rc, errno);
-        tgetc();
+        int errno_sv  = errno;
+
+        TRC(("umc_stat() = %d, errno = %d: %s", rc, errno_sv,
+             umc_strerror(errno_sv)));
 #  endif
         XSTRCPY(result, LOCKMSG);
         XSTRCAT(result, "Path not found");
 
         return (result);
     }
-    if ( (sb.st_mode & S_IFDIR) == 0 ) {
+    if ( !S_ISDIR(sb.st_mode) ) {
         XSTRCPY(result, LOCKMSG);
         XSTRCAT(result, "Illegal Path");
 
         return (result);
     }
-# endif /* IS_UNIX()  */
+# endif /* b_IS_UNIX  */
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
     XSTRCAT(lockpath, DIRSEPSTR);
     XSTRCAT(lockpath, LOCKDIR);
 # if  LOCKDEBUG
-    printf("Lockdir [%s]\n", lockpath);
-    tgetc();
+    TRC(("Lockdir [%s]", lockpath));
 # endif
 
     if ( umc_stat(lockpath, &sb) != 0 ) {
         /* create it! */
 # if  LOCKDEBUG
-        printf("MKDIR(%s)\n", lockpath);
-        tgetc();
+        TRC(("MKDIR(%s)", lockpath));
 # endif
-# if  ( IS_UNIX() )
-        if ( mkdir(lockpath, 0777) != 0 ) {
-# else
-        if ( mkdir(lockpath) != 0 ) {
-# endif
+        if ( umc_mkdir(lockpath) != 0 ) {
             XSTRCPY(result, LOCKMSG);
             switch ( errno ) {
 
@@ -331,11 +387,15 @@ char *dolock P1_(CONST char *, filespec)
             case ENOENT:
                 XSTRCAT(result, "No such file or directory");
                 break;
+
+            default:
+                XSTRCAT(result, "Unknown error creating lockpath");
+                break;
             }
 
             return (result);
         }
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         chmod(lockpath, 01777);
 # endif
     }
@@ -345,8 +405,7 @@ char *dolock P1_(CONST char *, filespec)
     XSTRCAT(lockfile, DIRSEPSTR);
     XSTRCAT(lockfile, filename);
 # if  LOCKDEBUG
-    printf("Lockfile [%s]\n", lockfile);
-    tgetc();
+    TRC(("Lockfile [%s]", lockfile));
 # endif
 
     if ( umc_stat(lockfile, &sb) != 0 ) {
@@ -356,33 +415,33 @@ char *dolock P1_(CONST char *, filespec)
             XSTRCPY(result, LOCKMSG);
             XSTRCAT(result, "Can not open lock file");
 # if  LOCKDEBUG
-            printf("Could not open lockfile [%s](%s)\n", lockfile, result);
-            tgetc();
+            TRC(("Could not open lockfile [%s](%s)", lockfile, result));
 # endif
 
             return (result);
         }
 
         /* and output the info needed */
-# if  ( IS_UNIX() )
-        fprintf( fp, "%lu\n", (long int)getpid() );
+# if  ( b_IS_UNIX )
+        fprintf(fp, "%lu\n", (unsigned long int)getpid());
 # else
         fprintf(fp, "%lu\n", 0ul); /* process ID */
 # endif
 
         /* user name */
-        if ( getenv("USER") )
+        if ( getenv("USER") )           {
             fprintf( fp, "%s\n", getenv("USER") );
-        else if ( getenv("LOGNAME") )
+        } else if ( getenv("LOGNAME") ) {
             fprintf( fp, "%s\n", getenv("LOGNAME") );
-        else
+        } else                          {
             fprintf(fp, "<unknown>\n");
+        }
 
         /* host name */
-        if ( getenv("HOST") )
+        if ( getenv("HOST") ) {
             fprintf( fp, "%s\n", getenv("HOST") );
-        else {
-# if  ( IS_UNIX() )
+        } else                {
+# if  ( b_IS_UNIX )
             ZEROMEM(buf);
             gethostname(buf, SIZEOF(buf) - 1);
             fprintf(fp, "%s\n", buf);
@@ -397,7 +456,7 @@ char *dolock P1_(CONST char *, filespec)
         fclose(fp);
 
         return (NULL);
-    } else {
+    } else                              {
         /* get the existing lock info */
         fp = fopen(lockfile, "r");
         if ( fp == (FILE *)NULL ) {
@@ -408,11 +467,11 @@ char *dolock P1_(CONST char *, filespec)
         }
 
         /* get the process id */
-        fgets(buf, NSTRING, fp);
+        fgets(buf, SIZEOF(buf), fp);
         proc_id = asc_int(buf);
 
         /* get the user name */
-        fgets(result, NSTRING, fp);
+        fgets(result, SIZEOF(result), fp);
         term_trim(result);
 
         /* get the host name */
@@ -421,14 +480,13 @@ char *dolock P1_(CONST char *, filespec)
         term_trim(buf);
         XSTRCAT(result, buf);
 
-# if  ( IS_UNIX() )
+# if  ( b_IS_UNIX )
         /* is it the current host? */
         ZEROMEM(host);
         gethostname(host, SIZEOF(host) - 1);
         if ( strcmp(buf, host) == 0 ) {
             /* see if the process is dead already */
             if ( kill(proc_id, 0) != 0 && errno == ESRCH ) {
-
                 /* kill the lock file and retry the lock */
                 fclose(fp);
                 umc_unlink(lockfile);
@@ -440,13 +498,12 @@ char *dolock P1_(CONST char *, filespec)
 
         /* get the time */
         XSTRCAT(result, " at ");
-        fgets(buf, NSTRING, fp);
+        fgets(buf, SIZEOF(buf), fp);
         term_trim(buf);
         XSTRCAT(result, buf);
         fclose(fp);
 # if  LOCKDEBUG
-        printf("Could not get lock: (%s)\n", result);
-        tgetc();
+        TRC(("Could not get lock: (%s)", result));
 # endif
 
         return (result);
@@ -466,64 +523,68 @@ char *dolock P1_(CONST char *, filespec)
 char *undolock P1_(CONST char *, filespec)
 /* filespec:  Filespec to unlock  */
 {
-    char filename[NFILEN];          /* name of file to lock */
-    char pathname[NFILEN];          /* path leading to file to lock */
-    char drivename[NFILEN];         /* drive for file to lock */
-    char lockpath[NFILEN];          /* lock directory name */
-    char lockfile[NFILEN];          /* lock file name */
+    char        filename[NFILEN];   /* name of file to lock */
+    char        pathname[NFILEN];   /* path leading to file to lock */
+    char        drivename[NFILEN];  /* drive for file to lock */
+    char        lockpath[NFILEN];   /* lock directory name */
+    char        lockfile[NFILEN];   /* lock file name */
     static char result[NSTRING];    /* error return string */
 
+    ZEROMEM(filename);
+    ZEROMEM(pathname);
+    ZEROMEM(drivename);
+    ZEROMEM(lockpath);
+    ZEROMEM(lockfile);
+    ZEROMEM(result);
+
     /* separate filespec into components */
-#if ( IS_UNIX() )
+# if ( b_IS_UNIX )
     {
         char  new_filespec[NFILEN];
 
         ZEROMEM(new_filespec);
         xstrlcpy(new_filespec, GetPathUNX(filespec), SIZEOF(new_filespec));
 
-        XSTRCPY( filename, parse_name(new_filespec) );
-        XSTRCPY( pathname, parse_path(new_filespec) );
-        XSTRCPY( drivename, parse_drive(new_filespec) );
+        XSTRCPY(filename, parse_name(new_filespec));
+        XSTRCPY(pathname, parse_path(new_filespec));
+        XSTRCPY(drivename, parse_drive(new_filespec));
     }
-#else
-    XSTRCPY( filename, parse_name(filespec) );
-    XSTRCPY( pathname, parse_path(filespec) );
-    XSTRCPY( drivename, parse_drive(filespec) );
-#endif
-    if ( pathname[0] == 0 )
+# else
+    XSTRCPY(filename, parse_name(filespec));
+    XSTRCPY(pathname, parse_path(filespec));
+    XSTRCPY(drivename, parse_drive(filespec));
+# endif
+    if ( pathname[0] == 0 ) {
         XSTRCPY(pathname, ".");
+    }
 
+# if  LOCKDEBUG
+    TRC(("Unlocking [%s] [%s] [%s]", drivename, pathname, filename));
+# endif
     /* merge the drive into the pathname */
     XSTRCAT(drivename, pathname);
     XSTRCPY(pathname, drivename);
-
-# if  LOCKDEBUG
-    printf("\nUnLocking [%s] [%s]\n", pathname, filename);
-    tgetc();
-# endif
 
     /* create the lock directory if it does not exist */
     XSTRCPY(lockpath, pathname);
     XSTRCAT(lockpath, DIRSEPSTR);
     XSTRCAT(lockpath, LOCKDIR);
 # if  LOCKDEBUG
-    printf("Lockdir [%s]\n", lockpath);
-    tgetc();
+    TRC(("Lockdir [%s]", lockpath));
 # endif
     /* check for the existance of this lockfile */
     XSTRCPY(lockfile, lockpath);
     XSTRCAT(lockfile, DIRSEPSTR);
     XSTRCAT(lockfile, filename);
 # if  LOCKDEBUG
-    printf("Lockfile [%s]\n", lockfile);
-    tgetc();
+    TRC(("Lockfile [%s]", lockfile));
 # endif
     if ( umc_unlink(lockfile) ) {
         XSTRCAT(result, "could not remove lock file");
 
         return (result);
     } else {
-        rmdir(lockpath); /* this will work only if dir is empty */
+        umc_rmdir(lockpath);  /* this will work only if dir is empty */
 
         return (NULL);
     }
@@ -532,11 +593,12 @@ char *undolock P1_(CONST char *, filespec)
 
 #else
 
-VOID dohello P0_()
+VOID dolockhello P0_()
 {
 }
 
 #endif
+#endif  /* ( FILOCK && WMCS ) */
 
 
 

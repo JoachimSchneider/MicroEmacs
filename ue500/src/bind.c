@@ -16,7 +16,6 @@
 
 
 #include <stdio.h>
-#include <stdlib.h>
 #include "estruct.h"
 #include "eproto.h"
 #include "edef.h"
@@ -72,18 +71,19 @@ int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
 int PASCAL NEAR deskey P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER int        c;                /* key to describe                        */
-    REGISTER CONST char *ptr;             /* string pointer to scan output strings  */
+    REGISTER int        c     = '\0';     /* key to describe                        */
+    REGISTER CONST char *ptr  = NULL;     /* string pointer to scan output strings  */
     char                outseq[NSTRING];  /* output buffer for command sequence     */
 
+    ZEROMEM(outseq);
     /* prompt the user to type us a key to describe */
     mlwrite(TEXT13);
 /*      ": describe-key " */
 
-    /* get the command sequence to describe change it to something we can print
-     * as well */
-    /* and dump it out */
-    ostring( cmdstr(c = getckey(FALSE), &outseq[0]) );
+    /* get the command sequence to describe change it to something we
+     * can print as well
+     * ... and dump it out */
+    ostring( getecnam(c = getckey(FALSE), &outseq[0], SIZEOF(outseq)) );
     ostring(" ");
 
     /* find the right ->function */
@@ -130,9 +130,9 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
                                    || (kfunc == ctrlg) );
 
     if ( clexec == FALSE ) {
-        /* change it to something we can print as well */
-        /* and dump it out */
-        ostring( cmdstr(c, &outseq[0]) );
+        /* change it to something we can print as well
+         * ... and dump it out */
+        ostring( getecnam(c, &outseq[0], SIZEOF(outseq)) );
     }
 
     /* if the function is a unique prefix key */
@@ -236,9 +236,9 @@ int PASCAL NEAR macrotokey P2_(int, f, int, n)
     /* get the command sequence to bind */
     c = getckey(FALSE);
 
-    /* change it to something we can print as well */
-    /* and dump it out */
-    ostring( cmdstr(c, &outseq[0]) );
+    /* change it to something we can print as well
+     * ... and dump it out */
+    ostring( getecnam(c, &outseq[0], SIZEOF(outseq)) );
 
     /* search the table to see if it exists */
     ktp = &keytab[0];
@@ -292,9 +292,9 @@ int PASCAL NEAR unbindkey P2_(int, f, int,n)
     /* get the command sequence to unbind */
     c = getckey(FALSE);                 /* get a command sequence */
 
-    /* change it to something we can print as well */
-    /* and dump it out */
-    ostring( cmdstr(c, &outseq[0]) );
+    /* change it to something we can print as well
+     * ... and dump it out */
+    ostring( getecnam(c, &outseq[0], SIZEOF(outseq)) );
 
     /* if it isn't bound, bitch */
     if ( unbindchar(c) == FALSE ) {
@@ -458,7 +458,7 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
                     outseq[cpos++] = ' ';
 
                 /* add in the command sequence */
-                cmdstr(ktp->k_code, &outseq[cpos]);
+                getecnam(ktp->k_code, &outseq[cpos], SIZEOF(outseq) - cpos);
 
                 /* and add it as a line into the buffer */
                 if ( addline(listbuf, outseq) != TRUE )
@@ -508,7 +508,7 @@ fail:   /* and on to the next name */
                     outseq[cpos++] = ' ';
 
                 /* add in the command sequence */
-                cmdstr(ktp->k_code, &outseq[cpos]);
+                getecnam(ktp->k_code, &outseq[cpos], SIZEOF(outseq) - cpos);
 
                 /* and add it as a line into the buffer */
                 if ( addline(listbuf, outseq) != TRUE )
@@ -678,18 +678,28 @@ CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
     while ( *cp ) {
 #if     AMIGA
         if ( *cp == ':' || *cp == '/' )
-elif    AOSVS | MV_UX
+#else
+#if     AOSVS | MV_UX
         if ( *cp == ':' )
-#elif   VMS
+#else
+#if     VMS
         if ( *cp == ':' || *cp == ']' )
-#elif   TOS
+#else
+#if     TOS
         if ( *cp == ':' || *cp == '\\' )
-#elif   IS_UNIX()
+#else
+#if     b_IS_UNIX
         if ( *cp == '/' )
-#elif   WMCS
+#else
+#if     WMCS
         if ( *cp == '_' || *cp == '/' )
 #else /* e.g. MSDOS | OS2 | WINNT | WINXP | FINDER  */
         if ( *cp == ':' || *cp == '\\' || *cp == '/' )
+#endif
+#endif
+#endif
+#endif
+#endif
 #endif
         {
             if ( ffropen(fname) == FIOSUC ) {
@@ -803,72 +813,87 @@ elif    AOSVS | MV_UX
     return (NULL);      /* no such luck */
 }
 
-/* CMDSTR:
+/* GETECNAM:
  *
  * Change a key command to a string we can print out. Return the string
- * passed in.
+ * passed in. The result may be up to 17 characters long so `seq' should
+ * be at least 18 characters long to avoid truncation.
  */
-char *PASCAL NEAR cmdstr P2_(int , c, char *, seq)
+char *PASCAL NEAR getecnam P3_(int , c, char *, seq, int, seqsiz)
 /* c:   Sequence to translate           */
 /* seq: Destination string for sequence */
 {
-    char *ptr;          /* pointer into current position in sequence */
+    /* pointer into current position in sequence: */
+    char        *ptr    = seq;
+    CONST char  *visres = NULL;
 
-    ptr = seq;
+    if ( 0 >= seqsiz )        {
+        return seq;
+    }
+    /* argument evaluated only once:  */
+#define getecnam_WSEQ_(c) do  {             \
+            if ( 1 == seqsiz-- )  goto end; \
+            *ptr++  = (c);                  \
+        } while ( 0 )
 
     /* apply ^X sequence if needed */
     if ( c & CTLX ) {
-        *ptr++ = '^';
-        *ptr++ = 'X';
+        getecnam_WSEQ_('^');
+        getecnam_WSEQ_('X');
     }
 
     /* apply ALT key sequence if needed */
     if ( c & ALTD ) {
-        *ptr++ = 'A';
-        *ptr++ = '-';
+        getecnam_WSEQ_('A');
+        getecnam_WSEQ_('-');
     }
 
     /* apply Shifted sequence if needed */
     if ( c & SHFT ) {
-        *ptr++ = 'S';
-        *ptr++ = '-';
+        getecnam_WSEQ_('S');
+        getecnam_WSEQ_('-');
     }
 
     /* apply MOUS sequence if needed */
     if ( c & MOUS ) {
-        *ptr++ = 'M';
-        *ptr++ = 'S';
+        getecnam_WSEQ_('M');
+        getecnam_WSEQ_('S');
     }
 
     /* apply meta sequence if needed */
     if ( c & META ) {
-        *ptr++ = 'M';
-        *ptr++ = '-';
+        getecnam_WSEQ_('M');
+        getecnam_WSEQ_('-');
     }
 
     /* apply SPEC sequence if needed */
     if ( c & SPEC ) {
-        *ptr++ = 'F';
-        *ptr++ = 'N';
+        getecnam_WSEQ_('F');
+        getecnam_WSEQ_('N');
     }
 
     /* apply control sequence if needed */
     if ( c & CTRF ) {
-
         /* non normal spaces look like @ */
-        if ( ptr == seq && ( (c & 255) == ' ' ) )
+        if ( ptr == seq && ( (c & 255) == ' ' ) ) {
             c = '@';
-
-        *ptr++ = '^';
+        }
+        getecnam_WSEQ_('^');
     }
 
-    c = c & 255;        /* strip the prefixes */
+    c = c & 0xFF;       /* strip the prefixes */
 
     /* and output the final sequence */
-    *ptr++ = c;
-    *ptr = 0;           /* terminate the string */
+    visres  = cmkvis(c);
+    while ( *visres ) {
+        getecnam_WSEQ_(*visres++);
+    }
+
+end:
+    *ptr = '\0';        /* terminate the string */
 
     return (seq);
+#undef getecnam_WSEQ_
 }
 
 /* GETBIND:
@@ -1096,7 +1121,7 @@ int PASCAL NEAR execkey P3_(KEYTAB *, key, int , f, int, n)
 
 #if     LOGFLG
         /* append the current command to the log file */
-        cmdstr(key->k_code, &outseq);
+        getecnam(key->k_code, &outseq, SIZEOF(outseq));
         fp = fopen("emacs.log", "a");
         fprintf(fp,
                 "<[%s] %s %s %d>\n",

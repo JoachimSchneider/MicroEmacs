@@ -36,6 +36,7 @@ $	cc_cmd char
 $	cc_cmd crypt
 $	cc_cmd display
 $ !!	cc_cmd dolock
+$	cc_cmd elang
 $	cc_cmd eval
 $	cc_cmd exec
 $	cc_cmd file

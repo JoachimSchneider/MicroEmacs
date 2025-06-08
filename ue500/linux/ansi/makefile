@@ -14,18 +14,16 @@ HDIR = ../../h
 
 # options and arguments to the C compiler
 #
-# - JES_REPAIR_CODE: Fix overwrites of the line data instead of bailing out
-# - EMACS_TRC: See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output into this file.
-#
 ##
+OPTFLAGS = -fno-strict-aliasing
 #WARNFLAGS = -Wall
- WARNFLAGS = -Wall -Wno-unused-local-typedefs
+DEFINES   =
+#DEFINES   = -DUSE_NOBLOCK_READ=1
+WARNFLAGS = -Wall -Wno-unused-variable
+#WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC -DJES_REPAIR_CODE
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)     -DEMACS_TRC
- CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2 -DEMACS_TRC
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) -O2
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS)
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS)
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS) -O2
 ##
 
 # Where to find the termcap/cureses library:
@@ -37,23 +35,28 @@ HDIR = ../../h
 
 # list of header files
 
-HFILES = estruct.h $(HDIR)/edef.h $(HDIR)/efunc.h $(HDIR)/epath.h $(HDIR)/ebind.h $(HDIR)/eproto.h
+HFILES = estruct.h $(HDIR)/ebind.h $(HDIR)/edef.h           \
+          $(HDIR)/elang.h $(HDIR)/epath.h $(HDIR)/eproto.h
+
 
 #list of object files
 
-F1 = $(OBJD)/abbrev.o $(OBJD)/ansi.o $(OBJD)/basic.o $(OBJD)/bind.o $(OBJD)/buffer.o
+F1 = $(OBJD)/abbrev.o $(OBJD)/ansi.o $(OBJD)/basic.o $(OBJD)/bind.o     \
+      $(OBJD)/buffer.o
 F2 = $(OBJD)/char.o $(OBJD)/crypt.o $(OBJD)/display.o $(OBJD)/dolock.o
 F3 = $(OBJD)/eval.o $(OBJD)/exec.o $(OBJD)/file.o $(OBJD)/fileio.o
 F4 = $(OBJD)/input.o $(OBJD)/isearch.o $(OBJD)/keyboard.o $(OBJD)/line.o
 F5 = $(OBJD)/lock.o $(OBJD)/main.o $(OBJD)/mouse.o $(OBJD)/screen.o
 F6 = $(OBJD)/random.o $(OBJD)/region.o $(OBJD)/search.o $(OBJD)/replace.o
-F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unix.o $(OBJD)/window.o $(OBJD)/word.o
+F7 = $(OBJD)/tags.o $(OBJD)/undo.o $(OBJD)/unixsys.o $(OBJD)/unixterm.o \
+      $(OBJD)/window.o $(OBJD)/word.o
+F8 = $(OBJD)/elang.o
 
 # product list
 
 all:	emacs
 
-OFILES =	$(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7)
+OFILES =  $(F1) $(F2) $(F3) $(F4) $(F5) $(F6) $(F7) $(F8)
 
 emacs:	$(OFILES)
 	$(CC) $(CFLAGS) $(OFILES) $(LIB_TERMCAP) -lc -o emacs
@@ -78,7 +81,9 @@ $(OBJD)/display.o: $(SRCD)/display.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/display.o $(SRCD)/display.c
 $(OBJD)/dolock.o: $(SRCD)/dolock.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/dolock.o $(SRCD)/dolock.c
-$(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.h
+$(OBJD)/elang.o: $(SRCD)/elang.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/elang.o $(SRCD)/elang.c
+$(OBJD)/eval.o: $(SRCD)/eval.c $(HFILES) $(HDIR)/evar.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/eval.o $(SRCD)/eval.c
 $(OBJD)/exec.o: $(SRCD)/exec.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/exec.o $(SRCD)/exec.c
@@ -96,7 +101,7 @@ $(OBJD)/line.o: $(SRCD)/line.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/line.o $(SRCD)/line.c
 $(OBJD)/lock.o: $(SRCD)/lock.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/lock.o $(SRCD)/lock.c
-$(OBJD)/main.o: $(SRCD)/main.c $(HFILES)
+$(OBJD)/main.o: $(SRCD)/main.c $(HFILES) $(HDIR)/efunc.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c
@@ -114,8 +119,10 @@ $(OBJD)/tags.o: $(SRCD)/tags.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/tags.o $(SRCD)/tags.c
 $(OBJD)/undo.o: $(SRCD)/undo.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/undo.o $(SRCD)/undo.c
-$(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
-	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
+$(OBJD)/unixsys.o: $(SRCD)/unixsys.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/unixsys.o $(SRCD)/unixsys.c
+$(OBJD)/unixterm.o: $(SRCD)/unixterm.c $(HFILES)
+	$(CC) $(CFLAGS) -c -o $(OBJD)/unixterm.o $(SRCD)/unixterm.c
 $(OBJD)/window.o: $(SRCD)/window.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/window.o $(SRCD)/window.c
 $(OBJD)/word.o: $(SRCD)/word.c $(HFILES)

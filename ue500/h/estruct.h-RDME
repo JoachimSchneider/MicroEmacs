@@ -1,0 +1,8 @@
+# SOF(estruct.h-RDME)
+
+
+Use h/estruct.h-tpl as a pattern for the platform-specific
+estruct.h (e.g. linux/ansi/estruct.h).
+
+
+# EOF(estruct.h-RDME)
