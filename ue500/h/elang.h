@@ -20,7 +20,7 @@
 # define LANGUAGE "english"
 #endif
 #if     FRENCH
-# if ( WINDOW_MSWIN || IS_UNIX() )
+# if ( WINDOW_MSWIN || b_IS_UNIX )
 #  include        "frenchis.h"  /* ISO version */
 # else
 #  include        "french.h"    /* IBM-PC char set */

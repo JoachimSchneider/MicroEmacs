@@ -174,7 +174,7 @@ int f, n;
     TTkclose();
     shellprog("");
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     sgarbf = TRUE;
@@ -216,7 +216,7 @@ int f, n;
         tgetc();
     }
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     sgarbf = TRUE;
 
@@ -245,7 +245,7 @@ int PASCAL NEAR execprg(f, n)
     TTkclose();
     execprog(line);
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     /* if we are interactive, pause here */
@@ -317,7 +317,7 @@ int f, n;
     TTkclose();
     shellprog(line);
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     sgarbf = TRUE;
@@ -397,7 +397,7 @@ int f, n;
     TTkclose();
     shellprog(line);
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
     TTkopen();
     sgarbf = TRUE;

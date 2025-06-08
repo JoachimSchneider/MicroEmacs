@@ -13,6 +13,7 @@ buffer.obj,-
 char.obj,-
 crypt.obj,-
 display.obj,-
+elang.obj,-
 eval.obj,-
 exec.obj,-
 file.obj,-

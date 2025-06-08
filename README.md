@@ -87,6 +87,27 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2025-04-11.00]
+  * It compiles and runs on BSD 4.1. This is a really old (1981) UNIX:
+    - No select() call
+    - No symbolic links
+    - No opendir(), readdir()
+    - No mkdir(), only mknod() which would require root privileges
+    - No vfprintf
+
+    The missing select made rewrite of the keyboard handling code
+    necessary: Indeed it was improved! Opendir() and readdir() were
+    implemented as proposed in Kernighan/Pike: The Unix Programming
+    Environment, 1984.
+
+    Of course a lot of minor changes were needed because of the pre
+    ANSI-C compiler, e.g.
+    - No `#elsif', no `#error', no `##' no `#str' in the preprocessor
+    - Prototypes were already handled by the P#_() and DCL() macros.
+    - The number of defines had to be reduced a lot as we got "too much
+      defining" errors. One main step was to change the language files
+      like english.h.
+
 [2024-05-23.00]
   * New escape character flag `~x' will be recognized im MicroEMACS
     macro language:

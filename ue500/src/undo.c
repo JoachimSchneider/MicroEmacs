@@ -22,12 +22,22 @@
 /*====================================================================*/
 
 
-#include        <stdio.h>
-#include        <string.h>
-#include        "estruct.h"
-#include        "eproto.h"
-#include        "edef.h"
-#include        "elang.h"
+/*==============================================================*/
+/* Include files                                                */
+/*==============================================================*/
+#include "estruct.h"            /* Emacs definitions            */
+#include "eproto.h"             /* Function definitions         */
+#include "edef.h"               /* Global variable definitions  */
+#include "elang.h"              /* Language definitions         */
+/*==============================================================*/
+
+
+/*==============================================================*/
+/* Static function declarations                                 */
+/*==============================================================*/
+static int PASCAL NEAR  undolist DCL((void));
+/*==============================================================*/
+
 
 /* UNDO_INSERT:
  *
@@ -75,7 +85,7 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
     if ( up == (UNDO_OBJ *)NULL )
         return;
 
-    memset(up, 0, undo_size);
+    umc_memset(up, 0, undo_size);
 
     /* update the buffer undo count */
     curwp->w_bufp->undo_count++;
@@ -265,127 +275,216 @@ int PASCAL NEAR undo_delete P2_(int, f, int, n)
 int PASCAL NEAR undo_list P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER int status;        /* stutus return */
+    REGISTER int  status  = FALSE;  /* status return  */
 
-    if ( ( status = undolist() ) != TRUE )
+    if ( ( status = undolist() ) != TRUE )  {
         return (status);
+    }
 
     return ( wpopup(ulistp) );
 }
 
 /* UNDOLIST:
  */
-int PASCAL NEAR undolist P0_()
+static int PASCAL NEAR undolist P0_()
 {
-    REGISTER char *cp1;         /* scanning pointer into line to build */
-    REGISTER char *cp2;
-    long count;                 /* number of remaining undo elements in stack */
-    UNDO_OBJ *up;               /* current undo object being listed */
-    char b[8];                  /* place to build ascii version of longs */
-    char line[128];             /* text buffer to hold current line */
-    int status;                 /* return status from subcommands */
+    /* scanning pointer into line to build:         */
+    REGISTER char *cp1  = NULL;
+    REGISTER char *cp2  = NULL;
+    /* number of remaining undo elements in stack:  */
+    long          count = 0;
+    /* current undo object being listed:            */
+    UNDO_OBJ      *up   = NULL;
+    /* place to build ascii version of longs:       */
+    char          b[C_8];
+    /* text buffer to hold current line:            */
+    char          line[NLINE];
+    /* return status from subcommands:              */
+    int           status  = 0;
+
+    ZEROMEM(b);
+    ZEROMEM(line);
 
     /* prepare and clear the buffer holding the undo list */
-    ulistp->b_flag &= ~BFCHG;                   /* Don't complain!  */
-    if ( ( status = bclear(ulistp) ) != TRUE )  /* Blow old text away   */
+    ulistp->b_flag &= ~BFCHG;   /* Don't complain! */
+    /* Blow old text away:  */
+    if ( ( status = bclear(ulistp) ) != TRUE )  {
         return (status);
+    }
 
     XSTRCPY(ulistp->b_fname, "");
 
     /* add in the header text */
-    if ( addline(ulistp, "           Line/Pos  REP   Type  Data") == FALSE||
-         addline(ulistp, "           --------  ---   ----  ----") == FALSE )
+    if ( addline(ulistp,
+            "           Line/Pos  REP   Type  Data") == FALSE ||
+         addline(ulistp,
+            "           --------  ---   ----  ----") == FALSE    )  {
         return (FALSE);
+    }
 
     /* scan through the undo stack, starting at the top! */
     up    = curwp->w_bufp->undo_head;
     count = curwp->w_bufp->undo_count;
     while ( up != NULL ) {
-
         /* Starting at the beginning of the line */
         cp1 = &line[0];
 
         /* add in the undo stack ordinal number */
-        flong_asc(b, 7, count);
+        flong_asc(b, SIZEOF(b) - 1, count);
         cp2 = &b[0];
-        while ( *cp2 )
+        while ( *cp2 )  {
+            if ( !BNDCHK_PTR(cp1, line) ) {
+                goto badend;
+            }
             *cp1++ = *cp2++;
+        }
+        if ( !BNDCHK_PTR(cp1, line) ) {
+            goto badend;
+        }
         *cp1++ = ' ';
 
         /* and then the line number */
-        flong_asc(b, 7, up->line_num);
+        flong_asc(b, SIZEOF(b) - 1, up->line_num);
         cp2 = &b[0];
-        while ( *cp2 )
+        while ( *cp2 )  {
+            if ( !BNDCHK_PTR(cp1, line) ) {
+                goto badend;
+            }
             *cp1++ = *cp2++;
+        }
+        if ( !BNDCHK_PTR(cp1, line) ) {
+            goto badend;
+        }
         *cp1++ = '/';
 
         /* and the offset into the line */
-        XSTRCPY( b, int_asc(up->offset) );
-        while ( STRLEN(b) < 6 )
-            XSTRCAT(b, " ");
+        xstrlcpy(b, int_asc(up->offset), SIZEOF(b));
+        while ( STRLEN(b) < C_6 ) {
+            xstrlcat(b, " ", SIZEOF(b));
+        }
         cp2 = &b[0];
-        while ( *cp2 )
+        while ( *cp2 )  {
+            if ( !BNDCHK_PTR(cp1, line) ) {
+                goto badend;
+            }
             *cp1++ = *cp2++;
+        }
+        if ( !BNDCHK_PTR(cp1, line) ) {
+            goto badend;
+        }
         *cp1++ = ' ';
 
         /* and the count */
-        XSTRCPY( b, int_asc(up->count) );
-        while ( STRLEN(b) < 3 )
-            XSTRCAT(b, " ");
+        xstrlcpy(b, int_asc(up->count), SIZEOF(b));
+        while ( STRLEN(b) < C_3 ) {
+            xstrlcat(b, " ", SIZEOF(b));
+        }
         cp2 = &b[0];
-        while ( *cp2 )
+        while ( *cp2 )  {
+            if ( !BNDCHK_PTR(cp1, line) ) {
+                goto badend;
+            }
             *cp1++ = *cp2++;
-        *cp1++ = ' ';                           /* Gap.         */
+        }
+        if ( !BNDCHK_PTR(cp1, line) ) {
+            goto badend;
+        }
+        *cp1++ = ' ';   /* Gap. */
 
         /* next, the undo type */
         switch ( up->type ) {
 
         case OP_CMND:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("CMND  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "CMND  ");
             break;
 
         case OP_CPOS:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("CPOS  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "CPOS  ");
             break;
 
         case OP_DELC:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("DELC  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "DELC  ");
-            cmdstr(up->undo_obj.obj_char, cp1 + 6);
+            getecnam(up->undo_obj.obj_char, cp1 + SLTLEN("DELC  "),
+                     SIZEOF(line) - (cp1 - line) - SLTLEN("DELC  "));
             break;
 
         case OP_DSTR:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("DSTR  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "DSTR  ");
+            if ( !BNDCHK_PTR(cp1, line) )                     {
+                goto badend;
+            }
             xstrcat(cp1, "\"");
-            strncat(cp1, up->undo_obj.obj_string, 40);
+            if ( !BNDCHK_PTRN(cp1, line, C_40 + 1) )          {
+                goto badend;
+            }
+            strncat(cp1, up->undo_obj.obj_string, C_40);
+            if ( !BNDCHK_PTRN(cp1, line, C_3) )               {
+                goto badend;
+            }
             cp1[26] = '+';
             cp1[27] = 0;
             xstrcat(cp1, "\"");
             break;
 
         case OP_INSC:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("INSC  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "INSC  ");
-            cmdstr(up->undo_obj.obj_char, cp1 + 6);
+            getecnam(up->undo_obj.obj_char, cp1 + SLTLEN("INSC  "),
+                     SIZEOF(line) - (cp1 - line) - SLTLEN("INSC  "));
             break;
 
         case OP_ISTR:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("ISTR  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "ISTR  ");
             break;
 
         case OP_REPC:
+            if ( !BNDCHK_PTRN(cp1, line, SIZEOF("REPC  ")) )  {
+                goto badend;
+            }
             xstrcpy(cp1, "REPC  ");
-            cmdstr(up->undo_obj.obj_char, cp1 + 6);
+            getecnam(up->undo_obj.obj_char, cp1 + SLTLEN("REPC  "),
+                     SIZEOF(line) - (cp1 - line) - SLTLEN("REPC  "));
             break;
         }
 
         /* terminate and add the built line into the buffer */
-        if ( addline(ulistp, line) == FALSE )
+        if ( addline(ulistp, line) == FALSE ) {
+            TRC(("undolist(): --- addline() == FALSE --- line = <%s>",
+                 line));
             return (FALSE);
+        } else                                {
+            TRC(("undolist(): --- addline() == TRUE --- line = <%s>",
+                 line));
+        }
 
         /* on to the next undo! */
         count--;
         up = up->next;
     }
 
+    goto goodend;
+badend:
+    TRC(("undolist(): --- *badend* --- line = <%s>", line));
+    return (FALSE);
+
+goodend:
     return (TRUE);
 }
 
@@ -426,7 +525,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
     UNDO_OBJ  *up   = NULL;   /* ptr to undo struct to free */
     UNDO_OBJ  *lp   = NULL;   /* last undo struct before up */
 
-    static int  firstcall = !0;
+    static int  firstcall = 1;
 
     if ( firstcall )  {
         firstcall = 0;
@@ -442,7 +541,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
         /* attempt to allocate the memory */
         ptr = (char *)malloc(nbytes);
         if ( ptr != NULL )  {
-            memset(ptr, 0, nbytes);
+            umc_memset(ptr, 0, nbytes);
 
             return ptr;
         }

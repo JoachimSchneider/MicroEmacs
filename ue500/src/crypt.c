@@ -241,7 +241,7 @@ static int PASCAL NEAR mod95 P1_(int, val)
 
 #else
 
-VOID nocrypt P0_()
+VOID crypthello P0_()
 {
 }
 

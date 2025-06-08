@@ -35,9 +35,9 @@
  * NBLOCK is a power of 2.
  */
 #if ( 0 )
-# define BSIZE(a)   ( ((a) + NBLOCK - 1) & ( ~(NBLOCK - 1) ) )
+# define LBSIZE(a)  ( ((a) + NBLOCK - 1) & ( ~(NBLOCK - 1) ) )
 #else
-# define BSIZE(a)   ( ((a) + NBLOCK - 1) / NBLOCK * NBLOCK )
+# define LBSIZE(a)  ( ((a) + NBLOCK - 1) / NBLOCK * NBLOCK )
 #endif
 
 static long last_size = -1L;    /* last # of bytes yanked */
@@ -283,7 +283,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
 
             return (FALSE);
         }
-        if ( ( lp2 = lalloc(BSIZE(n)) ) == NULL ) /* Allocate new line    */
+        if ( ( lp2 = lalloc(LBSIZE(n)) ) == NULL ) /* Allocate new line    */
             return (FALSE);
 
         set_lused(lp2, n);
@@ -301,7 +301,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     }
     doto = get_w_doto(curwp);                     /* Save for later.      */
     if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate     */
-        if ( ( lp2 = lalloc(BSIZE(get_lused(lp1) + n)) ) == NULL )
+        if ( ( lp2 = lalloc(LBSIZE(get_lused(lp1) + n)) ) == NULL )
             return (FALSE);
 
         set_lused(lp2, get_lused(lp1) + n);

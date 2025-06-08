@@ -29,7 +29,6 @@
 #define DXVT(a) xvt_dbg(a); xvt_dbg(NULL)
 
 #include        <stdio.h>
-#include        <stdlib.h>
 #include        "estruct.h"
 #include        "eproto.h"
 #include        "edef.h"

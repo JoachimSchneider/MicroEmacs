@@ -203,10 +203,10 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
  *
  * Used by TOKEN()
  */
-static int  GetHexDigVal(char d)
+static int  GetHexDigVal P1_(char, d)
 {
-    static int  FirstCall = !0;
-    static int  digtab[(int)(unsigned char)(-1) + 1];
+    static int  FirstCall = 1;
+    static int  digtab[0xFF/***(int)(unsigned char)(-1)***/ + 1];
 # define SET_DIG_VAL_(d, v) digtab[(int)(unsigned char) (d)]  = (v)
 
     if ( FirstCall )  {
@@ -390,13 +390,19 @@ int PASCAL NEAR nextarg P4_(
 
     /* if we are interactive, go get it! */
     if ( clexec == FALSE ) {
+        int rc  = 0;
+
         /* prompt the user for the input string */
         if ( discmd ) {
             if ( prompt ) mlwrite(prompt);
-        } else
+        } else        {
             movecursor(term.t_nrow, 0);
+        }
+        terminchr = terminator;
+        rc  = getstring((unsigned char *)buffer, size, terminator);
+        terminchr = '\0';
 
-        return ( getstring((unsigned char *)buffer, size, terminator) );
+        return rc;
     }
 
     /* grab token and advance past */

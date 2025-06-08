@@ -22,329 +22,333 @@
 /*34567890123456789012345678901234567890123456789012345678901234567890*/
 /*====================================================================*/
 
+/**********************************************************************/
+#include "eproto.h"
+/**********************************************************************/
+
 
 #define OQUOTE_CHAR     174
 #define CQUOTE_CHAR     175
 
 
-#define TEXT1   "[Lancement d'un nouvel interpr\202teur]"                 /*"[Starting new CLI]"*/
-#define TEXT2   "[\220criture du fichier filtre impossible]"              /*"[Cannot write filter file]"*/
-#define TEXT3   "[L'ex\202cution a \202chou\202]"                         /*"[Execution failed]"*/
-#define TEXT4   "Variable TERM non d\202finie"                            /*"Shell variable TERM not defined!"*/
-#define TEXT5   "Terminal non 'vt100'!"                                   /*"Terminal type not 'vt100'!"*/
-#define TEXT6   "\r\n\n[Termin\202]"                                      /*"\r\n\n[End]"*/
-#define TEXT7   "Aller \205 la ligne: "                                   /*"Line to GOTO: "*/
-#define TEXT8   "[Annul\202]"                                             /*"[Aborted]"*/
-#define TEXT9   "[Marque %d pos\202e]"                                    /*"[Mark set]"*/
-#define TEXT10  "[Marque %d enlev\202e]"                                  /*"[Mark removed]"*/
-#define TEXT11  "Pas de marque %d dans cette fen\210tre"                  /*"No mark %d in this window"*/
-#define TEXT12  "[Fichier Help absent]"                                   /*"[Help file is not online]"*/
-#define TEXT13  ": d\202crire-la-touche "                                 /*": describe-key "*/
-#define TEXT14  "Non li\202e"                                             /*"Not Bound"*/
-#define TEXT15  ": lier-une-touche "                                      /*": bind-to-key "*/
-#define TEXT16  "[Fonction inexistante]"                                  /*"[No such function]"*/
-#define TEXT17  "La table des liens est PLEINE!"                          /*"Binding table FULL!"*/
-#define TEXT18  ": touche-\205-d\202lier "                                /*": unbind-key "*/
-#define TEXT19  "[Touche non li\202e]"                                    /*"[Key not bound]"*/
-#define TEXT20  "Cha\214ne a-propos: "                                    /*"Apropos string: "*/
-#define TEXT21  "Liste des liens"                                         /*"Binding list"*/
-#define TEXT22  "Affichage de la liste des liens impossible"              /*"Can not display binding list"*/
-#define TEXT23  "[Cr\202ation de la liste des liens]"                     /*"[Building binding list]"*/
-#define TEXT24  "Tampon \205 utiliser"                                    /*"Use buffer"*/
-#define TEXT25  "Tampon \205 utiliser: "                                  /*"Use buffer: "*/
-#define TEXT26  "Tampon \205 d\202truire"                                 /*"Kill buffer"*/
-#define TEXT27  "Tampon \205 d\202piler: "                                /*"Pop buffer: "*/
-#define TEXT28  "Le tampon est affich\202"                                /*"Buffer is being displayed"*/
-#define TEXT29  "Changer le nom du tampon en: "                           /*"Change buffer name to: "*/
+TDCLDEF char TEXT1[NOSZ_]   TINIT_("[Lancement d'un nouvel interpr\202teur]");  /*"[Starting new CLI]"*/
+TDCLDEF char TEXT2[NOSZ_]   TINIT_("[\220criture du fichier filtre impossible]");  /*"[Cannot write filter file]"*/
+TDCLDEF char TEXT3[NOSZ_]   TINIT_("[L'ex\202cution a \202chou\202]");  /*"[Execution failed]"*/
+TDCLDEF char TEXT4[NOSZ_]   TINIT_("Variable TERM non d\202finie");  /*"Shell variable TERM not defined!"*/
+TDCLDEF char TEXT5[NOSZ_]   TINIT_("Terminal non 'vt100'!");  /*"Terminal type not 'vt100'!"*/
+TDCLDEF char TEXT6[NOSZ_]   TINIT_("\r\n\n[Termin\202]");  /*"\r\n\n[End]"*/
+TDCLDEF char TEXT7[NOSZ_]   TINIT_("Aller \205 la ligne: ");  /*"Line to GOTO: "*/
+TDCLDEF char TEXT8[NOSZ_]   TINIT_("[Annul\202]");       /*"[Aborted]"*/
+TDCLDEF char TEXT9[NOSZ_]   TINIT_("[Marque %d pos\202e]");  /*"[Mark set]"*/
+TDCLDEF char TEXT10[NOSZ_]  TINIT_("[Marque %d enlev\202e]");  /*"[Mark removed]"*/
+TDCLDEF char TEXT11[NOSZ_]  TINIT_("Pas de marque %d dans cette fen\210tre");  /*"No mark %d in this window"*/
+TDCLDEF char TEXT12[NOSZ_]  TINIT_("[Fichier Help absent]");  /*"[Help file is not online]"*/
+TDCLDEF char TEXT13[NOSZ_]  TINIT_(": d\202crire-la-touche ");  /*": describe-key "*/
+TDCLDEF char TEXT14[NOSZ_]  TINIT_("Non li\202e");       /*"Not Bound"*/
+TDCLDEF char TEXT15[NOSZ_]  TINIT_(": lier-une-touche ");  /*": bind-to-key "*/
+TDCLDEF char TEXT16[NOSZ_]  TINIT_("[Fonction inexistante]");  /*"[No such function]"*/
+TDCLDEF char TEXT17[NOSZ_]  TINIT_("La table des liens est PLEINE!");  /*"Binding table FULL!"*/
+TDCLDEF char TEXT18[NOSZ_]  TINIT_(": touche-\205-d\202lier ");  /*": unbind-key "*/
+TDCLDEF char TEXT19[NOSZ_]  TINIT_("[Touche non li\202e]");  /*"[Key not bound]"*/
+TDCLDEF char TEXT20[NOSZ_]  TINIT_("Cha\214ne a-propos: ");  /*"Apropos string: "*/
+TDCLDEF char TEXT21[NOSZ_]  TINIT_("Liste des liens");   /*"Binding list"*/
+TDCLDEF char TEXT22[NOSZ_]  TINIT_("Affichage de la liste des liens impossible");  /*"Can not display binding list"*/
+TDCLDEF char TEXT23[NOSZ_]  TINIT_("[Cr\202ation de la liste des liens]");  /*"[Building binding list]"*/
+TDCLDEF char TEXT24[NOSZ_]  TINIT_("Tampon \205 utiliser");  /*"Use buffer"*/
+TDCLDEF char TEXT25[NOSZ_]  TINIT_("Tampon \205 utiliser: ");  /*"Use buffer: "*/
+TDCLDEF char TEXT26[NOSZ_]  TINIT_("Tampon \205 d\202truire");  /*"Kill buffer"*/
+TDCLDEF char TEXT27[NOSZ_]  TINIT_("Tampon \205 d\202piler: ");  /*"Pop buffer: "*/
+TDCLDEF char TEXT28[NOSZ_]  TINIT_("Le tampon est affich\202");  /*"Buffer is being displayed"*/
+TDCLDEF char TEXT29[NOSZ_]  TINIT_("Changer le nom du tampon en: ");  /*"Change buffer name to: "*/
 
 /*              "ACTN   Modes      Size  Buffer          File"*/
-#define TEXT30  "ACTN   Modes    Taille  Tampon          Fichier"
+TDCLDEF char TEXT30[NOSZ_]  TINIT_("ACTN   Modes    Taille  Tampon          Fichier");
 
-#define TEXT31  "         Modes Globaux"                                  /*"         Global Modes"*/
-#define TEXT32  "Annuler les modifications"                               /*"Discard changes"*/
-#define TEXT33  "Cha\214ne d'encryptage: "                                /*"Encryption String: "*/
-#define TEXT34  "Fichier: "                                               /*"File: "*/
-#define TEXT35  "autre utilisateur"                                       /*"another user"*/
-#define TEXT36  "ERREUR AU VERROUILLAGE"                                  /*"LOCK ERROR -- "*/
-#define TEXT37  "v\202rification de l'existence de %s\n"                  /*"checking for existence of %s\n"*/
-#define TEXT38  "cr\202ation du r\202pertoire %s\n"                       /*"making directory %s\n"*/
-#define TEXT39  "en cours de cr\202ation de %s\n"                         /*"creating %s\n"*/
-#define TEXT40  "cr\202ation d'un fichier verrouill\202 impossible"       /*"could not create lock file"*/
-#define TEXT41  "pid: %ld\n"                                              /*"pid is %ld\n"*/
-#define TEXT42  "lecture du fichier verrouill\202 %s\n"                   /*"reading lock file %s\n"*/
-#define TEXT43  "lecture du fichier verrouill\202 impossible"             /*"could not read lock file"*/
-#define TEXT44  "le pid de %s est %ld\n"                                  /*"pid in %s is %ld\n"*/
-#define TEXT45  "envoi d'un signal au processus %ld\n"                    /*"signaling process %ld\n"*/
-#define TEXT46  "le processus existe"                                     /*"process exists"*/
-#define TEXT47  "kill a echou\202"                                        /*"kill was bad"*/
-#define TEXT48  "succ\212s du kill; le processus existe"                  /*"kill was good; process exists"*/
-#define TEXT49  "unlink de %s en cours\n"                                 /*"attempting to unlink %s\n"*/
-#define TEXT50  "destruction impossible d'un fichier verrouill\202"       /*"could not remove lock file"*/
-#define TEXT51  "Variable \205 positionner: "                             /*"Variable to set: "*/
-#define TEXT52  "%%La variable '%s' n'existe pas"                         /*"%%No such variable as '%s'"*/
-#define TEXT53  "Valeur: "                                                /*"Value: "*/
-#define TEXT54  "[Macro termin\202e anormalement]"                        /*"[Macro aborted]"*/
-#define TEXT55  "Affichage de la variable: "                              /*"Variable to display: "*/
-#define TEXT56  "Liste des variables"                                     /*"Variable list"*/
-#define TEXT57  "Affichage impossible de la liste des variables"          /*"Can not display variable list"*/
-#define TEXT58  "[Construction de la liste des variables]"                /*"[Building variable list]"*/
-#define TEXT59  UNUSED
+TDCLDEF char TEXT31[NOSZ_]  TINIT_("         Modes Globaux");  /*"         Global Modes"*/
+TDCLDEF char TEXT32[NOSZ_]  TINIT_("Annuler les modifications");  /*"Discard changes"*/
+TDCLDEF char TEXT33[NOSZ_]  TINIT_("Cha\214ne d'encryptage: ");  /*"Encryption String: "*/
+TDCLDEF char TEXT34[NOSZ_]  TINIT_("Fichier: ");         /*"File: "*/
+TDCLDEF char TEXT35[NOSZ_]  TINIT_("autre utilisateur");  /*"another user"*/
+TDCLDEF char TEXT36[NOSZ_]  TINIT_("ERREUR AU VERROUILLAGE");  /*"LOCK ERROR -- "*/
+TDCLDEF char TEXT37[NOSZ_]  TINIT_("v\202rification de l'existence de %s\n");  /*"checking for existence of %s\n"*/
+TDCLDEF char TEXT38[NOSZ_]  TINIT_("cr\202ation du r\202pertoire %s\n");  /*"making directory %s\n"*/
+TDCLDEF char TEXT39[NOSZ_]  TINIT_("en cours de cr\202ation de %s\n");  /*"creating %s\n"*/
+TDCLDEF char TEXT40[NOSZ_]  TINIT_("cr\202ation d'un fichier verrouill\202 impossible");  /*"could not create lock file"*/
+TDCLDEF char TEXT41[NOSZ_]  TINIT_("pid: %ld\n");        /*"pid is %ld\n"*/
+TDCLDEF char TEXT42[NOSZ_]  TINIT_("lecture du fichier verrouill\202 %s\n");  /*"reading lock file %s\n"*/
+TDCLDEF char TEXT43[NOSZ_]  TINIT_("lecture du fichier verrouill\202 impossible");  /*"could not read lock file"*/
+TDCLDEF char TEXT44[NOSZ_]  TINIT_("le pid de %s est %ld\n");  /*"pid in %s is %ld\n"*/
+TDCLDEF char TEXT45[NOSZ_]  TINIT_("envoi d'un signal au processus %ld\n");  /*"signaling process %ld\n"*/
+TDCLDEF char TEXT46[NOSZ_]  TINIT_("le processus existe");  /*"process exists"*/
+TDCLDEF char TEXT47[NOSZ_]  TINIT_("kill a echou\202");  /*"kill was bad"*/
+TDCLDEF char TEXT48[NOSZ_]  TINIT_("succ\212s du kill; le processus existe");  /*"kill was good; process exists"*/
+TDCLDEF char TEXT49[NOSZ_]  TINIT_("unlink de %s en cours\n");  /*"attempting to unlink %s\n"*/
+TDCLDEF char TEXT50[NOSZ_]  TINIT_("destruction impossible d'un fichier verrouill\202");  /*"could not remove lock file"*/
+TDCLDEF char TEXT51[NOSZ_]  TINIT_("Variable \205 positionner: ");  /*"Variable to set: "*/
+TDCLDEF char TEXT52[NOSZ_]  TINIT_("%%La variable '%s' n'existe pas");  /*"%%No such variable as '%s'"*/
+TDCLDEF char TEXT53[NOSZ_]  TINIT_("Valeur: ");          /*"Value: "*/
+TDCLDEF char TEXT54[NOSZ_]  TINIT_("[Macro termin\202e anormalement]");  /*"[Macro aborted]"*/
+TDCLDEF char TEXT55[NOSZ_]  TINIT_("Affichage de la variable: ");  /*"Variable to display: "*/
+TDCLDEF char TEXT56[NOSZ_]  TINIT_("Liste des variables");  /*"Variable list"*/
+TDCLDEF char TEXT57[NOSZ_]  TINIT_("Affichage impossible de la liste des variables");  /*"Can not display variable list"*/
+TDCLDEF char TEXT58[NOSZ_]  TINIT_("[Construction de la liste des variables]");  /*"[Building variable list]"*/
+TDCLDEF char TEXT59[NOSZ_]  TINIT_("");                  /* UNUSED */
 
 /*              "Line %d/%d Col %d/%d Char %D/%D (%d%%) char = 0x%x"*/
-#define TEXT60  "Ligne %D/%D Col %d/%d Car %D/%D (%d%%) car = 0x%x"
+TDCLDEF char TEXT60[NOSZ_]  TINIT_("Ligne %D/%D Col %d/%d Car %D/%D (%d%%) car = 0x%x");
 
-#define TEXT61  "<NOT USED>"                                              /*"not used"*/
-#define TEXT62  "Mode global \205 "                                       /*"Global mode to "*/
-#define TEXT63  "Mode \205 "                                              /*"Mode to "*/
-#define TEXT64  "ajouter: "                                               /*"add: "*/
-#define TEXT65  "supprimer: "                                             /*"delete: "*/
-#define TEXT66  "Mode inexistant!"                                        /*"No such mode!"*/
-#define TEXT67  "Message \205 \202crire: "                                /*"Message to write: "*/
-#define TEXT68  "Cha\214ne \205 ins\202rer: "                             /*"String to insert<META>: "*/
-#define TEXT69  "Cha\214ne \205 substituer: "                             /*"String to overwrite<META>: "*/
-#define TEXT70  "[R\202gion copi\202e]"                                   /*"[region copied]"*/
-#define TEXT71  "%%Ce tampon est d\202j\205 diminu\202"                   /*"%%This buffer is already narrowed"*/
+TDCLDEF char TEXT61[NOSZ_]  TINIT_("<NOT USED>");        /*"not used"*/
+TDCLDEF char TEXT62[NOSZ_]  TINIT_("Mode global \205 ");  /*"Global mode to "*/
+TDCLDEF char TEXT63[NOSZ_]  TINIT_("Mode \205 ");        /*"Mode to "*/
+TDCLDEF char TEXT64[NOSZ_]  TINIT_("ajouter: ");         /*"add: "*/
+TDCLDEF char TEXT65[NOSZ_]  TINIT_("supprimer: ");       /*"delete: "*/
+TDCLDEF char TEXT66[NOSZ_]  TINIT_("Mode inexistant!");  /*"No such mode!"*/
+TDCLDEF char TEXT67[NOSZ_]  TINIT_("Message \205 \202crire: ");  /*"Message to write: "*/
+TDCLDEF char TEXT68[NOSZ_]  TINIT_("Cha\214ne \205 ins\202rer: ");  /*"String to insert<META>: "*/
+TDCLDEF char TEXT69[NOSZ_]  TINIT_("Cha\214ne \205 substituer: ");  /*"String to overwrite<META>: "*/
+TDCLDEF char TEXT70[NOSZ_]  TINIT_("[R\202gion copi\202e]");  /*"[region copied]"*/
+TDCLDEF char TEXT71[NOSZ_]  TINIT_("%%Ce tampon est d\202j\205 diminu\202");  /*"%%This buffer is already narrowed"*/
 /*              "%%Must narrow at least 1 full line"*/
-#define TEXT72  "%%La diminution doit \210tre d'au moins une ligne compl\212te"
-#define TEXT73  "[Le tampon est diminu\202]"                              /*"[Buffer is narrowed]"*/
-#define TEXT74  "%%Ce tampon n'est pas diminu\202"                        /*"%%This buffer is not narrowed"*/
-#define TEXT75  "[Tampon \202largi]"                                      /*"[Buffer is widened]"*/
-#define TEXT76  "Pas de marque dans cette fen\210tre"                     /*"No mark set in this window"*/
-#define TEXT77  "Bogue: marque perdue"                                    /*"Bug: lost mark"*/
-#define TEXT78  "Recherche avant "                                        /*"Search"*/
-#define TEXT79  "Pas trouv\202"                                           /*"Not found"*/
-#define TEXT80  "Cha\214ne non initialis\202e"                            /*"No pattern set"*/
-#define TEXT81  "Recherche arri\212re "                                   /*"Reverse search"*/
-#define TEXT82  UNUSED
-#define TEXT83  UNUSED
-#define TEXT84  "Remplacer "                                              /*"Replace"*/
-#define TEXT85  "Remplacer avec confirmation "                            /*"Query replace"*/
-#define TEXT86  "par "                                                    /*"with"*/
-#define TEXT87  "Remplacer '"                                             /*"Replace '"*/
-#define TEXT88  "' par '"                                                 /*"' with '"*/
-#define TEXT89  "Annul\202!"                                              /*"Aborted!"*/
+TDCLDEF char TEXT72[NOSZ_]  TINIT_("%%La diminution doit \210tre d'au moins une ligne compl\212te");
+TDCLDEF char TEXT73[NOSZ_]  TINIT_("[Le tampon est diminu\202]");  /*"[Buffer is narrowed]"*/
+TDCLDEF char TEXT74[NOSZ_]  TINIT_("%%Ce tampon n'est pas diminu\202");  /*"%%This buffer is not narrowed"*/
+TDCLDEF char TEXT75[NOSZ_]  TINIT_("[Tampon \202largi]");  /*"[Buffer is widened]"*/
+TDCLDEF char TEXT76[NOSZ_]  TINIT_("Pas de marque dans cette fen\210tre");  /*"No mark set in this window"*/
+TDCLDEF char TEXT77[NOSZ_]  TINIT_("Bogue: marque perdue");  /*"Bug: lost mark"*/
+TDCLDEF char TEXT78[NOSZ_]  TINIT_("Recherche avant ");  /*"Search"*/
+TDCLDEF char TEXT79[NOSZ_]  TINIT_("Pas trouv\202");     /*"Not found"*/
+TDCLDEF char TEXT80[NOSZ_]  TINIT_("Cha\214ne non initialis\202e");  /*"No pattern set"*/
+TDCLDEF char TEXT81[NOSZ_]  TINIT_("Recherche arri\212re ");  /*"Reverse search"*/
+TDCLDEF char TEXT82[NOSZ_]  TINIT_("");                  /* UNUSED */
+TDCLDEF char TEXT83[NOSZ_]  TINIT_("");                  /* UNUSED */
+TDCLDEF char TEXT84[NOSZ_]  TINIT_("Remplacer ");        /*"Replace"*/
+TDCLDEF char TEXT85[NOSZ_]  TINIT_("Remplacer avec confirmation ");  /*"Query replace"*/
+TDCLDEF char TEXT86[NOSZ_]  TINIT_("par ");              /*"with"*/
+TDCLDEF char TEXT87[NOSZ_]  TINIT_("Remplacer '");       /*"Replace '"*/
+TDCLDEF char TEXT88[NOSZ_]  TINIT_("' par '");           /*"' with '"*/
+TDCLDEF char TEXT89[NOSZ_]  TINIT_("Annul\202!");        /*"Aborted!"*/
 
 /*              "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "*/
-#define TEXT90  "(O)Oui, (N)on, (!)Remp.tout, (U)ndo prec., (^G)Fin,(.)Fin debut, (?)Aide: "
+TDCLDEF char TEXT90[NOSZ_]  TINIT_("(O)Oui, (N)on, (!)Remp.tout, (U)ndo prec., (^G)Fin,(.)Fin debut, (?)Aide: ");
 
-#define TEXT91  "Cha\214ne vide remplac\202e, arr\210t"                   /*"Empty string replaced, stopping."*/
-#define TEXT92  "%D substitutions"                                        /* same in French */
-#define TEXT93  "%%ERREUR pendant la suppression"                         /*"%%ERROR while deleting"*/
-#define TEXT94  "%%Plus de m\202moire disponible"                         /*"%%Out of memory"*/
-#define TEXT95  "%%mceq: qu'est-ce que %d?"                               /*"%%mceq: what is %d?"*/
-#define TEXT96  "%%Pas de caract\212res dans cette classe"                /*"%%No characters in character class"*/
-#define TEXT97  "%%Classe de caract\212res non termin\202e"               /*"%%Character class not ended"*/
-#define TEXT98  "Marge droite non initialis\202e"                         /*"No fill column set"*/
-#define TEXT99  "[PLUS DE M\220MOIRE]"                                    /*"[OUT OF MEMORY]"*/
+TDCLDEF char TEXT91[NOSZ_]  TINIT_("Cha\214ne vide remplac\202e, arr\210t");  /*"Empty string replaced, stopping."*/
+TDCLDEF char TEXT92[NOSZ_]  TINIT_("%D substitutions");  /* same in French */
+TDCLDEF char TEXT93[NOSZ_]  TINIT_("%%ERREUR pendant la suppression");  /*"%%ERROR while deleting"*/
+TDCLDEF char TEXT94[NOSZ_]  TINIT_("%%Plus de m\202moire disponible");  /*"%%Out of memory"*/
+TDCLDEF char TEXT95[NOSZ_]  TINIT_("%%mceq: qu'est-ce que %d?");  /*"%%mceq: what is %d?"*/
+TDCLDEF char TEXT96[NOSZ_]  TINIT_("%%Pas de caract\212res dans cette classe");  /*"%%No characters in character class"*/
+TDCLDEF char TEXT97[NOSZ_]  TINIT_("%%Classe de caract\212res non termin\202e");  /*"%%Character class not ended"*/
+TDCLDEF char TEXT98[NOSZ_]  TINIT_("Marge droite non initialis\202e");  /*"No fill column set"*/
+TDCLDEF char TEXT99[NOSZ_]  TINIT_("[PLUS DE M\220MOIRE]");  /*"[OUT OF MEMORY]"*/
 /*              "Words %D Chars %D Lines %d Avg chars/word %f"*/
-#define TEXT100 "Mots %D Car %D Lignes %d Moyenne car/mots %f"
-#define TEXT101 "[Je ne peux pas chercher et me d\202placer en m\210me temps!]"     /*"[Can not search and goto at the same time!]"*/
-#define TEXT102 "[Aller-a: Param\212tre erron\202]"                       /*"[Bogus goto argument]"*/
-#define TEXT103 "[Sauvegarde de %s]"                                      /*"[Saving %s]"*/
-#define TEXT104 "Des tampons ont \202t\202 modifi\202s. On quitte malgr\202 tout"   /*"Modified buffers exist. Leave anyway"*/
-#define TEXT105 "%%Macro d\202j\205 active"                               /*"%%Macro already active"*/
-#define TEXT106 "[D\202but de la macro]"                                  /*"[Start macro]"*/
-#define TEXT107 "%%Macro non active"                                      /*"%%Macro not active"*/
-#define TEXT108 "[Fin de la macro]"                                       /*"[End macro]"*/
-#define TEXT109 "[Touche interdite dans le mode VIEW]"                    /*"[Key illegal in VIEW mode]"*/
-#define TEXT110 "[Commande \205 usage RESTREINT]"                         /*"[That command is RESTRICTED]"*/
-#define TEXT111 "Pas de macro indiqu\202e"                                /*"No macro specified"*/
-#define TEXT112 "Num\202ro de macro hors limite"                          /*"Macro number out of range"*/
-#define TEXT113 "Cr\202ation de macro impossible"                         /*"Can not create macro"*/
-#define TEXT114 "Nom de la proc\202dure: "                                /*"Procedure name: "*/
-#define TEXT115 "Ex\202cuter la proc\202dure"                             /*"Execute procedure"*/
-#define TEXT116 "Proc\202dure inexistante: "                              /*"No such procedure"*/
-#define TEXT117 "Ex\202cuter le tampon: "                                 /*"Execute buffer"*/
-#define TEXT118 "Tampon inexistant"                                       /*"No such buffer"*/
-#define TEXT119 "%%Plus de m\202moire pendant la recherche"               /*"%%Out of memory during while scan"*/
-#define TEXT120 "%%!BREAK en-dehors d'une boucle !WHILE"                  /*"%%!BREAK outside of any !WHILE loop"*/
-#define TEXT121 "%%!ENDWHILE sans !WHILE"                                 /*"%%!ENDWHILE with no preceding !WHILE in '%s'"*/
-#define TEXT122 "%%!WHILE sans !ENDWHILE"                                 /*"%%!WHILE with no matching !ENDWHILE in '%s'"*/
-#define TEXT123 "%%Plus de m\202moire pendant l'ex\202cution d'une macro" /*"%%Out of Memory during macro execution"*/
-#define TEXT124 "%%Directive inconnue"                                    /*"%%Unknown Directive"*/
-#define TEXT125 "Plus de m\202moire pour l'enregistrement d'une macro"    /*"Out of memory while storing macro"*/
-#define TEXT126 "%%Erreur interne boucle While"                           /*"%%Internal While loop error"*/
-#define TEXT127 "%%Etiquette inexistante"                                 /*"%%No such label"*/
+TDCLDEF char TEXT100[NOSZ_] TINIT_("Mots %D Car %D Lignes %d Moyenne car/mots %f");
+TDCLDEF char TEXT101[NOSZ_] TINIT_("[Je ne peux pas chercher et me d\202placer en m\210me temps!]");  /*"[Can not search and goto at the same time!]"*/
+TDCLDEF char TEXT102[NOSZ_] TINIT_("[Aller-a: Param\212tre erron\202]");  /*"[Bogus goto argument]"*/
+TDCLDEF char TEXT103[NOSZ_] TINIT_("[Sauvegarde de %s]");  /*"[Saving %s]"*/
+TDCLDEF char TEXT104[NOSZ_] TINIT_("Des tampons ont \202t\202 modifi\202s. On quitte malgr\202 tout");  /*"Modified buffers exist. Leave anyway"*/
+TDCLDEF char TEXT105[NOSZ_] TINIT_("%%Macro d\202j\205 active");  /*"%%Macro already active"*/
+TDCLDEF char TEXT106[NOSZ_] TINIT_("[D\202but de la macro]");  /*"[Start macro]"*/
+TDCLDEF char TEXT107[NOSZ_] TINIT_("%%Macro non active");  /*"%%Macro not active"*/
+TDCLDEF char TEXT108[NOSZ_] TINIT_("[Fin de la macro]");  /*"[End macro]"*/
+TDCLDEF char TEXT109[NOSZ_] TINIT_("[Touche interdite dans le mode VIEW]");  /*"[Key illegal in VIEW mode]"*/
+TDCLDEF char TEXT110[NOSZ_] TINIT_("[Commande \205 usage RESTREINT]");  /*"[That command is RESTRICTED]"*/
+TDCLDEF char TEXT111[NOSZ_] TINIT_("Pas de macro indiqu\202e");  /*"No macro specified"*/
+TDCLDEF char TEXT112[NOSZ_] TINIT_("Num\202ro de macro hors limite");  /*"Macro number out of range"*/
+TDCLDEF char TEXT113[NOSZ_] TINIT_("Cr\202ation de macro impossible");  /*"Can not create macro"*/
+TDCLDEF char TEXT114[NOSZ_] TINIT_("Nom de la proc\202dure: ");  /*"Procedure name: "*/
+TDCLDEF char TEXT115[NOSZ_] TINIT_("Ex\202cuter la proc\202dure");  /*"Execute procedure"*/
+TDCLDEF char TEXT116[NOSZ_] TINIT_("Proc\202dure inexistante: ");  /*"No such procedure"*/
+TDCLDEF char TEXT117[NOSZ_] TINIT_("Ex\202cuter le tampon: ");  /*"Execute buffer"*/
+TDCLDEF char TEXT118[NOSZ_] TINIT_("Tampon inexistant");  /*"No such buffer"*/
+TDCLDEF char TEXT119[NOSZ_] TINIT_("%%Plus de m\202moire pendant la recherche");  /*"%%Out of memory during while scan"*/
+TDCLDEF char TEXT120[NOSZ_] TINIT_("%%!BREAK en-dehors d'une boucle !WHILE");  /*"%%!BREAK outside of any !WHILE loop"*/
+TDCLDEF char TEXT121[NOSZ_] TINIT_("%%!ENDWHILE sans !WHILE");  /*"%%!ENDWHILE with no preceding !WHILE in '%s'"*/
+TDCLDEF char TEXT122[NOSZ_] TINIT_("%%!WHILE sans !ENDWHILE");  /*"%%!WHILE with no matching !ENDWHILE in '%s'"*/
+TDCLDEF char TEXT123[NOSZ_] TINIT_("%%Plus de m\202moire pendant l'ex\202cution d'une macro");  /*"%%Out of Memory during macro execution"*/
+TDCLDEF char TEXT124[NOSZ_] TINIT_("%%Directive inconnue");  /*"%%Unknown Directive"*/
+TDCLDEF char TEXT125[NOSZ_] TINIT_("Plus de m\202moire pour l'enregistrement d'une macro");  /*"Out of memory while storing macro"*/
+TDCLDEF char TEXT126[NOSZ_] TINIT_("%%Erreur interne boucle While");  /*"%%Internal While loop error"*/
+TDCLDEF char TEXT127[NOSZ_] TINIT_("%%Etiquette inexistante");  /*"%%No such label"*/
 
 /*              "(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META>stop debug"*/
-#define TEXT128 "(e)val exp, (c/x)ommand, (t)rack exp, (^G)avorte,<SP>exec, <META> stop debug"
+TDCLDEF char TEXT128[NOSZ_] TINIT_("(e)val exp, (c/x)ommand, (t)rack exp, (^G)avorte,<SP>exec, <META> stop debug");
 
-#define TEXT129 "Ex\202cuter le fichier: "                                 /*"File to execute: "*/
-#define TEXT130 "Macro non d\202finie"                                    /*"Macro not defined"*/
-#define TEXT131 "Lire le fichier "                                        /*"Read file: "*/
-#define TEXT132 "Ins\202rer le fichier "                                  /*"Insert file: "*/
-#define TEXT133 "Charger le fichier "                                     /*"Find file: "*/
-#define TEXT134 "Voir le fichier "                                        /*"View file: "*/
-#define TEXT135 "[Ancien tampon]"                                         /*"[Old buffer]"*/
-#define TEXT136 "Nom du tampon: "                                         /*"Buffer name: "*/
-#define TEXT137 "Cr\202ation du tampon impossible"                        /*"Cannot create buffer"*/
-#define TEXT138 "[Nouveau fichier]"                                       /*"[New file]"*/
-#define TEXT139 "[Lecture du fichier en cours]"                           /*"[Reading file]"*/
-#define TEXT140 "Lu "                                                     /*"Read "*/
-#define TEXT141 "ERREUR ENTR\220E/SORTIE"                                 /*"I/O ERROR, "*/
-#define TEXT142 "PLUS DE M\220MOIRE"                                      /*"OUT OF MEMORY, "*/
-#define TEXT143 " ligne"                                                  /*" line"*/
-#define TEXT144 "\220crire le fichier "                                   /*"Write file"*/
-#define TEXT145 "Pas de nom de fichier"                                   /*"No file name"*/
-#define TEXT146 "Fichier tronqu\202..\205 \202crire ailleurs"             /*"Truncated file..write it out"*/
-#define TEXT147 "Tampon raccourci.. \205 sauvegarder"                     /*"Narrowed Buffer..write it out"*/
-#define TEXT148 "[\220criture en cours...]"                               /*"[Writing...]"*/
-#define TEXT149 "[\220crit "                                              /*"[Wrote "*/
-#define TEXT150 ", sauvegard\202 sous le nom "                            /*", saved as "*/
-#define TEXT151 "Nom: "                                                   /*"Name: "*/
-#define TEXT152 "[Fichier inexistant]"                                    /*"[No such file]"*/
-#define TEXT153 "[Insertion du fichier en cours]"                         /*"[Inserting file]"*/
-#define TEXT154 "Ins\202r\202 "                                           /*"Inserted "*/
-#define TEXT155 "Ouverture du fichier en \202criture impossible"          /*"Cannot open file for writing"*/
-#define TEXT156 "Erreur \205 la fermeture du fichier"                     /*"Error closing file"*/
-#define TEXT157 "Erreur en \202criture E/S"                               /*"Write I/O error"*/
-#define TEXT158 "Erreur en lecture du fichier"                            /*"File read error"*/
-#define TEXT159 "%J'ai besoin d'un num\202ro de touche de fonction"       /*"%Need function key number"*/
-#define TEXT160 "%Num\202ro de touche de fonction hors limite"            /*"%Function key number out of range"*/
-#define TEXT161 "Contenu de l'\202tiquette: "                             /*"Label contents: "*/
-#define TEXT162 " [o/n]? "                                                /*" [y/n]? "*/
-#define TEXT163 "pas de valeur par d\202faut"                             /*"no default"*/
-#define TEXT164 "[\202chec de la recherche]"                              /*"[search failed]"*/
-#define TEXT165 "Recherche Incr\202mentale: "                             /*"ISearch: "*/
-#define TEXT166 "? Cha\214ne de recherche trop longue"                    /*"? Search string too long"*/
-#define TEXT167 "? commande trop longue"                                  /*"? command too long"*/
-#define TEXT168 "%%Insertion de cha\214ne impossible"                     /*"%%Can not insert string"*/
-#define TEXT169 "Ins\202r\202(e)"                                         /*"Inserted"*/
-#define TEXT170 "bogue: linsert"                                          /* same */
-#define TEXT171 "Remplac\202(e)"                                          /*"Replaced"*/
-#define TEXT172 "%%Plus de m\202moire en mode remplacement"               /*"%%Out of memory while overwriting"*/
-#define TEXT173 "ERREUR VERROUILLAGE: table de verrouillage pleine"       /*"LOCK ERROR: Lock table full"*/
-#define TEXT174 "Verrouillage impossible, plus de m\202moire"             /*"Cannot lock, out of memory"*/
-#define TEXT175 "VERROUILL\220"                                           /*"LOCK"*/
-#define TEXT176 "Fichier utilis\202 par "                                 /*"File in use by "*/
-#define TEXT177 ", on passe outre ?"                                      /*", overide?"*/
-#define TEXT178 "[Obtention d'un message d'erreur systeme impossible]"    /*"[can not get system error message]"*/
-#define TEXT179 "  A-propos de MicroEmacs"                                /*"  About MicroEmacs"*/
-#define TEXT180 "%%R\202solution inexistante"                             /*"%%No such resolution"*/
-#define TEXT181 "%%R\202solution interdite pour ce type d'\202cran"       /*"%%Resolution illegal for this monitor"*/
-#define TEXT182 "Variable TERM non d\202finie"                            /*"Environment variable TERM not defined!"*/
-#define TEXT183 "%s: type de terminal inconnu"                            /*"Unknown terminal type %s!"*/
-#define TEXT184 "Description termcap incompl\212te (lignes)"              /*"termcap entry incomplete (lines)"*/
-#define TEXT185 "Description termcap incompl\212te (colonnes)"            /*"Termcap entry incomplete (columns)"*/
-#define TEXT186 "Description termcap incompl\212te"                       /*"Incomplete termcap entry\n"*/
-#define TEXT187 "Description du terminal trop importante"                 /*"Terminal description too big!\n"*/
-#define TEXT188 "[Termin\202]"                                            /*"[End]"*/
-#define TEXT189 "Description du terminal non trouv\202e\n"                /*"Cannot find entry for terminal type.\n"*/
+TDCLDEF char TEXT129[NOSZ_] TINIT_("Ex\202cuter le fichier: ");  /*"File to execute: "*/
+TDCLDEF char TEXT130[NOSZ_] TINIT_("Macro non d\202finie");  /*"Macro not defined"*/
+TDCLDEF char TEXT131[NOSZ_] TINIT_("Lire le fichier ");  /*"Read file: "*/
+TDCLDEF char TEXT132[NOSZ_] TINIT_("Ins\202rer le fichier ");  /*"Insert file: "*/
+TDCLDEF char TEXT133[NOSZ_] TINIT_("Charger le fichier ");  /*"Find file: "*/
+TDCLDEF char TEXT134[NOSZ_] TINIT_("Voir le fichier ");  /*"View file: "*/
+TDCLDEF char TEXT135[NOSZ_] TINIT_("[Ancien tampon]");   /*"[Old buffer]"*/
+TDCLDEF char TEXT136[NOSZ_] TINIT_("Nom du tampon: ");   /*"Buffer name: "*/
+TDCLDEF char TEXT137[NOSZ_] TINIT_("Cr\202ation du tampon impossible");  /*"Cannot create buffer"*/
+TDCLDEF char TEXT138[NOSZ_] TINIT_("[Nouveau fichier]");  /*"[New file]"*/
+TDCLDEF char TEXT139[NOSZ_] TINIT_("[Lecture du fichier en cours]");  /*"[Reading file]"*/
+TDCLDEF char TEXT140[NOSZ_] TINIT_("Lu ");               /*"Read "*/
+TDCLDEF char TEXT141[NOSZ_] TINIT_("ERREUR ENTR\220E/SORTIE");  /*"I/O ERROR, "*/
+TDCLDEF char TEXT142[NOSZ_] TINIT_("PLUS DE M\220MOIRE");  /*"OUT OF MEMORY, "*/
+TDCLDEF char TEXT143[NOSZ_] TINIT_(" ligne");            /*" line"*/
+TDCLDEF char TEXT144[NOSZ_] TINIT_("\220crire le fichier ");  /*"Write file"*/
+TDCLDEF char TEXT145[NOSZ_] TINIT_("Pas de nom de fichier");  /*"No file name"*/
+TDCLDEF char TEXT146[NOSZ_] TINIT_("Fichier tronqu\202..\205 \202crire ailleurs");  /*"Truncated file..write it out"*/
+TDCLDEF char TEXT147[NOSZ_] TINIT_("Tampon raccourci.. \205 sauvegarder");  /*"Narrowed Buffer..write it out"*/
+TDCLDEF char TEXT148[NOSZ_] TINIT_("[\220criture en cours...]");  /*"[Writing...]"*/
+TDCLDEF char TEXT149[NOSZ_] TINIT_("[\220crit ");        /*"[Wrote "*/
+TDCLDEF char TEXT150[NOSZ_] TINIT_(", sauvegard\202 sous le nom ");  /*", saved as "*/
+TDCLDEF char TEXT151[NOSZ_] TINIT_("Nom: ");             /*"Name: "*/
+TDCLDEF char TEXT152[NOSZ_] TINIT_("[Fichier inexistant]");  /*"[No such file]"*/
+TDCLDEF char TEXT153[NOSZ_] TINIT_("[Insertion du fichier en cours]");  /*"[Inserting file]"*/
+TDCLDEF char TEXT154[NOSZ_] TINIT_("Ins\202r\202 ");     /*"Inserted "*/
+TDCLDEF char TEXT155[NOSZ_] TINIT_("Ouverture du fichier en \202criture impossible");  /*"Cannot open file for writing"*/
+TDCLDEF char TEXT156[NOSZ_] TINIT_("Erreur \205 la fermeture du fichier");  /*"Error closing file"*/
+TDCLDEF char TEXT157[NOSZ_] TINIT_("Erreur en \202criture E/S");  /*"Write I/O error"*/
+TDCLDEF char TEXT158[NOSZ_] TINIT_("Erreur en lecture du fichier");  /*"File read error"*/
+TDCLDEF char TEXT159[NOSZ_] TINIT_("%J'ai besoin d'un num\202ro de touche de fonction");  /*"%Need function key number"*/
+TDCLDEF char TEXT160[NOSZ_] TINIT_("%Num\202ro de touche de fonction hors limite");  /*"%Function key number out of range"*/
+TDCLDEF char TEXT161[NOSZ_] TINIT_("Contenu de l'\202tiquette: ");  /*"Label contents: "*/
+TDCLDEF char TEXT162[NOSZ_] TINIT_(" [o/n]? ");          /*" [y/n]? "*/
+TDCLDEF char TEXT163[NOSZ_] TINIT_("pas de valeur par d\202faut");  /*"no default"*/
+TDCLDEF char TEXT164[NOSZ_] TINIT_("[\202chec de la recherche]");  /*"[search failed]"*/
+TDCLDEF char TEXT165[NOSZ_] TINIT_("Recherche Incr\202mentale: ");  /*"ISearch: "*/
+TDCLDEF char TEXT166[NOSZ_] TINIT_("? Cha\214ne de recherche trop longue");  /*"? Search string too long"*/
+TDCLDEF char TEXT167[NOSZ_] TINIT_("? commande trop longue");  /*"? command too long"*/
+TDCLDEF char TEXT168[NOSZ_] TINIT_("%%Insertion de cha\214ne impossible");  /*"%%Can not insert string"*/
+TDCLDEF char TEXT169[NOSZ_] TINIT_("Ins\202r\202(e)");   /*"Inserted"*/
+TDCLDEF char TEXT170[NOSZ_] TINIT_("bogue: linsert");    /* same */
+TDCLDEF char TEXT171[NOSZ_] TINIT_("Remplac\202(e)");    /*"Replaced"*/
+TDCLDEF char TEXT172[NOSZ_] TINIT_("%%Plus de m\202moire en mode remplacement");  /*"%%Out of memory while overwriting"*/
+TDCLDEF char TEXT173[NOSZ_] TINIT_("ERREUR VERROUILLAGE: table de verrouillage pleine");  /*"LOCK ERROR: Lock table full"*/
+TDCLDEF char TEXT174[NOSZ_] TINIT_("Verrouillage impossible, plus de m\202moire");  /*"Cannot lock, out of memory"*/
+TDCLDEF char TEXT175[NOSZ_] TINIT_("VERROUILL\220");     /*"LOCK"*/
+TDCLDEF char TEXT176[NOSZ_] TINIT_("Fichier utilis\202 par ");  /*"File in use by "*/
+TDCLDEF char TEXT177[NOSZ_] TINIT_(", on passe outre ?");  /*", overide?"*/
+TDCLDEF char TEXT178[NOSZ_] TINIT_("[Obtention d'un message d'erreur systeme impossible]");  /*"[can not get system error message]"*/
+TDCLDEF char TEXT179[NOSZ_] TINIT_("  A-propos de MicroEmacs");  /*"  About MicroEmacs"*/
+TDCLDEF char TEXT180[NOSZ_] TINIT_("%%R\202solution inexistante");  /*"%%No such resolution"*/
+TDCLDEF char TEXT181[NOSZ_] TINIT_("%%R\202solution interdite pour ce type d'\202cran");  /*"%%Resolution illegal for this monitor"*/
+TDCLDEF char TEXT182[NOSZ_] TINIT_("Variable TERM non d\202finie");  /*"Environment variable TERM not defined!"*/
+TDCLDEF char TEXT183[NOSZ_] TINIT_("%s: type de terminal inconnu");  /*"Unknown terminal type %s!"*/
+TDCLDEF char TEXT184[NOSZ_] TINIT_("Description termcap incompl\212te (lignes)");  /*"termcap entry incomplete (lines)"*/
+TDCLDEF char TEXT185[NOSZ_] TINIT_("Description termcap incompl\212te (colonnes)");  /*"Termcap entry incomplete (columns)"*/
+TDCLDEF char TEXT186[NOSZ_] TINIT_("Description termcap incompl\212te");  /*"Incomplete termcap entry\n"*/
+TDCLDEF char TEXT187[NOSZ_] TINIT_("Description du terminal trop importante");  /*"Terminal description too big!\n"*/
+TDCLDEF char TEXT188[NOSZ_] TINIT_("[Termin\202]");      /*"[End]"*/
+TDCLDEF char TEXT189[NOSZ_] TINIT_("Description du terminal non trouv\202e\n");  /*"Cannot find entry for terminal type.\n"*/
 
 /*              "Check terminal type with \"SHOW TERMINAL\" or\n"*/
-#define TEXT190 "V\202rifiez le type de terminal avec \"SHOW TERMINAL\" ou\n"
+TDCLDEF char TEXT190[NOSZ_] TINIT_("V\202rifiez le type de terminal avec \"SHOW TERMINAL\" ou\n");
 
 /*              "try setting with \"SET TERMINAL/INQUIRE\"\n"*/
-#define TEXT191 "essayez de l'initialiser avec \"SET TERMINAL/INQUIRE\"\n"
+TDCLDEF char TEXT191[NOSZ_] TINIT_("essayez de l'initialiser avec \"SET TERMINAL/INQUIRE\"\n");
 
 /*              "The terminal type does not have enough power to run\n"*/
-#define TEXT192 "Ce terminal n'est pas assez performant pour \n"
+TDCLDEF char TEXT192[NOSZ_] TINIT_("Ce terminal n'est pas assez performant pour \n");
 
 /*              "MicroEMACS.  Try a different terminal or check\n"*/
-#define TEXT193 "MicroEMACS. Essayez un autre terminal ou v\202rifiez\n"
+TDCLDEF char TEXT193[NOSZ_] TINIT_("MicroEMACS. Essayez un autre terminal ou v\202rifiez\n");
 
 /*              "type with \"SHOW TERMINAL\".\n"*/
-#define TEXT194 "celui-ci avec \"SHOW TERMINAL\".\n"
+TDCLDEF char TEXT194[NOSZ_] TINIT_("celui-ci avec \"SHOW TERMINAL\".\n");
 
 /*              "Cannot open channel to terminal.\n"*/
-#define TEXT195 "Ouverture du canal associ\202 au terminal impossible.\n"
+TDCLDEF char TEXT195[NOSZ_] TINIT_("Ouverture du canal associ\202 au terminal impossible.\n");
 
 /*              "Cannot obtain terminal settings.\n"*/
-#define TEXT196 "Obtention des caract\202ristiques du terminal impossible.\n"
+TDCLDEF char TEXT196[NOSZ_] TINIT_("Obtention des caract\202ristiques du terminal impossible.\n");
 
 /*              "Cannot modify terminal settings.\n"*/
-#define TEXT197 "Modification des caract\202ristiques du terminal impossible.\n"
+TDCLDEF char TEXT197[NOSZ_] TINIT_("Modification des caract\202ristiques du terminal impossible.\n");
 
-#define TEXT198 "Erreur Entr\202e/Sortie (%d,%d)\n"                       /*"I/O error (%d,%d)\n"*/
-#define TEXT199 "[Lancement de DCL]\r\n"                                  /*"[Starting DCL]\r\n"*/
-#define TEXT200 "[Appel de DCL]\r\n"                                      /*"[Calling DCL]\r\n"*/
-#define TEXT201 "[Non encore disponible sous VMS]"                        /*"[Not available yet under VMS]"*/
-#define TEXT202 "Terminal non 'vt52' ou 'z19'!"                           /*"Terminal type not 'vt52'or 'z19' !"*/
-#define TEXT203 "Num\202ro de fen\210tre hors limite"                     /*"Window number out of range"*/
-#define TEXT204 "Destruction de cette fen\210tre impossible"              /*"Can not delete this window"*/
-#define TEXT205 "D\202coupage impossible d'une fen\210tre de %d lignes"   /*"Cannot split a %d line window"*/
-#define TEXT206 "Une seule fen\210tre"                                    /*"Only one window"*/
-#define TEXT207 "Changement impossible"                                   /*"Impossible change"*/
-#define TEXT208 "[Fen\210tre inexistante]"                                /*"[No such window exists]"*/
-#define TEXT209 "%%Taille d'\202cran hors limite"                         /*"%%Screen size out of range"*/
-#define TEXT210 "%%Largeur d'\202cran hors limite"                        /*"%%Screen width out of range"*/
-#define TEXT211 "Liste des Fonctions"                                     /*"Function list"*/
-#define TEXT212 "Affichage de la liste des fonctions impossible"          /*"Can not display function list"*/
-#define TEXT213 "[Cr\202ation de la liste des fonctions]"                 /*"[Building function list]"*/
-#define TEXT214 "%%Fichier %s inexistant"                                 /*"%%No such file as %s"*/
-#define TEXT215 ": macro-une-touche "                                     /*": macro-to-key "*/
-#define TEXT216 "Impossible de  lire/\202crire des r\202pertoires !!!"    /*"Cannot read/write directories!!!"*/
-#define TEXT217 "[Pas encore disponible sous AOS/VS]"                     /*"[Not available yet under AOS/VS]"*/
-#define TEXT218 "Compl\202 le fichier "                                   /* "Append file"  */
-#define TEXT219 "%%\220chec de la macro"                                  /* "%%Macro Failed" */
-#define TEXT220 "Ligne %D/%D Col %d/%d Car %D/%D (%d%%) car = 0x%x%x"
-#define TEXT221 "Trop de groupes"                                         /* "Too many groups" */
-#define TEXT222 "Groupe non ferm\202"                                     /* "Group not ended" */
-#define TEXT223 "%%Colonne origine hors limite"                           /* "%%Column origin out of range" */
-#define TEXT224 "%%Ligne origine hors limite"                             /* "%%Row origin out of range" */
-#define TEXT225 "[Changement pour l'\202cran %s]"                         /* "[Switched to screen %s]" */
-#define TEXT226 "%%Impossible de d\202truire un tampon en cours d'ex\202cution" /* "%%Can not kill an executing buffer" */
-#define TEXT227 "\n--- Appuyer sur une touche quelconque pour continuer ---"    /* "\n--- Press any key to Continue ---" */
-#define TEXT228 "[Anneau des effacements vid\202]\n"
-#define TEXT229 " dans <"                                                 /*" in <"*/
-#define TEXT230 "> ligne "                                                /*" > at line "*/
-#define TEXT231 "Abr\202viation \205 d\202finir: "                        /*"Abbreviation to set: "*/
-#define TEXT232 "Abr\202viation \205 supprimer: "                         /*"Abbreviation to delete: "*/
-#define TEXT233 "[Construction liste des abr\202viations]"                /*"[Building Abbreviation list]"*/
-#define TEXT234 "Liste des abr\202viations"                               /*"Abbreviation list"*/
-#define TEXT235 "Impossible d'afficher la liste des abr\202viations"      /*"Can not display abbreviation list"*/
-#define TEXT236 "D\202finition abr\202viations dans un tampon"            /*"Define Abbreviations in buffer"*/
-#define TEXT240 "[Aucun \202cran de ce nom]"                              /*"[No such screen]"*/
-#define TEXT241 "%%Impossible de supprimer l'\202cran courant"            /*"%%Can't delete current screen"*/
-#define TEXT242 "Chercher l'\202cran: "                                   /*"Find Screen: "*/
-#define TEXT243 "Supprimer l'\202cran: "                                  /*"Delete Screen: "*/
-#define TEXT244 "%%Fonction '%s' inexistante"                             /*"%%No such function as '%s'"*/
-#define TEXT245 "%%Division par z\202ro interdite"                        /*"%%Division by Zero is illegal"*/
-#define TEXT246 "%%Il faut un num\202ro de touche fonction"               /*"%%Need function key number"*/
-#define TEXT247 "%%num\202ro de touche fonction hors limite"              /*"%%Function key number out of range"*/*/
-#define TEXT248 "Entrer une \202tiquette: "                               /*"Enter Label String: "*/
-#define TEXT249 "Variable globale \205 d\202clarer : "
-#define TEXT250 "Variable locale \205 d\202clarer : "
+TDCLDEF char TEXT198[NOSZ_] TINIT_("Erreur Entr\202e/Sortie (%d,%d)\n");  /*"I/O error (%d,%d)\n"*/
+TDCLDEF char TEXT199[NOSZ_] TINIT_("[Lancement de DCL]\r\n");  /*"[Starting DCL]\r\n"*/
+TDCLDEF char TEXT200[NOSZ_] TINIT_("[Appel de DCL]\r\n");  /*"[Calling DCL]\r\n"*/
+TDCLDEF char TEXT201[NOSZ_] TINIT_("[Non encore disponible sous VMS]");  /*"[Not available yet under VMS]"*/
+TDCLDEF char TEXT202[NOSZ_] TINIT_("Terminal non 'vt52' ou 'z19'!");  /*"Terminal type not 'vt52'or 'z19' !"*/
+TDCLDEF char TEXT203[NOSZ_] TINIT_("Num\202ro de fen\210tre hors limite");  /*"Window number out of range"*/
+TDCLDEF char TEXT204[NOSZ_] TINIT_("Destruction de cette fen\210tre impossible");  /*"Can not delete this window"*/
+TDCLDEF char TEXT205[NOSZ_] TINIT_("D\202coupage impossible d'une fen\210tre de %d lignes");  /*"Cannot split a %d line window"*/
+TDCLDEF char TEXT206[NOSZ_] TINIT_("Une seule fen\210tre");  /*"Only one window"*/
+TDCLDEF char TEXT207[NOSZ_] TINIT_("Changement impossible");  /*"Impossible change"*/
+TDCLDEF char TEXT208[NOSZ_] TINIT_("[Fen\210tre inexistante]");  /*"[No such window exists]"*/
+TDCLDEF char TEXT209[NOSZ_] TINIT_("%%Taille d'\202cran hors limite");  /*"%%Screen size out of range"*/
+TDCLDEF char TEXT210[NOSZ_] TINIT_("%%Largeur d'\202cran hors limite");  /*"%%Screen width out of range"*/
+TDCLDEF char TEXT211[NOSZ_] TINIT_("Liste des Fonctions");  /*"Function list"*/
+TDCLDEF char TEXT212[NOSZ_] TINIT_("Affichage de la liste des fonctions impossible");  /*"Can not display function list"*/
+TDCLDEF char TEXT213[NOSZ_] TINIT_("[Cr\202ation de la liste des fonctions]");  /*"[Building function list]"*/
+TDCLDEF char TEXT214[NOSZ_] TINIT_("%%Fichier %s inexistant");  /*"%%No such file as %s"*/
+TDCLDEF char TEXT215[NOSZ_] TINIT_(": macro-une-touche ");  /*": macro-to-key "*/
+TDCLDEF char TEXT216[NOSZ_] TINIT_("Impossible de  lire/\202crire des r\202pertoires !!!");  /*"Cannot read/write directories!!!"*/
+TDCLDEF char TEXT217[NOSZ_] TINIT_("[Pas encore disponible sous AOS/VS]");  /*"[Not available yet under AOS/VS]"*/
+TDCLDEF char TEXT218[NOSZ_] TINIT_("Compl\202 le fichier ");  /* "Append file"  */
+TDCLDEF char TEXT219[NOSZ_] TINIT_("%%\220chec de la macro");  /* "%%Macro Failed" */
+TDCLDEF char TEXT220[NOSZ_] TINIT_("Ligne %D/%D Col %d/%d Car %D/%D (%d%%) car = 0x%x%x");
+TDCLDEF char TEXT221[NOSZ_] TINIT_("Trop de groupes");   /* "Too many groups" */
+TDCLDEF char TEXT222[NOSZ_] TINIT_("Groupe non ferm\202");  /* "Group not ended" */
+TDCLDEF char TEXT223[NOSZ_] TINIT_("%%Colonne origine hors limite");  /* "%%Column origin out of range" */
+TDCLDEF char TEXT224[NOSZ_] TINIT_("%%Ligne origine hors limite");  /* "%%Row origin out of range" */
+TDCLDEF char TEXT225[NOSZ_] TINIT_("[Changement pour l'\202cran %s]");  /* "[Switched to screen %s]" */
+TDCLDEF char TEXT226[NOSZ_] TINIT_("%%Impossible de d\202truire un tampon en cours d'ex\202cution");  /* "%%Can not kill an executing buffer" */
+TDCLDEF char TEXT227[NOSZ_] TINIT_("\n--- Appuyer sur une touche quelconque pour continuer ---");  /* "\n--- Press any key to Continue ---" */
+TDCLDEF char TEXT228[NOSZ_] TINIT_("[Anneau des effacements vid\202]\n");
+TDCLDEF char TEXT229[NOSZ_] TINIT_(" dans <");           /*" in <"*/
+TDCLDEF char TEXT230[NOSZ_] TINIT_("> ligne ");          /*" > at line "*/
+TDCLDEF char TEXT231[NOSZ_] TINIT_("Abr\202viation \205 d\202finir: ");  /*"Abbreviation to set: "*/
+TDCLDEF char TEXT232[NOSZ_] TINIT_("Abr\202viation \205 supprimer: ");  /*"Abbreviation to delete: "*/
+TDCLDEF char TEXT233[NOSZ_] TINIT_("[Construction liste des abr\202viations]");  /*"[Building Abbreviation list]"*/
+TDCLDEF char TEXT234[NOSZ_] TINIT_("Liste des abr\202viations");  /*"Abbreviation list"*/
+TDCLDEF char TEXT235[NOSZ_] TINIT_("Impossible d'afficher la liste des abr\202viations");  /*"Can not display abbreviation list"*/
+TDCLDEF char TEXT236[NOSZ_] TINIT_("D\202finition abr\202viations dans un tampon");  /*"Define Abbreviations in buffer"*/
+TDCLDEF char TEXT240[NOSZ_] TINIT_("[Aucun \202cran de ce nom]");  /*"[No such screen]"*/
+TDCLDEF char TEXT241[NOSZ_] TINIT_("%%Impossible de supprimer l'\202cran courant");  /*"%%Can't delete current screen"*/
+TDCLDEF char TEXT242[NOSZ_] TINIT_("Chercher l'\202cran: ");  /*"Find Screen: "*/
+TDCLDEF char TEXT243[NOSZ_] TINIT_("Supprimer l'\202cran: ");  /*"Delete Screen: "*/
+TDCLDEF char TEXT244[NOSZ_] TINIT_("%%Fonction '%s' inexistante");  /*"%%No such function as '%s'"*/
+TDCLDEF char TEXT245[NOSZ_] TINIT_("%%Division par z\202ro interdite");  /*"%%Division by Zero is illegal"*/
+TDCLDEF char TEXT246[NOSZ_] TINIT_("%%Il faut un num\202ro de touche fonction");  /*"%%Need function key number"*/
+TDCLDEF char TEXT247[NOSZ_] TINIT_("%%num\202ro de touche fonction hors limite");  /*"%%Function key number out of range"*/*/
+TDCLDEF char TEXT248[NOSZ_] TINIT_("Entrer une \202tiquette: ");  /*"Enter Label String: "*/
+TDCLDEF char TEXT249[NOSZ_] TINIT_("Variable globale \205 d\202clarer : ");
+TDCLDEF char TEXT250[NOSZ_] TINIT_("Variable locale \205 d\202clarer : ");
 
 /* some of these are just used in the microsoft windows version */
-#define TEXT300 "[Menu incorrect]"                                        /*"[Incorrect menu]"*/
-#define TEXT301 "[Trop de menus imbriqu\202s]"                            /*"[Too many nested popup menus]"*/
-#define TEXT302 "[Manque de ressources]"                                  /*"[Lack of resources]"*/
+TDCLDEF char TEXT300[NOSZ_] TINIT_("[Menu incorrect]");  /*"[Incorrect menu]"*/
+TDCLDEF char TEXT301[NOSZ_] TINIT_("[Trop de menus imbriqu\202s]");  /*"[Too many nested popup menus]"*/
+TDCLDEF char TEXT302[NOSZ_] TINIT_("[Manque de ressources]");  /*"[Lack of resources]"*/
 
-#define TEXT303 "Menu: "
-#define TEXT304 "Function: "
-#define TEXT305 "Macro: "
-#define TEXT306 "Menu: "
-#define TEXT307 "Help file: "
-#define TEXT308 "Help key: "
-#define TEXT310 "Alt+"
-#define TEXT311 "Shift+"
-#define TEXT312 "BkSp"
-#define TEXT313 "Tab"
-#define TEXT314 "Enter"
-#define TEXT315 "Esc"
-#define TEXT316 "Ctrl+"
-#define TEXT317 "Home"
-#define TEXT318 "DownArrow"
-#define TEXT319 "UpArrow"
-#define TEXT320 "LeftArrow"
-#define TEXT321 "RightArrow"
-#define TEXT322 "End"
-#define TEXT323 "PageUp"
-#define TEXT324 "PageDown"
-#define TEXT325 "Ins"
-#define TEXT326 "Del"
-#define TEXT327 "F10"
+TDCLDEF char TEXT303[NOSZ_] TINIT_("Menu: ");
+TDCLDEF char TEXT304[NOSZ_] TINIT_("Function: ");
+TDCLDEF char TEXT305[NOSZ_] TINIT_("Macro: ");
+TDCLDEF char TEXT306[NOSZ_] TINIT_("Menu: ");
+TDCLDEF char TEXT307[NOSZ_] TINIT_("Help file: ");
+TDCLDEF char TEXT308[NOSZ_] TINIT_("Help key: ");
+TDCLDEF char TEXT310[NOSZ_] TINIT_("Alt+");
+TDCLDEF char TEXT311[NOSZ_] TINIT_("Shift+");
+TDCLDEF char TEXT312[NOSZ_] TINIT_("BkSp");
+TDCLDEF char TEXT313[NOSZ_] TINIT_("Tab");
+TDCLDEF char TEXT314[NOSZ_] TINIT_("Enter");
+TDCLDEF char TEXT315[NOSZ_] TINIT_("Esc");
+TDCLDEF char TEXT316[NOSZ_] TINIT_("Ctrl+");
+TDCLDEF char TEXT317[NOSZ_] TINIT_("Home");
+TDCLDEF char TEXT318[NOSZ_] TINIT_("DownArrow");
+TDCLDEF char TEXT319[NOSZ_] TINIT_("UpArrow");
+TDCLDEF char TEXT320[NOSZ_] TINIT_("LeftArrow");
+TDCLDEF char TEXT321[NOSZ_] TINIT_("RightArrow");
+TDCLDEF char TEXT322[NOSZ_] TINIT_("End");
+TDCLDEF char TEXT323[NOSZ_] TINIT_("PageUp");
+TDCLDEF char TEXT324[NOSZ_] TINIT_("PageDown");
+TDCLDEF char TEXT325[NOSZ_] TINIT_("Ins");
+TDCLDEF char TEXT326[NOSZ_] TINIT_("Del");
+TDCLDEF char TEXT327[NOSZ_] TINIT_("F10");
 #define CHAR328 'F'
-#define TEXT329 "SpaceBar"
-#define TEXT330 " - Historique des messages"                              /*" - Message history"*/
-#define TEXT331 "Modes globaux"                                           /*"Global modes"*/
-#define TEXT332 "Modes pour le tampon: "                                  /*"Modes for buffer: "*/
-#define TEXT333 "\220criture d'un fichier en cours. Quitter plus tard !"  /*"File write in progress. Quit later !"*/
-#define TEXT334 "[R\202pertoire inexistant]"                              /*"[No such directory]"*/
-#define TEXT335 "Changer le nom de l'\202cran en: "                       /*"Change screen name to: "*/
-#define TEXT336 "[Nom d'\202cran d\202j\205 utilis\202]"                  /*"[Screen name already in use]"*/
-#define TEXT337 "impossible de contr\223ler un programme externe"         /*"cannot monitor external program"*/
+TDCLDEF char TEXT329[NOSZ_] TINIT_("SpaceBar");
+TDCLDEF char TEXT330[NOSZ_] TINIT_(" - Historique des messages");  /*" - Message history"*/
+TDCLDEF char TEXT331[NOSZ_] TINIT_("Modes globaux");     /*"Global modes"*/
+TDCLDEF char TEXT332[NOSZ_] TINIT_("Modes pour le tampon: ");  /*"Modes for buffer: "*/
+TDCLDEF char TEXT333[NOSZ_] TINIT_("\220criture d'un fichier en cours. Quitter plus tard !");  /*"File write in progress. Quit later !"*/
+TDCLDEF char TEXT334[NOSZ_] TINIT_("[R\202pertoire inexistant]");  /*"[No such directory]"*/
+TDCLDEF char TEXT335[NOSZ_] TINIT_("Changer le nom de l'\202cran en: ");  /*"Change screen name to: "*/
+TDCLDEF char TEXT336[NOSZ_] TINIT_("[Nom d'\202cran d\202j\205 utilis\202]");  /*"[Screen name already in use]"*/
+TDCLDEF char TEXT337[NOSZ_] TINIT_("impossible de contr\223ler un programme externe");  /*"cannot monitor external program"*/
 
 
 

@@ -21,7 +21,7 @@
 
 #if     FILOCK
 
-# if ( IS_UNIX() || WMCS )
+# if ( b_IS_UNIX && !b_IS_ANCIENT_UNIX || WMCS )
 #  include <string.h>
 #  include <sys/errno.h>
 # endif
@@ -168,11 +168,11 @@ int xunlock P1_(char *, fname /* file to unlock */)
 VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 {
     char obuf[NSTRING];   /* output buffer for error message */
-    char *sys_errstr = strerror(errno);
+    char *sys_errstr = umc_strerror(errno);
 
     XSTRCPY(obuf, errstr);
     XSTRCAT(obuf, " - ");
-# if ( IS_UNIX() || WMCS )
+# if ( b_IS_UNIX || WMCS )
     if ( sys_errstr && *sys_errstr )
         XSTRCAT(obuf, sys_errstr);
     else
@@ -188,7 +188,7 @@ VOID lckerror P1_(char *, errstr /* lock error string to print out */)
 
 #else
 
-VOID lckhello P0_()   /* dummy function */
+VOID lockhello P0_()
 {
 }
 

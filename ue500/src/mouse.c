@@ -190,7 +190,7 @@ int PASCAL NEAR mregdown P2_(int, f, int, n)
         /* get the name of the screen to create */
         XSTRCPY(scr_name, "SCREEN_T");
         XSTRCAT( scr_name, int_asc(temp_count++) );
-        while ( lookup_screen(scr_name) != (SCREEN_T *)NULL ) {
+        while ( lkp_screen(scr_name) != (SCREEN_T *)NULL )  {
             XSTRCPY(scr_name, "SCREEN_T");
             XSTRCAT( scr_name, int_asc(temp_count++) );
         }
@@ -292,7 +292,7 @@ int PASCAL NEAR mregup P2_(int, f, int, n)
         new_row_org(TRUE, ypos + term.t_roworg);
         new_col_org(TRUE, xpos + term.t_colorg);
 #  if     WINDOW_TEXT
-        refresh_screen(first_screen);
+        rdw_screen(first_screen);
 #  endif
 
         return (TRUE);
@@ -332,7 +332,7 @@ int PASCAL NEAR mregup P2_(int, f, int, n)
             first_screen->s_next_screen = sp->s_next_screen;
             free_screen(sp);
 # if     WINDOW_TEXT
-            refresh_screen(first_screen);
+            rdw_screen(first_screen);
 # endif
 
             return (TRUE);
@@ -417,7 +417,7 @@ int PASCAL NEAR movemu P2_(int, f, int, n)
         newsize(TRUE, ypos + 1);
 #  if     WINDOW_TEXT
         if ( redraw_needed ) {
-            refresh_screen(first_screen);
+            rdw_screen(first_screen);
         }
 #  endif
 
@@ -430,7 +430,7 @@ int PASCAL NEAR movemu P2_(int, f, int, n)
         new_row_org(TRUE, ypos + term.t_roworg);
         new_col_org(TRUE, xpos + term.t_colorg);
 #  if     WINDOW_TEXT
-        refresh_screen(first_screen);
+        rdw_screen(first_screen);
 #  endif
 
         return (TRUE);
@@ -692,7 +692,7 @@ int PASCAL NEAR resizm P2_(int, f, int, n)
 
 # if     WINDOW_TEXT
     if ( redraw_needed ) {
-        refresh_screen(first_screen);
+        rdw_screen(first_screen);
     }
 # endif
 
@@ -713,7 +713,7 @@ int PASCAL NEAR resizm2 P2_(int, f, int, n)
     newsize(TRUE, ypos + 1);
 
 # if     WINDOW_TEXT
-    refresh_screen(first_screen);
+    rdw_screen(first_screen);
 # endif
 
     return (TRUE);

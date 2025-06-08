@@ -29,12 +29,13 @@
  * "function (int,int) returning void",
  * which is not compatible with "function () returning int".'
  */
-# pragma message disable PTRMISMATCH
+/***# pragma message disable PTRMISMATCH***/
+/***HEREHEREHERE***/
 #endif
 
 #include "estruct.h"    /* global structures and defines */
 #include "eproto.h"     /* variable prototype definitions */
-#include "efunc.h"      /* function declarations and name table */
+#include "efunc.inc"    /* function declarations and name table */
 #include "edef.h"       /* global definitions */
 #include "elang.h"      /* human language definitions */
 #include "ebind.h"      /* default key bindings */
@@ -83,6 +84,19 @@ COMMON unsigned int _stklen = 10000;
 #if ( HANDLE_WINCH || DJGPP_DOS )
 # include <signal.h>
 #endif
+
+
+/*==============================================================*/
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_KEEP_TMPFLS=TRUE                               */
+/* to keep and investigate temporary files.                     */
+/*==============================================================*/
+#ifndef SWITCH_KEEP_TMPFLS
+# define SWITCH_KEEP_TMPFLS FALSE
+#endif
+/*==============================================================*/
 
 
 /* EMACS, CALLED_MAIN, MAIN:
@@ -171,7 +185,9 @@ abortrun:
 #if CLEAN
     clean();
 #endif
+#if ( SWITCH_KEEP_TMPFLS == FALSE )
     clntmpfls();
+#endif
 
 #if CALLED
     return (status);
@@ -1200,7 +1216,7 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
      * Bail out on error: Old version returned NULL.
      */
     ASRT(NULL !=(dp = ROOM(STRLEN(sp) + 1)));
-    strcpy(dp, sp);   /**UNSAFE_OK**/
+    xstrcpy(dp, sp);  /**UNSAFE_OK**/
 
     return (dp);
 }

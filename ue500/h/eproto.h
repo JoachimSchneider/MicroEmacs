@@ -17,13 +17,16 @@
 
 
 /**********************************************************************/
+#include "estruct.h"
+/**********************************************************************/
+
+
+/**********************************************************************/
 #include <stdio.h>
-/***#include <stdlib.h>***/
 #include <errno.h>
 #include <ctype.h>
-/***#include <string.h>***/
-#include <limits.h>
-#include <time.h>
+/*--------------------------------------------------------------------*/
+/* `stdlib.h' and `string.h' will be included below for newer systems */
 /**********************************************************************/
 
 
@@ -32,61 +35,71 @@
 /**********************************************************************/
 /* No braces `()' here!                                               */
 #define C_1    1
+#define C_2    2
+#define C_3    3
 #define C_4    4
+#define C_6    6
 #define C_7    7
+#define C_8    8
 #define C_10  10
 #define C_16  16
+#define C_18  18
 #define C_20  20
 #define C_30  30
 #define C_36  36
 #define C_40  40
+#if     BEGIN_COMMENT_
 #define C_50  50
 #define C_60  60
 #define C_70  70
 #define C_80  80
 #define C_90  90
+#endif  /*END_COMMENT_*/
+#define C_95  95
 /**********************************************************************/
 
 
+/**********************************************************************/
+#if b_IS_ANSI_C
 /**********************************************************************/
 /* If possible use XCONCAT* below -- CONCAT* might result in          */
 /* undefined behaviour due to unspecified evaluation order for        */
 /* multiple '##' operators.                                           */
 /**********************************************************************/
-#define CONCAT2(x, y)                           \
+# define CONCAT2(x, y)                                  \
     x##y
-#define CONCAT3(x, y, z)                        \
+# define CONCAT3(x, y, z)                               \
     x##y##z
-#define CONCAT4(x1, x2, x3, x4)                 \
+# define CONCAT4(x1, x2, x3, x4)                        \
     x1##x2##x3##x4
-#define CONCAT5(x1, x2, x3, x4, x5)             \
+# define CONCAT5(x1, x2, x3, x4, x5)                    \
     x1##x2##x3##x4##x5
-#define CONCAT6(x1, x2, x3, x4, x5, x6)         \
+# define CONCAT6(x1, x2, x3, x4, x5, x6)                \
     x1##x2##x3##x4##x5##x6
-#define CONCAT7(x1, x2, x3, x4, x5, x6, x7)     \
+# define CONCAT7(x1, x2, x3, x4, x5, x6, x7)            \
     x1##x2##x3##x4##x5##x6##x7
-#define CONCAT8(x1, x2, x3, x4, x5, x6, x7, x8) \
+# define CONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)        \
     x1##x2##x3##x4##x5##x6##x7##x8
-#define CONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)     \
+# define CONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)    \
     x1##x2##x3##x4##x5##x6##x7##x8##x9
 /**********************************************************************/
 /* Expand argument macros, concatenate from left to right.            */
 /**********************************************************************/
-#define XCONCAT2(x, y)                          \
+# define XCONCAT2(x, y)                                 \
     CONCAT2(x, y)
-#define XCONCAT3(x, y, z)                       \
+# define XCONCAT3(x, y, z)                              \
     XCONCAT2(XCONCAT2(x, y), z)
-#define XCONCAT4(x1, x2, x3, x4)                \
+# define XCONCAT4(x1, x2, x3, x4)                       \
     XCONCAT2(XCONCAT3(x1, x2, x3), x4)
-#define XCONCAT5(x1, x2, x3, x4, x5)            \
+# define XCONCAT5(x1, x2, x3, x4, x5)                   \
     XCONCAT2(XCONCAT4(x1, x2, x3, x4), x5)
-#define XCONCAT6(x1, x2, x3, x4, x5, x6)        \
+# define XCONCAT6(x1, x2, x3, x4, x5, x6)               \
     XCONCAT2(XCONCAT5(x1, x2, x3, x4, x5), x6)
-#define XCONCAT7(x1, x2, x3, x4, x5, x6, x7)            \
+# define XCONCAT7(x1, x2, x3, x4, x5, x6, x7)           \
     XCONCAT2(XCONCAT6(x1, x2, x3, x4, x5, x6), x7)
-#define XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)        \
+# define XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8)       \
     XCONCAT2(XCONCAT7(x1, x2, x3, x4, x5, x6, x7), x8)
-#define XCONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)            \
+# define XCONCAT9(x1, x2, x3, x4, x5, x6, x7, x8, x9)   \
     XCONCAT2(XCONCAT8(x1, x2, x3, x4, x5, x6, x7, x8), x9)
 /**********************************************************************/
 
@@ -99,31 +112,53 @@
  * error.  This is really useful, if you want to check e.g. sizes of
  * structures against given needs.  Example: CASRT( SIZEOF(int) ==
  * SIZEOF(long) );
+ *
+ * For Pre-ANSI-C only simple conditions (no '&&', no '||') are allowed:
+ * Try to reformalute conditions e.g. using `&' and `|'.
  */
-#define CASRT_0(condition)  typedef     int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
-#ifdef __cplusplus
-# define CASRT_1(condition) extern "C"  int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
-#else
-# define CASRT_1(condition) extern      int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
-#endif
+# define CASRT_0(condition)  typedef     int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+# ifdef __cplusplus
+#  define CASRT_1(condition) extern "C"  int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+# else
+#  define CASRT_1(condition) extern      int XCONCAT3(dummy_, __LINE__, _)[(condition)?1:-1]
+# endif
 /* CASRT_0 gives warnings about unused typedefs:
  * - FreeBSD clang version 13.0.0: `warning: unused typedef'
  * - gcc version 12.2.0: `warning: typedef ''dummy_805_'' locally defined but not used'
  * CASRT_1 gives warnings about unused variables:
  * - gcc version 12.2.0: `warning: unused variable ''dummy_2224_'''
  */
-#define CASRT CASRT_0
+# if     BEGIN_COMMENT_
+#  define  CASRT       CASRT_0
+# endif  /*END_COMMENT*/
+/**********************************************************************/
+#else
+# if     BEGIN_COMMENT_
+/*....................................................................*/
+/* Might give only produce a warning for non ANSI-C.                  */
+/*....................................................................*/
+#  define CASRT(cond)  extern int casrt_dummy_[(cond)?1:-1]
+# endif  /*END_COMMENT*/
+#endif  /* b_IS_ANSI_C  */
+
+/*....................................................................*/
+/* You may use                                                        */
+/* - `CASRT'  at places where a declaration is syntactically correct  */
+/* - `CASRTS' at places where a statement is syntactically correct    */
+/*....................................................................*/
+#define CASRT(cond)                         \
+  extern int casrt_dummy_x_[1];             \
+  extern int casrt_dummy_x_[(cond)? 1 : 2]
+/**END OF DEFINITION**/
+#define CASRTS(cond)  do { CASRT((cond)); } while ( 0 )
 /**********************************************************************/
 
-
 /**********************************************************************/
-#include "estruct.h"
+/* Check consistency of defines from estruct.h:                       */
 /*....................................................................*/
-/* Check consistency of defines:                                      */
-/*....................................................................*/
-CASRT(0 != VARARG);               /* VARARG needed in any case!     */
-CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
-/*....................................................................*/
+CASRT(0 != VARARG);                 /* VARARG needed in any case!     */
+/* To complicated for Pre-ANSI-C: `CASRT((VARG && !PROTO) || !VARG)'  */
+CASRT(0 == (VARG & PROTO));         /* varargs.h only with Pre-ANSI C */
 /**********************************************************************/
 
 
@@ -143,49 +178,107 @@ CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
 # define REGISTER     register
 #endif
 /**********************************************************************/
+#define _K_               ,     /* We need to marshall the `,'  */
+
+#ifdef  MAIN_C_
+# if defined(__cplusplus)
+/* C++ Needs this because all constants have *internal linkage* by default. */
+#   define CSTDEF         COMMON CONST
+# else
+#   define CSTDEF         CONST
+# endif
+# define DCLDEF
+# define INIT_(x)         = x
+# define NOSZ_
+#else
+# define CSTDEF           COMMON CONST
+# define DCLDEF           COMMON
+# define INIT_(x)
+# define NOSZ_            DUMMYSZ /* GRRR */
+#endif
+
+#ifdef  ELANG_C_
+# define TDCLDEF          NOSHARE
+# define TINIT_(x)        = x
+#else
+# define TDCLDEF          COMMON NOSHARE
+# define TINIT_(x)
+#endif
+/**********************************************************************/
 
 /**********************************************************************/
 #if PROTO
 # define P0_()                          (void)
 # define P1_(t1, x1)                                                                  \
   (t1 x1)
+# define V1_(t1, x1)                                                                  \
+  (t1 x1, ...)
 # define P2_(t1, x1, t2, x2)                                                          \
   (t1 x1, t2 x2)
+# define V2_(t1, x1, t2, x2)                                                          \
+  (t1 x1, t2 x2, ...)
 # define P3_(t1, x1, t2, x2, t3, x3)                                                  \
   (t1 x1, t2 x2, t3 x3)
+# define V3_(t1, x1, t2, x2, t3, x3)                                                  \
+  (t1 x1, t2 x2, t3 x3, ...)
 # define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
   (t1 x1, t2 x2, t3 x3, t4 x4)
+# define V4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, ...)
 # define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5)
+# define V5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, ...)
 # define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6)
+# define V6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, ...)
+#if     BEGIN_COMMENT_
 # define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7)
+# define V7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, ...)
 # define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
   (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8)
+# define V8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
+  (t1 x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, ...)
 # define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
   (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9)
+# define V9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
+  (t, x1, t2 x2, t3 x3, t4 x4, t5 x5, t6 x6, t7 x7, t8 x8, t9 x9, ...)
+#endif  /*END_COMMENT_*/
 # define DCL(args)                      args
 #else
 # define P0_()                          ()
 # define P1_(t1, x1)                                                                  \
   (x1)                                  t1 x1;
+# define V1_  P1_
 # define P2_(t1, x1, t2, x2)                                                          \
   (x1, x2)                              t1 x1; t2 x2;
+# define V2_  P2_
 # define P3_(t1, x1, t2, x2, t3, x3)                                                  \
   (x1, x2, x3)                          t1 x1; t2 x2; t3 x3;
+# define V3_  P3_
 # define P4_(t1, x1, t2, x2, t3, x3, t4, x4)                                          \
   (x1, x2, x3, x4)                      t1 x1; t2 x2; t3 x3; t4 x4;
+# define V4_  P4_
 # define P5_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5)                                  \
   (x1, x2, x3, x4, x5)                  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5;
+# define V5_  P5_
 # define P6_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6)                          \
   (x1, x2, x3, x4, x5, x6)              t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6;
+# define V6_  P6_
+#if     BEGIN_COMMENT_
 # define P7_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7)                  \
   (x1, x2, x3, x4, x5, x6, x7)          t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7;
+# define V7_  P7_
 # define P8_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8)          \
   (x1, x2, x3, x4, x5, x6, x7, x8)      t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8;
+# define V8_  P8_
 # define P9_(t1, x1, t2, x2, t3, x3, t4, x4, t5, x5, t6, x6, t7, x7, t8, x8, t9, x9)  \
   (x1, x2, x3, x4, x5, x6, x7, x8, x9)  t1 x1; t2 x2; t3 x3; t4 x4; t5 x5; t6 x6; t7 x7; t8 x8; t9 x9;
+# define V9_  P9_
+#endif  /*END_COMMENT_*/
 # define DCL(args)                      ()
 #endif
 /**********************************************************************/
@@ -193,16 +286,14 @@ CASRT((VARG && !PROTO) || !VARG); /* varargs.h only with Pre-ANSI C */
 
 /*....................................................................*/
 #if WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO))    \
-    || GCC || VMS || IS_UNIX()
+    || GCC || VMS || b_IS_ANSI_C || ( b_IS_UNIX && !b_IS_ANCIENT_UNIX )
 # include <stdlib.h>
 # include <string.h>
 #else
 EXTERN char *getenv DCL((CONST char *));
-EXTERN char *memcpy DCL((char *dst, CONST char *src, int len));
 EXTERN char *strcat DCL((char *, CONST char *));
 EXTERN char *strcpy DCL((char *, CONST char *));
 EXTERN int  strncmp DCL((CONST char *, CONST char *, int));
-EXTERN char *strchr DCL((CONST char *, int));
 EXTERN int  strcmp  DCL((CONST char *, CONST char *));
 # if     XVT == 0 || XVTDRIVER == 0
 EXTERN int  strlen DCL((CONST char *));
@@ -211,11 +302,18 @@ EXTERN char *malloc DCL((int));
 EXTERN VOID free DCL((char *));
 #  endif
 EXTERN char *realloc DCL((char *block, int siz));
+EXTERN int  errno;
 # endif
 #endif  /* WINXP || WINNT || WINDOW_MSWIN || (MSDOS && (IC || TURBO)) \
-         * || GCC || VMS || IS_UNIX()
+         * || GCC || VMS || b_IS_UNIX
          */
-#if IS_UNIX()
+#if b_IS_UNIX
+/* We need `struct stat': */
+# if b_IS_ANCIENT_UNIX
+#  include <sys/param.h>  /* Includes `sys/types.h' */
+# else
+#  include <sys/types.h>
+# endif
 # include <sys/stat.h>
 #endif
 /*....................................................................*/
@@ -234,14 +332,14 @@ EXTERN char *realloc DCL((char *block, int siz));
 # ifdef NDEBUG
 #   define UEMACS_TRC          (0)
 # else
-#   define UEMACS_TRC         (!0)
+#   define UEMACS_TRC          (1)
 # endif
 #endif
 #ifndef TRC_FILE_ENVVAR
 # define TRC_FILE_ENVVAR  "UEMACS_TRC_FILE"
 #endif
 #ifndef REPAIR_CODE_LINE
-# define REPAIR_CODE_LINE     (!0)
+# define REPAIR_CODE_LINE     (1)
 #endif
 #ifndef DFT_STATIC_STACKSIZE
 # define DFT_STATIC_STACKSIZE (16)
@@ -250,9 +348,18 @@ EXTERN char *realloc DCL((char *block, int siz));
 
 
 /**********************************************************************/
+
+/*======================================================================
+ * Some library functions not available everywhere:
+ *====================================================================*/
+EXTERN VOIDP  umc_memset  DCL((VOIDP dest, int c, unsigned long n));
+EXTERN VOIDP  umc_memcpy  DCL((VOIDP dest, CONST VOIDP src, unsigned long n));
+EXTERN char   *umc_strchr DCL((CONST char *s, int c));
+/*====================================================================*/
+
 EXTERN FILE *uetmpfile_ DCL((int delmode));
 #define uetmpfile() ( uetmpfile_(0) )
-#define clntmpfls() ( uetmpfile_(!0)  )
+#define clntmpfls() ( uetmpfile_(1)  )
 
 /* strcpy() possibly overlapping regions:   */
 EXTERN char *PASCAL NEAR  xstrcpy DCL((char *s1, CONST char *s2));
@@ -268,7 +375,14 @@ EXTERN char *PASCAL NEAR  xstrcat DCL((char *s1, CONST char *s2));
  *  ---
  *  n = snprintf(dst, len, "%s", src);
  */
-EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
+EXTERN int PASCAL NEAR  xstrlcpy  DCL((char * s1, CONST char * s2, int n));
+/* XSTRLCCPY:
+ *
+ * Safe copy of character to string buffer of size n
+ * Equivalent semantics:
+ * l = snprintf(s1, n, "%c", c2);
+ */
+EXTERN int PASCAL NEAR  xstrlccpy DCL((char * s1, CONST char   c2, int n));
 
 /* Like FreeBSD's strlcat(): Equivalent semantics:
  *  n = strlcat(dst, src, len);
@@ -277,7 +391,12 @@ EXTERN int PASCAL NEAR  xstrlcpy DCL((char * s1, CONST char * s2, int n));
  *  n = snprintf(dst, len, "%s%s", dup, src);
  *  free(dup);
  */
-EXTERN int PASCAL NEAR  xstrlcat DCL((char * s1, CONST char * s2, int n));
+EXTERN int PASCAL NEAR  xstrlcat  DCL((char * s1, CONST char * s2, int n));
+/* XSTRLCCAT:
+ *
+ * Safe append of character to string buffer of size n
+ */
+EXTERN int PASCAL NEAR  xstrlccat DCL((char * s1, CONST char   c2, int n));
 
 /* SFSTRCPY:
  *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, SIZEOF(dst))
@@ -346,11 +465,21 @@ EXTERN int PASCAL NEAR  strcasestart DCL((CONST char *start, CONST char *test));
 
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
-EXTERN char *PASCAL NEAR  astrcatc DCL((CONST char *str, CONST char c));
+EXTERN char *PASCAL NEAR  achrcat DCL((CONST char *str, CONST char c));
 
 /* Concatenate string d to string str and malloc the result.    */
 /* Input string must either be NULL or malloced.                */
 EXTERN char *PASCAL NEAR  astrcat DCL((CONST char *str, CONST char *s));
+
+/* Display character in a visible form.                         */
+EXTERN CONST char         *cmkvis DCL((char c));
+
+/* Display character string in a visible form.                  */
+EXTERN CONST char         *smkvis DCL((CONST char *s));
+
+/* Display character buffer in a visible form.                  */
+EXTERN CONST char         *bmkvis DCL((CONST char *s, int l));
+
 
 #if UEMACS_FEATURE_USE_STATIC_STACK
 /*--------------------------------------------------------------------*/
@@ -426,8 +555,8 @@ RETURN_L:
             rc_ = xstrlcpy(STATIC_STR_RET_ARR_, STATIC_STR_RET_VAL_,  \
                            SIZEOF(STATIC_STR_RET_ARR_));              \
             if ( SIZEOF(STATIC_STR_RET_ARR_) <= rc_ ) {               \
-                TRC(("%s(): RVl truncated: SIZEOF(RVl) = %d <= rc"    \
-                    " = %d", #func, SIZEOF(STATIC_STR_RET_ARR_),      \
+                TRC(("%s(): RVl truncated: SIZEOF(RVl) = %d <= rc = %d",  \
+                    MKSTRING(func), SIZEOF(STATIC_STR_RET_ARR_),      \
                     rc_));                                            \
             }                                                         \
                                                                       \
@@ -469,15 +598,15 @@ extern int         DebugMessage_lnno_;
 extern CONST char *DebugMessage_fname_;
 EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #if UEMACS_TRC
-# define  TRC(arg)  do {                        \
-        DebugMessage_fname_ = __FILE__;         \
-        DebugMessage_lnno_ = __LINE__;          \
-        DebugMessage arg;                       \
+# define  TRC(arg)  do {                              \
+        DebugMessage_fname_ = (CONST char *)__FILE__; \
+        DebugMessage_lnno_ = __LINE__;                \
+        DebugMessage arg;                             \
     } while ( 0 )
-# define  TRCK(arg, file, line)  do {           \
-        DebugMessage_fname_ = (file);           \
-        DebugMessage_lnno_ = (line);            \
-        DebugMessage arg;                       \
+# define  TRCK(arg, file, line)  do {                 \
+        DebugMessage_fname_ = (CONST char *)(file);   \
+        DebugMessage_lnno_ = (line);                  \
+        DebugMessage arg;                             \
     } while ( 0 )
 #else
 # define  TRC(arg)              do {} while ( 0 )
@@ -491,25 +620,48 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #define NELEM(A)      ( SIZEOF ( (A) )/SIZEOF ( (A)[0] ) )
 #define SIZEOF(e)     ( (int)sizeof(e) )
 #define STRLEN(x)     ( (int)strlen((x)) )
-#define ZEROMEM(x)    ( memset(&(x), 0, SIZEOF((x))) )
+#define SLTLEN(x)     ( SIZEOF((x)) - 1 ) /* strlen of a string literal */
+#define ZEROMEM(x)    ( umc_memset(&(x), 0, SIZEOF((x))) )
 #define MAXIMUM(x, y) ( ((x) < (y))? (y) : (x) )
 #define MINIMUM(x, y) ( ((x) > (y))? (y) : (x) )
 #define MIN2(x, y)    ( MINIMUM((x), (y)) )
 #define MAX2(x, y)    ( MAXIMUM((x), (y)) )
+#if     BEGIN_COMMENT_
 #define MIN3(x, y, z) ( MIN2((x), MIN2((y), (z))) )
 #define MAX3(x, y, z) ( MAX2((x), MAX2((y), (z))) )
+#endif  /*END_COMMENT_*/
 /**********************************************************************/
-#define MKSTRING(t)       #t
+
+/**********************************************************************/
+#if b_IS_ANSI_C
+# define  MKSTRING(t)     #t
+#else
+# define  MKSTRING(t)     "t"
+#endif
 #define MKXSTRING(t)      MKSTRING(t)
+/**********************************************************************/
+
 /**********************************************************************/
 /*
  * This macro tests for pointer to something versus array of something.
  * It fails for the definition w. initialization `type *p = (type *)&p;'
+ *
+ * Remarks: * On some Pre-ANSI_C-Compilers (e.g. on BSD 4.1) this macro
+ *            produces this *warning":
+ *
+ *              warning: & before array or function: ignored
+ *
+ *          * This macro wrongly classifies x as array:
+ *
+ *            char  *x  = NULL;
+ *            x = (char *)&x;
+ *            IS_ARRAY(x);  /o Will report TRUE which is FALSE o/
  */
 #define IS_ARRAY(a) ( (char *)(&(a)) == (char *)(&((a)[0])) )
 /**********************************************************************/
 
 /**********************************************************************/
+#if     BEGIN_COMMENT_
 /* With DJGPP_DOS (gcc version 4.0.1) and `-O2' this leads to the warning:
  *  `dereferencing type-punned pointer will break strict aliasing rules'
  * *and* to generation of wrong code!
@@ -522,18 +674,19 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
         *pp__ = NULL;                 \
     }                                 \
 } while ( 0 )
+#endif  /*END_COMMENT_*/
 
-#define FREE_(p)  do  {               \
-    char  *z__  = (char *)&(p);       \
-    char  *p__  = NULL;               \
-    CASRT(sizeof(p) == sizeof(p__));  \
-                                      \
-    memcpy(&p__, z__, sizeof(p__));   \
-    if ( NULL != p__ )  {             \
-        free(p__);                    \
-        p__ = NULL;                   \
-        memcpy(z__, &p__, sizeof(p)); \
-    }                                 \
+#define FREE_(p)  do  {                   \
+    char  *z__  = (char *)&(p);           \
+    char  *p__  = NULL;                   \
+    CASRT(sizeof(p) == sizeof(p__));      \
+                                          \
+    umc_memcpy(&p__, z__, sizeof(p__));   \
+    if ( NULL != p__ )  {                 \
+        free(p__);                        \
+        p__ = NULL;                       \
+        umc_memcpy(z__, &p__, sizeof(p)); \
+    }                                     \
 } while ( 0 )
 
 /**********************************************************************/
@@ -604,11 +757,11 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #else /* Array or non-void pointer  */
-# define MY_VA_COPY(d, s)     (               \
-    IS_ARRAY((d))?                            \
-      memcpy((d), (s), SIZEOF((d)))           \
-        :                                     \
-      memcpy(&(d), &(s), SIZEOF((d)))         \
+# define MY_VA_COPY(d, s)     (                   \
+    IS_ARRAY((d))?                                \
+      umc_memcpy((d), (s), SIZEOF((d)))           \
+        :                                         \
+      umc_memcpy(&(d), &(s), SIZEOF((d)))         \
     )
 # define MY_VA_END(x)         VOIDCAST(0)
 #endif
@@ -617,23 +770,33 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #if ( 0 ) /* Don't use own implementation per default */
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( defined(va_copy) )  /* C99, i.e.: __STDC_VERSION__ >= 199901  */
+#else
+#if ( defined(va_copy) )  /* C99, i.e.: __STDC_VERSION__ >= 199901  */
 # define VA_COPY            va_copy
 # define VA_END             va_end
-#elif ( defined(__va_copy) )
+#else
+#if ( defined(__va_copy) )
 # define VA_COPY            __va_copy
 # define VA_END             va_end
 /* VMS on non X86_64 has __STDC_VERSION__ >= 199901 but no va_copy: */
-#elif VMS && (__DECC_VER < 70500000)
+#else
+#if VMS && (__DECC_VER < 70500000)
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( MSDOS && TURBO )
+#else
+#if ( MSDOS && TURBO )
 # define VA_COPY            MY_VA_COPY
 # define VA_END             MY_VA_END
-#elif ( UEMACS_FEATURE_USE_VA_COPY )
-# error CANNOT DEFINE VA_COPY
+#else
+#if ( UEMACS_FEATURE_USE_VA_COPY )
+  CRASH(CANNOT DEFINE VA_COPY);
 #else
 /**EMPTY**/
+#endif
+#endif
+#endif
+#endif
+#endif
 #endif
 #if ( !UEMACS_FEATURE_USE_VA_COPY )
 # undef VA_COPY
@@ -648,11 +811,20 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 
 
 /**********************************************************************/
-EXTERN char *PASCAL NEAR  uitostr10_memacs DCL((unsigned int i));
-EXTERN char *PASCAL NEAR  uitostr16_memacs DCL((unsigned int i));
-EXTERN char *PASCAL NEAR  uitostr36_memacs DCL((unsigned int i));
+/* Unsigned int i to base 10, 16 or 36 strings:                       */
+/* - l if non-negative gives the desired zerp padded output wide      */
+/*   which might truncate the result(!); negative l doesn't truncate  */
+/*   the result und doesn't pad it with zeroes.                       */
+/* - u if TRUE gives an uppercase result.                             */
+/*--------------------------------------------------------------------*/
+EXTERN CONST char *PASCAL NEAR  ui2s10_memacs DCL((unsigned int i,
+                                                   int l));
+EXTERN CONST char *PASCAL NEAR  ui2s16_memacs DCL((unsigned int i,
+                                                   int l, int u));
+EXTERN CONST char *PASCAL NEAR  ui2s36_memacs DCL((unsigned int i,
+                                                   int l, int u));
 #ifdef MAIN_C_
-char *PASCAL NEAR uitostr10_memacs P1_(unsigned int, i)
+CONST char *PASCAL NEAR ui2s10_memacs P2_(unsigned int, i, int, l)
 {
     unsigned int  base  = C_10;
 
@@ -676,13 +848,15 @@ char *PASCAL NEAR uitostr10_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 3*SIZEOF(a)
      *
      ******************************************************************/
-    CONST char    tab[] = "0123456789";
+    static CONST char tab[] = "0123456789";
     CASRT(C_10 + 1 == SIZEOF(tab));
-    static char buf[1 + 3*SIZEOF(i) + 1];
-    int           pos   = SIZEOF(buf) - 2;
-    unsigned int  rest  = 0;
+    static char buf[NSTRING];
+    CASRT(1 + 3 * SIZEOF(i) + 1 <= SIZEOF(buf));
+    int               pos   = SIZEOF(buf) - 2;
+    unsigned int      rest  = 0;
 
-    ZEROMEM(buf);
+    umc_memset(buf, '0', SLTLEN(buf));
+    buf[SIZEOF(buf) - 1]    = '\0';
 
     for (;;)
     {
@@ -695,10 +869,17 @@ char *PASCAL NEAR uitostr10_memacs P1_(unsigned int, i)
         }
     }
 
-    return buf + pos + 1;
+    if  ( l < 0 ) {
+        return buf + pos + 1;
+    } else        {
+        l = MIN2(l, SLTLEN(buf));
+
+        return buf + SLTLEN(buf) - l;
+    }
 }
 
-char *PASCAL NEAR uitostr16_memacs P1_(unsigned int, i)
+CONST char *PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
+                                          int, u)
 {
     unsigned int  base  = C_16;
 
@@ -722,13 +903,22 @@ char *PASCAL NEAR uitostr16_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 2*SIZEOF(a)
      *
      ******************************************************************/
-    CONST char    tab[] = "0123456789abcdef";
-    CASRT(C_16 + 1 == SIZEOF(tab));
-    static char   buf[1 + 2*SIZEOF(i) + 1];
-    int           pos   = SIZEOF(buf) - 2;
-    unsigned int  rest  = 0;
+    static CONST char tabl[]  = "0123456789abcdef";
+    static CONST char tabu[]  = "0123456789ABCDEF";
+    CASRT(C_16 + 1 == SIZEOF(tabl));
+    CASRT(C_16 + 1 == SIZEOF(tabu));
+    CONST char        *tab    = tabl;
+    static char buf[NSTRING];
+    CASRT(1 + 2 * SIZEOF(i) + 1 <= SIZEOF(buf));
+    int           pos         = SIZEOF(buf) - 2;
+    unsigned int  rest        = 0;
 
-    ZEROMEM(buf);
+    umc_memset(buf, '0', SLTLEN(buf));
+    buf[SIZEOF(buf) - 1]  = '\0';
+
+    if ( u )  {
+        tab = tabu;
+    }
 
     for (;;)
     {
@@ -741,10 +931,17 @@ char *PASCAL NEAR uitostr16_memacs P1_(unsigned int, i)
         }
     }
 
-    return buf + pos + 1;
+    if  ( l < 0 ) {
+        return buf + pos + 1;
+    } else        {
+        l = MIN2(l, SLTLEN(buf));
+
+        return buf + SLTLEN(buf) - l;
+    }
 }
 
-char *PASCAL NEAR uitostr36_memacs P1_(unsigned int, i)
+CONST char *PASCAL NEAR ui2s36_memacs P3_(unsigned int, i, int, l,
+                                          int, u)
 {
     unsigned int  base  = C_36;
 
@@ -770,13 +967,22 @@ char *PASCAL NEAR uitostr36_memacs P1_(unsigned int, i)
      * Damit n <= 1 + 2*SIZEOF(a)
      *
      ******************************************************************/
-    CONST char    tab[] = "0123456789abcdefghijklmnopqrstuvwxyz";
-    CASRT(C_36 + 1 == SIZEOF(tab));
-    static char   buf[1 + 2*SIZEOF(i) + 1];
-    int           pos   = SIZEOF(buf) - 2;
-    unsigned int  rest  = 0;
+    static CONST char tabl[]  = "0123456789abcdefghijklmnopqrstuvwxyz";
+    static CONST char tabu[]  = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    CASRT(C_36 + 1 == SIZEOF(tabu));
+    CASRT(C_36 + 1 == SIZEOF(tabl));
+    CONST char        *tab    = tabl;
+    static char buf[NSTRING];
+    CASRT(1 + 2 * SIZEOF(i) + 1 <= SIZEOF(buf));
+    int               pos     = SIZEOF(buf) - 2;
+    unsigned int      rest    = 0;
 
-    ZEROMEM(buf);
+    umc_memset(buf, '0', SLTLEN(buf));
+    buf[SIZEOF(buf) - 1]  = '\0';
+
+    if ( u )  {
+        tab = tabu;
+    }
 
     for (;;)
     {
@@ -789,22 +995,31 @@ char *PASCAL NEAR uitostr36_memacs P1_(unsigned int, i)
         }
     }
 
-    return buf + pos + 1;
+    if  ( l < 0 ) {
+        return buf + pos + 1;
+    } else        {
+        l = MIN2(l, SLTLEN(buf));
+
+        return buf + SLTLEN(buf) - l;
+    }
 }
 #endif
 /* Non negative int to string:  */
-#define nni2s10_(i)     ( uitostr10_memacs((unsigned int)(i)) )
-#define nni2s16_(i)     ( uitostr16_memacs((unsigned int)(i)) )
-#define nni2s36_(i)     ( uitostr36_memacs((unsigned int)(i)) )
+#if     BEGIN_COMMENT_
+#define nni2s10_(i)     ( ui2s10_memacs((unsigned int)(i), (-1)) )
+#define nni2s16_(i)     ( ui2s16_memacs((unsigned int)(i), (-1), 0) )
+#define nni2S16_(i)     ( ui2s16_memacs((unsigned int)(i), (-1), 1) )
+#define nni2s36_(i)     ( ui2s36_memacs((unsigned int)(i), (-1), 0) )
+#endif  /*END_COMMENT_*/
 
 /**********************************************************************/
 #define trcs_(s)      VOIDCAST( GetTrcFP()? fputs((s), GetTrcFP()) : 0 )
-#define trci_(i)      trcs_(uitostr10_memacs((unsigned int)(i)))
+#define trci_(i)      trcs_(ui2s10_memacs((unsigned int)(i), (-1)))
 EXTERN VOID PASCAL NEAR ASRT_WriteStr_  DCL((CONST char *s));
 #define asrs_(s)      ASRT_WriteStr_((s))
-#define asri_(i)      asrs_(uitostr10_memacs((unsigned int)(i)))
+#define asri_(i)      asrs_(ui2s10_memacs((unsigned int)(i), (-1)))
 #ifdef MAIN_C_
-VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *s, )
+VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *, s)
 {
     trcs_(s);
     VOIDCAST fputs(s, stderr);
@@ -841,7 +1056,7 @@ VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
     asrs_("File: "); asrs_(file); asrs_(", Line: ");
     asri_(line); asrs_("\n");
     asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
-    asrs_("OS: `"); asrs_(strerror(errno_sv_)); asrs_("'\n");
+    asrs_("OS ERRNO: "); asri_(errno_sv_); asrs_("\n");
     asrs_("--- abort ...\n");
     abort();
 }
@@ -861,55 +1076,72 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
     asri_(line); asrs_("\n");
     asrs_("\t"); asrs_(msg); asrs_("\n");
     asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
-    asrs_("OS: `"); asrs_(strerror(errno_sv_)); asrs_("'\n");
+    asrs_("OS ERRNO: "); asri_(errno_sv_); asrs_("\n");
     asrs_("--- abort ...\n");
     abort();
 }
 #endif
 
+
+/*
+ * We MKSTRING() in the following macros to be able to use the same code
+ * for ANSI and pre-ANSI C-compilers. Unfortunately for ANSI-C compilers
+ * this results in an usually unwanted macro expansion of e.
+ */
+
 #define ASRT(e) do {                                                    \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRT_Catch (__FILE__, __LINE__, #e);                        \
+            ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
 
+#if     BEGIN_COMMENT_
 #define ASRTM(e, m) do {                                                \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRTM_Catch (__FILE__, __LINE__, #e, m);                    \
+            ASRTM_Catch (__FILE__, __LINE__, MKSTRING(e), m);           \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 
 #define ASRTK(e, file, line) do {                                       \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRT_Catch (file, line, #e);                                \
+            ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
 
+#if     BEGIN_COMMENT_
 #define ASRTMK(e, m, file, line) do {                                   \
         if ( !(e) )                                                     \
         {                                                               \
-            ASRTM_Catch (file, line, #e, m);                            \
+            ASRTM_Catch (file, line, MKSTRING(e), m);                   \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 
+#if     BEGIN_COMMENT_
 #define ASRT_TRC(e, a) do {                                             \
         if ( !(e) )                                                     \
         {                                                               \
             TRCK(a, __FILE__, __LINE__);                                \
-            ASRT_Catch (__FILE__, __LINE__, #e);                        \
+            ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 
 #define ASRTK_TRC(e, a, file, line) do {                                \
         if ( !(e) )                                                     \
         {                                                               \
             TRCK(a, file, line);                                        \
-            ASRT_Catch (file, line, #e);                                \
+            ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
+
+/**********************************************************************/
+#define IMPOSSIBLE  ( 0 )
+/**********************************************************************/
 
 /**********************************************************************/
 /*
@@ -924,10 +1156,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                                                                         \
             trcs_("File: "); trcs_(__FILE__); trcs_(", Line: ");        \
             trci_(__LINE__); trcs_("\n");                               \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `");                                     \
+                trcs_(MKSTRING(e)); trcs_("' failed!\n");               \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `"); trcs_(MKSTRING(r)); trcs_("'\n");           \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -935,6 +1168,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         }                                                               \
     } while (0)
 
+#if     BEGIN_COMMENT_
 #define REPAIRM(e, m, r) do {                                           \
         if ( !(e) )                                                     \
         {                                                               \
@@ -943,10 +1177,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             trcs_("File: "); trcs_(__FILE__); trcs_(", Line: ");        \
             trci_(__LINE__); trcs_("\n");                               \
             trcs_("\t"); trcs_((m)); trcs_("\n");                       \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `"); trcs_(MKSTRING(e));                 \
+                trcs_("' failed!\n");                                   \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `"); trcs(MKSTRING(r)); trcs_("'\n");            \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -961,10 +1196,11 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
                                                                         \
             trcs_("File: "); trcs_((file)); trcs_(", Line: ");          \
             trci_((line)); trcs_("\n");                                 \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `"); trcs_(MKSTRING(e));                 \
+                 trcs_("' failed!\n");                                  \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `"); trcs(MKSTRING(r)); trcs_("'\n");            \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
@@ -980,22 +1216,24 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
             trcs_("File: "); trcs_((file)); trcs_(", Line: ");          \
             trci_((line)); trcs_("\n");                                 \
             trcs_("\t"); trcs_((m)); trcs_("\n");                       \
-            trcs_("\tAssertion `"); trcs_(#e); trcs_("' failed!\n");    \
-            trcs_("OS: `"); trcs_(strerror(errno_sv_)); trcs_("'\n");   \
+            trcs_("\tAssertion `"); trcs_(MKSTRING(e));                 \
+                 trcs_("' failed!\n");                                  \
+            trcs_("OS ERRNO: "); trci_(errno_sv_); trcs_("\n");         \
             trcs_("--- REPAIRING ...\n");                               \
-            trcs_("    `" #r "'"); trcs_("\n");                         \
+            trcs_("    `"); trcs(MKSTRING(r)); trcs_("'\n");            \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
             do { r ; } while ( 0 );                                     \
             trcs_("--- ... DONE\n");                                    \
             VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );             \
         }                                                               \
     } while (0)
+#endif  /*END_COMMENT_*/
 /**********************************************************************/
 
 /**********************************************************************/
 /* Do something only *once*:  */
 #define BEGIN_DO_ONCE do {        \
-    static int  FirstCall_  = !0; \
+    static int  FirstCall_  = 1;  \
                                   \
     if ( FirstCall_ ) {           \
         FirstCall_  = 0;          \
@@ -1017,6 +1255,25 @@ BEGIN_DO_ONCE {
 #define C2I(c)  ( (int)(unsigned char)(c) )
 /* REMARK: Using integer promotion another (cryptic) way to achive    */
 /*         this would be: C2I(c) := ( (c) & 255 ).                    */
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* Bound checks when accessing buffer buf via index i or pointer cp:  */
+/* --- Arguments are evaluated multiple times ---                     */
+/*--------------------------------------------------------------------*/
+/* Assert that n items may be written at the indicated address:       */
+#define BNDCHK_IDXN(i, buf, n)  ( 0        <= (int)(i) &&             \
+                                  (int)(i) <= SIZEOF((buf)) - (int)(n) )
+#define BNDCHK_PTRN(cp, buf, n) ( (buf)    <= (cp) &&                 \
+                                  (cp)     <= (buf) + SIZEOF((buf))   \
+                                              - (int)(n) )
+/*--------------------------------------------------------------------*/
+/* Assert that *one* item may be written at the indicated address:    */
+#define BNDCHK_IDX(i, buf)  ( 0 <= (int)(i) && (int)(i)               \
+                              < SIZEOF((buf)) )
+#define BNDCHK_PTR(cp, buf) ( (buf) <= (cp) && (cp)                   \
+                              < (buf) + SIZEOF((buf)) )
 /**********************************************************************/
 
 
@@ -1190,7 +1447,7 @@ EXTERN char PASCAL NEAR lputc_ DCL((LINE *lp, int n, char c,
                                     CONST char *fnam, int lno));
 #define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
 
-#if ( IS_UNIX() )
+#if ( b_IS_UNIX )
 EXTERN unsigned char PASCAL NEAR  lgetc_ DCL((LINE *lp, int n,
                                               CONST char *fnam, int lno));
 #else
@@ -1747,7 +2004,7 @@ typedef int PASCAL NEAR         (*ue_fnc_T) DCL((int, int));
 /* MicroEmacs table value fetch function type:  */
 typedef CONST char *PASCAL NEAR (*ue_tvfetch_T)DCL((int));
 
-/* Filter function used by TransformRegion():
+/* Filter function used by TfmRegion():
  * Output string must be created by malloc(). */
 typedef char *PASCAL NEAR       (*filter_func_T) DCL((CONST char *rstart,
                                                       CONST char *rtext,
@@ -1812,7 +2069,7 @@ EXTERN BUFFER *PASCAL NEAR      getcbuf DCL((CONST char *prompt, CONST char *def
 EXTERN BUFFER *PASCAL NEAR      getdefb DCL((void));
 EXTERN BUFFER *PASCAL NEAR      getoldb DCL((void));
 EXTERN SCREEN_T *PASCAL NEAR    init_screen DCL((CONST char *, BUFFER *));
-EXTERN SCREEN_T *PASCAL NEAR    lookup_screen DCL((CONST char *scr_name));
+EXTERN SCREEN_T *PASCAL NEAR    lkp_screen DCL((CONST char *scr_name));
 EXTERN SCREEN_T *PASCAL NEAR    index_screen DCL((int scr_num));
 EXTERN int PASCAL NEAR          screen_index DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          insert_screen DCL((SCREEN_T *sp));
@@ -1821,7 +2078,8 @@ EXTERN VOID PASCAL NEAR         free_screen DCL((SCREEN_T *sp));
 EXTERN char *                   Eallocate DCL((unsigned nbytes));
 EXTERN char *                   dolock DCL((CONST char *fname));
 EXTERN char *PASCAL NEAR        bytecopy DCL((char *dst, CONST char *src, int maxlen));
-EXTERN char *PASCAL NEAR        cmdstr DCL((int c, char *seq));
+EXTERN char *PASCAL NEAR        getecnam DCL((int c, char *seq, int seqsiz));
+EXTERN CONST char *             ectostr DCL((int ec));
 EXTERN char *PASCAL NEAR        copystr DCL((CONST char *));
 EXTERN CONST char *PASCAL NEAR  envval DCL((int i));
 EXTERN CONST char *PASCAL NEAR  fixnull DCL((CONST char *s));
@@ -1851,7 +2109,6 @@ EXTERN char *PASCAL NEAR        token DCL((char *src, char *tok, int size));
 EXTERN CONST char *PASCAL NEAR  transbind DCL((CONST char *skey));
 EXTERN char *PASCAL NEAR        trimstr DCL((char *s));
 EXTERN char *PASCAL NEAR        xlat DCL((char *source, char *lookup, char *trans));
-EXTERN int PASCAL NEAR          undolist DCL((void));
 EXTERN char *                   undolock DCL((CONST char *fname));
 EXTERN char *PASCAL NEAR        regtostr DCL((char *buf, REGION *region));
 EXTERN int PASCAL NEAR          lowerc DCL((char ch));
@@ -1860,15 +2117,11 @@ EXTERN int PASCAL NEAR          upperc DCL((char ch));
 EXTERN ue_fnc_T                 fncmatch DCL((CONST char *fname));
 EXTERN ue_fnc_T                 getname DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR          asc_int DCL((CONST char *st));
-EXTERN VOID                     dohello DCL((void));
 EXTERN int                      dspram DCL((void));
 EXTERN VOID                     lckerror DCL((char *errstr));
-EXTERN VOID                     lckhello DCL((void));
 EXTERN int                      xlock DCL((CONST char *fname));
 EXTERN int                      lockchk DCL((CONST char *fname));
 EXTERN int                      lockrel DCL((void));
-EXTERN int                      mousehello DCL((void));
-EXTERN int                      nocrypt DCL((void));
 EXTERN int PASCAL NEAR          absv DCL((int x));
 EXTERN int PASCAL NEAR          add_abbrev DCL((int f, int n));
 EXTERN int PASCAL NEAR          del_abbrev DCL((int f, int n));
@@ -1929,8 +2182,10 @@ EXTERN int PASCAL NEAR          getkey DCL((void));
 EXTERN int PASCAL NEAR          getwpos DCL((void));
 EXTERN int PASCAL NEAR          get_char DCL((void));
 EXTERN int PASCAL NEAR          global_var DCL((int f, int n));
+#if USE_NOBLOCK_READ
 EXTERN unsigned char PASCAL NEAR  grabnowait DCL((void));
 #define grabnowait_TIMEOUT  ( 0xFF )
+#endif  /*USE_NOBLOCK_READ*/
 EXTERN unsigned char PASCAL NEAR  grabwait DCL((void));
 #if DBCS
 EXTERN int PASCAL NEAR          is2byte DCL((char *sp, char *cp));
@@ -1950,7 +2205,7 @@ EXTERN int PASCAL NEAR          liteq DCL((LINE **curline,
 EXTERN int PASCAL NEAR          litmake DCL((char **ppatptr, MC *mcptr));
 EXTERN int PASCAL NEAR          lnewline DCL((void));
 EXTERN int PASCAL NEAR          local_var DCL((int f, int n));
-EXTERN int PASCAL NEAR          lookup_color DCL((char *sp));
+EXTERN int PASCAL NEAR          lkp_color DCL((char *sp));
 EXTERN int PASCAL NEAR          lover DCL((char *ostr));
 EXTERN int PASCAL NEAR          mceq DCL((unsigned char bc, MC *mt));
 #if MSDOS
@@ -1968,7 +2223,7 @@ EXTERN int PASCAL NEAR          pop DCL((BUFFER *popbuffer));
 EXTERN int PASCAL NEAR          qreplace DCL((int f, int n));
 EXTERN int PASCAL NEAR          readpattern DCL((CONST char *prompt, char apat[], int srch));
 #if WINDOW_TEXT
-EXTERN VOID PASCAL NEAR         refresh_screen DCL((SCREEN_T *sp));
+EXTERN VOID PASCAL NEAR         rdw_screen DCL((SCREEN_T *sp));
 #endif
 EXTERN int PASCAL NEAR          reglines DCL((void));
 EXTERN int PASCAL NEAR          rename_screen DCL((int f, int n));
@@ -2087,7 +2342,7 @@ EXTERN int PASCAL NEAR          getccol DCL((int bflg));
 EXTERN int PASCAL NEAR          getcmd DCL((void));
 EXTERN int PASCAL NEAR          getfence DCL((int f, int n));
 EXTERN int PASCAL NEAR          getfile DCL((CONST char *fname, int lockfl));
-#if IS_UNIX()
+#if b_IS_UNIX
 EXTERN CONST char *             gettmpfname DCL((CONST char *ident));
 #endif
 EXTERN int PASCAL NEAR          get_key DCL((void));
@@ -2211,9 +2466,9 @@ EXTERN int PASCAL NEAR          strinc DCL((CONST char *source, CONST char *sub)
 EXTERN int PASCAL NEAR          swapmark DCL((int f, int n));
 EXTERN int PASCAL NEAR          swbuffer DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR          tab DCL((int f, int n));
-EXTERN int PASCAL NEAR          TransformBuffer DCL((filter_func_T filter, VOIDP argp));
-EXTERN int PASCAL NEAR          TransformParagraph DCL((filter_func_T filter, VOIDP argp));
-EXTERN int PASCAL NEAR          TransformRegion DCL((filter_func_T filter, VOIDP argp));
+EXTERN int PASCAL NEAR          TfmBuffer DCL((filter_func_T filter, VOIDP argp));
+EXTERN int PASCAL NEAR          TfmParagraph DCL((filter_func_T filter, VOIDP argp));
+EXTERN int PASCAL NEAR          TfmRegion DCL((filter_func_T filter, VOIDP argp));
 EXTERN int PASCAL NEAR          trBufFill DCL((int f, int n));
 EXTERN int PASCAL NEAR          trBufTest_ DCL((int f, int n));
 EXTERN int PASCAL NEAR          trParFill DCL((int f, int n));
@@ -2226,14 +2481,16 @@ EXTERN int PASCAL NEAR          trim DCL((int f, int n));
 EXTERN int PASCAL NEAR          ttclose DCL((void));
 EXTERN int PASCAL NEAR          ttflush DCL((void));
 EXTERN int PASCAL NEAR          ttgetc DCL((void));
-#if ( IS_UNIX() || VMS )
+#if ( b_IS_UNIX || VMS )
+# if USE_NOBLOCK_READ
 EXTERN int                      ttgetc_nowait DCL((void));
+# endif  /*USE_NOBLOCK_READ*/
 #endif
 EXTERN int PASCAL NEAR          ttopen DCL((void));
 EXTERN int PASCAL NEAR          ttputc DCL((int c));
 EXTERN int PASCAL NEAR          twiddle DCL((int f, int n));
 EXTERN int PASCAL NEAR          typahead DCL((void));
-#if IS_UNIX()
+#if b_IS_UNIX
 /*======================================================================
  * CYGWIN/DJGPP_DOS need wrappers for some (but not all) functions with
  * file name arguments to be able to work with DOS and UNIX style file
@@ -2242,12 +2499,19 @@ EXTERN int PASCAL NEAR          typahead DCL((void));
  *   work with UNIX style file names.
  * - fopen(), ... work with DOS and UNIX style file names.
  *====================================================================*/
-EXTERN CONST char *             GetPathUNX DCL((CONST char *path));
-EXTERN int                      unx_access_ DCL((CONST char *path, int mode));
-EXTERN int                      unx_rename_ DCL((CONST char *from, CONST char *to));
-EXTERN int                      unx_stat_ DCL((CONST char *path, struct stat *sb));
-EXTERN int                      unx_unlink_ DCL((CONST char* path));
+EXTERN CONST char *             GetPathUNX    DCL((CONST char *path));
+EXTERN int                      unx_access_   DCL((CONST char *path, int mode));
+EXTERN int                      unx_rename_   DCL((CONST char *from, CONST char *to));
+EXTERN int                      unx_stat_     DCL((CONST char *path, struct stat *sb));
+# if      BEGIN_COMMENT_
+EXTERN int                      unx_link_     DCL((CONST char* from, CONST char *to));
+# endif /*END_COMMENT_*/
+EXTERN int                      unx_unlink_   DCL((CONST char* path));
+EXTERN int                      unx_mkdir_    DCL((CONST char* path));
+EXTERN int                      unx_rmdir_    DCL((CONST char* path));
+EXTERN char *                   unx_strerror_ DCL((int num));
 #endif
+/*====================================================================*/
 EXTERN int PASCAL NEAR          unarg DCL((int f, int n));
 EXTERN int PASCAL NEAR          unbindchar DCL((int c));
 EXTERN int PASCAL NEAR          unbindkey DCL((int f, int n));
@@ -2307,13 +2571,13 @@ EXTERN VOID PASCAL NEAR         pad DCL((char *s, int len));
 EXTERN VOID PASCAL NEAR         reeat DCL((int c));
 EXTERN VOID PASCAL NEAR         reframe DCL((EWINDOW *wp));
 EXTERN VOID PASCAL NEAR         rmcclear DCL((void));
-EXTERN VOID PASCAL NEAR         setbit DCL((int bc, EBITMAP cclmap));
+EXTERN VOID PASCAL NEAR         umc_setbit DCL((int bc, EBITMAP cclmap));
 EXTERN VOID PASCAL NEAR         setjtable DCL((void));
 EXTERN VOID PASCAL NEAR         unbind_buf DCL((BUFFER *bp));
 EXTERN VOID PASCAL NEAR         unqname DCL((char *name));
 EXTERN VOID PASCAL NEAR         updall DCL((EWINDOW *wp));
 EXTERN VOID PASCAL NEAR         update DCL((int force));
-EXTERN VOID PASCAL NEAR         update_size DCL((void));
+EXTERN VOID PASCAL NEAR         upt_size DCL((void));
 EXTERN VOID PASCAL NEAR         upddex DCL((void));
 EXTERN VOID PASCAL NEAR         updext DCL((void));
 EXTERN VOID PASCAL NEAR         updgar DCL((void));
@@ -2328,12 +2592,14 @@ EXTERN VOID PASCAL NEAR         varclean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         uv_init DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         uv_clean DCL((UTABLE *ut));
 EXTERN VOID PASCAL NEAR         vtfree DCL((void));
-#if ( IS_UNIX() || VMS || MPE )
+#if ( b_IS_UNIX || VMS || MPE )
 EXTERN VOID                     cook        DCL((void));
 EXTERN int                      cook_nowait DCL((void));
-#endif
-EXTERN VOID                     qin DCL((int ch));
+EXTERN VOID                     qin  DCL((int ch));
 EXTERN VOID                     qrep DCL((int ch));
+EXTERN CONST int *              qget DCL((int *lp));
+#endif
+
 EXTERN EWINDOW *PASCAL NEAR     mousewindow DCL((int row));
 EXTERN int PASCAL NEAR          wpopup DCL((BUFFER *popbuf));
 
@@ -2342,22 +2608,60 @@ EXTERN int PASCAL NEAR         tagword DCL((int f, int n));   /* vi-like tagging
 EXTERN int PASCAL NEAR         retagword DCL((int f, int n)); /* Try again (if redefined) */
 EXTERN int PASCAL NEAR         backtagword DCL((int f, int n)); /* return from tagged word */
 #endif
+
+/*====================================================================*/
+/* Dummy Functions to avoid empty compilation unit warnings           */
+/*====================================================================*/
+EXTERN VOID                     crypthello DCL((void));
+EXTERN VOID                     dolockhello DCL((void));
+EXTERN VOID                     lockhello DCL((void));
+EXTERN VOID                     mousehello DCL((void));
+EXTERN VOID                     tagshello DCL((void));
+/*====================================================================*/
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* Some STAT(2) related macros not found on every UNIX:               */
+/**********************************************************************/
+#if b_IS_UNIX
+# ifdef S_IFMT
+#  if ( !defined(S_ISDIR) && defined(S_IFDIR) )
+#   define S_ISDIR(x)   ( ((x) & S_IFMT) == S_IFDIR )
+#  endif
+#  if ( !defined(S_ISREG) && defined(S_IFREG) )
+#   define S_ISREG(x)   ( ((x) & S_IFMT) == S_IFREG )
+#  endif
+# endif
+#endif
 /**********************************************************************/
 
 
 /**********************************************************************/
 /* MicroEMACS (umc_*) specific wrappers for some library functions:   */
 /**********************************************************************/
-#if IS_UNIX()
-# define umc_access  unx_access_
-# define umc_rename  unx_rename_
-# define umc_stat    unx_stat_
-# define umc_unlink  unx_unlink_
+#if b_IS_UNIX
+# define umc_access   unx_access_
+# define umc_rename   unx_rename_
+# define umc_stat     unx_stat_
+# define umc_unlink   unx_unlink_
+# define umc_mkdir    unx_mkdir_
+# define umc_rmdir    unx_rmdir_
+# define umc_strerror unx_strerror_
 #else
-# define umc_access  access
-# define umc_rename  rename
-# define umc_stat    stat
-# define umc_unlink  unlink
+# define umc_access   access
+# define umc_rename   rename
+# define umc_stat     stat
+# define umc_unlink   unlink
+# if  ( (WINNT || WINXP ) && MSC )
+#  include <direct.h>
+#  define umc_mkdir   _mkdir
+#  define umc_rmdir   _rmdir
+# else
+#  define umc_mkdir   mkdir
+#  define umc_rmdir   rmdir
+# endif
+# define umc_strerror strerror
 #endif
 /**********************************************************************/
 
@@ -2371,8 +2675,11 @@ EXTERN char *strrev DCL((char *));
 
 #if MWC | MSC | ZTC
 EXTERN char *ctime DCL((const char *));
-#elif IC  /* TURBO already has it defined */
+#else
+#if IC  /* TURBO already has it defined */
+# include <time.h>  /* time_t */
 EXTERN char *ctime DCL((const time_t *));
+#endif
 #endif
 /**********************************************************************/
 
@@ -2387,6 +2694,7 @@ EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
 EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
 
+#if     BEGIN_COMMENT_
 /* With DJGPP_DOS (gcc version 4.0.1) and `-O2' this leads to the warning:
  *  `dereferencing type-punned pointer will break strict aliasing rules'
  * *and* to generation of wrong code!
@@ -2399,17 +2707,18 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
         *pp_  = NULL;               \
     }                               \
 } while ( 0 )
-#define CLROOM(p) do  {                 \
-    char  *z_ = (char *)&(p);           \
-    char  *p_ = NULL;                   \
-    CASRT(sizeof(p) == sizeof(p_));     \
-                                        \
-    memcpy(&p_, z_, sizeof(p_));        \
-    if ( NULL != p_ )   {               \
-        DEROOM(p_);                     \
-        p_  = NULL;                     \
-        memcpy(z_, &p_, sizeof(p));     \
-    }                                   \
+#endif  /*END_COMMENT_*/
+#define CLROOM(p) do  {                     \
+    char  *z_ = (char *)&(p);               \
+    char  *p_ = NULL;                       \
+    CASRT(sizeof(p) == sizeof(p_));         \
+                                            \
+    umc_memcpy(&p_, z_, sizeof(p_));        \
+    if ( NULL != p_ )   {                   \
+        DEROOM(p_);                         \
+        p_  = NULL;                         \
+        umc_memcpy(z_, &p_, sizeof(p));     \
+    }                                       \
 } while ( 0 )
 /**********************************************************************/
 
@@ -2417,19 +2726,21 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 /**********************************************************************/
 /* Some helper macros:                                                */
 /**********************************************************************/
-#define ISALNUM(x)  isalnum((unsigned char)(x))
-#define ISALPHA(x)  isalpha((unsigned char)(x))
-#define ISCNTRL(x)  iscntrl((unsigned char)(x))
 #define ISDIGIT(x)  isdigit((unsigned char)(x))
-#define ISGRAPH(x)  isgraph((unsigned char)(x))
 #define ISLOWER(x)  islower((unsigned char)(x))
+#define ISSPACE(x)  isspace((unsigned char)(x))
+#define ISALPHA(x)  isalpha((unsigned char)(x))
+#if     BEGIN_COMMENT_
+#define ISALNUM(x)  isalnum((unsigned char)(x))
+#define ISCNTRL(x)  iscntrl((unsigned char)(x))
+#define ISGRAPH(x)  isgraph((unsigned char)(x))
 #define ISPRINT(x)  isprint((unsigned char)(x))
 #define ISPUNCT(x)  ispunct((unsigned char)(x))
-#define ISSPACE(x)  isspace((unsigned char)(x))
 #define ISUPPER(x)  isupper((unsigned char)(x))
 #define ISXDIGIT(x) isxdigit((unsigned char)(x))
 #define ISASCII(x)  isascii((unsigned char)(x))
 #define ISBLANK(x)  isblank((unsigned char)(x))
+#endif  /*END_COMMENT*/
 /**********************************************************************/
 
 

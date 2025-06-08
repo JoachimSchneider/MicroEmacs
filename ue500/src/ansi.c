@@ -14,52 +14,106 @@
 /*====================================================================*/
 
 
+/*==============================================================*/
+/* Include files                                                */
+/*==============================================================*/
 #define termdef 1                       /* don't define term external */
 /* don't define term external */
 
 #include        <stdio.h>
 #include        "estruct.h"
-#if IS_UNIX()
-# include <sys/ioctl.h>                 /* I/O control definitions  */
-# if ( !IS_POSIX_UNIX() )
-#  include <termio.h>
-# else
-#  include <termios.h>
-# endif /* !IS_POSIX_UNIX() */
-#endif  /* IS_UNIX() */
 #include        "eproto.h"
+#if b_IS_UNIX
+# if ( !b_IS_ANCIENT_UNIX )
+#  include <unistd.h>                   /* ioctl()                  */
+# else
+   EXTERN int ioctl DCL((int, unsigned long int, ...));
+# endif
+# include <sys/ioctl.h>                 /* I/O control definitions  */
+#endif
 #include        "edef.h"
 #include        "elang.h"
+/*==============================================================*/
+
 
 #if     ANSI
+
+
+/*==============================================================*/
+/* SETTINGS configurable via CPP defines --- i.e. `cc -DX=z'    */
+/*--------------------------------------------------------------*/
+/* e.g. use                                                     */
+/*  `cc -DSWITCH_BSD_FFS=USE_BSD_FFS_LATE                       */
+/* for BSD 4.2 and later.                                       */
+/*==============================================================*/
+# define ALT_SCREEN_NO    (1)
+# define ALT_SCREEN_XTERM (2)
+# ifndef SWITCH_ALT_SCREEN
+#  if ( b_IS_UNIX )
+#   if ( b_IS_ANCIENT_UNIX )
+#    define SWITCH_ALT_SCREEN ALT_SCREEN_NO
+#   else
+#    define SWITCH_ALT_SCREEN ALT_SCREEN_XTERM
+#   endif
+#  else
+#    define SWITCH_ALT_SCREEN ALT_SCREEN_NO
+#  endif
+# endif
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_NO )
+# else
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+# else
+  CRASH(Invalid value for SWITCH_ALT_SCREEN);
+# endif
+# endif
+
+/* Cooked input is only implemented for UNIX and VMS: */
+# if ( b_IS_UNIX || VMS )
+#  ifndef SWITCH_COOKED_INPUT
+#   define SWITCH_COOKED_INPUT  TRUE
+#  endif
+#  if ( SWITCH_COOKED_INPUT == TRUE )
+#  else
+#  if ( SWITCH_COOKED_INPUT == FALSE )
+#  else
+    CRASH(Invalid value for SWITCH_COOKED_INPUT);
+#  endif
+#  endif
+# endif
+/*==============================================================*/
+
 
 /*==============================================================*/
 /* FEATURES                                                     */
 /*==============================================================*/
-/* ( IS_UNIX() || VMS || MPE ): `addkey()' works                */
+/* ( b_IS_UNIX || VMS || MPE ): `addkey()' works                */
 /*..............................................................*/
-#if    ( IS_UNIX() )
+#if    ( b_IS_UNIX )
 # define USE_PALETTE ( !0 )
-#elif  ( VMS )
+#else
+#if  ( VMS )
 # define USE_PALETTE ( !0 )
-#elif  ( MPE )
+#else
+#if  ( MPE )
 # define USE_PALETTE ( !0 )
 #else
 # define USE_PALETTE ( 0 )    /* DON'T CHANGE */
   CASRT( !USE_PALETTE );
-#endif /* IS_UNIX() */
+#endif
+#endif
+#endif /* b_IS_UNIX */
 /*..............................................................*/
 /* USE_COOKED_ code only works on UNIX and VMS (`ttgetc()'      */
 /* cookes) and it gives sense there only if USE_PALETTE:        */
 /*..............................................................*/
-#if ( IS_UNIX() || VMS )
+#if ( b_IS_UNIX || VMS )
 # if ( USE_PALETTE )
-#  define USE_COOKED_    ( !0 )
+#  define USE_COOKED_    SWITCH_COOKED_INPUT
 # else
-#  define USE_COOKED_    (  0 )
+#  define USE_COOKED_    FALSE
 # endif
 #else
-# define USE_COOKED_    (  0 )
+# define USE_COOKED_     FALSE
 #endif
 /*==============================================================*/
 
@@ -89,6 +143,7 @@ typedef struct {
 COMMON NOSHARE TTCHAR orgchar;  /* Original characteristics */
 # endif /* VMS */
 
+
 /* --- See also vt52.c --- */
 # define NROW       25    /* Screen size.                   */
 # define NCOL       80    /* Edit if you want to.           */
@@ -114,6 +169,13 @@ CASRT(1 <= NCOL && NCOL < 80);
 # define SCRSIZ      64   /* scroll size for extended lines */
 # define BEL        0x07  /* BEL character.                 */
 # define ESC        0x1B  /* ESC character.                 */
+
+# define ANSI_RESET             "\033[;H\033[2J"
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+#  define ANSI_TO_ALT_SCREEN    "\033[?1049h"
+#  define ANSI_FROM_ALT_SCREEN  "\033[?1049l"
+# endif
+
 
 /* Forward references.          */
 static int  PASCAL NEAR ansimove    DCL((int row, int col));
@@ -408,9 +470,9 @@ static VOID PASCAL NEAR ansiparm P1_(int, n)
 
 static int PASCAL NEAR ansiopen P0_()
 {
-# if     IS_UNIX()
+# if     b_IS_UNIX
     REGISTER char *cp = NULL;
-#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+#  ifdef TIOCGWINSZ /* Previously `if !DJGPP_DOS' */
     struct winsize win;
 
     ZEROMEM(win);
@@ -435,7 +497,7 @@ static int PASCAL NEAR ansiopen P0_()
 #  endif
         }
     }
-#  if !DJGPP_DOS  /* One might also use `ifdef TIOCGWINSZ'  */
+#  ifdef TIOCGWINSZ /* Previously: `if !DJGPP_DOS'  */
     if ( 0 == ioctl(fileno(stdin), TIOCGWINSZ, &win) )  {
         /* REPAIR(): Sometimes --- e.g. with `qterminal -e emacs <args>'
          *           the ioctl() called at *this* point gives wrong
@@ -452,13 +514,16 @@ static int PASCAL NEAR ansiopen P0_()
 #  else
     term.t_nrow = NROW - 1;
     term.t_ncol = NCOL;
-#  endif  /* !DJGPP_DOS */
+#  endif  /* TIOCGWINSZ */
 #  if ( !0 )
     term.t_mrow = term.t_nrow;
     term.t_mcol = term.t_ncol;
 #  endif
-# endif /* IS_UNIX() */
-# if     MOUSE && (IS_UNIX() || VMS)
+# endif /* b_IS_UNIX */
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+  ttputs(ANSI_TO_ALT_SCREEN); ttflush();
+# endif
+# if MOUSE && (b_IS_UNIX || VMS)
    /*
     * If this is an ansi terminal of at least DEC level 2 capability,
     * some terminals of this level, such as the "Whack" emulator, the
@@ -471,17 +536,21 @@ static int PASCAL NEAR ansiopen P0_()
         CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_ENABLE");
-        if ( !s ) s = "\033[1)u\033[1;3'{\033[1;2'z";
-        ttputs(s);
+        if ( !s ) { /* Regular DEC workstation */
+            s = "\033[1)u\033[1;3'{\033[1;2'z";
+        }
+        ttputs(s); ttflush();
     }
-# endif /* MOUSE && (IS_UNIX() || VMS) */
+# endif /* MOUSE && (b_IS_UNIX || VMS) */
     xstrcpy(sres, "NORMAL");
-    revexist = TRUE;
+    revexist  = TRUE;
+    termreset = ANSI_RESET;
     ttopen();
 
 # if     KEYPAD
     ttputc(ESC);
     ttputc('=');
+    ttflush();
 # endif /* KEYPAD */
 
     return 0;
@@ -493,17 +562,25 @@ static int PASCAL NEAR ansiclose P0_()
     ansifcol(7);
     ansibcol(0);
 # endif /* COLOR */
-# if     MOUSE && (IS_UNIX() || VMS)
+# if     MOUSE && (b_IS_UNIX || VMS)
+   /*
+    * If this is an ansi terminal of at least DEC level 2 capability,
+    * some terminals of this level, such as the "Whack" emulator, the
+    * VWS terminal emulator, and some versions of XTERM, support access
+    * to the workstation mouse via escape sequences. In addition, any
+    * terminal that conforms to level 2 will, at very least, IGNORE the
+    * escape sequences for the mouse.
+    */
     {
         CONST char  *s  = NULL;
 
         s = getenv("MICROEMACS$MOUSE_DISABLE");
-
-        if ( !s )               /* Regular DEC workstation */
+        if ( !s ) { /* Regular DEC workstation */
             s = "\033[0'{\033[0;0'z";
-        ttputs(s);
+        }
+        ttputs(s); ttflush();
     }
-# endif /* MOUSE && (IS_UNIX() || VMS) */
+# endif /* MOUSE && (b_IS_UNIX || VMS) */
 # if     KEYPAD
 #  if     VMS
     if ( (orgchar.tt2 & TT2$M_APP_KEYPAD)==0 )
@@ -511,9 +588,13 @@ static int PASCAL NEAR ansiclose P0_()
     {
         ttputc(ESC);
         ttputc('>');
+        ttflush();
     }
 # endif /* KEYPAD */
     ttclose();
+# if ( SWITCH_ALT_SCREEN == ALT_SCREEN_XTERM )
+    ttputs(ANSI_FROM_ALT_SCREEN); ttflush();
+# endif
 
     return 0;
 }
@@ -536,7 +617,7 @@ static int PASCAL NEAR ansikclose P0_()
     return 0;
 }
 
-# if   IS_UNIX() || VMS
+# if   b_IS_UNIX || VMS
 /***
  *  ttputs  -  Send a string to ttputc
  *
@@ -745,13 +826,23 @@ static int PASCAL NEAR ansigetc P0_()
              * to operate properly. This makes VT100 users much
              * happier.
              */
-#  if USE_COOKED_
+#  if USE_NOBLOCK_READ
+#   if USE_COOKED_
             ch = ttgetc_nowait();
-#  else
+#   else
             ch = grabnowait();
-#  endif
+#   endif
             if ( grabnowait_TIMEOUT == ch ) return ( 27); /* Wasn't a function key  */
-
+#  else
+            if ( ch == ectoc(terminchr) ) {
+                return ch;
+            }
+#   if USE_COOKED_
+            ch = ttgetc();
+#   else
+            ch = grabwait();
+#   endif
+#  endif  /*USE_NOBLOCK_READ*/
             if ( ch == '[' )      docsi(ch);
             else if ( ch == ':' ) dobbnmouse();
             else if ( ch == 'O' ) docsi(ch);
@@ -772,7 +863,7 @@ static int PASCAL NEAR ansigetc P0_()
 {
     return ( ttgetc() );
 }
-# endif /* IS_UNIX() || VMS */
+# endif /* b_IS_UNIX || VMS */
 
 # if     FLABEL
 /* FNCLABEL:

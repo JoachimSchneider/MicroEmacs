@@ -24,7 +24,8 @@
 /* BE CAREFUL: The related C-variable is `hilite', the macro variable
  * is `$hilight'  */
 #define SEARCH_HIGHLIGHT        10      /* mark # used to highlight */
-CASRT( 0 <=  SEARCH_HIGHLIGHT && SEARCH_HIGHLIGHT < NMARKS - 1 );
+CASRT( 0 <=  SEARCH_HIGHLIGHT );
+CASRT( SEARCH_HIGHLIGHT < NMARKS - 1 );
 #define MAGIC_JUMP_TABLES       1       /* Jump tables in MAGIC mode */
 
 #if MAGIC
@@ -1277,7 +1278,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
         return FALSE;
     }
 
-    memset(bmap, 0, BMAPSIZE);
+    umc_memset(bmap, 0, BMAPSIZE);
 
     mcptr->u.cclmap = bmap;
     patptr = *ppatptr;
@@ -1311,10 +1312,10 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
         case MC_RCCL:
             pchr = *(patptr + 1);
             if ( ochr == MC_CCL || pchr == MC_ECCL ||ochr > pchr )
-                setbit(MC_RCCL, bmap);
+                umc_setbit(MC_RCCL, bmap);
             else {
                 do {
-                    setbit(++ochr, bmap);
+                    umc_setbit(++ochr, bmap);
                 } while (ochr < pchr);
                 patptr++;
             }
@@ -1326,7 +1327,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
             pchr = *++patptr;
 
         default:
-            setbit(pchr, bmap);
+            umc_setbit(pchr, bmap);
             break;
         }
         ochr = pchr;
@@ -1456,7 +1457,7 @@ int PASCAL NEAR biteq P2_(int, bc, EBITMAP, cclmap)
  *
  * Set a bit (ON only) in the bitmap.
  */
-VOID PASCAL NEAR setbit P2_(int, bc, EBITMAP, cclmap)
+VOID PASCAL NEAR umc_setbit P2_(int, bc, EBITMAP, cclmap)
 {
     if ( (unsigned)bc < HICHAR )
         *( cclmap + (bc >> 3) ) |= BIT(bc & 7);

@@ -39,43 +39,51 @@ static NOSHARE CONST char *pathname[] =
     ".emacsrc", "emacs.hlp", "", "c:", ":t/", ":s/"
 };
 
-# elif   TOS
+# else
+# if   TOS
 {
     "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\"
 };
 
-# elif   FINDER
+# else
+# if   FINDER
 {
     "emacs.rc", "emacs.hlp", "/bin/", "/sys/public/"
 };
 
-# elif   MSDOS || WINNT || WINXP || CYGWIN || DJGPP_DOS
+# else
+# if   MSDOS || WINNT || WINXP || CYGWIN || DJGPP_DOS
 {
     "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\"
 };
 
-# elif   OS2
+# else
+# if   OS2
 {
     "emacs.rc", "emacs.hlp", "C:\\OS2\\SYSTEM\\", "C:\\OS2\\DLL\\",
     "C:\\OS2\\BIN\\", "C:\\OS2\\", "\\"
 };
 
-# elif   IS_UNIX()
+# else
+# if   b_IS_UNIX
 {
     ".emacsrc", "emacs.hlp", "/usr/local/", "/usr/lib/"
 };
 
-# elif   VMS
+# else
+# if   VMS
 {
     "emacs.rc", "emacs.hlp", "SYS$LOGIN:", "MICROEMACS$LIB:"
 };
 
-# elif   WMCS
+# else
+# if   WMCS
 {
     "emacs.rc", "emacs.hlp", "", "sys$disk/syslib.users/"
 };
 
-# elif   AOSVS
+# else
+# if   AOSVS
 /*
  *   NOTE: you must use the Unix style pathnames here!
  */
@@ -83,7 +91,8 @@ static NOSHARE CONST char *pathname[] =
     "emacs.rc", "emacs.hlp", "", "/macros/", "/help/"
 };
 
-# elif   MPE
+# else
+# if   MPE
 {
     "emacsrc", "emacshlp", ".pub", ".pub.sys"
 };
@@ -92,6 +101,15 @@ static NOSHARE CONST char *pathname[] =
 {
     "", "", "", "", ""
 };
+# endif
+# endif
+# endif
+# endif
+# endif
+# endif
+# endif
+# endif
+# endif
 # endif
 
 # define NPNAMES ( SIZEOF (pathname)/SIZEOF (char *) )

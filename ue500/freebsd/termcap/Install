@@ -1,0 +1,49 @@
+# This simple session script shows how to install
+# the MicroEMACS:
+
+$ git clone https://github.com/JoachimSchneider/MicroEMACS
+# git switch master
+# git switch fixes
+# git switch current
+$ cd MicroEMACS/ue500/freebsd/termcap
+
+
+# If you need to adapt something ...
+$ vi estruct.h
+$ vi makefile
+
+$ make clean
+$ make
+$ ./emacs
+$ mkdir -p        /usr/loc/pkg/MicroEMACS
+$ mkdir           /usr/loc/pkg/MicroEMACS/bin
+$ mkdir           /usr/loc/pkg/MicroEMACS/cmd
+$ mkdir           /usr/loc/pkg/MicroEMACS/doc
+$ cp -p emacs     /usr/loc/pkg/MicroEMACS/bin
+$ cp -p .emacsrc  /usr/loc/pkg/MicroEMACS/bin/
+$ cd ../../cmd/
+$ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/cmd && tar -xpf -)
+$ cd ../doc/
+$ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/doc && tar -xpf -)
+$ cd ../freebsd/termcap
+$ cat runemacs
+#!/bin/sh -
+## CHANGE THIS TO YOUR NEEDS:
+mybas=/usr/loc/pkg/MicroEMACS
+##
+mybin="${mybas}/bin"
+mycmd="${mybas}/cmd"
+export PATH="${mybin}:${mycmd}:${PATH}"
+exec "${mybin}/emacs" "$@"
+# EOF
+
+$ cp -p runemacs /usr/loc/pkg/MicroEMACS/bin/
+
+Then link /usr/loc/pkg/MicroEMACS/bin/runemacs to your prefered
+directory, e.g. ~/bin/ or /usr/local/bin/
+
+The file .emacsrc may be moved to your HOME directory.
+
+
+
+# EOF
