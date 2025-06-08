@@ -92,6 +92,8 @@ Please use the *fixes* branch for pull requests.
     - No select() call
     - No symbolic links
     - No opendir(), readdir()
+    - No mkdir(), only mknod() which would require root privileges
+    - No vfprintf
 
     The missing select made rewrite of the keyboard handling code
     necessary: Indeed it was improved! Opendir() and readdir() were

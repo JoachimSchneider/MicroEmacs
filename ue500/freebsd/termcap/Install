@@ -5,7 +5,7 @@ $ git clone https://github.com/JoachimSchneider/MicroEMACS
 # git switch master
 # git switch fixes
 # git switch current
-$ cd MicroEMACS/ue500/freebsd/ansi
+$ cd MicroEMACS/ue500/freebsd/termcap
 
 
 # If you need to adapt something ...
@@ -25,7 +25,7 @@ $ cd ../../cmd/
 $ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/cmd && tar -xpf -)
 $ cd ../doc/
 $ tar -cpf - . | (cd /usr/loc/pkg/MicroEMACS/doc && tar -xpf -)
-$ cd ../freebsd/ansi
+$ cd ../freebsd/termcap
 $ cat runemacs
 #!/bin/sh -
 ## CHANGE THIS TO YOUR NEEDS:
