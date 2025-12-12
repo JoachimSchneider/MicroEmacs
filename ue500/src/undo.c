@@ -516,6 +516,8 @@ static char *AirBag_  = NULL;
  *
  * Allocate memory using malloc() on failure, discard oldest undo
  * information and retry. Memory region is initialized to zero.
+ *
+ * Return NULL on error.
  */
 char *room P3_(int, nbytes, CONST char *, file, int, line)
 /* nbytes:  Number of bytes to malloc() */
@@ -583,10 +585,40 @@ nextbuf:
     return NULL;  /**AVOID_WARNING**/
 }
 
-/* RE-ROOM:
+/* XROOM:
+ *
+ * Allocate memory using malloc() on failure, discard oldest undo
+ * information and retry. Memory region is initialized to zero.
+ *
+ * On Error: Write a message to Message-Line/STDERR/Trace and abort().
+ */
+char *xroom P3_(int, nbytes, CONST char *, file, int, line)
+/* nbytes:  Number of bytes to malloc() */
+{
+    char  *res  = NULL;
+
+    if ( NULL == (res = room(nbytes, file, line)) ) {
+        char  buf[NSTRING];
+
+        ZEROMEM(buf);
+        xsnprintf(buf, SIZEOF(buf), "xroom(): FATAL ERROR: %s", TEXT94);
+        TRCK(("%s", buf), file, line);
+        xsnprintf(buf, SIZEOF(buf) - 1, "xroom() [%s/%d]: FATAL ERROR: %s", file, line, TEXT94);
+        mlforce(buf);
+        fputs(xstrcat(buf, "\n"), stderr);
+
+        abort();
+    }
+
+    return res;
+}
+
+/* REROOM:
  *
  * Allocate memory using realloc() on failure, discard oldest undo
  * information and retry
+ *
+ * Return NULL on error.
  */
 char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
 /* orig_ptr:  Pointer to re-allocate      */
@@ -651,6 +683,35 @@ nxtbuf:
     }
 
     return NULL;  /**AVOID_WARNING**/
+}
+
+/* XREROOM:
+ *
+ * Allocate memory using relloc() on failure, discard oldest undo
+ * information and retry. Memory region is initialized to zero.
+ *
+ * On Error: Write a message to Message-Line/STDERR/Trace and abort().
+ */
+char *xreroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
+/* orig_ptr:  Pointer to re-allocate      */
+/* nbytes:    Number of bytes to malloc() */
+{
+    char  *res  = NULL;
+
+    if ( NULL == (res = reroom(orig_ptr, nbytes, file, line)) ) {
+        char  buf[NSTRING];
+
+        ZEROMEM(buf);
+        xsnprintf(buf, SIZEOF(buf), "xreroom(): FATAL ERROR: %s", TEXT94);
+        TRCK(("%s", buf), file, line);
+        xsnprintf(buf, SIZEOF(buf) - 1, "xreroom() [%s/%d]: FATAL ERROR: %s", file, line, TEXT94);
+        mlforce(buf);
+        fputs(xstrcat(buf, "\n"), stderr);
+
+        abort();
+    }
+
+    return res;
 }
 
 /* DEROOM:

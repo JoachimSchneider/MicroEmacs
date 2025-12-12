@@ -378,7 +378,7 @@ char *newname;          /* new file name */
 
 /* return a system dependant string with the current time */
 
-char *PASCAL NEAR timeset()
+char * PASCAL NEAR timeset()
 {
     REGISTER char *sp;          /* temp string pointer */
     char buf[16];               /* time data buffer */
@@ -398,7 +398,7 @@ char rbuf[NFILEN];              /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* file to match */
 
@@ -450,7 +450,7 @@ char *fspec;    /* file to match */
     return (rbuf);
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
 
     /* and call for the first file */

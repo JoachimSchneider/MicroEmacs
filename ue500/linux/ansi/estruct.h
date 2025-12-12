@@ -151,7 +151,9 @@
 #if BEGIN_COMMENT_
 #define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
 #define RAMSHOW         0 /* auto dynamic RAM reporting               */
-#define RAMTRCK         0 /* send debug info to MALLOC.DAT            */
+#endif  /*END_COMMENT_*/
+#define RAMTRCK         1 /* send debug info to EMACS.LOG             */
+#if BEGIN_COMMENT_
 #define DEBUG_SEARCH    0 /* pop some search info on patterns         */
 #endif  /*END_COMMENT_*/
 
@@ -271,7 +273,7 @@
 
 /* Does not work on SOLARIS:    */
 #define TYPEAH  1   /* type ahead causes update to be skipped         */
-#define LOGFLG  0   /* send all executed commands to EMACS.LOG        */
+#define LOGFLG  1   /* send all executed commands to EMACS.LOG        */
 #define VISMAC  0   /* update display during keyboard macros          */
 #define CTRLZ   0   /* add a ^Z at end of files under MSDOS only      */
 #define CLEAN   0   /* de-alloc memory on exit                        */
@@ -312,7 +314,7 @@
 #define REPAIR_CODE_LINE      (1)
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
-#define UEMACS_TRC            (1)
+#define UEMACS_TRC            (0)
 #define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
 
 

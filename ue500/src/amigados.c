@@ -827,7 +827,7 @@ f_filter(f, n)
 
 /* return a system dependant string with the current time */
 
-char *PASCAL NEAR timeset()
+char * PASCAL NEAR timeset()
 {
     return (errorm);
 }
@@ -841,7 +841,7 @@ EXTERN char *scdir();
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -869,7 +869,7 @@ char *fspec;    /* pattern to match */
     return ( getnfile() );
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     REGISTER char *sp;          /* return from scdir */
 
@@ -884,7 +884,7 @@ char *PASCAL NEAR getnfile()
     return (rbuf);
 }
 # else
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* file to match */
 
@@ -892,7 +892,7 @@ char *fspec;    /* file to match */
     return (NULL);
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     return (NULL);
 }

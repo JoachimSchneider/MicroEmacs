@@ -207,7 +207,7 @@ int PASCAL NEAR popbuffer P2_(int, f, int, n)
  *
  * Get the default buffer for a use or kill
  */
-BUFFER *PASCAL NEAR getdefb P0_()
+BUFFER * PASCAL NEAR getdefb P0_()
 {
     BUFFER *bp;         /* default buffer */
 
@@ -527,7 +527,7 @@ int PASCAL NEAR anycb P0_()
  * with it. If the buffer is not found and the "cflag" is TRUE, create it. The
  * "bflag" is the settings for the flags in in buffer.
  */
-BUFFER *PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
+BUFFER * PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
 /* bname: Name of buffer to find        */
 /* cflag: Create it if not found?       */
 /* bflag: Bit settings for a new buffer */
@@ -664,7 +664,7 @@ int PASCAL NEAR unmark P2_(int, f, int, n)
  *
  * Get the most ancient visited buffer
  */
-BUFFER *PASCAL NEAR getoldb P0_()
+BUFFER * PASCAL NEAR getoldb P0_()
 {
     BUFFER *bp;         /* current buffer */
     BUFFER *old_bp;     /* ptr to oldest buffer */

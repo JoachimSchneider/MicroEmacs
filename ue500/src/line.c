@@ -49,7 +49,7 @@ static long last_size = -1L;    /* last # of bytes yanked */
  * Return a pointer to the new block, or NULL if there isn't any memory
  * left. Print a message in the message line if no space.
  */
-LINE *PASCAL NEAR lalloc P1_(REGISTER int, used)
+LINE * PASCAL NEAR lalloc P1_(REGISTER int, used)
 {
     REGISTER LINE *lp = NULL;
 
@@ -718,7 +718,7 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
  *
  * grab and return a string with the text of the current line
  */
-char *PASCAL NEAR getctext P1_(char *, rline)
+char * PASCAL NEAR getctext P1_(char *, rline)
 {
     REGISTER LINE *lp   = NULL;   /* line to copy                       */
     REGISTER int  size  = 0;      /* length of line to return           */

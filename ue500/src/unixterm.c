@@ -1047,9 +1047,11 @@ int PASCAL NEAR ttgetc P0_()
     {
         int       l     = 0;
         int       i     = 0;
+#   if TRC_ON
         CONST int *chp  = NULL;
 
         chp = qget(&l);
+#   endif
         TRC(("ttgetc(): %s[head = %d, tail = %d](%d)",
              "BEGIN 'Get input from buffer'",
              (int)(inbufh - inbuf),

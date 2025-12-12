@@ -521,7 +521,7 @@ int PASCAL NEAR movemu P2_(int, f, int, n)
  * located, or NULL if "row" isn't in any window. The mode line is considered to
  * be part of the window.
  */
-EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
+EWINDOW * PASCAL NEAR mousewindow P1_(int, row)
 {
     REGISTER EWINDOW *wp;
 
@@ -553,7 +553,7 @@ EWINDOW *PASCAL NEAR mousewindow P1_(int, row)
  * if the mouse is on the mode line, or if the mouse is pointed off the end of
  * the text in the buffer.
  */
-LINE *PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
+LINE * PASCAL NEAR mouseline P2_(EWINDOW *, wp, int, row)
 {
     REGISTER LINE   *lp;
 

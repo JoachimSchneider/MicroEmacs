@@ -21,6 +21,50 @@
 #include "edef.h"
 #include "elang.h"
 
+
+/*====================================================================*/
+/* Functions which modify the global `execstr' variable:              */
+/*====================================================================*/
+/* - namedcmd                                                         */
+/* - nextarg                                                          */
+/* - storeproc                                                        */
+/* Via nextarg:                                                       */
+/* - macarc                                                           */
+/* Direct and via macarg                                              */
+/* - docmd                                                            */
+/* - dobuf   % Resets execstr                                         */
+/*====================================================================*/
+
+
+/*====================================================================*/
+/* Call dependencies (only a subset):                                 */
+/*====================================================================*
+ *
+ * - nextarg:
+ *    eval.c:getval
+ *
+ * - macarg:
+ *    nextarg
+ *
+ * - dobuf:
+ *    docmd
+ *    macarg
+ *
+ * - docmd:
+ *    macarg
+ *    eval.c:getval
+ *
+ * - eval.c:gtfun:
+ *    dobuf
+ *    eval.c:getval
+ *
+ * - eval.c:getval:
+ *    eval.c:gtfun
+ *    eval.c:getval
+ *
+ *====================================================================*/
+
+
 /* NAMEDCMD:
  *
  * Execute a named command even if it is not bound.
@@ -36,14 +80,13 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
 
     /* if we are non-interactive.... force the command interactivly */
     if ( clexec == TRUE ) {
-
         /* grab token and advance past */
-        execstr = token(execstr, buffer, NPAT);
-
+        BUFCPY(execstr, token(execstr, buffer, SIZEOF(buffer)));
         /* evaluate it */
-        XSTRCPY( buffer, fixnull( getval(buffer) ) );
-        if ( strcmp(buffer, errorm) == 0 )
+        BUFCPY(buffer, fixnull(getval(buffer)));
+        if ( strcmp(buffer, errorm) == 0 )  {
             return (FALSE);
+        }
 
         /* and look it up */
         if ( ( kfunc = fncmatch(buffer) ) == NULL ) {
@@ -82,14 +125,15 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
 int PASCAL NEAR execcmd P2_(int, f, int, n)
 /* default Flag and Numeric argument  */
 {
-    REGISTER int status   = 0;          /* status return */
-    char cmdstr[NSTRING];               /* string holding command to execute */
+    REGISTER int  status  = 0;        /* status return                      */
+    char          cmdstr[NSTRING];    /* string holding command to execute  */
 
     ZEROMEM(cmdstr);
 
     /* get the line wanted */
-    if ( ( status = mlreply(": ", cmdstr, NSTRING) ) != TRUE )
+    if ( ( status = mlreply(": ", cmdstr, NSTRING) ) != TRUE )  {
         return (status);
+    }
 
     execlevel = 0;
 
@@ -105,84 +149,124 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
  *
  * format of the command line is:
  *  {# arg} <command-name> {<argument string(s)>}
+ *
+ * This function restores `execstr' to its old value!
  */
-int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
+#if MTC_ON
+# define MTC_docmd(e) do {                                    \
+    CONST char  *msg_ = yasprintf e;                          \
+                                                              \
+    MTC(("docmd(`%s') [%12s:%04d]: %s",                       \
+         STR(cline), xbasenam(file), line, STR(msg_)));       \
+    CLROOM(msg_);                                             \
+} while ( 0 )
+#else
+# define MTC_docmd(e) NOOP
+#endif
+/**END OF DEFINITION**/
+#define docmd_RET_INIT                                        \
+      REGISTER int  docmd_RET_res_  = 0
+/**END OF DEFINITION**/
+#define docmd_RET_EXIT  do {                                  \
+      docmd_RET_exit_:                                        \
+          MTC(("BEFORE   - execstr: `%s'", execstr));         \
+          BUFCPY(execstr, oldestr);                           \
+          MTC(("RESTORED - execstr: `%s'", execstr));         \
+                                                              \
+      return docmd_RET_res_;                                  \
+  } while ( 0 )
+/**END OF DEFINITION**/
+#define docmd_RET(x)  do {                                    \
+      docmd_RET_res_  = (x);                                  \
+      goto docmd_RET_exit_;                                   \
+  } while ( 0 )
+/**END OF DEFINITION**/
+int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
+                           CONST char *, file, int, line)
 {
-    REGISTER int  f           = 0;      /* default argument flag */
-    REGISTER int  n           = 0;      /* numeric repeat value */
-    ue_fnc_T      fnc         = NULL;   /* function to execute */
-    BUFFER        *bp         = NULL;   /* buffer to execute */
-    int           status      = 0;      /* return status of function */
-    int           oldcle      = 0;      /* old contents of clexec flag */
-    char          *oldestr    = NULL;   /* original exec string */
-    char          tkn[NSTRING];         /* next token off of command line */
-    char          bufn[NBUFN+2];        /* name of buffer to execute */
+    docmd_RET_INIT;
 
+    REGISTER int  f           = 0;          /* default argument flag */
+    REGISTER int  n           = 0;          /* numeric repeat value */
+    ue_fnc_T      fnc         = NULL;       /* function to execute */
+    BUFFER        *bp         = NULL;       /* buffer to execute */
+    int           status      = 0;          /* return status of function */
+    int           oldcle      = 0;          /* old contents of clexec flag */
+    char          oldestr[SIZEOF(execstr)]; /* original exec string */
+    char          tkn[NSTRING];             /* next token off of command line */
+    char          bufn[NBUFN+2];            /* name of buffer to execute */
+
+    ZEROMEM(oldestr);
     ZEROMEM(tkn);
     ZEROMEM(bufn);
 
-    /* if we are scanning and not executing..go back here */
-    if ( execlevel )
-        return (TRUE);
+    /* if we are scanning and not executing ... go back here  */
+    if ( execlevel )  {
+        docmd_RET(TRUE);
+    }
 
-    oldestr = execstr;          /* save last ptr to string to execute */
-    execstr = cline;            /* and set this one as current */
+    ASRT(NULL != cline);
 
-    /* first set up the default command values */
+    MTC_docmd(("PREV execstr: `%s'", execstr));
+    /* save last string to execute: */
+    BUFCPY(oldestr, execstr);
+    /* and set this one as current: */
+    BUFCPY(execstr, cline);
+    MTC_docmd(("NEW execstr: `%s'", execstr));
+    /* first set up the default command values: */
     f = FALSE;
     n = 1;
     lastflag = thisflag;
     thisflag = 0;
 
-    if ( ( status = macarg(tkn) ) != TRUE ) {   /* and grab the first token */
-        execstr = oldestr;
-
-        return (status);
+    /* and grab the first token:  */
+    if ( ( status = macarg(tkn, SIZEOF(tkn)) ) != TRUE )  {
+        docmd_RET(status);
     }
 
     /* process leadin argument */
     if ( gettyp(tkn) != TKCMD ) {
         f = TRUE;
-        XSTRCPY( tkn, fixnull( getval(tkn) ) );
+        BUFCPY(tkn, fixnull(getval(tkn)));
         n = asc_int(tkn);
 
         /* and now get the command to execute */
-        if ( ( status = macarg(tkn) ) != TRUE ) {
-            execstr = oldestr;
-
-            return (status);
+        if ( ( status = macarg(tkn, SIZEOF(tkn)) ) != TRUE )  {
+            docmd_RET(status);
         }
     }
 
-    /* and match the token to see if it exists */
-    if ( ( fnc = fncmatch(tkn) ) == NULL ) {
-
+    /* and match the token to see if it exists: */
+    if ( ( fnc = fncmatch(tkn) ) == NULL ) {  /* Not a function */
         /* construct the buffer name */
-        XSTRCPY(bufn, "[");
-        XSTRCAT(bufn, tkn);
-        XSTRCAT(bufn, "]");
+        BUFCPY(bufn, "[");
+        BUFCAT(bufn, tkn);
+        BUFCAT(bufn, "]");
 
-        /* find the pointer to that buffer */
-        if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) {
+        /* find the pointer to that buffer: */
+        if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) { /* Not a macro  */
             mlwrite(TEXT16);
             /* "[No such Function]" */
-            execstr = oldestr;
 
-            return (FALSE);
+            docmd_RET(FALSE);
         }
 
         /* execute the buffer */
         oldcle = clexec;                /* save old clexec flag */
         clexec = TRUE;                  /* in cline execution */
-        while ( n-- > 0 )
-            if ( ( status = dobuf(bp) ) != TRUE )
+        while ( n-- > 0 ) {
+            MTC_docmd(("BEFORE(%s) - execstr: `%s'", "dobuf", execstr));
+            status = dobuf(bp);
+            MTC_docmd(("AFTER(%s)  - execstr: `%s'", "dobuf", execstr));
+            if ( status != TRUE ) {
                 break;
+            }
+	}
 
         cmdstatus = status;             /* save the status */
         clexec = oldcle;                /* restore clexec flag */
-        execstr = oldestr;
 
-        return (status);
+        docmd_RET(status);
     }
 
     /* save the arguments and go execute the command */
@@ -191,10 +275,15 @@ int PASCAL NEAR docmd P1_(char *, cline /* command line to execute */)
     status = (*fnc)(f, n);              /* call the function */
     cmdstatus = status;                 /* save the status */
     clexec = oldcle;                    /* restore clexec flag */
-    execstr = oldestr;
 
-    return (status);
+    docmd_RET(status);
+
+
+    docmd_RET_EXIT;
 }
+#undef  docmd_RET_INIT
+#undef  docmd_RET_EXIT
+#undef  docmd_RET
 
 /* GETHEXDIGVAL:
  *
@@ -251,7 +340,7 @@ static int  GetHexDigVal P1_(char, d)
  *
  * Chop a token off a string return a pointer past the token.
  */
-char *PASCAL NEAR token P3_(
+char * PASCAL NEAR token P3_(
         char *, src,  /* source string */
         char *, tok,  /* destination token string */
         int,    size  /* maximum size of token */
@@ -261,8 +350,9 @@ char *PASCAL NEAR token P3_(
     REGISTER char c       = '\0';   /* temporary character */
 
     /* first scan past any whitespace in the source string */
-    while ( *src == ' ' || *src == '\t' )
+    while ( *src == ' ' || *src == '\t' ) {
         ++src;
+    }
 
     /* scan through the source string */
     quotef = FALSE;
@@ -270,61 +360,62 @@ char *PASCAL NEAR token P3_(
         /* process special characters */
         if ( *src == '~' ) {
             ++src;
-            if ( *src == 0 )
+            if ( *src == 0 )  {
                 break;
+            }
             switch ( *src++ ) {
-            case 'r':
-                c = 13;
-                break;
+                case 'r':
+                    c = 13;
+                    break;
 
-            case 'n':
-                c = 13;
-                break;
+                case 'n':
+                    c = 13;
+                    break;
 
-            case 'l':
-                c = 10;
-                break;
+                case 'l':
+                    c = 10;
+                    break;
 
-            case 't':
-                c = 9;
-                break;
+                case 't':
+                    c = 9;
+                    break;
 
-            case 'b':
-                c = 8;
-                break;
+                case 'b':
+                    c = 8;
+                    break;
 
-            case 'f':
-                c = 12;
-                break;
+                case 'f':
+                    c = 12;
+                    break;
 
-            case 'e':
-                c = 27;
-                break;
+                case 'e':
+                    c = 27;
+                    break;
 
-            case 'x':
-                {
-                    /* Exactly two hexadecimal digits following `~x' are
-                     * evaluated to the character code:
-                     * ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
-                     */
-                    int d0  = 0;
-                    int d1  = 0;
+                case 'x':
+                    {
+                        /* Exactly two hexadecimal digits following `~x' are
+                         * evaluated to the character code:
+                         * ~xUV ===> 0xUV, e.g. ~x20 ===> 0x20 ===> ' '.
+                         */
+                        int d0  = 0;
+                        int d1  = 0;
 
-                    if ( 0 <= (d0 = GetHexDigVal(*src)) &&
-                         0 <= (d1 = GetHexDigVal(*(src + 1))) ) {
-                        unsigned char val = 0;
+                        if ( 0 <= (d0 = GetHexDigVal(*src)) &&
+                             0 <= (d1 = GetHexDigVal(*(src + 1))) ) {
+                            unsigned char val = 0;
 
-                        val = C_16 * d0 + d1;
-                        c   = *(char *)&val;
-                        src  += 2;
-                    } else                                      {
-                        c = *(src - 1);
+                            val = C_16 * d0 + d1;
+                            c   = *(char *)&val;
+                            src  += 2;
+                        } else                                      {
+                            c = *(src - 1);
+                        }
                     }
-                }
-                break;
+                    break;
 
-            default:
-                c = *(src - 1);
+                default:
+                    c = *(src - 1);
             }
             if ( --size > 0 ) {
                 *tok++ = c;
@@ -332,28 +423,42 @@ char *PASCAL NEAR token P3_(
         } else {
             /* check for the end of the token */
             if ( quotef ) {
-                if ( *src == '"' )
+                /* A string `"XYZ"' is returned here as `"XYZ': The
+                 * gettyp() and getval() routines in eval.c expect it
+                 * in this way. This way the first character of a token
+                 * marks its type:
+                 * - `&': Function
+                 * - `!': Directive
+                 * - `%': Variable
+                 * - `"': String Literal
+                 */
+                if ( *src == '"' )  {
                     break;
+                }
             } else {
-                if ( *src == ' ' || *src == '\t' )
+                if ( *src == ' ' || *src == '\t' )  {
                     break;
+                }
             }
 
             /* set quote mode if quote found */
-            if ( *src == '"' )
+            if ( *src == '"' )  {
                 quotef = TRUE;
+            }
 
             /* record the character */
             c = *src++;
-            if ( --size > 0 )
+            if ( --size > 0 ) {
                 *tok++ = c;
+            }
         }
     }
 
     /* terminate the token and exit */
-    if ( *src )
+    if ( *src ) {
         ++src;
-    *tok = 0;
+    }
+    *tok = '\0';
 
     return (src);
 }
@@ -362,14 +467,15 @@ char *PASCAL NEAR token P3_(
  *
  * Get a macro line argument.
  */
-int PASCAL NEAR macarg P1_(char *, tok /* buffer to place argument */)
+int PASCAL NEAR macarg P2_(char *, tok  /* buffer to place argument */,
+                           int, size    /* size of buffer */)
 {
     int savcle  = 0;    /* buffer to store original clexec */
     int status  = 0;
 
     savcle = clexec;            /* save execution mode */
     clexec = TRUE;              /* get the argument */
-    status = nextarg( "", tok, NSTRING, ctoec('\r') );
+    status = nextarg( "", tok, size, ctoec('\r') );
     clexec = savcle;            /* restore execution mode */
 
     return (status);
@@ -394,7 +500,9 @@ int PASCAL NEAR nextarg P4_(
 
         /* prompt the user for the input string */
         if ( discmd ) {
-            if ( prompt ) mlwrite(prompt);
+            if ( prompt ) {
+                mlwrite(prompt);
+            }
         } else        {
             movecursor(term.t_nrow, 0);
         }
@@ -406,13 +514,16 @@ int PASCAL NEAR nextarg P4_(
     }
 
     /* grab token and advance past */
-    execstr = token(execstr, buffer, size);
+    MTC(("BEFORE(token) - execstr: `%s'", execstr));
+    BUFCPY(execstr, token(execstr, buffer, size));
+    MTC(("AFTER(token)  - execstr: `%s', buffer: `%s'", execstr, buffer));
 
     /* evaluate it */
-    if ( ( sp = getval(buffer) ) == NULL )
+    if ( NULL == (sp = getval(buffer)) )  {
         return (FALSE);
-
+    }
     xstrlcpy(buffer, sp, size);
+    MTC(("AFTER(getval)  - buffer: `%s'", buffer));
 
     return (TRUE);
 }
@@ -430,23 +541,28 @@ int PASCAL NEAR storeproc P2_(
     REGISTER struct BUFFER  *bp       = NULL;   /* pointer to macro buffer */
     PARG                    *last_arg = NULL;   /* last macro argument */
     PARG                    *cur_arg  = NULL;   /* current macro argument */
-    char bname[NBUFN];                          /* name of buffer to use */
+    char buffer[NSTRING];                       /* name of buffer to use;
+                                                 * used as token buffer */
 
-    ZEROMEM(bname);
+    ZEROMEM(buffer);
 
     /* this commands makes no sense interactively */
-    if ( clexec == FALSE )
+    if ( clexec == FALSE )  {
         return (FALSE);
+    }
 
     /* get the name of the procedure */
-    execstr = token(execstr, &bname[1], NBUFN-2);
+    MTC(("BEFORE(name of procedure) - execstr: `%s'", execstr));
+    BUFCPY(execstr, token(execstr, &buffer[1], SIZEOF(buffer) -2));
+    MTC(("AFTER(name of procedure)  - execstr: `%s', buffer + 1: `%s'",
+         execstr, buffer + 1));
 
     /* construct the macro buffer name */
-    bname[0] = '[';
-    XSTRCAT(bname, "]");
+    buffer[0] = '[';
+    BUFCAT(buffer, "]");
 
     /* set up the new macro buffer */
-    if ( ( bp = bfind(bname, TRUE, BFINVS) ) == NULL ) {
+    if ( ( bp = bfind(buffer, TRUE, BFINVS) ) == NULL ) {
         mlwrite(TEXT113);
         /* "Can not create macro" */
 
@@ -459,10 +575,12 @@ int PASCAL NEAR storeproc P2_(
     /* retrieve and store any formal parameters */
     last_arg = (PARG *)NULL;
     bp->b_numargs = 0;
-    execstr = token(execstr, bname, NVSIZE);
+    ZEROMEM(buffer);
+    MTC(("BEFORE - execstr: `%s'", execstr));
+    BUFCPY(execstr, token(execstr, buffer, SIZEOF(buffer)));
+    MTC(("AFTER  - execstr: `%s', buffer: `%s'", execstr, buffer));
 
-    while ( *bname && *bname != ';' ) {
-
+    while ( *buffer && *buffer != ';' ) {
         /* allocate an argument */
         cur_arg = (PARG *)ROOM( SIZEOF (PARG) );
         if ( cur_arg == (PARG *)NULL ) {
@@ -473,19 +591,22 @@ int PASCAL NEAR storeproc P2_(
         }
 
         /* and add it to the linked list of arguments for this buffer */
-        XSTRCPY(cur_arg->name, bname);
+        BUFCPY(cur_arg->name, buffer);
         cur_arg->next = (PARG *)NULL;
-        if ( last_arg == (PARG *)NULL )
+        if ( last_arg == (PARG *)NULL ) {
             bp->b_args = cur_arg;
-        else
+        } else                          {
             last_arg->next = cur_arg;
+        }
 
         /* and let the buffer total these */
         bp->b_numargs++;
         last_arg = cur_arg;
 
         /* on to the next parameter */
-        execstr = token(execstr, bname, NVSIZE);
+        MTC(("BEFORE - execstr: `%s'", execstr));
+        BUFCPY(execstr, token(execstr, buffer, SIZEOF(buffer)));
+        MTC(("AFTER  - execstr: `%s', buffer: `%s'", execstr, buffer));
     }
 
     /* and set the macro store pointers to it */
@@ -509,13 +630,14 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
     ZEROMEM(bufn);
 
     /* find out what buffer the user wants to execute */
-    if ( ( status = mlreply(TEXT115, &bufn[1], NBUFN) ) != TRUE )
+    if ( ( status = mlreply(TEXT115, &bufn[1], NBUFN) ) != TRUE ) {
 /*                            "Execute procedure: " */
         return (status);
+    }
 
     /* construct the buffer name */
     bufn[0] = '[';
-    XSTRCAT(bufn, "]");
+    BUFCAT(bufn, "]");
 
     /* find the pointer to that buffer */
     if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) {
@@ -526,11 +648,11 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
     }
 
     /* and now execute it as asked */
-    while ( n-- > 0 )
-        if ( ( status = dobuf(bp) ) != TRUE )
+    while ( n-- > 0 ) {
+        if ( ( status = dobuf(bp) ) != TRUE ) {
             return (status);
-
-
+        }
+    }
 
     return (TRUE);
 }
@@ -546,14 +668,17 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
     REGISTER int    status  = 0;      /* status return */
 
     /* find out what buffer the user wants to execute */
-    if ( ( bp = getcbuf(TEXT117, curbp->b_bname, FALSE) ) == NULL )
+    if ( NULL == (bp = getcbuf(TEXT117, curbp->b_bname, FALSE)) ) {
 /*                        "Execute buffer: " */
         return (ABORT);
+    }
 
     /* and now execute it as asked */
-    while ( n-- > 0 )
-        if ( ( status = dobuf(bp) ) != TRUE )
+    while ( n-- > 0 ) {
+        if ( ( status = dobuf(bp) ) != TRUE ) {
             return (status);
+        }
+    }
 
     return (TRUE);
 }
@@ -579,8 +704,38 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
  *
  *  *LBL01
  */
-int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
+#if MTC_ON
+# define MTC_dobuf(e) do {                                    \
+    CONST char  *msg_ = yasprintf e;                          \
+                                                              \
+    MTC(("dobuf(`%s') [%12s:%04d]: %s",                       \
+         bp->b_bname, xbasenam(file), line, STR(msg_)));      \
+    CLROOM(msg_);                                             \
+} while ( 0 )
+#else
+# define MTC_dobuf(e) NOOP
+#endif
+/**END OF DEFINITION**/
+#define dobuf_RET_INIT                                        \
+      REGISTER int  dobuf_RET_res_  = 0
+/**END OF DEFINITION**/
+#define dobuf_RET_EXIT  do {                                  \
+      dobuf_RET_exit_:                                        \
+      MTC_dobuf(("%s", "  END"));                             \
+                                                              \
+      return dobuf_RET_res_;                                  \
+  } while ( 0 )
+/**END OF DEFINITION**/
+#define dobuf_RET(x)  do {                                    \
+      dobuf_RET_res_  = (x);                                  \
+      goto dobuf_RET_exit_;                                   \
+  } while ( 0 )
+/**END OF DEFINITION**/
+int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
+                           CONST char *, file, int, line)
 {
+    dobuf_RET_INIT;
+
     REGISTER int  status      = 0;    /* status return */
     REGISTER LINE *lp         = NULL; /* pointer to line to execute */
     REGISTER LINE *hlp        = NULL; /* pointer to line header */
@@ -600,20 +755,26 @@ int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
     int           num_locals  = 0;    /* number of local variables used in
                                        * procedure  */
     UTABLE        *ut         = NULL; /* new local user variable table */
-#if     LOGFLG
-    FILE          *fp         = NULL; /* file handle for log file */
-#endif
     int           skipflag    = 0;    /* are we skipping debugging a
                                        * function?  */
     PARG          *cur_arg    = NULL; /* current argument being filled */
     int           cur_index   = 0;    /* index into current user table */
     VDESC         vd;                 /* variable num/type */
     char          value[NSTRING];     /* evaluated argument */
+    char          dtv_str[NSTRING];   /* String following a directive */
+    char          sav_estr[NSTRING];  /* `execstr' before directive */
 
     ZEROMEM(tkn);
     ZEROMEM(vd);
     ZEROMEM(value);
+    ZEROMEM(dtv_str);
+    ZEROMEM(sav_estr);
 
+    ASRT(NULL != bp);
+    ASRT(NULL != file);
+    ASRT(0 <= line);
+
+    MTC_dobuf(("%s", "BEGIN"));
     /* clear IF level flags/while ptr */
     execlevel = 0;
     whlist = NULL;
@@ -631,9 +792,9 @@ int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
     hlp = bp->b_linep;
     lp = lforw(hlp);
     while ( lp != hlp ) {
-
         /* scan the current line */
         eline = ltext(lp);
+        MTC_dobuf(("eline: `%s'", STR(eline)));
         i = get_lused(lp);
 
         /* trim leading whitespace */
@@ -643,25 +804,30 @@ int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
         }
 
         /* if theres nothing here, don't bother */
-        if ( i <= 0 )
+        if ( i <= 0 ) {
             goto nxtscan;
+        }
 
         /* if we are already in a stored-procedure */
         if ( mstore ) {
-            if ( strncmp(eline, "!endm", 5) == 0 )
+            if ( strncmp(eline, "!endm", 5) == 0 )  {
                 mstore = FALSE;
+            }
+
             goto nxtscan;
         }
 
         /* stored procedure? */
         if ( strncmp(eline, "store-procedure", 15) == 0 ) {
             mstore = TRUE;
+
             goto nxtscan;
         }
 
         /* local variable declaration? */
-        if ( strncmp(eline, "local", 5) == 0 )
+        if ( strncmp(eline, "local", 5) == 0 )  {
             ++num_locals;
+        }
 
         /* if is a while directive, make a block... */
         if ( eline[0] == '!' && eline[1] == 'w' && eline[2] == 'h' ) {
@@ -670,6 +836,7 @@ int PASCAL NEAR dobuf P1_(BUFFER *, bp /* buffer to execute */)
 noram:          errormesg(TEXT119, bp, lp);
 /*                                        "%%Out of memory during while scan" */
 failexit:       freewhile(scanner);
+
                 goto eabort;
             }
             whtemp->w_begin = lp;
@@ -684,11 +851,12 @@ failexit:       freewhile(scanner);
                 errormesg(TEXT120, bp, lp);
 /*                                        "%%!BREAK outside of any !WHILE loop"
  */
+
                 goto failexit;
             }
-            whtemp = (WHBLOCK *)ROOM( SIZEOF (WHBLOCK) );
-            if ( whtemp == NULL )
+            if ( NULL == (whtemp = (WHBLOCK *)ROOM( SIZEOF (WHBLOCK))) )  {
                 goto noram;
+            }
             whtemp->w_begin = lp;
             whtemp->w_type = BTBREAK;
             whtemp->w_next = scanner;
@@ -701,6 +869,7 @@ failexit:       freewhile(scanner);
                 errormesg(TEXT121, bp, lp);
 /*                                      "%%!ENDWHILE with no preceding !WHILE"
  */
+
                 goto failexit;
             }
             /* move top records from the scanner list to the whlist until we
@@ -722,6 +891,7 @@ nxtscan:        /* on to the next line */
     if ( scanner != NULL ) {
         errormesg(TEXT122, bp, lp);
 /*                      "%%!WHILE with no matching !ENDWHILE" */
+
         goto failexit;
     }
 
@@ -729,8 +899,9 @@ nxtscan:        /* on to the next line */
     thisflag = lastflag;
 
     /* remember we need room for the procedure arguments among the locals */
-    if ( bp->b_numargs == NOTPROC )
+    if ( bp->b_numargs == NOTPROC ) {
         bp->b_numargs = 0;
+    }
     num_locals += bp->b_numargs;
 
     /* allocate a local user variable table */
@@ -741,7 +912,7 @@ nxtscan:        /* on to the next line */
         freewhile(whlist);
         bp->b_exec -= 1;
 
-        return (FALSE);
+        dobuf_RET(FALSE);
     }
     ut->next = uv_head;
     ut->size = num_locals;
@@ -749,16 +920,17 @@ nxtscan:        /* on to the next line */
     uv_init(ut);
     uv_head = ut;
 
-    /* and evaluate the arguments passed, placing them in the local variable
-     * table */
+    /* and evaluate the arguments passed, placing them in the local
+     * variable table */
     cur_index = 0;
     cur_arg = bp->b_args;
     while ( cur_arg != (PARG *)NULL ) {
-
         /* ask for argument names */
-        if ( ( status = mlreply("Argument: ", value, NSTRING) ) != TRUE )
+        if ( ( status = mlreply("Argument: ", value, NSTRING) ) != TRUE ) {
 /*                    "Argument: " */
-            return (status);
+
+            dobuf_RET(status);
+        }
 
         /* and create and set these in the local user var table */
         findvar(cur_arg->name, &vd, NVSIZE + 1, VT_LOCAL);
@@ -773,7 +945,6 @@ nxtscan:        /* on to the next line */
     hlp = bp->b_linep;
     lp = lforw(hlp);
     while ( lp != hlp && eexitflag == FALSE ) {
-
         /* allocate eline and copy macro line to it */
         linlen = get_lused(lp);
         if ( ( einit = eline = ROOM(linlen+1) ) == NULL ) {
@@ -781,6 +952,7 @@ nxtscan:        /* on to the next line */
 /*                              "%%Out of Memory during macro execution" */
             freewhile(whlist);
             bp->b_exec -= 1;
+
             goto freeut;
         }
         bytecopy(eline, ltext(lp), linlen);
@@ -788,43 +960,44 @@ nxtscan:        /* on to the next line */
          * Handled by bytecopy o/ */
 
         /* trim leading whitespace */
-        while ( *eline == ' ' || *eline == '\t' )
+        while ( *eline == ' ' || *eline == '\t' ) {
             ++eline;
+        }
 
         /* dump comments and blank lines */
-        if ( *eline == ';' || *eline == 0 )
+        if ( *eline == ';' || *eline == '\0' )  {
             goto onward;
+        }
 
-#if     LOGFLG
         /* append the current command to the log file */
-        fp = fopen("emacs.log", "a");
-        XSTRCPY(outline, eline);
-        fprintf(fp, "%s", outline);
-        fclose(fp);
-#endif
-
+        MTC_dobuf(("eline: `%s'", STR(eline)));
         /* only do this if we are debugging */
-        if ( macbug && !mstore && (execlevel == 0) )
+        if ( macbug && !mstore && (execlevel == 0) )  {
             if ( debug(bp, eline, &skipflag) == FALSE ) {
                 errormesg(TEXT54, bp, lp);
 /*                                      "[Macro aborted]" */
+
                 goto eabort;
             }
+        }
 
         /* Parse directives here.... */
         dirnum = -1;
         if ( *eline == '!' ) {
             /* Find out which directive this is */
             ++eline;
-            for ( dirnum = 0; dirnum < NUMDIRS; dirnum++ )
-                if ( strncmp(eline, dname[dirnum], dname_len[dirnum]) == 0 )
+            MTC_dobuf(("Directive: `%s'", STR(eline - 1)));
+            for ( dirnum = 0; dirnum < NUMDIRS; dirnum++ )  {
+                if ( strncmp(eline, dname[dirnum], dname_len[dirnum]) == 0 )  {
                     break;
-
+                }
+            }
 
             /* and bitch if it's illegal */
             if ( dirnum == NUMDIRS ) {
                 errormesg(TEXT124, bp, lp);
 /*                                      "%%Unknown Directive" */
+
                 goto eabort;
             }
 
@@ -832,6 +1005,7 @@ nxtscan:        /* on to the next line */
             if ( dirnum == DENDM ) {
                 mstore = FALSE;
                 bstore = NULL;
+
                 goto onward;
             }
 
@@ -846,189 +1020,241 @@ nxtscan:        /* on to the next line */
             if ( ( mp=lalloc(linlen) ) == NULL ) {
                 errormesg(TEXT125, bp, lp);
 /*                                      "Out of memory while storing macro" */
+
                 goto eabort;
             }
 
             /* copy the text into the new line */
-            for ( i=0; i<linlen; ++i )
+            for ( i=0; i<linlen; ++i )  {
                 lputc(mp, i, eline[i]);
+            }
 
             /* attach the line to the end of the buffer */
             if ( NULL == bstore ) {
                 errormesg(TEXT113, bp, lp);
 /*                                      "Can not create macro"  */
+
                 goto eabort;
             }
             bstore->b_linep->l_bp->l_fp = mp;
             mp->l_bp = bstore->b_linep->l_bp;
             bstore->b_linep->l_bp = mp;
             mp->l_fp = bstore->b_linep;
+
             goto onward;
         }
 
         force = FALSE;
 
         /* dump comments */
-        if ( *eline == '*' )
+        if ( *eline == '*' )  {
             goto onward;
+        }
 
         /* now, execute directives */
         if ( dirnum != -1 ) {
+            MTC_dobuf(("Directive: `%s'", STR(eline)));
             /* skip past the directive */
-            while ( *eline && *eline != ' ' && *eline != '\t' )
+            while ( *eline && *eline != ' ' && *eline != '\t' ) {
                 ++eline;
-            execstr = eline;
+            }
+
+            /*** TODO: Really understand this coding: Unfortunatey  ***/
+            /***       my changes have been `debugged into life'.   ***/
+            /***                                                    ***/
+            /***       The original code simply replaced `execstr'  ***/
+            /***       with dtv_str, which made                     ***/
+            /***       `&cat &call <Macro> 42' discard the          ***/
+            /***       trailing '42' --- in general everything      ***/
+            /***       after <Macro>'s arguments is discarded.      ***/
+            /***                                                    ***/
+            /***       Joachim Schneider, Dec. 2025                 ***/
+            BUFCPY(dtv_str, rtrimstr(ltrimstr(eline)));
+            MTC_dobuf(("String following directive: `%s'", dtv_str));
+            if ( ! *sav_estr )  {
+                BUFCPY(sav_estr, rtrimstr(ltrimstr(execstr)));
+                MTC_dobuf(("Saved `execstr': `%s'", sav_estr));
+            }
+
+            MTC_dobuf(("Old execstr: `%s'", execstr));
+            BUFCPY(execstr, dtv_str);
+            if ( *sav_estr )  {
+                if ( *execstr ) {
+                    BUFCAT(execstr, " ");
+                }
+                BUFCAT(execstr, sav_estr);
+            }
+            MTC_dobuf(("New execstr: `%s'", execstr));
 
             switch ( dirnum ) {
-            case DIF:                   /* IF directive */
-                /* grab the value of the logical exp */
-                if ( execlevel == 0 ) {
-                    if ( macarg(tkn) != TRUE ) {
-                        CLROOM(einit);
-                        goto eexec;
-                    }
-                    if ( stol(tkn) == FALSE )
+                case DIF:                   /* IF directive */
+                    /* grab the value of the logical exp */
+                    if ( execlevel == 0 ) {
+                        if ( macarg(tkn, SIZEOF(tkn)) != TRUE ) {
+                            CLROOM(einit);
+
+                            goto eexec;
+                        }
+                        if ( stol(tkn) == FALSE ) {
+                            ++execlevel;
+                        }
+                    } else  {
                         ++execlevel;
-                } else
-                    ++execlevel;
-                goto onward;
-
-            case DWHILE:                /* WHILE directive */
-                /* grab the value of the logical exp */
-                if ( execlevel == 0 ) {
-                    if ( macarg(tkn) != TRUE ) {
-                        CLROOM(einit);
-                        goto eexec;
                     }
-                    if ( stol(tkn) == TRUE )
-                        goto onward;
-                }
-            /* drop down and act just like !BREAK */
 
-            case DBREAK:                /* BREAK directive */
-                if ( dirnum == DBREAK && execlevel )
                     goto onward;
 
-                /* jump down to the endwhile */
-                /* find the right while loop */
-                whtemp = whlist;
-                while ( whtemp ) {
-                    if ( whtemp->w_begin == lp )
-                        break;
-                    whtemp = whtemp->w_next;
-                }
+                case DWHILE:                /* WHILE directive */
+                    /* grab the value of the logical exp */
+                    if ( execlevel == 0 ) {
+                        if ( macarg(tkn, SIZEOF(tkn)) != TRUE ) {
+                            CLROOM(einit);
 
-                if ( whtemp == NULL ) {
-                    errormesg(TEXT126, bp, lp);
-/*                                              "%%Internal While loop error" */
-                    goto eabort;
-                }
-
-                /* reset the line pointer back.. */
-                lp = whtemp->w_end;
-                goto onward;
-
-            case DELSE:                 /* ELSE directive */
-                if ( execlevel == 1 )
-                    --execlevel;
-                else if ( execlevel == 0 )
-                    ++execlevel;
-                goto onward;
-
-            case DENDIF:                /* ENDIF directive */
-                if ( execlevel )
-                    --execlevel;
-                goto onward;
-
-            case DGOTO:                 /* GOTO directive */
-                /* .....only if we are currently executing */
-                if ( execlevel == 0 ) {
-
-#if WINDOW_MSWIN
-                    longop(TRUE);
-#endif
-                    /* grab label to jump to */
-                    eline = token(eline, golabel, NPAT);
-                    linlen = STRLEN(golabel);
-                    glp = lforw(hlp);
-                    while ( glp != hlp ) {
-                        if ( (get_lused(glp) >= linlen) &&
-                             (lgetc(glp, 0) == '*') &&
-                             (strncmp( ( (char *)ltext(glp) ) + 1, golabel,
-                                       linlen ) == 0) ) {
-                            lp = glp;
+                            goto eexec;
+                        }
+                        if ( stol(tkn) == TRUE )  {
                             goto onward;
                         }
-                        glp = lforw(glp);
                     }
-                    errormesg(TEXT127, bp, lp);
-/*                                              "%%No such label" */
-                    goto eabort;
-                }
-                goto onward;
+                /* drop down and act just like !BREAK */
 
-            case DRETURN:               /* RETURN directive */
-                /* if we are executing.... */
-                if ( execlevel == 0 ) {
+                case DBREAK:                /* BREAK directive */
+                    if ( dirnum == DBREAK && execlevel )  {
+                        goto onward;
+                    }
 
-                    /* check for a return value */
-                    if ( macarg(tkn) == TRUE )
-                        xstrcpy(rval, tkn);
-
-                    /* and free the line resources */
-                    CLROOM(einit);
-                    goto eexec;
-                }
-                goto onward;
-
-            case DENDWHILE:             /* ENDWHILE directive */
-                if ( execlevel ) {
-                    --execlevel;
-                    goto onward;
-                } else {
-#if WINDOW_MSWIN
-                    longop(TRUE);
-#endif
+                    /* jump down to the endwhile */
                     /* find the right while loop */
                     whtemp = whlist;
                     while ( whtemp ) {
-                        if ( whtemp->w_type == BTWHILE &&whtemp->w_end == lp )
+                        if ( whtemp->w_begin == lp )  {
                             break;
+                        }
                         whtemp = whtemp->w_next;
                     }
 
                     if ( whtemp == NULL ) {
                         errormesg(TEXT126, bp, lp);
-                        /* "%%Internal While loop error"  */
+/*                                              "%%Internal While loop error" */
+
                         goto eabort;
                     }
 
                     /* reset the line pointer back.. */
-                    lp = lback(whtemp->w_begin);
+                    lp = whtemp->w_end;
+
                     goto onward;
-                }
 
-            case DFORCE:                /* FORCE directive */
-                force = TRUE;
+                case DELSE:                 /* ELSE directive */
+                    if        ( execlevel == 1 )  {
+                        --execlevel;
+                    } else if ( execlevel == 0 )  {
+                        ++execlevel;
+                    }
 
+                    goto onward;
+
+                case DENDIF:                /* ENDIF directive */
+                    if ( execlevel )  {
+                        --execlevel;
+                    }
+
+                    goto onward;
+
+                case DGOTO:                 /* GOTO directive */
+                    /* .....only if we are currently executing */
+                    if ( execlevel == 0 ) {
+#if WINDOW_MSWIN
+                        longop(TRUE);
+#endif
+                        /* grab label to jump to */
+                        MTC_dobuf(("eline: `%s'", STR(eline)));
+                        eline = token(eline, golabel, SIZEOF(golabel));
+                        MTC_dobuf(("golabel: `%s'", STR(golabel)));
+                        linlen = STRLEN(golabel);
+                        glp = lforw(hlp);
+                        while ( glp != hlp ) {
+                            if ( (get_lused(glp) >= linlen) &&
+                                 (lgetc(glp, 0) == '*') &&
+                                 (strncmp( ( (char *)ltext(glp) ) + 1, golabel,
+                                           linlen ) == 0) ) {
+                                lp = glp;
+
+                                goto onward;
+                            }
+                            glp = lforw(glp);
+                        }
+                        errormesg(TEXT127, bp, lp);
+/*                                              "%%No such label" */
+
+                        goto eabort;
+                    }
+
+                    goto onward;
+
+                case DRETURN:               /* RETURN directive */
+                    /* if we are executing.... */
+                    if ( execlevel == 0 ) {
+                        /* check for a return value */
+                        if ( macarg(tkn, SIZEOF(tkn)) == TRUE ) {
+                            BUFCPY(rval, tkn);
+                            MTC_dobuf(("rval: `%s'", fixnull(rval)));
+                        }
+
+                        /* and free the line resources */
+                        CLROOM(einit);
+
+                        goto eexec;
+                    }
+
+                    goto onward;
+
+                case DENDWHILE:             /* ENDWHILE directive */
+                    if ( execlevel ) {
+                        --execlevel;
+
+                        goto onward;
+                    } else {
+#if WINDOW_MSWIN
+                        longop(TRUE);
+#endif
+                        /* find the right while loop */
+                        whtemp = whlist;
+                        while ( whtemp ) {
+                            if ( whtemp->w_type == BTWHILE &&whtemp->w_end == lp )  {
+                                break;
+                            }
+                            whtemp = whtemp->w_next;
+                        }
+
+                        if ( whtemp == NULL ) {
+                            errormesg(TEXT126, bp, lp);
+                            /* "%%Internal While loop error"  */
+
+                            goto eabort;
+                        }
+
+                        /* reset the line pointer back.. */
+                        lp = lback(whtemp->w_begin);
+
+                        goto onward;
+                    }
+
+                case DFORCE:                /* FORCE directive */
+                    force = TRUE;
             }
         }
 
         /* execute the statement */
         status = docmd(eline);
-        if ( force )                    /* force the status */
-            status = TRUE;
-
-#if     LOGFLG
+        if ( force )  {
+            status = TRUE;  /* force the status */
+        }
         /* append the current command to the log file */
-        fp = fopen("emacs.log", "a");
-        fprintf(fp, ". . . done\n");
-        fclose(fp);
-#endif
+        MTC_dobuf(("%s", ". . . done"));
 
         /* check for a command error */
         if ( status != TRUE ) {
-
             /* look if buffer is showing */
             wp = wheadp;
             while ( wp != NULL ) {
@@ -1058,14 +1284,15 @@ nxtscan:        /* on to the next line */
             uv_clean(ut);
             CLROOM(ut);
 
-            return (status);
+            dobuf_RET(status);
         }
 
 onward: /* on to the next line */
         CLROOM(einit);
         lp = lforw(lp);
-        if ( skipflag )
+        if ( skipflag ) {
             macbug = TRUE;
+        }
     }
 
 eexec:  /* exit the current function */
@@ -1078,7 +1305,7 @@ eexec:  /* exit the current function */
     uv_clean(ut);
     CLROOM(ut);
 
-    return (TRUE);
+    dobuf_RET(TRUE);
 
 eabort: /* exit the current function with a failure */
     execlevel = 0;
@@ -1091,8 +1318,15 @@ freeut: uv_head = ut->next;
     uv_clean(ut);
     CLROOM(ut);
 
-    return (FALSE);
+    dobuf_RET(FALSE);
+
+
+    dobuf_RET_EXIT;
 }
+#undef  MTC_dobuf
+#undef  dobuf_RET_INIT
+#undef  dobuf_RET_EXIT
+#undef  dobuf_RET
 
 /* ERRORMESG:
  *
@@ -1100,9 +1334,9 @@ freeut: uv_head = ut->next;
  * currently being executed.
  */
 VOID PASCAL NEAR errormesg P3_(CONST char *, mesg, BUFFER *, bp, LINE *, lp)
-/* mesg:  Error message to display  */
-/* bp:    Buffer error occured in   AAAA*/
-/* lp:    Line                      */
+/* mesg:  Error message to display        */
+/* bp:    Buffer error occured in   AAAA  */
+/* lp:    Line                            */
 {
     char buf[NSTRING];
 
@@ -1111,15 +1345,17 @@ VOID PASCAL NEAR errormesg P3_(CONST char *, mesg, BUFFER *, bp, LINE *, lp)
     exec_error = TRUE;
 
     /* build error message line */
-    XSTRCPY(buf, "\n");
-    XSTRCAT(buf, mesg);
-    XSTRCAT(buf, TEXT229);
+    BUFCPY(buf, "\n");
+    BUFCAT(buf, mesg);
+    BUFCAT(buf, TEXT229);
 /*      " in < " */
-    XSTRCAT(buf, bp->b_bname);
-    XSTRCAT(buf, TEXT230);
+    BUFCAT(buf, bp->b_bname);
+    BUFCAT(buf, TEXT230);
 /*      "> at line " */
-    XSTRCAT( buf, long_asc( getlinenum(bp, lp) ) );
+    BUFCAT(buf, long_asc( getlinenum(bp, lp)));
     mlforce(buf);
+
+    return;
 }
 
 /* INTERACTIVE DEBUGGER
@@ -1129,45 +1365,45 @@ VOID PASCAL NEAR errormesg P3_(CONST char *, mesg, BUFFER *, bp, LINE *, lp)
  * Commands are listed out with the ? key.
  */
 int PASCAL NEAR debug P3_(
-        BUFFER *, bp,       /* buffer to execute */
-        char *,   eline,    /* text of line to debug */
+        BUFFER *, bp,       /* buffer to execute          */
+        char *,   eline,    /* text of line to debug      */
         int *,    skipflag  /* are we skipping debugging? */
     )
 {
-    REGISTER int    oldcmd          = 0;    /* original command display flag */
-    REGISTER int    oldinp          = 0;    /* original connamd input flag */
-    REGISTER int    oldstatus       = 0;    /* status of last command */
-    REGISTER int    c               = '\0'; /* temp character */
-    REGISTER KEYTAB *key            = NULL; /* ptr to a key entry */
-    static char     track[NSTRING]  = "";   /* expression to track value of */
-    char            temp[NSTRING];          /* command or expression */
+    REGISTER int    oldcmd          = 0;    /* original command display flag  */
+    REGISTER int    oldinp          = 0;    /* original connamd input flag    */
+    REGISTER int    oldstatus       = 0;    /* status of last command         */
+    REGISTER int    c               = '\0'; /* temp character                 */
+    REGISTER KEYTAB *key            = NULL; /* ptr to a key entry             */
+    static char     track[NSTRING]  = "";   /* expression to track value of   */
+    char            temp[NSTRING];          /* command or expression          */
 
     ZEROMEM(temp);
 
 dbuild: /* Build the information line to be presented to the user */
 
-    xstrcpy(outline, "<<<");
+    BUFCPY(outline, "<<<");
 
     /* display the tracked expression */
     if ( track[0] != 0 ) {
         oldstatus = cmdstatus;
         docmd(track);
         cmdstatus = oldstatus;
-        xstrcat(outline, "[=");
-        xstrcat(outline, gtusr("track"));
-        xstrcat(outline, "]");
+        BUFCAT(outline, "[=");
+        BUFCAT(outline, gtusr("track"));
+        BUFCAT(outline, "]");
     }
 
     /* debug macro name */
-    xstrcat(outline, bp->b_bname);
-    xstrcat(outline, ":");
+    BUFCAT(outline, bp->b_bname);
+    BUFCAT(outline, ":");
 
     /* and lastly the line */
-    xstrcat(outline, eline);
-    xstrcat(outline, ">>>");
+    BUFCAT(outline, eline);
+    BUFCAT(outline, ">>>");
 
     /* write out the debug line */
-dinput: outline[term.t_ncol - 1] = 0;
+dinput: outline[MIN2(SIZEOF(outline) - 1, MAX2(0, term.t_ncol - 1))] = '\0';
     mlforce(outline);
     update(TRUE);
 
@@ -1175,86 +1411,96 @@ dinput: outline[term.t_ncol - 1] = 0;
     c = get_key();
 
     /* ignore the mouse here */
-    if ( c & MOUS )
+    if ( c & MOUS ) {
         goto dinput;
+    }
 
     /* META key turns off debugging */
     key = getbind(c);
-    if ( key && key->k_type == BINDFNC && key && key->k_ptr.fp == f_meta )
+    if        ( key                     &&
+                key->k_type == BINDFNC  &&
+                key->k_ptr.fp == f_meta )   {
         macbug = FALSE;
-
-    else if ( c == abortc ) {
+    } else if ( c == abortc )               {
         return (FALSE);
+    } else                                  {
+        switch ( c ) {
 
-    } else switch ( c ) {
-
-        case '?':         /* list commands */
-            xstrcpy(outline, TEXT128);
+            case '?':         /* list commands */
+                BUFCPY(outline, TEXT128);
 /*"(e)val exp, (c/x)ommand, (t)rack exp, (^G)abort, <SP>exec, <META> stop
  * debug"*/
-            goto dinput;
 
-        case 'c':         /* execute statement */
-            oldcmd = discmd;
-            discmd = TRUE;
-            oldinp = disinp;
-            disinp = TRUE;
-            execcmd(FALSE, 1);
-            discmd = oldcmd;
-            disinp = oldinp;
-            goto dbuild;
+                goto dinput;
 
-        case 'x':         /* execute extended command */
-            oldcmd = discmd;
-            discmd = TRUE;
-            oldinp = disinp;
-            disinp = TRUE;
-            oldstatus = cmdstatus;
-            namedcmd(FALSE, 1);
-            cmdstatus = oldstatus;
-            discmd = oldcmd;
-            disinp = oldinp;
-            goto dbuild;
+            case 'c':         /* execute statement */
+                oldcmd = discmd;
+                discmd = TRUE;
+                oldinp = disinp;
+                disinp = TRUE;
+                execcmd(FALSE, 1);
+                discmd = oldcmd;
+                disinp = oldinp;
 
-        case 'e':         /* evaluate expresion */
-            XSTRCPY(temp, "set %track ");
-            oldinp = disinp;
-            disinp = TRUE;
-            mlwrite("Exp:");
-            getstring( (unsigned char *)&temp[11], NSTRING, ctoec(RETCHAR) );
-            disinp = oldinp;
-            oldstatus = cmdstatus;
-            docmd(temp);
-            cmdstatus = oldstatus;
-            XSTRCPY(temp, " = [");
-            XSTRCAT( temp, gtusr("track") );
-            XSTRCAT(temp, "]");
-            mlforce(temp);
-            c = get_key();
-            goto dinput;
+                goto dbuild;
 
-        case 't':         /* track expresion */
-            oldinp = disinp;
-            disinp = TRUE;
-            mlwrite("Exp: ");
-            getstring( (unsigned char *)temp, NSTRING, ctoec(RETCHAR) );
-            disinp = oldinp;
-            XSTRCPY(track, "set %track ");
-            XSTRCAT(track, temp);
-            goto dbuild;
+            case 'x':         /* execute extended command */
+                oldcmd = discmd;
+                discmd = TRUE;
+                oldinp = disinp;
+                disinp = TRUE;
+                oldstatus = cmdstatus;
+                namedcmd(FALSE, 1);
+                cmdstatus = oldstatus;
+                discmd = oldcmd;
+                disinp = oldinp;
 
-        case 's':         /* execute a function */
-            *skipflag = TRUE;
-            macbug = FALSE;
-            break;
+                goto dbuild;
 
-        case ' ':         /* execute a statement */
-            break;
+            case 'e':         /* evaluate expresion */
+                BUFCPY(temp, "set %track ");
+                oldinp = disinp;
+                disinp = TRUE;
+                mlwrite("Exp:");
+                getstring( (unsigned char *)&temp[11], NSTRING, ctoec(RETCHAR) );
+                disinp = oldinp;
+                oldstatus = cmdstatus;
+                docmd(temp);
+                cmdstatus = oldstatus;
+                BUFCPY(temp, " = [");
+                BUFCAT( temp, gtusr("track") );
+                BUFCAT(temp, "]");
+                mlforce(temp);
+                c = get_key();
 
-        default:         /* illegal command */
-            TTbeep();
-            goto dbuild;
+                goto dinput;
+
+            case 't':         /* track expresion */
+                oldinp = disinp;
+                disinp = TRUE;
+                mlwrite("Exp: ");
+                getstring( (unsigned char *)temp, NSTRING, ctoec(RETCHAR) );
+                disinp = oldinp;
+                BUFCPY(track, "set %track ");
+                BUFCAT(track, temp);
+
+                goto dbuild;
+
+            case 's':         /* execute a function */
+                *skipflag = TRUE;
+                macbug = FALSE;
+
+                break;
+
+            case ' ':         /* execute a statement */
+                break;
+
+            default:          /* illegal command */
+                TTbeep();
+
+                goto dbuild;
         }
+    }
 
     return (TRUE);
 }
@@ -1295,35 +1541,39 @@ int PASCAL NEAR execfile P2_(
 #else
     if ( ( status = mlreply(TEXT129, fname, NSTRING -1) ) != TRUE )
 #endif
+    {
         return (status);
+    }
 
     /* look up the path for the file */
     fspec = flook(fname, TRUE, TRUE);
 
     /* if it isn't around */
     if ( fspec == NULL ) {
-
         /* try to default the extension */
         if ( sindex(fname, ".") == 0 ) {
-            XSTRCAT(fname, ".cmd");
+            BUFCAT(fname, ".cmd");
             fspec = flook(fname, TRUE, TRUE);
-            if ( fspec != NULL )
+            if ( fspec != NULL )  {
                 goto exec1;
+            }
         }
 
         /* complain if we are interactive */
-        if ( clexec == FALSE )
+        if ( clexec == FALSE )  {
             mlwrite(TEXT214, fname);
             /* "%%No such file as %s" */
+        }
 
         return (FALSE);
     }
 
 exec1:  /* otherwise, execute it */
-    while ( n-- > 0 )
-        if ( ( status=dofile(fspec) ) != TRUE )
+    while ( n-- > 0 ) {
+        if ( ( status=dofile(fspec) ) != TRUE ) {
             return (status);
-
+        }
+    }
 
     return (TRUE);
 }
@@ -1335,36 +1585,40 @@ exec1:  /* otherwise, execute it */
  */
 int PASCAL NEAR dofile P1_(CONST char *, fname  /* file name to execute */)
 {
-    REGISTER BUFFER *bp     = NULL; /* buffer to place file to exeute */
+    REGISTER BUFFER *bp     = NULL; /* buffer to place file to exeute         */
     REGISTER BUFFER *cb     = NULL; /* temp to hold current buf while we read */
-    REGISTER int    status  = 0;    /* results of various calls */
-    char bname[NBUFN];              /* name of buffer */
+    REGISTER int    status  = 0;    /* results of various calls               */
+    char bname[NBUFN];              /* name of buffer                         */
 
     ZEROMEM(bname);
 
-    makename(bname, fname);             /* derive the name of the buffer */
-    unqname(bname);                     /* make sure we don't stomp things */
-    if ( ( bp = bfind(bname, TRUE, 0) ) == NULL ) /* get the needed buffer */
+    makename(bname, fname);               /* derive the name of the buffer    */
+    unqname(bname);                       /* make sure we don't stomp things  */
+    if ( ( bp = bfind(bname, TRUE, 0) ) == NULL ) { /* get the needed buffer  */
         return (FALSE);
+    }
 
-    bp->b_mode = MDVIEW;        /* mark the buffer as read only */
-    cb = curbp;                 /* save the old buffer */
-    curbp = bp;                 /* make this one current */
+    bp->b_mode = MDVIEW;                  /* mark the buffer as read only     */
+    cb = curbp;                           /* save the old buffer              */
+    curbp = bp;                           /* make this one current            */
     /* and try to read in the file to execute */
     if ( ( status = readin(fname, FALSE) ) != TRUE ) {
-        curbp = cb;             /* restore the current buffer */
+        curbp = cb;                       /* restore the current buffer       */
 
         return (status);
     }
 
     /* go execute it! */
-    curbp = cb;                 /* restore the current buffer */
-    if ( ( status = dobuf(bp) ) != TRUE )
+    curbp = cb;                           /* restore the current buffer       */
+    status = dobuf(bp);
+    if ( status != TRUE ) {
         return (status);
+    }
 
     /* if not displayed, remove the now unneeded buffer and exit */
-    if ( bp->b_nwnd == 0 )
+    if ( bp->b_nwnd == 0 )  {
         zotbuf(bp);
+    }
 
     return (TRUE);
 }

@@ -17,6 +17,7 @@ HDIR = ../../h
 ##
 OPTFLAGS = -fno-strict-aliasing
 #WARNFLAGS = -Wall
+#DEFINES   = -DTEST_UEMACS=1
 DEFINES   =
 #DEFINES   = -DUSE_NOBLOCK_READ=1
 WARNFLAGS = -Wall -Wno-unused-variable

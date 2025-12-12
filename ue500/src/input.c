@@ -78,10 +78,10 @@ EXTERN struct passwd *getpwnam DCL((CONST char *login));
 /* Static functions declared here:                                    */
 /*====================================================================*/
 /* MSDOS and OS/2 change '/' to '\' in returned (static) buffer */
-static char *PASCAL NEAR  complete DCL((CONST char *prompt,
-                                        CONST char *defval,
-                                        int        type,
-                                        int        maxlen));
+static char * PASCAL NEAR  complete DCL((CONST char *prompt,
+                                         CONST char *defval,
+                                         int        type,
+                                         int        maxlen));
 /*====================================================================*/
 
 
@@ -204,9 +204,9 @@ ue_fnc_T getname P1_(CONST char *, prompt)
  *
  * I was goaded into this by lots of other people's completion code.
  */
-BUFFER *PASCAL NEAR getcbuf P3_(CONST char *, prompt,
-                                CONST char *, defval,
-                                int,          createflag)
+BUFFER * PASCAL NEAR getcbuf P3_(CONST char *, prompt,
+                                 CONST char *, defval,
+                                 int,          createflag)
 /* prompt:      Prompt to user on command line    */
 /* defval:      Default value to display to user  */
 /* createflag:  Should this create a new buffer?  */
@@ -222,7 +222,7 @@ BUFFER *PASCAL NEAR getcbuf P3_(CONST char *, prompt,
 }
 
 
-CONST char *PASCAL NEAR gtfilename P1_(CONST char *, prompt)
+CONST char * PASCAL NEAR gtfilename P1_(CONST char *, prompt)
 /* prompt:  Prompt to user on command line  */
 {
 #if     MSDOS | OS2
@@ -1082,10 +1082,10 @@ int PASCAL NEAR echochar P1_(unsigned char, c /* character to be echoed */)
 /* Static functions defined here:                                     */
 /*====================================================================*/
 /* MSDOS and OS/2 change '/' to '\' in returned (static) buffer */
-static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
-                                       CONST char *,  defval,
-                                       int,           type,
-                                       int,           maxlen)
+static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
+                                        CONST char *,  defval,
+                                        int,           type,
+                                        int,           maxlen)
 /* prompt:  Prompt to user on command line    */
 /* defval:  Default value to display to user  */
 /* type:    Type of what we are completing    */
@@ -1108,8 +1108,7 @@ static char *PASCAL NEAR  complete P4_(CONST char *,  prompt,
 
     /* if we are executing a command line get the next arg and match it */
     if ( clexec ) {
-        if ( macarg(buf) != TRUE )
-            return (NULL);
+        if ( macarg(buf, SIZEOF(buf)) != TRUE ) return (NULL);
 
         return (buf);
     }

@@ -405,7 +405,7 @@ out:    TTkopen();      /* open the keyboard again */
  * pointer into fname indicating the end of the file path; i.e., 1 character
  * BEYOND the path name.
  */
-CONST char *PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
+CONST char * PASCAL NEAR makename P2_(char *, bname, CONST char *, fname)
 {
     char                *fnameA = NULL;
     REGISTER CONST char *cp1    = NULL;

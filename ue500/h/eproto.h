@@ -42,6 +42,7 @@
 #define C_7    7
 #define C_8    8
 #define C_10  10
+#define C_14  14
 #define C_16  16
 #define C_18  18
 #define C_20  20
@@ -52,10 +53,14 @@
 #define C_50  50
 #define C_60  60
 #define C_70  70
+#endif  /*END_COMMENT_*/
 #define C_80  80
+#if     BEGIN_COMMENT_
 #define C_90  90
 #endif  /*END_COMMENT_*/
 #define C_95  95
+/*====================================================================*/
+#define UMC_UCHAR_MAX   ( 0xFF/***(int)(unsigned char)(-1)***/ )
 /**********************************************************************/
 
 
@@ -159,6 +164,24 @@
 CASRT(0 != VARARG);                 /* VARARG needed in any case!     */
 /* To complicated for Pre-ANSI-C: `CASRT((VARG && !PROTO) || !VARG)'  */
 CASRT(0 == (VARG & PROTO));         /* varargs.h only with Pre-ANSI C */
+/**********************************************************************/
+
+/**********************************************************************/
+/* Ways to define NOOPs:                                              */
+/*....................................................................*/
+#if ( 0 )
+# define NOOP   do {} while ( 0 )
+#else
+#if ( 0 )
+# define NOOP   ( 0 )
+#else
+#if ( 1 )
+# define NOOP
+#else
+CRASH(NOOP undefined);
+#endif
+#endif
+#endif
 /**********************************************************************/
 
 
@@ -328,13 +351,54 @@ EXTERN int  errno;
 /*....................................................................*/
 /* Set defaults for settings which *could* be defined in estructc.h:  */
 /*....................................................................*/
-#ifndef UEMACS_TRC
-# ifdef NDEBUG
-#   define UEMACS_TRC          (0)
+#ifdef UEMACS_TRC
+#else
+# ifdef TRC_ON
+#  if TRC_ON
+#   undef  UEMACS_TRC
+#   define UEMACS_TRC   (1)
+#  else
+#   undef  UEMACS_TRC
+#   define UEMACS_TRC   (0)
+#  endif
 # else
-#   define UEMACS_TRC          (1)
+#  ifdef NDEBUG
+#   undef  UEMACS_TRC
+#   define UEMACS_TRC   (0)
+#  else
+#   undef  UEMACS_TRC
+#   define UEMACS_TRC   (1)
+#  endif
 # endif
 #endif
+
+
+#if UEMACS_TRC
+# undef   UEMACS_TRC
+# define  UEMACS_TRC    (1)
+# undef   TRC_ON
+# define  TRC_ON        (1)
+#else
+# undef   UEMACS_TRC
+# define  UEMACS_TRC    (0)
+# undef   TRC_ON
+# define  TRC_ON        (0)
+#endif
+
+
+#if LOGFLG
+# undef   LOGFLG
+# define  LOGFLG        (1)
+# undef   MTC_ON
+# define  MTC_ON        (1)
+#else
+# undef   LOGFLG
+# define  LOGFLG        (0)
+# undef   MTC_ON
+# define  MTC_ON        (0)
+#endif
+
+
 #ifndef TRC_FILE_ENVVAR
 # define TRC_FILE_ENVVAR  "UEMACS_TRC_FILE"
 #endif
@@ -362,13 +426,13 @@ EXTERN FILE *uetmpfile_ DCL((int delmode));
 #define clntmpfls() ( uetmpfile_(1)  )
 
 /* strcpy() possibly overlapping regions:   */
-EXTERN char *PASCAL NEAR  xstrcpy DCL((char *s1, CONST char *s2));
+EXTERN char * PASCAL NEAR xstrcpy DCL((char *s1, CONST char *s2));
 
 /* strncpy() possibly overlapping regions:  */
-EXTERN char *PASCAL NEAR  xstrncpy DCL((char *s1, CONST char *s2, int n));
+EXTERN char * PASCAL NEAR xstrncpy DCL((char *s1, CONST char *s2, int n));
 
 /* strcat of possibly overlapping regions   */
-EXTERN char *PASCAL NEAR  xstrcat DCL((char *s1, CONST char *s2));
+EXTERN char * PASCAL NEAR xstrcat DCL((char *s1, CONST char *s2));
 
 /* Like FreeBSD's strlcpy(): Equivalent semantics:
  *  n = strlcpy(dst, src, len);
@@ -376,6 +440,7 @@ EXTERN char *PASCAL NEAR  xstrcat DCL((char *s1, CONST char *s2));
  *  n = snprintf(dst, len, "%s", src);
  */
 EXTERN int PASCAL NEAR  xstrlcpy  DCL((char * s1, CONST char * s2, int n));
+#define BUFCPY(dst, src)  xstrlcpy((dst), (src), SIZEOF((dst)))
 /* XSTRLCCPY:
  *
  * Safe copy of character to string buffer of size n
@@ -392,6 +457,7 @@ EXTERN int PASCAL NEAR  xstrlccpy DCL((char * s1, CONST char   c2, int n));
  *  free(dup);
  */
 EXTERN int PASCAL NEAR  xstrlcat  DCL((char * s1, CONST char * s2, int n));
+#define BUFCAT(dst, src)  xstrlcat((dst), (src), SIZEOF((dst)))
 /* XSTRLCCAT:
  *
  * Safe append of character to string buffer of size n
@@ -403,9 +469,9 @@ EXTERN int PASCAL NEAR  xstrlccat DCL((char * s1, CONST char   c2, int n));
  *  else           copy src to dst using xstrcpy(dst, src) and log
  *                 a warning message.
  */
-EXTERN char *PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
-                                        const char *src,
-                                        const char *file, int line));
+EXTERN char * PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
+                                         const char *src,
+                                         const char *file, int line));
 /* Safe string copy (if dst is an array): Do not use if dst is a char
  * array with faked length, e.g. var->txt in
  * typedef struct { ..., char txt[1] } s_T;
@@ -419,7 +485,7 @@ EXTERN char *PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
  *  else           append src to dst usling xstrcat(dst, src) and log a
  *                 warning message.
  */
-EXTERN char *PASCAL NEAR  sfstrcat_ DCL((char       *dst,
+EXTERN char * PASCAL NEAR sfstrcat_ DCL((char       *dst,
                                          int        dst_size,
                                          const char *src,
                                          const char *file,
@@ -431,6 +497,8 @@ EXTERN char *PASCAL NEAR  sfstrcat_ DCL((char       *dst,
 /* be the result of an unrestricted write.                              */
 /* Returns the number of characters (not including the trailing '\0')   */
 /* that would have been written if n were large enough.                 */
+/*                                                                      */
+/* The function implemented here *allows* overlapping buffers!          */
 EXTERN int PASCAL NEAR  xvsnprintf DCL((char *s, size_t n,
                                         CONST char *fmt, va_list ap));
 
@@ -439,6 +507,8 @@ EXTERN int PASCAL NEAR  xvsnprintf DCL((char *s, size_t n,
 /* be the result of an unrestricted write.                              */
 /* Returns the number of characters (not including the trailing '\0')   */
 /* that would have been written if n were large enough.                 */
+/*                                                                      */
+/* The function implemented here *allows* overlapping buffers!          */
 EXTERN int CDECL NEAR xsnprintf DCL((char *s, size_t n, CONST char *fmt, ...));
 
 #if UEMACS_FEATURE_USE_VA_COPY
@@ -454,9 +524,13 @@ EXTERN int PASCAL NEAR  xvasprintf DCL((char **ret, CONST char *fmt,
 /* resulting string.                                            */
 EXTERN int CDECL NEAR xasprintf DCL((char **ret, CONST char *fmt, ...));
 
+/* Allocate (using malloc()) a string large enough to hold the  */
+/* resulting string and return this string or NULL on error.    */
+EXTERN CONST char * CDECL NEAR yasprintf DCL((CONST char *fmt, ...));
+
 #define xstrdup copystr
 
-EXTERN char *PASCAL NEAR  xstrtok_r DCL((char *str, CONST char *sep,
+EXTERN char * PASCAL NEAR xstrtok_r DCL((char *str, CONST char *sep,
                                          char **next));
 
 EXTERN int PASCAL NEAR  xstrcasecmp  DCL((CONST char *s1, CONST char *s2));
@@ -465,11 +539,19 @@ EXTERN int PASCAL NEAR  strcasestart DCL((CONST char *start, CONST char *test));
 
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
-EXTERN char *PASCAL NEAR  achrcat DCL((CONST char *str, CONST char c));
+EXTERN char * PASCAL NEAR achrcat DCL((CONST char *str, CONST char c));
 
 /* Concatenate string d to string str and malloc the result.    */
 /* Input string must either be NULL or malloced.                */
-EXTERN char *PASCAL NEAR  astrcat DCL((CONST char *str, CONST char *s));
+EXTERN char * PASCAL NEAR astrcat DCL((CONST char *str, CONST char *s));
+
+/* Trim string from left --- static result                      */
+EXTERN CONST char * PASCAL NEAR ltrimstr DCL((CONST char *s));
+/* Trim string from right --- static result                     */
+EXTERN CONST char * PASCAL NEAR rtrimstr DCL((CONST char *s));
+
+/* Return base name of input --- static result                  */
+EXTERN CONST char * PASCAL NEAR xbasenam DCL((CONST char *s));
 
 /* Display character in a visible form.                         */
 EXTERN CONST char         *cmkvis DCL((char c));
@@ -569,7 +651,7 @@ RETURN_L:
 /* Usage example: */
 #if ( 0 )
 # define RETURN  STATIC_STR_RET_RETURN
-CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname)
+CONST char * PASCAL NEAR  gtfun P1_(CONST char *, fname)
 {
     STATIC_STR_RET_PROLOG();
 
@@ -592,26 +674,49 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname)
 
 
 /**********************************************************************/
-EXTERN FILE *PASCAL NEAR  GetTrcFP DCL((void));
+EXTERN FILE * PASCAL NEAR GetTrcFP DCL((void));
 
-extern int         DebugMessage_lnno_;
-extern CONST char *DebugMessage_fname_;
+COMMON int         DebugMessage_lnno_;
+COMMON CONST char *DebugMessage_fname_;
+COMMON CONST char *DebugMessage_tag_;
 EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
-#if UEMACS_TRC
-# define  TRC(arg)  do {                              \
+/*--------------------------------------------------------------------*/
+#if TRC_ON
+# define TRC(arg) do {                                \
         DebugMessage_fname_ = (CONST char *)__FILE__; \
-        DebugMessage_lnno_ = __LINE__;                \
+        DebugMessage_lnno_  = __LINE__;               \
+        DebugMessage_tag_   = (CONST char *)"TRC";    \
         DebugMessage arg;                             \
     } while ( 0 )
-# define  TRCK(arg, file, line)  do {                 \
+# define TRCK(arg, file, line)  do {                  \
         DebugMessage_fname_ = (CONST char *)(file);   \
-        DebugMessage_lnno_ = (line);                  \
+        DebugMessage_lnno_  = (line);                 \
+        DebugMessage_tag_   = (CONST char *)"TRC";    \
         DebugMessage arg;                             \
     } while ( 0 )
 #else
-# define  TRC(arg)              do {} while ( 0 )
-# define  TRCK(arg, file, line) do {} while ( 0 )
+# define TRC(arg)                 NOOP
+# define TRCK(arg, file, line)    NOOP
 #endif
+/*--------------------------------------------------------------------*/
+#if MTC_ON
+# define MTC(arg)  do {                               \
+        DebugMessage_fname_ = (CONST char *)__FILE__; \
+        DebugMessage_lnno_  = __LINE__;               \
+        DebugMessage_tag_   = (CONST char *)"MTC";    \
+        DebugMessage arg;                             \
+    } while ( 0 )
+# define MTCK(arg, file, line)  do {                  \
+        DebugMessage_fname_ = (CONST char *)(file);   \
+        DebugMessage_lnno_  = (line);                 \
+        DebugMessage_tag_   = (CONST char *)"MTC";    \
+        DebugMessage arg;                             \
+    } while ( 0 )
+#else
+# define MTC(arg)                 NOOP
+# define MTCK(arg, file, line)    NOOP
+#endif
+/*--------------------------------------------------------------------*/
 /**********************************************************************/
 
 /**********************************************************************/
@@ -817,14 +922,14 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /*   the result und doesn't pad it with zeroes.                       */
 /* - u if TRUE gives an uppercase result.                             */
 /*--------------------------------------------------------------------*/
-EXTERN CONST char *PASCAL NEAR  ui2s10_memacs DCL((unsigned int i,
+EXTERN CONST char * PASCAL NEAR ui2s10_memacs DCL((unsigned int i,
                                                    int l));
-EXTERN CONST char *PASCAL NEAR  ui2s16_memacs DCL((unsigned int i,
+EXTERN CONST char * PASCAL NEAR ui2s16_memacs DCL((unsigned int i,
                                                    int l, int u));
-EXTERN CONST char *PASCAL NEAR  ui2s36_memacs DCL((unsigned int i,
+EXTERN CONST char * PASCAL NEAR ui2s36_memacs DCL((unsigned int i,
                                                    int l, int u));
 #ifdef MAIN_C_
-CONST char *PASCAL NEAR ui2s10_memacs P2_(unsigned int, i, int, l)
+CONST char * PASCAL NEAR  ui2s10_memacs P2_(unsigned int, i, int, l)
 {
     unsigned int  base  = C_10;
 
@@ -878,8 +983,8 @@ CONST char *PASCAL NEAR ui2s10_memacs P2_(unsigned int, i, int, l)
     }
 }
 
-CONST char *PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
-                                          int, u)
+CONST char * PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
+                                           int, u)
 {
     unsigned int  base  = C_16;
 
@@ -940,8 +1045,8 @@ CONST char *PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
     }
 }
 
-CONST char *PASCAL NEAR ui2s36_memacs P3_(unsigned int, i, int, l,
-                                          int, u)
+CONST char * PASCAL NEAR ui2s36_memacs P3_(unsigned int, i, int, l,
+                                           int, u)
 {
     unsigned int  base  = C_36;
 
@@ -1096,14 +1201,12 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         }                                                               \
     } while (0)
 
-#if     BEGIN_COMMENT_
 #define ASRTM(e, m) do {                                                \
         if ( !(e) )                                                     \
         {                                                               \
             ASRTM_Catch (__FILE__, __LINE__, MKSTRING(e), m);           \
         }                                                               \
     } while (0)
-#endif  /*END_COMMENT_*/
 
 #define ASRTK(e, file, line) do {                                       \
         if ( !(e) )                                                     \
@@ -1456,7 +1559,7 @@ EXTERN          char PASCAL NEAR  lgetc_ DCL((LINE *lp, int n,
 #endif
 #define lgetc(lp, n)    ( lgetc_((lp), (n), __FILE__, __LINE__) )
 
-EXTERN char *PASCAL NEAR  lgetcp_ DCL((LINE *lp, int n,
+EXTERN char * PASCAL NEAR lgetcp_ DCL((LINE *lp, int n,
                                        CONST char *fnam, int lno));
 #define lgetcp(lp, n)   ( lgetcp_((lp), (n), __FILE__, __LINE__) )
 #define ltext(lp)       ( lgetcp(lp, 0) )
@@ -1999,16 +2102,16 @@ typedef struct {
 /**********************************************************************/
 
 /* MicroEmacs named function type:  */
-typedef int PASCAL NEAR         (*ue_fnc_T) DCL((int, int));
+typedef int PASCAL NEAR           (*ue_fnc_T) DCL((int, int));
 
 /* MicroEmacs table value fetch function type:  */
-typedef CONST char *PASCAL NEAR (*ue_tvfetch_T)DCL((int));
+typedef CONST char * PASCAL NEAR  (*ue_tvfetch_T)DCL((int));
 
 /* Filter function used by TfmRegion():
  * Output string must be created by malloc(). */
-typedef char *PASCAL NEAR       (*filter_func_T) DCL((CONST char *rstart,
-                                                      CONST char *rtext,
-                                                      VOIDP argp));
+typedef char * PASCAL NEAR        (*filter_func_T) DCL((CONST char *rstart,
+                                                        CONST char *rtext,
+                                                        VOIDP argp));
 
 #if WINDOW_MSWIN
 EXTERN char * PASCAL            fullpathname DCL((char *PathName, int Nbuf));
@@ -2060,57 +2163,57 @@ EXTERN int PASCAL NEAR          undo DCL((int f, int n));
 EXTERN int PASCAL NEAR          undo_delete DCL((int f, int n));
 EXTERN int PASCAL NEAR          undo_list DCL((int f, int n));
 EXTERN int PASCAL NEAR          ab_insert DCL((char *sym, CONST char *expansion));
-EXTERN char *PASCAL NEAR        ab_lookup DCL((CONST char *sym));
-EXTERN char *PASCAL NEAR        ab_taillookup DCL((CONST char *sym));
+EXTERN char * PASCAL NEAR       ab_lookup DCL((CONST char *sym));
+EXTERN char * PASCAL NEAR       ab_taillookup DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_delete DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_clean DCL((void));
-EXTERN BUFFER *PASCAL NEAR      bfind DCL((CONST char *bname, int cflag, int bflag));
-EXTERN BUFFER *PASCAL NEAR      getcbuf DCL((CONST char *prompt, CONST char *defval, int createflag));
-EXTERN BUFFER *PASCAL NEAR      getdefb DCL((void));
-EXTERN BUFFER *PASCAL NEAR      getoldb DCL((void));
-EXTERN SCREEN_T *PASCAL NEAR    init_screen DCL((CONST char *, BUFFER *));
-EXTERN SCREEN_T *PASCAL NEAR    lkp_screen DCL((CONST char *scr_name));
-EXTERN SCREEN_T *PASCAL NEAR    index_screen DCL((int scr_num));
+EXTERN BUFFER * PASCAL NEAR     bfind DCL((CONST char *bname, int cflag, int bflag));
+EXTERN BUFFER * PASCAL NEAR     getcbuf DCL((CONST char *prompt, CONST char *defval, int createflag));
+EXTERN BUFFER * PASCAL NEAR     getdefb DCL((void));
+EXTERN BUFFER * PASCAL NEAR     getoldb DCL((void));
+EXTERN SCREEN_T * PASCAL NEAR   init_screen DCL((CONST char *, BUFFER *));
+EXTERN SCREEN_T * PASCAL NEAR   lkp_screen DCL((CONST char *scr_name));
+EXTERN SCREEN_T * PASCAL NEAR   index_screen DCL((int scr_num));
 EXTERN int PASCAL NEAR          screen_index DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          insert_screen DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          select_screen DCL((SCREEN_T *sp, int announce));
 EXTERN VOID PASCAL NEAR         free_screen DCL((SCREEN_T *sp));
 EXTERN char *                   Eallocate DCL((unsigned nbytes));
 EXTERN char *                   dolock DCL((CONST char *fname));
-EXTERN char *PASCAL NEAR        bytecopy DCL((char *dst, CONST char *src, int maxlen));
-EXTERN char *PASCAL NEAR        getecnam DCL((int c, char *seq, int seqsiz));
+EXTERN char * PASCAL NEAR       bytecopy DCL((char *dst, CONST char *src, int maxlen));
+EXTERN char * PASCAL NEAR       getecnam DCL((int c, char *seq, int seqsiz));
 EXTERN CONST char *             ectostr DCL((int ec));
-EXTERN char *PASCAL NEAR        copystr DCL((CONST char *));
-EXTERN CONST char *PASCAL NEAR  envval DCL((int i));
-EXTERN CONST char *PASCAL NEAR  fixnull DCL((CONST char *s));
-EXTERN CONST char *PASCAL NEAR  flook DCL((CONST char *fname, int hflag, int cflag));
-EXTERN CONST char *PASCAL NEAR  funval DCL((int i));
-EXTERN char *PASCAL NEAR        getctext DCL((char *rline));
-EXTERN char *PASCAL NEAR        getffile DCL((char *fspec));
-EXTERN CONST char *PASCAL NEAR  getfname DCL((KEYTAB *key));
-EXTERN char *PASCAL NEAR        getkill DCL((void));
-EXTERN char *PASCAL NEAR        getnfile DCL((void));
-EXTERN CONST char *PASCAL NEAR  getreg DCL((char *value));
-EXTERN CONST char *PASCAL NEAR  getval DCL((char *token));
-EXTERN CONST char *PASCAL NEAR  getwlist DCL((char *buf));
-EXTERN CONST char *PASCAL NEAR  gtenv DCL((CONST char *vname));
-EXTERN CONST char *PASCAL NEAR  gtfilename DCL((CONST char *prompt));
-EXTERN CONST char *PASCAL NEAR  gtfun DCL((CONST char *fname));
-EXTERN CONST char *PASCAL NEAR  gtusr DCL((CONST char *vname));
-EXTERN char *PASCAL NEAR        int_asc DCL((int i));
-EXTERN char *PASCAL NEAR        long_asc DCL((long num));
-EXTERN CONST char *PASCAL NEAR  ltos DCL((int val));
-EXTERN CONST char *PASCAL NEAR  makename DCL((char *bname, CONST char *fname));
-EXTERN char *PASCAL NEAR        mklower DCL((char *str));
-EXTERN char *PASCAL NEAR        mkupper DCL((char *str));
-EXTERN CONST char *PASCAL NEAR  namval DCL((int index));
-EXTERN char *PASCAL NEAR        timeset DCL((void));
-EXTERN char *PASCAL NEAR        token DCL((char *src, char *tok, int size));
-EXTERN CONST char *PASCAL NEAR  transbind DCL((CONST char *skey));
-EXTERN char *PASCAL NEAR        trimstr DCL((char *s));
-EXTERN char *PASCAL NEAR        xlat DCL((char *source, char *lookup, char *trans));
+EXTERN char * PASCAL NEAR       copystr DCL((CONST char *));
+EXTERN CONST char * PASCAL NEAR envval DCL((int i));
+EXTERN CONST char * PASCAL NEAR fixnull DCL((CONST char *s));
+EXTERN CONST char * PASCAL NEAR flook DCL((CONST char *fname, int hflag, int cflag));
+EXTERN CONST char * PASCAL NEAR funval DCL((int i));
+EXTERN char * PASCAL NEAR       getctext DCL((char *rline));
+EXTERN char * PASCAL NEAR       getffile DCL((char *fspec));
+EXTERN CONST char * PASCAL NEAR getfname DCL((KEYTAB *key));
+EXTERN char * PASCAL NEAR       getkill DCL((void));
+EXTERN char * PASCAL NEAR       getnfile DCL((void));
+EXTERN CONST char * PASCAL NEAR getreg DCL((char *value));
+EXTERN CONST char * PASCAL NEAR getval DCL((CONST char *token));
+EXTERN CONST char * PASCAL NEAR getwlist DCL((char *buf));
+EXTERN CONST char * PASCAL NEAR gtenv DCL((CONST char *vname));
+EXTERN CONST char * PASCAL NEAR gtfilename DCL((CONST char *prompt));
+EXTERN CONST char * PASCAL NEAR gtfun DCL((CONST char *fname));
+EXTERN CONST char * PASCAL NEAR gtusr DCL((CONST char *vname));
+EXTERN char * PASCAL NEAR       int_asc DCL((int i));
+EXTERN char * PASCAL NEAR       long_asc DCL((long num));
+EXTERN CONST char * PASCAL NEAR ltos DCL((int val));
+EXTERN CONST char * PASCAL NEAR makename DCL((char *bname, CONST char *fname));
+EXTERN char * PASCAL NEAR       mklower DCL((char *str));
+EXTERN char * PASCAL NEAR       mkupper DCL((char *str));
+EXTERN CONST char * PASCAL NEAR namval DCL((int index));
+EXTERN char * PASCAL NEAR       timeset DCL((void));
+EXTERN char * PASCAL NEAR       token DCL((char *src, char *tok, int size));
+EXTERN CONST char * PASCAL NEAR transbind DCL((CONST char *skey));
+EXTERN char * PASCAL NEAR       trimstr DCL((char *s));
+EXTERN char * PASCAL NEAR       xlat DCL((char *source, char *lookup, char *trans));
 EXTERN char *                   undolock DCL((CONST char *fname));
-EXTERN char *PASCAL NEAR        regtostr DCL((char *buf, REGION *region));
+EXTERN char * PASCAL NEAR       regtostr DCL((char *buf, REGION *region));
 EXTERN int PASCAL NEAR          lowerc DCL((char ch));
 EXTERN int PASCAL NEAR          cycle_ring DCL((int f, int n));
 EXTERN int PASCAL NEAR          upperc DCL((char ch));
@@ -2177,7 +2280,7 @@ EXTERN int PASCAL NEAR          getcwnum DCL((void));
 EXTERN int PASCAL NEAR          getgoal DCL((LINE *dlp));
 EXTERN int PASCAL NEAR          getstring DCL((unsigned char *buf, int nbuf, int eolchar));
 EXTERN int PASCAL NEAR          gettwnum DCL((void));
-EXTERN int PASCAL NEAR          gettyp DCL((char *token));
+EXTERN int PASCAL NEAR          gettyp DCL((CONST char *token));
 EXTERN int PASCAL NEAR          getkey DCL((void));
 EXTERN int PASCAL NEAR          getwpos DCL((void));
 EXTERN int PASCAL NEAR          get_char DCL((void));
@@ -2257,8 +2360,8 @@ EXTERN int                      Erelease DCL((char *mp));
 EXTERN int                      set_key DCL((KEYTAB *key, CONST char *name));
 EXTERN int                      xunlock DCL((char *fname));
 EXTERN KEYTAB *                 getbind DCL((int c));
-EXTERN LINE *PASCAL NEAR        lalloc DCL((int used));
-EXTERN LINE *PASCAL NEAR        mouseline DCL((EWINDOW *wp, int row));
+EXTERN LINE * PASCAL NEAR       lalloc DCL((int used));
+EXTERN LINE * PASCAL NEAR       mouseline DCL((EWINDOW *wp, int row));
 EXTERN long PASCAL NEAR         getlinenum DCL((BUFFER *bp, LINE *sline));
 EXTERN int PASCAL NEAR          addkey DCL((unsigned char * seq, int fn));
 EXTERN int PASCAL NEAR          addkeymap DCL((int f, int n));
@@ -2303,8 +2406,10 @@ EXTERN int PASCAL NEAR          desbind DCL((int f, int n));
 EXTERN int PASCAL NEAR          deskey DCL((int f, int n));
 EXTERN int PASCAL NEAR          desvars DCL((int f, int n));
 EXTERN int PASCAL NEAR          detab DCL((int f, int n));
-EXTERN int PASCAL NEAR          dobuf DCL((BUFFER *bp));
-EXTERN int PASCAL NEAR          docmd DCL((char *cline));
+EXTERN int PASCAL NEAR          dobuf_ DCL((BUFFER *bp, CONST char * file, int line));
+#define                         dobuf(bp)     ( dobuf_((bp),    __FILE__, __LINE__) )
+EXTERN int PASCAL NEAR          docmd_ DCL((char *cline, CONST char * file, int line));
+#define                         docmd(cline)  ( docmd_((cline), __FILE__, __LINE__) )
 EXTERN int PASCAL NEAR          dofile DCL((CONST char *fname));
 EXTERN int PASCAL NEAR          ectoc DCL((int c));
 EXTERN VOID PASCAL NEAR         edinit DCL((char bname[]));
@@ -2379,7 +2484,7 @@ EXTERN int PASCAL NEAR          list_screens DCL((int f, int n));
 EXTERN int PASCAL NEAR          lowerregion DCL((int f, int n));
 EXTERN int PASCAL NEAR          lowerword DCL((int f, int n));
 EXTERN int PASCAL NEAR          lowrite DCL((char c));
-EXTERN int PASCAL NEAR          macarg DCL((char *tok));
+EXTERN int PASCAL NEAR          macarg DCL((char *tok, int size));
 EXTERN int PASCAL NEAR          macrotokey DCL((int f, int n));
 EXTERN int PASCAL NEAR          makelist DCL((int iflag));
 EXTERN VOID PASCAL NEAR         mouse_screen DCL((void));
@@ -2600,13 +2705,13 @@ EXTERN VOID                     qrep DCL((int ch));
 EXTERN CONST int *              qget DCL((int *lp));
 #endif
 
-EXTERN EWINDOW *PASCAL NEAR     mousewindow DCL((int row));
+EXTERN EWINDOW * PASCAL NEAR    mousewindow DCL((int row));
 EXTERN int PASCAL NEAR          wpopup DCL((BUFFER *popbuf));
 
 #if CTAGS
-EXTERN int PASCAL NEAR         tagword DCL((int f, int n));   /* vi-like tagging */
-EXTERN int PASCAL NEAR         retagword DCL((int f, int n)); /* Try again (if redefined) */
-EXTERN int PASCAL NEAR         backtagword DCL((int f, int n)); /* return from tagged word */
+EXTERN int PASCAL NEAR          tagword DCL((int f, int n));   /* vi-like tagging */
+EXTERN int PASCAL NEAR          retagword DCL((int f, int n)); /* Try again (if redefined) */
+EXTERN int PASCAL NEAR          backtagword DCL((int f, int n)); /* return from tagged word */
 #endif
 
 /*====================================================================*/
@@ -2687,10 +2792,42 @@ EXTERN char *ctime DCL((const time_t *));
 /**********************************************************************/
 /* Memor (de-)allocation functions and wrapper macros                 */
 /**********************************************************************/
+/* ROOM:
+ *
+ * Allocate memory using malloc() on failure, discard oldest undo
+ * information and retry. Memory region is initialized to zero.
+ *
+ * Return NULL on error.
+ */
 EXTERN char *room DCL((int, CONST char *, int));
-#define ROOM(nbytes)              ( room((nbytes), __FILE__, __LINE__) )
+/* XROOM:
+ *
+ * Allocate memory using malloc() on failure, discard oldest undo
+ * information and retry. Memory region is initialized to zero.
+ *
+ * On Error: Write a message to Message-Line/STDERR/Trace and abort().
+ */
+EXTERN char *xroom DCL((int, CONST char *, int));
+#define ROOM(nbytes)              ( room((nbytes),  __FILE__, __LINE__) )
+#define XROOM(nbytes)             ( xroom((nbytes), __FILE__, __LINE__) )
+/* REROOM:
+ *
+ * Allocate memory using realloc() on failure, discard oldest undo
+ * information and retry
+ *
+ * Return NULL on error.
+ */
 EXTERN char *reroom DCL((VOIDP, int, CONST char *, int));
-#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
+/* XREROOM:
+ *
+ * Allocate memory using relloc() on failure, discard oldest undo
+ * information and retry. Memory region is initialized to zero.
+ *
+ * On Error: Write a message to Message-Line/STDERR/Trace and abort().
+ */
+EXTERN char *xreroom DCL((VOIDP, int, CONST char *, int));
+#define REROOM(orig_ptr, nbytes)  ( reroom((VOIDP)(orig_ptr),  (nbytes), __FILE__, __LINE__) )
+#define XREROOM(orig_ptr, nbytes) ( xreroom((VOIDP)(orig_ptr), (nbytes), __FILE__, __LINE__) )
 EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #define DEROOM(ptr)               ( deroom((VOIDP)(ptr), __FILE__, __LINE__) )
 

@@ -115,26 +115,45 @@ COMMON unsigned int _stklen = 10000;
  * Note that re-entering an Emacs that is saved in a kept subprocess
  * would require a similar entrypoint.
  */
+#if     TEST_UEMACS
+static int run_uemacs_test(int argc, char *argv[])
+{
+    char buf0[NSTRING];
+    char buf1[NSTRING];
+
+    BUFCPY(buf0, ltrimstr(argv[1]));
+    BUFCPY(buf1, rtrimstr(argv[1]));
+
+    fprintf(stdout, "ltrimstr = `%s', rtrimstr = `%s'\n", buf0, buf1);
+
+    return 0;
+}
+
+int main(int argc, char *argv[])
+{
+    return run_uemacs_test(argc, argv);
+}
+#else
 #if     CALLED
 int emacs P2_(int, argc, char **, argv)
 #else
-# if     XVT
+#if     XVT
 int called_main P2_(int, argc, char **, argv)
-# else
+#else
 int main P2_(int, argc, char **, argv)
-# endif
+#endif
 #endif
 /* argc:    # of arguments    */
 /* argv[]:  argument strings  */
 {
     REGISTER int  status  = 0;
 
-#if HANDLE_WINCH
+# if HANDLE_WINCH
     signal(SIGWINCH, winch_changed);
-#endif
-#if DJGPP_DOS
+# endif
+# if DJGPP_DOS
     signal(SIGINT, SIG_IGN);
-#endif
+# endif
 
     /* the room mechanism would deallocate undo info no failure....
      * its not set up yet, so make sure it doesn't try until the editor is
@@ -143,9 +162,9 @@ int main P2_(int, argc, char **, argv)
 
     /* Initialize the editor */
     eexitflag = FALSE;
-#if     !WINDOW_MSWIN
+# if     !WINDOW_MSWIN
     vtinit();                           /* Terminal */
-#endif
+# endif
 
     if ( eexitflag )
         goto abortrun;
@@ -154,17 +173,17 @@ int main P2_(int, argc, char **, argv)
     varinit();                  /* user variables */
     initchars();                /* character set definitions */
 
-#if MAGIC
+# if MAGIC
     mcdeltapat[0].mc_type = tapatledcm[0].mc_type = JMPTABLE;
     mcdeltapat[0].u.jmptable = &deltapat;
     tapatledcm[0].u.jmptable = &tapatled;
     mcdeltapat[1].mc_type = tapatledcm[1].mc_type = MCNIL;
-#endif
+# endif
 
     /* Process the command line and let the user edit */
-#if     VMS
+# if     VMS
     expandargs(&argc, &argv);           /* expand VMS wildcards.*/
-#endif
+# endif
     dcline(argc, argv, TRUE);
 
 edit:
@@ -182,20 +201,21 @@ abortrun:
 
     /* close things down */
     vttidy();
-#if CLEAN
+# if CLEAN
     clean();
-#endif
-#if ( SWITCH_KEEP_TMPFLS == FALSE )
+# endif
+# if ( SWITCH_KEEP_TMPFLS == FALSE )
     clntmpfls();
-#endif
+# endif
 
-#if CALLED
+# if CALLED
     return (status);
-#else
+# else
     exit(status);
     return (status);    /* Keep compiler happy. */
-#endif
+# endif
 }
+#endif
 
 
 #if     CLEAN
@@ -1250,15 +1270,12 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
 char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
 {
     char *mp;           /* ptr returned from malloc */
-    FILE *track;        /* malloc track file */
 
     mp = malloc(nbytes);
 
 # if     RAMTRCK
-    track = fopen("emacs.log", "a");
-    fprintf( track, "Allocating %u bytes at %u:%u\n", nbytes, FP_SEG(mp), FP_OFF(
-                 mp) );
-    fclose(track);
+    TRC(("Allocating %u bytes at %u:%u\n", nbytes, FP_SEG(mp),
+         FP_OFF(mp)));
 # endif
 
     if ( mp ) {
@@ -1283,11 +1300,7 @@ Erelease P1_(char *, mp /* chunk of RAM to release */)
 {
     unsigned *lp;       /* ptr to the long containing the block size */
 # if     RAMTRCK
-    FILE *track;        /* malloc track file */
-
-    track = fopen("emacs.log", "a");
-    fprintf( track, "Freeing %u:%u\n", FP_SEG(mp), FP_OFF(mp) );
-    fclose(track);
+    TRC(("Freeing %u:%u\n", FP_SEG(mp), FP_OFF(mp)));
 # endif
 
     if ( mp ) {
@@ -1311,7 +1324,6 @@ VOID dspram P0_() /* display the amount of RAM currently malloced */
 {
     char mbuf[20];
     char *sp;
-    FILE *track;        /* malloc track file */
 
     TTmove(term.t_nrow - 0, 70);
 #  if     COLOR
@@ -1324,11 +1336,9 @@ VOID dspram P0_() /* display the amount of RAM currently malloced */
         TTputc(*sp++);
     TTmove(term.t_nrow, 0);
     movecursor(term.t_nrow, 0);
-#  if     RAMTRCK & LOGFLG
-    track = fopen("emacs.log", "a");
-    fprintf(track, "Total allocation at %lu bytes\n", envram);
-    fprintf( track, "Stack space at %u bytes\n", stackavail() );
-    fclose(track);
+#  if RAMTRCK
+    TRC(("Total allocation at %lu bytes\n", envram));
+    TRC(("Stack space at %u bytes\n", stackavail()));
 #  endif
 }
 # endif /* RAMSHOW  */

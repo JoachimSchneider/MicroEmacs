@@ -870,7 +870,7 @@ int f_filter(f, n)
  * didn't work.  modified idea of bill benedetto by doug rady.  note the use of
  * sys($ITIME, ...)  instead of sys_itime()
  */
-char *PASCAL NEAR timeset()
+char * PASCAL NEAR timeset()
 {
     REGISTER char *sp;      /* temp string pointer */
     short int tvec[2];
@@ -1860,7 +1860,7 @@ char PASCAL NEAR *getnfile();
 
 /*  do a template directory search (for file name completion) */
 
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -1904,7 +1904,7 @@ char *fspec;    /* pattern to match */
     return ( getnfile() );
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     REGISTER int index;                 /* index into various strings */
 

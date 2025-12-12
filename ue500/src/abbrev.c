@@ -377,7 +377,7 @@ int PASCAL NEAR ab_insert P2_(char *, sym, CONST char *, expansion)
  * Look up and return the expansion of <sym>. Return a NULL if it is
  * not in the list
  */
-char *PASCAL NEAR ab_lookup P1_(CONST char *, sym)
+char * PASCAL NEAR ab_lookup P1_(CONST char *, sym)
 /* sym: Name of the symbol to look up */
 {
     ABBREV  *cur_node = NULL; /* ptr to look through list */
@@ -402,7 +402,7 @@ char *PASCAL NEAR ab_lookup P1_(CONST char *, sym)
  * if there is no match: In sym try matches starting from 0 to
  * STRLEN(sym) - 1.
  */
-char *PASCAL NEAR ab_taillookup P1_(CONST char *, sym)
+char * PASCAL NEAR ab_taillookup P1_(CONST char *, sym)
 /* sym: Name of the symbol to look up */
 {
     if ( ! sym && *sym )  {

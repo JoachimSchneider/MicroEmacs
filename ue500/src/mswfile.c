@@ -491,7 +491,7 @@ char rbuf[NFILEN];      /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL getffile(fspec)
+char * PASCAL getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -541,7 +541,7 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL getnfile()
+char * PASCAL getnfile()
 {
     REGISTER int index;                 /* index into various strings */
     REGISTER int point;                 /* index into other strings */
@@ -570,7 +570,7 @@ char rbuf[NFILEN];      /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL getffile(fspec)
+char * PASCAL getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -631,7 +631,7 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL getnfile()
+char * PASCAL getnfile()
 {
     REGISTER int index;                 /* index into various strings */
     REGISTER int point;                 /* index into other strings */
@@ -667,7 +667,7 @@ char *PASCAL getnfile()
     return (rbuf);
 }
 # else
-char *PASCAL getffile(fspec)
+char * PASCAL getffile(fspec)
 
 char *fspec;    /* file to match */
 
@@ -675,7 +675,7 @@ char *fspec;    /* file to match */
     return (NULL);
 }
 
-char *PASCAL getnfile()
+char * PASCAL getnfile()
 {
     return (NULL);
 }

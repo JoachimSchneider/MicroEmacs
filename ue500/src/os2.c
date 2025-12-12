@@ -393,7 +393,7 @@ char rbuf[NFILEN];      /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -446,7 +446,7 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     REGISTER int index;                 /* index into various strings */
     REGISTER int point;                 /* index into other strings */

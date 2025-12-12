@@ -588,12 +588,14 @@ int PASCAL NEAR strinc P2_(CONST char *, source, CONST char *, sub)
 unsigned int PASCAL NEAR getckey P1_(int, mflag)
 /* mflag: Going for a meta sequence?  */
 {
-    REGISTER unsigned int c;            /* character fetched */
+    REGISTER unsigned int c = 0;        /* character fetched */
     char tok[NSTRING];                  /* command incoming */
+
+    ZEROMEM(tok);
 
     /* check to see if we are executing a command line */
     if ( clexec ) {
-        macarg(tok);            /* get the next token */
+        macarg(tok, SIZEOF(tok));       /* get the next token */
 
         return ( stock(tok) );
     }
@@ -658,7 +660,7 @@ int PASCAL NEAR startup P1_(CONST char *, sfname)
  *                 all directories along PATH environment
  *                 directories in table from EPATH.H
  */
-CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
+CONST char * PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
 /* fname: Base file name to search for                  */
 /* hflag: Look in the HOME environment variable first?  */
 /* cflag: Use current directory?                        */
@@ -819,7 +821,7 @@ CONST char *PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
  * passed in. The result may be up to 17 characters long so `seq' should
  * be at least 18 characters long to avoid truncation.
  */
-char *PASCAL NEAR getecnam P3_(int , c, char *, seq, int, seqsiz)
+char * PASCAL NEAR getecnam P3_(int , c, char *, seq, int, seqsiz)
 /* c:   Sequence to translate           */
 /* seq: Destination string for sequence */
 {
@@ -923,7 +925,7 @@ KEYTAB *getbind P1_(int, c)
  * This function takes a ptr to KEYTAB entry and gets the name
  * associated with it
  */
-CONST char *PASCAL NEAR getfname P1_(KEYTAB *, key)
+CONST char * PASCAL NEAR getfname P1_(KEYTAB *, key)
 /* key: Key binding to return a name of */
 {
     REGISTER ue_fnc_T func;     /* ptr to the requested function */
@@ -983,7 +985,7 @@ ue_fnc_T fncmatch P1_(CONST char *, fname)
 
 /* NAMVAL:
  */
-CONST char *PASCAL NEAR namval P1_(int, index)
+CONST char * PASCAL NEAR namval P1_(int, index)
 /* index: Index of name to fetch out of the name table  */
 {
     return (names[index].n_name);
@@ -1091,7 +1093,7 @@ unsigned int PASCAL NEAR stock P1_(CONST char *, keyname)
  *
  * String key name to binding name....
  */
-CONST char *PASCAL NEAR transbind P1_(CONST char *, skey)
+CONST char * PASCAL NEAR transbind P1_(CONST char *, skey)
 /* skey:  Name of key to get binding for  */
 {
     CONST char  *bindname;
@@ -1111,27 +1113,16 @@ int PASCAL NEAR execkey P3_(KEYTAB *, key, int , f, int, n)
 /* key:   Key to execute          */
 /* f, n:  Arguments to C function */
 {
-    REGISTER int status;        /* error return */
-#if     LOGFLG
-    FILE *fp;                           /* file handle for log file */
-    char outseq[32];
-#endif
+    REGISTER int  status;       /* error return */
+    char          outseq[32];
+
+    ZEROMEM(outseq);
 
     if ( key->k_type == BINDFNC ) {
-
-#if     LOGFLG
         /* append the current command to the log file */
-        getecnam(key->k_code, &outseq, SIZEOF(outseq));
-        fp = fopen("emacs.log", "a");
-        fprintf(fp,
-                "<[%s] %s %s %d>\n",
-                outseq,
-                getfname(key),
-                f == TRUE ? "TRUE" : "FALSE",
-                n);
-        fclose(fp);
-#endif
-
+        getecnam(key->k_code, &outseq[0], SIZEOF(outseq));
+        MTC(("<[%s] %s %s %d>", outseq, getfname(key),
+             f == TRUE ? "TRUE" : "FALSE", n));
         undo_insert(OP_CMND, 1, obj);
 
         return ( ( *(key->k_ptr.fp) )(f, n) );

@@ -376,7 +376,7 @@ f_filter(f, n)
 
 /* return a system dependant string with the current time */
 
-char *PASCAL NEAR timeset()
+char * PASCAL NEAR timeset()
 {
     REGISTER char *sp;          /* temp string pointer */
     char buf[16];               /* time data buffer */

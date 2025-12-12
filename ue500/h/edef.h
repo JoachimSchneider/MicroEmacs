@@ -43,7 +43,7 @@ COMMON NOSHARE TERM term; /* Terminal information.    */
 /* initialized global definitions */
 
 DCLDEF NOSHARE int            fillcol             INIT_(72);            /* Current fill column              */
-DCLDEF NOSHARE char           *execstr            INIT_(NULL);          /* pointer to string to execute     */
+DCLDEF NOSHARE char           execstr[NSTRING]    INIT_("");            /* string buffer to execute         */
 DCLDEF NOSHARE char           *termreset          INIT_(NULL);          /* terminal reset string kjc        */
 DCLDEF NOSHARE char           golabel[NPAT]       INIT_("");            /* current line to go to            */
 DCLDEF NOSHARE char           paralead[NPAT]      INIT_(" \t");         /* paragraph leadin chars           */
@@ -182,7 +182,8 @@ DCLDEF NOSHARE KILL           *kbufh[NRING];      /* kill buffer header pointer 
 DCLDEF NOSHARE int            kskip[NRING];       /* # of bytes to skip in 1st kill chunk   */
 DCLDEF NOSHARE short          *kbdptr;            /* current position in keyboard buf       */
 DCLDEF NOSHARE char           lterm[NSTRING];     /* line terminators on file write         */
-DCLDEF NOSHARE unsigned char  wordlist[256];      /* characters considered "in words"       */
+DCLDEF NOSHARE unsigned char  wordlist[UMC_UCHAR_MAX + 1];
+                                                  /* characters considered "in words"       */
 DCLDEF NOSHARE int            kused[NRING];       /* # of bytes used in last kill chunk     */
 DCLDEF NOSHARE int            oquote;             /* open quote variable                    */
 DCLDEF NOSHARE int            cquote;             /* close quote variable                   */

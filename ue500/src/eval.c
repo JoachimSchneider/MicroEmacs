@@ -23,7 +23,35 @@
 #include "evar.inc"
 
 
-#define RETURN  STATIC_STR_RET_RETURN
+/*====================================================================*/
+/* Functions which modify the global `execstr' variable:              */
+/*====================================================================*/
+/* These are associated with commands, see 'efunc.inc'                */
+/* - setvar                                                           */
+/* - global_var                                                       */
+/* - local_var                                                        */
+/* - dispvar                                                          */
+/* This one needs to look ahed in the command line if it gets an      */
+/* indirect variable reference vie `&ind <var>':                      */
+/* - findvar                                                          */
+/*====================================================================*/
+
+
+#if ( 0 )
+# define RETURN(x)  do {              \
+    CONST char *res_  = (x);          \
+                                      \
+    MTC(("RETURN(%s)", STR(res_)));   \
+                                      \
+    STATIC_STR_RET_RETURN(res_);      \
+  } while ( 0 )
+#else
+# define RETURN(x)  do {              \
+    CONST char *res_  = (x);          \
+                                      \
+    STATIC_STR_RET_RETURN(res_);      \
+  } while ( 0 )
+#endif
 
 
 /* UV_INIT:
@@ -33,9 +61,9 @@
 VOID PASCAL NEAR uv_init P1_(UTABLE *, ut)
 /* ut:  User variable table to initialize */
 {
-    REGISTER int i;
+    REGISTER int  i = 0;
 
-    for ( i=0; i < ut->size; i++ ) {
+    for ( i = 0; i < ut->size; i++ )  {
         ut->uv[i].u_name[0] = 0;
         ut->uv[i].u_value = (char *)NULL;
     }
@@ -65,12 +93,14 @@ VOID PASCAL NEAR varinit P0_()
 VOID PASCAL NEAR uv_clean P1_(UTABLE *, ut)
 /* ut:  Ptr to table to clear */
 {
-    REGISTER int i;
+    REGISTER int  i = 0;
 
     /* now clear the entries in this one */
-    for ( i=0; i < ut->size; i++ )
-        if ( ut->uv[i].u_name[0] != 0 )
+    for ( i = 0; i < ut->size; i++ )  {
+        if ( ut->uv[i].u_name[0] != 0 ) {
             CLROOM(ut->uv[i].u_value);
+        }
+    }
 }
 
 /* VARCLEAN:
@@ -81,8 +111,9 @@ VOID PASCAL NEAR varclean P1_(UTABLE *, ut)
 /* ut:  Table to clear  */
 {
     /* first clean all the ones under this one */
-    if ( ut->next != (UTABLE *)NULL )
+    if ( ut->next != (UTABLE *)NULL ) {
         varclean(ut->next);
+    }
 
     /* clear the contents of this table */
     uv_clean(ut);
@@ -97,7 +128,8 @@ VOID PASCAL NEAR varclean P1_(UTABLE *, ut)
  *
  * Function returns a static result string: Copy immediately!
  */
-CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to evaluate */)
+CONST char * PASCAL NEAR gtfun P1_(CONST char *, fname)
+/* fname: Name of function to evaluate  */
 {
     STATIC_STR_RET_PROLOG();
 
@@ -135,257 +167,262 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
 
     /* if needed, retrieve the first argument */
     if ( funcs[fnum].f_type >= MONAMIC ) {
-        if ( macarg(arg1) != TRUE )
-            RETURN ( errorm );
+        if ( macarg(arg1, SIZEOF(arg1)) != TRUE ) RETURN ( errorm );
 
+        MTC(("`%s': arg1 = (%s)", fname, arg1));
         /* if needed, retrieve the second argument */
         if ( funcs[fnum].f_type >= DYNAMIC ) {
-            if ( macarg(arg2) != TRUE )
-                RETURN ( errorm );
+            if ( macarg(arg2, SIZEOF(arg2)) != TRUE ) RETURN ( errorm );
 
+            MTC(("`%s': arg2 = (%s)", fname, arg2));
             /* if needed, retrieve the third argument */
-            if ( funcs[fnum].f_type >= TRINAMIC )
-                if ( macarg(arg3) != TRUE )
-                    RETURN ( errorm );
+            if ( funcs[fnum].f_type >= TRINAMIC ) {
+                if ( macarg(arg3, SIZEOF(arg3)) != TRUE ) RETURN ( errorm );
 
+                MTC(("`%s': arg3 = (%s)", fname, arg3));
+            }
         }
     }
 
     /* and now evaluate it! */
     switch ( fnum ) {
-    case UFABBREV:
-        RETURN ( fixnull( ab_lookup(arg1) ) );
+        case UFABBREV:
+            RETURN ( fixnull( ab_lookup(arg1) ) );
 
-    case UFABS:
-        RETURN ( int_asc( absv( asc_int(arg1) ) ) );
+        case UFABS:
+            RETURN ( int_asc( absv( asc_int(arg1) ) ) );
 
-    case UFADD:
-        RETURN ( int_asc( asc_int(arg1) + asc_int(arg2) ) );
+        case UFADD:
+            RETURN ( int_asc( asc_int(arg1) + asc_int(arg2) ) );
 
-    case UFAND:
-        RETURN ( ltos( stol(arg1) && stol(arg2) ) );
+        case UFAND:
+            RETURN ( ltos( stol(arg1) && stol(arg2) ) );
 
-    case UFASCII:
-        RETURN ( int_asc( (int)arg1[0] ) );
+        case UFASCII:
+            RETURN ( int_asc( (int)arg1[0] ) );
 
-    case UFBAND:
-        RETURN ( int_asc( asc_int(arg1) & asc_int(arg2) ) );
+        case UFBAND:
+            RETURN ( int_asc( asc_int(arg1) & asc_int(arg2) ) );
 
-    case UFBIND:
-        RETURN ( transbind(arg1) );
+        case UFBIND:
+            RETURN ( transbind(arg1) );
 
-    case UFBNOT:
-        RETURN ( int_asc( ~asc_int(arg1) ) );
+        case UFBNOT:
+            RETURN ( int_asc( ~asc_int(arg1) ) );
 
-    case UFBOR:
-        RETURN ( int_asc( asc_int(arg1) | asc_int(arg2) ) );
+        case UFBOR:
+            RETURN ( int_asc( asc_int(arg1) | asc_int(arg2) ) );
 
-    case UFBXOR:
-        RETURN ( int_asc( asc_int(arg1) ^ asc_int(arg2) ) );
+        case UFBXOR:
+            RETURN ( int_asc( asc_int(arg1) ^ asc_int(arg2) ) );
 
-    case UFCALL:                /* construct buffer name to execute */
-        result[0] = '[';
-        xstrlcpy(&result[1], arg1, SIZEOF(result) - 2);
-        /* `-2' instead `-1' above to have room for ']' in any case */
-        XSTRCAT(result, "]");
+        case UFCALL:                /* construct buffer name to execute */
+            result[0] = '[';
+            xstrlcpy(&result[1], arg1, SIZEOF(result) - 2);
+            /* `-2' instead `-1' above to have room for ']' in any case */
+            BUFCAT(result, "]");
 
-        /* find it, return ERROR if it does not exist */
-        bp = bfind(result, FALSE, 0);
-        if ( bp == NULL )
-            RETURN ( errorm );
+            /* find it, return ERROR if it does not exist */
+            bp = bfind(result, FALSE, 0);
+            if ( bp == NULL ) {
+                TRC(("Command `%s' not found.", arg1));
 
-        /* execute it and return whats in the $rval */
-        dobuf(bp);
+                RETURN ( errorm );
+            }
 
-        RETURN ( fixnull(rval) );
+            /* execute it and return whats in the $rval */
+            dobuf(bp);
 
-    case UFCAT:
-        XSTRCPY(result, arg1);
-        XSTRCAT(result, arg2);
-        /***TODO: The original code did a `result[NSTRING - 1] = 0;' at
-         ***      this place effectively cutting result to NSTRING - 1.
-         ***      This is inconsistent with all other uses inside of
-         ***      this function.
-         ***/
+            RETURN ( fixnull(rval) );
 
-        RETURN ( result );
+        case UFCAT:
+            XSTRCPY(result, arg1);
+            XSTRCAT(result, arg2);
+            /*** TODO: The original code did a `result[NSTRING - 1] = 0;' at
+             ***       this place effectively cutting result to NSTRING - 1.
+             ***       This is inconsistent with all other uses inside of
+             ***       this function.
+             ***/
 
-    case UFCHR:
-        result[0] = asc_int(arg1);
-        result[1] = 0;
+            RETURN ( result );
 
-        RETURN ( result );
+        case UFCHR:
+            result[0] = asc_int(arg1);
+            result[1] = 0;
 
-    case UFDIV:
-        if ( ( arg = asc_int(arg2) ) != 0 )
-            RETURN ( int_asc(asc_int(arg1) / arg) );
-        else {
-            mlwrite(TEXT245);
+            RETURN ( result );
 
+        case UFDIV:
+            if ( ( arg = asc_int(arg2) ) != 0 ) {
+                RETURN ( int_asc(asc_int(arg1) / arg) );
+            } else                              {
+                mlwrite(TEXT245);
 /*                      "%%Division by Zero is illegal" */
-            RETURN ( errorm );
-        }
+                RETURN ( errorm );
+            }
 
-    case UFENV:
+        case UFENV:
 #if     ENVFUNC
-        RETURN ( fixnull( getenv(arg1) ) );
+            RETURN ( fixnull( getenv(arg1) ) );
 #else
-        RETURN ( "" );
+            RETURN ( "" );
 #endif
 
-    case UFEQUAL:
-        RETURN ( ltos( asc_int(arg1) == asc_int(arg2) ) );
+        case UFEQUAL:
+            RETURN ( ltos( asc_int(arg1) == asc_int(arg2) ) );
 
-    case UFEXIST:
-        RETURN ( ltos( fexist(arg1) ) );
+        case UFEXIST:
+            RETURN ( ltos( fexist(arg1) ) );
 
-    case UFFIND:
-        RETURN ( fixnull( flook(arg1, TRUE, TRUE) ) );
+        case UFFIND:
+            RETURN ( fixnull( flook(arg1, TRUE, TRUE) ) );
 
-    case UFGREATER:
-        RETURN ( ltos( asc_int(arg1) > asc_int(arg2) ) );
+        case UFGREATER:
+            RETURN ( ltos( asc_int(arg1) > asc_int(arg2) ) );
 
-    case UFGROUP:
-        arg = asc_int(arg1);
+        case UFGROUP:
+            arg = asc_int(arg1);
 #if     MAGIC
-        if ( arg < 0 || arg >= MAXGROUPS )
-            RETURN ( bytecopy(result, errorm, NSTRING * 2 - 1) );
+            if ( arg < 0 || arg >= MAXGROUPS )  {
+                RETURN ( bytecopy(result, errorm, NSTRING * 2 - 1) );
+            }
 
-        RETURN ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2 - 1) );
+            RETURN ( bytecopy(result, fixnull(grpmatch[arg]), NSTRING * 2 - 1) );
 #else
-        if ( arg == 0 )
-            bytecopy(result, patmatch, NSTRING * 2 - 1);
-        else
-            RETURN ( bytecopy(result, errorm, NSTRING * 2 - 1) );
+            if ( arg == 0 ) {
+                bytecopy(result, patmatch, NSTRING * 2 - 1);
+            } else          {
+                RETURN ( bytecopy(result, errorm, NSTRING * 2 - 1) );
+            }
 
-        RETURN ( result );
+            RETURN ( result );
 #endif
 
-    case UFGTCMD:
-        RETURN ( getecnam(getcmd(), result, SIZEOF(result)) );
+        case UFGTCMD:
+            RETURN ( getecnam(getcmd(), result, SIZEOF(result)) );
 
-    case UFGTKEY:
-        result[0] = tgetc();
-        result[1] = 0;
+        case UFGTKEY:
+            result[0] = tgetc();
+            result[1] = 0;
 
-        RETURN ( result );
+            RETURN ( result );
 
-    case UFIND:
-        RETURN ( XSTRCPY( result, fixnull( getval(arg1) ) ) );
+        case UFIND:
+            RETURN ( XSTRCPY( result, fixnull( getval(arg1) ) ) );
 
-    case UFISNUM:
-        RETURN ( ltos( is_num(arg1) ) );
+        case UFISNUM:
+            RETURN ( ltos( is_num(arg1) ) );
 
-    case UFLEFT:
-        /***TODO: OVERWRITE POSSIBLE***/
-        RETURN ( bytecopy( result, arg1, asc_int(arg2) ) );
+        case UFLEFT:
+            /*** TODO: OVERWRITE POSSIBLE ***/
+            RETURN ( bytecopy( result, arg1, asc_int(arg2) ) );
 
-    case UFLENGTH:
-        RETURN ( int_asc( STRLEN(arg1) ) );
+        case UFLENGTH:
+            RETURN ( int_asc( STRLEN(arg1) ) );
 
-    case UFLESS:
-        RETURN ( ltos( asc_int(arg1) < asc_int(arg2) ) );
+        case UFLESS:
+            RETURN ( ltos( asc_int(arg1) < asc_int(arg2) ) );
 
-    case UFLOWER:
-        RETURN ( mklower(arg1) );
+        case UFLOWER:
+            RETURN ( mklower(arg1) );
 
-    case UFMID:
-        arg = asc_int(arg2);
-        if ( arg > STRLEN(arg1) )
-            RETURN ( XSTRCPY(result, "") );
+        case UFMID:
+            arg = asc_int(arg2);
+            if ( arg > STRLEN(arg1) ) RETURN ( XSTRCPY(result, "") );
 
-        /***TODO: OVERWRITE POSSIBLE***/
-        RETURN ( bytecopy( result, &arg1[arg-1], asc_int(arg3) ) );
+            /*** TODO: OVERWRITE POSSIBLE ***/
+            RETURN ( bytecopy( result, &arg1[arg-1], asc_int(arg3) ) );
 
-    case UFMKCOL:
-        if ( ( arg = asc_int(arg1) ) < 0 || arg >= NMARKS ||
-             curwp->w_markp[arg] == NULL ) {
-            mlwrite(TEXT11, arg);
+        case UFMKCOL:
+            if ( ( arg = asc_int(arg1) ) < 0 || arg >= NMARKS ||
+                 curwp->w_markp[arg] == NULL ) {
+                mlwrite(TEXT11, arg);
 
-            RETURN ( int_asc(-1) );
-        }
+                RETURN ( int_asc(-1) );
+            }
 
-        RETURN ( int_asc( findcol(curwp->w_markp[arg], curwp->w_marko[arg]) ) );
+            RETURN ( int_asc( findcol(curwp->w_markp[arg], curwp->w_marko[arg]) ) );
 
-    case UFMKLINE:
-        if ( ( arg = asc_int(arg1) ) < 0 || arg >= NMARKS ||
-             curwp->w_markp[arg] == NULL ) {
-            mlwrite(TEXT11, arg);
+        case UFMKLINE:
+            if ( ( arg = asc_int(arg1) ) < 0 || arg >= NMARKS ||
+                 curwp->w_markp[arg] == NULL ) {
+                mlwrite(TEXT11, arg);
 
-            RETURN ( int_asc(0) );
-        }
+                RETURN ( int_asc(0) );
+            }
 
-        RETURN ( long_asc( getlinenum(curbp, curwp->w_markp[arg]) ) );
+            RETURN ( long_asc( getlinenum(curbp, curwp->w_markp[arg]) ) );
 
-    case UFMOD:
-        if ( ( arg = asc_int(arg2) ) != 0 )
-            RETURN ( int_asc(asc_int(arg1) % arg) );
-        else {
-            mlwrite(TEXT245);
-
+        case UFMOD:
+            if ( ( arg = asc_int(arg2) ) != 0 ) {
+                RETURN ( int_asc(asc_int(arg1) % arg) );
+            } else                              {
+                mlwrite(TEXT245);
 /*                      "%%Division by Zero is illegal" */
-            RETURN ( errorm );
+                RETURN ( errorm );
+            }
+
+        case UFNEG:
+            RETURN ( int_asc( -asc_int(arg1) ) );
+
+        case UFNOT:
+            RETURN ( ltos(stol(arg1) == FALSE) );
+
+        case UFOR:
+            RETURN ( ltos( stol(arg1) || stol(arg2) ) );
+
+        case UFREVERSE:
+            RETURN ( strrev( bytecopy(result, arg1, NSTRING * 2 - 1) ) );
+
+        case UFRIGHT:
+            arg = asc_int(arg2);
+            if ( arg > STRLEN(arg1) ) {
+                arg = STRLEN(arg1);
+            }
+
+            RETURN ( XSTRCPY(result, &arg1[STRLEN(arg1) - arg]) );
+
+        case UFRND:
+            RETURN ( int_asc( (int)( ernd()
+                                      % (long)absv( asc_int(arg1) ) )
+                                        + 1L ) );
+
+        case UFSEQUAL:
+            RETURN ( ltos(strcmp(arg1, arg2) == 0) );
+
+        case UFSGREAT:
+            RETURN ( ltos(strcmp(arg1, arg2) > 0) );
+
+        case UFSINDEX:
+            RETURN ( int_asc( sindex(arg1, arg2) ) );
+
+        case UFSLESS:
+            RETURN ( ltos(strcmp(arg1, arg2) < 0) );
+
+        case UFSLOWER:
+            RETURN ( (setlower(arg1, arg2), "") );
+
+        case UFSUB:
+            RETURN ( int_asc( asc_int(arg1) - asc_int(arg2) ) );
+
+        case UFSUPPER:
+            RETURN ( (setupper(arg1, arg2), "") );
+
+        case UFTIMES:
+            RETURN ( int_asc( asc_int(arg1) * asc_int(arg2) ) );
+
+        case UFTRIM:
+            RETURN ( trimstr(arg1) );
+
+        case UFTRUTH:
+            RETURN ( ltos(asc_int(arg1) == 42) );
+
+        case UFUPPER:
+            RETURN ( mkupper(arg1) );
+
+        case UFXLATE:
+            RETURN ( xlat(arg1, arg2, arg3) );
         }
-
-    case UFNEG:
-        RETURN ( int_asc( -asc_int(arg1) ) );
-
-    case UFNOT:
-        RETURN ( ltos(stol(arg1) == FALSE) );
-
-    case UFOR:
-        RETURN ( ltos( stol(arg1) || stol(arg2) ) );
-
-    case UFREVERSE:
-        RETURN ( strrev( bytecopy(result, arg1, NSTRING * 2 - 1) ) );
-
-    case UFRIGHT:
-        arg = asc_int(arg2);
-        if ( arg > STRLEN(arg1) )
-            arg = STRLEN(arg1);
-
-        RETURN ( XSTRCPY(result, &arg1[STRLEN(arg1) - arg]) );
-
-    case UFRND:
-        RETURN ( int_asc( (int)( ernd() % (long)absv( asc_int(arg1) ) ) +
-                          1L ) );
-
-    case UFSEQUAL:
-        RETURN ( ltos(strcmp(arg1, arg2) == 0) );
-
-    case UFSGREAT:
-        RETURN ( ltos(strcmp(arg1, arg2) > 0) );
-
-    case UFSINDEX:
-        RETURN ( int_asc( sindex(arg1, arg2) ) );
-
-    case UFSLESS:
-        RETURN ( ltos(strcmp(arg1, arg2) < 0) );
-
-    case UFSLOWER:
-        RETURN ( (setlower(arg1, arg2), "") );
-
-    case UFSUB:
-        RETURN ( int_asc( asc_int(arg1) - asc_int(arg2) ) );
-
-    case UFSUPPER:
-        RETURN ( (setupper(arg1, arg2), "") );
-
-    case UFTIMES:
-        RETURN ( int_asc( asc_int(arg1) * asc_int(arg2) ) );
-
-    case UFTRIM:
-        RETURN ( trimstr(arg1) );
-
-    case UFTRUTH:
-        RETURN ( ltos(asc_int(arg1) == 42) );
-
-    case UFUPPER:
-        RETURN ( mkupper(arg1) );
-
-    case UFXLATE:
-        RETURN ( xlat(arg1, arg2, arg3) );
-    }
 
     meexit(-11);        /* never should get here */
 
@@ -397,7 +434,7 @@ CONST char *PASCAL NEAR gtfun P1_(CONST char *, fname /* name of function to eva
  *
  * Look up a user var's value
  */
-CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
+CONST char * PASCAL NEAR gtusr P1_(CONST char *, vname)
 /* vname: Name of user variable to fetch  */
 {
     char            *vnameL =  NULL;
@@ -407,8 +444,9 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
 
     vnameL  = xstrdup(vname);
     /* limit comparisons to significant length */
-    if ( STRLEN(vnameL) >= NVSIZE )     /* "%" counts, but is not passed */
+    if ( STRLEN(vnameL) >= NVSIZE ) { /* "%" counts, but is not passed */
         vnameL[NVSIZE] = '\0';
+    }
 
     /* scan through each user variable table starting with the most local and
      * going to the global table */
@@ -417,18 +455,20 @@ CONST char *PASCAL NEAR gtusr P1_(CONST char *, vname)
         /* scan this table looking for the user var name */
         for ( vnum = 0; vnum < ut->size; vnum++ ) {
             /* out of entries? */
-            if ( ut->uv[vnum].u_name[0] == 0 )
+            if ( ut->uv[vnum].u_name[0] == 0 )  {
                 goto next_ut;
+            }
 
             /* is this the one? */
             if ( strcmp(vnameL, ut->uv[vnum].u_name) == 0 ) {
                 CLROOM(vnameL);
                 /* return its value..... */
                 vptr = ut->uv[vnum].u_value;
-                if ( vptr )
+                if ( vptr ) {
                     return (vptr);
-                else
+                } else      {
                     return (errorm);
+                }
             }
         }
 
@@ -444,29 +484,33 @@ next_ut:
 
 /* FUNVAL:
  */
-CONST char *PASCAL NEAR funval P1_(int, i)
+CONST char * PASCAL NEAR funval P1_(int, i)
 {
     return (funcs[i].f_name);
 }
 
 /* ENVVAL:
  */
-CONST char *PASCAL NEAR envval P1_(int, i)
+CONST char * PASCAL NEAR envval P1_(int, i)
 {
     return (envars[i]);
 }
 
 /* BINARY:
  */
-int PASCAL NEAR binary P4_(CONST char *, key, ue_tvfetch_T, tval, int, tlength, int, klength)
+int PASCAL NEAR binary P4_(CONST char *,  key,
+                           ue_tvfetch_T,  tval,
+                           int,           tlength,
+                           int,           klength)
 /* key:     Key string to look for                    */
 /* tval:    Ptr to function to fetch table value with */
 /* tlength: Length of table to search                 */
 /* klength: Maximum length of string to compare       */
 {
-    int l, u;           /* lower and upper limits of binary search */
-    int i;              /* current search index */
-    int cresult;        /* result of comparison */
+    int l       = 0;    /* lower limit of binary search */
+    int u       = 0;    /* upper limit of binary search */
+    int i       = 0;    /* current search index         */
+    int cresult = 0;    /* result of comparison         */
 
     /* set current search limit as entire list */
     l = 0;
@@ -478,13 +522,15 @@ int PASCAL NEAR binary P4_(CONST char *, key, ue_tvfetch_T, tval, int, tlength, 
 
         /* do the comparison */
         cresult = strncmp(key, (*tval)(i), klength);
-        if ( cresult == 0 )
+        if ( cresult == 0 ) {
             return (i);
+        }
 
-        if ( cresult < 0 )
+        if ( cresult < 0 )  {
             u = i - 1;
-        else
+        } else              {
             l = i + 1;
+        }
     }
 
     return (-1);
@@ -496,7 +542,7 @@ int PASCAL NEAR binary P4_(CONST char *, key, ue_tvfetch_T, tval, int, tlength, 
  *
  * Function returns a static result string: Copy immediately!
  */
-CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
+CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
 /* vname: Name of environment variable to retrieve  */
 {
     STATIC_STR_RET_PROLOG();
@@ -513,306 +559,309 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
     vnum = binary(vname, envval, NELEM(envars), NVSIZE);
 
     /* return errorm on a bad reference */
-    if ( vnum == -1 )
+    if ( vnum == -1 ) {
         RETURN ( errorm );
+    }
 
     /* otherwise, fetch the appropriate value */
     switch ( vnum ) {
-    case EVABBELL:
-        RETURN ( ltos(ab_bell) );
+        case EVABBELL:
+            RETURN ( ltos(ab_bell) );
 
-    case EVABCAP:
-        RETURN ( ltos(ab_cap) );
+        case EVABCAP:
+            RETURN ( ltos(ab_cap) );
 
-    case EVABFULL:
-        RETURN ( ltos(ab_full) );
+        case EVABFULL:
+            RETURN ( ltos(ab_full) );
 
-    case EVABQUICK:
-        RETURN ( ltos(ab_quick) );
+        case EVABQUICK:
+            RETURN ( ltos(ab_quick) );
 
-    case EVACOUNT:
-        RETURN ( int_asc(gacount) );
+        case EVACOUNT:
+            RETURN ( int_asc(gacount) );
 
-    case EVASAVE:
-        RETURN ( int_asc(gasave) );
+        case EVASAVE:
+            RETURN ( int_asc(gasave) );
 
-    case EVBUFHOOK:
-        RETURN ( fixnull(getfname(&bufhook)) );
+        case EVBUFHOOK:
+            RETURN ( fixnull(getfname(&bufhook)) );
 
-    case EVCBFLAGS:
-        RETURN ( int_asc(curbp->b_flag) );
+        case EVCBFLAGS:
+            RETURN ( int_asc(curbp->b_flag) );
 
-    case EVCBUFNAME:
-        RETURN ( curbp->b_bname );
+        case EVCBUFNAME:
+            RETURN ( curbp->b_bname );
 
-    case EVCFNAME:
-        RETURN ( curbp->b_fname );
+        case EVCFNAME:
+            RETURN ( curbp->b_fname );
 
-    case EVCMDHK:
-        RETURN ( fixnull( getfname(&cmdhook) ) );
+        case EVCMDHK:
+            RETURN ( fixnull( getfname(&cmdhook) ) );
 
-    case EVCMODE:
-        RETURN ( int_asc(curbp->b_mode) );
+        case EVCMODE:
+            RETURN ( int_asc(curbp->b_mode) );
 
-    case EVCQUOTE:
-        RETURN ( int_asc(cquote) );
+        case EVCQUOTE:
+            RETURN ( int_asc(cquote) );
 
-    case EVCURCHAR:
-        RETURN ( get_lused(curwp->w_dotp) ==
-                 get_w_doto(curwp) ? int_asc('\r') :int_asc( lgetc(curwp->w_dotp,
-                                                               get_w_doto(curwp)) ) );
+        case EVCURCHAR:
+            RETURN ( get_lused(curwp->w_dotp) == get_w_doto(curwp) ?
+                        int_asc('\r')
+                            :
+                        int_asc( lgetc(curwp->w_dotp,
+                                       get_w_doto(curwp)) ) );
 
-    case EVCURCOL:
-        RETURN ( int_asc(getccol(FALSE)) );
+        case EVCURCOL:
+            RETURN ( int_asc(getccol(FALSE)) );
 
-    case EVCURLINE:
-        RETURN ( long_asc(getlinenum(curbp, curwp->w_dotp)) );
+        case EVCURLINE:
+            RETURN ( long_asc(getlinenum(curbp, curwp->w_dotp)) );
 
-    case EVCURWIDTH:
-        RETURN ( int_asc(term.t_ncol) );
+        case EVCURWIDTH:
+            RETURN ( int_asc(term.t_ncol) );
 
-    case EVCURWIND:
-        RETURN ( int_asc(getcwnum()) );
+        case EVCURWIND:
+            RETURN ( int_asc(getcwnum()) );
 
-    case EVCWLINE:
-        RETURN ( int_asc(getwpos()) );
+        case EVCWLINE:
+            RETURN ( int_asc(getwpos()) );
 
-    case EVDEBUG:
-        RETURN ( ltos(macbug) );
+        case EVDEBUG:
+            RETURN ( ltos(macbug) );
 
-    case EVDESKCLR:
-        RETURN ( cname[deskcolor] );
+        case EVDESKCLR:
+            RETURN ( cname[deskcolor] );
 
-    case EVDIAGFLAG:
-        RETURN ( ltos(diagflag) );
+        case EVDIAGFLAG:
+            RETURN ( ltos(diagflag) );
 
-    case EVDISCMD:
-        RETURN ( ltos(discmd) );
+        case EVDISCMD:
+            RETURN ( ltos(discmd) );
 
-    case EVDISINP:
-        RETURN ( ltos(disinp) );
+        case EVDISINP:
+            RETURN ( ltos(disinp) );
 
-    case EVDISPHIGH:
-        RETURN ( ltos(disphigh) );
+        case EVDISPHIGH:
+            RETURN ( ltos(disphigh) );
 
-    case EVDISPUNDO:
-        RETURN ( ltos(dispundo) );
+        case EVDISPUNDO:
+            RETURN ( ltos(dispundo) );
 
-    case EVEXBHOOK:
-        RETURN ( fixnull(getfname(&exbhook)) );
+        case EVEXBHOOK:
+            RETURN ( fixnull(getfname(&exbhook)) );
 
-    case EVEXITHOOK:
-        RETURN ( fixnull(getfname(&exithook)) );
+        case EVEXITHOOK:
+            RETURN ( fixnull(getfname(&exithook)) );
 
-    case EVFCOL:
-        RETURN ( int_asc(curwp->w_fcol) );
+        case EVFCOL:
+            RETURN ( int_asc(curwp->w_fcol) );
 
-    case EVFILLCOL:
-        RETURN ( int_asc(fillcol) );
+        case EVFILLCOL:
+            RETURN ( int_asc(fillcol) );
 
-    case EVFLICKER:
-        RETURN ( ltos(flickcode) );
+        case EVFLICKER:
+            RETURN ( ltos(flickcode) );
 
-    case EVFMTLEAD:
-        RETURN ( fmtlead );
+        case EVFMTLEAD:
+            RETURN ( fmtlead );
 
-    case EVGFLAGS:
-        RETURN ( int_asc(gflags) );
+        case EVGFLAGS:
+            RETURN ( int_asc(gflags) );
 
-    case EVGMODE:
-        RETURN ( int_asc(gmode) );
+        case EVGMODE:
+            RETURN ( int_asc(gmode) );
 
-    case EVHARDTAB:
-        RETURN ( int_asc(tabsize) );
+        case EVHARDTAB:
+            RETURN ( int_asc(tabsize) );
 
-    case EVHILITE:
-        RETURN ( int_asc(hilite) );
+        case EVHILITE:
+            RETURN ( int_asc(hilite) );
 
-    case EVHJUMP:
-        RETURN ( int_asc(hjump) );
+        case EVHJUMP:
+            RETURN ( int_asc(hjump) );
 
-    case EVHSCRLBAR:
-        RETURN ( ltos(hscrollbar) );
+        case EVHSCRLBAR:
+            RETURN ( ltos(hscrollbar) );
 
-    case EVHSCROLL:
-        RETURN ( ltos(hscroll) );
+        case EVHSCROLL:
+            RETURN ( ltos(hscroll) );
 
-    case EVISTERM:
-        RETURN ( getecnam(isterm, result, SIZEOF(result)) );
+        case EVISTERM:
+            RETURN ( getecnam(isterm, result, SIZEOF(result)) );
 
-    case EVKILL:
-        RETURN ( getkill() );
+        case EVKILL:
+            RETURN ( getkill() );
 
-    case EVLANG:
-        RETURN ( LANGUAGE );
+        case EVLANG:
+            RETURN ( LANGUAGE );
 
-    case EVLASTKEY:
-        RETURN ( int_asc(lastkey) );
+        case EVLASTKEY:
+            RETURN ( int_asc(lastkey) );
 
-    case EVLASTMESG:
-        RETURN ( lastmesg );
+        case EVLASTMESG:
+            RETURN ( lastmesg );
 
-    case EVLINE:
-        RETURN ( getctext(result) );
+        case EVLINE:
+            RETURN ( getctext(result) );
 
-    case EVLTERM:
-        RETURN ( lterm );
+        case EVLTERM:
+            RETURN ( lterm );
 
-    case EVLWIDTH:
-        RETURN ( int_asc(get_lused(curwp->w_dotp)) );
+        case EVLWIDTH:
+            RETURN ( int_asc(get_lused(curwp->w_dotp)) );
 
-    case EVMATCH:
-        RETURN ( fixnull(patmatch) );
+        case EVMATCH:
+            RETURN ( fixnull(patmatch) );
 
-    case EVMMOVE:
-        RETURN ( int_asc(mouse_move) );
+        case EVMMOVE:
+            RETURN ( int_asc(mouse_move) );
 
-    case EVMODEFLAG:
-        RETURN ( ltos(modeflag) );
+        case EVMODEFLAG:
+            RETURN ( ltos(modeflag) );
 
-    case EVMSFLAG:
-        RETURN ( ltos(mouseflag) );
+        case EVMSFLAG:
+            RETURN ( ltos(mouseflag) );
 
-    case EVNEWSCRN:
-        RETURN ( ltos(newscreenflag) );
+        case EVNEWSCRN:
+            RETURN ( ltos(newscreenflag) );
 
-    case EVNUMWIND:
-        RETURN ( int_asc( gettwnum() ) );
+        case EVNUMWIND:
+            RETURN ( int_asc( gettwnum() ) );
 
-    case EVOQUOTE:
-        RETURN ( int_asc(oquote) );
+        case EVOQUOTE:
+            RETURN ( int_asc(oquote) );
 
-    case EVORGCOL:
-        RETURN ( int_asc(term.t_colorg) );
+        case EVORGCOL:
+            RETURN ( int_asc(term.t_colorg) );
 
-    case EVORGROW:
-        RETURN ( int_asc(term.t_roworg) );
+        case EVORGROW:
+            RETURN ( int_asc(term.t_roworg) );
 
-    case EVOS:
-        RETURN ( os );
+        case EVOS:
+            RETURN ( os );
 
-    case EVOVERLAP:
-        RETURN ( int_asc(overlap) );
+        case EVOVERLAP:
+            RETURN ( int_asc(overlap) );
 
-    case EVPARINDENT:
-        RETURN ( int_asc(parindent) );
+        case EVPARINDENT:
+            RETURN ( int_asc(parindent) );
 
-    case EVPAGELEN:
-        RETURN ( int_asc(term.t_nrow + 1) );
+        case EVPAGELEN:
+            RETURN ( int_asc(term.t_nrow + 1) );
 
-    case EVPALETTE:
-        RETURN ( palstr );
+        case EVPALETTE:
+            RETURN ( palstr );
 
-    case EVPARALEAD:
-        RETURN ( paralead );
+        case EVPARALEAD:
+            RETURN ( paralead );
 
-    case EVPENDING:
+        case EVPENDING:
 #if     TYPEAH || WINDOW_MSWIN
-        RETURN ( ltos(typahead()) );
+            RETURN ( ltos(typahead()) );
 #else
-        RETURN ( falsem );
+            RETURN ( falsem );
 #endif
 
-    case EVPOPFLAG:
-        RETURN ( ltos(popflag) );
+        case EVPOPFLAG:
+            RETURN ( ltos(popflag) );
 
-    case EVPOPWAIT:
-        RETURN ( ltos(popwait) );
+        case EVPOPWAIT:
+            RETURN ( ltos(popwait) );
 
-    case EVPOSFLAG:
-        RETURN ( ltos(posflag) );
+        case EVPOSFLAG:
+            RETURN ( ltos(posflag) );
 
-    case EVPROGNAME:
-        RETURN ( PROGNAME );
+        case EVPROGNAME:
+            RETURN ( PROGNAME );
 
-    case EVRAM:
-        RETURN ( int_asc((int)(envram / 1024l)) );
+        case EVRAM:
+            RETURN ( int_asc((int)(envram / 1024l)) );
 
-    case EVREADHK:
-        RETURN ( fixnull(getfname(&readhook)) );
+        case EVREADHK:
+            RETURN ( fixnull(getfname(&readhook)) );
 
-    case EVREGION:
-        RETURN ( getreg(result) );
+        case EVREGION:
+            RETURN ( getreg(result) );
 
-    case EVREPLACE:
-        RETURN ( (char *)rpat );
+        case EVREPLACE:
+            RETURN ( (char *)rpat );
 
-    case EVRVAL:
-        RETURN ( rval );
+        case EVRVAL:
+            RETURN ( rval );
 
-    case EVSCRNAME:
-        RETURN ( first_screen->s_screen_name );
+        case EVSCRNAME:
+            RETURN ( first_screen->s_screen_name );
 
-    case EVSEARCH:
-        RETURN ( (char *)pat );
+        case EVSEARCH:
+            RETURN ( (char *)pat );
 
-    case EVSEARCHPNT:
-        RETURN ( int_asc(searchtype) );
+        case EVSEARCHPNT:
+            RETURN ( int_asc(searchtype) );
 
-    case EVSEED:
-        RETURN ( int_asc((int)seed) );
+        case EVSEED:
+            RETURN ( int_asc((int)seed) );
 
-    case EVSOFTTAB:
-        RETURN ( int_asc(stabsize) );
+        case EVSOFTTAB:
+            RETURN ( int_asc(stabsize) );
 
-    case EVSRES:
-        RETURN ( sres );
+        case EVSRES:
+            RETURN ( sres );
 
-    case EVSSAVE:
-        RETURN ( ltos(ssave) );
+        case EVSSAVE:
+            RETURN ( ltos(ssave) );
 
-    case EVSSCROLL:
-        RETURN ( ltos(sscroll) );
+        case EVSSCROLL:
+            RETURN ( ltos(sscroll) );
 
-    case EVSTATUS:
-        RETURN ( ltos(cmdstatus) );
+        case EVSTATUS:
+            RETURN ( ltos(cmdstatus) );
 
-    case EVSTERM:
-        RETURN ( getecnam(sterm, result, SIZEOF(result)) );
+        case EVSTERM:
+            RETURN ( getecnam(sterm, result, SIZEOF(result)) );
 
-    case EVTARGET:
-        saveflag = lastflag;
+        case EVTARGET:
+            saveflag = lastflag;
 
-        RETURN ( int_asc(curgoal) );
+            RETURN ( int_asc(curgoal) );
 
-    case EVTIME:
-        RETURN ( timeset() );
+        case EVTIME:
+            RETURN ( timeset() );
 
-    case EVTIMEFLAG:
-        RETURN ( ltos(timeflag) );
+        case EVTIMEFLAG:
+            RETURN ( ltos(timeflag) );
 
-    case EVTPAUSE:
-        RETURN ( int_asc(term.t_pause) );
+        case EVTPAUSE:
+            RETURN ( int_asc(term.t_pause) );
 
-    case EVUNDOFLAG:
-        RETURN ( ltos(undoflag) );
+        case EVUNDOFLAG:
+            RETURN ( ltos(undoflag) );
 
-    case EVVERSION:
-        RETURN ( VERSION );
+        case EVVERSION:
+            RETURN ( VERSION );
 
-    case EVVSCRLBAR:
-        RETURN ( ltos(vscrollbar) );
+        case EVVSCRLBAR:
+            RETURN ( ltos(vscrollbar) );
 
-    case EVWCHARS:
-        RETURN ( getwlist(result) );
+        case EVWCHARS:
+            RETURN ( getwlist(result) );
 
-    case EVWLINE:
-        RETURN ( int_asc(curwp->w_ntrows) );
+        case EVWLINE:
+            RETURN ( int_asc(curwp->w_ntrows) );
 
-    case EVWRAPHK:
-        RETURN ( fixnull( getfname(&wraphook) ) );
+        case EVWRAPHK:
+            RETURN ( fixnull( getfname(&wraphook) ) );
 
-    case EVWRITEHK:
-        RETURN ( fixnull( getfname(&writehook) ) );
+        case EVWRITEHK:
+            RETURN ( fixnull( getfname(&writehook) ) );
 
-    case EVXPOS:
-        RETURN ( int_asc(xpos) );
+        case EVXPOS:
+            RETURN ( int_asc(xpos) );
 
-    case EVYANKFLAG:
-        RETURN ( ltos(yankflag) );
+        case EVYANKFLAG:
+            RETURN ( ltos(yankflag) );
 
-    case EVYPOS:
-        RETURN ( int_asc(ypos) );
+        case EVYPOS:
+            RETURN ( int_asc(ypos) );
     }
 
     meexit(-12);        /* again, we should never get here */
@@ -825,12 +874,13 @@ CONST char *PASCAL NEAR gtenv P1_(CONST char *, vname)
  *
  * Don't return NULL pointers!
  */
-CONST char *PASCAL NEAR fixnull P1_(CONST char *, s)
+CONST char * PASCAL NEAR fixnull P1_(CONST char *, s)
 {
-    if ( s == NULL )
+    if ( s == NULL )  {
         return ( (CONST char *)"" );
-    else
+    } else            {
         return (s);
+    }
 }
 
 /* GETKILL:
@@ -839,7 +889,7 @@ CONST char *PASCAL NEAR fixnull P1_(CONST char *, s)
  *
  * Function returns a static result string: Copy immediately!
  */
-char *PASCAL NEAR getkill P0_()
+char * PASCAL NEAR getkill P0_()
 {
     STATIC_STR_RET_PROLOG();
 
@@ -919,15 +969,16 @@ char *PASCAL NEAR getkill P0_()
  *
  * Trim whitespace off the end of a string
  */
-char *PASCAL NEAR trimstr P1_(char *, s)
+char * PASCAL NEAR trimstr P1_(char *, s)
 /* s: String to trim  */
 {
-    char *sp;           /* backward index */
+    char  *sp = NULL;   /* backward index */
 
     sp = s + STRLEN(s) - 1;
-    while ( (sp >= s) && (*sp == ' ' || *sp == '\t') )
+    while ( (sp >= s) && (*sp == ' ' || *sp == '\t') )  {
         --sp;
-    *(sp+1) = 0;
+    }
+    *(sp + 1) = '\0';
 
     return (s);
 }
@@ -940,20 +991,25 @@ int PASCAL NEAR setvar P2_(int, f, int, n)
 /* f: Default flag                              */
 /* n: Numeric arg (can overide prompted value)  */
 {
-    REGISTER int status;        /* status return */
-    VDESC vd;                   /* variable num/type */
-    char var[NVSIZE+1];         /* name of variable to fetch */
-    char value[NSTRING];        /* value to set variable to */
+    REGISTER int  status  = 0;      /* status return              */
+    VDESC         vd;               /* variable num/type          */
+    char          var[NVSIZE+1];    /* name of variable to fetch  */
+    char          value[NSTRING];   /* value to set variable to   */
+
+    ZEROMEM(vd);
+    ZEROMEM(var);
+    ZEROMEM(value);
 
     /* first get the variable to set.. */
     if ( clexec == FALSE ) {
         status = mlreply(TEXT51, &var[0], NVSIZE+1);
 /*               "Variable to set: " */
-        if ( status != TRUE )
+        if ( status != TRUE ) {
             return (status);
+        }
     } else {            /* macro line argument */
         /* grab token and skip it */
-        execstr = token(execstr, var, NVSIZE + 1);
+        BUFCPY(execstr, token(execstr, var, SIZEOF(var)));
     }
 
     /* check the legality and find the var */
@@ -962,36 +1018,37 @@ int PASCAL NEAR setvar P2_(int, f, int, n)
     /* if its not legal....bitch */
     if ( vd.v_type == -1 ) {
         mlwrite(TEXT52, var);
-
 /*          "%%No such variable as '%s'" */
+
         return (FALSE);
     }
 
     /* get the value for that variable */
-    if ( f == TRUE )
-        XSTRCPY( value, int_asc(n) );
-    else {
+    if ( f == TRUE )  {
+        BUFCPY(value, int_asc(n));
+    } else {
         status = mlreply(TEXT53, &value[0], NSTRING);
 /*               "Value: " */
-        if ( status == ABORT )
+        if ( status == ABORT )  {
             return (status);
+        }
     }
 
     /* and set the appropriate value */
     status = svar(&vd, value);
 
-    /* if $debug == TRUE, every assignment will echo a statment to that effect
-     * here. */
+    /* if $debug == TRUE, every assignment will echo a statment to that
+     * effect here. */
 
     if ( macbug && (strcmp(var, "%track") != 0) ) {
-        xstrcpy(outline, "(((");
+        BUFCPY(outline, "(((");
 
-        xstrcat(outline, var);
-        xstrcat(outline, " <- ");
+        BUFCAT(outline, var);
+        BUFCAT(outline, " <- ");
 
         /* and lastly the value we tried to assign */
-        xstrcat(outline, value);
-        xstrcat(outline, ")))");
+        BUFCAT(outline, value);
+        BUFCAT(outline, ")))");
 
         /* write out the debug line */
         mlforce(outline);
@@ -1017,19 +1074,23 @@ int PASCAL NEAR global_var P2_(int, f, int, n)
 /* f: Default flag                */
 /* n: Numeric arg (ignored here)  */
 {
-    REGISTER int status;        /* status return */
-    VDESC vd;                   /* variable num/type */
-    char var[NVSIZE+1];         /* name of variable to fetch */
+    REGISTER int  status  = 0;      /* status return              */
+    VDESC         vd;               /* variable num/type          */
+    char          var[NVSIZE+1];    /* name of variable to fetch  */
+
+    ZEROMEM(vd);
+    ZEROMEM(var);
 
     /* first get the variable to set.. */
-    if ( clexec == FALSE ) {
+    if ( clexec == FALSE )  {
         status = mlreply(TEXT249, &var[0], NVSIZE+1);
 /*               "Global variable to declare: " */
-        if ( status != TRUE )
+        if ( status != TRUE ) {
             return (status);
-    } else {            /* macro line argument */
+        }
+    } else                  {   /* macro line argument */
         /* grab token and skip it */
-        execstr = token(execstr, var, NVSIZE + 1);
+        BUFCPY(execstr, token(execstr, var, SIZEOF(var)));
     }
 
     /* check the legality and find the var */
@@ -1038,22 +1099,22 @@ int PASCAL NEAR global_var P2_(int, f, int, n)
     /* if its not legal....bitch */
     if ( vd.v_type == -1 ) {
         mlwrite(TEXT52, var);
-
 /*          "%%No such variable as '%s'" */
+
         return (FALSE);
     }
 
     /* and set the appropriate value */
     status = svar(&vd, "");
 
-    /* if $debug == TRUE, every assignment will echo a statment to that effect
-     * here. */
+    /* if $debug == TRUE, every assignment will echo a statment to that
+     * effect here. */
 
     if ( macbug && (strcmp(var, "%track") != 0) ) {
-        xstrcpy(outline, "(((Globally declare ");
+        BUFCPY(outline, "(((Globally declare ");
 
-        xstrcat(outline, var);
-        xstrcat(outline, ")))");
+        BUFCAT(outline, var);
+        BUFCAT(outline, ")))");
 
         /* write out the debug line */
         mlforce(outline);
@@ -1079,19 +1140,23 @@ int PASCAL NEAR local_var P2_(int, f, int, n)
 /* f: Default flag                */
 /* n: Numeric arg (ignored here)  */
 {
-    REGISTER int status;        /* status return */
-    VDESC vd;                   /* variable num/type */
-    char var[NVSIZE+1];         /* name of variable to fetch */
+    REGISTER int  status  = 0;      /* status return              */
+    VDESC         vd;               /* variable num/type          */
+    char          var[NVSIZE+1];    /* name of variable to fetch  */
+
+    ZEROMEM(vd);
+    ZEROMEM(var);
 
     /* first get the variable to set.. */
-    if ( clexec == FALSE ) {
+    if ( clexec == FALSE )  {
         status = mlreply(TEXT250, &var[0], NVSIZE+1);
 /*               "Local variable to declare: " */
-        if ( status != TRUE )
+        if ( status != TRUE ) {
             return (status);
-    } else {            /* macro line argument */
+        }
+    } else                  {   /* macro line argument */
         /* grab token and skip it */
-        execstr = token(execstr, var, NVSIZE + 1);
+        BUFCPY(execstr, token(execstr, var, SIZEOF(var)));
     }
 
     /* check the legality and find the var */
@@ -1100,22 +1165,22 @@ int PASCAL NEAR local_var P2_(int, f, int, n)
     /* if its not legal....bitch */
     if ( vd.v_type == -1 ) {
         mlwrite(TEXT52, var);
-
 /*          "%%No such variable as '%s'" */
+
         return (FALSE);
     }
 
     /* and set the appropriate value */
     status = svar(&vd, "");
 
-    /* if $debug == TRUE, every assignment will echo a statment to that effect
-     * here. */
+    /* if $debug == TRUE, every assignment will echo a statment to that
+     * effect here. */
 
     if ( macbug && (strcmp(var, "%track") != 0) ) {
-        xstrcpy(outline, "(((Locally declare ");
+        BUFCPY(outline, "(((Locally declare ");
 
-        xstrcat(outline, var);
-        xstrcat(outline, ")))");
+        BUFCAT(outline, var);
+        BUFCAT(outline, ")))");
 
         /* write out the debug line */
         mlforce(outline);
@@ -1153,62 +1218,70 @@ fvar:   vtype = -1;
 
     switch ( var[0] ) {
 
-    case '$':             /* check for legal enviromnent var */
-        if ( ( vnum = binary(&var[1], envval, NELEM(envars), NVSIZE) ) != -1 )
-            vtype = TKENV;
-        break;
+        case '$':   /* check for legal enviromnent var */
+            if ( (vnum = binary(&var[1], envval, NELEM(envars), NVSIZE))
+                  != -1 ) {
+                vtype = TKENV;
+            }
+            break;
 
-    case '%':             /* check for existing legal user variable */
-        while ( vut ) {
-            for ( vnum = 0; vnum < vut->size; vnum++ )
-                if ( strcmp(&var[1], vut->uv[vnum].u_name) == 0 ) {
-                    vtype = TKVAR;
-                    goto retvar;
+        case '%':   /* check for existing legal user variable */
+            while ( vut ) {
+                for ( vnum = 0; vnum < vut->size; vnum++ )  {
+                    if ( strcmp(&var[1], vut->uv[vnum].u_name) == 0 ) {
+                        vtype = TKVAR;
+                        goto retvar;
+                    }
                 }
-            vut = vut->next;
-            if ( scope == VT_LOCAL )
-                break;
-        }
+                vut = vut->next;
+                if ( scope == VT_LOCAL )  {
+                    break;
+                }
+            }
 
-        /* if we should not define one.... */
-        if ( scope == VT_NONE )
-            break;
-
-        /* scope it as requested */
-        if ( scope == VT_LOCAL )
-            vut = uv_head;
-        else
-            vut = uv_global;
-
-        /* no room left in requested user var table? */
-        if ( vnum < vut->size )
-            break;
-
-        /* create a new variable */
-        for ( vnum = 0; vnum < vut->size; vnum++ )
-            if ( vut->uv[vnum].u_name[0] == 0 ) {
-                vtype = TKVAR;
-                umc_memset( (char *)&vut->uv[vnum].u_name[0], '\0', NVSIZE );
-                xstrncpy(vut->uv[vnum].u_name, &var[1], NVSIZE);
-                vut->uv[vnum].u_value = NULL;
+            /* if we should not define one.... */
+            if ( scope == VT_NONE ) {
                 break;
             }
-        break;
 
-    case '&':                   /* indirect operator? */
-        var[4] = 0;
-        if ( strcmp(&var[1], "ind") == 0 ) {
-            /* grab token, and eval it */
-            execstr = token(execstr, var, size);
-            XSTRCPY( var, fixnull( getval(var) ) );
-            goto fvar;
-        }
+            /* scope it as requested */
+            if ( scope == VT_LOCAL )  {
+                vut = uv_head;
+            } else                    {
+                vut = uv_global;
+            }
+
+            /* no room left in requested user var table? */
+            if ( vnum < vut->size ) {
+                break;
+            }
+
+            /* create a new variable */
+            for ( vnum = 0; vnum < vut->size; vnum++ )
+                if ( vut->uv[vnum].u_name[0] == 0 ) {
+                    vtype = TKVAR;
+                    umc_memset(&vut->uv[vnum].u_name[0], '\0', NVSIZE);
+                    xstrncpy(vut->uv[vnum].u_name, &var[1], NVSIZE);
+                    vut->uv[vnum].u_value = NULL;
+                    break;
+                }
+            break;
+
+        case '&':   /* indirect operator? */
+            var[4] = 0;
+            if ( strcmp(&var[1], "ind") == 0 ) {
+                /* grab token, and eval it */
+                BUFCPY(execstr, token(execstr, var, size));
+                xstrlcpy(var, fixnull(getval(var)), size);
+                goto fvar;
+            }
     }
 
     /* return the results */
-retvar: vd->v_num = vnum;
-    vd->v_type = vtype;
-    vd->v_ut = vut;
+retvar:
+    vd->v_num   = vnum;
+    vd->v_type  = vtype;
+    vd->v_ut    = vut;
 
     return;
 }
@@ -1237,450 +1310,464 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
     /* and set the appropriate value */
     status  = TRUE;
     switch ( vtype ) {
-    case TKVAR:     /* set a user variable */
-        CLROOM(vut->uv[vnum].u_value);
-        vut->uv[vnum].u_value = xstrdup(valueL);
 
-        /* setting a variable to error stops macro execution */
-        if ( strcmp(valueL, errorm) == 0 )
-            status = FALSE;
+        case TKVAR:     /* set a user variable */
+            CLROOM(vut->uv[vnum].u_value);
+            vut->uv[vnum].u_value = xstrdup(valueL);
 
-        break;
-
-    case TKENV:     /* set an environment variable */
-        switch ( vnum ) {
-        case EVABBELL:
-            ab_bell = stol(valueL);
+            /* setting a variable to error stops macro execution */
+            if ( strcmp(valueL, errorm) == 0 )  {
+                status = FALSE;
+            }
             break;
 
-        case EVABCAP:
-            ab_cap = stol(valueL);
-            break;
+        case TKENV:     /* set an environment variable */
+            switch ( vnum ) {
 
-        case EVABFULL:
-            ab_full = stol(valueL);
-            break;
+                case EVABBELL:
+                    ab_bell = stol(valueL);
+                    break;
 
-        case EVABQUICK:
-            ab_quick = stol(valueL);
-            break;
+                case EVABCAP:
+                    ab_cap = stol(valueL);
+                    break;
 
-        case EVACOUNT:
-            gacount = asc_int(valueL);
-            break;
+                case EVABFULL:
+                    ab_full = stol(valueL);
+                    break;
 
-        case EVASAVE:
-            gasave = asc_int(valueL);
-            break;
+                case EVABQUICK:
+                    ab_quick = stol(valueL);
+                    break;
 
-        case EVBUFHOOK:
-            set_key(&bufhook, valueL);
-            break;
+                case EVACOUNT:
+                    gacount = asc_int(valueL);
+                    break;
 
-        case EVCBFLAGS:
-            c = asc_int(valueL);
-            curbp->b_flag = ( curbp->b_flag & ~(BFCHG|BFINVS) )|
-                            ( c & (BFCHG|BFINVS) );
-            if ( (c & BFCHG) == BFCHG )
-                lchange(WFMODE);
-            break;
+                case EVASAVE:
+                    gasave = asc_int(valueL);
+                    break;
 
-        case EVCBUFNAME:
-            XSTRCPY(curbp->b_bname, valueL);
-            curwp->w_flag |= WFMODE;
-            break;
+                case EVBUFHOOK:
+                    set_key(&bufhook, valueL);
+                    break;
 
-        case EVCFNAME:
-            XSTRCPY(curbp->b_fname, valueL);
+                case EVCBFLAGS:
+                    c = asc_int(valueL);
+                    curbp->b_flag = ( curbp->b_flag & ~(BFCHG|BFINVS) )
+                                    | ( c & (BFCHG|BFINVS) );
+                    if ( (c & BFCHG) == BFCHG ) {
+                        lchange(WFMODE);
+                    }
+                    break;
+
+                case EVCBUFNAME:
+                    BUFCPY(curbp->b_bname, valueL);
+                    curwp->w_flag |= WFMODE;
+                    break;
+
+                case EVCFNAME:
+                    BUFCPY(curbp->b_fname, valueL);
 #if     WINDOW_MSWIN
-            fullpathname(curbp->b_fname, NFILEN);
+                    fullpathname(curbp->b_fname, NFILEN);
 #endif
-            curwp->w_flag |= WFMODE;
-            break;
+                    curwp->w_flag |= WFMODE;
+                    break;
 
-        case EVCMDHK:
-            set_key(&cmdhook, valueL);
-            break;
+                case EVCMDHK:
+                    set_key(&cmdhook, valueL);
+                    break;
 
-        case EVCMODE:
-            curbp->b_mode = asc_int(valueL);
-            curwp->w_flag |= WFMODE;
-            break;
+                case EVCMODE:
+                    curbp->b_mode = asc_int(valueL);
+                    curwp->w_flag |= WFMODE;
+                    break;
 
-        case EVCQUOTE:
-            cquote = asc_int(valueL);
-            break;
+                case EVCQUOTE:
+                    cquote = asc_int(valueL);
+                    break;
 
-        case EVCURCHAR:
-            ldelete(1L, FALSE);       /* delete 1 char */
-            c = asc_int(valueL);
-            if ( c == '\r' )
-                lnewline();
-            else
-                linsert(1, (char)c);
-            backchar(FALSE, 1);
-            break;
+                case EVCURCHAR:
+                    ldelete(1L, FALSE);       /* delete 1 char */
+                    c = asc_int(valueL);
+                    if ( c == '\r' )  {
+                        lnewline();
+                    } else            {
+                        linsert(1, (char)c);
+                    }
+                    backchar(FALSE, 1);
+                    break;
 
-        case EVCURCOL:
-            status = setccol( asc_int(valueL) );
-            break;
+                case EVCURCOL:
+                    status = setccol(asc_int(valueL));
+                    break;
 
-        case EVCURLINE:
-            status = gotoline( TRUE, asc_int(valueL) );
-            break;
+                case EVCURLINE:
+                    status = gotoline(TRUE, asc_int(valueL));
+                    break;
 
-        case EVCURWIDTH:
-            status = newwidth( TRUE, asc_int(valueL) );
-            break;
+                case EVCURWIDTH:
+                    status = newwidth(TRUE, asc_int(valueL));
+                    break;
 
-        case EVCURWIND:
-            nextwind( TRUE, asc_int(valueL) );
-            break;
+                case EVCURWIND:
+                    nextwind(TRUE, asc_int(valueL));
+                    break;
 
-        case EVCWLINE:
-            status = forwline( TRUE, asc_int(valueL) - getwpos() );
-            break;
+                case EVCWLINE:
+                    status = forwline(TRUE, asc_int(valueL) - getwpos());
+                    break;
 
-        case EVDEBUG:
-            macbug = stol(valueL);
-            break;
+                case EVDEBUG:
+                    macbug = stol(valueL);
+                    break;
 
-        case EVDESKCLR:
-            c = lkp_color( mkupper(valueL) );
-            if ( c != -1 ) {
-                deskcolor = c;
+                case EVDESKCLR:
+                    c = lkp_color(mkupper(valueL));
+                    if ( c != -1 ) {
+                        deskcolor = c;
 #if     WINDOW_TEXT
-                rdw_screen(first_screen);
+                        rdw_screen(first_screen);
 #endif
+                    }
+                    break;
+
+                case EVDIAGFLAG:
+                    diagflag = stol(valueL);
+                    break;
+
+                case EVDISCMD:
+                    discmd = stol(valueL);
+                    break;
+
+                case EVDISINP:
+                    disinp = stol(valueL);
+                    break;
+
+                case EVDISPHIGH:
+                    c = disphigh;
+                    disphigh = stol(valueL);
+                    if ( c != disphigh )  {
+                        upwind();
+                    }
+                    break;
+
+                case EVDISPUNDO:
+                    dispundo = stol(valueL);
+                    break;
+
+                case EVEXBHOOK:
+                    set_key(&exbhook, valueL);
+                    break;
+
+                case EVEXITHOOK:
+                    set_key(&exithook, valueL);
+                    break;
+
+                case EVFCOL:
+                    curwp->w_fcol = asc_int(valueL);
+                    if ( curwp->w_fcol < 0 )  {
+                        curwp->w_fcol = 0;
+                    }
+                    curwp->w_flag |= WFHARD | WFMODE;
+                    break;
+
+                case EVFILLCOL:
+                    fillcol = asc_int(valueL);
+                    break;
+
+                case EVFLICKER:
+                    flickcode = stol(valueL);
+                    break;
+
+                case EVFMTLEAD:
+                    xstrlcpy(fmtlead, valueL, NSTRING);
+                    break;
+
+                case EVGFLAGS:
+                    gflags = asc_int(valueL);
+                    break;
+
+                case EVGMODE:
+                    gmode = asc_int(valueL);
+                    break;
+
+                case EVHARDTAB:
+                    if ( ( c = asc_int(valueL) ) >= 0 ) {
+                        tabsize = c;
+                        upwind();
+                    }
+                    break;
+
+                case EVHILITE:
+                    hilite = asc_int(valueL);
+                    if ( !hilite_IsValid() )  {
+                        hilite_InValidate();
+                    }
+                    break;
+
+                case EVHJUMP:
+                    hjump = asc_int(valueL);
+                    if ( hjump < 1 )  {
+                        hjump = 1;
+                    }
+                    if ( hjump > term.t_ncol - 1 )  {
+                        hjump = term.t_ncol - 1;
+                    }
+                    break;
+
+                case EVHSCRLBAR:
+                    hscrollbar = stol(valueL);
+                    break;
+
+                case EVHSCROLL:
+                    hscroll = stol(valueL);
+                    lbound = 0;
+                    break;
+
+                case EVISTERM:
+                    isterm = stock(valueL);
+                    break;
+
+                case EVKILL:
+                    break;
+
+                case EVLANG:
+                    break;
+
+                case EVLASTKEY:
+                    lastkey = asc_int(valueL);
+                    break;
+
+                case EVLASTMESG:
+                    BUFCPY(lastmesg, valueL);
+                    break;
+
+                case EVLINE:
+                    putctext(valueL);
+                    break;
+
+                case EVLTERM:
+                    xstrlcpy(lterm, valueL, NSTRING);
+                    break;
+
+                case EVLWIDTH:
+                    break;
+
+                case EVMATCH:
+                    break;
+
+                case EVMMOVE:
+                    mouse_move = asc_int(valueL);
+                    if ( mouse_move < 0 ) {
+                        mouse_move = 0;
+                    }
+                    if ( mouse_move > 2 ) {
+                        mouse_move = 2;
+                    }
+                    break;
+
+                case EVMODEFLAG:
+                    modeflag = stol(valueL);
+                    upwind();
+                    break;
+
+                case EVMSFLAG:
+                    mouseflag = stol(valueL);
+                    break;
+
+                case EVNEWSCRN:
+                    newscreenflag = stol(valueL);
+                    break;
+
+                case EVNUMWIND:
+                    break;
+
+                case EVOQUOTE:
+                    oquote = asc_int(valueL);
+                    break;
+
+                case EVORGCOL:
+                    status = new_col_org(TRUE, asc_int(valueL));
+                    break;
+
+                case EVORGROW:
+                    status = new_row_org(TRUE, asc_int(valueL));
+                    break;
+
+                case EVOS:
+                    break;
+
+                case EVOVERLAP:
+                    overlap = asc_int(valueL);
+                    break;
+
+                case EVPARINDENT:
+                    parindent = asc_int(valueL);
+                    break;
+
+                case EVPAGELEN:
+                    status = newsize(TRUE, asc_int(valueL));
+                    break;
+
+                case EVPALETTE:
+                    xstrlcpy(palstr, valueL, palstr_LEN);
+                    spal(palstr);
+                    break;
+
+                case EVPARALEAD:
+                    xstrlcpy(paralead, valueL, NSTRING);
+                    break;
+
+                case EVPENDING:
+                    break;
+
+                case EVPOPFLAG:
+                    popflag = stol(valueL);
+                    break;
+
+                case EVPOPWAIT:
+                    popwait = stol(valueL);
+                    break;
+
+                case EVPOSFLAG:
+                    posflag = stol(valueL);
+                    upmode();
+                    break;
+
+                case EVPROGNAME:
+                    break;
+
+                case EVRAM:
+                    break;
+
+                case EVREADHK:
+                    set_key(&readhook, valueL);
+                    break;
+
+                case EVREGION:
+                    break;
+
+                case EVREPLACE:
+                    xstrlcpy((char *)rpat, valueL, SIZEOF(rpat));
+#if     MAGIC
+                    rmcclear();
+#endif
+                    break;
+
+                case EVRVAL:
+                    BUFCPY(rval, valueL);
+                    break;
+
+                case EVSCRNAME:
+                    select_screen(lkp_screen(valueL), TRUE);
+                    break;
+
+                case EVSEARCH:
+                    xstrlcpy((char *)pat, valueL, SIZEOF(pat));
+                    setjtable();    /* Set up fast search arrays  */
+#if     MAGIC
+                    mcclear();
+#endif
+                    break;
+
+                case EVSEARCHPNT:
+                    searchtype = asc_int(valueL);
+                    if ( searchtype < SRNORM  || searchtype > SREND ) {
+                        searchtype = SRNORM;
+                    }
+                    break;
+
+                case EVSEED:
+                    seed = (long)abs(asc_int(valueL));
+                    break;
+
+                case EVSOFTTAB:
+                    stabsize = asc_int(valueL);
+                    upwind();
+                    break;
+
+                case EVSRES:
+                    status = TTrez(valueL);
+                    break;
+
+                case EVSSAVE:
+                    ssave = stol(valueL);
+                    break;
+
+                case EVSSCROLL:
+                    sscroll = stol(valueL);
+                    break;
+
+                case EVSTATUS:
+                    cmdstatus = stol(valueL);
+                    break;
+
+                case EVSTERM:
+                    sterm = stock(valueL);
+                    break;
+
+                case EVTARGET:
+                    curgoal = asc_int(valueL);
+                    thisflag = saveflag;
+                    break;
+
+                case EVTIME:
+                    break;
+
+                case EVTIMEFLAG:
+                    timeflag = stol(valueL);
+                    upmode();
+                    break;
+
+                case EVTPAUSE:
+                    term.t_pause = asc_int(valueL);
+                    break;
+
+                case EVUNDOFLAG:
+                    if ( undoflag != stol(valueL) ) {
+                        undo_dump();
+                    }
+                    undoflag = stol(valueL);
+                    break;
+
+                case EVVERSION:
+                    break;
+
+                case EVVSCRLBAR:
+                    vscrollbar = stol(valueL);
+                    break;
+
+                case EVWCHARS:
+                    setwlist(valueL);
+                    break;
+
+                case EVWLINE:
+                    status = resize(TRUE, asc_int(valueL));
+                    break;
+
+                case EVWRAPHK:
+                    set_key(&wraphook, valueL);
+                    break;
+
+                case EVWRITEHK:
+                    set_key(&writehook, valueL);
+                    break;
+
+                case EVXPOS:
+                    xpos = asc_int(valueL);
+                    break;
+
+                case EVYANKFLAG:
+                    yankflag = stol(valueL);
+                    break;
+
+                case EVYPOS:
+                    ypos = asc_int(valueL);
+                    break;
             }
             break;
-
-        case EVDIAGFLAG:
-            diagflag = stol(valueL);
-            break;
-
-        case EVDISCMD:
-            discmd = stol(valueL);
-            break;
-
-        case EVDISINP:
-            disinp = stol(valueL);
-            break;
-
-        case EVDISPHIGH:
-            c = disphigh;
-            disphigh = stol(valueL);
-            if ( c != disphigh )
-                upwind();
-            break;
-
-        case EVDISPUNDO:
-            dispundo = stol(valueL);
-            break;
-
-        case EVEXBHOOK:
-            set_key(&exbhook, valueL);
-            break;
-
-        case EVEXITHOOK:
-            set_key(&exithook, valueL);
-            break;
-
-        case EVFCOL:
-            curwp->w_fcol = asc_int(valueL);
-            if ( curwp->w_fcol < 0 )
-                curwp->w_fcol = 0;
-            curwp->w_flag |= WFHARD | WFMODE;
-            break;
-
-        case EVFILLCOL:
-            fillcol = asc_int(valueL);
-            break;
-
-        case EVFLICKER:
-            flickcode = stol(valueL);
-            break;
-
-        case EVFMTLEAD:
-            xstrlcpy(fmtlead, valueL, NSTRING);
-            break;
-
-        case EVGFLAGS:
-            gflags = asc_int(valueL);
-            break;
-
-        case EVGMODE:
-            gmode = asc_int(valueL);
-            break;
-
-        case EVHARDTAB:
-            if ( ( c = asc_int(valueL) ) >= 0 ) {
-                tabsize = c;
-                upwind();
-            }
-            break;
-
-        case EVHILITE:
-            hilite = asc_int(valueL);
-            if ( !hilite_IsValid() )
-                hilite_InValidate();
-            break;
-
-        case EVHJUMP:
-            hjump = asc_int(valueL);
-            if ( hjump < 1 )
-                hjump = 1;
-            if ( hjump > term.t_ncol - 1 )
-                hjump = term.t_ncol - 1;
-            break;
-
-        case EVHSCRLBAR:
-            hscrollbar = stol(valueL);
-            break;
-
-        case EVHSCROLL:
-            hscroll = stol(valueL);
-            lbound = 0;
-            break;
-
-        case EVISTERM:
-            isterm = stock(valueL);
-            break;
-
-        case EVKILL:
-            break;
-
-        case EVLANG:
-            break;
-
-        case EVLASTKEY:
-            lastkey = asc_int(valueL);
-            break;
-
-        case EVLASTMESG:
-            xstrcpy(lastmesg, valueL);
-            break;
-
-        case EVLINE:
-            putctext(valueL);
-            break;
-
-        case EVLTERM:
-            xstrlcpy(lterm, valueL, NSTRING);
-            break;
-
-        case EVLWIDTH:
-            break;
-
-        case EVMATCH:
-            break;
-
-        case EVMMOVE:
-            mouse_move = asc_int(valueL);
-            if ( mouse_move < 0 ) mouse_move = 0;
-            if ( mouse_move > 2 ) mouse_move = 2;
-            break;
-
-        case EVMODEFLAG:
-            modeflag = stol(valueL);
-            upwind();
-            break;
-
-        case EVMSFLAG:
-            mouseflag = stol(valueL);
-            break;
-
-        case EVNEWSCRN:
-            newscreenflag = stol(valueL);
-            break;
-
-        case EVNUMWIND:
-            break;
-
-        case EVOQUOTE:
-            oquote = asc_int(valueL);
-            break;
-
-        case EVORGCOL:
-            status = new_col_org( TRUE, asc_int(valueL) );
-            break;
-
-        case EVORGROW:
-            status = new_row_org( TRUE, asc_int(valueL) );
-            break;
-
-        case EVOS:
-            break;
-
-        case EVOVERLAP:
-            overlap = asc_int(valueL);
-            break;
-
-        case EVPARINDENT:
-            parindent = asc_int(valueL);
-            break;
-
-        case EVPAGELEN:
-            status = newsize( TRUE, asc_int(valueL) );
-            break;
-
-        case EVPALETTE:
-            xstrlcpy(palstr, valueL, palstr_LEN);
-            spal(palstr);
-            break;
-
-        case EVPARALEAD:
-            xstrlcpy(paralead, valueL, NSTRING);
-            break;
-
-        case EVPENDING:
-            break;
-
-        case EVPOPFLAG:
-            popflag = stol(valueL);
-            break;
-
-        case EVPOPWAIT:
-            popwait = stol(valueL);
-            break;
-
-        case EVPOSFLAG:
-            posflag = stol(valueL);
-            upmode();
-            break;
-
-        case EVPROGNAME:
-            break;
-
-        case EVRAM:
-            break;
-
-        case EVREADHK:
-            set_key(&readhook, valueL);
-            break;
-
-        case EVREGION:
-            break;
-
-        case EVREPLACE:
-            xstrcpy( (char *)rpat, valueL );
-#if     MAGIC
-            rmcclear();
-#endif
-            break;
-
-        case EVRVAL:
-            xstrcpy(rval, valueL);
-            break;
-
-        case EVSCRNAME:
-            select_screen(lkp_screen(valueL), TRUE);
-            break;
-
-        case EVSEARCH:
-            xstrcpy( (char *)pat, valueL );
-            setjtable();                     /* Set up fast search arrays  */
-#if     MAGIC
-            mcclear();
-#endif
-            break;
-
-        case EVSEARCHPNT:
-            searchtype = asc_int(valueL);
-            if ( searchtype < SRNORM  || searchtype > SREND )
-                searchtype = SRNORM;
-            break;
-
-        case EVSEED:
-            seed = (long)abs( asc_int(valueL) );
-            break;
-
-        case EVSOFTTAB:
-            stabsize = asc_int(valueL);
-            upwind();
-            break;
-
-        case EVSRES:
-            status = TTrez(valueL);
-            break;
-
-        case EVSSAVE:
-            ssave = stol(valueL);
-            break;
-
-        case EVSSCROLL:
-            sscroll = stol(valueL);
-            break;
-
-        case EVSTATUS:
-            cmdstatus = stol(valueL);
-            break;
-
-        case EVSTERM:
-            sterm = stock(valueL);
-            break;
-
-        case EVTARGET:
-            curgoal = asc_int(valueL);
-            thisflag = saveflag;
-            break;
-
-        case EVTIME:
-            break;
-
-        case EVTIMEFLAG:
-            timeflag = stol(valueL);
-            upmode();
-            break;
-
-        case EVTPAUSE:
-            term.t_pause = asc_int(valueL);
-            break;
-
-        case EVUNDOFLAG:
-            if ( undoflag != stol(valueL) )
-                undo_dump();
-            undoflag = stol(valueL);
-            break;
-
-        case EVVERSION:
-            break;
-
-        case EVVSCRLBAR:
-            vscrollbar = stol(valueL);
-            break;
-
-        case EVWCHARS:
-            setwlist(valueL);
-            break;
-
-        case EVWLINE:
-            status = resize( TRUE, asc_int(valueL) );
-            break;
-
-        case EVWRAPHK:
-            set_key(&wraphook, valueL);
-            break;
-
-        case EVWRITEHK:
-            set_key(&writehook, valueL);
-            break;
-
-        case EVXPOS:
-            xpos = asc_int(valueL);
-            break;
-
-        case EVYANKFLAG:
-            yankflag = stol(valueL);
-            break;
-
-        case EVYPOS:
-            ypos = asc_int(valueL);
-            break;
-        }
-        break;
     }
-
 
     CLROOM(valueL);
 
@@ -1694,32 +1781,35 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
  */
 int PASCAL NEAR asc_int P1_(CONST char *, st)
 {
-    int result;         /* resulting number */
-    int sign;           /* sign of resulting number */
-    char c;             /* current char being examined */
+    int   result  = 0;      /* resulting number             */
+    int   sign    = 0;      /* sign of resulting number     */
+    char  c       = '\0';   /* current char being examined  */
 
     result = 0;
     sign = 1;
 
     /* skip preceding whitespace */
-    while ( *st == ' ' || *st == '\t' )
+    while ( *st == ' ' || *st == '\t' ) {
         ++st;
+    }
 
     /* check for sign */
     if ( *st == '-' ) {
         sign = -1;
         ++st;
     }
-    if ( *st == '+' )
+    if ( *st == '+' ) {
         ++st;
+    }
 
     /* scan digits, build value */
-    while ( '\0' != (c = *st++) )
-        if ( c >= '0' && c <= '9' )
+    while ( '\0' != (c = *st++) ) {
+        if ( c >= '0' && c <= '9' ) {
             result = result * 10 + c - '0';
-        else
+        } else                    {
             break;
-
+        }
+    }
 
     return (result * sign);
 }
@@ -1731,7 +1821,7 @@ int PASCAL NEAR asc_int P1_(CONST char *, st)
  *
  * Function returns a static result string: Copy immediately!
  */
-char *PASCAL NEAR int_asc P1_(int, i)
+char * PASCAL NEAR int_asc P1_(int, i)
 /* i: Integer to translate to a string  */
 {
     STATIC_STR_RET_PROLOG();
@@ -1748,7 +1838,7 @@ char *PASCAL NEAR int_asc P1_(int, i)
      * integers as well --- TODO.
      */
     if ( i == -32768 ) {
-        XSTRCPY(result, "-32768");
+        BUFCPY(result, "-32768");
 
         RETURN ( result );
     }
@@ -1787,7 +1877,7 @@ char *PASCAL NEAR int_asc P1_(int, i)
  *
  * Function returns a static result string: Copy immediately!
  */
-char *PASCAL NEAR long_asc P1_(long int, num)
+char * PASCAL NEAR long_asc P1_(long int, num)
 /* num: Integer to translate to a string  */
 {
     STATIC_STR_RET_PROLOG();
@@ -1830,49 +1920,51 @@ char *PASCAL NEAR long_asc P1_(long int, num)
  *
  * Find the type of a passed token
  */
-int PASCAL NEAR gettyp P1_(char *, token)
+int PASCAL NEAR gettyp P1_(CONST char *, token)
 /* token: Token to analyze  */
 {
-    REGISTER char c;            /* first char in token */
+    REGISTER char c = '\0';   /* first char in token */
 
     /* grab the first char (this is all we need) */
     c = *token;
 
     /* no blanks!!! */
-    if ( c == 0 )
+    if ( c == '\0' )  {
         return (TKNUL);
+    }
 
     /* a numeric literal? */
-    if ( c >= '0' && c <= '9' )
+    if ( c >= '0' && c <= '9' ) {   /* Would even work with EBCDIC  */
         return (TKLIT);
+    }
 
     switch ( c ) {
-    case '"':
-        return (TKSTR);
+        case '"':
+            return (TKSTR);
 
-    case '!':
-        return (TKDIR);
+        case '!':
+            return (TKDIR);
 
-    case '@':
-        return (TKARG);
+        case '@':
+            return (TKARG);
 
-    case '#':
-        return (TKBUF);
+        case '#':
+            return (TKBUF);
 
-    case '$':
-        return (TKENV);
+        case '$':
+            return (TKENV);
 
-    case '%':
-        return (TKVAR);
+        case '%':
+            return (TKVAR);
 
-    case '&':
-        return (TKFUN);
+        case '&':
+            return (TKFUN);
 
-    case '*':
-        return (TKLBL);
+        case '*':
+            return (TKLBL);
 
-    default:
-        return (TKCMD);
+        default:
+            return (TKCMD);
     }
 }
 
@@ -1882,7 +1974,7 @@ int PASCAL NEAR gettyp P1_(char *, token)
  *
  * Function returns a static result string: Copy immediately!
  */
-CONST char *PASCAL NEAR getval P1_(char *, token)
+CONST char * PASCAL NEAR getval P1_(CONST char *, token)
 /* token: token to evaluate */
 {
     STATIC_STR_RET_PROLOG();
@@ -1890,88 +1982,91 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
     REGISTER int    status  = 0;      /* error return                 */
     REGISTER BUFFER *bp     = NULL;   /* temp buffer pointer          */
     REGISTER int    blen    = 0;      /* length of buffer argument    */
-    char            buf[NSTRING];     /* string buf for some returns  */
+    char            buf0[NSTRING];    /* string buf for some returns  */
+    char            buf1[NSTRING];    /* scratch string buf           */
 
-    ZEROMEM(buf);
+    ZEROMEM(buf0);
+    ZEROMEM(buf1);
 
     ASRT(NULL != token);
 
     switch ( gettyp(token) )  {
-    case TKNUL:
-        RETURN ( "" );
+        case TKNUL:
+            RETURN ( "" );
 
-    case TKARG:                 /* interactive argument */
-        XSTRCPY( token, fixnull( getval(&token[1]) ) );
-        mlwrite("%s", token);
-        status = getstring( (unsigned char *)buf, NSTRING, ctoec(RETCHAR) );
-        if ( status == ABORT )
+        case TKARG:                 /* interactive argument */
+            BUFCPY(buf1, fixnull(getval(&token[1])));
+            mlwrite("%s", buf1);
+            status = getstring((unsigned char *)buf0, NSTRING, ctoec(RETCHAR));
+            if ( status == ABORT )  {
+                RETURN ( NULL );
+            }
+            RETURN ( buf0 );
+
+        case TKBUF:                 /* buffer contents fetch */
+            /* grab the right buffer */
+            BUFCPY(buf1, fixnull(getval(&token[1])));
+            bp = bfind(buf1, FALSE, 0);
+            if ( bp == NULL ) {
+                RETURN ( NULL );
+            }
+
+            /* if the buffer is displayed, get the window vars instead
+             * of the buffer vars */
+            if ( bp->b_nwnd > 0 ) {
+                curbp->b_dotp = curwp->w_dotp;
+                set_b_doto(curbp, get_w_doto(curwp));
+            }
+
+            /* if we are at the end, return <END> */
+            if ( bp->b_linep == bp->b_dotp )  {
+                RETURN ( "<END>" );
+            }
+
+            /* grab the line as an argument */
+            blen = get_lused(bp->b_dotp) - get_b_doto(bp);
+            CASRT(SIZEOF(buf0) == NSTRING);
+            blen = MIN2(blen, NSTRING - 1);
+            bytecopy(buf0, ltext(bp->b_dotp) + get_b_doto(bp), blen);
+            /* buf0[blen] = 0; /o Done by bytecopy o/  */
+
+            /* and step the buffer's line ptr ahead a line */
+            bp->b_dotp = lforw(bp->b_dotp);
+            set_b_doto(bp, 0);
+
+            /* if displayed buffer, reset window ptr vars*/
+            if ( bp->b_nwnd > 0 ) {
+                curwp->w_dotp = curbp->b_dotp;
+                set_w_doto(curwp, 0);
+                curwp->w_flag |= WFMOVE;
+            }
+
+            /* and return the spoils */
+            RETURN ( buf0 );
+
+        case TKVAR:
+            RETURN ( gtusr(token+1) );
+
+        case TKENV:
+            RETURN ( gtenv(token+1) );
+
+        case TKFUN:
+            RETURN ( gtfun(token+1) );
+
+        case TKDIR:
             RETURN ( NULL );
 
-        RETURN ( buf );
-
-    case TKBUF:                 /* buffer contents fetch */
-
-        /* grab the right buffer */
-        XSTRCPY( token, fixnull( getval(&token[1]) ) );
-        bp = bfind(token, FALSE, 0);
-        if ( bp == NULL )
+        case TKLBL:
             RETURN ( NULL );
 
-        /* if the buffer is displayed, get the window vars instead of the buffer
-         * vars */
-        if ( bp->b_nwnd > 0 ) {
-            curbp->b_dotp = curwp->w_dotp;
-            set_b_doto(curbp, get_w_doto(curwp));
-        }
+        case TKLIT:
+            RETURN ( token );
 
-        /* if we are at the end, return <END> */
-        if ( bp->b_linep == bp->b_dotp )
-            RETURN ( "<END>" );
+        case TKSTR:
+            RETURN ( token + 1 );
 
-        /* grab the line as an argument */
-        blen = get_lused(bp->b_dotp) - get_b_doto(bp);
-        if ( blen >= NSTRING )
-            blen = NSTRING - 1;
-        bytecopy(buf, ltext(bp->b_dotp) + get_b_doto(bp), blen);
-        /* buf[blen] = 0; /o Done by bytecopy o/  */
-
-        /* and step the buffer's line ptr ahead a line */
-        bp->b_dotp = lforw(bp->b_dotp);
-        set_b_doto(bp, 0);
-
-        /* if displayed buffer, reset window ptr vars*/
-        if ( bp->b_nwnd > 0 ) {
-            curwp->w_dotp = curbp->b_dotp;
-            set_w_doto(curwp, 0);
-            curwp->w_flag |= WFMOVE;
-        }
-
-        /* and return the spoils */
-        RETURN ( buf );
-
-    case TKVAR:
-        RETURN ( gtusr(token+1) );
-
-    case TKENV:
-        RETURN ( gtenv(token+1) );
-
-    case TKFUN:
-        RETURN ( gtfun(token+1) );
-
-    case TKDIR:
-        RETURN ( NULL );
-
-    case TKLBL:
-        RETURN ( NULL );
-
-    case TKLIT:
-        RETURN ( token );
-
-    case TKSTR:
-        RETURN ( token + 1 );
-
-    case TKCMD:
-        RETURN ( token );
+        case TKCMD:
+            RETURN ( token );
     }
 
 
@@ -1985,12 +2080,16 @@ CONST char *PASCAL NEAR getval P1_(char *, token)
 int PASCAL NEAR stol P1_(CONST char *, val)
 /* val: Value to check for stol */
 {
-    /* check for logical values */
-    if ( val[0] == 'F' )
-        return (FALSE);
+    ASRT(NULL != val);
 
-    if ( val[0] == 'T' )
+    /* check for logical values */
+    if ( val[0] == 'F' )  {
+        return (FALSE);
+    }
+
+    if ( val[0] == 'T' )  {
         return (TRUE);
+    }
 
     /* check for numeric truth (!= 0) */
     return ( (asc_int(val) != 0) );
@@ -2000,27 +2099,30 @@ int PASCAL NEAR stol P1_(CONST char *, val)
  *
  * Numeric logical to string logical
  */
-CONST char *PASCAL NEAR ltos P1_(int, val)
+CONST char * PASCAL NEAR ltos P1_(int, val)
 /* val: Value to translate  */
 {
-    if ( val )
+    if ( val )  {
         return (truem);
-    else
+    } else      {
         return (falsem);
+    }
 }
 
 /* MKUPPER:
  *
  * Make a string upper case
  */
-char *PASCAL NEAR mkupper P1_(char *, str)
+char * PASCAL NEAR mkupper P1_(char *, str)
 /* str: String to upper case  */
 {
-    char *sp;
+    char  *sp = str;
 
-    sp = str;
-    while ( *sp )
-        uppercase( (unsigned char *)sp++ );
+    ASRT(NULL != str);
+
+    while ( *sp ) {
+        uppercase((unsigned char *)sp++);
+    }
 
     return (str);
 }
@@ -2029,14 +2131,16 @@ char *PASCAL NEAR mkupper P1_(char *, str)
  *
  * Make a string lower case
  */
-char *PASCAL NEAR mklower P1_(char *, str)
+char * PASCAL NEAR mklower P1_(char *, str)
 /* str: String to lower case  */
 {
-    char *sp;
+    char  *sp = str;
 
-    sp = str;
-    while ( *sp )
-        lowercase( (unsigned char *)sp++ );
+    ASRT(NULL != str);
+
+    while ( *sp ) {
+        lowercase((unsigned char *)sp++);
+    }
 
     return (str);
 }
@@ -2060,8 +2164,8 @@ int PASCAL NEAR absv P1_(int, x)
  */
 long PASCAL NEAR ernd P0_()
 {
-    long int a=16807L, m=2147483647L, q=127773L, r=2836L;
-    long lo, hi, test;
+    long int  a = 16807L, m = 2147483647L, q = 127773L, r = 2836L;
+    long int  lo = 0, hi = 0, test = 0;
 
     hi = seed / q;
     lo = seed % q;
@@ -2079,9 +2183,12 @@ int PASCAL NEAR sindex P2_(CONST char *, source, CONST char *, pattern)
 /* source:  Source string to search */
 /* pattern: String to look for      */
 {
-    CONST char *sp;     /* ptr to current position to scan */
-    CONST char *csp;    /* ptr to source string during comparison */
-    CONST char *cp;     /* ptr to place to check for equality */
+    CONST char  *sp   = NULL;   /* ptr to current position to scan        */
+    CONST char  *csp  = NULL;   /* ptr to source string during comparison */
+    CONST char  *cp   = NULL;   /* ptr to place to check for equality     */
+
+    ASRT(NULL != source);
+    ASRT(NULL != pattern);
 
     /* scanning through the source string */
     sp = source;
@@ -2090,15 +2197,17 @@ int PASCAL NEAR sindex P2_(CONST char *, source, CONST char *, pattern)
         cp = pattern;
         csp = sp;
         while ( *cp ) {
-            if ( !eq(*cp, *csp) )
+            if ( !eq(*cp, *csp) ) {
                 break;
+            }
             ++cp;
             ++csp;
         }
 
         /* was it a match? */
-        if ( *cp == 0 )
+        if ( *cp == 0 ) {
             return ( (int)(sp - source) + 1 );
+        }
 
         ++sp;
     }
@@ -2113,12 +2222,13 @@ int PASCAL NEAR sindex P2_(CONST char *, source, CONST char *, pattern)
  *
  * Function returns a static result string: Copy immediately!
  */
-char *PASCAL NEAR xlat P3_(char *, source, char *, lookup, char *, trans)
+char * PASCAL NEAR xlat P3_(char *, source, char *, lookup, char *, trans)
 /* source:  string to filter                */
 /* lookup:  characters to translate         */
 /* trans:   resulting translated characters */
 {
     STATIC_STR_RET_PROLOG();
+
     REGISTER char *sp = NULL;       /* pointer into source table  */
     REGISTER char *lp = NULL;       /* pointer into lookup table  */
     REGISTER char *rp = NULL;       /* pointer into result        */
@@ -2155,17 +2265,18 @@ xnext:  ++sp;
 
     RETURN (result);
 
+
     STATIC_STR_RET_EPILOG(xlat, char *, NSTRING);
 }
 
 /* SETWLIST:
  *
- * Set an alternative list of character to be considered "in a word
+ * Set an alternative list of character to be considered "in a word"
  */
 int PASCAL NEAR setwlist P1_(char *, wclist)
 /* wclist:  List of characters to consider "in a word"  */
 {
-    REGISTER int index;
+    REGISTER int  index = 0;
 
     /* if we are turning this facility off, just flag so */
     if ( wclist == NULL || *wclist == 0 ) {
@@ -2175,13 +2286,15 @@ int PASCAL NEAR setwlist P1_(char *, wclist)
     }
 
     /* first clear the table */
-    for ( index = 0; index < 256; index++ )
+    for ( index = 0; index < NELEM(wordlist); index++ ) {
         wordlist[index] = FALSE;
+    }
 
     /* and for each character in the new value, set that element of the word
      * character list */
-    while ( *wclist )
+    while ( *wclist ) {
         wordlist[(unsigned char)(*wclist++)] = TRUE;            /* ep */
+    }
     wlflag = TRUE;
 
     return 0;
@@ -2191,23 +2304,25 @@ int PASCAL NEAR setwlist P1_(char *, wclist)
  *
  * Place in a buffer a list of characters considered "in a word"
  */
- /***TODO: Missing size info***/
-CONST char *PASCAL NEAR getwlist P1_(char *, buf)
+ /*** TODO: Missing size info ***/
+CONST char * PASCAL NEAR getwlist P1_(char *, buf)
 /* buf: Buffer to place list of characters  */
 {
-    REGISTER int index;
-    REGISTER char *sp;
+    REGISTER int  index = 0;
+    REGISTER char *sp   = NULL;
 
     /* if we are defaulting to a standard word char list... */
-    if ( wlflag == FALSE )
+    if ( wlflag == FALSE )  {
         return ("");
+    }
 
     /* build the string of characters in the return buffer */
     sp = buf;
-    for ( index = 0; index < 256; index++ )
-        if ( wordlist[index] )
+    for ( index = 0; index < NELEM(wordlist); index++ ) {
+        if ( wordlist[index] )  {
             *sp++ = index;
-
+        }
+    }
     *sp = 0;
 
     return (buf);
@@ -2220,29 +2335,35 @@ CONST char *PASCAL NEAR getwlist P1_(char *, buf)
  */
 int PASCAL NEAR is_num P1_(char *, st)
 {
-    int period_flag;            /* have we seen a period yet? */
+    int period_flag = 0;            /* have we seen a period yet? */
+
+    ASRT(NULL != st);
 
     /* skip preceding whitespace */
-    while ( *st == ' ' || *st == '\t' )
+    while ( *st == ' ' || *st == '\t' ) {
         ++st;
+    }
 
     /* check for sign */
-    if ( (*st == '-') || (*st == '+') )
+    if ( (*st == '-') || (*st == '+') ) {
         ++st;
+    }
 
     /* scan digits */
     period_flag = FALSE;
     while ( (*st >= '0' && *st <= '9') ||
             (*st == '.' && period_flag == FALSE) ) {
-        if ( *st == '.' )
+        if ( *st == '.' ) {
             period_flag = TRUE;
+        }
         st++;
     }
 
     /* scan rest of line for just white space */
     while ( *st ) {
-        if ( (*st != '\t') && (*st != ' ') )
+        if ( (*st != '\t') && (*st != ' ') )  {
             return (FALSE);
+        }
 
         st++;
     }
@@ -2258,19 +2379,23 @@ int PASCAL NEAR dispvar P2_(int, f, int, n)
 /* f: Default flag                              */
 /* n: Numeric arg (can overide prompted value)  */
 {
-    REGISTER int status;        /* status return */
-    VDESC vd;                   /* variable num/type */
-    char var[NVSIZE+1];         /* name of variable to fetch */
+    REGISTER int  status  = 0;        /* status return              */
+    VDESC         vd;                 /* variable num/type          */
+    char          var[NVSIZE + 1];    /* name of variable to fetch  */
+
+    ZEROMEM(vd);
+    ZEROMEM(var);
 
     /* first get the variable to display.. */
-    if ( clexec == FALSE ) {
-        status = mlreply(TEXT55, &var[0], NVSIZE+1);
+    if ( clexec == FALSE )  {
+        status = mlreply(TEXT55, &var[0], NVSIZE + 1);
 /*               "Variable to display: " */
-        if ( status != TRUE )
+        if ( status != TRUE ) {
             return (status);
-    } else {            /* macro line argument */
+        }
+    } else                  {   /* macro line argument */
         /* grab token and skip it */
-        execstr = token(execstr, var, NVSIZE + 1);
+        BUFCPY(execstr, token(execstr, var, SIZEOF(var)));
     }
 
     /* check the legality and find the var */
@@ -2279,17 +2404,17 @@ int PASCAL NEAR dispvar P2_(int, f, int, n)
     /* if its not legal....bitch */
     if ( vd.v_type == -1 ) {
         mlwrite(TEXT52, var);
-
 /*          "%%No such variable as '%s'" */
+
         return (FALSE);
     }
 
     /* and display the value */
-    xstrcpy(outline, var);
-    xstrcat(outline, " = ");
+    BUFCPY(outline, var);
+    BUFCAT(outline, " = ");
 
     /* and lastly the current value */
-    xstrcat( outline, fixnull( getval(var) ) );
+    BUFCAT(outline, fixnull(getval(var)));
 
     /* write out the result */
     mlforce(outline);
@@ -2307,19 +2432,21 @@ int PASCAL NEAR dispvar P2_(int, f, int, n)
 int PASCAL NEAR desvars P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER BUFFER *varbuf;    /* buffer to put variable list into */
-    REGISTER int uindex;        /* index into uvar table */
-    UTABLE *ut;                 /* user variable table pointer */
-    PARG *cur_arg;              /* ptr to buffers argument list */
-    char outseq[NSTRING];       /* output buffer for keystroke sequence */
+    REGISTER BUFFER *varbuf   = NULL; /* buffer to put variable list into     */
+    REGISTER int    uindex    = 0;    /* index into uvar table                */
+    UTABLE          *ut       = NULL; /* user variable table pointer          */
+    PARG            *cur_arg  = NULL; /* ptr to buffers argument list         */
+    char            outseq[NSTRING];  /* output buffer for keystroke sequence */
+
+    ZEROMEM(outseq);
 
     /* and get a buffer for it */
     varbuf = bfind(TEXT56, TRUE, BFINVS);
 /*         "Variable list" */
     if ( varbuf == NULL || bclear(varbuf) == FALSE ) {
         mlwrite(TEXT57);
-
 /*          "Can not display variable list" */
+
         return (FALSE);
     }
 
@@ -2333,37 +2460,40 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
         /* add in the environment variable name */
         XSTRCPY(outseq, "$");
         XSTRCAT(outseq, envars[uindex]);
-        pad(outseq, 14);
+        CASRT(NELEM(outseq) >= C_14 + 1);
+        pad(outseq, C_14);
 
         /* add in the value */
         XSTRCAT(outseq, gtenv(envars[uindex]));
 
         /* and add it as a line into the buffer */
-        if ( addline(varbuf, outseq) != TRUE )
+        if ( addline(varbuf, outseq) != TRUE )  {
             return (FALSE);
+        }
     }
 
     /* build all the user variable lists */
     ut = uv_head;
     while ( ut ) {
-
         /* a blank line, please.... */
-        if ( addline(varbuf, "") != TRUE )
+        if ( addline(varbuf, "") != TRUE )  {
             return (FALSE);
+        }
 
         /* make a header for this list */
         XSTRCPY(outseq, "----- ");
-        if ( ut->bufp == (BUFFER *)NULL )
+        if ( ut->bufp == (BUFFER *)NULL ) {
             XSTRCAT(outseq, "Global User Variables");
-        else {
+        } else {
             XSTRCAT(outseq, "Defined in ");
             XSTRCAT(outseq, ut->bufp->b_bname);
             if ( ut->bufp->b_numargs > 0 ) {
                 XSTRCAT(outseq, "(");
                 cur_arg = ut->bufp->b_args;
                 while ( cur_arg ) {
-                    if ( cur_arg != ut->bufp->b_args )
+                    if ( cur_arg != ut->bufp->b_args )  {
                         XSTRCAT(outseq, ", ");
+                    }
                     XSTRCAT(outseq, cur_arg->name);
                     cur_arg = cur_arg->next;
                 }
@@ -2373,25 +2503,28 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
         XSTRCAT(outseq, " -----");
 
         /* and add it as a line into the buffer */
-        if ( addline(varbuf, outseq) != TRUE )
+        if ( addline(varbuf, outseq) != TRUE )  {
             return (FALSE);
+        }
 
         /* build this list */
         for ( uindex = 0; uindex < ut->size; uindex++ ) {
-            if ( ut->uv[uindex].u_name[0] == 0 )
+            if ( ut->uv[uindex].u_name[0] == 0 )  {
                 break;
-
+            }
             /* add in the user variable name */
             XSTRCPY(outseq, "%");
             XSTRCAT(outseq, ut->uv[uindex].u_name);
-            pad(outseq, 14);
+            CASRT(NELEM(outseq) >= C_14 + 1);
+            pad(outseq, C_14);
 
             /* add in the value */
             XSTRCAT(outseq, ut->uv[uindex].u_value);
 
             /* and add it as a line into the buffer */
-            if ( addline(varbuf, outseq) != TRUE )
+            if ( addline(varbuf, outseq) != TRUE )  {
                 return (FALSE);
+            }
         }
         ut = ut->next;
     }
@@ -2411,17 +2544,17 @@ int PASCAL NEAR desvars P2_(int, f, int, n)
 int PASCAL NEAR desfunc P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER BUFFER *fncbuf;    /* buffer to put function list into */
-    REGISTER int uindex;        /* index into funcs table */
-    char outseq[80];            /* output buffer for keystroke sequence */
+    REGISTER BUFFER *fncbuf;      /* buffer to put function list into     */
+    REGISTER int    uindex;       /* index into funcs table               */
+    char            outseq[C_80]; /* output buffer for keystroke sequence */
 
     /* get a buffer for the function list */
     fncbuf = bfind(TEXT211, TRUE, BFINVS);
 /*         "Function list" */
     if ( fncbuf == NULL || bclear(fncbuf) == FALSE ) {
         mlwrite(TEXT212);
-
 /*          "Can not display function list" */
+
         return (FALSE);
     }
 
@@ -2431,18 +2564,19 @@ int PASCAL NEAR desfunc P2_(int, f, int, n)
 
     /* build the function list */
     for ( uindex = 0; uindex < NELEM(funcs); uindex++ ) {
-
         /* add in the environment variable name */
         XSTRCPY(outseq, "&");
         XSTRCAT(outseq, funcs[uindex].f_name);
 
         /* and add it as a line into the buffer */
-        if ( addline(fncbuf, outseq) != TRUE )
+        if ( addline(fncbuf, outseq) != TRUE )  {
             return (FALSE);
+        }
     }
 
-    if ( addline(fncbuf, "") != TRUE )
+    if ( addline(fncbuf, "") != TRUE )  {
         return (FALSE);
+    }
 
     /* display the list */
     wpopup(fncbuf);

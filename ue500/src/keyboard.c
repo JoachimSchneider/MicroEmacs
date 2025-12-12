@@ -902,9 +902,11 @@ VOID cook P0_()
                 {
                     int       l     = 0;
                     int       i     = 0;
+#   if TRC_ON
                     CONST int *chp  = NULL;
 
                     chp = qget(&l);
+#   endif
                     TRC(("cook(): %s(%d)", "BEGIN Match", __LINE__));
                     for ( i = 0; i < l; i++ ) {
                         TRC(("cook():     %s", ectostr(chp[i])));
@@ -934,9 +936,11 @@ VOID cook P0_()
                     {
                         int       l     = 0;
                         int       i     = 0;
+#    if TRC_ON
                         CONST int *chp  = NULL;
 
                         chp = qget(&l);
+#    endif
                         TRC(("cook(): %s(%d)", "BEGIN NoMatch", __LINE__));
                         for ( i = 0; i < l; i++ ) {
                             TRC(("cook():     %s", ectostr(chp[i])));
@@ -963,9 +967,11 @@ VOID cook P0_()
     {
         int       l     = 0;
         int       i     = 0;
+#   if TRC_ON
         CONST int *chp  = NULL;
 
         chp = qget(&l);
+#   endif
         TRC(("cook(): %s(%d)", "BEGIN NoMatch", __LINE__));
         for ( i = 0; i < l; i++ ) {
             TRC(("cook():     %s", ectostr(chp[i])));

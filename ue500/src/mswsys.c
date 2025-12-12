@@ -80,7 +80,7 @@ static VOID PASCAL SetHourglass (BOOL hg);
 
 /* timeset: return a system-dependant time string */
 /* =======                                        */
-char *PASCAL timeset()
+char * PASCAL timeset()
 {
     REGISTER char *sp;  /* temp string pointer */
     time_t buf;         /* time data buffer */

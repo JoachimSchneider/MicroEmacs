@@ -727,14 +727,8 @@ int PASCAL NEAR newsize P2_(int, f, int, n)
     EWINDOW *lastwp;     /* last window scanned */
     int lastline;       /* screen line of last line of current window */
     int cmark;                  /* current mark */
-#if     LOGFLG
-    FILE *fp;
-
     /* append the current command to the log file */
-    fp = fopen("emacs.log", "a");
-    fprintf(fp, "<newsize %s %d>\n", f == TRUE ? "TRUE" : "FALSE", n);
-    fclose(fp);
-#endif
+    MTC(("<newsize %s %d>", f == TRUE ? "TRUE" : "FALSE", n));
 
 #if     WINDOW_MSWIN
     ++n;        /* in this implementation, the message line is not part of the
@@ -836,17 +830,9 @@ int PASCAL NEAR newwidth P2_(int, f, int, n)
 /* f, n:  Default flag and numeric argument */
 {
     REGISTER EWINDOW *wp;
-#if     LOGFLG
-    FILE *fp;                           /* file handle for log file */
-#endif
 
-#if     LOGFLG
     /* append the current command to the log file */
-    fp = fopen("emacs.log", "a");
-    fprintf(fp, "<newwidth %s %d>\n", f == TRUE ? "TRUE" : "FALSE", n);
-    fclose(fp);
-#endif
-
+    MTC(("<newwidth %s %d>", f == TRUE ? "TRUE" : "FALSE", n));
     /* if the command defaults, assume the largest */
     if ( f == FALSE )
         n = term.t_mcol;

@@ -820,7 +820,7 @@ char *cmd;      /*  Incoming command line to execute  */
 
 /* return a system dependant string with the current time */
 
-char *PASCAL NEAR timeset()
+char * PASCAL NEAR timeset()
 {
 # if     MWC | TURBO | IC | MSC
     REGISTER char *sp;          /* temp string pointer */
@@ -848,7 +848,7 @@ char rbuf[NFILEN];      /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -898,7 +898,7 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     REGISTER int index;                 /* index into various strings */
     REGISTER int point;                 /* index into other strings */
@@ -927,7 +927,7 @@ char rbuf[NFILEN];      /* return file buffer */
 
 /*  do a wild card directory search (for file name completion) */
 
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* pattern to match */
 
@@ -977,7 +977,7 @@ char *fspec;    /* pattern to match */
     return (rbuf);
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     REGISTER int index;                 /* index into various strings */
     REGISTER int point;                 /* index into other strings */
@@ -998,7 +998,7 @@ char *PASCAL NEAR getnfile()
     return (rbuf);
 }
 #  else
-char *PASCAL NEAR getffile(fspec)
+char * PASCAL NEAR getffile(fspec)
 
 char *fspec;    /* file to match */
 
@@ -1006,7 +1006,7 @@ char *fspec;    /* file to match */
     return (NULL);
 }
 
-char *PASCAL NEAR getnfile()
+char * PASCAL NEAR getnfile()
 {
     return (NULL);
 }

@@ -523,7 +523,7 @@ int PASCAL NEAR getregion P1_(REGION *, rp)
  * Copy all of the characters in the region to the string buffer. It is
  * assumed that the buffer size is at least one plus the region size.
  */
-char *PASCAL NEAR regtostr P2_(char *, buf, REGION *, region)
+char * PASCAL NEAR regtostr P2_(char *, buf, REGION *, region)
 {
     REGISTER LINE   *linep;
     REGISTER int loffs;
@@ -554,7 +554,7 @@ char *PASCAL NEAR regtostr P2_(char *, buf, REGION *, region)
  *
  * Return some of the contents of the current region
  */
-CONST char *PASCAL NEAR getreg P1_(char *, value)
+CONST char * PASCAL NEAR getreg P1_(char *, value)
 {
     REGION region;
 
