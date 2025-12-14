@@ -87,6 +87,24 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2025-12-14.00]
+  * Fixed a bug in the `&call' macro function: Constructs like
+    ```
+    store-procedure M0
+      !return "X"
+    !endm
+
+    set %R &cat &cal M0 "Y"
+    ```
+    would set `%R` to garbage line  `X+7Af^!("` and *not* to `XY`.
+
+  * Extensive macro tracing (when `LOGFLG = 1` is set in estruct.h).
+   Macro trace messages start with 'MTC ': To filter them out use
+   ```
+   grep '^MTC '  "${EMACS_TRC_FILE}"
+   ```
+   if you are on a Unix system.
+
 [2025-04-11.00]
   * It compiles and runs on BSD 4.1. This is a really old (1981) UNIX:
     - No select() call
@@ -450,10 +468,13 @@ modern Linux and FreeBSD systems:
 
 
 ## TODO
+
+- The macro capabilities should be compared with those of Jasspa
+  MicroEmacs (<http://www.jasspa.com/>).
+- UTF-8 support
 - Compile on Windows:
   + Borland C++
   + MSC
-- UTF-8 support
 
 
 

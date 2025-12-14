@@ -2816,7 +2816,7 @@ int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 
         ZEROMEM(ap);
 
-        fprintf(TFP, "%3s(%12s/%04d): ", DebugMessage_tag_,
+        fprintf(TFP, "%3s (%12s/%04d): ", DebugMessage_tag_,
                 xbasenam(DebugMessage_fname_), DebugMessage_lnno_);
 #if VARG
         va_start(ap);

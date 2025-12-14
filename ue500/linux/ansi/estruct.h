@@ -314,7 +314,7 @@
 #define REPAIR_CODE_LINE      (1)
 /* See eproto.h: If TRC_FILE_ENVVAR is defined generate trace output  */
 /* into this file:                                                    */
-#define UEMACS_TRC            (0)
+#define UEMACS_TRC            (1)
 #define TRC_FILE_ENVVAR       "EMACS_TRC_FILE"
 
 
