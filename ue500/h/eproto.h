@@ -2218,7 +2218,7 @@ EXTERN int PASCAL NEAR          lowerc DCL((char ch));
 EXTERN int PASCAL NEAR          cycle_ring DCL((int f, int n));
 EXTERN int PASCAL NEAR          upperc DCL((char ch));
 EXTERN ue_fnc_T                 fncmatch DCL((CONST char *fname));
-EXTERN ue_fnc_T                 getname DCL((CONST char *prompt));
+EXTERN CONST char * PASCAL NEAR getname DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR          asc_int DCL((CONST char *st));
 EXTERN int                      dspram DCL((void));
 EXTERN VOID                     lckerror DCL((char *errstr));
@@ -2532,7 +2532,8 @@ EXTERN int PASCAL NEAR          quickexit DCL((int f, int n));
 EXTERN int PASCAL NEAR          quit DCL((int f, int n));
 EXTERN int PASCAL NEAR          quote DCL((int f, int n));
 EXTERN int PASCAL NEAR          rdonly DCL((void));
-EXTERN int PASCAL NEAR          readin DCL((const char *fname, int lockfl));
+EXTERN int PASCAL NEAR          readin_hk DCL((const char *fname, int lockfl, int hook));
+#define                         readin(fname, lockfl) ( readin_hk((fname), (lockfl), TRUE) )
 EXTERN int PASCAL NEAR          refresh DCL((int f, int n));
 EXTERN int PASCAL NEAR          remmark DCL((int f, int n));
 EXTERN int PASCAL NEAR          reposition DCL((int f, int n));

@@ -472,7 +472,8 @@ modern Linux and FreeBSD systems:
 - The macro capabilities should be compared with those of Jasspa
   MicroEmacs (<http://www.jasspa.com/>).
 - UTF-8 support
-- Compile on Windows:
+- Windows buffer names should not include the file path
+- Compile on (native --- not cygwin) Windows:
   + Borland C++
   + MSC
 

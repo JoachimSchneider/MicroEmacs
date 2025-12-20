@@ -112,7 +112,7 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
 
     /* prompt the user to type in a key to bind */
     /* get the function name to bind it to */
-    kfunc = getname(TEXT15);
+    kfunc = fncmatch(getname(TEXT15));
 /*          ": bind-to-key " */
     if ( kfunc == NULL ) {
         mlwrite(TEXT16);
@@ -975,12 +975,15 @@ CONST char * PASCAL NEAR getfname P1_(KEYTAB *, key)
  */
 ue_fnc_T fncmatch P1_(CONST char *, fname)
 {
-    int nval;
+    int nval  = 0;
 
-    if ( ( nval = binary(fname, namval, numfunc, NSTRING) ) == -1 )
+    if        ( NULL == fname )                                             {
+        return NULL;
+    } else if ( ( nval = binary(fname, namval, numfunc, NSTRING) ) == -1 )  {
         return (NULL);
-    else
+    } else                                                                  {
         return (names[nval].n_func);
+    }
 }
 
 /* NAMVAL:
@@ -1147,13 +1150,16 @@ int set_key P2_(KEYTAB *, key, CONST char *, name)
 /* key:   Ptr to key to set           */
 /* name:  Name of function or buffer  */
 {
-    ue_fnc_T        ktemp;        /* temp function pointer to assign  */
-    REGISTER BUFFER *kmacro;      /* ptr to buffer of macro to bind
-                                   * to key                           */
-    char            bufn[NBUFN];  /* buffer to hold macro name        */
+    ue_fnc_T        ktemp   = NULL; /* temp function pointer to assign        */
+    REGISTER BUFFER *kmacro = NULL; /* ptr to buffer of macro to bind to key  */
+    char            bufn[NBUFN];    /* buffer to hold macro name              */
 
-    /* are we unbinding it? */
-    if ( *name == 0 ) {
+    ZEROMEM(bufn);
+
+    ASRT(NULL != name);
+
+   /* are we unbinding it? */
+    if ( *name == '\0' )  {
         key->k_type = BINDNUL;
 
         return (TRUE);
@@ -1162,26 +1168,26 @@ int set_key P2_(KEYTAB *, key, CONST char *, name)
     /* bind to a built in function? */
     if ( ( ktemp = fncmatch(name) ) != NULL ) {
         key->k_ptr.fp = ktemp;
-        key->k_type = BINDFNC;
+        key->k_type   = BINDFNC;
 
         return (TRUE);
     }
 
     /* is it a procedure/macro? */
-    XSTRCPY(bufn, "[");
-    XSTRCAT(bufn, name);
-    XSTRCAT(bufn, "]");
-    if ( ( kmacro=bfind(bufn, FALSE, 0) ) != NULL ) {
-        key->k_ptr.buf = kmacro;
-        key->k_type = BINDBUF;
+    BUFCPY(bufn, "[");
+    BUFCAT(bufn, name);
+    BUFCAT(bufn, "]");
+    if ( ( kmacro = bfind(bufn, FALSE, 0) ) != NULL ) {
+        key->k_ptr.buf  = kmacro;
+        key->k_type     = BINDBUF;
 
         return (TRUE);
     }
 
     /* not anything we can bind to */
-    mlwrite(TEXT16);
+    mlwrite(TEXT244, name);
+/* "%%No such function as '%s'" */
 
-/*      "[No such function]" */
     return (FALSE);
 }
 

@@ -269,11 +269,11 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
  * Read file "fname" into the current buffer, blowing away any text
  * found there. Called by both the read and find commands. Return the
  * final status of the read. Also called by the mainline, to read in a
- * file specified on the command line as an argument. The command in
- * $readhook is called after the buffer is set up and before it is
- * read.
+ * file specified on the command line as an argument. If `hook' is TRUE
+ * the command in $readhook is called after the buffer is set up and
+ * before it is read.
  */
-int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
+int PASCAL NEAR readin_hk P3_(const char *, fname, int, lockfl, int, hook)
 /* fname:   Name of file to read  */
 /* lockfl:  Check for file locks? */
 {
@@ -287,9 +287,15 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
     REGISTER int cmark;         /* current mark */
     int nbytes;
     char mesg[NSTRING];
-
 #if     FILOCK
     int force_read = FALSE;
+#endif
+
+    if ( !fname || !*fname )  {
+        return FALSE;
+    }
+
+#if     FILOCK
     if ( lockfl && lockchk(fname) == ABORT )
         force_read = TRUE;
 #endif
@@ -302,7 +308,9 @@ int PASCAL NEAR readin P2_(CONST char *, fname, int, lockfl)
     XSTRCPY(bp->b_fname, fname);
 
     /* let a user macro get hold of things...if he wants */
-    execkey(&readhook, FALSE, 1);
+    if ( TRUE == hook ) {
+        execkey(&readhook, FALSE, 1);
+    }
 
 #if     CRYPT
     /* set up for decryption */

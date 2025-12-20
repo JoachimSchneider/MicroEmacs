@@ -83,6 +83,7 @@ int PASCAL NEAR nextbuffer P2_(int, f, int, n)
 /* SWBUFFER:
  *
  * Make buffer BP current
+ * hook: Execute `exbhook' if TRUE
  */
 int PASCAL NEAR swbuffer P1_(BUFFER *, bp)
 {

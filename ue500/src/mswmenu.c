@@ -1349,7 +1349,7 @@ PASCAL bindtomenu (int f, int n)
 {
     ETYPE EPOINTER e;
 
-    e.fp = getname (TEXT304);   /* "Function: " */
+    e.fp = fncmatch(getname (TEXT304)); /* "Function: " */
     if ( e.fp == NULL ) {
         mlwrite (TEXT16);       /* "[No such function]" */
 

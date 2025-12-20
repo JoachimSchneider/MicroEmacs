@@ -186,16 +186,12 @@ int PASCAL NEAR ctoec P1_(int, c)
  * that pressing a <SPACE> will attempt to complete an unfinished
  * command name if it is unique.
  */
-ue_fnc_T getname P1_(CONST char *, prompt)
+CONST char * PASCAL NEAR  getname P1_(CONST char *, prompt)
 {
+    ASRT(NULL != prompt);
+
     /* ptr to the returned string:  */
-    CONST char  *sp = complete(prompt, NULL, CMP_COMMAND, NSTRING);
-
-    if ( sp == NULL ) {
-        return (NULL);
-    }
-
-    return ( fncmatch(sp) );
+    return complete(prompt, NULL, CMP_COMMAND, NSTRING);
 }
 
 /* GETCBUF:
@@ -1139,7 +1135,7 @@ static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
         /* if we are at the end, just match it */
         if ( c == '\n'  ||  c == '\r' ) {
             if ( defval && cpos == 0 )  {
-                XSTRCPY(buf, defval);
+                BUFCPY(buf, defval);
 
                 return (buf);
             } else                      {
@@ -1200,7 +1196,7 @@ static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
                     ( ( home_ptr = getenv("HOME") ) != (char *)NULL ) ) {
             /* save the user name! */
             buf[cpos] = 0;
-            XSTRCPY(user_name, &buf[1]);
+            BUFCPY(user_name, &buf[1]);
 
             /* erase the chars on-screen */
             while ( cpos > 0 ) {

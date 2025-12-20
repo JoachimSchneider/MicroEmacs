@@ -90,32 +90,58 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
 
         /* and look it up */
         if ( ( kfunc = fncmatch(buffer) ) == NULL ) {
-            mlwrite(TEXT16);
-            /* "[No such Function]" */
+            mlwrite(TEXT244, buffer);
+            /* "%%No such function as '%s'" */
 
             return (FALSE);
         }
 
-        /* and execute it  INTERACTIVE */
+        /* and execute it INTERACTIVE */
         clexec = FALSE;
-        status = (*kfunc)(f, n);                /* call the function */
+        status = (*kfunc)(f, n);        /* call the function */
         clexec = TRUE;
 
         return (status);
     }
 
+
+    /* === Interactive mode: === */
+    /* ------------------------- */
+
     /* prompt the user to type a named command */
     /* and get the function name to execute */
-    kfunc = getname(": ");
-    if ( kfunc == NULL ) {
-        mlwrite(TEXT16);
-        /* "[No such function]" */
+    BUFCPY(buffer, getname(": "));
+    if ( NULL != (kfunc = fncmatch(buffer)) ) { /* It is a function */
+        /* And then execute the command:  */
+        return ( (*kfunc)(f, n) );
+    } else                                    { /* Not a function   */
+        BUFFER  *bp     = NULL;
+        int     oldcle  = 0;
+        char    bufn[NSTRING];
 
-        return (FALSE);
+        ZEROMEM(bufn);
+
+        /* construct the buffer name */
+        BUFCPY(bufn, "[");
+        BUFCAT(bufn, buffer);
+        BUFCAT(bufn, "]");
+
+        /* find the pointer to that buffer: */
+        if ( NULL == (bp = bfind(bufn, FALSE, 0)) ) { /* Not a macro  */
+            mlwrite(TEXT244, buffer);
+            /* "%%No such function as '%s'" */
+
+            return FALSE;
+        }
+
+        /* execute the buffer */
+        oldcle = clexec;                /* save old clexec flag */
+        clexec = TRUE;                  /* in cline execution */
+        status = dobuf(bp);
+        clexec = oldcle;                /* restore clexec flag */
+
+        return status;
     }
-
-    /* and then execute the command */
-    return ( (*kfunc)(f, n) );
 }
 
 /* EXECCMD:
@@ -244,9 +270,9 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
         BUFCAT(bufn, "]");
 
         /* find the pointer to that buffer: */
-        if ( ( bp=bfind(bufn, FALSE, 0) ) == NULL ) { /* Not a macro  */
-            mlwrite(TEXT16);
-            /* "[No such Function]" */
+        if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) { /* Not a macro  */
+            mlwrite(TEXT244, tkn);
+            /* "%%No such function as '%s'" */
 
             docmd_RET(FALSE);
         }
@@ -664,18 +690,42 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
 int PASCAL NEAR execbuf P2_(int, f, int, n)
 /* default flag and numeric arg */
 {
-    REGISTER BUFFER *bp     = NULL;   /* ptr to buffer to execute */
-    REGISTER int    status  = 0;      /* status return */
+    REGISTER BUFFER *bp     = NULL;     /* ptr to buffer to execute */
+    REGISTER int    status  = 0;        /* status return */
+    char            bufn[NSTRING];
+    int             oldcle  = 0;
 
-    /* find out what buffer the user wants to execute */
-    if ( NULL == (bp = getcbuf(TEXT117, curbp->b_bname, FALSE)) ) {
-/*                        "Execute buffer: " */
-        return (ABORT);
+    ZEROMEM(bufn);
+
+    if ( clexec == TRUE ) {             /* if we are non-interactive: */
+        /* grab token and advance past */
+        BUFCPY(execstr, token(execstr, bufn, SIZEOF(bufn)));
+        /* evaluate it */
+        BUFCPY(bufn, fixnull(getval(bufn)));
+        if ( strcmp(bufn, errorm) == 0 )  {
+            return (FALSE);
+        }
+    } else                {
+        /* prompt the user to type the name of the buffer to execute: */
+        BUFCPY(bufn, getname(TEXT117));
+    }
+
+    /* find the pointer to that buffer: */
+    if ( NULL == (bp = bfind(bufn, FALSE, 0)) ) {
+        mlwrite(TEXT244, bufn);
+        /* "%%No such function as '%s'" */
+
+        return ABORT;
     }
 
     /* and now execute it as asked */
     while ( n-- > 0 ) {
-        if ( ( status = dobuf(bp) ) != TRUE ) {
+        oldcle = clexec;                /* save old clexec flag */
+        clexec = TRUE;                  /* in cline execution */
+        status = dobuf(bp);
+        clexec = oldcle;                /* restore clexec flag */
+
+        if ( status != TRUE ) {
             return (status);
         }
     }
@@ -775,6 +825,25 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
     ASRT(0 <= line);
 
     MTC_dobuf(("%s", "BEGIN"));
+
+    /* If necessary activate the buffer:  */
+    {
+        BUFFER  *xp = curbp;
+
+        /* Must switch the current buffer as `readin_hk()' uses it!   */
+        curbp = bp;                         /* Switch.                */
+        bp->last_access = access_time;
+        if ( curbp->b_active != TRUE ) {    /* buffer not active yet  */
+             MTC_dobuf(("%s", "Activate buffer"));
+            /* read it in and activate it */
+            readin_hk(curbp->b_fname, ((curbp->b_mode & MDVIEW) == 0), FALSE);
+            curbp->b_dotp = lforw(curbp->b_linep);
+            set_b_doto(curbp, 0);
+            curbp->b_active = TRUE;
+        }
+        curbp = xp;                         /* Switch back.           */
+    }
+
     /* clear IF level flags/while ptr */
     execlevel = 0;
     whlist = NULL;
