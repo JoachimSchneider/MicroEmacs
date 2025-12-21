@@ -112,7 +112,7 @@ int PASCAL NEAR bindtokey P2_(int, f, int, n)
 
     /* prompt the user to type in a key to bind */
     /* get the function name to bind it to */
-    kfunc = fncmatch(getname(TEXT15));
+    kfunc = fncmatch(getfncname(TEXT15));
 /*          ": bind-to-key " */
     if ( kfunc == NULL ) {
         mlwrite(TEXT16);

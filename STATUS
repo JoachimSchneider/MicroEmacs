@@ -1642,6 +1642,37 @@ TODOs:  (All done now --- 2025-06-08)
 - adapt the other language files
 
 
+[2025-12-21.00]
+
+We should investigate
+
+  efunc.inc:    { "execute-buffer", execbuf },          -- Exec buffer of commands, INTERACTIVE && CLEXEC, Completion
+  efunc.inc:    { "execute-command-line", execcmd },    -- Exec macro or function, INTERACTIVE
+  efunc.inc:    { "execute-file", execfile },           -- Exec file of commands, INTERACTIVE
+  efunc.inc:    { "execute-macro", ctlxe },             -- Exec keyboard macro
+  efunc.inc:    { "execute-named-command", namedcmd },  -- Exec function (originally), INTERACTIVE && CLEXEC, Completion
+  efunc.inc:    { "execute-procedure", execproc },      -- Exec macro, INTERACTIVE
+
+  ===> Proposed changes:
+        (a) execfile  ---> INTERACTIVE && CLEXEC, Completion    ===> DONE
+        (b) execproc  ---> INTERACTIVE && CLEXEC
+        (c) execcmd   ---> INTERACTIVE && CLEXEC
+        (d) Rebind M-x from `execute-named-command' to `execute-command-line'
+        (e) Implement completion for the INTERACTIVE Modes of
+            - execproc
+            - execfile
+            - execcmd
+
+* We've already fixed `execbuf' so that it may execute every buffer ---
+  not only the current one.
+
+* Should `namedcmd' first try to execute a bulit-in and if there is no
+  buitin with the specified name try to execute a macro?
+
+* All should try to complete the users input like
+  `execute-named-command' does.
+
+
 #============================== TODO LIST ==============================
 
 - Windows and DJGPP emacs sets \\<host>\<share>\<file> arguments to read-only.  ===> DONE

@@ -87,6 +87,10 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2025-12-21.00]
+  * Fixed execbuf() ("execute-buffer"): It is now able to execute *any*
+    buffer --- not just the current one.
+
 [2025-12-14.00]
   * Fixed a bug in the `&call' macro function: Constructs like
     ```

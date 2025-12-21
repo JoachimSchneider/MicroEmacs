@@ -180,13 +180,46 @@ int PASCAL NEAR ctoec P1_(int, c)
     return (c);
 }
 
-/* GETNAME:
+/* GETBUFNAME:
+ *
+ * Get a buffer name from the command line. Buffer name completion
+ * means that pressing a <SPACE> will attempt to complete an unfinished
+ * buffer name if it is unique.
+ */
+CONST char * PASCAL NEAR  getbufname P1_(CONST char *, prompt)
+{
+    char  *dflt = NULL;
+
+    ASRT(NULL != prompt);
+
+    if ( NULL != curbp )  {
+        dflt = curbp->b_bname;
+    }
+    /* ptr to the returned string:  */
+    return complete(prompt, dflt, CMP_BUFFER, NSTRING);
+}
+
+/* GETFILNAME:
  *
  * Get a command name from the command line. Command completion means
  * that pressing a <SPACE> will attempt to complete an unfinished
  * command name if it is unique.
  */
-CONST char * PASCAL NEAR  getname P1_(CONST char *, prompt)
+CONST char * PASCAL NEAR  getfilname P1_(CONST char *, prompt)
+{
+    ASRT(NULL != prompt);
+
+    /* ptr to the returned string:  */
+    return complete(prompt, NULL, CMP_FILENAME, NSTRING);
+}
+
+/* GETFNCNAME:
+ *
+ * Get a command name from the command line. Command completion means
+ * that pressing a <SPACE> will attempt to complete an unfinished
+ * command name if it is unique.
+ */
+CONST char * PASCAL NEAR  getfncname P1_(CONST char *, prompt)
 {
     ASRT(NULL != prompt);
 
@@ -1101,6 +1134,8 @@ static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
 
     ZEROMEM(user_name);
     ZEROMEM(buf);
+
+    maxlen  = MIN2(SIZEOF(buf) - 1, MAX2(maxlen, 0));
 
     /* if we are executing a command line get the next arg and match it */
     if ( clexec ) {

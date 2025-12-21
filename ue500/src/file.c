@@ -264,66 +264,74 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
     return ( readin(fname, lockfl) );   /* Read it in.      */
 }
 
-/* READIN:
+/* READINX:
  *
- * Read file "fname" into the current buffer, blowing away any text
- * found there. Called by both the read and find commands. Return the
- * final status of the read. Also called by the mainline, to read in a
- * file specified on the command line as an argument. If `hook' is TRUE
- * the command in $readhook is called after the buffer is set up and
- * before it is read.
+ * Read file "fname" into the buffer given as argument, blowing away
+ * any text * found there. Called by both the read and find commands.
+ * Return the * final status of the read. Also called by the mainline,
+ * to read in a * file specified on the command line as an argument. If
+ * `hook' is TRUE * the command in $readhook is called after the buffer
+ * is set up and before it is read.
  */
-int PASCAL NEAR readin_hk P3_(const char *, fname, int, lockfl, int, hook)
+int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int, hook)
 /* fname:   Name of file to read  */
 /* lockfl:  Check for file locks? */
+/* bp:      Buffer to fill        */
+/* hook:    Call $readhook?       */
 {
-    REGISTER LINE *lp1;
-    REGISTER LINE *lp2;
-    REGISTER int i;
-    REGISTER EWINDOW *wp;
-    REGISTER BUFFER *bp;
-    REGISTER int s;
-    REGISTER long nline;
-    REGISTER int cmark;         /* current mark */
-    int nbytes;
-    char mesg[NSTRING];
+    REGISTER LINE     *lp1        = NULL;
+    REGISTER LINE     *lp2        = NULL;
+    REGISTER int      i           = 0;
+    REGISTER EWINDOW  *wp         = NULL;
+    REGISTER int      s           = 0;
+    REGISTER long     nline       = 0;
+    REGISTER int      cmark       = 0;          /* current mark     */
+    int               nbytes      = 0;
+    char              mesg[NSTRING];
 #if     FILOCK
-    int force_read = FALSE;
+    int               force_read  = FALSE;
 #endif
+
+    ZEROMEM(mesg);
+
+    ASRT(NULL != bp);
 
     if ( !fname || !*fname )  {
         return FALSE;
     }
 
 #if     FILOCK
-    if ( lockfl && lockchk(fname) == ABORT )
+    if ( lockfl && lockchk(fname) == ABORT )  {
         force_read = TRUE;
+    }
 #endif
 
-    bp = curbp;                                 /* Cheap.       */
-    if ( ( s=bclear(bp) ) != TRUE )             /* Might be old.    */
+    if ( !(s = bclear(bp)) )  {                 /* Might be old.    */
         return (s);
+    }
 
     bp->b_flag &= ~(BFINVS|BFCHG);
-    XSTRCPY(bp->b_fname, fname);
+    BUFCPY(bp->b_fname, fname);
 
     /* let a user macro get hold of things...if he wants */
-    if ( TRUE == hook ) {
+    if ( hook ) {
         execkey(&readhook, FALSE, 1);
     }
 
 #if     CRYPT
     /* set up for decryption */
     s = resetkey();
-    if ( s != TRUE )
+    if ( !s ) {
         return (s);
+    }
 #endif
 
     /* turn off ALL keyboard translation in case we get a dos error */
     TTkclose();
 
-    if ( ( s=ffropen(fname) ) == FIOERR )       /* Hard file open.  */
+    if ( (s = ffropen(fname)) == FIOERR ) {     /* Hard file open.  */
         goto out;
+    }
 
     if ( s == FIOFNF ) {                        /* File not found.  */
         mlwrite(TEXT138);
@@ -334,59 +342,63 @@ int PASCAL NEAR readin_hk P3_(const char *, fname, int, lockfl, int, hook)
     /* read the file in */
     mlwrite(TEXT139);
 /*              "[Reading file]" */
-    nline = 0L;
-    while ( ( s=ffgetline(&nbytes) ) == FIOSUC ) {
-        if ( ( lp1=lalloc(nbytes) ) == NULL ) {
-            s = FIOMEM;                         /* Keep message on the  */
-            break;                              /* display.     */
+    /* `nline = 0;': Initialized above  */
+    while ( (s = ffgetline(&nbytes)) == FIOSUC )  {
+        if ( (lp1 = lalloc(nbytes)) == NULL ) {
+            s = FIOMEM;                         /* Keep message on  */
+            break;                              /* the display.     */
         }
-        lp2 = lback(curbp->b_linep);
+        lp2 = lback(bp->b_linep);
         lp2->l_fp = lp1;
-        lp1->l_fp = curbp->b_linep;
+        lp1->l_fp = bp->b_linep;
         lp1->l_bp = lp2;
-        curbp->b_linep->l_bp = lp1;
-        for ( i=0; i<nbytes; ++i )
+        bp->b_linep->l_bp = lp1;
+        for ( i=0; i < nbytes; ++i )  {
             lputc(lp1, i, fline[i]);
+        }
         ++nline;
     }
     ffclose();                                  /* Ignore errors.   */
 
 #if ( b_IS_UNIX )
     /* if we don't have write priviledges, make this in VIEW mode */
-    if ( s !=FIOERR && s != FIOFNF ) {
-        if ( umc_access(fname, 2 /* W_OK*/) != 0 )
-            curbp->b_mode |= MDVIEW;
+    if ( s != FIOERR && s != FIOFNF ) {
+        if ( umc_access(fname, 2 /* W_OK*/) != 0 )  {
+            bp->b_mode |= MDVIEW;
+        }
     }
 #endif
 
-    XSTRCPY(mesg, "[");
-    if ( s==FIOERR ) {
-        XSTRCAT(mesg, TEXT141);
+    BUFCPY(mesg, "[");
+    if ( s == FIOERR )  {
+        BUFCAT(mesg, TEXT141);
 /*                           "I/O ERROR, " */
-        curbp->b_flag |= BFTRUNC;
+        bp->b_flag |= BFTRUNC;
     }
-    if ( s == FIOMEM ) {
-        XSTRCAT(mesg, TEXT142);
+    if ( s == FIOMEM )  {
+        BUFCAT(mesg, TEXT142);
 /*                           "OUT OF MEMORY, " */
-        curbp->b_flag |= BFTRUNC;
+        bp->b_flag |= BFTRUNC;
     }
-    XSTRCAT(mesg, TEXT140);
+    BUFCAT(mesg, TEXT140);
 /*                   "Read " */
-    XSTRCAT( mesg, long_asc(nline) );
-    XSTRCAT(mesg, TEXT143);
+    BUFCAT(mesg, long_asc(nline));
+    BUFCAT(mesg, TEXT143);
 /*                   " line" */
-    if ( nline > 1L )
-        XSTRCAT(mesg, "s");
-    XSTRCAT(mesg, "]");
+    if ( nline > 1 )  {
+        BUFCAT(mesg, "s");
+    }
+    BUFCAT(mesg, "]");
     mlwrite(mesg);
 
-out:    TTkopen();      /* open the keyboard again */
-    for ( wp=wheadp; wp!=NULL; wp=wp->w_wndp ) {
-        if ( wp->w_bufp == curbp ) {
-            wp->w_linep = lforw(curbp->b_linep);
-            wp->w_dotp  = lforw(curbp->b_linep);
+out:
+    TTkopen();  /* open the keyboard again */
+    for ( wp = wheadp; wp != NULL; wp = wp->w_wndp )  {
+        if ( wp->w_bufp == bp ) {
+            wp->w_linep = lforw(bp->b_linep);
+            wp->w_dotp  = lforw(bp->b_linep);
             set_w_doto(wp, 0);
-            for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+            for ( cmark = 0; cmark < NMARKS; cmark++ )  {
                 wp->w_markp[cmark] = NULL;
                 wp->w_marko[cmark] = 0;
             }
@@ -394,13 +406,14 @@ out:    TTkopen();      /* open the keyboard again */
         }
     }
 #if     FILOCK
-    if ( force_read == TRUE ) {
-        curbp->b_mode |= MDVIEW;
+    if ( force_read ) {
+        bp->b_mode |= MDVIEW;
         upmode();
     }
 #endif
-    if ( s == FIOERR || s == FIOFNF )           /* False if error.  */
+    if ( s == FIOERR || s == FIOFNF ) {         /* False if error.  */
         return (FALSE);
+    }
 
     return (TRUE);
 }

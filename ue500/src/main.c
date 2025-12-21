@@ -1089,16 +1089,17 @@ int PASCAL NEAR ctlxe P2_(int, f /* prefix flag */,
 {
     if ( kbdmode != STOP ) {
         mlwrite(TEXT105);
-
 /*          "%%Macro already active" */
+
         return (FALSE);
     }
-    if ( n <= 0 )
+    if ( n <= 0 ) {
         return (TRUE);
+    }
 
-    kbdrep = n;                         /* remember how many times to execute */
+    kbdrep = n;                 /* remember how many times to execute */
     kbdmode = PLAY;             /* start us in play mode */
-    kbdptr = &kbdm[0];          /*    at the beginning */
+    kbdptr = &kbdm[0];          /* at the beginning */
 
     return (TRUE);
 }
