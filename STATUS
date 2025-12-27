@@ -1650,18 +1650,20 @@ We should investigate
   efunc.inc:    { "execute-command-line", execcmd },    -- Exec macro or function, INTERACTIVE
   efunc.inc:    { "execute-file", execfile },           -- Exec file of commands, INTERACTIVE
   efunc.inc:    { "execute-macro", ctlxe },             -- Exec keyboard macro
-  efunc.inc:    { "execute-named-command", namedcmd },  -- Exec function (originally), INTERACTIVE && CLEXEC, Completion
+  efunc.inc:    { "execute-named-command", namedcmd },  -- Exec function, INTERACTIVE && CLEXEC, Completion
   efunc.inc:    { "execute-procedure", execproc },      -- Exec macro, INTERACTIVE
 
   ===> Proposed changes:
+        Check nammedcmd, exec* for clexec:
+
         (a) execfile  ---> INTERACTIVE && CLEXEC, Completion    ===> DONE
-        (b) execproc  ---> INTERACTIVE && CLEXEC
-        (c) execcmd   ---> INTERACTIVE && CLEXEC
+        (b) execproc  ---> INTERACTIVE && CLEXEC                ===> DONE
+        (c) execcmd   ---> INTERACTIVE && CLEXEC                ===> DONE
         (d) Rebind M-x from `execute-named-command' to `execute-command-line'
         (e) Implement completion for the INTERACTIVE Modes of
-            - execproc
-            - execfile
+            - execfile  ==> DONE
             - execcmd
+            - execproc
 
 * We've already fixed `execbuf' so that it may execute every buffer ---
   not only the current one.
@@ -1671,6 +1673,73 @@ We should investigate
 
 * All should try to complete the users input like
   `execute-named-command' does.
+
+
+[2025-12-26.00]
+
+- `INT':  Interactive
+- `CLN':  Command Line, i.e. Macro Code
+- `IMD':  Interactive Mode  -- one of INT, CLN
+- `CMD':  Command Line      -- one of INT, CLN
+- `EXEC": Executes          -- one ore more of ((B)uffer, (C)ommand --- i.e. builtin
+                               function, (F)ile, (P)rocedure
+
+                                        Old: INT  CLN IMD CMD EXEC | New: INT  CLN IMD CMD EXEC | Remarks
+===================================================================|============================|=========
+{ "execute-buffer", execbuf },                X       CLN     B    |       X    X  CLN CLN B    |
+{ "execute-command-line", execcmd },          X    X  CLN CLN CP   |       X    X  CLN CLN CP   | Sets `execlevel = 0'
+{ "execute-file", execfile },                 X       CLN     F    |       X    X  CLN CLN F    |
+{ "execute-procedure", execproc },            X       CLN     P    |       X    X  CLN CLN P    |
+{ "execute-named-command", namedcmd },        X    X  INT INT C    |       X    X  INT INT C    |
+
+
+Tests:
+
+                                        Old: INT  CLN   | New: INT  CLN
+========================================================|==============
+{ "execute-buffer", execbuf },                Y    Y    |       Y    Y
+{ "execute-command-line", execcmd },          Y    (Y)* |       Y    Y
+{ "execute-file", execfile },                 Y    Y    |       Y    Y
+{ "execute-procedure", execproc },            Y    Y    |       Y    Y
+{ "execute-named-command", namedcmd },        Y    Y    |       Y    Y
+
+*) Only Without argument
+
+
+The test also shows that the "only-interactive" routines of the old
+version also work in CLN-mode as the input functions do automatic input
+redirection (they check the 'clexec' flag).
+
+
+[2025-12-28.00]
+
+Next steps:
+
+- Set `execlevel = 0' in all functions which *start* a macro
+  (`P'-flag above).
+
+  ===> DONE
+
+- Extend `namedcmd' so the it also is able to start a macro: Then
+  + `namedcmd' will start function/macro in interactive mode
+  + `execcmd'  will start function/macro in command line mode
+
+  ===> DONE
+
+- Set `execlevel = 0' in all interactive parts of the functions above
+  --- ist this TRUE? Think!
+
+  No, we should rework the `execlevel' related coding: `execlevel' is
+  *only* unsed in exec.c:dobuf() and exec.c:docmd() and initialized to
+  `0' at the start of dobuf() so it should be initialized to 0 by any
+  function calling docmd().
+
+  ===> DONE
+
+- Implement autocompletion for macro searching: Then exec{cmd,proc}
+  and namedcmd with macro execution would have autocompletion.
+
+  Look into the `describe-bindings'-code which also lists bound macros.
 
 
 #============================== TODO LIST ==============================

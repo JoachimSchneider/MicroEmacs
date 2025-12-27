@@ -65,6 +65,26 @@
  *====================================================================*/
 
 
+/*====================================================================*
+ * The global flag `execlevel' is set and used in dobuf() and used
+ * in docmd().
+ * - If .GT. 0 docmd() immediately returns so that code is only
+ *   scanned but not evaluated which is used to go over conditional
+ *   expressions which evaluate to FALSE.
+ * - It is initialized to `0' at the start of dobuf().
+ * - It should be initialized to `0' in any function calling docmd().
+ *====================================================================*/
+
+
+/*====================================================================*/
+/* Module local functions                                             */
+/*====================================================================*/
+static VOID PASCAL NEAR freewhile_ DCL((WHBLOCK **wpp));
+#define                 freewhile(wp)   ( freewhile_(&(wp)) )
+static int PASCAL NEAR  debug DCL((BUFFER *bp, char *eline, int *skipflag));
+/*====================================================================*/
+
+
 /*====================================================================*/
 /* MicroEMACS' procedures ar stored in buffers: */
 #if ( 0 ) /* Don't use: Too many existing macros use '['<proc>']' */
@@ -87,100 +107,143 @@
 
 /* NAMEDCMD:
  *
- * Execute a named command even if it is not bound.
+ * Execute a named command (builtin function) even if it is not bound
  */
 int PASCAL NEAR namedcmd P2_(int, f, int, n)
 /* command arguments [passed through to command executed] */
 {
     ue_fnc_T  kfunc   = NULL;   /* ptr to the function to execute */
+    char      bufn[NBUFN];      /* name of buffer to execute      */
+    BUFFER    *bp     = NULL;
     char      buffer[NSTRING];  /* buffer to store function name  */
     int       status  = 0;
 
+    /* As this function is used for MicroEMACS command execution  */
+    /* (bound to `M-x') all subcomands *must* be called in        */
+    /* interactive mode to allow a user dialog so save the old    */
+    /* clexec flag here:                                          */
+    int       oldcle  = clexec;
+
+    ZEROMEM(bufn);
     ZEROMEM(buffer);
 
-    /* if we are non-interactive.... force the command interactivly */
-    if ( clexec == TRUE ) {
+
+    if ( clexec ) {
+        /* ==================== Command Line mode: ================== */
+        /* ---------------------------------------------------------- */
+
         /* grab token and advance past and evaluate token:  */
         if ( ! macarg(buffer, SIZEOF(buffer)) ) {
             return FALSE;
         }
 
-        /* and look it up */
+        /* and look it up: */
         if ( ( kfunc = fncmatch(buffer) ) == NULL ) {
-            mlwrite(TEXT244, buffer);
-            /* "%%No such function as '%s'" */
+            MTC(("`%s' is NOT a function", buffer));
+            /* Is it a macro? Construct its buffer name: */
+            MKPROCBUF(bufn, buffer);
 
-            return (FALSE);
+            /* find the pointer to that buffer: */
+            if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) {
+                return FALSE;
+            }
         }
+    } else        {
+        /* ==================== Interactive mode: =================== */
+        /* ---------------------------------------------------------- */
 
-        /* and execute it INTERACTIVE */
-        clexec = FALSE;
-        status = (*kfunc)(f, n);        /* call the function */
-        clexec = TRUE;
+        /* prompt the user to type a named command */
+        /* and get the function name to execute */
+        BUFCPY(buffer, getfncname(": "));
+        if ( NULL == (kfunc = fncmatch(buffer)) ) {
+            MTC(("`%s' is NOT a function", buffer));
+            /* Is it a macro? Construct its buffer name: */
+            MKPROCBUF(bufn, buffer);
 
-        return (status);
+            /* find the pointer to that buffer: */
+            if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) {
+                mlwrite(TEXT244, buffer);
+/*                      "%%No such function as '%s'" */
+
+                return FALSE;
+            }
+        }
     }
 
 
-    /* === Interactive mode: === */
-    /* ------------------------- */
+    /* ================= and now execute it as asked ================ */
+    /* -------------------------------------------------------------- */
 
-    /* prompt the user to type a named command */
-    /* and get the function name to execute */
-    BUFCPY(buffer, getfncname(": "));
-    if ( NULL != (kfunc = fncmatch(buffer)) ) { /* It is a function */
-        /* And then execute the command:  */
-        return ( (*kfunc)(f, n) );
-    } else                                    { /* Not a function   */
-        BUFFER  *bp     = NULL;
-        int     oldcle  = 0;
-        char    bufn[NBUFN];
 
-        ZEROMEM(bufn);
+    if ( NULL != kfunc )  {
+        /* if non-interactive .... force interactive execution        */
+        clexec = FALSE;
+        status = (*kfunc)(f, n);    /* call the function              */
+        clexec = oldcle;            /* restore clexec flag            */
 
-        /* construct the buffer name */
-        MKPROCBUF(bufn, buffer);
-
-        /* find the pointer to that buffer: */
-        if ( NULL == (bp = bfind(bufn, FALSE, 0)) ) { /* Not a macro  */
-            mlwrite(TEXT244, buffer);
-            /* "%%No such function as '%s'" */
-
+        if ( ! status ) {
             return FALSE;
         }
+    } else                {
+        while ( n-- > 0 ) {
+            /* if non-interactive .... force interactive execution    */
+            clexec = FALSE;
+            status = dobuf(bp);     /* execute buffer                 */
+            clexec = oldcle;        /* restore clexec flag            */
 
-        /* execute the buffer */
-        oldcle = clexec;                /* save old clexec flag */
-        clexec = TRUE;                  /* in cline execution */
-        status = dobuf(bp);
-        clexec = oldcle;                /* restore clexec flag */
-
-        return status;
+            if ( ! status ) {
+                return FALSE;
+            }
+        }
     }
+
+    return (TRUE);
 }
 
 /* EXECCMD:
  *
  * Execute a command line command to be typed in by the user.
- * - INTERACTIVE
  * - might be either a procedure (macro) or a function (builtin)
  */
 int PASCAL NEAR execcmd P2_(int, f, int, n)
 /* default Flag and Numeric argument  */
 {
-    REGISTER int  status  = 0;        /* status return                      */
-    char          cmdstr[NSTRING];    /* string holding command to execute  */
+    REGISTER int  status  = 0;          /* status return      */
+    char          cmdstr[NSTRING];      /* command to execute */
 
     ZEROMEM(cmdstr);
 
-    /* get the line wanted */
-    if ( ! (status = mlreply(": ", cmdstr, NSTRING)) )  {
-        return (status);
+    if ( clexec ) {   /* if we are non-interactive: */
+        /* grab token and advance past and evaluate token:  */
+        if ( ! macarg(cmdstr, SIZEOF(cmdstr)) ) {
+            return FALSE;
+        }
+    } else                {
+        /* find out what command the user wants to execute: */
+        if ( ! (status = mlreply("===> ", cmdstr, SIZEOF(cmdstr))) )  {
+            return FALSE;
+        }
     }
 
-    execlevel = 0;
+    /* and now execute it as asked */
+    while ( n-- > 0 ) {
+        int oldcle  = clexec;           /* save old clexec flag */
 
-    return ( docmd(cmdstr) );
+        clexec = TRUE;                  /* in cline execution */
+        /*============================================================*
+         * Call to docmd() --- initialize `execlevel' to 0:
+         *============================================================*/
+        execlevel = 0;
+        /*============================================================*/
+        status = docmd(cmdstr);
+        clexec = oldcle;                /* restore clexec flag */
+
+        if ( ! status ) {
+            return FALSE;
+        }
+    }
+
+    return (TRUE);
 }
 
 /* DOCMD:
@@ -199,8 +262,9 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
 # define MTC_docmd(e) do {                                    \
     CONST char  *msg_ = yasprintf e;                          \
                                                               \
-    MTC(("docmd(`%s') [%12s:%04d]: %s",                       \
-         STR(cline), xbasenam(file), line, STR(msg_)));       \
+    MTC(("docmd{%d}(`%s') [%12s:%04d]: %s",                   \
+         docmd_CALL_LEVEL_, STR(cline), xbasenam(file),       \
+         line, STR(msg_)));                                   \
     CLROOM(msg_);                                             \
 } while ( 0 )
 #else
@@ -208,10 +272,16 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
 #endif
 /**END_OF_DEFINITION**/
 #define docmd_RET_INIT                                        \
-      REGISTER int  docmd_RET_res_  = 0
+      REGISTER int  docmd_RET_res_    = 0;                    \
+      static int    docmd_CALL_LEVEL_ = 0;                    \
+                                                              \
+      do  {                                                   \
+          docmd_CALL_LEVEL_++;                                \
+      } while ( 0 )
 /**END_OF_DEFINITION**/
 #define docmd_RET_EXIT  do {                                  \
       docmd_RET_exit_:                                        \
+          docmd_CALL_LEVEL_--;                                \
           MTC(("BEFORE   - execstr: `%s'", execstr));         \
           BUFCPY(execstr, oldestr);                           \
           MTC(("RESTORED - execstr: `%s'", execstr));         \
@@ -227,8 +297,6 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
 int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
                            CONST char *, file, int, line)
 {
-    docmd_RET_INIT;
-
     REGISTER int  f           = 0;          /* default argument flag */
     REGISTER int  n           = 0;          /* numeric repeat value */
     ue_fnc_T      fnc         = NULL;       /* function to execute */
@@ -239,12 +307,16 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
     char          tkn[NSTRING];             /* next token off of command line */
     char          bufn[NBUFN];              /* name of buffer to execute */
 
+    docmd_RET_INIT;
+
     ZEROMEM(oldestr);
     ZEROMEM(tkn);
     ZEROMEM(bufn);
 
     /* if we are scanning and not executing ... go back here  */
     if ( execlevel )  {
+        MTC_docmd(("Only scanning, execlevel = %d", execlevel));
+
         docmd_RET(TRUE);
     }
 
@@ -252,9 +324,22 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
 
     MTC_docmd(("PREV execstr: `%s'", execstr));
     /* save last string to execute: */
-    BUFCPY(oldestr, execstr);
+    BUFCPY(oldestr, rtrimstr(ltrimstr(execstr)));
     /* and set this one as current: */
-    BUFCPY(execstr, cline);
+    BUFCPY(execstr, rtrimstr(ltrimstr(cline)));
+
+    /* Push `execstr' if necessary, this allows constructs like
+     * ```
+     *   execute-command-line { execute-command-line } print "Hello World"
+     * ```
+     * in MicroEMACS macros
+     */
+    if ( *oldestr ) {
+        MTC_docmd(("Push `%s' ---> `%s'", execstr, oldestr));
+        BUFCAT(execstr, " ");
+        BUFCAT(execstr, oldestr);
+    }
+
     MTC_docmd(("NEW execstr: `%s'", execstr));
     /* first set up the default command values: */
     f = FALSE;
@@ -266,9 +351,11 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
     if ( ( status = macarg(tkn, SIZEOF(tkn)) ) != TRUE )  {
         docmd_RET(status);
     }
+    MTC_docmd(("First token: `%s'", tkn));
 
     /* process leadin argument */
     if ( gettyp(tkn) != TKCMD ) {
+        MTC_docmd(("First token: `%s' is not a TKCMD", tkn));
         f = TRUE;
         BUFCPY(tkn, fixnull(getval(tkn)));
         n = asc_int(tkn);
@@ -278,26 +365,30 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
             docmd_RET(status);
         }
     }
+    MTC_docmd(("Command to execute: `%s'", tkn));
 
     /* and match the token to see if it exists: */
     if ( ( fnc = fncmatch(tkn) ) == NULL ) {  /* Not a function */
+        MTC_docmd(("`%s' is NOT a function", tkn));
+        MTC_docmd(("execstr: `%s'", execstr));
         /* construct the buffer name */
         MKPROCBUF(bufn, tkn);
 
         /* find the pointer to that buffer: */
         if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) { /* Not a macro  */
             mlwrite(TEXT244, tkn);
-            /* "%%No such function as '%s'" */
+/*                  "%%No such function as '%s'" */
 
             docmd_RET(FALSE);
         }
 
         /* execute the buffer */
         oldcle = clexec;                /* save old clexec flag */
-        clexec = TRUE;                  /* in cline execution */
         while ( n-- > 0 ) {
             MTC_docmd(("BEFORE(%s) - execstr: `%s'", "dobuf", execstr));
+            clexec = TRUE;              /* in cline execution */
             status = dobuf(bp);
+            clexec = oldcle;            /* restore clexec flag */
             MTC_docmd(("AFTER(%s)  - execstr: `%s'", "dobuf", execstr));
             if ( status != TRUE ) {
                 break;
@@ -305,11 +396,16 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
 	}
 
         cmdstatus = status;             /* save the status */
-        clexec = oldcle;                /* restore clexec flag */
 
         docmd_RET(status);
     }
 
+
+    /* ====================== It is a function ====================== */
+    /* -------------------------------------------------------------- */
+
+    MTC_docmd(("`%s' is a function", tkn));
+    MTC_docmd(("execstr: `%s'", execstr));
     /* save the arguments and go execute the command */
     oldcle = clexec;                    /* save old clexec flag */
     clexec = TRUE;                      /* in cline execution */
@@ -536,7 +632,7 @@ int PASCAL NEAR nextarg P4_(
     REGISTER CONST char *sp = NULL; /* return pointer from getval() */
 
     /* if we are interactive, go get it! */
-    if ( clexec == FALSE ) {
+    if ( ! clexec ) {
         int rc  = 0;
 
         /* prompt the user for the input string */
@@ -589,7 +685,7 @@ int PASCAL NEAR storeproc P2_(
     ZEROMEM(buffer);
 
     /* this commands makes no sense interactively */
-    if ( clexec == FALSE )  {
+    if ( ! clexec ) {
         return (FALSE);
     }
 
@@ -692,12 +788,15 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
         char  buffer[NSTRING];
 
         ZEROMEM(buffer);
-        BUFCPY(buffer, TEXT116);
-        /* "No such procedure"  */
-        BUFCAT(buffer, ": `");
-        BUFCAT(buffer, procn);
-        BUFCAT(buffer, "'");
-        mlwrite(buffer);
+
+        if ( ! clexec ) {
+            BUFCPY(buffer, TEXT116);
+/*                         "No such procedure" */
+            BUFCAT(buffer, ": `");
+            BUFCAT(buffer, procn);
+            BUFCAT(buffer, "'");
+            mlwrite(buffer);
+        }
 
         return (FALSE);
     }
@@ -748,12 +847,15 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
         char  buffer[NSTRING];
 
         ZEROMEM(buffer);
-        BUFCPY(buffer, TEXT118);
-/*                     "No such buffer" */
-        BUFCAT(buffer, ": `");
-        BUFCAT(buffer, bufn);
-        BUFCAT(buffer, "'");
-        mlwrite(buffer);
+
+        if ( ! clexec ) {
+            BUFCPY(buffer, TEXT118);
+/*                         "No such buffer" */
+            BUFCAT(buffer, ": `");
+            BUFCAT(buffer, bufn);
+            BUFCAT(buffer, "'");
+            mlwrite(buffer);
+        }
 
         if ( clexec ) {
             return FALSE;
@@ -771,7 +873,7 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
         clexec = oldcle;                /* restore clexec flag */
 
         if ( ! status ) {
-            return (status);
+            return FALSE;
         }
     }
 
@@ -812,11 +914,18 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
 #endif
 /**END_OF_DEFINITION**/
 #define dobuf_RET_INIT                                        \
-      REGISTER int  dobuf_RET_res_  = 0
+      REGISTER int  dobuf_RET_res_  = 0;                      \
+                                                              \
+      do  {                                                   \
+          /* clear IF level flags/while ptr */                \
+          execlevel = 0;                                      \
+      } while ( 0 )
 /**END_OF_DEFINITION**/
 #define dobuf_RET_EXIT  do {                                  \
       dobuf_RET_exit_:                                        \
       MTC_dobuf(("%s", "  END"));                             \
+      execlevel = 0;                                          \
+      freewhile(whlist);                                      \
                                                               \
       return dobuf_RET_res_;                                  \
   } while ( 0 )
@@ -829,8 +938,6 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
 int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
                            CONST char *, file, int, line)
 {
-    dobuf_RET_INIT;
-
     REGISTER int  status      = 0;    /* status return */
     REGISTER LINE *lp         = NULL; /* pointer to line to execute */
     REGISTER LINE *hlp        = NULL; /* pointer to line header */
@@ -859,6 +966,8 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
     char          dtv_str[NSTRING];   /* String following a directive */
     char          sav_estr[NSTRING];  /* `execstr' before directive */
 
+    dobuf_RET_INIT;
+
     ZEROMEM(tkn);
     ZEROMEM(vd);
     ZEROMEM(value);
@@ -881,12 +990,6 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
         bp->last_access = access_time;
         bp->b_active = TRUE;
     }
-
-    /* clear IF level flags/while ptr */
-    execlevel = 0;
-    whlist = NULL;
-    scanner = NULL;
-    num_locals = 0;
 
     /* flag we are executing the buffer */
     bp->b_exec += 1;
@@ -1015,8 +1118,6 @@ nxtscan:        /* on to the next line */
     ut = (UTABLE *)ROOM( SIZEOF (UTABLE) + num_locals * SIZEOF (UVAR) );
     if ( ut == (UTABLE *)NULL ) {
         errormesg("%%Out of memory allocating locals", bp, lp);
-        execlevel = 0;
-        freewhile(whlist);
         bp->b_exec -= 1;
 
         dobuf_RET(FALSE);
@@ -1033,7 +1134,7 @@ nxtscan:        /* on to the next line */
     cur_arg = bp->b_args;
     while ( cur_arg != (PARG *)NULL ) {
         /* ask for argument names */
-        if ( ( status = mlreply("Argument: ", value, NSTRING) ) != TRUE ) {
+        if ( ! (status = mlreply("Argument: ", value, NSTRING)) ) {
 /*                    "Argument: " */
 
             dobuf_RET(status);
@@ -1057,7 +1158,6 @@ nxtscan:        /* on to the next line */
         if ( ( einit = eline = ROOM(linlen+1) ) == NULL ) {
             errormesg(TEXT123, bp, lp);
 /*                              "%%Out of Memory during macro execution" */
-            freewhile(whlist);
             bp->b_exec -= 1;
 
             goto freeut;
@@ -1202,7 +1302,7 @@ nxtscan:        /* on to the next line */
 
                             goto eexec;
                         }
-                        if ( stol(tkn) == FALSE ) {
+                        if ( ! stol(tkn) )  {
                             ++execlevel;
                         }
                     } else  {
@@ -1219,7 +1319,7 @@ nxtscan:        /* on to the next line */
 
                             goto eexec;
                         }
-                        if ( stol(tkn) == TRUE )  {
+                        if ( stol(tkn) )  {
                             goto onward;
                         }
                     }
@@ -1381,8 +1481,6 @@ nxtscan:        /* on to the next line */
             errormesg(TEXT219, bp, lp);
 /*                "%%Macro Failed" */
 
-            execlevel = 0;
-            freewhile(whlist);
             bp->b_exec -= 1;
             CLROOM(einit);
 
@@ -1403,8 +1501,6 @@ onward: /* on to the next line */
     }
 
 eexec:  /* exit the current function */
-    execlevel = 0;
-    freewhile(whlist);
     bp->b_exec -= 1;
 
     /* discard the local user variable table */
@@ -1415,8 +1511,6 @@ eexec:  /* exit the current function */
     dobuf_RET(TRUE);
 
 eabort: /* exit the current function with a failure */
-    execlevel = 0;
-    freewhile(whlist);
     bp->b_exec -= 1;
     CLROOM(einit);
 
@@ -1479,6 +1573,7 @@ int PASCAL NEAR debug P3_(
 {
     REGISTER int    oldcmd          = 0;    /* original command display flag  */
     REGISTER int    oldinp          = 0;    /* original connamd input flag    */
+    REGISTER int    oldelevel       = 0;    /* original execlevel             */
     REGISTER int    oldstatus       = 0;    /* status of last command         */
     REGISTER int    c               = '\0'; /* temp character                 */
     REGISTER KEYTAB *key            = NULL; /* ptr to a key entry             */
@@ -1494,7 +1589,13 @@ dbuild: /* Build the information line to be presented to the user */
     /* display the tracked expression */
     if ( track[0] != 0 ) {
         oldstatus = cmdstatus;
+        /** TODO: Is `execlevel' handling correct here?           **/
+        /**       In the old coding it wasn't saved/restored.     **/
+        /**       ===> The old coding lets execlevel *unchanged*  **/
+        oldelevel = execlevel;
+        execlevel = 0;
         docmd(track);
+        execlevel = oldelevel;
         cmdstatus = oldstatus;
         BUFCAT(outline, "[=");
         BUFCAT(outline, gtusr("track"));
@@ -1572,7 +1673,13 @@ dinput: outline[MIN2(SIZEOF(outline) - 1, MAX2(0, term.t_ncol - 1))] = '\0';
                 getstring( (unsigned char *)&temp[11], NSTRING, ctoec(RETCHAR) );
                 disinp = oldinp;
                 oldstatus = cmdstatus;
+                /** TODO: Is `execlevel' handling correct here?           **/
+                /**       In the old coding it wasn't saved/restored.     **/
+                /**       ===> The old coding lets execlevel *unchanged*  **/
+                oldelevel = execlevel;
+                execlevel = 0;
                 docmd(temp);
+                execlevel = oldelevel;
                 cmdstatus = oldstatus;
                 BUFCPY(temp, " = [");
                 BUFCAT(temp, gtusr("track"));
@@ -1616,11 +1723,13 @@ dinput: outline[MIN2(SIZEOF(outline) - 1, MAX2(0, term.t_ncol - 1))] = '\0';
  *
  * Free a list of while block pointers.
  */
-VOID PASCAL NEAR freewhile P1_(WHBLOCK *, wp /* head of structure to free */)
+VOID PASCAL NEAR  freewhile_ P1_(WHBLOCK **, wpp)
+/* wpp: ptr to head of structure to free  */
 {
-    if ( wp != NULL ) {
-        freewhile(wp->w_next);
-        CLROOM(wp);
+    if ( *wpp != NULL ) {
+        freewhile_(&((*wpp)->w_next));
+        CLROOM(*wpp);
+        *wpp = NULL;
     }
 }
 
@@ -1634,9 +1743,11 @@ int PASCAL NEAR execfile P2_(
     )
 /* default flag and numeric arg to pass on to file */
 {
-    REGISTER int  status  = FALSE;  /* return status of name query */
-    char          fname[NSTRING];   /* name of file to execute */
-    CONST char    *fspec  = NULL;   /* full file spec */
+    REGISTER int  status  = FALSE;  /* return status of name query  */
+    char          fname[NSTRING];   /* name of file to execute      */
+    CONST char    *fspec  = NULL;   /* full file spec               */
+    int           oldcle  = clexec; /* save old clexec flag         */
+
 
     ZEROMEM(fname);
 
@@ -1688,7 +1799,7 @@ int PASCAL NEAR execfile P2_(
         /* complain if we are interactive */
         if ( ! clexec ) {
             mlwrite(TEXT214, fname);
-            /* "%%No such file as %s" */
+/*                  "%%No such file as %s" */
         }
 
         return (FALSE);
@@ -1697,14 +1808,12 @@ int PASCAL NEAR execfile P2_(
 exec1:
     /* otherwise, execute it */
     while ( n-- > 0 ) {
-        int oldcle  = clexec;           /* save old clexec flag */
-
         clexec = TRUE;                  /* in cline execution */
         status = dofile(fspec);
         clexec = oldcle;                /* restore clexec flag */
 
         if ( ! status ) {
-            return (status);
+            return FALSE;
         }
     }
 
