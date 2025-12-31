@@ -2429,6 +2429,45 @@ int PASCAL NEAR strcasestart P2_(CONST char *, start, CONST char *, test)
     }
 }
 
+/* STRSTART:
+ */
+int PASCAL NEAR strstart P2_(CONST char *, start, CONST char *, test)
+{
+    REGISTER int  slen  = 0;
+    REGISTER int  tlen  = 0;
+
+    ASRT(NULL != start);
+    ASRT(NULL != test);
+
+    slen  = strlen(start);
+    tlen  = strlen(test);
+
+    if ( tlen < slen )  {
+        return ( 0 );
+    } else              {
+        return ( 0 == strncmp(start, test, slen) );
+    }
+}
+
+/* STREND:
+ */
+int PASCAL NEAR strend P2_(CONST char *, end, CONST char *, test)
+{
+    REGISTER int  elen  = 0;
+    REGISTER int  tlen  = 0;
+
+    ASRT(NULL != end);
+    ASRT(NULL != test);
+
+    elen  = strlen(end);
+    tlen  = strlen(test);
+
+    if ( tlen < elen )  {
+        return ( 0 );
+    } else              {
+        return ( 0 == strncmp(end, test + tlen - elen, elen) );
+    }
+}
 
 /*====================================================================*/
 

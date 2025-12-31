@@ -927,6 +927,7 @@ execl(va_alist)
 #define CMP_BUFFER      0
 #define CMP_COMMAND     1
 #define CMP_FILENAME    2
+#define CMP_PROCEDURE   4
 
 /*===== Directive definitions ========================================*/
 

@@ -46,6 +46,7 @@
 #define C_16  16
 #define C_18  18
 #define C_20  20
+#define C_25  25
 #define C_30  30
 #define C_36  36
 #define C_40  40
@@ -533,9 +534,11 @@ EXTERN CONST char * CDECL NEAR yasprintf DCL((CONST char *fmt, ...));
 EXTERN char * PASCAL NEAR xstrtok_r DCL((char *str, CONST char *sep,
                                          char **next));
 
-EXTERN int PASCAL NEAR  xstrcasecmp  DCL((CONST char *s1, CONST char *s2));
-EXTERN int PASCAL NEAR  xstrncasecmp DCL((CONST char *s1, CONST char *s2, int len));
-EXTERN int PASCAL NEAR  strcasestart DCL((CONST char *start, CONST char *test));
+EXTERN int PASCAL NEAR  xstrcasecmp  DCL((CONST char *s1,     CONST char *s2));
+EXTERN int PASCAL NEAR  xstrncasecmp DCL((CONST char *s1,     CONST char *s2, int len));
+EXTERN int PASCAL NEAR  strcasestart DCL((CONST char *start,  CONST char *test));
+EXTERN int PASCAL NEAR  strstart     DCL((CONST char *start,  CONST char *test));
+EXTERN int PASCAL NEAR  strend       DCL((CONST char *end,    CONST char *test));
 
 /* Concatenate character c to string str and malloc the result. */
 /* Input string must either be NULL or malloced.                */
@@ -2197,7 +2200,6 @@ EXTERN CONST char * PASCAL NEAR getreg DCL((char *value));
 EXTERN CONST char * PASCAL NEAR getval DCL((CONST char *token));
 EXTERN CONST char * PASCAL NEAR getwlist DCL((char *buf));
 EXTERN CONST char * PASCAL NEAR gtenv DCL((CONST char *vname));
-EXTERN CONST char * PASCAL NEAR gtfilename DCL((CONST char *prompt));
 EXTERN CONST char * PASCAL NEAR gtfun DCL((CONST char *fname));
 EXTERN CONST char * PASCAL NEAR gtusr DCL((CONST char *vname));
 EXTERN char * PASCAL NEAR       int_asc DCL((int i));
@@ -2468,6 +2470,26 @@ EXTERN int PASCAL NEAR          insbrace DCL((int n, int c));
 EXTERN int PASCAL NEAR          insfile DCL((int f, int n));
 EXTERN int PASCAL NEAR          inspound DCL((void));
 EXTERN int PASCAL NEAR          insspace DCL((int f, int n));
+
+/* Buffer names for specific purposes:  */
+EXTERN CONST char * PASCAL NEAR spcl2bfn_ DCL((CONST char *name,
+                                               CONST char *prefix,
+                                               CONST char *suffix));
+/* Naming conventions for special purpose buffers:
+ * - `prefix' and `suffix' *must* be different for each type.
+ * - To continue to support existing MicroEMACS macros "[" and "]"
+ *   in procbfn() must not be changed!  */
+#define intlbfn(name) ( spcl2bfn_((name), "{", "}") ) /* Internal use */
+#define procbfn(name) ( spcl2bfn_((name), "[", "]") ) /* Macro store  */
+#define tempbfn(name) ( spcl2bfn_((name), "<", ">") ) /* Temporaries  */
+/* Invert the functions above:  */
+EXTERN CONST char * PASCAL NEAR bfn2spcl_ DCL((CONST char *name,
+                                               CONST char *prefix,
+                                               CONST char *suffix));
+#define bfnintl(name) ( bfn2spcl_((name), "{", "}") ) /* Internal use */
+#define bfnproc(name) ( bfn2spcl_((name), "[", "]") ) /* Macro store  */
+#define bfntemp(name) ( bfn2spcl_((name), "<", ">") ) /* Temporaries  */
+
 EXTERN int PASCAL NEAR          inword DCL((void));
 EXTERN int PASCAL NEAR          isinword DCL((char c));
 EXTERN int PASCAL NEAR          ismodeline DCL((EWINDOW *wp, int row));

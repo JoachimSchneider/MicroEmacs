@@ -21,6 +21,14 @@
 #include        "edef.h"
 #include        "elang.h"
 
+
+/*==============================================================*/
+/* FEATURES                                                     */
+/*==============================================================*/
+#define USE_POPBUFFER_FILL  ( 1 )
+/*==============================================================*/
+
+
 #define FARRIGHT        999             /* column beyond the right edge! */
 
 #if     WINDOW_MSWIN
@@ -1033,35 +1041,52 @@ VOID PASCAL NEAR upt_size P0_()
 
 /* POP:
  *
- * Display a pop up window.  Page it for the user.  Any key other than a
- * space gets pushed back into the input stream to be interpeted later as a
- * command.
+ * Display a pop up window. Page it for the user. Any key other than a
+ * space gets pushed back into the input stream to be interpeted later
+ * as a command.
  */
 int PASCAL NEAR pop P1_(BUFFER *, popbuf)
 {
-    REGISTER int index;         /* index into the current output line */
-    REGISTER int llen;          /* length of the current output line */
-    REGISTER int cline;         /* current screen line number */
-    LINE *lp;           /* ptr to next line to display */
-    int numlines;       /* remaining number of lines to display */
-    int c;              /* input character */
+    REGISTER int  index = 0;        /* index into the current output line   */
+    REGISTER int  llen  = 0;        /* length of the current output line    */
+    REGISTER int  cline = 0;        /* current screen line number           */
+    LINE          *lp   = NULL;     /* ptr to next line to display          */
+    int           numlines  = 0;    /* remaining number of lines to display */
+    int           c         = '\0'; /* input character                      */
 
     /* add the barrior line to the end of the pop up buffer */
     addline(popbuf, "------------------------------------------");
+#if USE_POPBUFFER_FILL
+    /** TODO: This should be handled so that the `END'-line appears
+     **       at the bottom of the last screen.
+     **/
+    {
+        int i = 0;
+
+        for ( i = 0; i < term.t_nrow - 2 + !modeflag; i++ ) {
+            addline(popbuf, "");
+        }
+        addline(popbuf, "******************************************");
+        addline(popbuf, "*** ENDENDENDENDENDENDENDENDENDENDEND  ***");
+        addline(popbuf, "******************************************");
+        addline(popbuf, "");
+        addline(popbuf, "===>");
+    }
+#endif
 
     /* set up to scan pop up buffer */
     lp = lforw(popbuf->b_linep);
-    numlines = term.t_nrow-2 + !modeflag;
+    numlines = term.t_nrow - 2 + !modeflag;
     cline = 0;
     mmove_flag = FALSE;         /* disable mouse move events */
 
     while ( lp != popbuf->b_linep ) {
-
         /* update the virtual screen image for this one line */
         vtmove(cline, 0);
         llen = get_lused(lp);
-        for ( index = 0; index < llen; index++ )
+        for ( index = 0; index < llen; index++ )  {
             vtputc( lgetc(lp, index) );
+        }
         vteeol();
 #if     COLOR
         vscreen[cline]->v_rfcolor = gfcolor;
@@ -1072,7 +1097,6 @@ int PASCAL NEAR pop P1_(BUFFER *, popbuf)
         vscreen[cline++]->v_flag |= VFCHG|VFCOL;
 
         if ( numlines-- < 1 ) {
-
             /* update the virtual screen to the physical screen */
             updupd(FALSE);
 
@@ -1081,7 +1105,7 @@ int PASCAL NEAR pop P1_(BUFFER *, popbuf)
             TTflush();
 
             /* and see if they want more */
-            if ( (popwait) && ( ( c = tgetc() ) != ' ' ) ) {
+            if ( (popwait) && ( ( c = tgetc() ) != ' ' ) )  {
                 cpending = TRUE;
                 charpending = c;
                 upwind();
@@ -1097,21 +1121,20 @@ int PASCAL NEAR pop P1_(BUFFER *, popbuf)
             cline = 0;
 
             /* if we at the end, don't requeue for more */
-            if ( lforw(lp) == popbuf->b_linep )
+            if ( lforw(lp) == popbuf->b_linep ) {
                 numlines = -1;
-
+            }
         }
 
         /* on to the next line */
         lp = lforw(lp);
     }
-    if ( numlines >= 0 ) {
-
+    if ( numlines >= 0 )  {
         /* update the virtual screen to the physical screen */
         updupd(FALSE);
         TTflush();
 
-        if ( (popwait) && ( ( c = tgetc() ) != ' ' ) ) {
+        if ( (popwait) && ( ( c = tgetc() ) != ' ' ) )  {
             cpending = TRUE;
             charpending = c;
         }

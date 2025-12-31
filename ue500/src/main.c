@@ -709,6 +709,85 @@ loop:
     goto loop;
 }
 
+/* SPCL2BFN_:
+ *
+ * Create a buffer name that is used for special purposes.
+ */
+CONST char * PASCAL NEAR  spcl2bfn_ P3_(CONST char *, name,
+                                        CONST char *, prefix,
+                                        CONST char *, suffix)
+{
+    static char res[NBUFN];
+
+    ZEROMEM(res);
+
+    ASRT(NULL != name);
+
+    /* BUF(CPY|CAT) handle second NULL-argument gracefully */
+    BUFCPY(res, prefix);
+    BUFCAT(res, name);
+    BUFCAT(res, suffix);
+
+    return res;
+}
+
+/* BFN2SPCL_:
+ *
+ * Inverse function to SPCL2BFN_
+ *
+ * Returns NULL if `name' does not start ith `prefix' and end
+ * with `suffix'.
+ */
+CONST char * PASCAL NEAR  bfn2spcl_ P3_(CONST char *, name,
+                                        CONST char *, prefix,
+                                        CONST char *, suffix)
+{
+    static char res[NBUFN];
+    char        buf[NBUFN];
+    char        *cp         = &buf[0];
+    int         prefix_len  = strlen(fixnull(prefix));
+    int         suffix_len  = strlen(fixnull(suffix));
+    int         len         = strlen(fixnull(name));
+
+    ZEROMEM(res);
+    ZEROMEM(buf);
+
+    ASRT(NULL != name);
+    ASRT(NULL != prefix);
+    ASRT(NULL != suffix);
+
+    if ( ! strstart(prefix, name) ) {
+        return NULL;
+    }
+    if ( ! strend(suffix, name) ) {
+        return NULL;
+    }
+
+    if ( C_2 >= len ) {
+        return res;
+    }
+    /* prefix_len + x + suffix_len = len,
+     * where x, (pre|suf)ix_len >= 1 i.e.
+     *
+     *  prefix_len = len - x - suffix_len <= len - 1 - suffix_len <= len - 2
+     *  suffix_len = len - x - prefix_len <= len - 1 - prefix_len
+     *
+     *  1 <= prefix_len <= len -2
+     *  1 <= suffix_len <= len -2
+     */
+    prefix_len  = MIN2(prefix_len, len - 2);
+    suffix_len  = MIN2(suffix_len, len - 1 - prefix_len);
+    BUFCPY(buf, name);
+    /* Substring selection below does *not* result in under/overruns:
+     * len - suffix_len >= len - len + 1 + prefix_len = 1 + prefix_len
+     */
+    cp  += prefix_len;
+    buf[len - suffix_len] = '\0';
+    BUFCPY(res, cp);
+
+    return res;
+}
+
 /* EDINIT:
  *
  * Initialize all of the buffers, windows and screens. The buffer name
@@ -754,9 +833,9 @@ VOID PASCAL NEAR edinit P1_(char *, bname /* name of buffer to initialize */)
 
     /* allocate the first buffer */
     bp = bfind(bname, TRUE, 0);         /* First buffer     */
-    blistp = bfind("[Buffers]", TRUE, BFINVS);          /* Buffer list buffer   */
-    slistp = bfind("[Screens]", TRUE, BFINVS);          /* screen list buffer   */
-    ulistp = bfind("[Undos]", TRUE, BFINVS);            /* undo list buffer */
+    blistp = bfind(intlbfn("Buffers"), TRUE, BFINVS); /* Buffer list buffer */
+    slistp = bfind(intlbfn("Screens"), TRUE, BFINVS); /* screen list buffer */
+    ulistp = bfind(intlbfn("Undos"),   TRUE, BFINVS); /* undo list buffer   */
     if ( bp == NULL || blistp == NULL )
         meexit(1);
 

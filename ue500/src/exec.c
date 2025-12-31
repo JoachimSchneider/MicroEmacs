@@ -85,26 +85,6 @@ static int PASCAL NEAR  debug DCL((BUFFER *bp, char *eline, int *skipflag));
 /*====================================================================*/
 
 
-/*====================================================================*/
-/* MicroEMACS' procedures ar stored in buffers: */
-#if ( 0 ) /* Don't use: Too many existing macros use '['<proc>']' */
-# define MKPROCBUF(buf, proc) do {  \
-  BUFCPY((buf), "<M:");             \
-  BUFCAT((buf), (proc));            \
-  BUFCAT((buf), ">");               \
-} while ( 0 )
-/**END_OF_DEFINITION**/
-#else
-# define MKPROCBUF(buf, proc) do {  \
-  BUFCPY((buf), "[");               \
-  BUFCAT((buf), (proc));            \
-  BUFCAT((buf), "]");               \
-} while ( 0 )
-/**END_OF_DEFINITION**/
-#endif
-/*====================================================================*/
-
-
 /* NAMEDCMD:
  *
  * Execute a named command (builtin function) even if it is not bound
@@ -113,7 +93,6 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
 /* command arguments [passed through to command executed] */
 {
     ue_fnc_T  kfunc   = NULL;   /* ptr to the function to execute */
-    char      bufn[NBUFN];      /* name of buffer to execute      */
     BUFFER    *bp     = NULL;
     char      buffer[NSTRING];  /* buffer to store function name  */
     int       status  = 0;
@@ -124,7 +103,6 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
     /* clexec flag here:                                          */
     int       oldcle  = clexec;
 
-    ZEROMEM(bufn);
     ZEROMEM(buffer);
 
 
@@ -140,11 +118,10 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
         /* and look it up: */
         if ( ( kfunc = fncmatch(buffer) ) == NULL ) {
             MTC(("`%s' is NOT a function", buffer));
-            /* Is it a macro? Construct its buffer name: */
-            MKPROCBUF(bufn, buffer);
 
-            /* find the pointer to that buffer: */
-            if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) {
+            /* Is it a macro? Construct its buffer name and find the
+             * pointer to that buffer:  */
+            if ( ( bp = bfind(procbfn(buffer), FALSE, 0) ) == NULL )  {
                 return FALSE;
             }
         }
@@ -157,11 +134,10 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
         BUFCPY(buffer, getfncname(": "));
         if ( NULL == (kfunc = fncmatch(buffer)) ) {
             MTC(("`%s' is NOT a function", buffer));
-            /* Is it a macro? Construct its buffer name: */
-            MKPROCBUF(bufn, buffer);
 
-            /* find the pointer to that buffer: */
-            if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) {
+            /* Is it a macro? Construct its buffer name and find the
+             * pointer to that buffer:  */
+            if ( ( bp = bfind(procbfn(buffer), FALSE, 0) ) == NULL )  {
                 mlwrite(TEXT244, buffer);
 /*                      "%%No such function as '%s'" */
 
@@ -305,13 +281,11 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
     int           oldcle      = 0;          /* old contents of clexec flag */
     char          oldestr[SIZEOF(execstr)]; /* original exec string */
     char          tkn[NSTRING];             /* next token off of command line */
-    char          bufn[NBUFN];              /* name of buffer to execute */
 
     docmd_RET_INIT;
 
     ZEROMEM(oldestr);
     ZEROMEM(tkn);
-    ZEROMEM(bufn);
 
     /* if we are scanning and not executing ... go back here  */
     if ( execlevel )  {
@@ -372,10 +346,10 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
         MTC_docmd(("`%s' is NOT a function", tkn));
         MTC_docmd(("execstr: `%s'", execstr));
         /* construct the buffer name */
-        MKPROCBUF(bufn, tkn);
 
-        /* find the pointer to that buffer: */
-        if ( ( bp = bfind(bufn, FALSE, 0) ) == NULL ) { /* Not a macro  */
+        /* Is it a macro? Construct its buffer name and find the
+         * pointer to that buffer:  */
+        if ( ( bp = bfind(procbfn(tkn), FALSE, 0) ) == NULL ) { /* No */
             mlwrite(TEXT244, tkn);
 /*                  "%%No such function as '%s'" */
 
@@ -678,10 +652,8 @@ int PASCAL NEAR storeproc P2_(
     REGISTER struct BUFFER  *bp       = NULL;   /* pointer to macro buffer  */
     PARG                    *last_arg = NULL;   /* last macro argument      */
     PARG                    *cur_arg  = NULL;   /* current macro argument   */
-    char bufn[NBUFN];                           /* name of buffer to use    */
     char buffer[NSTRING];                       /* token buffer             */
 
-    ZEROMEM(bufn);
     ZEROMEM(buffer);
 
     /* this commands makes no sense interactively */
@@ -695,11 +667,8 @@ int PASCAL NEAR storeproc P2_(
     MTC(("AFTER(name of procedure)  - execstr: `%s', buffer: `%s'",
          execstr, buffer));
 
-    /* construct the macro buffer name */
-    MKPROCBUF(bufn, buffer);
-
-    /* set up the new macro buffer */
-    if ( ( bp = bfind(bufn, TRUE, BFINVS) ) == NULL ) {
+    /* construct macro buffer name and set up the new macro buffer: */
+    if ( (bp = bfind(procbfn(buffer), TRUE, BFINVS)) == NULL )  {
         mlwrite(TEXT113);
         /* "Can not create macro" */
 
@@ -762,10 +731,8 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
     REGISTER BUFFER *bp     = NULL;   /* ptr to buffer to execute     */
     REGISTER int    status  = 0;      /* status return                */
     char procn[NBUFN];                /* name of procedure to execute */
-    char bufn[NBUFN];                 /* name of buffer to execute    */
 
     ZEROMEM(procn);
-    ZEROMEM(bufn);
 
     if ( clexec ) {                     /* if we are non-interactive: */
         /* grab token and advance past and evaluate token:  */
@@ -780,11 +747,8 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
         }
     }
 
-    /* construct the buffer name */
-    MKPROCBUF(bufn, procn);
-
-    /* find the pointer to that buffer */
-    if ( NULL == (bp = bfind(bufn, FALSE, 0)) ) {
+    /* construct the buffer name and find the pointer to that buffer: */
+    if ( NULL == (bp = bfind(procbfn(procn), FALSE, 0)) ) {
         char  buffer[NSTRING];
 
         ZEROMEM(buffer);

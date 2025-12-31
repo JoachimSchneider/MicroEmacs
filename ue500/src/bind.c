@@ -413,56 +413,57 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
 /* type:    True = full list,   false = partial list  */
 /* mstring: Match string if a partial list            */
 {
-    REGISTER KEYTAB *ktp;       /* pointer into the command table */
-    REGISTER NBIND *nptr;       /* pointer into the name binding table */
-    REGISTER BUFFER *listbuf;    /* buffer to put binding list into */
-    REGISTER BUFFER *bp;        /* buffer ptr for function scan */
-    int cpos;                   /* current position to use in outseq */
-    char outseq[80];            /* output buffer for keystroke sequence */
-    int first_entry;            /* is this the first macro listing? */
+    REGISTER KEYTAB *ktp        = NULL; /* ptr into the command table         */
+    REGISTER NBIND  *nptr       = NULL; /* ptr into the name binding table    */
+    REGISTER BUFFER *listbuf    = NULL; /* buffer to put binding list into    */
+    REGISTER BUFFER *bp         = NULL; /* buffer ptr for function scan       */
+    int             cpos        = 0;    /* current position to use in outseq  */
+    char            outseq[C_80];       /* output buf. for keystroke sequence */
+    int             first_entry = 0;    /* is this the first macro listing?   */
 
     /* get a buffer for the binding list */
     listbuf = bfind(TEXT21, TRUE, BFINVS);
 /*         "Binding list" */
-    if ( listbuf == NULL || bclear(listbuf) == FALSE ) {
+    if ( listbuf == NULL || !bclear(listbuf) )  {
         mlwrite(TEXT22);
-
-/*          "Can not display binding list" */
+/*              "Can not display binding list" */
         return (FALSE);
     }
 
     /* let us know this is in progress */
     mlwrite(TEXT23);
-/*      "[Building binding list]" */
+/*          "[Building binding list]" */
 
     /* build the contents of this window, inserting it line by line */
     nptr = &names[0];
-    while ( nptr->n_func != NULL ) {
-
-        /* add in the command name */
-        XSTRCPY(outseq, nptr->n_name);
+    while ( nptr->n_func != NULL )  {
+        /* add in the command name: "F: " --- a (builtin) function */
+        BUFCPY(outseq, "F: ");
+        BUFCAT(outseq, nptr->n_name);
         cpos = STRLEN(outseq);
 
         /* if we are executing an apropos command..... */
-        if ( type == FALSE &&
-             /* and current string doesn't include the search string */
-             strinc(outseq, mstring) == FALSE )
+        if ( !type && !strinc(outseq, mstring) )  {
+            /* and current string doesn't include the search string */
             goto fail;
+        }
 
         /* search down any keys bound to this */
         ktp = &keytab[0];
         while ( ktp->k_type != BINDNUL ) {
             if ( ktp->k_type == BINDFNC &&ktp->k_ptr.fp == nptr->n_func ) {
                 /* padd out some spaces */
-                while ( cpos < 25 )
+                while ( cpos < C_25 ) {
                     outseq[cpos++] = ' ';
+                }
 
                 /* add in the command sequence */
                 getecnam(ktp->k_code, &outseq[cpos], SIZEOF(outseq) - cpos);
 
                 /* and add it as a line into the buffer */
-                if ( addline(listbuf, outseq) != TRUE )
+                if ( ! addline(listbuf, outseq) ) {
                     return (FALSE);
+                }
 
                 cpos = 0;                       /* and clear the line */
             }
@@ -472,8 +473,9 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
         /* if no key was bound, we need to dump it anyway */
         if ( cpos > 0 ) {
             outseq[cpos] = 0;
-            if ( addline(listbuf, outseq) != TRUE )
+            if ( ! addline(listbuf, outseq) ) {
                 return (FALSE);
+            }
         }
 
 fail:   /* and on to the next name */
@@ -484,35 +486,40 @@ fail:   /* and on to the next name */
     first_entry = TRUE;
     bp = bheadp;
     while ( bp ) {
+        CONST char  *cp = bfnproc(bp->b_bname);
 
         /* is this buffer a macro? */
-        if ( bp->b_bname[0] != '[' )
+        if ( NULL == cp ) {
             goto bfail;
+        }
 
-        /* add in the command name */
-        XSTRCPY(outseq, bp->b_bname);
+        /* add in the command name: "P: " --- it's a procedure */
+        BUFCPY(outseq, "P: ");
+        BUFCAT(outseq, cp);
         cpos = STRLEN(outseq);
 
         /* if we are executing an apropos command..... */
-        if ( type == FALSE &&
+        if ( !type && !strinc(outseq, mstring) )  {
              /* and current string doesn't include the search string */
-             strinc(outseq, mstring) == FALSE )
             goto bfail;
+        }
 
         /* search down any keys bound to this macro */
         ktp = &keytab[0];
         while ( ktp->k_type != BINDNUL ) {
             if ( ktp->k_type == BINDBUF &&ktp->k_ptr.buf == bp ) {
                 /* padd out some spaces */
-                while ( cpos < 25 )
+                while ( cpos < C_25 ) {
                     outseq[cpos++] = ' ';
+                }
 
                 /* add in the command sequence */
                 getecnam(ktp->k_code, &outseq[cpos], SIZEOF(outseq) - cpos);
 
                 /* and add it as a line into the buffer */
-                if ( addline(listbuf, outseq) != TRUE )
+                if ( ! addline(listbuf, outseq) ) {
                     return (FALSE);
+                }
 
                 cpos = 0;                       /* and clear the line */
             }
@@ -520,9 +527,10 @@ fail:   /* and on to the next name */
         }
 
         /* add a blank line between the key and macro lists */
-        if ( first_entry == TRUE ) {
-            if ( addline(listbuf, "") != TRUE )
+        if ( first_entry )  {
+            if ( ! addline(listbuf, "") ) {
                 return (FALSE);
+            }
 
             first_entry = FALSE;
         }
@@ -530,8 +538,9 @@ fail:   /* and on to the next name */
         /* if no key was bound, we need to dump it anyway */
         if ( cpos > 0 ) {
             outseq[cpos] = 0;
-            if ( addline(listbuf, outseq) != TRUE )
+            if ( ! addline(listbuf, outseq) ) {
                 return (FALSE);
+            }
         }
 
 bfail:  /* and on to the next buffer */

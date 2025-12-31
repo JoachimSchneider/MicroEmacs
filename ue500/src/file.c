@@ -43,7 +43,7 @@ int PASCAL NEAR fileread P2_(int, f, int, n)
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
 
-    if ( ( fname = gtfilename(TEXT131) ) == NULL )
+    if ( ( fname = getfilname(TEXT131) ) == NULL )
 /*                              "Read file" */
         return (FALSE);
 
@@ -69,7 +69,7 @@ int PASCAL NEAR insfile P2_(int, f, int, n)
     if ( curbp->b_mode&MDVIEW )        /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode */
 
-    if ( ( fname = gtfilename(TEXT132) ) == NULL )
+    if ( ( fname = getfilname(TEXT132) ) == NULL )
 /*                              "Insert file" */
         return (FALSE);
 
@@ -105,7 +105,7 @@ int PASCAL NEAR filefind P2_(int, f, int, n)
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
 
-    if ( ( fname = gtfilename(TEXT133) ) == NULL )
+    if ( ( fname = getfilname(TEXT133) ) == NULL )
 /*                              "Find file" */
         return (FALSE);
 
@@ -125,7 +125,7 @@ int PASCAL NEAR viewfile P2_(int, f, int, n)
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
 
-    if ( ( fname = gtfilename(TEXT134) ) == NULL )
+    if ( ( fname = getfilname(TEXT134) ) == NULL )
 /*                              "View file" */
         return (FALSE);
 
@@ -531,7 +531,7 @@ int PASCAL NEAR filewrite P2_(int, f, int, n)
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
 
-    if ( ( fname = gtfilename(TEXT144) ) == NULL )
+    if ( ( fname = getfilname(TEXT144) ) == NULL )
 /*                     "Write file: " */
         return (FALSE);
 
@@ -558,7 +558,7 @@ int PASCAL NEAR fileapp P2_(int, f, int, n)
     if ( restflag )             /* don't allow this command if restricted */
         return ( resterr() );
 
-    if ( ( fname = gtfilename(TEXT218) ) == NULL )
+    if ( ( fname = getfilname(TEXT218) ) == NULL )
 /*                     "Append file: " */
         return (FALSE);
 

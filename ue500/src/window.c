@@ -590,33 +590,38 @@ int PASCAL NEAR resize P2_(int, f, int, n)
  */
 int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
 {
-    REGISTER EWINDOW *wp;
-    REGISTER BUFFER *bp;
-    REGISTER int cmark;                 /* current mark */
+    REGISTER EWINDOW  *wp   = NULL;
+    REGISTER BUFFER   *bp   = NULL;
+    REGISTER int      cmark = 0;    /* current mark */
 
     /* on screen already? */
-    if ( popbuf->b_nwnd != 0 )
+    if ( popbuf->b_nwnd != 0 )  {
         goto setwin;
+    }
 
     /* if flaged so, do a real pop up */
-    if ( popflag )
+    if ( popflag )  {
         return ( pop(popbuf) );
+    }
 
     /* find the window to split */
     if ( wheadp->w_wndp == NULL                 /* Only 1 window    */
          && splitwind(FALSE, 0) == FALSE )      /* and it won't split   */
+                                            {
         return (FALSE);
+    }
 
     wp = wheadp;                                /* Find window to use   */
-    while ( wp!=NULL && wp == curwp )
+    while ( wp!=NULL && wp == curwp ) {
         wp = wp->w_wndp;
+    }
 
-    if ( popbuf->b_nwnd == 0 ) {                /* Not on screen yet.   */
+    if ( popbuf->b_nwnd == 0 )  {               /* Not on screen yet.   */
         bp = wp->w_bufp;
-        if ( --bp->b_nwnd == 0 ) {
+        if ( --bp->b_nwnd == 0 )  {
             bp->b_dotp  = wp->w_dotp;
             set_b_doto(bp, get_w_doto(wp));
-            for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+            for ( cmark = 0; cmark < NMARKS; cmark++ )  {
                 bp->b_markp[cmark] = wp->w_markp[cmark];
                 bp->b_marko[cmark] = wp->w_marko[cmark];
             }
@@ -627,18 +632,17 @@ int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
     }
 
 setwin: wp = wheadp;
-    while ( wp != NULL ) {
+    while ( wp != NULL )  {
         if ( wp->w_bufp == popbuf ) {
             wp->w_linep = lforw(popbuf->b_linep);
             wp->w_dotp  = lforw(popbuf->b_linep);
             set_w_doto(wp, 0);
-            for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+            for ( cmark = 0; cmark < NMARKS; cmark++ )  {
                 wp->w_markp[cmark] = NULL;
                 wp->w_marko[cmark] = 0;
             }
             wp->w_flag |= WFMODE|WFHARD;
-            popbuf->b_mode |= MDVIEW;             /* put this buffer view mode
-                                                   */
+            popbuf->b_mode |= MDVIEW;     /* put this buffer view mode */
             upmode();
         }
         wp = wp->w_wndp;

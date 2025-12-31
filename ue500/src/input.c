@@ -180,6 +180,7 @@ int PASCAL NEAR ctoec P1_(int, c)
     return (c);
 }
 
+
 /* GETBUFNAME:
  *
  * Get a buffer name from the command line. Buffer name completion
@@ -199,19 +200,58 @@ CONST char * PASCAL NEAR  getbufname P1_(CONST char *, prompt)
     return complete(prompt, dflt, CMP_BUFFER, NSTRING);
 }
 
+
 /* GETFILNAME:
  *
- * Get a command name from the command line. Command completion means
+ * Get a file name from the command line. Command completion means
  * that pressing a <SPACE> will attempt to complete an unfinished
- * command name if it is unique.
+ * file name if it is unique.
  */
 CONST char * PASCAL NEAR  getfilname P1_(CONST char *, prompt)
+#if WINDOW_MSWIN
 {
+    static char buf[NFILEN];
+
+    ZEROMEM(buf);
+
+    if ( !FILENAMEREPLY(prompt, buf, NFILEN) )  {
+        return NULL;
+    }
+
+    return buf;
+}
+#else
+{
+    char  *sp   = NULL; /* ptr to the returned string */
+# if  MSDOS | OS2
+    char  *scan = NULL;
+# endif
+
     ASRT(NULL != prompt);
 
-    /* ptr to the returned string:  */
-    return complete(prompt, NULL, CMP_FILENAME, NSTRING);
+    /* get a file name, default to current buffer's */
+    if ( curbp && *curbp->b_fname ) {
+        sp = complete(prompt, curbp->b_fname, CMP_FILENAME, NFILEN);
+    } else                          {
+        sp = complete(prompt, NULL, CMP_FILENAME, NFILEN);
+    }
+
+# if  MSDOS | OS2
+    /* change forward slashes to back */
+    if ( sp ) {
+        scan = sp;
+        while ( *scan ) {
+            if ( *scan == '/' )
+                *scan = DIRSEPCHAR;
+            ++scan;
+        }
+    }
+# endif
+
+    return sp;
 }
+#endif  /* WINDOW_MSWIN */
+
 
 /* GETFNCNAME:
  *
@@ -226,6 +266,7 @@ CONST char * PASCAL NEAR  getfncname P1_(CONST char *, prompt)
     /* ptr to the returned string:  */
     return complete(prompt, NULL, CMP_COMMAND, NSTRING);
 }
+
 
 /* GETCBUF:
  *
@@ -248,42 +289,6 @@ BUFFER * PASCAL NEAR getcbuf P3_(CONST char *, prompt,
     }
 
     return ( bfind(sp, createflag, 0) );
-}
-
-
-CONST char * PASCAL NEAR gtfilename P1_(CONST char *, prompt)
-/* prompt:  Prompt to user on command line  */
-{
-#if     MSDOS | OS2
-    char  *scan = NULL;
-#endif
-#if     WINDOW_MSWIN
-    static char sp[NFILEN];
-
-    if ( !FILENAMEREPLY(prompt, sp, NFILEN) )
-        return NULL;
-#else
-    char  *sp = NULL;   /* ptr to the returned string */
-
-    /* get a file name, default to current buffer's */
-    if ( curbp && strcmp(curbp->b_fname, "") != 0 )
-        sp = complete(prompt, curbp->b_fname, CMP_FILENAME, NFILEN);
-    else
-        sp = complete(prompt, NULL, CMP_FILENAME, NFILEN);
-#endif
-#if     MSDOS | OS2
-    /* change forward slashes to back */
-    if ( sp ) {
-        scan = sp;
-        while ( *scan ) {
-            if ( *scan == '/' )
-                *scan = DIRSEPCHAR;
-            ++scan;
-        }
-    }
-#endif
-
-    return (sp);
 }
 
 
@@ -386,7 +391,7 @@ VOID PASCAL NEAR clist_command P2_(CONST char *, name, int *, cpos)
     REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
 
     /* get a buffer for the completion list */
-    listbuf = bfind("[Completion list]", TRUE, BFINVS);
+    listbuf = bfind(intlbfn("Completion list"), TRUE, BFINVS);
     if ( listbuf == NULL || bclear(listbuf) == FALSE ) {
         ctrlg(FALSE, 0);
         TTflush();
@@ -409,6 +414,7 @@ VOID PASCAL NEAR clist_command P2_(CONST char *, name, int *, cpos)
 
     return;
 }
+
 
 /* COMP_BUFFER:
  *
@@ -503,7 +509,7 @@ VOID PASCAL NEAR clist_buffer P2_(CONST char *, name, int *, cpos)
     REGISTER BUFFER *bp       = NULL;   /* trial buffer to complete           */
 
     /* get a buffer for the completion list */
-    listbuf = bfind("[Completion list]", TRUE, BFINVS);
+    listbuf = bfind(intlbfn("Completion list"), TRUE, BFINVS);
     if ( listbuf == NULL || bclear(listbuf) == FALSE ) {
         ctrlg(FALSE, 0);
         TTflush();
@@ -528,6 +534,7 @@ VOID PASCAL NEAR clist_buffer P2_(CONST char *, name, int *, cpos)
 
     return;
 }
+
 
 #if     !WINDOW_MSWIN
 
@@ -627,7 +634,7 @@ VOID PASCAL NEAR clist_file P2_(char *, name, int *, cpos )
     REGISTER char   *fname    = NULL;   /* trial file to complete             */
 
     /* get a buffer for the completion list */
-    listbuf = bfind("[Completion list]", TRUE, BFINVS);
+    listbuf = bfind(intlbfn("Completion list"), TRUE, BFINVS);
     if ( listbuf == NULL || bclear(listbuf) == FALSE ) {
         ctrlg(FALSE, 0);
         TTflush();
@@ -657,6 +664,7 @@ VOID PASCAL NEAR clist_file P2_(char *, name, int *, cpos )
 }
 
 #endif /* !WINDOW_MSWIN */
+
 
 /* TGETC:
  *

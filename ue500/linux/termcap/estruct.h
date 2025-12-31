@@ -151,7 +151,7 @@
 #if BEGIN_COMMENT_
 #define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
 #define RAMSHOW         0 /* auto dynamic RAM reporting               */
-#define RAMTRCK         0 /* send debug info to MALLOC.DAT            */
+#define RAMTRCK         0 /* send debug info to EMACS.LOG             */
 #define DEBUG_SEARCH    0 /* pop some search info on patterns         */
 #endif  /*END_COMMENT_*/
 
@@ -923,6 +923,7 @@ execl(va_alist)
 #define CMP_BUFFER      0
 #define CMP_COMMAND     1
 #define CMP_FILENAME    2
+#define CMP_PROCEDURE   4
 
 /*===== Directive definitions ========================================*/
 
