@@ -922,13 +922,6 @@ execl(va_alist)
 #define PLAY    1               /*                playing             */
 #define RECORD  2               /*                recording           */
 
-/*===== Completion types =============================================*/
-
-#define CMP_BUFFER      0
-#define CMP_FUNC        1
-#define CMP_PROC        2
-#define CMP_FILENAME    4
-
 /*===== Directive definitions ========================================*/
 
 #define DIF             0

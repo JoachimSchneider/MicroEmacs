@@ -1,0 +1,225 @@
+91-+
+92-     ZEROMEM(buffer);
+93- 
+94--    /* if we are non-interactive.... force the command interactivly */
+95:-    if ( clexec == TRUE ) {
+96- 
+97--        /* grab token and advance past */
+98--        execstr = token(execstr, buffer, NPAT);
+99-+    if ( clexec ) {
+--
+213- 
+214-     ZEROMEM(cmdstr);
+215- 
+216--    /* get the line wanted */
+217:-    if ( ( status = mlreply(": ", cmdstr, NSTRING) ) != TRUE )
+218--        return (status);
+219-+    if ( clexec ) {   /* if we are non-interactive: */
+220-+        /* grab token and advance past and evaluate token:  */
+221-+        if ( ! macarg(cmdstr, SIZEOF(cmdstr)) ) {
+--
+247-+        xsnprintf(buf1, SIZEOF(buf1), "  [%s] Arguments: ", buf0);
+248-+# else  /*END_COMMENT_*/
+249-+        xsnprintf(buf1, SIZEOF(buf1), "%s%s ", EXECCMD_PROMPT_, buf0);
+250-+# endif
+251:+        if ( (status = mlreply(buf1, buf2, SIZEOF(buf2))) != TRUE ) {
+252-+            return status;
+253-+        }
+254-+        BUFCPY(buf2, rtrimstr(ltrimstr(buf2)));
+255- 
+--
+391-     n = 1;
+392-     lastflag = thisflag;
+393-     thisflag = 0;
+394- 
+395:-    if ( ( status = macarg(tkn) ) != TRUE ) {   /* and grab the first token */
+396--        execstr = oldestr;
+397--
+398--        return (status);
+399-+    /* and grab the first token:  */
+400:+    if ( ( status = macarg(tkn, SIZEOF(tkn)) ) != TRUE )  {
+401-+        docmd_RET(status);
+402-     }
+403-+    MTC_docmd(("First token: `%s'", tkn));
+404- 
+--
+410-+        BUFCPY(tkn, fixnull(getval(tkn)));
+411-         n = asc_int(tkn);
+412- 
+413-         /* and now get the command to execute */
+414:-        if ( ( status = macarg(tkn) ) != TRUE ) {
+415--            execstr = oldestr;
+416--
+417--            return (status);
+418:+        if ( (status = macarg(tkn, SIZEOF(tkn))) != TRUE )  {
+419-+            docmd_RET(status);
+420-         }
+421-     }
+422-+    MTC_docmd(("Command to execute: `%s'", tkn));
+--
+453-+        while ( n-- > 0 ) {
+454-+            MTC_docmd(("BEFORE(%s) - execstr: `%s'", "dobuf", execstr));
+455-             clexec = TRUE;              /* in cline execution */
+456--        while ( n-- > 0 )
+457:-            if ( ( status = dobuf(bp) ) != TRUE )
+458-+            status = dobuf(bp);
+459-+            clexec = oldcle;            /* restore clexec flag */
+460-+            MTC_docmd(("AFTER(%s)  - execstr: `%s'", "dobuf", execstr));
+461:+            if ( status != TRUE ) {
+462-                 break;
+463-+            }
+464-+	}
+465- 
+--
+650-+    MTC(("AFTER(name of procedure)  - execstr: `%s', buffer: `%s'",
+651-+         execstr, buffer));
+652- 
+653--    /* set up the new macro buffer */
+654:-    if ( ( bp = bfind(bname, TRUE, BFINVS) ) == NULL ) {
+655-+    /* construct macro buffer name and set up the new macro buffer: */
+656:+    if ( (bp = bfind(procbfn(buffer), TRUE, BFINVS)) == NULL )  {
+657-         mlwrite(TEXT113);
+658-         /* "Can not create macro" */
+659- 
+660-@@ -459,10 +730,11 @@ int PASCAL NEAR storeproc P2_(
+--
+717--    ZEROMEM(bufn);
+718-+    ZEROMEM(procn);
+719- 
+720--    /* find out what buffer the user wants to execute */
+721:-    if ( ( status = mlreply(TEXT115, &bufn[1], NBUFN) ) != TRUE )
+722-+    if ( clexec ) {                     /* if we are non-interactive: */
+723-+        /* grab token and advance past and evaluate token:  */
+724-+        if ( ! macarg(procn, SIZEOF(procn)) ) {
+725-+            return FALSE;
+--
+762-     }
+763- 
+764-     /* and now execute it as asked */
+765--    while ( n-- > 0 )
+766:-        if ( ( status = dobuf(bp) ) != TRUE )
+767--            return (status);
+768-+    while ( n-- > 0 ) {
+769-+        int oldcle  = clexec;           /* save old clexec flag */
+770- 
+--
+828-+    }
+829- 
+830-     /* and now execute it as asked */
+831--    while ( n-- > 0 )
+832:-        if ( ( status = dobuf(bp) ) != TRUE )
+833--            return (status);
+834-+    while ( n-- > 0 ) {
+835-+        int oldcle  = clexec;           /* save old clexec flag */
+836-+
+--
+1056-     cur_arg = bp->b_args;
+1057-     while ( cur_arg != (PARG *)NULL ) {
+1058--
+1059-         /* ask for argument names */
+1060:-        if ( ( status = mlreply("Argument: ", value, NSTRING) ) != TRUE )
+1061-+        if ( ! (status = mlreply("Argument: ", value, NSTRING)) ) {
+1062- /*                    "Argument: " */
+1063--            return (status);
+1064-+
+--
+1226-             switch ( dirnum ) {
+1227-                 case DIF:                   /* IF directive */
+1228-                     /* grab the value of the logical exp */
+1229-                     if ( execlevel == 0 ) {
+1230:-                    if ( macarg(tkn) != TRUE ) {
+1231:+                        if ( macarg(tkn, SIZEOF(tkn)) != TRUE ) {
+1232-                             CLROOM(einit);
+1233-+
+1234-                             goto eexec;
+1235-                         }
+--
+1246- 
+1247-                 case DWHILE:                /* WHILE directive */
+1248-                     /* grab the value of the logical exp */
+1249-                     if ( execlevel == 0 ) {
+1250:-                    if ( macarg(tkn) != TRUE ) {
+1251:+                        if ( macarg(tkn, SIZEOF(tkn)) != TRUE ) {
+1252-                             CLROOM(einit);
+1253-+
+1254-                             goto eexec;
+1255-                         }
+1256:-                    if ( stol(tkn) == TRUE )
+1257-+                        if ( stol(tkn) )  {
+1258-                             goto onward;
+1259-                         }
+1260-+                    }
+--
+1344-                     /* if we are executing.... */
+1345-                     if ( execlevel == 0 ) {
+1346--
+1347-                         /* check for a return value */
+1348:-                    if ( macarg(tkn) == TRUE )
+1349--                        xstrcpy(rval, tkn);
+1350:+                        if ( macarg(tkn, SIZEOF(tkn)) == TRUE ) {
+1351-+                            BUFCPY(rval, tkn);
+1352-+                            MTC_dobuf(("rval: `%s'", fixnull(rval)));
+1353-+                        }
+1354- 
+--
+1413--#endif
+1414-+        MTC_dobuf(("%s", ". . . done"));
+1415- 
+1416-         /* check for a command error */
+1417:         if ( status != TRUE ) {
+1418--
+1419-             /* look if buffer is showing */
+1420-             wp = wheadp;
+1421-             while ( wp != NULL ) {
+--
+1704- #if WINDOW_MSWIN
+1705-         /* special case: we want filenamedlg to refrain from stuffing a full
+1706-          * pathname so that flook() can be put to use a few lines down the road...
+1707-          */
+1708:-    if ( ( status = filenamedlg(TEXT129, fname, NSTRING -1, FALSE) ) != TRUE )
+1709-+        if ( ! (status = filenamedlg(TEXT129, fname, NSTRING - 1, FALSE)) )
+1710- #else
+1711:-    if ( ( status = mlreply(TEXT129, fname, NSTRING -1) ) != TRUE )
+1712-+        {
+1713-+            char  prompt[NSTRING];
+1714-+            int   len = 0;
+1715-+
+--
+1756-     }
+1757- 
+1758--exec1:  /* otherwise, execute it */
+1759--    while ( n-- > 0 )
+1760:-        if ( ( status=dofile(fspec) ) != TRUE )
+1761--            return (status);
+1762-+exec1:
+1763-+    /* otherwise, execute it */
+1764-+    while ( n-- > 0 ) {
+--
+1784-@@ -1344,27 +1852,26 @@ int PASCAL NEAR dofile P1_(CONST char *, fname  /* file name to execute */)
+1785- 
+1786-     makename(bname, fname);               /* derive the name of the buffer    */
+1787-     unqname(bname);                       /* make sure we don't stomp things  */
+1788:-    if ( ( bp = bfind(bname, TRUE, 0) ) == NULL ) /* get the needed buffer */
+1789:+    if ( ( bp = bfind(bname, TRUE, 0) ) == NULL ) { /* get the needed buffer  */
+1790-         return (FALSE);
+1791--
+1792-+    }
+1793-     bp->b_mode = MDVIEW;                  /* mark the buffer as read only     */
+1794--    cb = curbp;                 /* save the old buffer */
+1795--    curbp = bp;                 /* make this one current */
+1796--    /* and try to read in the file to execute */
+1797:-    if ( ( status = readin(fname, FALSE) ) != TRUE ) {
+1798--        curbp = cb;             /* restore the current buffer */
+1799- 
+1800-+    /* try to read in the file to execute */
+1801:+    if ( ! (status = readinx(fname, FALSE, bp, TRUE)) ) {
+1802-         return (status);
+1803-     }
+1804- 
+1805-     /* go execute it! */
+1806--    curbp = cb;                 /* restore the current buffer */
+1807:-    if ( ( status = dobuf(bp) ) != TRUE )
+1808-+    status = dobuf(bp);
+1809-+    if ( ! status ) {
+1810-         return (status);
+1811-+    }

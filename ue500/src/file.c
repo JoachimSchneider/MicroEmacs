@@ -306,7 +306,7 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
     }
 #endif
 
-    if ( !(s = bclear(bp)) )  {                 /* Might be old.    */
+    if ( (s = bclear(bp)) != TRUE ) {           /* Might be old.    */
         return (s);
     }
 
@@ -321,7 +321,7 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
 #if     CRYPT
     /* set up for decryption */
     s = resetkey();
-    if ( !s ) {
+    if ( s != TRUE )  {
         return (s);
     }
 #endif
@@ -406,7 +406,7 @@ out:
         }
     }
 #if     FILOCK
-    if ( force_read ) {
+    if ( force_read == TRUE ) {
         bp->b_mode |= MDVIEW;
         upmode();
     }

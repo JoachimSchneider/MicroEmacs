@@ -1,0 +1,29 @@
+103-+    }
+104- #endif
+105- 
+106--    bp = curbp;                                 /* Cheap.       */
+107:-    if ( ( s=bclear(bp) ) != TRUE )             /* Might be old.    */
+108-+    if ( !(s = bclear(bp)) )  {                 /* Might be old.    */
+109-         return (s);
+110-+    }
+111- 
+--
+120- 
+121- #if     CRYPT
+122-     /* set up for decryption */
+123-     s = resetkey();
+124:-    if ( s != TRUE )
+125-+    if ( !s ) {
+126-         return (s);
+127-+    }
+128- #endif
+--
+226-@@ -386,13 +406,14 @@ out:    TTkopen();      /* open the keyboard again */
+227-         }
+228-     }
+229- #if     FILOCK
+230:-    if ( force_read == TRUE ) {
+231--        curbp->b_mode |= MDVIEW;
+232-+    if ( force_read ) {
+233-+        bp->b_mode |= MDVIEW;
+234-         upmode();

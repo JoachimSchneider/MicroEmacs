@@ -424,7 +424,7 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
     /* get a buffer for the binding list */
     listbuf = bfind(TEXT21, TRUE, BFINVS);
 /*         "Binding list" */
-    if ( listbuf == NULL || !bclear(listbuf) )  {
+    if ( listbuf == NULL || bclear(listbuf) == FALSE )  {
         mlwrite(TEXT22);
 /*              "Can not display binding list" */
         return (FALSE);
@@ -443,7 +443,7 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
         cpos = STRLEN(outseq);
 
         /* if we are executing an apropos command..... */
-        if ( !type && !strinc(outseq, mstring) )  {
+        if ( type == FALSE && strinc(outseq, mstring) == FALSE )  {
             /* and current string doesn't include the search string */
             goto fail;
         }
@@ -461,7 +461,7 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
                 getecnam(ktp->k_code, &outseq[cpos], SIZEOF(outseq) - cpos);
 
                 /* and add it as a line into the buffer */
-                if ( ! addline(listbuf, outseq) ) {
+                if ( addline(listbuf, outseq) != TRUE ) {
                     return (FALSE);
                 }
 
@@ -473,7 +473,7 @@ int PASCAL NEAR buildlist P2_(int, type, CONST char *, mstring)
         /* if no key was bound, we need to dump it anyway */
         if ( cpos > 0 ) {
             outseq[cpos] = 0;
-            if ( ! addline(listbuf, outseq) ) {
+            if ( addline(listbuf, outseq) != TRUE ) {
                 return (FALSE);
             }
         }
@@ -482,7 +482,7 @@ fail:   /* and on to the next name */
         ++nptr;
     }
 
-    /* scan all buffers looking for macroes and their bindings */
+    /* scan all buffers looking for macros and their bindings */
     first_entry = TRUE;
     bp = bheadp;
     while ( bp ) {
@@ -499,7 +499,7 @@ fail:   /* and on to the next name */
         cpos = STRLEN(outseq);
 
         /* if we are executing an apropos command..... */
-        if ( !type && !strinc(outseq, mstring) )  {
+        if ( type == FALSE && strinc(outseq, mstring) == FALSE )  {
              /* and current string doesn't include the search string */
             goto bfail;
         }
@@ -517,7 +517,7 @@ fail:   /* and on to the next name */
                 getecnam(ktp->k_code, &outseq[cpos], SIZEOF(outseq) - cpos);
 
                 /* and add it as a line into the buffer */
-                if ( ! addline(listbuf, outseq) ) {
+                if ( addline(listbuf, outseq) != TRUE ) {
                     return (FALSE);
                 }
 
@@ -527,8 +527,8 @@ fail:   /* and on to the next name */
         }
 
         /* add a blank line between the key and macro lists */
-        if ( first_entry )  {
-            if ( ! addline(listbuf, "") ) {
+        if ( first_entry == TRUE )  {
+            if ( addline(listbuf, "") != TRUE ) {
                 return (FALSE);
             }
 
@@ -538,7 +538,7 @@ fail:   /* and on to the next name */
         /* if no key was bound, we need to dump it anyway */
         if ( cpos > 0 ) {
             outseq[cpos] = 0;
-            if ( ! addline(listbuf, outseq) ) {
+            if ( addline(listbuf, outseq) != TRUE ) {
                 return (FALSE);
             }
         }
@@ -1161,9 +1161,6 @@ int set_key P2_(KEYTAB *, key, CONST char *, name)
 {
     ue_fnc_T        ktemp   = NULL; /* temp function pointer to assign        */
     REGISTER BUFFER *kmacro = NULL; /* ptr to buffer of macro to bind to key  */
-    char            bufn[NBUFN];    /* buffer to hold macro name              */
-
-    ZEROMEM(bufn);
 
     ASRT(NULL != name);
 
@@ -1183,10 +1180,7 @@ int set_key P2_(KEYTAB *, key, CONST char *, name)
     }
 
     /* is it a procedure/macro? */
-    BUFCPY(bufn, "[");
-    BUFCAT(bufn, name);
-    BUFCAT(bufn, "]");
-    if ( ( kmacro = bfind(bufn, FALSE, 0) ) != NULL ) {
+    if ( ( kmacro = bfind(procbfn(name), FALSE, 0) ) != NULL ) {
         key->k_ptr.buf  = kmacro;
         key->k_type     = BINDBUF;
 

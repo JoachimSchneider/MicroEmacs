@@ -75,6 +75,20 @@ EXTERN struct passwd *getpwnam DCL((CONST char *login));
 
 
 /*====================================================================*/
+/* Local macro definitions here:                                      */
+/*====================================================================*/
+/*===== Completion types =============================================*/
+
+#define CMP_BUFFER      1
+#define CMP_FUNC        2
+#define CMP_PROC        3
+#define CMP_CMND        4
+#define CMP_FILENAME    5
+
+/*====================================================================*/
+
+
+/*====================================================================*/
 /* Static functions declared here:                                    */
 /*====================================================================*/
 /* MSDOS and OS/2 change '/' to '\' in returned (static) buffer */
@@ -214,7 +228,7 @@ CONST char * PASCAL NEAR  getfilname P1_(CONST char *, prompt)
 
     ZEROMEM(buf);
 
-    if ( !FILENAMEREPLY(prompt, buf, NFILEN) )  {
+    if ( FILENAMEREPLY(prompt, buf, NFILEN) != TRUE ) {
         return NULL;
     }
 
@@ -251,6 +265,21 @@ CONST char * PASCAL NEAR  getfilname P1_(CONST char *, prompt)
     return sp;
 }
 #endif  /* WINDOW_MSWIN */
+
+
+/* GETCMDNAME:
+ *
+ * Get a command (builtin or macro) name from the command line.
+ * Command completion means that pressing a <SPACE> will attempt to
+ * complete an unfinished command name if it is unique.
+ */
+CONST char * PASCAL NEAR  getcmdname P1_(CONST char *, prompt)
+{
+    ASRT(NULL != prompt);
+
+    /* ptr to the returned string:  */
+    return complete(prompt, NULL, CMP_CMND, NSTRING);
+}
 
 
 /* GETFNCNAME:
@@ -307,6 +336,219 @@ BUFFER * PASCAL NEAR getcbuf P3_(CONST char *, prompt,
 }
 
 
+/* COMP_CMND:
+ *
+ * Attempt a completion on a command (builtin or macro) name
+ *
+ * This function combines the functionality of comp_func()
+ * and comp_proc().
+ */
+VOID PASCAL NEAR comp_cmnd P2_(
+        char *, name, /* String containing the current name to complete */
+        int *,  cpos  /* ptr to position of next character to insert    */
+    )
+{
+    REGISTER NBIND  *np       = NULL;   /* trial command to complete      */
+    REGISTER int    curbind   = 0;      /* index into the names[] array   */
+    REGISTER BUFFER *bp       = NULL;   /* trial buffer to complete       */
+    REGISTER int    index     = 0;      /* index into strings to compare  */
+    REGISTER int    matched   = FALSE;  /* Match occured                  */
+    REGISTER int    matchflag = 0;      /* did this command name match?   */
+    REGISTER int    comflag   = 0;      /* was there a completion at all? */
+
+    /* everything (or nothing) matches an empty string */
+    if ( *cpos == 0 ) {
+        return;
+    }
+
+    /* start attempting completions, one character at a time */
+    comflag = FALSE;
+    while ( *cpos < NSTRING ) {
+        matched = FALSE;
+
+        /* We look up the builtin functions first:  */
+        curbind = 0;
+        while ( curbind < numfunc ) {
+            /* is this a match? */
+            np = &names[curbind];
+            matchflag = TRUE;
+            for ( index = 0; index < *cpos; index++ )
+                if ( name[index] != np->n_name[index] ) {
+                    matchflag = FALSE;
+                    break;
+                }
+
+            /* if it is a match */
+            if ( matchflag ) {
+                /* if this is the first match, simply record it */
+                if ( ! matched )  {
+                    matched = TRUE;
+                    name[*cpos] = np->n_name[*cpos];
+                } else                {
+                    /* if there's a difference, stop here */
+                    if ( name[*cpos] != np->n_name[*cpos] ) {
+                        return;
+                    }
+                }
+            }
+
+            /* on to the next command */
+            curbind++;
+        }
+
+        /* Next we look up the defined procedures (macros): */
+        bp = bheadp;
+        while ( bp ) {
+            CONST char  *cp = bfnproc(bp->b_bname);
+            char  bprocn[NBUFN];
+
+            ZEROMEM(bprocn);
+
+            /* is this buffer a macro? */
+            if ( NULL == cp ) {
+                goto bfail;
+            }
+
+            BUFCPY(bprocn, cp);
+
+            /* is this a match? */
+            matchflag = TRUE;
+            for ( index = 0; index < *cpos; index++ ) {
+                if ( name[index] != bprocn[index] ) {
+                    matchflag = FALSE;
+                    break;
+                }
+            }
+
+            /* if it is a match */
+            if ( matchflag )  {
+                /* if this is the first match, simply record it */
+                if ( ! matched )  {
+                    matched = TRUE;
+                    name[*cpos] = bprocn[*cpos];
+                } else                {
+                    /* if there's a difference, stop here */
+                    if ( name[*cpos] != bprocn[*cpos] ) {
+                        return;
+                    }
+                }
+            }
+
+bfail:
+            /* on to the next buffer */
+            bp = bp->b_bufp;
+        }
+
+        /* with no match, we are done */
+        if ( ! matched )  {
+            /* beep if we never matched */
+            if ( comflag == FALSE )
+                TTbeep();
+
+            return;
+        }
+
+        /* if we have completed all the way... go back */
+        if ( name[*cpos] == 0 ) {
+            (*cpos)++;
+
+            return;
+        }
+
+        /* remember we matched, and complete one character */
+        comflag = TRUE;
+        TTputc(name[(*cpos)++]);
+        ++ttcol;
+        TTflush();
+    }
+
+    /* don't allow a completion past the end of the max command name length */
+    return;
+}
+
+
+/* CLIST_CMND:
+ *
+ * Make a completion list based on a partial name
+ *
+ * This function combines the functionality of clist_func()
+ * and clist_proc().
+ *
+ * ** TODO: The returned list is *not* sorted alphabetically **
+ */
+VOID PASCAL NEAR clist_cmnd P2_(CONST char *, name, int *, cpos)
+/* name:  String containing the current name to complete  */
+/* cpos:  Ptr to position of next character to insert     */
+{
+    REGISTER NBIND  *np       = NULL;   /* trial command to complete */
+    REGISTER int    curbind   = 0;      /* index into the names[] array */
+    REGISTER BUFFER *bp       = NULL;   /* trial buffer to complete           */
+    REGISTER int    name_len  = 0;      /* current length of input string */
+    REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
+
+    /* get a buffer for the completion list */
+    listbuf = bfind(intlbfn("Completion list"), TRUE, BFINVS);
+    if ( listbuf == NULL || bclear(listbuf) == FALSE ) {
+        ctrlg(FALSE, 0);
+        TTflush();
+
+        return;
+    }
+
+    name_len = *cpos;
+
+    /* We look up the builtin functions first:  */
+    for ( curbind = 0; curbind < numfunc; curbind++ ) {
+        /* is this a match? */
+        np = &names[curbind];
+        if ( strncmp(name, np->n_name, name_len) == 0 ) {
+            char  buf[NSTRING];
+
+            ZEROMEM(buf);
+
+            BUFCPY(buf, "F: ");
+            BUFCAT(buf, np->n_name);
+            addline(listbuf, buf);
+        }
+    }
+
+    /* Now we look up the procedures defined so far:  */
+    bp = bheadp;
+    while ( bp ) {
+        CONST char  *cp = bfnproc(bp->b_bname);
+        char  bprocn[NBUFN];
+
+        ZEROMEM(bprocn);
+
+        /* is this buffer a macro? */
+        if ( NULL == cp ) {
+            goto bfail;
+        }
+
+        BUFCPY(bprocn, cp);
+
+        /* is this a match? */
+        if ( strncmp(name, bprocn, name_len) == 0 ) {
+            char  buf[NSTRING];
+
+            ZEROMEM(buf);
+
+            BUFCPY(buf, "P: ");
+            BUFCAT(buf, bprocn);
+            addline(listbuf, buf);
+        }
+
+bfail:
+        /* on to the next buffer */
+        bp = bp->b_bufp;
+    }
+
+    wpopup(listbuf);
+
+    return;
+}
+
+
 /* COMP_FUNC:
  *
  * Attempt a completion on a function (i.e. builtin command) name
@@ -316,47 +558,47 @@ VOID PASCAL NEAR comp_func P2_(
         int *,  cpos  /* ptr to position of next character to insert    */
     )
 {
-    REGISTER NBIND  *bp       = NULL; /* trial command to complete */
-    REGISTER int    index     = 0;    /* index into strings to compare */
-    REGISTER int    curbind   = 0;    /* index into the names[] array */
-    REGISTER NBIND  *match    = NULL; /* last command that matches string */
-    REGISTER int    matchflag = 0;    /* did this command name match? */
-    REGISTER int    comflag   = 0;    /* was there a completion at all? */
+    REGISTER NBIND  *bp       = NULL;   /* trial command to complete      */
+    REGISTER int    index     = 0;      /* index into strings to compare  */
+    REGISTER int    curbind   = 0;      /* index into the names[] array   */
+    REGISTER int    matched   = FALSE;  /* Match occured                  */
+    REGISTER int    matchflag = 0;      /* did this command name match?   */
+    REGISTER int    comflag   = 0;      /* was there a completion at all? */
 
     /* everything (or nothing) matches an empty string */
-    if ( *cpos == 0 )
+    if ( *cpos == 0 ) {
         return;
+    }
 
     /* start attempting completions, one character at a time */
     comflag = FALSE;
     curbind = 0;
     while ( *cpos < NSTRING ) {
-
         /* first, we start at the first command and scan the list */
-        match = NULL;
+        matched = FALSE;
         curbind = 0;
-        while ( curbind <= numfunc ) {
-
+        while ( curbind < numfunc ) {
             /* is this a match? */
             bp = &names[curbind];
             matchflag = TRUE;
-            for ( index = 0; index < *cpos; index++ )
+            for ( index = 0; index < *cpos; index++ ) {
                 if ( name[index] != bp->n_name[index] ) {
                     matchflag = FALSE;
                     break;
                 }
+            }
 
             /* if it is a match */
-            if ( matchflag ) {
-
+            if ( matchflag )  {
                 /* if this is the first match, simply record it */
-                if ( match == NULL ) {
-                    match = bp;
+                if ( ! matched )  {
+                    matched = TRUE;
                     name[*cpos] = bp->n_name[*cpos];
-                } else {
+                } else            {
                     /* if there's a difference, stop here */
-                    if ( name[*cpos] != bp->n_name[*cpos] )
+                    if ( name[*cpos] != bp->n_name[*cpos] ) {
                         return;
+                    }
                 }
             }
 
@@ -365,10 +607,11 @@ VOID PASCAL NEAR comp_func P2_(
         }
 
         /* with no match, we are done */
-        if ( match == NULL ) {
+        if ( ! matched )  {
             /* beep if we never matched */
-            if ( comflag == FALSE )
+            if ( comflag == FALSE ) {
                 TTbeep();
+            }
 
             return;
         }
@@ -400,9 +643,9 @@ VOID PASCAL NEAR clist_func P2_(CONST char *, name, int *, cpos)
 /* name:  String containing the current name to complete  */
 /* cpos:  Ptr to position of next character to insert     */
 {
-    REGISTER NBIND  *bp       = NULL;   /* trial command to complete */
-    REGISTER int    curbind   = 0;      /* index into the names[] array */
-    REGISTER int    name_len  = 0;      /* current length of input string */
+    REGISTER NBIND  *bp       = NULL;   /* trial command to complete          */
+    REGISTER int    curbind   = 0;      /* index into the names[] array       */
+    REGISTER int    name_len  = 0;      /* current length of input string     */
     REGISTER BUFFER *listbuf  = NULL;   /* buffer to put completion list into */
 
     /* get a buffer for the completion list */
@@ -417,12 +660,12 @@ VOID PASCAL NEAR clist_func P2_(CONST char *, name, int *, cpos)
     name_len = *cpos;
 
     /* first, we start at the first command and scan the list */
-    for ( curbind = 0; curbind <= numfunc; curbind++ ) {
-
+    for ( curbind = 0; curbind < numfunc; curbind++ ) {
         /* is this a match? */
         bp = &names[curbind];
-        if ( strncmp(name, bp->n_name, name_len) == 0 )
+        if ( strncmp(name, bp->n_name, name_len) == 0 ) {
             addline(listbuf, bp->n_name);
+        }
     }
 
     wpopup(listbuf);
@@ -439,11 +682,11 @@ VOID PASCAL NEAR comp_proc P2_(char *, name, int *, cpos)
 /* name:  Buffer containing the current name to complete  */
 /* cpos:  Ptr to position of next character to insert     */
 {
-    REGISTER BUFFER *bp       = NULL; /* trial buffer to complete         */
-    REGISTER int    index     = 0;    /* index into strings to compare    */
-    REGISTER BUFFER *match    = NULL; /* last buffer that matches string  */
-    REGISTER int    matchflag = 0;    /* did this buffer name match?      */
-    REGISTER int    comflag   = 0;    /* was there a completion at all?   */
+    REGISTER BUFFER *bp       = NULL;     /* trial buffer to complete       */
+    REGISTER int    index     = 0;        /* index into strings to compare  */
+    REGISTER int    matched   = FALSE;    /* Match occured                  */
+    REGISTER int    matchflag = 0;        /* did this buffer name match?    */
+    REGISTER int    comflag   = 0;        /* was there a completion at all? */
 
     /* everything (or nothing) matches an empty string */
     if ( *cpos == 0 ) {
@@ -454,7 +697,7 @@ VOID PASCAL NEAR comp_proc P2_(char *, name, int *, cpos)
     comflag = FALSE;
     while ( *cpos < NBUFN ) {
         /* first, we start at the first buffer and scan the list */
-        match = NULL;
+        matched = FALSE;
         bp = bheadp;
         while ( bp ) {
             CONST char  *cp = bfnproc(bp->b_bname);
@@ -481,10 +724,10 @@ VOID PASCAL NEAR comp_proc P2_(char *, name, int *, cpos)
             /* if it is a match */
             if ( matchflag )  {
                 /* if this is the first match, simply record it */
-                if ( match == NULL )  {
-                    match = bp;
+                if ( ! matched )  {
+                    matched = TRUE;
                     name[*cpos] = bprocn[*cpos];
-                } else                {
+                } else            {
                     /* if there's a difference, stop here */
                     if ( name[*cpos] != bprocn[*cpos] ) {
                         return;
@@ -498,7 +741,7 @@ bfail:
         }
 
         /* with no match, we are done */
-        if ( match == NULL )  {
+        if ( ! matched )  {
             /* beep if we never matched */
             if ( comflag == FALSE ) {
                 TTbeep();
@@ -565,8 +808,9 @@ VOID PASCAL NEAR clist_proc P2_(CONST char *, name, int *, cpos)
         BUFCPY(bprocn, cp);
 
         /* is this a match? */
-        if ( strncmp(name, bprocn, name_len) == 0 )
+        if ( strncmp(name, bprocn, name_len) == 0 ) {
             addline(listbuf, bprocn);
+        }
 
 bfail:
         /* on to the next buffer */
@@ -589,41 +833,42 @@ VOID PASCAL NEAR comp_buffer P2_(char *, name, int *, cpos)
 {
     REGISTER BUFFER *bp       = NULL; /* trial buffer to complete         */
     REGISTER int    index     = 0;    /* index into strings to compare    */
-    REGISTER BUFFER *match    = NULL; /* last buffer that matches string  */
+    REGISTER int    matched   = FALSE;    /* Match occured                  */
     REGISTER int    matchflag = 0;    /* did this buffer name match?      */
     REGISTER int    comflag   = 0;    /* was there a completion at all?   */
 
     /* everything (or nothing) matches an empty string */
-    if ( *cpos == 0 )
+    if ( *cpos == 0 ) {
         return;
+    }
 
     /* start attempting completions, one character at a time */
     comflag = FALSE;
     while ( *cpos < NBUFN ) {
-
         /* first, we start at the first buffer and scan the list */
-        match = NULL;
+        matched = FALSE;
         bp = bheadp;
         while ( bp ) {
             /* is this a match? */
             matchflag = TRUE;
-            for ( index = 0; index < *cpos; index++ )
+            for ( index = 0; index < *cpos; index++ ) {
                 if ( name[index] != bp->b_bname[index] ) {
                     matchflag = FALSE;
                     break;
                 }
+            }
 
             /* if it is a match */
             if ( matchflag ) {
-
                 /* if this is the first match, simply record it */
-                if ( match == NULL ) {
-                    match = bp;
+                if ( ! matched )  {
+                    matched = TRUE;
                     name[*cpos] = bp->b_bname[*cpos];
-                } else {
+                } else            {
                     /* if there's a difference, stop here */
-                    if ( name[*cpos] != bp->b_bname[*cpos] )
+                    if ( name[*cpos] != bp->b_bname[*cpos] )  {
                         return;
+                    }
                 }
             }
 
@@ -632,10 +877,11 @@ VOID PASCAL NEAR comp_buffer P2_(char *, name, int *, cpos)
         }
 
         /* with no match, we are done */
-        if ( match == NULL ) {
+        if ( ! matched )  {
             /* beep if we never matched */
-            if ( comflag == FALSE )
+            if ( comflag == FALSE ) {
                 TTbeep();
+            }
 
             return;
         }
@@ -686,8 +932,9 @@ VOID PASCAL NEAR clist_buffer P2_(CONST char *, name, int *, cpos)
 
     while ( bp ) {
         /* is this a match? */
-        if ( strncmp(name, bp->b_bname, name_len) == 0 )
+        if ( strncmp(name, bp->b_bname, name_len) == 0 )  {
             addline(listbuf, bp->b_bname);
+        }
 
         /* on to the next buffer */
         bp = bp->b_bufp;
@@ -1310,7 +1557,9 @@ static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
 
     /* if we are executing a command line get the next arg and match it */
     if ( clexec ) {
-        if ( macarg(buf, SIZEOF(buf)) != TRUE ) return (NULL);
+        if ( macarg(buf, SIZEOF(buf)) != TRUE ) {
+            return (NULL);
+        }
 
         return (buf);
     }
@@ -1320,7 +1569,9 @@ static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
 
     /* if it exists, prompt the user for a buffer name */
     if ( prompt ) {
-        if        ( type == CMP_FUNC )  {
+        if        ( type == CMP_CMND )  {
+            mlwrite("%s", prompt);
+        } else if ( type == CMP_FUNC )  {
             mlwrite("%s", prompt);
         } else if ( type == CMP_PROC )  {
             mlwrite("%s", prompt);
@@ -1380,6 +1631,10 @@ static char * PASCAL NEAR  complete P4_(CONST char *,  prompt,
             switch ( type ) {
             case CMP_BUFFER:
                 comp_buffer(buf, &cpos);
+                break;
+
+            case CMP_CMND:
+                comp_cmnd(buf, &cpos);
                 break;
 
             case CMP_FUNC:
@@ -1516,6 +1771,10 @@ clist:      /* make a completion list! */
                 clist_buffer(buf, &cpos);
                 break;
 
+            case CMP_CMND:
+                clist_cmnd(buf, &cpos);
+                break;
+
             case CMP_FUNC:
                 clist_func(buf, &cpos);
                 break;
@@ -1536,7 +1795,9 @@ clist:      /* make a completion list! */
             /* if it exists, reprompt the user */
             if ( prompt ) {
                 buf[cpos] = 0;
-                if        ( type == CMP_FUNC )  {
+                if        ( type == CMP_CMND )  {
+                    mlwrite("%s%s", prompt, buf);
+                } else if ( type == CMP_FUNC )  {
                     mlwrite("%s%s", prompt, buf);
                 } else if ( type == CMP_PROC )  {
                     mlwrite("%s%s", prompt, buf);

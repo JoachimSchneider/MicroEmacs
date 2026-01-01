@@ -1646,12 +1646,20 @@ TODOs:  (All done now --- 2025-06-08)
 
 We should investigate
 
-  efunc.inc:    { "execute-buffer", execbuf },          -- Exec buffer of commands, INTERACTIVE && CLEXEC, Completion
-  efunc.inc:    { "execute-command-line", execcmd },    -- Exec macro or function, INTERACTIVE
-  efunc.inc:    { "execute-file", execfile },           -- Exec file of commands, INTERACTIVE
+  efunc.inc:    { "execute-buffer", execbuf },          -- Exec buffer of commands, INTERACTIVE && CLEXEC,  Completion
+  efunc.inc:    { "execute-command-line", execcmd },    -- Exec macro or function, INTERACTIVE,             No Completion
+  efunc.inc:    { "execute-file", execfile },           -- Exec file of commands, INTERACTIVE               No Completion
   efunc.inc:    { "execute-macro", ctlxe },             -- Exec keyboard macro
-  efunc.inc:    { "execute-named-command", namedcmd },  -- Exec function, INTERACTIVE && CLEXEC, Completion
-  efunc.inc:    { "execute-procedure", execproc },      -- Exec macro, INTERACTIVE
+  efunc.inc:    { "execute-named-command", namedcmd },  -- Exec function, INTERACTIVE && CLEXEC,            Completion
+  efunc.inc:    { "execute-procedure", execproc },      -- Exec macro, INTERACTIVE                          No Completion
+
+Remarks:
+
+  - We may add completion in a simple way to
+    + execfile: We simply need a file name
+    + execproc: We simply need a procedure name
+  - Adding completion to execcmd is more complicated as it needs a whole command line!
+
 
   ===> Proposed changes:
         Check nammedcmd, exec* for clexec:
@@ -1740,6 +1748,27 @@ Next steps:
   and namedcmd with macro execution would have autocompletion.
 
   Look into the `describe-bindings'-code which also lists bound macros.
+
+  ===> DONE
+
+
+[2026-01-01.00]
+
+We create a new fuction wich only executes builtin fucntions:
+
+                            FUNC    PROC    INTERACTIVE
+F: execute-command-line     Y       Y       N
+F: execute-named-command    Y       Y       Y
+F: execute-procedure        N       Y       N
+
+// So we'll create an `execute-function'
+
+F: execute-function         Y       N       N
+
+It will use the getfncname() completion function.
+
+The CMP_* macros should be moved away from estruct.h    ===> DONE
+
 
 
 #============================== TODO LIST ==============================

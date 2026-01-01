@@ -76,6 +76,36 @@
  *====================================================================*/
 
 
+/*====================================================================*
+ * Unfortuanetly FALSE/TRUE are not the only values that MicroEMACS
+ * boolean valued functions return: When used interactively they may
+ * also return values like `ABORT'.
+ *
+ * Just to be shure we define a macro here that remaps such results
+ * depending on the interactive ( !clexec ) or non-interactive
+ * ( clexec ) state.
+ *
+ * It should/may be used in the functions that may be called
+ * interactively by the user like `execbuf', `execcmd', `execfile',
+ * `execfunc' `execproc', `namedcmd'.
+ *====================================================================*/
+#define STATRET(x)  do  {                 \
+    int x_  = (x);                        \
+                                          \
+    if ( x_ == TRUE || x_ == FALSE )  {   \
+        return x_;                        \
+    }                                     \
+                                          \
+    if ( clexec ) {                       \
+        return FALSE;                     \
+    } else        {                       \
+        return x_;                        \
+    }                                     \
+} while ( 0 )
+/**END_OF_DEFINITION**/
+/*====================================================================*/
+
+
 /*====================================================================*/
 /* Module local functions                                             */
 /*====================================================================*/
@@ -111,7 +141,7 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
         /* ---------------------------------------------------------- */
 
         /* grab token and advance past and evaluate token:  */
-        if ( ! macarg(buffer, SIZEOF(buffer)) ) {
+        if ( macarg(buffer, SIZEOF(buffer)) != TRUE ) {
             return FALSE;
         }
 
@@ -131,7 +161,12 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
 
         /* prompt the user to type a named command */
         /* and get the function name to execute */
-        BUFCPY(buffer, getfncname(": "));
+        CONST char  *cp = getcmdname(": ");
+
+        if ( NULL == cp ) {
+            return FALSE;
+        }
+        BUFCPY(buffer, cp);
         if ( NULL == (kfunc = fncmatch(buffer)) ) {
             MTC(("`%s' is NOT a function", buffer));
 
@@ -157,8 +192,8 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
         status = (*kfunc)(f, n);    /* call the function              */
         clexec = oldcle;            /* restore clexec flag            */
 
-        if ( ! status ) {
-            return FALSE;
+        if ( status != TRUE ) {
+            STATRET(status);
         }
     } else                {
         while ( n-- > 0 ) {
@@ -167,8 +202,8 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
             status = dobuf(bp);     /* execute buffer                 */
             clexec = oldcle;        /* restore clexec flag            */
 
-            if ( ! status ) {
-                return FALSE;
+            if ( status != TRUE ) {
+                STATRET(status);
             }
         }
     }
@@ -180,10 +215,17 @@ int PASCAL NEAR namedcmd P2_(int, f, int, n)
  *
  * Execute a command line command to be typed in by the user.
  * - might be either a procedure (macro) or a function (builtin)
+ *
+ * This function executes a command line the same way as would be done
+ * in macro line: e.g it is possible to type in
+ *
+ *  print &cat "The answer is " &add 40 2
+ *
  */
 int PASCAL NEAR execcmd P2_(int, f, int, n)
 /* default Flag and Numeric argument  */
 {
+#define EXECCMD_PROMPT_ "===> "
     REGISTER int  status  = 0;          /* status return      */
     char          cmdstr[NSTRING];      /* command to execute */
 
@@ -191,14 +233,47 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
 
     if ( clexec ) {   /* if we are non-interactive: */
         /* grab token and advance past and evaluate token:  */
-        if ( ! macarg(cmdstr, SIZEOF(cmdstr)) ) {
+        if ( macarg(cmdstr, SIZEOF(cmdstr)) != TRUE ) {
             return FALSE;
         }
     } else                {
         /* find out what command the user wants to execute: */
-        if ( ! (status = mlreply("===> ", cmdstr, SIZEOF(cmdstr))) )  {
+#if BEGIN_COMMENT_
+      /* Old coding without command completion: */
+      if ( (status = mlreply(EXECCMD_PROMPT_, cmdstr, SIZEOF(cmdstr)))
+            != TRUE ) {
+          STATRET(status);
+      }
+#else   /*END_COMMENT_*/
+        CONST char  *cp = getcmdname(EXECCMD_PROMPT_);
+        char        buf0[NSTRING];
+        char        buf1[NSTRING];
+        char        buf2[NSTRING];
+
+        ZEROMEM(buf0);
+        ZEROMEM(buf1);
+        ZEROMEM(buf2);
+
+        if ( NULL == cp ) {
             return FALSE;
         }
+        BUFCPY(buf0, rtrimstr(ltrimstr(cp)));
+# if BEGIN_COMMENT_
+        xsnprintf(buf1, SIZEOF(buf1), "  [%s] Arguments: ", buf0);
+# else  /*END_COMMENT_*/
+        xsnprintf(buf1, SIZEOF(buf1), "%s%s ", EXECCMD_PROMPT_, buf0);
+# endif
+        if ( (status = mlreply(buf1, buf2, SIZEOF(buf2))) != TRUE ) {
+            STATRET(status);
+        }
+        BUFCPY(buf2, rtrimstr(ltrimstr(buf2)));
+
+        BUFCPY(cmdstr, buf0);
+        if ( *buf0 && *buf2 ) {
+            BUFCAT(cmdstr, " ");
+        }
+        BUFCAT(cmdstr, buf2);
+#endif
     }
 
     /* and now execute it as asked */
@@ -214,12 +289,13 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
         status = docmd(cmdstr);
         clexec = oldcle;                /* restore clexec flag */
 
-        if ( ! status ) {
-            return FALSE;
+        if ( status != TRUE ) {
+            STATRET(status);
         }
     }
 
     return (TRUE);
+#undef  EXECCMD_PROMPT_
 }
 
 /* DOCMD:
@@ -231,6 +307,9 @@ int PASCAL NEAR execcmd P2_(int, f, int, n)
  *
  * format of the command line is:
  *  {# arg} <command-name> {<argument string(s)>}
+ *
+ * <command-name> is first tried as a builtin function then as a user
+ * defined procedure (macro).
  *
  * This function restores `execstr' to its old value!
  */
@@ -322,7 +401,7 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
     thisflag = 0;
 
     /* and grab the first token:  */
-    if ( ( status = macarg(tkn, SIZEOF(tkn)) ) != TRUE )  {
+    if ( (status = macarg(tkn, SIZEOF(tkn))) != TRUE )  {
         docmd_RET(status);
     }
     MTC_docmd(("First token: `%s'", tkn));
@@ -335,21 +414,21 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
         n = asc_int(tkn);
 
         /* and now get the command to execute */
-        if ( ( status = macarg(tkn, SIZEOF(tkn)) ) != TRUE )  {
+        if ( (status = macarg(tkn, SIZEOF(tkn))) != TRUE )  {
             docmd_RET(status);
         }
     }
     MTC_docmd(("Command to execute: `%s'", tkn));
 
     /* and match the token to see if it exists: */
-    if ( ( fnc = fncmatch(tkn) ) == NULL ) {  /* Not a function */
+    if ( (fnc = fncmatch(tkn)) == NULL )  { /* Not a function */
         MTC_docmd(("`%s' is NOT a function", tkn));
         MTC_docmd(("execstr: `%s'", execstr));
         /* construct the buffer name */
 
         /* Is it a macro? Construct its buffer name and find the
          * pointer to that buffer:  */
-        if ( ( bp = bfind(procbfn(tkn), FALSE, 0) ) == NULL ) { /* No */
+        if ( (bp = bfind(procbfn(tkn), FALSE, 0)) == NULL ) { /* No */
             mlwrite(TEXT244, tkn);
 /*                  "%%No such function as '%s'" */
 
@@ -589,7 +668,7 @@ int PASCAL NEAR macarg P2_(char *, tok  /* buffer to place argument */,
     status = nextarg("", tok, size, ctoec('\r'));
     clexec = savcle;            /* restore execution mode */
 
-    return (status);
+    return status;
 }
 
 /* NEXTARG:
@@ -736,7 +815,7 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
 
     if ( clexec ) {                     /* if we are non-interactive: */
         /* grab token and advance past and evaluate token:  */
-        if ( ! macarg(procn, SIZEOF(procn)) ) {
+        if ( macarg(procn, SIZEOF(procn)) != TRUE ) {
             return FALSE;
         }
     } else                {
@@ -777,8 +856,8 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
         status = dobuf(bp);
         clexec = oldcle;                /* restore clexec flag */
 
-        if ( ! status ) {
-            return FALSE;
+        if ( status != TRUE ) {
+            STATRET(status);
         }
     }
 
@@ -800,7 +879,7 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
 
     if ( clexec ) {                     /* if we are non-interactive: */
         /* grab token and advance past and evaluate token:  */
-        if ( ! macarg(bufn, SIZEOF(bufn)) ) {
+        if ( macarg(bufn, SIZEOF(bufn)) != TRUE ) {
             return FALSE;
         }
     } else        {
@@ -840,8 +919,8 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
         status = dobuf(bp);
         clexec = oldcle;                /* restore clexec flag */
 
-        if ( ! status ) {
-            return FALSE;
+        if ( status != TRUE ) {
+            STATRET(status);
         }
     }
 
@@ -1102,9 +1181,7 @@ nxtscan:        /* on to the next line */
     cur_arg = bp->b_args;
     while ( cur_arg != (PARG *)NULL ) {
         /* ask for argument names */
-        if ( ! (status = mlreply("Argument: ", value, NSTRING)) ) {
-/*                    "Argument: " */
-
+        if ( (status = mlreply("Argument: ", value, NSTRING)) != TRUE ) {
             dobuf_RET(status);
         }
 
@@ -1200,7 +1277,7 @@ nxtscan:        /* on to the next line */
             }
 
             /* copy the text into the new line */
-            for ( i=0; i<linlen; ++i )  {
+            for ( i=0; i < linlen; ++i )  {
                 lputc(mp, i, eline[i]);
             }
 
@@ -1721,7 +1798,7 @@ int PASCAL NEAR execfile P2_(
 
     if ( clexec ) {                     /* if we are non-interactive: */
         /* grab token and advance past and evaluate token:  */
-        if ( ! macarg(fname, SIZEOF(fname)) ) {
+        if ( macarg(fname, SIZEOF(fname)) != TRUE ) {
             return FALSE;
         }
     } else        {
@@ -1729,7 +1806,7 @@ int PASCAL NEAR execfile P2_(
         /* special case: we want filenamedlg to refrain from stuffing a full
          * pathname so that flook() can be put to use a few lines down the road...
          */
-        if ( ! (status = filenamedlg(TEXT129, fname, NSTRING - 1, FALSE)) )
+        if ( (status = filenamedlg(TEXT129, fname, NSTRING - 1, FALSE)) != TRUE )
 #else
         {
             char  prompt[NSTRING];
@@ -1746,7 +1823,7 @@ int PASCAL NEAR execfile P2_(
         if ( ! *fname )   /* status initialized to FALSE */
 #endif
         {
-            return (status);
+            STATRET(status);
         }
     }
 
@@ -1780,8 +1857,8 @@ exec1:
         status = dofile(fspec);
         clexec = oldcle;                /* restore clexec flag */
 
-        if ( ! status ) {
-            return FALSE;
+        if ( status != TRUE ) {
+            STATRET(status);
         }
     }
 
@@ -1809,13 +1886,13 @@ int PASCAL NEAR dofile P1_(CONST char *, fname  /* file name to execute */)
     bp->b_mode = MDVIEW;                  /* mark the buffer as read only     */
 
     /* try to read in the file to execute */
-    if ( ! (status = readinx(fname, FALSE, bp, TRUE)) ) {
+    if ( (status = readinx(fname, FALSE, bp, TRUE)) != TRUE ) {
         return (status);
     }
 
     /* go execute it! */
     status = dobuf(bp);
-    if ( ! status ) {
+    if ( status != TRUE ) {
         return (status);
     }
 
