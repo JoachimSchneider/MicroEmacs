@@ -612,7 +612,7 @@ int PASCAL NEAR wpopup P1_(BUFFER *, popbuf)
     }
 
     wp = wheadp;                                /* Find window to use   */
-    while ( wp!=NULL && wp == curwp ) {
+    while ( wp != NULL && wp == curwp ) {
         wp = wp->w_wndp;
     }
 

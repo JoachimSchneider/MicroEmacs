@@ -917,9 +917,9 @@ execl(va_alist)
 /*===== Completion types =============================================*/
 
 #define CMP_BUFFER      0
-#define CMP_COMMAND     1
-#define CMP_FILENAME    2
-#define CMP_PROCEDURE   4
+#define CMP_FUNC        1
+#define CMP_PROC        2
+#define CMP_FILENAME    4
 
 /*===== Directive definitions ========================================*/
 

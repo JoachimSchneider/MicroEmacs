@@ -22,13 +22,6 @@
 #include        "elang.h"
 
 
-/*==============================================================*/
-/* FEATURES                                                     */
-/*==============================================================*/
-#define USE_POPBUFFER_FILL  ( 1 )
-/*==============================================================*/
-
-
 #define FARRIGHT        999             /* column beyond the right edge! */
 
 #if     WINDOW_MSWIN
@@ -1045,6 +1038,11 @@ VOID PASCAL NEAR upt_size P0_()
  * space gets pushed back into the input stream to be interpeted later
  * as a command.
  */
+/** TODO:
+ **   As the lines of a buffer are parts of a circular list the start
+ **   of the buffer is displayed *after* the end which might be
+ **   confusing: This should be changed.
+ **/
 int PASCAL NEAR pop P1_(BUFFER *, popbuf)
 {
     REGISTER int  index = 0;        /* index into the current output line   */
@@ -1055,23 +1053,10 @@ int PASCAL NEAR pop P1_(BUFFER *, popbuf)
     int           c         = '\0'; /* input character                      */
 
     /* add the barrior line to the end of the pop up buffer */
+#if ( 0 )
     addline(popbuf, "------------------------------------------");
-#if USE_POPBUFFER_FILL
-    /** TODO: This should be handled so that the `END'-line appears
-     **       at the bottom of the last screen.
-     **/
-    {
-        int i = 0;
-
-        for ( i = 0; i < term.t_nrow - 2 + !modeflag; i++ ) {
-            addline(popbuf, "");
-        }
-        addline(popbuf, "******************************************");
-        addline(popbuf, "*** ENDENDENDENDENDENDENDENDENDENDEND  ***");
-        addline(popbuf, "******************************************");
-        addline(popbuf, "");
-        addline(popbuf, "===>");
-    }
+#else
+    addline(popbuf, "*** ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ ***");
 #endif
 
     /* set up to scan pop up buffer */

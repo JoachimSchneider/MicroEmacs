@@ -2223,6 +2223,7 @@ EXTERN ue_fnc_T                 fncmatch DCL((CONST char *fname));
 EXTERN CONST char * PASCAL NEAR getbufname DCL((CONST char *prompt));
 EXTERN CONST char * PASCAL NEAR getfilname DCL((CONST char *prompt));
 EXTERN CONST char * PASCAL NEAR getfncname DCL((CONST char *prompt));
+EXTERN CONST char * PASCAL NEAR getprcname DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR          asc_int DCL((CONST char *st));
 EXTERN int                      dspram DCL((void));
 EXTERN VOID                     lckerror DCL((char *errstr));
@@ -2667,13 +2668,15 @@ EXTERN VOID PASCAL NEAR         ab_init DCL((void));
 EXTERN VOID PASCAL NEAR         ab_save DCL((char c));
 EXTERN VOID PASCAL NEAR         ab_expand DCL((void));
 EXTERN VOID PASCAL NEAR         clist_buffer DCL((CONST char *name, int *cpos));
-EXTERN VOID PASCAL NEAR         clist_command DCL((CONST char *name, int *cpos));
+EXTERN VOID PASCAL NEAR         clist_func DCL((CONST char *name, int *cpos));
 EXTERN VOID PASCAL NEAR         clist_file DCL((char *name, int *cpos));
+EXTERN VOID PASCAL NEAR         clist_proc DCL((CONST char *name, int *cpos));
 EXTERN VOID PASCAL NEAR         comp_buffer DCL((char *name, int *cpos));
-EXTERN VOID PASCAL NEAR         comp_command DCL((char *name, int *cpos));
+EXTERN VOID PASCAL NEAR         comp_func DCL((char *name, int *cpos));
 #if !WINDOW_MSWIN
 EXTERN VOID PASCAL NEAR         comp_file DCL((char *name, int *cpos));
 #endif
+EXTERN VOID PASCAL NEAR         comp_proc DCL((char *name, int *cpos));
 EXTERN VOID PASCAL NEAR         ecrypt DCL((char *bptr, unsigned len));
 EXTERN VOID PASCAL NEAR         errormesg DCL((CONST char *mesg, BUFFER *bp, LINE *lp));
 EXTERN VOID PASCAL NEAR         flong_asc DCL((char *buf, int width, long num));

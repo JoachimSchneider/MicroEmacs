@@ -741,10 +741,14 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
         }
     } else                {
         /* find out what procedure the user wants to execute: */
-        if ( ! (status = mlreply(TEXT115, procn, SIZEOF(procn))) )  {
-/*                               "Execute procedure: " */
+        /* getprcname(): Completion with SPACE*/
+        CONST char  *cp = getprcname(TEXT115);
+/*                                   "Execute procedure: " */
+
+        if ( NULL == cp ) {
             return FALSE;
         }
+        BUFCPY(procn, cp);
     }
 
     /* construct the buffer name and find the pointer to that buffer: */
