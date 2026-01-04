@@ -2425,6 +2425,7 @@ EXTERN int PASCAL NEAR          entab DCL((int f, int n));
 EXTERN int PASCAL NEAR          execbuf DCL((int f, int n));
 EXTERN int PASCAL NEAR          execcmd DCL((int f, int n));
 EXTERN int PASCAL NEAR          execfile DCL((int f, int n));
+EXTERN int PASCAL NEAR          execfunc DCL((int f, int n));
 EXTERN int PASCAL NEAR          execprg DCL((int f, int n));
 EXTERN int PASCAL NEAR          execproc DCL((int f, int n));
 EXTERN int PASCAL NEAR          execute DCL((int c, int f, int n));

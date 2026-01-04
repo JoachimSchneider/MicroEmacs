@@ -117,6 +117,7 @@ NOSHARE NBIND names[] =
     { "execute-buffer", execbuf },
     { "execute-command-line", execcmd },
     { "execute-file", execfile },
+    { "execute-function", execfunc },
     { "execute-macro", ctlxe },
     { "execute-named-command", namedcmd },
     { "execute-procedure", execproc },

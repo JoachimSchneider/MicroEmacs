@@ -1754,18 +1754,18 @@ Next steps:
 
 [2026-01-01.00]
 
-We create a new fuction wich only executes builtin fucntions:
+We create a new function wich only executes builtin functions:
 
                             FUNC    PROC    INTERACTIVE
 F: execute-command-line     Y       Y       N
 F: execute-named-command    Y       Y       Y
 F: execute-procedure        N       Y       N
 
-// So we'll create an `execute-function'
+// So we'll create an `execute-function', `execfunc'
 
 F: execute-function         Y       N       N
 
-It will use the getfncname() completion function.
+It will use the getfncname() completion function.       ===> DONE
 
 The CMP_* macros should be moved away from estruct.h    ===> DONE
 

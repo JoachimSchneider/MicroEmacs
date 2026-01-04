@@ -809,7 +809,7 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
 {
     REGISTER BUFFER *bp     = NULL;   /* ptr to buffer to execute     */
     REGISTER int    status  = 0;      /* status return                */
-    char procn[NBUFN];                /* name of procedure to execute */
+    char            procn[NBUFN];     /* name of procedure to execute */
 
     ZEROMEM(procn);
 
@@ -821,8 +821,12 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
     } else                {
         /* find out what procedure the user wants to execute: */
         /* getprcname(): Completion with SPACE*/
+#if BEGIN_COMMENT_
         CONST char  *cp = getprcname(TEXT115);
 /*                                   "Execute procedure: " */
+#else   /*END_COMMENT_*/
+        CONST char  *cp = getprcname("P?> ");
+#endif
 
         if ( NULL == cp ) {
             return FALSE;
@@ -859,6 +863,64 @@ int PASCAL NEAR execproc P2_(int, f, int, n)
         if ( status != TRUE ) {
             STATRET(status);
         }
+    }
+
+    return TRUE;
+}
+
+/* EXECFUNC:
+ *
+ * Execute a (builtin) function.
+ */
+int PASCAL NEAR execfunc P2_(int, f, int, n)
+/* default flag and numeric arg */
+{
+    ue_fnc_T      kfunc   = NULL;   /* ptr to the function to execute */
+    REGISTER int  status  = 0;      /* status return                  */
+    REGISTER int  oldcle  = clexec; /* Org exec mode (interact./CLI)  */
+    char          funcn[NBUFN];     /* name of procedure to execute   */
+
+    ZEROMEM(funcn);
+
+    if ( clexec ) {                     /* if we are non-interactive: */
+        /* grab token and advance past and evaluate token:  */
+        if ( macarg(funcn, SIZEOF(funcn)) != TRUE ) {
+            return FALSE;
+        }
+    } else                {
+        /* find out what function the user wants to execute: */
+        /* getfncname(): Completion with SPACE*/
+#if BEGIN_COMMENT_
+        CONST char  *cp = getfncname(TEXT115);
+/*                                   "Execute procedure: " */
+#else   /*END_COMMENT_*/
+        CONST char  *cp = getfncname("F?> ");
+#endif
+
+        if ( NULL == cp ) {
+            return FALSE;
+        }
+        BUFCPY(funcn, cp);
+    }
+
+    /* and look it up: */
+    if ( (kfunc = fncmatch(funcn)) == NULL )  {
+        MTC(("%%No such function as '%s'", funcn));
+        if ( ! clexec ) {
+            mlwrite(TEXT244, funcn);
+/*                  "%%No such function as '%s'" */
+        }
+
+        return FALSE;
+    }
+
+    /* if interactive .... force non-interactive execution  */
+    clexec  = TRUE;
+    status  = (*kfunc)(f, n);   /* call the function    */
+    clexec  = oldcle;           /* restore clexec flag  */
+
+    if ( status != TRUE ) {
+        STATRET(status);
     }
 
     return TRUE;
