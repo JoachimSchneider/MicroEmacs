@@ -565,6 +565,9 @@ EXTERN CONST char         *smkvis DCL((CONST char *s));
 /* Display character buffer in a visible form.                  */
 EXTERN CONST char         *bmkvis DCL((CONST char *s, int l));
 
+/* Get name of a tmp not yet existing buffer --- static result  */
+EXTERN CONST char         *gettmpbufnam DCL((void));
+
 
 #if UEMACS_FEATURE_USE_STATIC_STACK
 /*--------------------------------------------------------------------*/

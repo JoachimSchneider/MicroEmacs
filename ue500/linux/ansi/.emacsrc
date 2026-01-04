@@ -449,6 +449,30 @@ store-procedure start-search
 ; Was bound to replace-string
 macro-to-key start-search M-r
 
+store-procedure unfold
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  add-mode "MAGIC"
+  beginning-of-file
+  replace-string "\([^~r~n]\)[~r~n]\([^~r~n]\)" "\1 \2"
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+macro-to-key unfold M-^Q
 
 ;===============================================================================
 

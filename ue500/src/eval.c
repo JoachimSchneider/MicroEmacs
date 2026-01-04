@@ -383,9 +383,9 @@ CONST char * PASCAL NEAR gtfun P1_(CONST char *, fname)
             RETURN ( XSTRCPY(result, &arg1[STRLEN(arg1) - arg]) );
 
         case UFRND:
-            RETURN ( int_asc( (int)( ernd()
-                                      % (long)absv( asc_int(arg1) ) )
-                                        + 1L ) );
+            RETURN ( int_asc(
+                      (int)(ernd() % (long)absv(asc_int(arg1)) + 1L)
+                      ) );
 
         case UFSEQUAL:
             RETURN ( ltos(strcmp(arg1, arg2) == 0) );
@@ -862,6 +862,9 @@ CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
 
         case EVYPOS:
             RETURN ( int_asc(ypos) );
+
+        case EVTBUF:
+            RETURN ( gettmpbufnam() );
     }
 
     meexit(-12);        /* again, we should never get here */
@@ -1323,7 +1326,6 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
 
         case TKENV:     /* set an environment variable */
             switch ( vnum ) {
-
                 case EVABBELL:
                     ab_bell = stol(valueL);
                     break;
@@ -1765,6 +1767,9 @@ int PASCAL NEAR svar P2_(VDESC *, var, CONST char *, value)
                 case EVYPOS:
                     ypos = asc_int(valueL);
                     break;
+
+                case EVTBUF:
+                    break;
             }
             break;
     }
@@ -2158,14 +2163,25 @@ int PASCAL NEAR absv P1_(int, x)
  *
  * Returns a random integer
  *
+ *
  * This function implements the "minimal standard" RNG from the paper "RNGs:
  * Good Ones are Hard to Find" by Park and Miller, CACM, Volume 31, Number 10,
  * October 1988.
+ *
+ * See also William. H. Press et.al.: Numerical Recipes in C, 2nd Ed.
+ * Cambridge 1992, Chapter 7.1:
+ *
+ * - m = 2^31 - 1, the function uses Schrage's algorithm.
+ *
+ * - It returns an integer in the range 0 ... m - 1 which fits into the
+ *   range of a signed four byte integer.
  */
 long PASCAL NEAR ernd P0_()
 {
     long int  a = 16807L, m = 2147483647L, q = 127773L, r = 2836L;
     long int  lo = 0, hi = 0, test = 0;
+
+    CASRT(4 <= SIZEOF(long));
 
     hi = seed / q;
     lo = seed % q;

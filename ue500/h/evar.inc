@@ -111,6 +111,7 @@ static NOSHARE CONST char *envars[] =
     "status",                   /* returns the status of the last command   */
     "sterm",                    /* search terminator character              */
     "target",                   /* target for line moves                    */
+    "tbuf",                     /* name of tmp. (not existing) buffer (ro)  */
     "time",                     /* date and time                            */
     "timeflag",                 /* display time?                            */
     "tpause",                   /* length to pause for paren matching       */
@@ -211,19 +212,21 @@ static NOSHARE CONST char *envars[] =
 # define EVSTATUS       (80)
 # define EVSTERM        (81)
 # define EVTARGET       (82)
-# define EVTIME         (83)
-# define EVTIMEFLAG     (84)
-# define EVTPAUSE       (85)
-# define EVUNDOFLAG     (86)
-# define EVVERSION      (87)
-# define EVVSCRLBAR     (88)
-# define EVWCHARS       (89)
-# define EVWLINE        (90)
-# define EVWRAPHK       (91)
-# define EVWRITEHK      (92)
-# define EVXPOS         (93)
-# define EVYANKFLAG     (94)
-# define EVYPOS         (95)
+# define EVTBUF         (83)
+# define EVTIME         (84)
+# define EVTIMEFLAG     (85)
+# define EVTPAUSE       (86)
+# define EVUNDOFLAG     (87)
+# define EVVERSION      (88)
+# define EVVSCRLBAR     (89)
+# define EVWCHARS       (90)
+# define EVWLINE        (91)
+# define EVWRAPHK       (92)
+# define EVWRITEHK      (93)
+# define EVXPOS         (94)
+# define EVYANKFLAG     (95)
+# define EVYPOS         (96)
+
 
 /*  list of recognized user functions   */
 

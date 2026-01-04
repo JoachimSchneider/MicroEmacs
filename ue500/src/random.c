@@ -2719,6 +2719,30 @@ CONST char *bmkvis P2_(CONST char *, s, int, l)
     return res;
 }
 
+/* GETTMPBUFFER:
+ *
+ * Get the name of a temporary not yet existing buffer
+ */
+CONST char *gettmpbufnam P0_()
+{
+    static char   res[NBUFN];
+    unsigned long rnd = 0;
+    char          buf[C_10];
+    BUFFER        *bp = NULL;
+
+    ZEROMEM(res);
+    ZEROMEM(buf);
+
+    do  {
+        rnd = (unsigned long)ernd();
+        rnd &= 0xFFFFFFFF;  /* Should be a NOOP */
+        xsnprintf(buf, SIZEOF(buf), "T%08lX", rnd);
+        BUFCPY(res, tempbfn(buf));
+    } while ( NULL != (bp = bfind(res, FALSE, 0)) );
+
+    return res;
+}
+
 
 /* We want to use a working `assert' inside of some of these
  * functions therefor we use the following construct:
