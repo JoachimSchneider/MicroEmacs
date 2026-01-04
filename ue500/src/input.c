@@ -228,7 +228,7 @@ CONST char * PASCAL NEAR  getfilname P1_(CONST char *, prompt)
 
     ZEROMEM(buf);
 
-    if ( FILENAMEREPLY(prompt, buf, NFILEN) != TRUE ) {
+    if ( ! FILENAMEREPLY(prompt, buf, NFILEN) ) {
         return NULL;
     }
 
