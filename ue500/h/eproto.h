@@ -553,7 +553,7 @@ EXTERN CONST char * PASCAL NEAR ltrimstr DCL((CONST char *s));
 /* Trim string from right --- static result                     */
 EXTERN CONST char * PASCAL NEAR rtrimstr DCL((CONST char *s));
 
-/* Return base name of input --- static result                  */
+/* Base name part of input string or `""' when it is NULL       */
 EXTERN CONST char * PASCAL NEAR xbasenam DCL((CONST char *s));
 
 /* Display character in a visible form.                         */

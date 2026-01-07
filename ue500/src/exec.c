@@ -381,14 +381,14 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
     /* and set this one as current: */
     BUFCPY(execstr, rtrimstr(ltrimstr(cline)));
 
-    /* Push `execstr' if necessary, this allows constructs like
+    /* Push to `execstr' if necessary, this allows constructs like
      * ```
      *   execute-command-line { execute-command-line } print "Hello World"
      * ```
      * in MicroEMACS macros
      */
+    MTC_docmd(("Push to `exexstr' `%s' ---> `%s'", execstr, oldestr));
     if ( *oldestr ) {
-        MTC_docmd(("Push `%s' ---> `%s'", execstr, oldestr));
         BUFCAT(execstr, " ");
         BUFCAT(execstr, oldestr);
     }
@@ -474,6 +474,7 @@ int PASCAL NEAR docmd_ P3_(char *, cline /* command line to execute */,
 #undef  docmd_RET_INIT
 #undef  docmd_RET_EXIT
 #undef  docmd_RET
+#undef  MTC_docmd
 
 /* GETHEXDIGVAL:
  *
@@ -769,7 +770,7 @@ int PASCAL NEAR storeproc P2_(
         cur_arg = (PARG *)ROOM( SIZEOF (PARG) );
         if ( cur_arg == (PARG *)NULL ) {
             mlwrite(TEXT113);
-            /* "Can not create macro" */
+/*                  "Can not create macro" */
 
             return (FALSE);
         }
@@ -1014,8 +1015,9 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
 # define MTC_dobuf(e) do {                                    \
     CONST char  *msg_ = yasprintf e;                          \
                                                               \
-    MTC(("dobuf(`%s') [%12s:%04d]: %s",                       \
-         bp->b_bname, xbasenam(file), line, STR(msg_)));      \
+    MTC(("dobuf{%d}(`%s') [%12s:%04d]: %s",                   \
+         dobuf_CALL_LEVEL_, bp->b_bname, xbasenam(file),      \
+         line, STR(msg_)));                                   \
     CLROOM(msg_);                                             \
 } while ( 0 )
 #else
@@ -1023,20 +1025,28 @@ int PASCAL NEAR execbuf P2_(int, f, int, n)
 #endif
 /**END_OF_DEFINITION**/
 #define dobuf_RET_INIT                                        \
-      REGISTER int  dobuf_RET_res_  = 0;                      \
+      REGISTER int  dobuf_RET_res_    = 0;                    \
+      static int    dobuf_CALL_LEVEL_ = 0;                    \
                                                               \
       do  {                                                   \
+          dobuf_CALL_LEVEL_++;                                \
           /* clear IF level flags/while ptr */                \
           execlevel = 0;                                      \
+                                                              \
+          MTC_dobuf(("%s", "BEGIN"));                         \
+          MTC_dobuf(("  execstr = `%s'", execstr));           \
       } while ( 0 )
 /**END_OF_DEFINITION**/
 #define dobuf_RET_EXIT  do {                                  \
       dobuf_RET_exit_:                                        \
-      MTC_dobuf(("%s", "  END"));                             \
-      execlevel = 0;                                          \
-      freewhile(whlist);                                      \
+          MTC_dobuf(("  execstr = `%s'", execstr));           \
+          MTC_dobuf(("  Saved `execstr' = `%s'", sav_estr));  \
+          MTC_dobuf(("%s", "  END"));                         \
+          dobuf_CALL_LEVEL_--;                                \
+          execlevel = 0;                                      \
+          freewhile(whlist);                                  \
                                                               \
-      return dobuf_RET_res_;                                  \
+          return dobuf_RET_res_;                              \
   } while ( 0 )
 /**END_OF_DEFINITION**/
 #define dobuf_RET(x)  do {                                    \
@@ -1087,8 +1097,6 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
     ASRT(NULL != file);
     ASRT(0 <= line);
 
-    MTC_dobuf(("%s", "BEGIN"));
-
     /* If necessary activate the buffer:  */
     if ( ! bp->b_active ) {   /* buffer not active yet  */
         MTC_dobuf(("%s", "Activate buffer"));
@@ -1110,6 +1118,8 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
      * local variables */
     hlp = bp->b_linep;
     lp = lforw(hlp);
+    /* eproto.h: `All text is kept in circularly linked lists of
+     *           "LINE" structures' */
     while ( lp != hlp ) {
         /* scan the current line */
         eline = ltext(lp);
@@ -1129,31 +1139,33 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
 
         /* if we are already in a stored-procedure */
         if ( mstore ) {
-            if ( strncmp(eline, "!endm", 5) == 0 )  {
+            if ( strstart("!endm", eline) ) {
                 mstore = FALSE;
             }
 
             goto nxtscan;
         }
 
-        /* stored procedure? */
-        if ( strncmp(eline, "store-procedure", 15) == 0 ) {
+        /* procedure to be stored? */
+        if ( strstart("store-procedure", eline) ) {
             mstore = TRUE;
 
             goto nxtscan;
         }
 
         /* local variable declaration? */
-        if ( strncmp(eline, "local", 5) == 0 )  {
+        if ( strstart("local", eline) ) {
             ++num_locals;
         }
 
         /* if is a while directive, make a block... */
-        if ( eline[0] == '!' && eline[1] == 'w' && eline[2] == 'h' ) {
+        /* One might also use `strstart("!while", eline)' here */
+        if ( strstart("!wh", eline) ) {
             whtemp = (WHBLOCK *)ROOM( SIZEOF (WHBLOCK) );
             if ( whtemp == NULL ) {
-noram:          errormesg(TEXT119, bp, lp);
-/*                                        "%%Out of memory during while scan" */
+noram:
+                errormesg(TEXT119, bp, lp);
+/*                        "%%Out of memory during while scan" */
 failexit:       freewhile(scanner);
 
                 goto eabort;
@@ -1165,11 +1177,11 @@ failexit:       freewhile(scanner);
         }
 
         /* if is a BREAK directive, make a block... */
-        if ( eline[0] == '!' && eline[1] == 'b' && eline[2] == 'r' ) {
+        /* One might also use `strstart("!break", eline)' here */
+        if ( strstart("!br", eline) ) {
             if ( scanner == NULL ) {
                 errormesg(TEXT120, bp, lp);
-/*                                        "%%!BREAK outside of any !WHILE loop"
- */
+/*                        "%%!BREAK outside of any !WHILE loop" */
 
                 goto failexit;
             }
@@ -1183,11 +1195,10 @@ failexit:       freewhile(scanner);
         }
 
         /* if it is an endwhile directive, record the spot... */
-        if ( eline[0] == '!' && strncmp(&eline[1], "endw", 4) == 0 ) {
+        if ( strstart("!endw", eline) ) {
             if ( scanner == NULL ) {
                 errormesg(TEXT121, bp, lp);
-/*                                      "%%!ENDWHILE with no preceding !WHILE"
- */
+/*                        "%%!ENDWHILE with no preceding !WHILE" */
 
                 goto failexit;
             }
@@ -1209,7 +1220,7 @@ nxtscan:        /* on to the next line */
     /* while and endwhile should match! */
     if ( scanner != NULL ) {
         errormesg(TEXT122, bp, lp);
-/*                      "%%!WHILE with no matching !ENDWHILE" */
+/*                "%%!WHILE with no matching !ENDWHILE" */
 
         goto failexit;
     }
@@ -1242,7 +1253,8 @@ nxtscan:        /* on to the next line */
     cur_index = 0;
     cur_arg = bp->b_args;
     while ( cur_arg != (PARG *)NULL ) {
-        /* ask for argument names */
+        /* When interactive ask for argument names */
+        /* Here `execstr' gets modified by eating the arguments */
         if ( (status = mlreply("Argument: ", value, NSTRING)) != TRUE ) {
             dobuf_RET(status);
         }
@@ -1256,6 +1268,18 @@ nxtscan:        /* on to the next line */
         cur_index++;
     }
 
+    /*================================================================*/
+    /* ------------------ Start of Macro Execution ------------------ */
+    /*================================================================*/
+
+    /* Save execstr, which now should be the original execstr without
+     * the macro's arguments: */
+    MTC_dobuf((
+        "execstr = `%s' --- saved to `sav_estr' at Start of Macro Exeution",
+        execstr
+    ));
+    BUFCPY(sav_estr, rtrimstr(ltrimstr(execstr)));
+
     /* starting at the beginning of the buffer */
     hlp = bp->b_linep;
     lp = lforw(hlp);
@@ -1264,7 +1288,7 @@ nxtscan:        /* on to the next line */
         linlen = get_lused(lp);
         if ( ( einit = eline = ROOM(linlen+1) ) == NULL ) {
             errormesg(TEXT123, bp, lp);
-/*                              "%%Out of Memory during macro execution" */
+/*                    "%%Out of Memory during macro execution" */
             bp->b_exec -= 1;
 
             goto freeut;
@@ -1289,7 +1313,7 @@ nxtscan:        /* on to the next line */
         if ( macbug && !mstore && (execlevel == 0) )  {
             if ( debug(bp, eline, &skipflag) == FALSE ) {
                 errormesg(TEXT54, bp, lp);
-/*                                      "[Macro aborted]" */
+/*                        "[Macro aborted]" */
 
                 goto eabort;
             }
@@ -1300,7 +1324,6 @@ nxtscan:        /* on to the next line */
         if ( *eline == '!' ) {
             /* Find out which directive this is */
             ++eline;
-            MTC_dobuf(("Directive: `%s'", STR(eline - 1)));
             for ( dirnum = 0; dirnum < NUMDIRS; dirnum++ )  {
                 if ( strncmp(eline, dname[dirnum], dname_len[dirnum]) == 0 )  {
                     break;
@@ -1310,7 +1333,7 @@ nxtscan:        /* on to the next line */
             /* and bitch if it's illegal */
             if ( dirnum == NUMDIRS ) {
                 errormesg(TEXT124, bp, lp);
-/*                                      "%%Unknown Directive" */
+/*                        "%%Unknown Directive" */
 
                 goto eabort;
             }
@@ -1331,9 +1354,9 @@ nxtscan:        /* on to the next line */
         if ( mstore ) {
             /* allocate the space for the line */
             linlen = STRLEN(eline);
-            if ( ( mp=lalloc(linlen) ) == NULL ) {
+            if ( ( mp = lalloc(linlen) ) == NULL )  {
                 errormesg(TEXT125, bp, lp);
-/*                                      "Out of memory while storing macro" */
+/*                        "Out of memory while storing macro" */
 
                 goto eabort;
             }
@@ -1346,7 +1369,7 @@ nxtscan:        /* on to the next line */
             /* attach the line to the end of the buffer */
             if ( NULL == bstore ) {
                 errormesg(TEXT113, bp, lp);
-/*                                      "Can not create macro"  */
+/*                        "Can not create macro"  */
 
                 goto eabort;
             }
@@ -1360,7 +1383,7 @@ nxtscan:        /* on to the next line */
 
         force = FALSE;
 
-        /* dump comments */
+        /* dump labels */
         if ( *eline == '*' )  {
             goto onward;
         }
@@ -1383,14 +1406,10 @@ nxtscan:        /* on to the next line */
             /***       after <Macro>'s arguments is discarded.      ***/
             /***                                                    ***/
             /***       Joachim Schneider, Dec. 2025                 ***/
+
             BUFCPY(dtv_str, rtrimstr(ltrimstr(eline)));
             MTC_dobuf(("String following directive: `%s'", dtv_str));
-            if ( ! *sav_estr )  {
-                BUFCPY(sav_estr, rtrimstr(ltrimstr(execstr)));
-                MTC_dobuf(("Saved `execstr': `%s'", sav_estr));
-            }
-
-            MTC_dobuf(("Old execstr: `%s'", execstr));
+            MTC_dobuf(("Push to `exexstr' `%s' ---> `%s'", dtv_str, sav_estr));
             BUFCPY(execstr, dtv_str);
             if ( *sav_estr )  {
                 if ( *execstr ) {
@@ -1398,17 +1417,19 @@ nxtscan:        /* on to the next line */
                 }
                 BUFCAT(execstr, sav_estr);
             }
-            MTC_dobuf(("New execstr: `%s'", execstr));
 
             switch ( dirnum ) {
                 case DIF:                   /* IF directive */
                     /* grab the value of the logical exp */
                     if ( execlevel == 0 ) {
+                        /* `execstr' changed by eval of IF-expr     */
+                        MTC_dobuf(("execstr = `%s' --- before 'IF'", execstr));
                         if ( macarg(tkn, SIZEOF(tkn)) != TRUE ) {
                             CLROOM(einit);
 
                             goto eexec;
                         }
+                        MTC_dobuf(("execstr = `%s' --- after 'IF'", execstr));
                         if ( ! stol(tkn) )  {
                             ++execlevel;
                         }
@@ -1421,11 +1442,14 @@ nxtscan:        /* on to the next line */
                 case DWHILE:                /* WHILE directive */
                     /* grab the value of the logical exp */
                     if ( execlevel == 0 ) {
+                        /* `execstr' changed by eval of WHILE-expr  */
+                        MTC_dobuf(("execstr = `%s' --- before 'WHILE'", execstr));
                         if ( macarg(tkn, SIZEOF(tkn)) != TRUE ) {
                             CLROOM(einit);
 
                             goto eexec;
                         }
+                        MTC_dobuf(("execstr = `%s' --- after 'WHILE'", execstr));
                         if ( stol(tkn) )  {
                             goto onward;
                         }
@@ -1449,7 +1473,7 @@ nxtscan:        /* on to the next line */
 
                     if ( whtemp == NULL ) {
                         errormesg(TEXT126, bp, lp);
-/*                                              "%%Internal While loop error" */
+/*                                "%%Internal While loop error" */
 
                         goto eabort;
                     }
@@ -1499,7 +1523,7 @@ nxtscan:        /* on to the next line */
                             glp = lforw(glp);
                         }
                         errormesg(TEXT127, bp, lp);
-/*                                              "%%No such label" */
+/*                                "%%No such label" */
 
                         goto eabort;
                     }
@@ -1510,10 +1534,13 @@ nxtscan:        /* on to the next line */
                     /* if we are executing.... */
                     if ( execlevel == 0 ) {
                         /* check for a return value */
+                        /* `execstr' changed by eval of RETURN-expr */
+                        MTC_dobuf(("execstr = `%s' --- before 'RETURN'", execstr));
                         if ( macarg(tkn, SIZEOF(tkn)) == TRUE ) {
                             BUFCPY(rval, tkn);
                             MTC_dobuf(("rval: `%s'", fixnull(rval)));
                         }
+                        MTC_dobuf(("execstr = `%s' --- after 'RETURN'", execstr));
 
                         /* and free the line resources */
                         CLROOM(einit);
@@ -1543,7 +1570,7 @@ nxtscan:        /* on to the next line */
 
                         if ( whtemp == NULL ) {
                             errormesg(TEXT126, bp, lp);
-                            /* "%%Internal While loop error"  */
+/*                                    "%%Internal While loop error"  */
 
                             goto eabort;
                         }
@@ -1560,6 +1587,7 @@ nxtscan:        /* on to the next line */
         }
 
         /* execute the statement */
+        MTC_dobuf(("docmd(%s)", fixnull(eline)));
         status = docmd(eline);
         if ( force )  {
             status = TRUE;  /* force the status */
@@ -1586,7 +1614,7 @@ nxtscan:        /* on to the next line */
             set_b_doto(bp, 0);
 
             errormesg(TEXT219, bp, lp);
-/*                "%%Macro Failed" */
+/*                    "%%Macro Failed" */
 
             bp->b_exec -= 1;
             CLROOM(einit);
@@ -1621,8 +1649,8 @@ eabort: /* exit the current function with a failure */
     bp->b_exec -= 1;
     CLROOM(einit);
 
-    /* discard the local user variable table */
-freeut: uv_head = ut->next;
+freeut: /* discard the local user variable table */
+    uv_head = ut->next;
     uv_clean(ut);
     CLROOM(ut);
 
@@ -1631,10 +1659,10 @@ freeut: uv_head = ut->next;
 
     dobuf_RET_EXIT;
 }
-#undef  MTC_dobuf
 #undef  dobuf_RET_INIT
 #undef  dobuf_RET_EXIT
 #undef  dobuf_RET
+#undef  MTC_dobuf
 
 /* ERRORMESG:
  *

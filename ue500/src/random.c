@@ -2599,27 +2599,21 @@ eoskip:
 
 /* XBASENAM:
  *
- * Return base name of input --- static result
+ * Return base name part of input string or `""' when it is NULL
  */
 CONST char * PASCAL NEAR  xbasenam P1_(CONST char *, s)
 {
-    static char res[NSTRING];
     int         i = 0;
 
-    ZEROMEM(res);
-
-    if ( NULL == s )  return res;
+    if ( NULL == s )  return "";
 
     for ( i = strlen(s) - 1; i >= 0; i-- )  {
         if ( DIRSEPCHAR == s[i] ) {
-            BUFCPY(res, s + i + 1);
-
-            return res;
+            return s + i + 1;
         }
     }
-    BUFCPY(res, s);
 
-    return res;
+    return s;
 }
 
 /* CMKVIS:
