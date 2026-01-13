@@ -1079,7 +1079,6 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
     int           skipflag    = 0;    /* are we skipping debugging a
                                        * function?  */
     PARG          *cur_arg    = NULL; /* current argument being filled */
-    int           cur_index   = 0;    /* index into current user table */
     VDESC         vd;                 /* variable num/type */
     char          value[NSTRING];     /* evaluated argument */
     char          dtv_str[NSTRING];   /* String following a directive */
@@ -1250,7 +1249,6 @@ nxtscan:        /* on to the next line */
 
     /* and evaluate the arguments passed, placing them in the local
      * variable table */
-    cur_index = 0;
     cur_arg = bp->b_args;
     while ( cur_arg != (PARG *)NULL ) {
         /* When interactive ask for argument names */
@@ -1265,7 +1263,6 @@ nxtscan:        /* on to the next line */
 
         /* on to the next argument */
         cur_arg = cur_arg->next;
-        cur_index++;
     }
 
     /*================================================================*/

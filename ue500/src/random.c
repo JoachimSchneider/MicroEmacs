@@ -2510,7 +2510,7 @@ char * PASCAL NEAR  astrcat P2_(CONST char *, str, CONST char *, s)
     if ( NULL == str ) {
         len = slen + 1;
         ASRT(NULL != (nstr = ROOM(len * SIZEOF(char))));
-        strcpy(nstr, xs);
+        xstrcpy(nstr, xs);
     } else {
         len = STRLEN(str) + slen + 1;
         ASRT(NULL != (nstr = REROOM(str, len * SIZEOF(char))));
