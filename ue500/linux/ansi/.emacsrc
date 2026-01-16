@@ -449,7 +449,7 @@ store-procedure start-search
 ; Was bound to replace-string
 macro-to-key start-search M-r
 
-store-procedure unfold
+store-procedure unfill-region
   local %curbuf
   local %tbuf
 
@@ -461,7 +461,7 @@ store-procedure unfold
   yank
   add-mode "MAGIC"
   beginning-of-file
-  replace-string "\([^~r~n]\)[~r~n]\([^~r~n]\)" "\1 \2"
+  replace-string "\([^~r~n]\)[~r~n][ ~t]*\([^~r~n]\)" "\1 \2"
   beginning-of-file
   set-mark
   end-of-file
@@ -472,7 +472,7 @@ store-procedure unfold
   delete-buffer %tbuf
 !endm
 
-macro-to-key unfold M-^Q
+macro-to-key unfill-region M-^Q
 
 ;===============================================================================
 
