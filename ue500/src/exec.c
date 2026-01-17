@@ -29,8 +29,8 @@
 /***       - docmd(), dobuf(), ...                                  ***/
 /***       - execstr                                                ***/
 /***       - Explain the changes which were necesary to make the    ***/
-/***         'call'-construct work in a correct way:                ***/
-/***         + 'execstr' was changed from a charcter pointer to a   ***/
+/***         `call'-construct work in a correct way:                ***/
+/***         + `execstr' was changed from a charcter pointer to a   ***/
 /***            character buffer.                                   ***/
 /***         + At two places in the code the execstr was simply     ***/
 /***           overwritten --- now the new string is "pushed" onto  ***/

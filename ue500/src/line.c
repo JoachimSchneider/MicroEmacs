@@ -281,8 +281,13 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     if ( lp1 == curbp->b_linep ) {                /* At the end: special  */
         /*** TODO: When one does an `insert-string' at the end of the
          ***       buffer an additional empty line will be created.
+         ***       Reproduce by `execute-command-line Hello~n' in the
+         ***       middle of a buffer and at the end of a buffer.
          ***       - This error occurs already with the original
          ***         ue500 coding.
+         ***       - It occurs in ue312 from 1998
+         ***       - It occurs in uEmacs/PK 4.0, the version found in
+         ***         <https://git.kernel.org/pub/scm/editors/uemacs/uemacs.git>
          ***       - It does not occur with Jasspa
          ***         MicroEmacs (me090909).
          ***/
