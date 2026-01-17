@@ -192,7 +192,7 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
     char prompt[NSTRING];       /* string for collisions prompt */
 
 #if     MSDOS | WINNT | WINXP | AOSVS | VMS | TOS
-    /***TODO***/
+    /*** TODO: Do not overwrite fname ***/
     mklower((char *)fname);     /* msdos isn't case sensitive */
 #endif
     for ( bp=bheadp; bp!=NULL; bp=bp->b_bufp ) {

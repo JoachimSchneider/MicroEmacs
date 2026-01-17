@@ -238,10 +238,11 @@ CONST char * PASCAL NEAR gtfun P1_(CONST char *, fname)
         case UFCAT:
             XSTRCPY(result, arg1);
             XSTRCAT(result, arg2);
-            /*** TODO: The original code did a `result[NSTRING - 1] = 0;' at
-             ***       this place effectively cutting result to NSTRING - 1.
-             ***       This is inconsistent with all other uses inside of
-             ***       this function.
+            /*** TODO: The original code did `result[NSTRING - 1] = 0;'
+             ***        at this place effectively cutting result to
+             ***        NSTRING - 1. This is inconsistent with all
+             ***        other uses inside of this function --- check if
+             ***        the current version is OK.
              ***/
 
             RETURN ( result );
@@ -1838,10 +1839,10 @@ char * PASCAL NEAR int_asc P1_(int, i)
 
     ZEROMEM(result);
 
-    /* this is a special case for two byte integers but not wrong in
-     * the general case. One could extend this to four or eight byte
-     * integers as well --- TODO.
-     */
+    /*** TODO: This is a special case for two byte integers but not
+     ***       wrong in the general case. One could extend this to four
+     ***       or eight byte integers as well.
+     ***/
     if ( i == -32768 ) {
         BUFCPY(result, "-32768");
 

@@ -60,7 +60,9 @@ LINE * PASCAL NEAR lalloc P1_(REGISTER int, used)
         return (NULL);
     }
     lp->l_size_ = used;
-    /* JES_TODO: Setting l_used to 0 here dos *not* work, but I don't know why. */
+    /*** TODO: Setting l_used to 0 here dos *not* work, but I don't
+     ***       know why.
+     ***/
     lp->l_used_ = used;
 #if     WINDOW_MSWIN
     {
@@ -277,6 +279,13 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
 
     lp1 = curwp->w_dotp;                          /* Current line         */
     if ( lp1 == curbp->b_linep ) {                /* At the end: special  */
+        /*** TODO: When one does an `insert-string' at the end of the
+         ***       buffer an additional empty line will be created.
+         ***       - This error occurs already with the original
+         ***         ue500 coding.
+         ***       - It does not occur with Jasspa
+         ***         MicroEmacs (me090909).
+         ***/
         if ( get_w_doto(curwp) != 0 ) {
             mlwrite(TEXT170);
 /*                              "bug: linsert" */

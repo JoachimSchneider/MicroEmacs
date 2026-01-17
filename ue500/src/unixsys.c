@@ -2927,7 +2927,8 @@ int unx_access_ P2_(CONST char *, path, int, mode)
         pbits = fmode & pmask;  /* Everyone has "world" permissions */
         if ( gid == sb.st_gid ) {
             pbits |= (fmode & (pmask << 3)) >> 3; /* Add group mode */
-            /* TODO: Add permissions resulting from secondary groups  */
+            /*** TODO: Add permissions resulting from secondary groups.
+             ***/
         }
         if ( uid == sb.st_uid ) {
             pbits |= (fmode & (pmask << 6)) >> 6; /* Add owner mode */

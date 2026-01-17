@@ -3061,7 +3061,7 @@ int PASCAL NEAR FUNC_ P4_(EWINDOW *, wp, int, doto,
     if ( wp->w_dotp->l_used_ < doto ) {
         TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
               FSTR_, doto, wp->w_dotp->l_used_), fnam, lno);
-        doto  = wp->w_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
+        doto  = wp->w_dotp->l_used_;  /*** TODO: Use `l_used_ - 1'? ***/
     }
 
     return ( (wp)->w_doto_ = doto );
@@ -3105,7 +3105,7 @@ int PASCAL NEAR FUNC_ P4_(BUFFER *, bp, int, doto,
     if ( bp->b_dotp->l_used_ < doto ) {
         TRCK(("%s(): Too large doto: %d. REWRITTEN TO: %d.",
               FSTR_, doto, bp->b_dotp->l_used_), fnam, lno);
-        doto  = bp->b_dotp->l_used_;  /* TODO: Use `l_used_ - 1'? */
+        doto  = bp->b_dotp->l_used_;  /*** TODO: Use `l_used_ - 1'? ***/
     }
 
     return ( (bp)->b_doto_ = doto );

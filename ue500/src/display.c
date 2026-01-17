@@ -1037,12 +1037,11 @@ VOID PASCAL NEAR upt_size P0_()
  * Display a pop up window. Page it for the user. Any key other than a
  * space gets pushed back into the input stream to be interpeted later
  * as a command.
+ *
+ *** TODO: As the lines of a buffer are parts of a circular list the
+ ***       start of the buffer is displayed *after* the end which
+ ***       might be confusing: This should be changed.
  */
-/** TODO:
- **   As the lines of a buffer are parts of a circular list the start
- **   of the buffer is displayed *after* the end which might be
- **   confusing: This should be changed.
- **/
 int PASCAL NEAR pop P1_(BUFFER *, popbuf)
 {
     REGISTER int  index = 0;        /* index into the current output line   */
@@ -1634,8 +1633,10 @@ VOID PASCAL NEAR modeline P1_(EWINDOW *, wp)
 /* GETDTIME:
  *
  * Get the current display time string
+ *
+ *** TODO: Needs a size argument
  */
-VOID PASCAL NEAR getdtime P1_(char *, ts) /***TODO: Needs a size argument***/
+VOID PASCAL NEAR getdtime P1_(char *, ts)
 {
     char buf[80];
 

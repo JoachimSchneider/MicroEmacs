@@ -25,12 +25,11 @@
 #include <stdio.h>
 
 #if VMS
-/* Suppress 'the referenced type of the pointer value "nextdown"/"nextup" is
- * "function (int,int) returning void",
- * which is not compatible with "function () returning int".'
- */
+/*** TODO: Suppress 'the referenced type of the pointer value
+ ***       "nextdown"/"nextup" is "function (int,int) returning void",
+ ***        which is not compatible with "function () returning int".'
+ ***/
 /***# pragma message disable PTRMISMATCH***/
-/***HEREHEREHERE***/
 #endif
 
 #include "estruct.h"    /* global structures and defines */

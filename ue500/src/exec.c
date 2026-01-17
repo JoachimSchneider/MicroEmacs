@@ -22,6 +22,22 @@
 #include "elang.h"
 
 
+/***================================================================***/
+/*** TODO: Document the inner workings of MicroEMACS'               ***/
+/***       macro evaluation:                                        ***/
+/***       - General syntax                                         ***/
+/***       - docmd(), dobuf(), ...                                  ***/
+/***       - execstr                                                ***/
+/***       - Explain the changes which were necesary to make the    ***/
+/***         'call'-construct work in a correct way:                ***/
+/***         + 'execstr' was changed from a charcter pointer to a   ***/
+/***            character buffer.                                   ***/
+/***         + At two places in the code the execstr was simply     ***/
+/***           overwritten --- now the new string is "pushed" onto  ***/
+/***           the old one.                                         ***/
+/***================================================================***/
+
+
 /*====================================================================*/
 /* Functions which modify the global `execstr' variable:              */
 /*====================================================================*/
@@ -1393,17 +1409,14 @@ nxtscan:        /* on to the next line */
                 ++eline;
             }
 
-            /*** TODO: Really understand this coding: Unfortunatey  ***/
-            /***       my changes have been `debugged into life'.   ***/
-            /***                                                    ***/
-            /***       The original code simply replaced `execstr'  ***/
-            /***       with dtv_str, which made                     ***/
-            /***       `&cat &call <Macro> 42' discard the          ***/
-            /***       trailing '42' --- in general everything      ***/
-            /***       after <Macro>'s arguments is discarded.      ***/
-            /***                                                    ***/
-            /***       Joachim Schneider, Dec. 2025                 ***/
-
+            /*
+             * The original code simply replaced `execstr' with
+             * dtv_str, which made `&cat &call <Macro> 42' discard the
+             * trailing '42' --- in general everything after <Macro>'s
+             * arguments was discarded.
+             *
+             * Joachim Schneider, Dec. 2025
+             */
             BUFCPY(dtv_str, rtrimstr(ltrimstr(eline)));
             MTC_dobuf(("String following directive: `%s'", dtv_str));
             MTC_dobuf(("Push to `exexstr' `%s' ---> `%s'", dtv_str, sav_estr));
@@ -1721,9 +1734,10 @@ dbuild: /* Build the information line to be presented to the user */
     /* display the tracked expression */
     if ( track[0] != 0 ) {
         oldstatus = cmdstatus;
-        /** TODO: Is `execlevel' handling correct here?           **/
-        /**       In the old coding it wasn't saved/restored.     **/
-        /**       ===> The old coding lets execlevel *unchanged*  **/
+        /*** TODO: Is `execlevel' handling correct here?
+         ***       In the old coding it wasn't saved/restored.
+         ***       ===> The old coding lets execlevel *unchanged*
+         ***/
         oldelevel = execlevel;
         execlevel = 0;
         docmd(track);
@@ -1805,9 +1819,10 @@ dinput: outline[MIN2(SIZEOF(outline) - 1, MAX2(0, term.t_ncol - 1))] = '\0';
                 getstring( (unsigned char *)&temp[11], NSTRING, ctoec(RETCHAR) );
                 disinp = oldinp;
                 oldstatus = cmdstatus;
-                /** TODO: Is `execlevel' handling correct here?           **/
-                /**       In the old coding it wasn't saved/restored.     **/
-                /**       ===> The old coding lets execlevel *unchanged*  **/
+                /*** TODO: Is `execlevel' handling correct here?
+                 ***       In the old coding it wasn't saved/restored.
+                 ***       ===> The old coding lets execlevel *unchanged*
+                 ***/
                 oldelevel = execlevel;
                 execlevel = 0;
                 docmd(temp);

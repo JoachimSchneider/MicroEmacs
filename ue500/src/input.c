@@ -474,7 +474,7 @@ bfail:
  * This function combines the functionality of clist_func()
  * and clist_proc().
  *
- * ** TODO: The returned list is *not* sorted alphabetically **
+ *** TODO: The returned list is *not* sorted alphabetically ***
  */
 VOID PASCAL NEAR clist_cmnd P2_(CONST char *, name, int *, cpos)
 /* name:  String containing the current name to complete  */
