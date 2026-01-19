@@ -30,6 +30,101 @@
 #include        "edef.h"
 #include        "elang.h"
 
+/*====================================================================*/
+/*** TODO: When one does an `insert-string' at the end of the
+ ***       buffer an additional empty line will be created.
+ ***       Reproduce by `execute-command-line Hello~n' in the
+ ***       middle of a buffer and at the end of a buffer.
+ ***
+ ***       The same happens when one does a `yank' at the end of
+ ***       a buffer.
+ ***
+ ***       - This error occurs already with the original
+ ***         ue500 coding.
+ ***
+ ***       - It occurs in ue312 from 1998
+ ***
+ ***       - It occurs in uEmacs/PK 4.0, the version found in
+ ***         <https://git.kernel.org/pub/scm/editors/uemacs/uemacs.git>
+ ***
+ ***       - It does not occur with Jasspa
+ ***         MicroEmacs (me090909).
+ ***
+ ***       The code enclosed in the JES_REP_EOB_LN preprocessor
+ ***       conditional tries to repair this bug.
+ ***
+ ***       Test until 2026-03-21 than delete the JES_REP_EOB_LN.
+ ***/
+#define JES_REP_EOB_LN      ( 1 )
+
+/***********************************************************************
+ *
+ * with UEMACS_FEATURE_SMART_EOW_NL we get this transition table:
+ *
+ * Notation:
+ * - 'E':   End of a (empty or non-empty) String
+ * - '*':   Location of Point
+ * - 'Z':   End of Buffer (where curbp->b_linep points to)
+ * - 'L':   Input is a non-newline character e.g. a letter or a number
+ * - 'r':   Input is something that wants a linefeed
+ * - 'X':   curwp->w_linsert_at_eow
+ *
+ * So we have these states:
+ *
+ *  (E*, Z), X == TRUE  =:  A
+ *  (E, Z*), X == TRUE  =:  B
+ *  (E*, Z), X == FALSE =:  C
+ *  (E, Z*), X == FALSE =:  D
+ *
+ * Examples
+ *
+ *  A:    abc*      --- X == TRUE
+ *        Z
+ *
+ *  B:    abc       --- X == TRUE
+ *        Z*
+ *
+ *  C:    abc*      --- X == FALSE
+ *        Z
+ *
+ *  D:    abc       --- X == FALSE
+ *        Z*
+ *
+ *  The transition digramm shows how each current state gets modified
+ *  depending on the current input. The table shows the reulting new
+ *  states.
+ *
+ *         |             Current State
+ *         |.......................................
+ *   Input |    A    |    B    |    C    |    D
+ *  .......|---------------------------------------
+ *     L   |    A    |    C    |    A    |    B
+ *     r   |    D    |    D    |    C    |    D
+ *
+ *
+ * without UEMACS_FEATURE_SMART_EOW_NL the above set of states reduces
+ * to { A, B } and we have this transition table:
+ *
+ *         |   Current State
+ *         |...................
+ *   Input |    A    |    B
+ *  .......|-------------------
+ *     L   |    A    |    A
+ *     r   |    B    |    B
+ *
+ * and without even the `empty last line at eob'-fix we get this table:
+ *
+ *         |   Current State
+ *         |...................
+ *   Input |    A    |    B
+ *  .......|-------------------
+ *     L   |    A    |    A
+ *     r   |    A    |    B
+ *
+ **********************************************************************/
+
+/*====================================================================*/
+
 /*
  * First version *only* works when NBLOCK -1 matches ^0*1*$, i.e when
  * NBLOCK is a power of 2.
@@ -40,7 +135,41 @@
 # define LBSIZE(a)  ( ((a) + NBLOCK - 1) / NBLOCK * NBLOCK )
 #endif
 
-static long last_size = -1L;    /* last # of bytes yanked */
+/*====================================================================*/
+static long last_size             = -1L;    /* last # of bytes yanked */
+#if JES_REP_EOB_LN
+/***********************************************************************
+ *
+ *  The window's buffer looks like this:
+ *
+ *  ----------------------------
+ *  abcdefgh
+ *  ijklmnopq
+ *  rst
+ *
+ *  ----------------------------
+ *
+ *  And we are here:
+ *
+ *  ----------------------------
+ *  abcdefgh
+ *  ijklmnopq
+ *  rst
+ *    ^
+ *  ----------------------------
+ *
+ **********************************************************************/
+# define LAST_WIN_CHR(winp)   (                                       \
+        /* Next line is win buffer's (symbolic empty) bottom line */  \
+        (winp)->w_dotp->l_fp == (winp)->w_bufp->b_linep               \
+                      &&                                              \
+        /* We are at the end of the line  */                          \
+        get_lused((winp)->w_dotp) == get_w_doto((winp))               \
+        ? TRUE : FALSE                                                \
+    )
+/**END_OF_DEFINITION**/
+#endif
+/*====================================================================*/
 
 /* LALLOC:
  *
@@ -154,7 +283,7 @@ int PASCAL NEAR lfree P1_(LINE *, lp)
  * This routine gets called when a character is changed in place in the current
  * buffer. It updates all of the required flags in the buffer and window system.
  * The flag used is passed as an argument; if the buffer is being displayed in
- * more than 1 window we change EDIT t HARD. Set MODE if the mode line needs to
+ * more than 1 window we change EDIT to HARD. Set MODE if the mode line needs to
  * be updated (the "*" has to be set).
  */
 int PASCAL NEAR lchange P1_(int, flag)
@@ -250,7 +379,7 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
 {
     REGISTER char     *cp1  = NULL;
     REGISTER char     *cp2  = NULL;
-    LINE              *lp1  = NULL;
+    REGISTER LINE     *lp1  = NULL;
     REGISTER LINE     *lp2  = NULL;
     REGISTER LINE     *lp3  = NULL;
     REGISTER int      doto  = 0;
@@ -259,8 +388,8 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
     int               cmark = 0;    /* current mark               */
 
-    if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
-        return ( rdonly() );            /* we are in read only mode */
+    if ( curbp->b_mode & MDVIEW )     /* don't allow this command if  */
+        return ( rdonly() );          /* we are in read only mode     */
 
     /* a zero insert means do nothing! */
     if ( n == 0 )
@@ -270,6 +399,15 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     if ( n < 1 )
         return (FALSE);
 
+#if UEMACS_FEATURE_SMART_EOW_NL
+    curwp->w_linsert_at_eow = FALSE;
+# if JES_REP_EOB_LN
+    if ( LAST_WIN_CHR(curwp) )  {
+        curwp->w_linsert_at_eow = TRUE;
+    }
+# endif
+#endif
+
     /* remember we did this! */
     obj.obj_char = c;
     undo_insert(OP_INSC, (long)n, obj);
@@ -277,20 +415,8 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     /* mark the current window's buffer as changed */
     lchange(WFEDIT);
 
-    lp1 = curwp->w_dotp;                          /* Current line         */
+    lp1 = curwp->w_dotp;                          /* Current line     */
     if ( lp1 == curbp->b_linep ) {                /* At the end: special  */
-        /*** TODO: When one does an `insert-string' at the end of the
-         ***       buffer an additional empty line will be created.
-         ***       Reproduce by `execute-command-line Hello~n' in the
-         ***       middle of a buffer and at the end of a buffer.
-         ***       - This error occurs already with the original
-         ***         ue500 coding.
-         ***       - It occurs in ue312 from 1998
-         ***       - It occurs in uEmacs/PK 4.0, the version found in
-         ***         <https://git.kernel.org/pub/scm/editors/uemacs/uemacs.git>
-         ***       - It does not occur with Jasspa
-         ***         MicroEmacs (me090909).
-         ***/
         if ( get_w_doto(curwp) != 0 ) {
             mlwrite(TEXT170);
 /*                              "bug: linsert" */
@@ -313,8 +439,8 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
 
         return (TRUE);
     }
-    doto = get_w_doto(curwp);                     /* Save for later.      */
-    if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate     */
+    doto = get_w_doto(curwp);                     /* Save for later.  */
+    if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate */
         if ( ( lp2 = lalloc(LBSIZE(get_lused(lp1) + n)) ) == NULL )
             return (FALSE);
 
@@ -330,17 +456,18 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         lp2->l_fp = lp1->l_fp;
         lp1->l_fp->l_bp = lp2;
         lp2->l_bp = lp1->l_bp;
-        /** DO NOT USE CLROOM(), DON'T CHANGE lp1: IT'S USED BELOW --- BAD STYLE **/
+        /** DO NOT USE CLROOM(), DON'T CHANGE lp1: IT'S USED BELOW  **/
+        /** TO CHECK IF OTHER WINDOWS USE IT AS DOT OR MARKS.       **/
         DEROOM(lp1);
-    } else {                                      /* Easy: in place       */
-        lp2 = lp1;                                /* Pretend new line     */
+    } else {                                      /* Easy: in place   */
+        lp2 = lp1;                                /* Pretend new line */
         set_lused(lp2, get_lused(lp2) + n);
         cp2 = lgetcp(lp1, get_lused(lp1));
         cp1 = cp2 - n;
         while ( cp1 > lgetcp(lp1, doto) )
             *--cp2 = *--cp1;
     }
-    for ( i = 0; i < n; ++i )                     /* Add the characters   */
+    for ( i = 0; i < n; ++i )                  /* Add the characters  */
         lputc(lp2, doto + i, c);
     /* in all screens.... */
     scrp = first_screen;
@@ -432,24 +559,62 @@ int PASCAL NEAR lnewline P0_()
     if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
         return ( rdonly() );            /* we are in read only mode     */
 
+#if JES_REP_EOB_LN
+# if UEMACS_FEATURE_SMART_EOW_NL
+    if ( LAST_WIN_CHR(curwp) && curwp->w_linsert_at_eow ) {
+        curwp->w_linsert_at_eow = FALSE;
+# else
+    if ( LAST_WIN_CHR(curwp) )  {
+# endif
+# if ( 1 )
+        curwp->w_dotp = curwp->w_dotp->l_fp;
+        set_w_doto(curwp, 0);
+# else  /* Would also be possible:  */
+        forwline(TRUE, 1);
+# endif
+
+        /* remember we did this! */
+        obj.obj_char = 13;
+        undo_insert(OP_INSC, 1L, obj);
+
+        /* We set it here just to be compatible with the behaviour of
+         * the rest of this function: */
+        lchange(WFHARD);
+
+        /* In this case: No need to change dot and marks in */
+        /*               other windows.                     */
+
+        return TRUE;
+    }
+# if UEMACS_FEATURE_SMART_EOW_NL
+    curwp->w_linsert_at_eow = FALSE;
+# endif
+#endif
+
     /* remember we did this! */
     obj.obj_char = 13;
     undo_insert(OP_INSC, 1L, obj);
 
     lchange(WFHARD);
+
     lp1  = curwp->w_dotp;                       /* Get the address and  */
     doto = get_w_doto(curwp);                   /* offset of "."        */
-    if ( ( lp2=lalloc(doto) ) == NULL )         /* New first half line  */
+    if ( ( lp2 = lalloc(doto) ) == NULL ) {     /* New first half line  */
         return (FALSE);
+    }
 
     cp1 = lgetcp(lp1, 0);                       /* Shuffle text around  */
     cp2 = lgetcp(lp2, 0);
-    while ( cp1 < lgetcp(lp1, doto) )
+    while ( cp1 < lgetcp(lp1, doto) ) {
         *cp2++ = *cp1++;
+    }
     cp2 = lgetcp(lp1, 0);
-    while ( cp1 < lgetcp(lp1, get_lused(lp1)) )
+    while ( cp1 < lgetcp(lp1, get_lused(lp1)) ) {
         *cp2++ = *cp1++;
+    }
     set_lused(lp1, get_lused(lp1) - doto);
+
+    /* The new line (lp2) gets inserted *before* the current one: */
     lp2->l_bp = lp1->l_bp;
     lp1->l_bp = lp2;
     lp2->l_bp->l_fp = lp2;
@@ -457,26 +622,51 @@ int PASCAL NEAR lnewline P0_()
 
     /* in all screens.... */
     scrp = first_screen;
-    while ( scrp ) {
-
+    while ( scrp )  {
+        /* in all windows ... */
         wp = scrp->s_first_window;
-        while ( wp != NULL ) {
-            if ( wp->w_linep == lp1 )
+        while ( wp != NULL )  {
+            if ( wp->w_linep == lp1 ) {
                 wp->w_linep = lp2;
-            if ( wp->w_dotp == lp1 ) {
-                if ( get_w_doto(wp) < doto )
-                    wp->w_dotp = lp2;
-                else
-                    set_w_doto(wp, get_w_doto(wp) - doto);
             }
-            for ( cmark = 0; cmark < NMARKS; cmark++ ) {
-                if ( wp->w_markp[cmark] == lp1 ) {
-                    if ( wp->w_marko[cmark] < doto )
-                        wp->w_markp[cmark] = lp2;
-                    else
-                        wp->w_marko[cmark] -= doto;
+
+            /***********************************************************
+             *
+             * Before:  lp1: abcdefghijklmnopqrstuvwxyz
+             *                   ^      ^      (^)
+             *                   |      |      (|)
+             *                 w_dot   dot   (w_dot)
+             *
+             * After:   lp2: abcdefghijk
+             *          lp1: lmnopqrstuvwxyz
+             *
+             * IF wdot_p == lp1 THEN
+             *   IF a <= w_doto <= k  THEN
+             *     wdot_p := lp2
+             *     w_doto does not change
+             * ELSE (* l <= wdot_o <= z *)
+             *   wdot_p does not change
+             *   w_doto := w_doto - doto
+             *
+             **********************************************************/
+            if ( wp->w_dotp == lp1 )  {
+                if ( get_w_doto(wp) < doto )  {
+                    wp->w_dotp = lp2;
+                } else                        {
+                    set_w_doto(wp, get_w_doto(wp) - doto);
                 }
             }
+            for ( cmark = 0; cmark < NMARKS; cmark++ )  {
+                if ( wp->w_markp[cmark] == lp1 )  {
+                    if ( wp->w_marko[cmark] < doto )  {
+                        wp->w_markp[cmark] = lp2;
+                    } else                            {
+                        wp->w_marko[cmark] -= doto;
+                    }
+                }
+            }
+
+            /* next window! */
             wp = wp->w_wndp;
         }
 

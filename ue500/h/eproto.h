@@ -346,6 +346,7 @@ EXTERN int  errno;
 /*....................................................................*/
 #define UEMACS_FEATURE_USE_STATIC_STACK (0)
 #define UEMACS_FEATURE_USE_VA_COPY      (0)
+#define UEMACS_FEATURE_SMART_EOW_NL     (1)
 /*....................................................................*/
 
 
@@ -1531,6 +1532,36 @@ typedef struct UNDO_OBJ {
 } UNDO_OBJ;
 
 
+/***********************************************************************
+ *
+ *  SCREEN ---> SCREEN ---> ... --->  SCREEN ---> NULL
+ *   |  |
+ *   |  +-----------------+
+ *   |                    | cur. window
+ *   | first window       V
+ *   +---> WINDOW ---> WINDOW ---> ... ---> WINDOW ---> NULL
+ *                      | | |
+ *                      | | |
+ *                      | | +--> BUFFER ---> ... ---> BUFFER ---> NULL
+ *      +-------------- + |          |
+ *      |         +-------+          | b_linep /o dummy buttom line o/
+ *      |         |                  |
+ *      | mark    | dot              |
+ *      V         V                  V
+ *    LINE ---> LINE ---> .... ---> LINE ---> LINE ---> LINE
+ *     ^                                                  |
+ *     |                                                  |
+ *     |                                                  V
+ *    LINE <--- LINE <--- LINE <--- LINE <--- LINE <--- LINE
+ *
+ *
+ *  - Dot and mark are stored in the WINDOW structure
+ *  - The buffer's b_linep points to a dummy buttom line.
+ * - The list of buffers is global
+ *
+ **********************************************************************/
+
+
 /*
  * All text is kept in circularly linked lists of "LINE" structures. These begin
  * at the header line (which is the blank line beyond the end of the buffer).
@@ -1609,6 +1640,12 @@ typedef struct  EWINDOW {
     char            w_bcolor;           /* current background color     */
 #endif
     int             w_fcol;             /* first column displayed       */
+#if UEMACS_FEATURE_SMART_EOW_NL         /* EOW: End Of Window           */
+    int             w_linsert_at_eow;   /* Last linsert() was at EOW    */
+                    /* This flag gets set at every call to linsert().
+                     * It is evaluated and reset to FALSE at every call
+                     * to lnewline(). */
+#endif
 }       EWINDOW;
 /**********************************************************************/
 EXTERN int PASCAL NEAR  get_w_doto_ DCL((EWINDOW *wp,

@@ -87,6 +87,62 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2026-01-25.02]
+  * Fixed a bug in MicroEMACS' handling of the current buffer's last line:
+
+    When one does an `insert-string' at the end of the buffer an
+    additional empty line will be created. Reproduce by
+    `execute-command-line Hello~n' in the middle of a buffer and at the
+    end of a buffer.
+
+    The same happens when one does a `yank' at the end of a buffer.
+
+    + This error occurred already with the original ue500 coding.
+
+    + It occurs in ue312 from 1998.
+
+    + It occurs in uEmacs/PK 4.0, the version found in
+      <https://git.kernel.org/pub/scm/editors/uemacs/uemacs.git>
+
+    + It does not occur with Jasspa MicroEmacs (me090909).
+
+[2026-01-25.01]
+  * The additional environment variable `$tbuf' (example value
+    '<T43CD3747>') gives the name of a not yet existing buffer which
+    might be used as a temporary buffer name in macros, e.g. like:
+
+    ```
+    set %tbuf $tbuf
+    1 select-buffer %tbuf
+    ...
+    delete-buffer %tbuf
+    ```
+
+[2026-01-25.00]
+* Changes in the command execution functions:
+
+  In MicroEMACS one may execute builtin functions (FUNC) or macros
+  (PROC) which were created with `store-procedure`. The relevant
+  functions are:
+
+  ```
+
+                           FUNC    PROC
+  -------------------------------------
+  execute-command-line     Y       Y
+  execute-named-command    Y       Y
+  execute-procedure        N       Y
+  execute-function         Y       N
+
+  ```
+
+  + *All* of the above functions do command completion now.
+
+  + `execute-named-command` is able to handle functions as well as
+    procedures (i.e. macros).
+
+  + The new `execute-function` only executes functions.
+
 [2025-12-21.00]
   * Fixed execbuf() ("execute-buffer"): It is now able to execute *any*
     buffer --- not just the current one.
@@ -469,6 +525,36 @@ modern Linux and FreeBSD systems:
 
     ; EOF(Abbreviations for uemacs)
     ```
+
+* The environment variable `$tbuf' (example value '<T43CD3747>') gives
+  the name of a not yet existing buffer which might be used as a
+  temporary buffer name in macros, e.g. like:
+
+  ```
+  set %tbuf $tbuf
+  1 select-buffer %tbuf
+  ...
+  delete-buffer %tbuf
+  ```
+
+* In MicroEMACS one may execute builtin functions (FUNC) or macros
+  (PROC) which were created with `store-procedure`. The relevant
+  functions are:
+
+  ```
+
+                           FUNC    PROC   Prompt
+  ------------------------------------------------
+  execute-command-line     Y       Y      '===> '
+  execute-named-command    Y       Y      ': '
+  execute-procedure        N       Y      ': '
+  execute-function         Y       N      ': '
+
+  ```
+
+  *All* of the above functions do command completion.
+  `execute-named-command` forses *interactive* execution while
+  `execute-command-line` forces CLI execution.
 
 
 ## TODO
