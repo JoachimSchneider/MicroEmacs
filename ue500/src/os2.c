@@ -288,8 +288,35 @@ f_filter(f, n)
     sgarbf = TRUE;
     s = TRUE;
 
-    /* on failure, escape gracefully */
-    if ( s != TRUE || (readin(filnam2, FALSE) == FALSE) ) {
+    /* WHEN f ==TRUE AND n == 1: Don't change buffer flags:
+     *
+     * Why do we want this special handling:
+     *
+     * Consider these macro commands
+     *
+     * ```
+     *  set %tbuf $tbuf
+     *  set %curbuf $cbufname
+     *  ; The '1' makes %tbuf invisible (i.e. sets BFINVS):
+     *  1 select-buffer %tbuf
+     *  ; somehow fill text into %tbuf:
+     *  ...
+     *  set %cmd  <Some Command Line>
+     *  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+     *  1 filter-buffer %cmd
+     *  select-buffer %curbuf
+     *  delete-buffer %tbuf
+     * ```
+     *
+     * Calling readin() here would reset the BFINVS flag which would
+     * cause the 'delete-buffer %tbuf' to ask the user if this is
+     * really wanted. The readinfnc() reacts on the special
+     * `1' flag to avoid this behaviour!
+     *
+     * Therefore we use readinfnc().
+     */
+    if ( s != TRUE || (readinfnc(f, n, filnam2, FALSE) == FALSE) )  {
+        /* on failure, escape gracefully */
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
         xstrcpy(bp->b_fname, tmpnam);

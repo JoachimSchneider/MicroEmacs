@@ -273,11 +273,16 @@ int PASCAL NEAR getfile P2_(CONST char *, fname, int, lockfl)
  * `hook' is TRUE * the command in $readhook is called after the buffer
  * is set up and before it is read.
  */
-int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int, hook)
-/* fname:   Name of file to read  */
-/* lockfl:  Check for file locks? */
-/* bp:      Buffer to fill        */
-/* hook:    Call $readhook?       */
+int PASCAL NEAR readinx P5_(const char *, fname,
+                            int,          lockfl,
+                            BUFFER *,     bp,
+                            int,          hook,
+                            int,          chgflags)
+/* fname:     Name of file to read  */
+/* lockfl:    Check for file locks? */
+/* bp:        Buffer to fill        */
+/* hook:      Call $readhook?       */
+/* chgflags:  Change buffer flags?  */
 {
     REGISTER LINE     *lp1        = NULL;
     REGISTER LINE     *lp2        = NULL;
@@ -285,7 +290,7 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
     REGISTER EWINDOW  *wp         = NULL;
     REGISTER int      s           = 0;
     REGISTER long     nline       = 0;
-    REGISTER int      cmark       = 0;          /* current mark     */
+    REGISTER int      cmark       = 0;          /* current mark       */
     int               nbytes      = 0;
     char              mesg[NSTRING];
 #if     FILOCK
@@ -306,11 +311,13 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
     }
 #endif
 
-    if ( (s = bclear(bp)) != TRUE ) {           /* Might be old.    */
+    if ( (s = bclear(bp)) != TRUE ) {           /* Might be old.      */
         return (s);
     }
 
-    bp->b_flag &= ~(BFINVS|BFCHG);
+    if ( chgflags ) {
+        bp->b_flag &= ~(BFINVS|BFCHG);
+    }
     BUFCPY(bp->b_fname, fname);
 
     /* let a user macro get hold of things...if he wants */
@@ -329,24 +336,24 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
     /* turn off ALL keyboard translation in case we get a dos error */
     TTkclose();
 
-    if ( (s = ffropen(fname)) == FIOERR ) {     /* Hard file open.  */
+    if ( (s = ffropen(fname)) == FIOERR ) {     /* Hard file open.    */
         goto out;
     }
 
-    if ( s == FIOFNF ) {                        /* File not found.  */
+    if ( s == FIOFNF ) {                        /* File not found.    */
         mlwrite(TEXT138);
-/*                      "[New file]" */
+/*              "[New file]" */
         goto out;
     }
 
     /* read the file in */
     mlwrite(TEXT139);
-/*              "[Reading file]" */
+/*          "[Reading file]" */
     /* `nline = 0;': Initialized above  */
     while ( (s = ffgetline(&nbytes)) == FIOSUC )  {
         if ( (lp1 = lalloc(nbytes)) == NULL ) {
-            s = FIOMEM;                         /* Keep message on  */
-            break;                              /* the display.     */
+            s = FIOMEM;                         /* Keep message on    */
+            break;                              /* the display.       */
         }
         lp2 = lback(bp->b_linep);
         lp2->l_fp = lp1;
@@ -358,7 +365,7 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
         }
         ++nline;
     }
-    ffclose();                                  /* Ignore errors.   */
+    ffclose();                                  /* Ignore errors.     */
 
 #if ( b_IS_UNIX )
     /* if we don't have write priviledges, make this in VIEW mode */
@@ -372,19 +379,19 @@ int PASCAL NEAR readinx P4_(const char *, fname, int, lockfl, BUFFER *, bp, int,
     BUFCPY(mesg, "[");
     if ( s == FIOERR )  {
         BUFCAT(mesg, TEXT141);
-/*                           "I/O ERROR, " */
+/*                   "I/O ERROR, " */
         bp->b_flag |= BFTRUNC;
     }
     if ( s == FIOMEM )  {
         BUFCAT(mesg, TEXT142);
-/*                           "OUT OF MEMORY, " */
+/*                   "OUT OF MEMORY, " */
         bp->b_flag |= BFTRUNC;
     }
     BUFCAT(mesg, TEXT140);
-/*                   "Read " */
+/*               "Read " */
     BUFCAT(mesg, long_asc(nline));
     BUFCAT(mesg, TEXT143);
-/*                   " line" */
+/*               " line" */
     if ( nline > 1 )  {
         BUFCAT(mesg, "s");
     }
@@ -411,7 +418,7 @@ out:
         upmode();
     }
 #endif
-    if ( s == FIOERR || s == FIOFNF ) {         /* False if error.  */
+    if ( s == FIOERR || s == FIOFNF ) {         /* False if error.    */
         return (FALSE);
     }
 

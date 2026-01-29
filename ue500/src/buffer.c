@@ -33,18 +33,23 @@
 int PASCAL NEAR usebuffer P2_(int, f, int, n)
 /* f, n:  Prefix flag and argument  */
 {
-    REGISTER BUFFER *bp;        /* temporary buffer pointer */
+    REGISTER BUFFER *bp = NULL;   /* temporary buffer pointer */
 
     /* get the buffer name to switch to */
     bp = getdefb();
     bp = getcbuf(TEXT24, bp ? bp->b_bname : mainbuf, TRUE);
-/*              "Use buffer" */
-    if ( !bp )
+/*               "Use buffer" */
+    if ( !bp )  {
         return (ABORT);
+    }
 
     /* make it invisible if there is an argument */
-    if ( f == TRUE )
+    if ( f == TRUE )  {
         bp->b_flag |= BFINVS;
+        TRC(("Buffer `%s' switched to INVISIBLE, b_flag = 0x%02X",
+             STR(bp->b_bname),
+             (unsigned int)(unsigned char)bp->b_flag));
+    }
 
     /* switch to it in any case */
     return ( swbuffer(bp) );
@@ -620,27 +625,30 @@ BUFFER * PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
  */
 int PASCAL NEAR bclear P1_(BUFFER *, bp)
 {
-    REGISTER LINE   *lp;
-    REGISTER int s;
-    int cmark;                  /* current mark */
+    REGISTER LINE *lp   = NULL;
+    int           cmark = 0;      /* current mark */
 
-    if ( (bp->b_flag&BFINVS) == 0               /* Not scratch buffer.  */
-         && (bp->b_flag&BFCHG) != 0             /* Something changed    */
-         && ( s=mlyesno(TEXT32) ) != TRUE )
-/*            "Discard changes" */
-        return (s);
+    ASRT(NULL != bp);
 
-    bp->b_flag  &= ~BFCHG;                      /* Not changed      */
-    while ( ( lp=lforw(bp->b_linep) ) != bp->b_linep )
+    if (    (bp->b_flag&BFINVS) == 0        /* Not scratch buffer.  */
+         && (bp->b_flag&BFCHG)  != 0        /* Something changed    */
+         && mlyesno(TEXT32)     != TRUE )
+/*                  "Discard changes" */  {
+        return FALSE;
+    }
+
+    bp->b_flag  &= ~BFCHG;                    /* Not changed          */
+    while ( ( lp=lforw(bp->b_linep) ) != bp->b_linep )  {
         lfree(lp);
-    bp->b_dotp  = bp->b_linep;                  /* Fix "."      */
+    }
+    bp->b_dotp  = bp->b_linep;                /* Fix "."              */
     set_b_doto(bp, 0);
     for ( cmark = 0; cmark < NMARKS; cmark++ ) {
-        bp->b_markp[cmark] = NULL;          /* Invalidate "mark"    */
+        bp->b_markp[cmark] = NULL;            /* Invalidate "mark"    */
         bp->b_marko[cmark] = 0;
     }
     bp->b_fcol = 0;
-    undo_zot(bp);       /* discard undo info for this buffer! */
+    undo_zot(bp);               /* discard undo info for this buffer! */
 
     return (TRUE);
 }

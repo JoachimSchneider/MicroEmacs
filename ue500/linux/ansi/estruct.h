@@ -906,18 +906,6 @@ execl(va_alist)
 #define BINDFNC 1               /* key bound to a function            */
 #define BINDBUF 2               /* key bound to a buffer              */
 
-#ifdef  FALSE
-# undef  FALSE
-#endif
-#ifdef  TRUE
-# undef  TRUE
-#endif
-
-#define FALSE   0               /* False, no, bad, etc.               */
-#define TRUE    1               /* True, yes, good, etc.              */
-#define ABORT   2               /* Death, ^G, abort, etc.             */
-#define FAILD   3               /* not-quite fatal false return       */
-
 #define STOP    0               /* keyboard macro not in use          */
 #define PLAY    1               /*                playing             */
 #define RECORD  2               /*                recording           */

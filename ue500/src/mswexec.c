@@ -519,7 +519,32 @@ PASCAL f_filter (int f, int n)
             umc_unlink (InFile);
         } else {
             if ( Result == TRUE ) {
-                Result = readin (OutFile, FALSE);
+                /* WHEN f ==TRUE AND n == 1: Don't change buffer flags:
+                 *
+                 * Why do we want this special handling:
+                 *
+                 * Consider these macro commands
+                 *
+                 * ```
+                 *  set %tbuf $tbuf
+                 *  set %curbuf $cbufname
+                 *  ; The '1' makes %tbuf invisible (i.e. sets BFINVS):
+                 *  1 select-buffer %tbuf
+                 *  ; somehow fill text into %tbuf:
+                 *  ...
+                 *  set %cmd  <Some Command Line>
+                 *  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+                 *  1 filter-buffer %cmd
+                 *  select-buffer %curbuf
+                 *  delete-buffer %tbuf
+                 * ```
+                 *
+                 * Calling readin() here would reset the BFINVS flag which would
+                 * cause the 'delete-buffer %tbuf' to ask the user if this is
+                 * really wanted. The readinfnc() reacts on the special
+                 * `1' flag to avoid this behaviour!
+                 */
+                Result = readinfnc (f, n, OutFile, FALSE);
                 umc_unlink (OutFile);
                 umc_unlink (InFile);
             }

@@ -66,6 +66,43 @@
 
 
 /**********************************************************************/
+#ifdef  FALSE
+# undef  FALSE
+#endif
+#ifdef  TRUE
+# undef  TRUE
+#endif
+
+#define FALSE   ( 0 )           /* False, no, bad, etc.               */
+#define TRUE    ( 1 )           /* True, yes, good, etc.              */
+#define ABORT   ( 2 )           /* Death, ^G, abort, etc.             */
+#define FAILD   ( 3 )           /* not-quite fatal false return       */
+
+/* As MicroEMACS often uses coding like `if ( x == TRUE )' it might   */
+/* from time to time be necessary to convert between C-BOOL and what  */
+/* might call UMC-BOOL:                                               */
+/*--------------------------------------------------------------------*/
+#define UMC_BOOL(cond)  ( (cond)? TRUE : FALSE )
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* The MicroEMACS internal commands accept the arguments f and n:     */
+/* - f: A count argument was given                                    */
+/* - n: Value of the count argument                                   */
+/* If f == FALSE then n defaults to 1.                                */
+/* Therefore f == TRUE AND n == 1 may be used as a special case.  It  */
+/* may be triggered via command line:                                 */
+/*  `1 <command>'                                                     */
+/* or interactive:                                                    */
+/*  META-n, META-x                                                    */
+/*  <command>                                                         */
+/*--------------------------------------------------------------------*/
+#define UMC_SPECIAL(f, n)   ( (f) && (1 == (n)) ? TRUE : FALSE )
+/**********************************************************************/
+
+
+/**********************************************************************/
 #if b_IS_ANSI_C
 /**********************************************************************/
 /* If possible use XCONCAT* below -- CONCAT* might result in          */
@@ -2402,6 +2439,7 @@ EXTERN int PASCAL NEAR          upscreen DCL((int f, int n));
 EXTERN int PASCAL NEAR          vtinit DCL((void));
 EXTERN int PASCAL NEAR          yank DCL((int f, int n));
 EXTERN int PASCAL NEAR          yank_pop DCL((int f, int n));
+EXTERN int PASCAL NEAR          z000_dsp_args DCL((int f, int n));
 EXTERN int                      Erelease DCL((char *mp));
 EXTERN int                      set_key DCL((KEYTAB *key, CONST char *name));
 EXTERN int                      xunlock DCL((char *fname));
@@ -2598,8 +2636,10 @@ EXTERN int PASCAL NEAR          quickexit DCL((int f, int n));
 EXTERN int PASCAL NEAR          quit DCL((int f, int n));
 EXTERN int PASCAL NEAR          quote DCL((int f, int n));
 EXTERN int PASCAL NEAR          rdonly DCL((void));
-EXTERN int PASCAL NEAR          readinx DCL((const char *fname, int lockfl, BUFFER * bp, int hook));
-#define                         readin(fname, lockfl) ( readinx((fname), (lockfl), curbp, TRUE) )
+EXTERN int PASCAL NEAR          readinx DCL((const char *fname, int lockfl, BUFFER * bp, int hook, int chgflags));
+#define                         readin(fname, lockfl) ( readinx((fname), (lockfl), curbp, TRUE, TRUE) )
+                                /* readinfnc() won't change buffer flags when f == TRUE and n == 1: */
+#define                         readinfnc(f, n, fname, lockfl) ( readinx((fname), (lockfl), curbp, TRUE, UMC_BOOL(!UMC_SPECIAL(f, n))) )
 EXTERN int PASCAL NEAR          refresh DCL((int f, int n));
 EXTERN int PASCAL NEAR          remmark DCL((int f, int n));
 EXTERN int PASCAL NEAR          reposition DCL((int f, int n));

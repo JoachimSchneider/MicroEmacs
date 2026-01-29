@@ -1116,7 +1116,7 @@ int PASCAL NEAR dobuf_ P3_(BUFFER *, bp /* buffer to execute */,
     if ( ! bp->b_active ) {   /* buffer not active yet  */
         MTC_dobuf(("%s", "Activate buffer"));
         /* read it in and activate it */
-        readinx(bp->b_fname, ((bp->b_mode & MDVIEW) == 0), bp, FALSE);
+        readinx(bp->b_fname, ((bp->b_mode & MDVIEW) == 0), bp, FALSE, TRUE);
         bp->b_dotp = lforw(bp->b_linep);
         set_b_doto(bp, 0);
         bp->last_access = access_time;
@@ -1988,7 +1988,7 @@ int PASCAL NEAR dofile P1_(CONST char *, fname  /* file name to execute */)
     bp->b_mode = MDVIEW;                  /* mark the buffer as read only     */
 
     /* try to read in the file to execute */
-    if ( (status = readinx(fname, FALSE, bp, TRUE)) != TRUE ) {
+    if ( (status = readinx(fname, FALSE, bp, TRUE, TRUE)) != TRUE ) {
         return (status);
     }
 

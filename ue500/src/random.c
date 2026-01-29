@@ -1500,6 +1500,37 @@ int PASCAL NEAR ovstring P2_(int, f, int, n)
     return (status);
 }
 
+
+/*====================================================================*/
+/* Starting the series fo ``z-functions'' here:                       */
+/*====================================================================*/
+
+/* For debugging purposes:  */
+int PASCAL NEAR z000_dsp_args P2_(int, f, int, n)
+/* f, n:  prefix flag and argument  */
+{
+    char  buf[NPAT];
+
+    ZEROMEM(buf);
+
+    if ( 0 <= xsnprintf(buf, SIZEOF(buf), "Args: f = %s, n = %d",
+                        f ? "TRUE" : "FALSE", n) )  {
+        mlforce(buf);
+        /**TTgetc();**/
+
+        return TRUE;
+    } else                                          {
+        mlforce("FAILED");
+        /**TTgetc();**/
+
+        return FALSE;
+    }
+}
+
+
+/*====================================================================*/
+
+
 /* LKP_COLOR:
  *
  *  lookup color

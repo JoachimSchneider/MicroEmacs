@@ -87,6 +87,30 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2026-01-28.00]
+
+  * Extended the behaviour of `filter-buffer`: When called with a
+    numeric argument of 1 it does *not* change the current buffer's
+    BFINVS flag --- consider these macro lines to see why this
+    is useful:
+
+    ```
+      set %tbuf $tbuf
+      set %curbuf $cbufname
+      ; The '1' makes %tbuf invisible (i.e. sets BFINVS):
+      1 select-buffer %tbuf
+      ; somehow fill text into %tbuf:
+      ...
+      set %cmd  <Some Command Line>
+      ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+      1 filter-buffer %cmd
+      select-buffer %curbuf
+      delete-buffer %tbuf
+    ```
+
+    So the %tbuf will keep its BFINVS flag and `delete-buffer` won't
+    query the user for confirmation.
+
 [2026-01-25.02]
   * Fixed a bug in MicroEMACS' handling of the current buffer's last line:
 
@@ -555,6 +579,27 @@ modern Linux and FreeBSD systems:
   *All* of the above functions do command completion.
   `execute-named-command` forses *interactive* execution while
   `execute-command-line` forces CLI execution.
+
+* Extended the behaviour of `filter-buffer`: When called with a numeric
+  argument of 1 it does *not* change the current buffer's BFINVS flag
+  --- consider these macro lines to see why this is useful:
+
+  ```
+    set %tbuf $tbuf
+    set %curbuf $cbufname
+    ; The '1' makes %tbuf invisible (i.e. sets BFINVS):
+    1 select-buffer %tbuf
+    ; somehow fill text into %tbuf:
+    ...
+    set %cmd  <Some Command Line>
+    ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+    1 filter-buffer %cmd
+    select-buffer %curbuf
+    delete-buffer %tbuf
+  ```
+
+  So the %tbuf will keep its BFINVS flag and `delete-buffer` won't
+  query the user for confirmation.
 
 
 ## TODO

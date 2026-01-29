@@ -2448,7 +2448,7 @@ int pipecmd P2_(int, f, int, n)
     ZEROMEM(OutFile);
     ZEROMEM(bname);
 
-    XSTRCPY(bname, "command");
+    BUFCPY(bname, "command");
     /* Don't allow this command if restricted */
     if ( restflag ) {
         return resterr();
@@ -2460,37 +2460,37 @@ int pipecmd P2_(int, f, int, n)
     }
 
     if ( NULL != ( cp = gettmpfname("i") ) )  {
-        XSTRCPY(InFile, cp);
+        BUFCPY(InFile, cp);
     } else {
         return FALSE;
     }
     if ( NULL != ( cp = gettmpfname("o") ) )  {
-        XSTRCPY(OutFile, cp);
+        BUFCPY(OutFile, cp);
     } else {
         return FALSE;
     }
 
     /* Setup the proper file names */
     bp = curbp;
-    XSTRCPY(tmpnam, bp->b_fname);       /* Save the original name */
-    XSTRCPY(bp->b_fname, InFile);       /* Set it to our new one */
+    BUFCPY(tmpnam, bp->b_fname);            /* Save the original name */
+    BUFCPY(bp->b_fname, InFile);            /* Set it to our new one  */
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
         mlwrite("[Cannot write filter file <%s>]", InFile);
-        XSTRCPY(bp->b_fname, tmpnam);
+        BUFCPY(bp->b_fname, tmpnam);
         umc_unlink(InFile);
         sleep(MLWAIT);
 
         return FALSE;
     }
     /* Reset file name */
-    XSTRCPY(bp->b_fname, tmpnam);
+    BUFCPY(bp->b_fname, tmpnam);
 
-# if   ( 0 )    /* Activate multiple "command" buffers  */
+# if   ( 0 )  /* Use a single "command" buffer:       */
     makename(bname, OutFile);           /* New buffer name. */
 # else
-# if ( !0 )
+# if ( !0 )   /* Activate multiple "command" buffers: */
     if ( !makecmdbname(bname, SIZEOF (bname), Command, "@Cmd") ) {
         umc_unlink(InFile);
 
@@ -2499,7 +2499,7 @@ int pipecmd P2_(int, f, int, n)
 # endif
 # endif
 
-    /*-find the "command" buffer */
+    /* find the "command" buffer */
     if ( ( bp = bfind (bname, FALSE, 0) ) != NULL ) {
         /*-make sure the contents can safely be blown away */
         if ( bp->b_flag & BFCHG ) {
@@ -2512,7 +2512,7 @@ int pipecmd P2_(int, f, int, n)
         /* discard changes */
     } else if ( ( bp = bfind (bname, TRUE, 0) ) == NULL ) {
         mlwrite (TEXT137);
-        /* cannot create buffer */
+/*               "cannot create buffer" */
         umc_unlink(InFile);
         sleep(MLWAIT);
 
@@ -2521,7 +2521,7 @@ int pipecmd P2_(int, f, int, n)
 
     if ( !( Result = LaunchPrg (Command, InFile, OutFile, NULL) ) ) {
         mlwrite (TEXT3);
-        /* [execution failed] */
+/*               "[execution failed]" */
         umc_unlink(InFile);
         umc_unlink(OutFile);
         sleep(MLWAIT);
@@ -2530,10 +2530,10 @@ int pipecmd P2_(int, f, int, n)
     }
 
     {
-        BUFFER  *temp_bp = curbp;
-        int bmode;
-        char bflag;
-        int Result;
+        BUFFER  *temp_bp  = curbp;
+        int     bmode     = 0;
+        char    bflag     = 0;
+        int     Result    = 0;
 
 # if ( 0 )
 /* Use multiple "command" windows                               */
@@ -2545,22 +2545,20 @@ int pipecmd P2_(int, f, int, n)
             return FALSE;
         }
 # endif
-        swbuffer(bp);       /* make this buffer the current one */
+        swbuffer(bp);             /* make this buffer the current one */
         bmode = bp->b_mode;
         bp->b_mode &= ~MDVIEW;
         bflag = bp->b_flag;
         bp->b_flag &= ~BFCHG;
         Result = readin(OutFile, FALSE);
-        bp->b_fname[0] = '\0';          /* clear file name */
+        bp->b_fname[0] = '\0';      /* clear file name                */
         if ( Result ) {
-            bp->b_mode |= MDVIEW;               /* force VIEW mode */
-            lchange (WFMODE);                   /* update all relevant mode
-                                                 * lines */
-            bp->b_flag &= ~BFCHG;               /* remove by-product BFCHG flag
-                                                 */
+            bp->b_mode |= MDVIEW;   /* force VIEW mode                */
+            lchange (WFMODE);       /* update all relevant mode lines */
+            bp->b_flag &= ~BFCHG;   /* remove by-product BFCHG flag   */
         } else {
-            bp->b_mode = bmode;                 /* restore mode */
-            bp->b_flag = bflag;
+            bp->b_mode = bmode;     /* restore mode                   */
+            bp->b_flag = bflag;     /* restore flags                  */
             swbuffer (temp_bp);
         }
         umc_unlink(InFile);
@@ -2576,9 +2574,9 @@ int f_filter P2_(int, f, int, n)
 /* n: Argument count  */
 {
     char        line[NLINE];
-    int         s   = 0;
-    BUFFER      *bp = NULL;
-    CONST char  *cp = NULL;
+    int         s     = 0;
+    BUFFER      *bp   = NULL;
+    CONST char  *cp   = NULL;
     char        tmpnam[NFILEN];
     char        InFile[NFILEN];
     char        OutFile[NFILEN];
@@ -2589,12 +2587,12 @@ int f_filter P2_(int, f, int, n)
     ZEROMEM(OutFile);
 
     if ( NULL != ( cp = gettmpfname("i") ) )  {
-        XSTRCPY(InFile, cp);
+        BUFCPY(InFile, cp);
     } else {
         return FALSE;
     }
     if ( NULL != ( cp = gettmpfname("o") ) )  {
-        XSTRCPY(OutFile, cp);
+        BUFCPY(OutFile, cp);
     } else {
         return FALSE;
     }
@@ -2617,13 +2615,13 @@ int f_filter P2_(int, f, int, n)
 
     /* Setup the proper file names */
     bp = curbp;
-    XSTRCPY(tmpnam, bp->b_fname);       /* Save the original name */
-    XSTRCPY(bp->b_fname, InFile);       /* Set it to our new one */
+    BUFCPY(tmpnam, bp->b_fname);            /* Save the original name */
+    BUFCPY(bp->b_fname, InFile);            /* Set it to our new one  */
 
     /* Write it out, checking for errors */
     if ( !writeout(InFile, "w") ) {
         mlwrite("[Cannot write filter file <%s>]", InFile);
-        XSTRCPY(bp->b_fname, tmpnam);
+        BUFCPY(bp->b_fname, tmpnam);
         umc_unlink(InFile);
         sleep(MLWAIT);
 
@@ -2634,16 +2632,40 @@ int f_filter P2_(int, f, int, n)
     s = LaunchPrg(line, InFile, OutFile, NULL);
     /* If successful, read in file */
     if ( s ) {
-        s = readin(OutFile, FALSE);
+        /* WHEN f ==TRUE AND n == 1: Don't change buffer flags:
+         *
+         * Why do we want this special handling:
+         *
+         * Consider these macro commands
+         *
+         * ```
+         *  set %tbuf $tbuf
+         *  set %curbuf $cbufname
+         *  ; The '1' makes %tbuf invisible (i.e. sets BFINVS):
+         *  1 select-buffer %tbuf
+         *  ; somehow fill text into %tbuf:
+         *  ...
+         *  set %cmd  <Some Command Line>
+         *  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+         *  1 filter-buffer %cmd
+         *  select-buffer %curbuf
+         *  delete-buffer %tbuf
+         * ```
+         *
+         * Calling readin() here would reset the BFINVS flag which would
+         * cause the 'delete-buffer %tbuf' to ask the user if this is
+         * really wanted. The readinfnc() reacts on the special
+         * `1' flag to avoid this behaviour!
+         */
+        s = readinfnc(f, n, OutFile, FALSE);
         if ( s ) {
             /* Mark buffer as changed */
             bp->b_flag |= BFCHG;
         }
     }
 
-
     /* Reset file name */
-    XSTRCPY(bp->b_fname, tmpnam);
+    BUFCPY(bp->b_fname, tmpnam);
 
     /* and get rid of the temporary file */
     umc_unlink(InFile);

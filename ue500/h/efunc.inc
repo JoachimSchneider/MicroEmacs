@@ -274,6 +274,7 @@ NOSHARE NBIND names[] =
     { "write-message", writemsg },
     { "yank", yank },
     { "yank-pop", yank_pop },
+    { "z000-dsp-args", z000_dsp_args },
     { "", NULL }
 };
 
