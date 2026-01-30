@@ -2648,10 +2648,25 @@ EXTERN int PASCAL NEAR          quickexit DCL((int f, int n));
 EXTERN int PASCAL NEAR          quit DCL((int f, int n));
 EXTERN int PASCAL NEAR          quote DCL((int f, int n));
 EXTERN int PASCAL NEAR          rdonly DCL((void));
-EXTERN int PASCAL NEAR          readinx DCL((const char *fname, int lockfl, BUFFER * bp, int hook, int chgflags));
-#define                         readin(fname, lockfl) ( readinx((fname), (lockfl), curbp, TRUE, TRUE) )
-                                /* readinfnc() won't change buffer flags when f == TRUE and n == 1: */
-#define                         readinfnc(f, n, fname, lockfl) ( readinx((fname), (lockfl), curbp, TRUE, UMC_BOOL(!UMC_SPECIAL(f, n))) )
+EXTERN int PASCAL NEAR          readinx DCL((const char *fname,
+                                             int        lockfl,
+                                             BUFFER     *bp,
+                                             int        hook,
+                                             int        chgflags));
+#define                         readin(fname, lockfl)                 \
+                                    ( readinx((fname), (lockfl),      \
+                                               curbp,                 \
+                                               TRUE,                  \
+                                               TRUE) )
+/**END_OF_DEFINITION**/
+/* readinfncA() won't change buffer flags when f == TRUE and n == 1.  */
+/* Why `A'? Might need `B', `C', ... later on.                        */
+#define                         readinfncA(f, n, fname, lockfl)       \
+                                    ( readinx((fname), (lockfl),      \
+                                               curbp,                 \
+                                               TRUE,                  \
+                                               UMC_BOOL(!UMC_SPECIAL(f, n))) )
+/**END_OF_DEFINITION**/
 EXTERN int PASCAL NEAR          refresh DCL((int f, int n));
 EXTERN int PASCAL NEAR          remmark DCL((int f, int n));
 EXTERN int PASCAL NEAR          reposition DCL((int f, int n));

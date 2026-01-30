@@ -825,10 +825,10 @@ int n;                                  /* Argument count       */
          *
          * Calling readin() here would reset the BFINVS flag which would
          * cause the 'delete-buffer %tbuf' to ask the user if this is
-         * really wanted. The readinfnc() reacts on the special
+         * really wanted. The readinfncA() reacts on the special
          * `1' flag to avoid this behaviour!
          */
-        s = readinfnc(f, n, filnam2, FALSE);
+        s = readinfncA(f, n, filnam2, FALSE);
         if ( s )
             /* Mark buffer as changed */
             bp->b_flag |= BFCHG;

@@ -1263,16 +1263,17 @@ int PASCAL NEAR mceq P2_(unsigned char, bc, MC *, mt)
  */
 int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
 {
-    EBITMAP bmap;
-    REGISTER char   *patptr;
-    REGISTER int pchr, ochr;
+    EBITMAP       bmap      = NULL;
+    REGISTER char *patptr   = NULL;
+    REGISTER int  pchr      = 0;
+    REGISTER int  ochr      = 0;
 
     if ( ( bmap = (EBITMAP) ROOM(BMAPSIZE) ) == NULL ) {
         mlabort(TEXT94);
-/*          "%%Out of memory" */
+/*              "%%Out of memory" */
         mcptr->mc_type = MCNIL;
 
-        return FALSE;
+        goto badret;
     }
 
     umc_memset(bmap, 0, BMAPSIZE);
@@ -1289,15 +1290,15 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
     if ( *++patptr == MC_NCCL ) {
         patptr++;
         mcptr->mc_type = NCCL;
-    } else
+    } else                      {
         mcptr->mc_type = CCL;
+    }
 
     if ( (pchr = *patptr) == MC_ECCL ) {
         mlwrite(TEXT96);
-/*          "%%No characters in character class" */
-        CLROOM(bmap);
+/*              "%%No characters in character class" */
 
-        return FALSE;
+        goto badret;
     }
 
     while ( pchr != MC_ECCL && pchr != '\0' ) {
@@ -1308,9 +1309,9 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
          */
         case MC_RCCL:
             pchr = *(patptr + 1);
-            if ( ochr == MC_CCL || pchr == MC_ECCL ||ochr > pchr )
+            if ( ochr == MC_CCL || pchr == MC_ECCL ||ochr > pchr )  {
                 umc_setbit(MC_RCCL, bmap);
-            else {
+            } else                                                  {
                 do {
                     umc_setbit(++ochr, bmap);
                 } while (ochr < pchr);
@@ -1318,8 +1319,7 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
             }
             break;
 
-        /* Note: no break between case MC_ESC and the default.
-         */
+        /* Note: no break between case MC_ESC and the default: */
         case MC_ESC:
             pchr = *++patptr;
 
@@ -1335,13 +1335,18 @@ int PASCAL NEAR cclmake P2_(char **, ppatptr, MC *, mcptr)
 
     if ( pchr == '\0' ) {
         mlwrite(TEXT97);
-/*          "%%Character class not ended" */
-        CLROOM(bmap);
+/*              "%%Character class not ended" */
 
-        return FALSE;
+        goto badret;
     }
 
     return TRUE;
+
+badret:
+    CLROOM(bmap);
+    mcptr->u.cclmap = NULL; /* Avoid double free  */
+
+    return FALSE;
 }
 
 /* LITMAKE:

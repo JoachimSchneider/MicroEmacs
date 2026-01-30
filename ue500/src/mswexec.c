@@ -541,10 +541,10 @@ PASCAL f_filter (int f, int n)
                  *
                  * Calling readin() here would reset the BFINVS flag which would
                  * cause the 'delete-buffer %tbuf' to ask the user if this is
-                 * really wanted. The readinfnc() reacts on the special
+                 * really wanted. The readinfncA() reacts on the special
                  * `1' flag to avoid this behaviour!
                  */
-                Result = readinfnc (f, n, OutFile, FALSE);
+                Result = readinfncA (f, n, OutFile, FALSE);
                 umc_unlink (OutFile);
                 umc_unlink (InFile);
             }

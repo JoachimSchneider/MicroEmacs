@@ -305,12 +305,12 @@ PASCAL NEAR f_filter(f, n)
      *
      * Calling readin() here would reset the BFINVS flag which would
      * cause the 'delete-buffer %tbuf' to ask the user if this is
-     * really wanted. The readinfnc() reacts on the special
+     * really wanted. The readinfncA() reacts on the special
      * `1' flag to avoid this behaviour!
      *
-     * Therefore we use readinfnc().
+     * Therefore we use readinfncA().
      */
-    if ( s != TRUE || (readinfnc(f, n, filnam2, FALSE) == FALSE) )  {
+    if ( s != TRUE || (readinfncA(f, n, filnam2, FALSE) == FALSE) ) {
         /* on failure, escape gracefully */
         mlwrite(TEXT3);
 /*                      "[Execution failed]" */
