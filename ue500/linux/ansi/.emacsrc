@@ -474,6 +474,108 @@ store-procedure unfill-region
 
 macro-to-key unfill-region M-^Q
 
+
+store-procedure print-region
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  copy-region
+  set %curbuf $cbufname
+  ; The '1' sets the BFINVS flag: So it may be deleted later without
+  ; a user inquiry.
+  1 select-buffer %tbuf
+  yank
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+  1 filter-buffer "lpr"
+  select-buffer %curbuf
+  delete-buffer %tbuf
+!endm
+
+
+store-procedure auml-to-ae
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  delete-mode "MAGIC"
+  add-mode    "EXACT"
+
+  beginning-of-file
+  replace-string "&auml;"   "ae"
+  beginning-of-file
+  replace-string "&ouml;"   "oe"
+  beginning-of-file
+  replace-string "&uuml;"   "ue"
+  beginning-of-file
+  replace-string "&Auml;"   "Ae"
+  beginning-of-file
+  replace-string "&Ouml;"   "Oe"
+  beginning-of-file
+  replace-string "&Uuml;"   "Ue"
+  beginning-of-file
+  replace-string "&szlig;"  "ss"
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+
+store-procedure utf8-to-ae
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  delete-mode "MAGIC"
+  add-mode    "EXACT"
+
+  beginning-of-file
+  replace-string "~xc3~xa4"   "ae"
+  beginning-of-file
+  replace-string "~xc3~xb6"   "oe"
+  beginning-of-file
+  replace-string "~xc3~xbc"   "ue"
+  beginning-of-file
+  replace-string "~xc3~x84"   "Ae"
+  beginning-of-file
+  replace-string "~xc3~x96"   "Oe"
+  beginning-of-file
+  replace-string "~xc3~x9c"   "Ue"
+  beginning-of-file
+  replace-string "~xc3~x9f"   "ss"
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+
 ;===============================================================================
 
 

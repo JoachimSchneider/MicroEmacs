@@ -1773,6 +1773,8 @@ The CMP_* macros should be moved away from estruct.h    ===> DONE
 
 #============================== TODO LIST ==============================
 
+- Changed lgetc_() to return `unsigned char' for *all* platforms (not
+  just UNIX) on 2026-01-30: Test this on all platforms.
 - Windows and DJGPP emacs sets \\<host>\<share>\<file> arguments to read-only.  ===> DONE
 - Allow empty replacement string on repeated query-replace.
 - Make 'Ctrl-X,#' (filter-buffer) redoable.

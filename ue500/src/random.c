@@ -2945,13 +2945,8 @@ char PASCAL NEAR  lputc_ P5_(LINE *, lp, int, n, char, c,
 
 #undef  FUNC_
 #define FUNC_ lgetc_
-#if ( b_IS_UNIX )
 unsigned char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
                                     fnam, int, lno)
-#else
-         char PASCAL NEAR FUNC_ P4_(LINE *, lp, int, n, CONST char *,
-                                    fnam, int, lno)
-#endif
 {
     ASRTK(NULL != lp,                     fnam, lno);
 #if ( !0 )

@@ -779,6 +779,11 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #define MIN3(x, y, z) ( MIN2((x), MIN2((y), (z))) )
 #define MAX3(x, y, z) ( MAX2((x), MAX2((y), (z))) )
 #endif  /*END_COMMENT_*/
+/*--------------------------------------------------------------------*/
+/* NEVER use a `char' or `signed char' as an array subscript ---      */
+/* sometimes it might get a negative value.                           */
+/*--------------------------------------------------------------------*/
+#define CHAR2INT(c)   ( (int)(unsigned char)(c) )
 /**********************************************************************/
 
 /**********************************************************************/
@@ -1624,13 +1629,8 @@ EXTERN char PASCAL NEAR lputc_ DCL((LINE *lp, int n, char c,
                                     CONST char *fnam, int lno));
 #define lputc(lp, n, c) ( lputc_((lp), (n), (c), __FILE__, __LINE__) )
 
-#if ( b_IS_UNIX )
 EXTERN unsigned char PASCAL NEAR  lgetc_ DCL((LINE *lp, int n,
                                               CONST char *fnam, int lno));
-#else
-EXTERN          char PASCAL NEAR  lgetc_ DCL((LINE *lp, int n,
-                                              CONST char *fnam, int lno));
-#endif
 #define lgetc(lp, n)    ( lgetc_((lp), (n), __FILE__, __LINE__) )
 
 EXTERN char * PASCAL NEAR lgetcp_ DCL((LINE *lp, int n,
@@ -2315,14 +2315,20 @@ EXTERN int PASCAL NEAR          kill_abbrevs DCL((int f, int n));
 EXTERN int PASCAL NEAR          ins_abbrevs DCL((int f, int n));
 EXTERN int PASCAL NEAR          def_abbrevs DCL((int f, int n));
 EXTERN int PASCAL NEAR          addline DCL((BUFFER *bp, CONST char *text));
+# if MAGIC
 EXTERN int PASCAL NEAR          amatch DCL((MC *mcptr, int direct, LINE **pcwline,
                                             int *pcwoff));
+# endif
 EXTERN int PASCAL NEAR          backhunt DCL((int f, int n));
 EXTERN int PASCAL NEAR          backsearch DCL((int f, int n));
+# if MAGIC
 EXTERN int PASCAL NEAR          biteq DCL((int bc, EBITMAP cclmap));
+# endif
 EXTERN int PASCAL NEAR          bktoshell DCL((int f, int n));
 EXTERN int PASCAL NEAR          boundry DCL((LINE *curline, int curoff, int dir));
+# if MAGIC
 EXTERN int PASCAL NEAR          cclmake DCL((char **ppatptr, MC *mcptr));
+# endif
 #if MSDOS
 # if MOUSE
 EXTERN int PASCAL NEAR          checkmouse DCL((void));
@@ -2388,19 +2394,25 @@ EXTERN int PASCAL NEAR          liteq DCL((LINE **curline,
                                            int  *curpos,
                                            int  direct,
                                            char *lstring));
+# if MAGIC
 EXTERN int PASCAL NEAR          litmake DCL((char **ppatptr, MC *mcptr));
+# endif
 EXTERN int PASCAL NEAR          lnewline DCL((void));
 EXTERN int PASCAL NEAR          local_var DCL((int f, int n));
 EXTERN int PASCAL NEAR          lkp_color DCL((char *sp));
 EXTERN int PASCAL NEAR          lover DCL((char *ostr));
+# if MAGIC
 EXTERN int PASCAL NEAR          mceq DCL((unsigned char bc, MC *mt));
+# endif
 #if MSDOS
 EXTERN VOID PASCAL NEAR         maxlines DCL((int lines));
 #endif
+# if MAGIC
 EXTERN int PASCAL NEAR          mcscanner DCL((MC   *mcpatrn,
                                                int  direct,
                                                int  beg_or_end,
                                                int  repeats));
+# endif
 EXTERN int PASCAL NEAR          mcstr DCL((void));
 EXTERN int PASCAL NEAR          mlprompt DCL((CONST char *, CONST char *, int));
 EXTERN int PASCAL NEAR          movelocalpoint DCL((int n, int *pcuroff, LINE **pcurline));
@@ -2786,7 +2798,9 @@ EXTERN VOID PASCAL NEAR         pad DCL((char *s, int len));
 EXTERN VOID PASCAL NEAR         reeat DCL((int c));
 EXTERN VOID PASCAL NEAR         reframe DCL((EWINDOW *wp));
 EXTERN VOID PASCAL NEAR         rmcclear DCL((void));
+# if MAGIC
 EXTERN VOID PASCAL NEAR         umc_setbit DCL((int bc, EBITMAP cclmap));
+# endif
 EXTERN VOID PASCAL NEAR         setjtable DCL((void));
 EXTERN VOID PASCAL NEAR         unbind_buf DCL((BUFFER *bp));
 EXTERN VOID PASCAL NEAR         unqname DCL((char *name));

@@ -114,12 +114,9 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
     else
         status = mcscanner(&mcdeltapat[0], FORWARD, spoint, n);
 # else
-    status =
-        mcscanner(
-             ( magical &&
-               (curwp->w_bufp->b_mode & MDMAGIC) )?&mcpat[0]: &mcdeltapat[0],
-            FORWARD,
-            spoint, n );
+    status =  mcscanner(magical && (curwp->w_bufp->b_mode & MDMAGIC) ?
+                            &mcpat[0] : &mcdeltapat[0],
+                        FORWARD, spoint, n );
 # endif
 #else
     status = scanner(FORWARD, spoint, n);
@@ -713,7 +710,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
     /* Now put in the characters contained in the pattern, duplicating the CASE.
      */
     for ( j = 0; j < jump_by; j++ ) {
-        ch = *pstring++;
+        ch = CHAR2INT(*pstring++);
         if ( is_letter(ch) )
             tbl->delta[(unsigned char) chcase(ch)] = jump_by - j;
         tbl->delta[ch] = jump_by - j;
@@ -723,7 +720,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
      * length, unless there are duplicates of it.  Get the number to jump from
      * the delta array, and overwrite with zeroes in delta duplicating the CASE.
      */
-    ch = *pstring;
+    ch = CHAR2INT(*pstring);
     tbl->patlen = jump_by;
     tbl->jump = jump_by + tbl->delta[ch];
 
