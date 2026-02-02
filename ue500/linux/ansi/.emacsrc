@@ -387,6 +387,7 @@ set $softtab 2
 set $hardtab 8
 bind-to-key set-mark ^@
 set $dispundo TRUE
+; Display 8-Bit characters in readable form:
 set $disphigh TRUE
 ; turn off highlighting:
 set $hilight 255
@@ -475,6 +476,7 @@ store-procedure unfill-region
 macro-to-key unfill-region M-^Q
 
 
+!if &seq $os "UNIX"
 store-procedure print-region
   local %curbuf
   local %tbuf
@@ -496,6 +498,7 @@ store-procedure print-region
   select-buffer %curbuf
   delete-buffer %tbuf
 !endm
+!endif
 
 
 store-procedure auml-to-ae
@@ -570,6 +573,124 @@ store-procedure utf8-to-ae
   end-of-file
   trim-region
   kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+
+; Re-format C-clock comments:
+;
+; MARK
+; |
+; v      /* Something
+;           ...
+;           ...
+; ^
+; |
+; POINT
+;
+;        /* Something
+;         * ...
+;         * ...
+;
+; The comments text will be filled to $fillcol
+;
+; We call the function `*-cmnt0' because one might introduce a
+; `*-cmnt1' with other comment-style in the future.
+store-procedure fmt-c-cmnt0
+  local %curbuf
+  local %tbuf
+  local %nspace
+  local %i
+  local %str0
+  local %str1
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  ; The '1' sets the BFINVS flag: So it may be deleted later without
+  ; a user inquiry.
+  1 select-buffer %tbuf
+  yank
+  add-mode "MAGIC"
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+
+; Remove all C-comments:
+  beginning-of-file
+  replace-string "^\([ ~t]*\)[ /]\*\(.*\)$" "\1  \2"
+  beginning-of-file
+  replace-string "[ ^I]*\*/$" ""
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+
+; Remove empty lines at start or end of comment block:
+  beginning-of-file
+  !while &seq $line ""
+      kill-to-end-of-line
+  !endwhile
+  end-of-file
+  !while &seq $line ""
+      !force kill-to-end-of-line
+      previous-line
+  !endwhile
+
+; Reformat comment to $fillcol:
+  beginning-of-file
+  set-mark
+  end-of-file
+  fill-region
+
+; Get the indentation of the comment block:
+  beginning-of-file
+  beginning-of-line
+  set %nspace 0
+  !while &seq " " &chr $curchar
+      set %nspace &add %nspace 1
+      !force forward-character
+  !endwhile
+
+; Insert C-comment-start:
+  beginning-of-file
+  beginning-of-line
+  set %i 0
+  !while &less %i &sub %nspace 3
+      forward-character
+      set %i &add %i 1
+  !endwhile
+  insert-string "/* "
+  3 delete-next-character
+
+; Set appropriate replacement strings for the remaining lines:
+  next-line
+  beginning-of-line
+  set %str0 "^"
+  set %str1 ""
+  set %i 0
+  !while &less %i &sub %nspace 2
+      set %str0 &cat %str0 " "
+      set %str1 &cat %str1 " "
+      set %i &add %i 1
+  !endwhile
+  set %str0 &cat %str0 "  "
+  set %str1 &cat %str1 "* "
+
+; Insert appropriate start of comment characters:
+  replace-string %str0 %str1 "\1  \2"
+
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  copy-region
+
   select-buffer %curbuf
   yank
   delete-buffer %tbuf

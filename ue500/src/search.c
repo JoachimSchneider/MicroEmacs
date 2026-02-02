@@ -23,20 +23,19 @@
 
 /* BE CAREFUL: The related C-variable is `hilite', the macro variable
  * is `$hilight'  */
-#define SEARCH_HIGHLIGHT        10      /* mark # used to highlight */
+#define SEARCH_HIGHLIGHT        (10)    /* mark # used to highlight   */
 CASRT( 0 <=  SEARCH_HIGHLIGHT );
 CASRT( SEARCH_HIGHLIGHT < NMARKS - 1 );
-#define MAGIC_JUMP_TABLES       1       /* Jump tables in MAGIC mode */
+#define MAGIC_JUMP_TABLES       (1)     /* Jump tables in MAGIC mode  */
 
 #if MAGIC
-static int group_count;
-static int group_len[MAXGROUPS];
+static int    group_count = 0;
+static int    group_len[MAXGROUPS];
 static REGION group_reg[MAXGROUPS];
-
 #endif
 
 #if     WINDOW_MSWIN
-static int o = 0;       /* For longop() calls.*/
+static int  o = 0;       /* For longop() calls.*/
 #endif
 
 /* FORWSEARCH:
@@ -47,21 +46,22 @@ static int o = 0;       /* For longop() calls.*/
  */
 int PASCAL NEAR forwsearch P2_(int, f, int, n)
 {
-    REGISTER int status;
+    REGISTER int  status  = FALSE;
 
     /* If n is negative, search backwards. Otherwise proceed by asking for the
      * search string.
      */
-    if ( n < 0 )
+    if ( n < 0 )  {
         return ( backsearch(f, -n) );
+    }
 
     /* Ask the user for the text of a pattern.  If the response is TRUE
      * (responses other than FALSE are possible), search for pattern for up to n
      * times, as long as the pattern is there to be found.
      */
-    if ( ( status = readpattern(TEXT78, (char *)&pat[0], TRUE) ) == TRUE )
-        status = forwhunt(f, n);
-/*              "Search" */
+    if ( ( status = readpattern(TEXT78, (char *)&pat[0], TRUE) ) == TRUE )  {
+        status = forwhunt(f, n);  /* "Search" */
+    }
 
     return (status);
 }
@@ -74,26 +74,29 @@ int PASCAL NEAR forwsearch P2_(int, f, int, n)
  */
 int PASCAL NEAR forwhunt P2_(int, f, int, n)
 {
-    REGISTER int spoint = PTEND;
-    REGISTER int status;
+    REGISTER int  spoint  = PTEND;
+    REGISTER int  status  = FALSE;
 
-    if ( n < 0 )                /* search backwards */
+    if ( n < 0 )  {   /* search backwards */
         return ( backhunt(f, -n) );
+    }
 
     /* Make sure a pattern exists, or that we didn't switch into MAGIC mode
      * after we entered the pattern.
      */
     if ( pat[0] == '\0' ) {
         mlwrite(TEXT80);
+/*              "No pattern set" */
 
-/*          "No pattern set" */
         return FALSE;
     }
 
 #if MAGIC
-    if ( (curwp->w_bufp->b_mode & MDMAGIC) && mcpat[0].mc_type == MCNIL ) {
-        if ( !mcstr() )
+    if ( (curwp->w_bufp->b_mode & MDMAGIC) &&
+         mcpat[0].mc_type == MCNIL )            {
+        if ( !mcstr() ) {
             return FALSE;
+        }
     }
 #endif
 
@@ -101,36 +104,38 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
      * Do one extra search to get us past our current match, if the search type
      * has us at the start of a match, instead of after a match.
      */
-    if ( searchtype == SRBEGIN ) {
+    if ( searchtype == SRBEGIN )  {
         spoint = PTBEG;
-        if ( lastflag & CFSRCH )
-            n = (n > 2)? (n + 1): 2;
+        if ( lastflag & CFSRCH )  {
+            n = (n > 2)? (n + 1) : 2;
+        }
     }
 
 #if MAGIC
 # if 0
-    if ( magical && (curwp->w_bufp->b_mode & MDMAGIC) )
+    if ( magical && (curwp->w_bufp->b_mode & MDMAGIC) ) {
         status = mcscanner(&mcpat[0], FORWARD, spoint, n);
-    else
+    } else                                              {
         status = mcscanner(&mcdeltapat[0], FORWARD, spoint, n);
+    }
 # else
     status =  mcscanner(magical && (curwp->w_bufp->b_mode & MDMAGIC) ?
                             &mcpat[0] : &mcdeltapat[0],
-                        FORWARD, spoint, n );
+                        FORWARD, spoint, n);
 # endif
 #else
     status = scanner(FORWARD, spoint, n);
 #endif
 
-    /* Complain if not there.
-     */
-    if ( status == FALSE )
+    /* Complain if not there. */
+    if ( status == FALSE )  {
         mlwrite(TEXT79);
-/*          "Not found" */
+/*              "Not found" */
+    }
 
     thisflag |= CFSRCH;
 
-    return (status);
+    return status;
 }
 
 /* BACKSEARCH:
@@ -142,23 +147,24 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
  */
 int PASCAL NEAR backsearch P2_(int, f, int, n)
 {
-    REGISTER int status;
+    REGISTER int  status  = FALSE;
 
     /* If n is negative, search forwards. Otherwise proceed by asking for the
      * search string.
      */
-    if ( n < 0 )
+    if ( n < 0 )  {
         return ( forwsearch(f, -n) );
+    }
 
     /* Ask the user for the text of a pattern.  If the response is TRUE
      * (responses other than FALSE are possible), search for pattern for up to n
      * times, as long as the pattern is there to be found.
      */
-    if ( ( status = readpattern(TEXT81, (char *)&pat[0], TRUE) ) == TRUE )
-        status = backhunt(f, n);
-/*              "Reverse search" */
+    if ( ( status = readpattern(TEXT81, (char *)&pat[0], TRUE) ) == TRUE )  {
+        status = backhunt(f, n);  /* "Reverse search" */
+    }
 
-    return (status);
+    return status;
 }
 
 /* BACKHUNT:
@@ -170,26 +176,28 @@ int PASCAL NEAR backsearch P2_(int, f, int, n)
  */
 int PASCAL NEAR backhunt P2_(int, f, int, n)
 {
-    REGISTER int spoint = PTBEG;
-    REGISTER int status;
+    REGISTER int  spoint  = PTBEG;
+    REGISTER int  status  = FALSE;
 
-    if ( n < 0 )
+    if ( n < 0 )  {
         return ( forwhunt(f, -n) );
+    }
 
     /* Make sure a pattern exists, or that we didn't switch into MAGIC mode
      * after we entered the pattern.
      */
     if ( tap[0] == '\0' ) {
         mlwrite(TEXT80);
+/*              "No pattern set" */
 
-/*          "No pattern set" */
         return FALSE;
     }
 
 #if MAGIC
     if ( (curwp->w_bufp->b_mode & MDMAGIC) && tapcm[0].mc_type == MCNIL ) {
-        if ( !mcstr() )
+        if ( ! mcstr() )  {
             return FALSE;
+        }
     }
 #endif
 
@@ -199,37 +207,36 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
      */
     if ( searchtype == SREND ) {
         spoint = PTEND;
-        if ( lastflag & CFSRCH )
-            n = (n > 2)? (n + 1): 2;
+        if ( lastflag & CFSRCH )  {
+            n = (n > 2)? (n + 1) : 2;
+        }
     }
 
 #if MAGIC
 # if 0
-    if ( magical && (curwp->w_bufp->b_mode & MDMAGIC) )
+    if ( magical && (curwp->w_bufp->b_mode & MDMAGIC) ) {
         status = mcscanner(&tapcm[0], REVERSE, spoint, n);
-    else
+    } else                                              {
         status = mcscanner(&tapatledcm[0], REVERSE, spoint, n);
+    }
 # else
-    status =
-        mcscanner(
-             ( magical &&
-               (curwp->w_bufp->b_mode & MDMAGIC) )?&tapcm[0]: &tapatledcm[0],
-            REVERSE,
-            spoint, n );
+    status = mcscanner(magical && (curwp->w_bufp->b_mode & MDMAGIC) ?
+                           &tapcm[0] : &tapatledcm[0],
+                       REVERSE, spoint, n);
 # endif
 #else
     status = scanner(REVERSE, spoint, n);
 #endif
 
-    /* Complain if not there.
-     */
-    if ( status == FALSE )
+    /* Complain if not there. */
+    if ( status == FALSE )  {
         mlwrite(TEXT79);
-/*          "Not found" */
+/*              "Not found" */
+    }
 
     thisflag |= CFSRCH;
 
-    return (status);
+    return status;
 }
 
 #if MAGIC
@@ -259,17 +266,16 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
         jump = tbl->jump;
         patlenadd = tbl->patlen;
         mcpatrn++;
-    } else
+    } else                              {
         tbl = NULL;
+    }
 # endif
 
-    /* Setup local scan pointers to global ".".
-     */
+    /* Setup local scan pointers to global ".". */
     curline = curwp->w_dotp;
     curoff  = get_w_doto(curwp);
 
-    /* Scan each character until we hit the head link record.
-     */
+    /* Scan each character until we hit the head link record. */
     while ( !boundry(curline, curoff, direct) ) {
         /* Save the current position in case we need to restore it on a match,
          * and initialize matchlen to zero in case we are doing a search for
@@ -288,23 +294,27 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
         if ( tbl != NULL ) {
             if ( !fbound(tbl, patlenadd, &curline, &curoff, direct) ) {
                 do {
-                    if ( direct == FORWARD )
+                    if ( direct == FORWARD )  {
                         movelocalpoint(-patlenadd, &curoff, &curline);
-                    else
+                    } else                    {
                         movelocalpoint(patlenadd + 1, &curoff, &curline);
+                    }
 
                     matchline = curline;
                     matchoff = curoff;
 
-                    if ( ( matchlen =
-                               liteq(&curline, &curoff, direct,
-                                     tbl->patrn) ) > 0 )
+                    if ( (matchlen = liteq(&curline,
+                                           &curoff,
+                                           direct,
+                                           tbl->patrn)) > 0 ) {
                         break;
+                    }
                 } while ( !fbound(tbl, jump, &curline, &curoff, direct) );
             }
 
-            if ( matchlen == 0 )
+            if ( matchlen == 0 )  {
                 return FALSE;
+            }
         }
 # endif
 
@@ -341,23 +351,24 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
                 matchoff = curoff;
             }
 
-            if ( savematch() == ABORT )
+            if ( savematch() == ABORT ) {
                 return ABORT;
+            }
 
-            /* Continue scanning if we haven't found the nth match.
-             */
-            if ( --repeats <= 0 )
+            /* Continue scanning if we haven't found the nth match. */
+            if ( --repeats <= 0 ) {
                 return TRUE;
+            }
         }
 
-        /* Advance the cursor.
-         */
+        /* Advance the cursor. */
         nextch(&curline, &curoff, direct);
     }
 
     return FALSE;       /* We could not find a match.*/
 }
 
+/**HEREHEREHERE**/
 /* AMATCH:
  *
  * Search for a meta-pattern in either direction.  Update the passed-in

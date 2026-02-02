@@ -87,8 +87,16 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
-[2026-01-28.00]
+[2026-02-02.00]
+  * [query-]replace-string now works woth 8-Bit characters like ~x81.
+    E.g. it is possible to do something like
 
+    ```
+      replace-string "~xc3~xa4"   "ae"
+
+    ```
+
+[2026-01-28.00]
   * Extended the behaviour of `filter-buffer`: When called with a
     numeric argument of 1 it does *not* change the current buffer's
     BFINVS flag --- consider these macro lines to see why this
@@ -143,29 +151,29 @@ Please use the *fixes* branch for pull requests.
     ```
 
 [2026-01-25.00]
-* Changes in the command execution functions:
+  * Changes in the command execution functions:
 
-  In MicroEMACS one may execute builtin functions (FUNC) or macros
-  (PROC) which were created with `store-procedure`. The relevant
-  functions are:
+    In MicroEMACS one may execute builtin functions (FUNC) or macros
+    (PROC) which were created with `store-procedure`. The relevant
+    functions are:
 
-  ```
+    ```
 
-                           FUNC    PROC
-  -------------------------------------
-  execute-command-line     Y       Y
-  execute-named-command    Y       Y
-  execute-procedure        N       Y
-  execute-function         Y       N
+                             FUNC    PROC
+    -------------------------------------
+    execute-command-line     Y       Y
+    execute-named-command    Y       Y
+    execute-procedure        N       Y
+    execute-function         Y       N
 
-  ```
+    ```
 
-  + *All* of the above functions do command completion now.
+    + *All* of the above functions do command completion now.
 
-  + `execute-named-command` is able to handle functions as well as
-    procedures (i.e. macros).
+    + `execute-named-command` is able to handle functions as well as
+      procedures (i.e. macros).
 
-  + The new `execute-function` only executes functions.
+    + The new `execute-function` only executes functions.
 
 [2025-12-21.00]
   * Fixed execbuf() ("execute-buffer"): It is now able to execute *any*
@@ -183,11 +191,11 @@ Please use the *fixes* branch for pull requests.
     would set `%R` to garbage line  `X+7Af^!("` and *not* to `XY`.
 
   * Extensive macro tracing (when `LOGFLG = 1` is set in estruct.h).
-   Macro trace messages start with 'MTC ': To filter them out use
-   ```
-   grep '^MTC '  "${EMACS_TRC_FILE}"
-   ```
-   if you are on a Unix system.
+    Macro trace messages start with 'MTC ': To filter them out use
+    ```
+      grep '^MTC '  "${EMACS_TRC_FILE}"
+    ```
+    if you are on a Unix system.
 
 [2025-04-11.00]
   * It compiles and runs on BSD 4.1. This is a really old (1981) UNIX:
