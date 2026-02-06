@@ -37,16 +37,31 @@
 # undef  CTRLZ
 #endif
 
+
+/*====================================================================*/
+/* If this is .NE. 0 do not allow changes incompatible to the         */
+/* original MicroEMACS version 5.00 of 23-Jan-2009 distributed as     */
+/* emacs5.zip by Daniel M. Lawrence [(C)Copyright 1988-2009].         */
+/*====================================================================*/
+#define MICROEMACS_COMPAT       (0)
+#define MICROEMACS_COMPAT_VERS  "5.00"
+/*====================================================================*/
+
+
 /*
  *      Program Identification.....
  *
- * PROGNAME should always be MicroEMACS for a distribution unmodified *
+ * PROGNAME should always be MicroEMACS for a distribution unmodified
  * version. People using MicroEMACS as a shell for other products
- * should change * this to reflect their product. Macros can query this
+ * should change this to reflect their product. Macros can query this
  * via the $progname variable
  */
 #define PROGNAME        "MicroEMACS"
-#define VERSION         "5.00"
+#if MICROEMACS_COMPAT
+# define VERSION        MICROEMACS_COMPAT_VERS
+#else
+# define VERSION        "5.01"
+#endif
 
 
 /*====================================================================*/

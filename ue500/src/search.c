@@ -368,7 +368,6 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
     return FALSE;       /* We could not find a match.*/
 }
 
-/**HEREHEREHERE**/
 /* AMATCH:
  *
  * Search for a meta-pattern in either direction.  Update the passed-in
@@ -376,14 +375,17 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
  * amatch() (for "anchored match") in Kernighan & Plauger's "Software
  * Tools".
  */
-int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pcwoff)
+int PASCAL NEAR amatch P4_(MC *,    mcptr,
+                           int,     direct,
+                           LINE **, pcwline,
+                           int *,   pcwoff)
 {
-    LINE    *curline;   /* current line during scan */
-    int curoff;         /* position within current line */
-    int pre_matchlen;   /* matchlen before a recursive amatch() call.*/
-    int cl_matchlen;    /* number of chars matched in a local closure.*/
-    int cl_min;         /* minimum number of chars matched in closure.*/
-    int cl_type;        /* Which closure type?.*/
+    LINE  *curline      = NULL; /* current line during scan                   */
+    int   curoff        = 0;    /* position within current line               */
+    int   pre_matchlen  = 0;    /* matchlen before a recursive amatch() call  */
+    int   cl_matchlen   = 0;    /* number of chars matched in a local closure */
+    int   cl_min        = 0;    /* minimum number of chars matched in closure */
+    int   cl_type       = 0;    /* Which closure type?                        */
 
     /* Set up local scan pointers to ".", and set up our local
      * character counting variable, which can correct matchlen
@@ -397,12 +399,9 @@ int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pc
      * Loop through the meta-pattern, laughing all the way.
      */
     while ( mcptr->mc_type != MCNIL ) {
-        /* Is the current meta-character modified by a closure?
-         */
+        /* Is the current meta-character modified by a closure? */
         if ( 0 != (cl_type = (mcptr->mc_type & ALLCLOS)) )  {
-
-            /* Minimum number of characters that may match is 0 or 1.
-             */
+            /* Minimum number of characters that may match is 0 or 1  */
             cl_min = (cl_type == CLOSURE_1);
 
             if ( cl_type == ZEROONE ) {
@@ -414,8 +413,9 @@ int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pc
                 /* Match as many characters as possible against the current
                  * meta-character.
                  */
-                while ( mceq(nextch(&curline, &curoff, direct), mcptr) )
+                while ( mceq(nextch(&curline, &curoff, direct), mcptr) )  {
                     cl_matchlen++;
+                }
             }
 
             /* We are now at the character that made us fail.  Try to match the
@@ -433,56 +433,61 @@ int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pc
 
                 nextch(&curline, &curoff, direct ^ REVERSE);
                 pre_matchlen = matchlen;
-                if ( amatch(mcptr, direct, &curline, &curoff) )
+                if ( amatch(mcptr, direct, &curline, &curoff) ) {
                     goto success;
+                }
                 matchlen = pre_matchlen - 1;
                 cl_matchlen--;
             }
-        } else if ( mcptr->mc_type == GRPBEG ) {
+        } else if ( mcptr->mc_type == GRPBEG )  {
             group_reg[mcptr->u.group_no].r_offset = curoff;
             group_reg[mcptr->u.group_no].r_linep = curline;
             group_reg[mcptr->u.group_no].r_size =
-                (direct == FORWARD)? -matchlen: matchlen;
-        } else if ( mcptr->mc_type == GRPEND ) {
+                (direct == FORWARD)? -matchlen : matchlen;
+        } else if ( mcptr->mc_type == GRPEND )  {
             group_len[mcptr->u.group_no] =
-                (direct == FORWARD)? matchlen: -matchlen;
+                (direct == FORWARD)? matchlen : -matchlen;
         } else if ( mcptr->mc_type == BOL ) {
-            if ( curoff != 0 )
+            if ( curoff != 0 )  {
                 return FALSE;
+            }
         } else if ( mcptr->mc_type == EOL ) {
-            if ( curoff != get_lused(curline) )
+            if ( curoff != get_lused(curline) ) {
                 return FALSE;
+            }
         } else if ( mcptr->mc_type == BOWRD ) {
-            if ( !isinword( lgetc(curline, curoff) ) )
+            if ( !isinword(lgetc(curline, curoff)) )  {
                 return FALSE;
-
-            if ( curoff != 0 &&isinword( lgetc(curline, curoff - 1) ) )
+            }
+            if ( curoff != 0 && isinword(lgetc(curline, curoff - 1)) )  {
                 return FALSE;
+            }
         } else if ( mcptr->mc_type == EOWRD ) {
-            if ( isinword( lgetc(curline, curoff) ) )
+            if ( isinword(lgetc(curline, curoff)) ) {
                 return FALSE;
-
-            if ( curoff == 0 ||!isinword( lgetc(curline, curoff - 1) ) )
+            }
+            if ( curoff == 0 || !isinword(lgetc(curline, curoff - 1)) ) {
                 return FALSE;
+            }
         } else if ( mcptr->mc_type == LITSTRING ) {
-            if ( ( pre_matchlen =
-                       liteq(&curline, &curoff, direct,
-                             mcptr->u.lstring) ) == 0 )
+            if ( (pre_matchlen = liteq(&curline, &curoff, direct,
+                                        mcptr->u.lstring)) == 0 ) {
                 return FALSE;
-
+            }
             matchlen += pre_matchlen;
         } else {
             /* A character to compare against the meta-character equal function.
              * If we still match, increment the length.
              */
-            if ( !mceq(nextch(&curline, &curoff, direct), mcptr) )
+            if ( !mceq(nextch(&curline, &curoff, direct), mcptr) )  {
                 return FALSE;
+            }
 
             matchlen++;
         }
 
         mcptr++;
-    }                           /* End of mcptr loop.*/
+    }                           /* End of mcptr loop */
 
     /* A SUCCESSFULL MATCH!!!
      * Reset the "." pointers.
@@ -490,7 +495,7 @@ int PASCAL NEAR amatch P4_(MC *, mcptr, int, direct, LINE **, pcwline, int *, pc
 success: *pcwline = curline;
     *pcwoff  = curoff;
 
-    return (TRUE);
+    return TRUE;
 }
 
 #else /* !MAGIC */
@@ -504,12 +509,12 @@ success: *pcwline = curline;
  */
 int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
 {
-    DELTA   *tbl;                       /* structure holding the jump info */
-    char    *patrn;                     /* string to scan for */
-    LINE    *curline;                   /* current line during scan */
-    int curoff;                         /* position within current line */
-    int jump;                           /* next offset */
-    int patlenadd;
+    DELTA *tbl      = NULL;       /* structure holding the jump info  */
+    char  *patrn    = NULL;       /* string to scan for               */
+    LINE  *curline  = NULL;       /* current line during scan         */
+    int   curoff    = 0;          /* position within current line     */
+    int   jump      = 0;          /* next offset                      */
+    int   patlenadd = 0;
 
     /* If we are going in reverse, then the 'end' is actually the beginning of
      * the pattern.  Toggle it.
@@ -520,20 +525,19 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
      * pattern and the jump size in deltapat.  Otherwise, use the reversed
      * pattern pattern and the jump size in tapatled.
      */
-    if ( direct == FORWARD ) {
+    if ( direct == FORWARD )  {
         tbl = &deltapat;
         patrn = deltapat.patrn;
         patlenadd = deltapat.patlen;
         jump = deltapat.jump;
-    } else {
+    } else                    {
         tbl = &tapatled;
         patrn = tapatled.patrn;
         patlenadd = tapatled.patlen;
         jump = tapatled.jump;
     }
 
-    /* Set up local pointers to global ".".
-     */
+    /* Set up local pointers to global ".": */
     curline = curwp->w_dotp;
     curoff = get_w_doto(curwp);
 
@@ -546,16 +550,18 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
             /* Set up the scanning pointers, and save the current position in
              * case we match the search string at this point.
              */
-            if ( direct == FORWARD )
+            if ( direct == FORWARD )  {
                 movelocalpoint(-patlenadd, &curoff, &curline);
-            else
+            } else                    {
                 movelocalpoint(patlenadd + 1, &curoff, &curline);
+            }
 
             matchline = curline;
             matchoff  = curoff;
 
-            if ( liteq(&curline, &curoff, direct, patrn) == 0 )
+            if ( liteq(&curline, &curoff, direct, patrn) == 0 ) {
                 goto fail;
+            }
 
             /* A SUCCESSFULL MATCH!!!
              * Flag that we have moved and reset the global "." pointers.
@@ -566,10 +572,10 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
             curwp->w_marko[SEARCH_HIGHLIGHT+1] = curoff;
 
             curwp->w_flag |= WFMOVE;
-            if ( beg_or_end == PTEND ) {                /* at end of string */
+            if ( beg_or_end == PTEND )  {   /* at end of string       */
                 curwp->w_dotp = curline;
                 set_w_doto(curwp, curoff);
-            } else {                    /* at beginning of string */
+            } else                      {   /* at beginning of string */
                 curwp->w_dotp = matchline;
                 set_w_doto(curwp, matchoff);
             }
@@ -577,25 +583,27 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
             /* If we're heading in reverse, set the "match"
              * pointers to the start of the string, for savematch().
              */
-            if ( direct == REVERSE ) {
+            if ( direct == REVERSE )  {
                 matchline = curline;
                 matchoff = curoff;
             }
 
             matchlen = patlenadd + 1;
-            if ( savematch() == ABORT )
+            if ( savematch() == ABORT ) {
                 return ABORT;
+            }
 
-            /* Continue scanning if we haven't found the nth match.
-             */
-            if ( --repeats <= 0 )
+            /* Continue scanning if we haven't found the nth match: */
+            if ( --repeats <= 0 ) {
                 return (TRUE);
+            }
 
-fail:       ;           /* continue to search */
+fail:
+            NOOP;   /* continue to search */
         } while ( !fbound(tbl, jump, &curline, &curoff, direct) );
     }
 
-    return FALSE;       /* We could not find a match */
+    return FALSE;                         /* We could not find a match  */
 }
 
 #endif  /* MAGIC  */
@@ -613,8 +621,8 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
                             int,      dir
                           )
 {
-    int curoff;
-    LINE    *curline;
+    int   curoff    = 0;
+    LINE  *curline  = NULL;
 
     curline = *pcurline;
     curoff = *pcuroff;
@@ -623,14 +631,15 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
         while ( jump != 0 ) {
 #if WINDOW_MSWIN
             /* to lower overhead, only 1/100 calls to longop */
-            if ( --o < 0 ) {
+            if ( --o < 0 )  {
                 longop(TRUE);
                 o = 100;
             }
 #endif
-            if ( movelocalpoint(jump, &curoff, &curline) )
-                return (TRUE);                  /* hit end of buffer */
-
+            if ( movelocalpoint(jump, &curoff, &curline) )  {
+                return (TRUE);                  /* hit end of buffer  */
+	    }
+/**HEREHEREHERE**/
             if ( curoff == get_lused(curline) )
                 jump = tbl->delta[(int) '\r'];
             else

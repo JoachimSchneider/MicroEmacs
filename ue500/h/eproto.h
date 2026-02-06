@@ -384,6 +384,11 @@ EXTERN int  errno;
 #define UEMACS_FEATURE_USE_STATIC_STACK (0)
 #define UEMACS_FEATURE_USE_VA_COPY      (0)
 #define UEMACS_FEATURE_SMART_EOW_NL     (1)
+#if MICROEMACS_COMPAT
+# define UEMACS_FEATURE_NEW_DISPHIGH    (0)
+#else
+# define UEMACS_FEATURE_NEW_DISPHIGH    (1)
+#endif
 /*....................................................................*/
 
 
@@ -3019,6 +3024,55 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
 #endif  /*END_COMMENT*/
 /**********************************************************************/
 
+
+/**********************************************************************/
+/* Miscellaneous macro definitions                                    */
+/**********************************************************************/
+
+/* CHGCOL_():
+ *
+ * Change display column depending on output character.
+ *
+ * Used in random.c and mouse.c
+ */
+#if UEMACS_FEATURE_NEW_DISPHIGH
+# define CHGCOL_(col, c)  do  {                           \
+    int           *pcol_  = &(col);                       \
+    unsigned char c_      = (c);                          \
+                                                          \
+    if        ( c_ == '\t' && tabsize > 0 ) {             \
+        *pcol_ += -(*pcol_ % tabsize) + tabsize;          \
+    } else if ( c_ < 0x20 || c_ == 0x7F )   {             \
+        *pcol_ += 2;  /* e.g. `^H'    */                  \
+    } else if ( disphigh && c_ > 0x7f )     {             \
+        *pcol_ += 4;  /* e.g. `~x81'  */                  \
+    } else                                  {             \
+       ++*pcol_;      /* e.g. `a'     */                  \
+    }                                                     \
+} while ( 0 )
+/**END_OF_DEFINITION**/
+#else
+# define CHGCOL_(col, c)  do  {                           \
+    int           *pcol_  = &(col);                       \
+    unsigned char c_      = (c);                          \
+                                                          \
+    if ( c_ == '\t' && tabsize > 0 )  {                   \
+        *pcol_ += -(*pcol_ % tabsize) + (tabsize - 1);    \
+    } else                            {                   \
+        if ( disphigh && c_ > 0x7f )  {                   \
+            *pcol_ += 2;                                  \
+            c_ -= 0x80;                                   \
+        }                                                 \
+        if ( c_ < 0x20 || c_ == 0x7F )  {                 \
+            ++*pcol_;                                     \
+        }                                                 \
+    }                                                     \
+    ++*pcol_;                                             \
+} while ( 0 )
+/**END_OF_DEFINITION**/
+#endif
+
+/**********************************************************************/
 
 
 /*====================================================================*/

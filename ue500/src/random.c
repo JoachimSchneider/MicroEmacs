@@ -13,6 +13,7 @@
 /*====================================================================*/
 
 
+/*====================================================================*/
 #include <stdio.h>
 #include <assert.h>
 #include "estruct.h"
@@ -24,6 +25,7 @@
 #include "eproto.h"
 #include "edef.h"
 #include "elang.h"
+/*====================================================================*/
 
 
 /* SHOWCPOS:
@@ -164,19 +166,10 @@ int PASCAL NEAR getccol P1_(int, bflg)
 #endif
     for ( i = 0; i < doto; ++i )  {
         c = lgetc(curwp->w_dotp, i) & 0xFF;
-        if ( c != ' ' && c != '\t' && bflg )
+        if ( c != ' ' && c != '\t' && bflg )  {
             break;
-        if ( c == '\t' && tabsize > 0 )
-            col += -(col % tabsize) + (tabsize - 1);
-        else {
-            if ( disphigh && c > 0x7f ) {
-                col += 2;
-                c -= 0x80;
-            }
-            if ( c < 0x20 || c == 0x7f )
-                ++col;
         }
-        ++col;
+        CHGCOL_(col, c);
     }
 
     return (col);
@@ -190,25 +183,16 @@ int PASCAL NEAR findcol P2_(LINE *, lp, int, pos)
 /* lp:  Line to scan      */
 /* pos: Character offset  */
 {
-    REGISTER int c, i, col;
+    REGISTER int  c   = 0;
+    REGISTER int  i   = 0;
+    int           col = 0;
 
-    col = 0;
     for ( i = 0; i < pos; ++i ) {
         c = lgetc(lp, i);
-        if ( c == '\t' && tabsize > 0 )
-            col += -(col % tabsize) + (tabsize - 1);
-        else {
-            if ( disphigh && c > 0x7f ) {
-                col += 2;
-                c -= 0x80;
-            }
-            if ( c < 0x20 || c == 0x7F )
-                ++col;
-        }
-        ++col;
+        CHGCOL_(col, c);
     }
 
-    return (col);
+    return col;
 }
 
 /* SETCCOL:
@@ -218,33 +202,23 @@ int PASCAL NEAR findcol P2_(LINE *, lp, int, pos)
 int PASCAL NEAR setccol P1_(int, pos)
 /* pos: Position to set cursor  */
 {
-    REGISTER int c;             /* character being scanned */
-    REGISTER int i;             /* index into current line */
-    REGISTER int col;           /* current cursor column   */
-    REGISTER int llen;          /* length of line in bytes */
+    REGISTER int  c     = 0;    /* character being scanned  */
+    REGISTER int  i     = 0;    /* index into current line  */
+    int           col   = 0;    /* current cursor column    */
+    REGISTER int  llen  = 0;    /* length of line in bytes  */
 
-    col = 0;
     llen = get_lused(curwp->w_dotp);
 
     /* scan the line until we are at or past the target column */
     for ( i = 0; i < llen; ++i ) {
         /* upon reaching the target, drop out */
-        if ( col >= pos )
+        if ( col >= pos ) {
             break;
+	}
 
         /* advance one character */
         c = lgetc(curwp->w_dotp, i);
-        if ( c == '\t' && tabsize > 0 )
-            col += -(col % tabsize) + (tabsize - 1);
-        else {
-            if ( disphigh && c > 0x7f ) {
-                col += 2;
-                c -= 0x80;
-            }
-            if ( c < 0x20 || c == 0x7F )
-                ++col;
-        }
-        ++col;
+        CHGCOL_(col, c);
     }
 
     /* set us at the new position */

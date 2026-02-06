@@ -325,17 +325,30 @@ VOID PASCAL NEAR vtputc P1_(int, c)
         vp->v_text[term.t_ncol - 1] = '$';
 
     } else if ( disphigh && c > 0x7f ) {
+        /* char with high bit set is displayed symbolically on
+         * 7 bit screens
+	 */
+#if UEMACS_FEATURE_NEW_DISPHIGH
+        const char  *sp = NULL;
 
-        /* char with high bit set is displayed symbolically on 7 bit screens */
+        vtputc('~');
+        vtputc('x');
+        sp  = ui2s16_memacs((unsigned int)c, C_2, TRUE);
+        vtputc(sp[0]);
+        vtputc(sp[1]);
+#else
         vtputc('^');
         vtputc('!');
         c -= 0x80;
+        /* Special handling necessary because '\t' is handled in a
+         * special way above
+         */
         if ( c == '\t' ) {
             vtputc('^');
             vtputc('I');
         } else
             vtputc(c);
-
+#endif
     } else if ( c < 0x20 || c == 0x7F ) {
 
         /* control character? */

@@ -354,9 +354,18 @@ bind-to-key exit-emacs                  FN0
 
         set $discmd TRUE
 
+
 ;===============================================================================
 ; Local additions
 ;===============================================================================
+
+;-------------------------------------------------------------------------------
+; Global variables
+;-------------------------------------------------------------------------------
+set %TAB    &chr 9
+set %SPACE  &chr 32
+;-------------------------------------------------------------------------------
+
 store-procedure get-abbrevs
         !if &seq &find .emacs-abbrevs ""
                 write-message "[Can not find .emacs-abbrevs]"
@@ -601,10 +610,11 @@ store-procedure utf8-to-ae
 store-procedure fmt-c-cmnt0
   local %curbuf
   local %tbuf
-  local %nspace
+  local %llength
+  local %chrcount
+  local %curchr
+  local %numlines
   local %i
-  local %str0
-  local %str1
 
   set %tbuf $tbuf
   !force delete-buffer %tbuf
@@ -621,10 +631,29 @@ store-procedure fmt-c-cmnt0
   trim-region
 
 ; Remove all C-comments:
+
+; First line: ... /* ...
   beginning-of-file
-  replace-string "^\([ ~t]*\)[ /]\*\(.*\)$" "\1  \2"
+  beginning-of-line
+  1  replace-string "^\([~x20~x09]*\)/\*[~x20~x09]*\(.*\)$" "\1   \2"
+  ; ===> The first line has at least three trailing space characters now
+
+; Next lines
+
+; ... /* ...
   beginning-of-file
-  replace-string "[ ^I]*\*/$" ""
+  beginning-of-line
+  next-line
+  replace-string "^\([~x20~x09]*\)/\*[~x20~x09]*\(.*\)$" "\1   \2"
+
+; ... * ...
+  beginning-of-file
+  beginning-of-line
+  next-line
+  replace-string "^\([~x20~x09]*\)\*[~x20~x09]*\(.*\)$" "\1  \2"
+
+  beginning-of-file
+  replace-string "[~x20~x09]*\*/$" ""
 
   beginning-of-file
   set-mark
@@ -647,45 +676,50 @@ store-procedure fmt-c-cmnt0
   set-mark
   end-of-file
   fill-region
+  ; All lines have at least three trailing space characters now
 
 ; Get the indentation of the comment block:
   beginning-of-file
   beginning-of-line
-  set %nspace 0
-  !while &seq " " &chr $curchar
-      set %nspace &add %nspace 1
-      !force forward-character
-  !endwhile
 
-; Insert C-comment-start:
+  set %chrcount 1
+  set %llength &add &length $line 1
+  !if &not &equal %llength 1
+    set %curchr &mid $line %chrcount 1
+    !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
+       set %chrcount &add %chrcount 1
+       set %curchr &mid $line %chrcount 1
+    !endwhile
+  !endif
+  set %chrcount &sub %chrcount 1
+
+; Insert C-comments:
+  end-of-file
+  set %numlines $curline
+
   beginning-of-file
-  beginning-of-line
-  set %i 0
-  !while &less %i &sub %nspace 3
-      forward-character
-      set %i &add %i 1
-  !endwhile
-  insert-string "/* "
-  3 delete-next-character
 
-; Set appropriate replacement strings for the remaining lines:
+; -- Insert C-comment for first line:
+  beginning-of-line
+  %chrcount forward-character
+  !force backward-character
+  !force backward-character
+  !force backward-character
+  overwrite-string "/* "
+
+; -- Insert C-comments for next lines:
   next-line
-  beginning-of-line
-  set %str0 "^"
-  set %str1 ""
-  set %i 0
-  !while &less %i &sub %nspace 2
-      set %str0 &cat %str0 " "
-      set %str1 &cat %str1 " "
-      set %i &add %i 1
+  !while  &less $curline %numlines
+    beginning-of-line
+    %chrcount forward-character
+    !force backward-character
+    !force backward-character
+    !force backward-character
+    overwrite-string " * "
+    !force next-line
   !endwhile
-  set %str0 &cat %str0 "  "
-  set %str1 &cat %str1 "* "
 
-; Insert appropriate start of comment characters:
-  replace-string %str0 %str1 "\1  \2"
-
-
+; Copy result
   beginning-of-file
   set-mark
   end-of-file
@@ -695,6 +729,67 @@ store-procedure fmt-c-cmnt0
   yank
   delete-buffer %tbuf
 !endm
+
+set %OVERW  0
+store-procedure toggle-overw
+  !if &equ 0 %OVERW
+    set %OVERW 1
+    add-mode OVER
+  !else
+    set %OVERW 0
+    delete-mode OVER
+  !endif
+!endm
+
+store-procedure wrap-proc-emacs
+  local %line
+  local %llength
+  local %chrcount
+  local %curchr
+
+  wrap-word
+  previous-line
+  set %chrcount 1
+  set %line $line
+  set %llength &add &length %line 1
+  !if &not &equal %llength 1
+    set %curchr &mid %line %chrcount 1
+    !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
+       set %chrcount &add %chrcount 1
+       set %curchr &mid %line %chrcount 1
+    !endwhile
+    set %line &left %line &sub %chrcount 1
+  !else
+    set %line ""
+  !endif
+  end-of-line
+  next-line
+  beginning-of-line
+  insert-string %line
+  end-of-line
+!endm
+
+set %CMODE 2
+store-procedure do-newline-and-indent
+; CMODE uses it's builtin indentation function `cinsert()'
+    !if &not &equ &band $cmode %CMODE 0
+    newline
+  !else
+    newline-and-indent
+  !endif
+!endm
+
+store-procedure do-newline
+  newline
+!endm
+
+;-------------------------------------------------------------------------------
+macro-to-key do-newline-and-indent  ^M
+macro-to-key do-newline             ^J
+macro-to-key toggle-overw           FNC
+set $wraphook wrap-proc-emacs
+;-------------------------------------------------------------------------------
+
 
 
 ;===============================================================================
