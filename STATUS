@@ -1773,6 +1773,15 @@ The CMP_* macros should be moved away from estruct.h    ===> DONE
 
 #============================== TODO LIST ==============================
 
+- In linux/ansi/.emacsrc these TODOs are mentioned:
+  + There seem to be situations where $curline does not give the correct value.
+  + In `execute-region' one won't see the contents of the temporary buffer
+    when a `print <something>; &gtk' is done.
+- Introduce a variable `$itermax' which will be evaluated in the main loop
+  of `dobuf()' to avoid endless while-loops.
+- Create a &match function which checks if a specific string matches a
+  given pattern: This may be done by copying the string into a temporary
+  buffer and then using the function implementing `search-forward'
 - Changed lgetc_() to return `unsigned char' for *all* platforms (not
   just UNIX) on 2026-01-30: Test this on all platforms.
 - Windows and DJGPP emacs sets \\<host>\<share>\<file> arguments to read-only.  ===> DONE

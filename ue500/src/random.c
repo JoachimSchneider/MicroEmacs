@@ -169,7 +169,7 @@ int PASCAL NEAR getccol P1_(int, bflg)
         if ( c != ' ' && c != '\t' && bflg )  {
             break;
         }
-        CHGCOL_(col, c);
+        CHGCOL_(&col, c);
     }
 
     return (col);
@@ -189,7 +189,7 @@ int PASCAL NEAR findcol P2_(LINE *, lp, int, pos)
 
     for ( i = 0; i < pos; ++i ) {
         c = lgetc(lp, i);
-        CHGCOL_(col, c);
+        CHGCOL_(&col, c);
     }
 
     return col;
@@ -218,7 +218,7 @@ int PASCAL NEAR setccol P1_(int, pos)
 
         /* advance one character */
         c = lgetc(curwp->w_dotp, i);
-        CHGCOL_(col, c);
+        CHGCOL_(&col, c);
     }
 
     /* set us at the new position */

@@ -590,7 +590,7 @@ int PASCAL NEAR mouseoffset P3_(EWINDOW *, wp, LINE *, lp, int, col)
     while ( offset != get_lused(lp) ) {
         newcol = curcol;
         c = lgetc(lp, offset);
-        CHGCOL_(newcol, c);
+        CHGCOL_(&newcol, c);
         if ( newcol > col ) {
             break;
         }

@@ -360,10 +360,18 @@ bind-to-key exit-emacs                  FN0
 ;===============================================================================
 
 ;-------------------------------------------------------------------------------
+; Constants
+;-------------------------------------------------------------------------------
+set %TAB        &chr 9
+set %SPACE      &chr 32
+set %CMODE      2
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
 ; Global variables
 ;-------------------------------------------------------------------------------
-set %TAB    &chr 9
-set %SPACE  &chr 32
+set %g_overw    0
+set %g_raw_nl   0
 ;-------------------------------------------------------------------------------
 
 store-procedure get-abbrevs
@@ -507,6 +515,46 @@ store-procedure print-region
   select-buffer %curbuf
   delete-buffer %tbuf
 !endm
+
+store-procedure execute-region
+  local %curbuf
+  local %tbuf
+  local %dummy
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  copy-region
+  set %curbuf $cbufname
+  ; The '1' sets the BFINVS flag: So it may be deleted later without
+  ; a user inquiry.
+  1 select-buffer %tbuf
+  yank
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+  1 filter-buffer "/bin/sh  2>&1"
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  ;---------------------------------------------------------------------
+  ; TODO: You wan't see the command-output here --- why?
+  ;---------------------------------------------------------------------
+  ;print "Press any key ..."
+  ;set %dummy  &gtk
+  ;---------------------------------------------------------------------
+  copy-region
+  select-buffer %curbuf
+  beginning-of-line
+  insert-string "# --- BEGIN: Command Output ---"
+  newline
+  yank
+  insert-string "# ---   END: Command Output ---"
+  newline
+  delete-buffer %tbuf
+!endm
 !endif
 
 
@@ -608,13 +656,16 @@ store-procedure utf8-to-ae
 ; We call the function `*-cmnt0' because one might introduce a
 ; `*-cmnt1' with other comment-style in the future.
 store-procedure fmt-c-cmnt0
+  local %pattern
+  local %line
   local %curbuf
   local %tbuf
   local %llength
   local %chrcount
   local %curchr
   local %numlines
-  local %i
+  local %curline
+  local %dummy
 
   set %tbuf $tbuf
   !force delete-buffer %tbuf
@@ -635,21 +686,37 @@ store-procedure fmt-c-cmnt0
 ; First line: ... /* ...
   beginning-of-file
   beginning-of-line
-  1  replace-string "^\([~x20~x09]*\)/\*[~x20~x09]*\(.*\)$" "\1   \2"
+  set %pattern  "^\([~x20~x09]*\)/\*[~x20~x09]*"
+  set %line $line
+  !force 1 search-forward %pattern
+  !if &not &and &seq TRUE $status &equ 1 $curline
+    print &cat &cat "Marked line `" %line "' does *not* have a staring C-comment `/*' --- Press any key ..."
+    set %dummy  &gtk
+    select-buffer %curbuf
+    1 undo
+    delete-buffer %tbuf
+
+    !return
+  !else
+    beginning-of-line
+  !endif
+  1 replace-string &cat %pattern "\(.*\)$" "\1   \2"
   ; ===> The first line has at least three trailing space characters now
+  ; ===> But *only* if it matches the given Pattern --- that is the
+  ; ===> reason why we checked with `search-forward %pattern' above.
 
 ; Next lines
 
 ; ... /* ...
   beginning-of-file
   beginning-of-line
-  next-line
+  !force next-line
   replace-string "^\([~x20~x09]*\)/\*[~x20~x09]*\(.*\)$" "\1   \2"
 
 ; ... * ...
   beginning-of-file
   beginning-of-line
-  next-line
+  !force next-line
   replace-string "^\([~x20~x09]*\)\*[~x20~x09]*\(.*\)$" "\1  \2"
 
   beginning-of-file
@@ -662,13 +729,21 @@ store-procedure fmt-c-cmnt0
 
 ; Remove empty lines at start or end of comment block:
   beginning-of-file
+
   !while &seq $line ""
-      kill-to-end-of-line
+    !force kill-to-end-of-line
+    !if &not &seq $status TRUE
+      !break
+    !endif
   !endwhile
   end-of-file
+
   !while &seq $line ""
-      !force kill-to-end-of-line
-      previous-line
+    !force kill-to-end-of-line
+    !if &not &seq $status TRUE
+      !break
+    !endif
+    previous-line
   !endwhile
 
 ; Reformat comment to $fillcol:
@@ -687,8 +762,8 @@ store-procedure fmt-c-cmnt0
   !if &not &equal %llength 1
     set %curchr &mid $line %chrcount 1
     !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
-       set %chrcount &add %chrcount 1
-       set %curchr &mid $line %chrcount 1
+      set %chrcount &add %chrcount 1
+      set %curchr &mid $line %chrcount 1
     !endwhile
   !endif
   set %chrcount &sub %chrcount 1
@@ -696,8 +771,8 @@ store-procedure fmt-c-cmnt0
 ; Insert C-comments:
   end-of-file
   set %numlines $curline
-
   beginning-of-file
+  set %curline  1
 
 ; -- Insert C-comment for first line:
   beginning-of-line
@@ -708,16 +783,46 @@ store-procedure fmt-c-cmnt0
   overwrite-string "/* "
 
 ; -- Insert C-comments for next lines:
-  next-line
-  !while  &less $curline %numlines
+  !force next-line
+  set %curline  &add %curline 1
+
+  !while  &less %curline %numlines
     beginning-of-line
     %chrcount forward-character
     !force backward-character
     !force backward-character
     !force backward-character
     overwrite-string " * "
+
     !force next-line
+    set %curline  &add %curline 1
   !endwhile
+
+  ;---------------------------------------------------------------------
+  ; TODO:
+  ;
+  ; We need to use %curline here instead of $curline --- why?
+  ; Sometimes $curline does *not* show the expected value, e.g when one
+  ; uses as input (there are tabs!):
+  ; ```
+  ;	* Kommentar
+  ;	   und hier geht es weiter
+  ;	   und hier geht es weiter
+  ;	   und hier geht es weiter
+  ;	   und hier geht es weiter
+  ;	   und hier geht es weiter
+  ;	   und hier geht es weiter
+  ;	*/
+  ; ```
+  ; Check with
+  ; ```
+  ; print &cat &cat &cat &cat "%curline = " %curline ", $curline = " $curline " --- Press any key ..."
+  ; set %dummy &gtk
+  ; ```
+  ;
+  ; Using $curline would produice an infinite while-loop
+  ;---------------------------------------------------------------------
+
 
 ; Copy result
   beginning-of-file
@@ -730,14 +835,41 @@ store-procedure fmt-c-cmnt0
   delete-buffer %tbuf
 !endm
 
-set %OVERW  0
 store-procedure toggle-overw
-  !if &equ 0 %OVERW
-    set %OVERW 1
+  !if &equ 0 %g_overw
+    set %g_overw 1
     add-mode OVER
   !else
-    set %OVERW 0
+    set %g_overw 0
     delete-mode OVER
+  !endif
+!endm
+
+store-procedure nl-indent
+  local %chrcount
+  local %line
+  local %llength
+  local %curchr
+
+  set %chrcount 1
+  set %line $line
+  set %llength &add &length %line 1
+  !if &not &equal %llength 1
+    set %curchr &mid %line %chrcount 1
+    !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
+      set %chrcount &add %chrcount 1
+      set %curchr &mid %line %chrcount 1
+    !endwhile
+    !if &less $curcol %chrcount
+      beginning-of-line
+      newline
+      previous-line
+    !else
+      newline
+      insert-string &left %line &sub %chrcount 1
+    !endif
+  !else
+    newline
   !endif
 !endm
 
@@ -755,27 +887,45 @@ store-procedure wrap-proc-emacs
   !if &not &equal %llength 1
     set %curchr &mid %line %chrcount 1
     !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
-       set %chrcount &add %chrcount 1
-       set %curchr &mid %line %chrcount 1
+      set %chrcount &add %chrcount 1
+      set %curchr &mid %line %chrcount 1
     !endwhile
     set %line &left %line &sub %chrcount 1
   !else
     set %line ""
   !endif
   end-of-line
-  next-line
+  !force next-line
   beginning-of-line
   insert-string %line
   end-of-line
 !endm
 
-set %CMODE 2
-store-procedure do-newline-and-indent
-; CMODE uses it's builtin indentation function `cinsert()'
-    !if &not &equ &band $cmode %CMODE 0
-    newline
+; One needs raw-nl-mode to copy-and-paste from other applications into
+; the MicroEMACS windows
+store-procedure toggle-raw-nl
+  !if &equ 0 %g_raw_nl
+    set %g_raw_nl 1
+    print "RAW <NL> is ON"
   !else
-    newline-and-indent
+    set %g_raw_nl 0
+    print "RAW <NL> is OFF"
+  !endif
+!endm
+
+store-procedure do-newline-and-indent
+  !if &equ 0 %g_raw_nl
+    ; CMODE uses it's builtin indentation function `cinsert()'
+    !if &not &equ &band $cmode %CMODE 0
+      newline
+    !else
+      ; Does at the beginning of line not what we expect --- therefore
+      ; we use our own implementation:
+      ;newline-and-indent
+      nl-indent
+    !endif
+  !else
+    newline
   !endif
 !endm
 
@@ -787,6 +937,8 @@ store-procedure do-newline
 macro-to-key do-newline-and-indent  ^M
 macro-to-key do-newline             ^J
 macro-to-key toggle-overw           FNC
+;macro-to-key toggle-raw-nl          ^~x20
+macro-to-key toggle-raw-nl          M-~x20
 set $wraphook wrap-proc-emacs
 ;-------------------------------------------------------------------------------
 

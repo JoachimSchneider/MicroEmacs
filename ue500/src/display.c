@@ -331,8 +331,8 @@ VOID PASCAL NEAR vtputc P1_(int, c)
 #if UEMACS_FEATURE_NEW_DISPHIGH
         const char  *sp = NULL;
 
-        vtputc('~');
-        vtputc('x');
+        vtputc('!');
+        vtputc('^');
         sp  = ui2s16_memacs((unsigned int)c, C_2, TRUE);
         vtputc(sp[0]);
         vtputc(sp[1]);

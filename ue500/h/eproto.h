@@ -3035,9 +3035,10 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
  *
  * Used in random.c and mouse.c
  */
-#if UEMACS_FEATURE_NEW_DISPHIGH
-# define CHGCOL_(col, c)  do  {                           \
-    int           *pcol_  = &(col);                       \
+#if ( defined(RANDOM_C_) || defined (MOUSE_C_) )
+# if UEMACS_FEATURE_NEW_DISPHIGH
+#  define CHGCOL_(pcol, c) do  {                          \
+    int           *pcol_  = (pcol);                       \
     unsigned char c_      = (c);                          \
                                                           \
     if        ( c_ == '\t' && tabsize > 0 ) {             \
@@ -3051,9 +3052,9 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
     }                                                     \
 } while ( 0 )
 /**END_OF_DEFINITION**/
-#else
-# define CHGCOL_(col, c)  do  {                           \
-    int           *pcol_  = &(col);                       \
+# else
+#  define CHGCOL_(pcol, c)  do  {                         \
+    int           *pcol_  = (pcol);                       \
     unsigned char c_      = (c);                          \
                                                           \
     if ( c_ == '\t' && tabsize > 0 )  {                   \
@@ -3070,6 +3071,7 @@ EXTERN VOID deroom DCL((VOIDP p, CONST char *, int));
     ++*pcol_;                                             \
 } while ( 0 )
 /**END_OF_DEFINITION**/
+# endif
 #endif
 
 /**********************************************************************/
