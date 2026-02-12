@@ -584,6 +584,9 @@ CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
         case EVASAVE:
             RETURN ( int_asc(gasave) );
 
+        case EVBOF:
+            RETURN ( ltos(curwp->w_dotp == lforw(curbp->b_linep)) );
+
         case EVBUFHOOK:
             RETURN ( fixnull(getfname(&bufhook)) );
 
@@ -647,6 +650,9 @@ CONST char * PASCAL NEAR gtenv P1_(CONST char *, vname)
 
         case EVDISPUNDO:
             RETURN ( ltos(dispundo) );
+
+        case EVEOF:
+            RETURN ( ltos(curwp->w_dotp == curbp->b_linep) );
 
         case EVEXBHOOK:
             RETURN ( fixnull(getfname(&exbhook)) );

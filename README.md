@@ -87,6 +87,11 @@ Please use the *fixes* branch for pull requests.
 
 ## Change Log
 
+[2026-02-11.00]
+  * The new boolean valued environment variables $bof and $eof are TRUE
+    iff one is at beginning of current buffer ($bof) or at the end of
+    the current buffer ($eof).
+
 [2026-02-02.00]
   * [query-]replace-string now works woth 8-Bit characters like ~x81.
     E.g. it is possible to do something like
@@ -608,6 +613,26 @@ modern Linux and FreeBSD systems:
 
   So the %tbuf will keep its BFINVS flag and `delete-buffer` won't
   query the user for confirmation.
+
+* The new boolean valued environment variables $bof and $eof are TRUE
+  iff one is at beginning of current buffer ($bof) or at the end of the
+  current buffer ($eof).
+
+  The example given here adds line numbers to a file:
+
+  ```
+    beginning-of-file
+    set %i  0
+    !while &not $eof
+      set %i  &add %i 1
+      beginning-of-line
+      insert-string     "   "
+      beginning-of-line
+      overwrite-string  %i
+      next-line
+    !endwhile
+  ```
+
 
 
 ## TODO

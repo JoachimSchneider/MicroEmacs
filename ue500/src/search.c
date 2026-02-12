@@ -39,27 +39,27 @@ static int  o = 0;       /* For longop() calls.*/
 #endif
 
 /* FORWSEARCH:
- *
- * Search forward.  Get a search string from the user, and search for
- * the string.  If found, reset the "." to be just after the match
+ * 
+ * Search forward. Get a search string from the user, and search for
+ * the string. If found, reset the "." to be just after the match
  * string, and (perhaps) repaint the display.
  */
 int PASCAL NEAR forwsearch P2_(int, f, int, n)
 {
     REGISTER int  status  = FALSE;
 
-    /* If n is negative, search backwards. Otherwise proceed by asking for the
-     * search string.
+    /* If n is negative, search backwards. Otherwise proceed by asking
+     * for the search string.
      */
     if ( n < 0 )  {
         return ( backsearch(f, -n) );
     }
 
-    /* Ask the user for the text of a pattern.  If the response is TRUE
-     * (responses other than FALSE are possible), search for pattern for up to n
-     * times, as long as the pattern is there to be found.
+    /* Ask the user for the text of a pattern. If the response is TRUE
+     * (responses other than FALSE are possible), search for pattern
+     * for up to n times, as long as the pattern is there to be found.
      */
-    if ( ( status = readpattern(TEXT78, (char *)&pat[0], TRUE) ) == TRUE )  {
+    if ( (status = readpattern(TEXT78, (char *)&pat[0], TRUE)) == TRUE )  {
         status = forwhunt(f, n);  /* "Search" */
     }
 
@@ -67,7 +67,7 @@ int PASCAL NEAR forwsearch P2_(int, f, int, n)
 }
 
 /* FORWHUNT:
- *
+ * 
  * Search forward for a previously acquired search string. If found,
  * reset the "." to be just after the match string, and (perhaps)
  * repaint the display.
@@ -81,8 +81,8 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
         return ( backhunt(f, -n) );
     }
 
-    /* Make sure a pattern exists, or that we didn't switch into MAGIC mode
-     * after we entered the pattern.
+    /* Make sure a pattern exists, or that we didn't switch into MAGIC
+     * mode after we entered the pattern.
      */
     if ( pat[0] == '\0' ) {
         mlwrite(TEXT80);
@@ -100,9 +100,9 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
     }
 #endif
 
-    /*
-     * Do one extra search to get us past our current match, if the search type
-     * has us at the start of a match, instead of after a match.
+    /* Do one extra search to get us past our current match, if the
+     * search type has us at the start of a match, instead of after
+     * a match.
      */
     if ( searchtype == SRBEGIN )  {
         spoint = PTBEG;
@@ -139,8 +139,8 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
 }
 
 /* BACKSEARCH:
- *
- * Reverse search.  Get a search string from the user, and search,
+ * 
+ * Reverse search. Get a search string from the user, and search,
  * starting at "." and proceeding toward the front of the buffer. If
  * found "." is left pointing at the first character of the pattern
  * (the last character that was matched).
@@ -156,9 +156,9 @@ int PASCAL NEAR backsearch P2_(int, f, int, n)
         return ( forwsearch(f, -n) );
     }
 
-    /* Ask the user for the text of a pattern.  If the response is TRUE
-     * (responses other than FALSE are possible), search for pattern for up to n
-     * times, as long as the pattern is there to be found.
+    /* Ask the user for the text of a pattern. If the response is TRUE
+     * (responses other than FALSE are possible), search for pattern
+     * for up to n times, as long as the pattern is there to be found.
      */
     if ( ( status = readpattern(TEXT81, (char *)&pat[0], TRUE) ) == TRUE )  {
         status = backhunt(f, n);  /* "Reverse search" */
@@ -168,10 +168,10 @@ int PASCAL NEAR backsearch P2_(int, f, int, n)
 }
 
 /* BACKHUNT:
- *
- * Reverse search for a previously acquired search string, starting
- * at "." and proceeding toward the front of the buffer. If found "."
- * is left pointing at the first character of the pattern (the last
+ * 
+ * Reverse search for a previously acquired search string, starting at
+ * "." and proceeding toward the front of the buffer. If found "." is
+ * left pointing at the first character of the pattern (the last
  * character that was matched).
  */
 int PASCAL NEAR backhunt P2_(int, f, int, n)
@@ -183,8 +183,8 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
         return ( forwhunt(f, -n) );
     }
 
-    /* Make sure a pattern exists, or that we didn't switch into MAGIC mode
-     * after we entered the pattern.
+    /* Make sure a pattern exists, or that we didn't switch into MAGIC
+     * mode after we entered the pattern.
      */
     if ( tap[0] == '\0' ) {
         mlwrite(TEXT80);
@@ -201,9 +201,9 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
     }
 #endif
 
-    /*
-     * Do one extra search to get us past our current match, if the search type
-     * has us at the start of a match, instead of after a match.
+    /* Do one extra search to get us past our current match, if the
+     * search type has us at the start of a match, instead of after a
+     * match.
      */
     if ( searchtype == SREND ) {
         spoint = PTEND;
@@ -242,10 +242,10 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
 #if MAGIC
 
 /* MCSCANNER:
- *
- * Search for a meta-pattern in either direction.  If found, reset
- * the "." to be at the start or just after the match string, and
- * (perhaps) repaint the display.
+ * 
+ * Search for a meta-pattern in either direction. If found, reset the
+ * "." to be at the start or just after the match string, and (perhaps)
+ * repaint the display.
  */
 int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, repeats)
 {
@@ -255,8 +255,8 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
     int   patlenadd = 0;
     int   jump      = 0;
 
-    /* If we are going in reverse, then the 'end' is actually the beginning of
-     * the pattern.  Toggle it.
+    /* If we are going in reverse, then the 'end' is actually the
+     * beginning of the pattern. Toggle it.
      */
     beg_or_end ^= direct;
 
@@ -277,19 +277,19 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
 
     /* Scan each character until we hit the head link record. */
     while ( !boundry(curline, curoff, direct) ) {
-        /* Save the current position in case we need to restore it on a match,
-         * and initialize matchlen to zero in case we are doing a search for
-         * replacement.
+        /* Save the current position in case we need to restore it on a
+         * match, and initialize matchlen to zero in case we are doing
+         * a search for replacement.
          */
         matchline = curline;
         matchoff = curoff;
         matchlen = 0;
 
 # if MAGIC_JUMP_TABLES
-        /*
-         * If the first thing to look for is a constant string that has been
-         * made into a jump table, use the fast scan routines.  If that fails,
-         * then we have nothing to match and return immediately.
+        /* If the first thing to look for is a constant string that has
+         * been made into a jump table, use the fast scan routines. If
+         * that fails, then we have nothing to match and return
+         * immediately.
          */
         if ( tbl != NULL ) {
             if ( !fbound(tbl, patlenadd, &curline, &curoff, direct) ) {
@@ -327,6 +327,7 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
 # endif
         if ( amatch(mcpatrn, direct, &curline, &curoff) ) {
             /* A SUCCESSFULL MATCH!!!
+             * 
              * Flag that we have moved, reset the global "." pointers.
              */
             curwp->w_markp[SEARCH_HIGHLIGHT] = matchline;
@@ -335,16 +336,16 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
             curwp->w_marko[SEARCH_HIGHLIGHT+1] = curoff;
 
             curwp->w_flag |= WFMOVE;
-            if ( beg_or_end == PTEND ) {                /* at end of string */
+            if ( beg_or_end == PTEND ) {          /* at end of string */
                 curwp->w_dotp = curline;
                 set_w_doto(curwp, curoff);
-            } else {                    /* at beginning of string */
+            } else {                        /* at beginning of string */
                 curwp->w_dotp = matchline;
                 set_w_doto(curwp, matchoff);
             }
 
-            /* If we're heading in reverse, set the "match"
-             * pointers to the start of the string, for savematch().
+            /* If we're heading in reverse, set the "match" pointers to
+             * the start of the string, for savematch().
              */
             if ( direct == REVERSE ) {
                 matchline = curline;
@@ -365,7 +366,7 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
         nextch(&curline, &curoff, direct);
     }
 
-    return FALSE;       /* We could not find a match.*/
+    return FALSE;   /* We could not find a match. */
 }
 
 /* AMATCH:
@@ -388,16 +389,14 @@ int PASCAL NEAR amatch P4_(MC *,    mcptr,
     int   cl_type       = 0;    /* Which closure type?                        */
 
     /* Set up local scan pointers to ".", and set up our local
-     * character counting variable, which can correct matchlen
-     * on a failed partial match.
+     * character counting variable, which can correct matchlen on a
+     * failed partial match.
      */
     curline = *pcwline;
     curoff = *pcwoff;
     cl_matchlen = 0;
 
-    /*
-     * Loop through the meta-pattern, laughing all the way.
-     */
+    /* Loop through the meta-pattern, laughing all the way. */
     while ( mcptr->mc_type != MCNIL ) {
         /* Is the current meta-character modified by a closure? */
         if ( 0 != (cl_type = (mcptr->mc_type & ALLCLOS)) )  {
@@ -410,16 +409,17 @@ int PASCAL NEAR amatch P4_(MC *,    mcptr,
                     cl_matchlen++;
                 }
             } else {
-                /* Match as many characters as possible against the current
-                 * meta-character.
+                /* Match as many characters as possible against the
+                 * current meta-character.
                  */
                 while ( mceq(nextch(&curline, &curoff, direct), mcptr) )  {
                     cl_matchlen++;
                 }
             }
 
-            /* We are now at the character that made us fail.  Try to match the
-             * rest of the pattern. Shrink the closure by one for each failure.
+            /* We are now at the character that made us fail. Try to
+             * match the rest of the pattern. Shrink the closure by one
+             * for each failure.
              */
             mcptr++;
             matchlen += cl_matchlen;
@@ -476,8 +476,8 @@ int PASCAL NEAR amatch P4_(MC *,    mcptr,
             }
             matchlen += pre_matchlen;
         } else {
-            /* A character to compare against the meta-character equal function.
-             * If we still match, increment the length.
+            /* A character to compare against the meta-character equal
+             * function. If we still match, increment the length.
              */
             if ( !mceq(nextch(&curline, &curoff, direct), mcptr) )  {
                 return FALSE;
@@ -487,9 +487,10 @@ int PASCAL NEAR amatch P4_(MC *,    mcptr,
         }
 
         mcptr++;
-    }                           /* End of mcptr loop */
+    }                                           /* End of mcptr loop  */
 
     /* A SUCCESSFULL MATCH!!!
+     * 
      * Reset the "." pointers.
      */
 success: *pcwline = curline;
@@ -516,14 +517,14 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
     int   jump      = 0;          /* next offset                      */
     int   patlenadd = 0;
 
-    /* If we are going in reverse, then the 'end' is actually the beginning of
-     * the pattern.  Toggle it.
+    /* If we are going in reverse, then the 'end' is actually the
+     * beginning of the pattern. Toggle it.
      */
     beg_or_end ^= direct;
 
-    /* Another directional problem: if we are searching forwards, use the
-     * pattern and the jump size in deltapat.  Otherwise, use the reversed
-     * pattern pattern and the jump size in tapatled.
+    /* Another directional problem: if we are searching forwards, use
+     * the pattern and the jump size in deltapat. Otherwise, use the
+     * reversed pattern pattern and the jump size in tapatled.
      */
     if ( direct == FORWARD )  {
         tbl = &deltapat;
@@ -541,14 +542,15 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
     curline = curwp->w_dotp;
     curoff = get_w_doto(curwp);
 
-    /* Scan each character until we hit the head link record. Get the character
-     * resolving newlines, offset by the pattern length, i.e. the last character
-     * of the potential match.
+    /* Scan each character until we hit the head link record. Get the
+     * character resolving newlines, offset by the pattern length, i.e.
+     * the last character of the potential match.
      */
     if ( !fbound(tbl, patlenadd, &curline, &curoff, direct) ) {
         do {
-            /* Set up the scanning pointers, and save the current position in
-             * case we match the search string at this point.
+            /* Set up the scanning pointers, and save the current
+             * position in case we match the search string at this
+             * point.
              */
             if ( direct == FORWARD )  {
                 movelocalpoint(-patlenadd, &curoff, &curline);
@@ -564,7 +566,9 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
             }
 
             /* A SUCCESSFULL MATCH!!!
-             * Flag that we have moved and reset the global "." pointers.
+             * 
+             * Flag that we have moved and reset the global "."
+             * pointers.
              */
             curwp->w_markp[SEARCH_HIGHLIGHT] = matchline;
             curwp->w_marko[SEARCH_HIGHLIGHT] = matchoff;
@@ -580,8 +584,8 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
                 set_w_doto(curwp, matchoff);
             }
 
-            /* If we're heading in reverse, set the "match"
-             * pointers to the start of the string, for savematch().
+            /* If we're heading in reverse, set the "match" pointers to
+             * the start of the string, for savematch().
              */
             if ( direct == REVERSE )  {
                 matchline = curline;
@@ -599,11 +603,11 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
             }
 
 fail:
-            NOOP;   /* continue to search */
+            NOOP;                               /* continue to search */
         } while ( !fbound(tbl, jump, &curline, &curoff, direct) );
     }
 
-    return FALSE;                         /* We could not find a match  */
+    return FALSE;                       /* We could not find a match  */
 }
 
 #endif  /* MAGIC  */
@@ -621,6 +625,7 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
                             int,      dir
                           )
 {
+/**HEREHERE_COMMENT**/
     int   curoff    = 0;
     LINE  *curline  = NULL;
 
@@ -639,14 +644,14 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
             if ( movelocalpoint(jump, &curoff, &curline) )  {
                 return (TRUE);                  /* hit end of buffer  */
 	    }
-/**HEREHEREHERE**/
-            if ( curoff == get_lused(curline) )
+            if ( curoff == get_lused(curline) ) {
                 jump = tbl->delta[(int) '\r'];
-            else
+            } else                              {
                 jump = tbl->delta[(int) lgetc(curline, curoff)];
+            }
         }
-    } else {                    /* Reverse.*/
-        jump++;                 /* allow for offset in reverse */
+    } else                {           /* Reverse.                     */
+        jump++;                       /* allow for offset in reverse  */
         while ( jump != 0 ) {
 #if WINDOW_MSWIN
             /* to lower overhead, only 1/100 calls to longop */
@@ -655,18 +660,19 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
                 o = 100;
             }
 #endif
-            if ( movelocalpoint(-jump, &curoff, &curline) )
-                return (TRUE);                  /* hit end of buffer */
-
-            if ( curoff == get_lused(curline) )
+            if ( movelocalpoint(-jump, &curoff, &curline) ) {
+                return (TRUE);                  /* hit end of buffer  */
+	    }
+            if ( curoff == get_lused(curline) ) {
                 jump = tbl->delta[(int) '\r'];
-            else
+            } else                              {
                 jump = tbl->delta[(int) lgetc(curline, curoff)];
+            }
         }
     }
 
     *pcurline = curline;
-    *pcuroff = curoff;
+    *pcuroff  = curoff;
 
     return FALSE;
 }
@@ -679,33 +685,35 @@ int PASCAL NEAR fbound P5_( DELTA *,  tbl,
  */
 int PASCAL NEAR movelocalpoint P3_(int, n, int *, pcuroff, LINE **, pcurline)
 {
-    REGISTER int spare;
-    REGISTER int curoff;
-    REGISTER LINE *curline;
+    REGISTER int  spare     = 0;
+    REGISTER int  curoff    = 0;
+    REGISTER LINE *curline  = NULL;
 
     curline = *pcurline;
-    curoff = *pcuroff + n;
+    curoff  = *pcuroff + n;
 
-    if ( n > 0 ) {
-        if ( curline == curbp->b_linep )
-            return TRUE;                        /* hit end of buffer */
-
+    if ( n > 0 )  {
+        if ( curline == curbp->b_linep )  {
+            return TRUE;                        /* hit end of buffer  */
+	}
         while ( ( spare = curoff - get_lused(curline) ) > 0 ) {
-            curline = lforw(curline);            /* skip to next line */
+            curline = lforw(curline);           /* skip to next line  */
             curoff = spare - 1;
-            if ( curline == curbp->b_linep )
-                return (TRUE);                  /* hit end of buffer */
+            if ( curline == curbp->b_linep )  {
+                return (TRUE);                  /* hit end of buffer  */
+            }
         }
-    } else {
-        while ( curoff < 0 ) {
-            curline = lback(curline);                   /* skip back a line */
+    } else        {
+        while ( curoff < 0 )  {
+            curline = lback(curline);             /* skip back a line */
             curoff += get_lused(curline) + 1;
-            if ( curline == curbp->b_linep )
-                return (TRUE);                  /* hit end of buffer */
+            if ( curline == curbp->b_linep )  {
+                return (TRUE);                    /* hit end of buffe */
+            }
         }
     }
     *pcurline = curline;
-    *pcuroff = curoff;
+    *pcuroff  = curoff;
 
     return FALSE;
 }
@@ -716,14 +724,17 @@ int PASCAL NEAR movelocalpoint P3_(int, n, int *, pcuroff, LINE **, pcurline)
  */
 static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
 {
-    int j, jump_by, ch;
+    int j       = 0;
+    int jump_by = 0;
+    int ch      = 0;
 
-    XSTRCPY(tbl->patrn, pstring);
+    BUFCPY(tbl->patrn, pstring);
 
     jump_by = STRLEN(pstring);
 
-    for ( j = 0; j < HICHAR; j++ )
+    for ( j = 0; j < HICHAR; j++ )  {
         tbl->delta[j] = jump_by;
+    }
 
     jump_by -= 1;
 
@@ -731,8 +742,9 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
      */
     for ( j = 0; j < jump_by; j++ ) {
         ch = CHAR2INT(*pstring++);
-        if ( is_letter(ch) )
-            tbl->delta[(unsigned char) chcase(ch)] = jump_by - j;
+        if ( is_letter(ch) )  {
+            tbl->delta[(unsigned char)chcase(ch)] = jump_by - j;
+        }
         tbl->delta[ch] = jump_by - j;
     }
 
@@ -744,8 +756,9 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
     tbl->patlen = jump_by;
     tbl->jump = jump_by + tbl->delta[ch];
 
-    if ( is_letter(ch) )
+    if ( is_letter(ch) )  {
         tbl->delta[(unsigned char) chcase(ch)] = 0;
+    }
     tbl->delta[ch] = 0;
 }
 
@@ -759,7 +772,8 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
 VOID PASCAL NEAR setjtable P0_()
 {
     make_delta((CONST char *)pat, &deltapat);
-    make_delta(strrev( xstrcpy( (char *)tap, (char *)pat ) ), &tapatled);
+    BUFCPY((char *)tap, (char *)pat);
+    make_delta(strrev((char *)tap), &tapatled);
 }
 
 /* EQ:
@@ -769,6 +783,7 @@ VOID PASCAL NEAR setjtable P0_()
  */
 int PASCAL NEAR eq P2_(unsigned char, bc, unsigned char, pc)
 {
+/**HEREHEREHERE**/
     if ( (curwp->w_bufp->b_mode & MDEXACT) == 0 ) {
         if ( is_lower(bc) )
             bc = chcase(bc);

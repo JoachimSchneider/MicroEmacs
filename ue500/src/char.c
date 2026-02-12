@@ -283,10 +283,10 @@ int PASCAL NEAR setupper P2_(char *, ch, char *, val)
  */
 char *strrev P1_(char *, our_str)
 {
-    REGISTER char   *beg_str, *end_str;
-    REGISTER char the_char;
+    REGISTER char *beg_str  = our_str;
+    REGISTER char *end_str  = our_str;
+    REGISTER char the_char  = '\0';
 
-    end_str = beg_str = our_str;
     end_str += STRLEN(beg_str);
 
     do {
@@ -295,7 +295,7 @@ char *strrev P1_(char *, our_str)
         *beg_str++ = the_char;
     } while (end_str > beg_str);
 
-    return (our_str);
+    return our_str;
 }
 
 #endif

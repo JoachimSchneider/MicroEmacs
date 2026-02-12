@@ -19,112 +19,117 @@
 #ifdef EVAL_C_
 
 
-# define MAXVARS        (512)   /* Maximum number of global user variables */
+# define MAXVARS    (512) /* Maximum number of global user variables  */
 
-/*  list of recognized environment variables    */
-
+/*  list of recognized environment variables
+ *
+ *      THE TABLE MUST BE SORTED ALPHABETICALLY IT IS LOOKED UP BY
+ *      THE BINARY() function.
+ */
 static NOSHARE CONST char *envars[] =
 {
-    "abbell",                   /* ring bell on abbreviation expansion?     */
-    "abcap",                    /* match capitolization in expansions       */
-    "abfull",                   /* full expansion? (exceeds abquick)        */
-    "abquick",                  /* quick, aggressive expansions enabled?    */
-    "acount",                   /* # of chars until next auto-save          */
-    "asave",                    /* # of chars between auto-saves            */
-    "bufhook",                  /* enter buffer switch hook                 */
-    "cbflags",                  /* current buffer flags                     */
-    "cbufname",                 /* current buffer name                      */
-    "cfname",                   /* current file name                        */
-    "cmdhook",                  /* command loop hook                        */
-    "cmode",                    /* mode of current buffer                   */
-    "cquote",                   /* close quote character                    */
-    "curchar",                  /* current character under the cursor       */
-    "curcol",                   /* current column pos of cursor             */
-    "curline",                  /* current line in file                     */
-    "curwidth",                 /* current screen width                     */
-    "curwind",                  /* current window ordinal on current screen */
-    "cwline",                   /* current screen line in window            */
-    "debug",                    /* macro debugging                          */
-    "deskcolor",                /* desktop color                            */
-    "diagflag",                 /* diagonal mouse movements enabled?        */
-    "discmd",                   /* display commands on command line         */
-    "disinp",                   /* display command line input characters    */
-    "disphigh",                 /* display high bit characters escaped      */
-    "dispundo",                 /* display undo depth on command line       */
-    "exbhook",                  /* exit buffer switch hook                  */
-    "exithook",                 /* exiting emacs hook                       */
-    "fcol",                     /* first displayed column in curent window  */
-    "fillcol",                  /* current fill column                      */
-    "flicker",                  /* flicker supression                       */
-    "fmtlead",                  /* format command lead characters           */
-    "gflags",                   /* global internal emacs flags              */
-    "gmode",                    /* global modes                             */
-    "hardtab",                  /* current hard tab size                    */
-    "hilight",                  /* region # to hilight (255 to turn off)    */
-                                /* BE CAREFUL: The corresponding case       */
-                                /* code (EVHILITE) and C-variable (hilite)  */
-                                /* are spelled differntly!                  */
-    "hjump",                    /* horizontal screen jump size              */
-    "hscrlbar",                 /* horizontal scroll bar flag               */
-    "hscroll",                  /* horizontal scrolling flag                */
-    "isterm",                   /* incremental-search terminator character  */
-    "kill",                     /* kill buffer (read only)                  */
-    "language",                 /* language of text messages                */
-    "lastkey",                  /* last keyboard char struck                */
-    "lastmesg",                 /* last string mlwrite()ed                  */
-    "line",                     /* text of current line                     */
-    "lterm",                    /* current line terminator for writes       */
-    "lwidth",                   /* width of current line                    */
-    "match",                    /* last matched magic pattern               */
-    "mmove",                    /* mouse moves events style                 */
-    "modeflag",                 /* Modelines displayed flag                 */
-    "msflag",                   /* activate mouse?                          */
-    "newscreen",                /* new screen with new buffer?              */
-    "numwind",                  /* number of windows on current screen      */
-    "oquote",                   /* open quote character                     */
-    "orgcol",                   /* screen origin column                     */
-    "orgrow",                   /* screen origin row                        */
-    "os",                       /* what Operating System?                   */
-    "overlap",                  /* line overlap when paging                 */
-    "pagelen",                  /* number of lines used by editor           */
-    "palette",                  /* current palette string                   */
-    "paralead",                 /* paragraph leadin characters              */
-    "parindent",                /* paragraph first line indent with fill    */
-    "pending",                  /* type ahead pending flag                  */
-    "popflag",                  /* pop-up windows active?                   */
-    "popwait",                  /* user wait on end of pop-up window?       */
-    "posflag",                  /* display point position on modeline?      */
-    "progname",                 /* returns current prog name - "MicroEMACS" */
-    "ram",                      /* ram in use by malloc                     */
-    "readhook",                 /* read file execution hook                 */
-    "region",                   /* current region (read only)               */
-    "replace",                  /* replacement pattern                      */
-    "rval",                     /* child process return value               */
-    "scrname",                  /* current screen name                      */
-    "search",                   /* search pattern                           */
-    "searchpnt",                /* differing search styles (term point)     */
-    "seed",                     /* current random number seed               */
-    "softtab",                  /* current soft tab size                    */
-    "sres",                     /* current screen resolution                */
-    "ssave",                    /* safe save flag                           */
-    "sscroll",                  /* smooth scrolling flag                    */
-    "status",                   /* returns the status of the last command   */
-    "sterm",                    /* search terminator character              */
-    "target",                   /* target for line moves                    */
-    "tbuf",                     /* name of tmp. (not existing) buffer (ro)  */
-    "time",                     /* date and time                            */
-    "timeflag",                 /* display time?                            */
-    "tpause",                   /* length to pause for paren matching       */
-    "undoflag",                 /* currently processing undos               */
-    "version",                  /* current version number                   */
-    "vscrlbar",                 /* vertical scroll bar flag                 */
-    "wchars",                   /* set of characters legal in words         */
-    "wline",                    /* # of lines in current window             */
-    "wraphook",                 /* wrap word execution hook                 */
-    "writehook",                /* write file hook                          */
-    "xpos",                     /* current mouse X position                 */
-    "yankflag",                 /* point placement at yanked/included text  */
-    "ypos"                      /* current mouse Y position                 */
+    "abbell",             /* ring bell on abbreviation expansion?     */
+    "abcap",              /* match capitolization in expansions       */
+    "abfull",             /* full expansion? (exceeds abquick)        */
+    "abquick",            /* quick, aggressive expansions enabled?    */
+    "acount",             /* # of chars until next auto-save          */
+    "asave",              /* # of chars between auto-saves            */
+    "bof",                /* beginning of file? --- i.e. cur. buffer  */
+    "bufhook",            /* enter buffer switch hook                 */
+    "cbflags",            /* current buffer flags                     */
+    "cbufname",           /* current buffer name                      */
+    "cfname",             /* current file name                        */
+    "cmdhook",            /* command loop hook                        */
+    "cmode",              /* mode of current buffer                   */
+    "cquote",             /* close quote character                    */
+    "curchar",            /* current character under the cursor       */
+    "curcol",             /* current column pos of cursor             */
+    "curline",            /* current line in file                     */
+    "curwidth",           /* current screen width                     */
+    "curwind",            /* current window ordinal on current screen */
+    "cwline",             /* current screen line in window            */
+    "debug",              /* macro debugging                          */
+    "deskcolor",          /* desktop color                            */
+    "diagflag",           /* diagonal mouse movements enabled?        */
+    "discmd",             /* display commands on command line         */
+    "disinp",             /* display command line input characters    */
+    "disphigh",           /* display high bit characters escaped      */
+    "dispundo",           /* display undo depth on command line       */
+    "eof",                /* end of file? --- i.e. cur. buffer        */
+    "exbhook",            /* exit buffer switch hook                  */
+    "exithook",           /* exiting emacs hook                       */
+    "fcol",               /* first displayed column in curent window  */
+    "fillcol",            /* current fill column                      */
+    "flicker",            /* flicker supression                       */
+    "fmtlead",            /* format command lead characters           */
+    "gflags",             /* global internal emacs flags              */
+    "gmode",              /* global modes                             */
+    "hardtab",            /* current hard tab size                    */
+    "hilight",            /* region # to hilight (255 to turn off)    */
+                          /* BE CAREFUL: The corresponding case       */
+                          /* code (EVHILITE) and C-variable (hilite)  */
+                          /* are spelled differntly!                  */
+    "hjump",              /* horizontal screen jump size              */
+    "hscrlbar",           /* horizontal scroll bar flag               */
+    "hscroll",            /* horizontal scrolling flag                */
+    "isterm",             /* incremental-search terminator character  */
+    "kill",               /* kill buffer (read only)                  */
+    "language",           /* language of text messages                */
+    "lastkey",            /* last keyboard char struck                */
+    "lastmesg",           /* last string mlwrite()ed                  */
+    "line",               /* text of current line                     */
+    "lterm",              /* current line terminator for writes       */
+    "lwidth",             /* width of current line                    */
+    "match",              /* last matched magic pattern               */
+    "mmove",              /* mouse moves events style                 */
+    "modeflag",           /* Modelines displayed flag                 */
+    "msflag",             /* activate mouse?                          */
+    "newscreen",          /* new screen with new buffer?              */
+    "numwind",            /* number of windows on current screen      */
+    "oquote",             /* open quote character                     */
+    "orgcol",             /* screen origin column                     */
+    "orgrow",             /* screen origin row                        */
+    "os",                 /* what Operating System?                   */
+    "overlap",            /* line overlap when paging                 */
+    "pagelen",            /* number of lines used by editor           */
+    "palette",            /* current palette string                   */
+    "paralead",           /* paragraph leadin characters              */
+    "parindent",          /* paragraph first line indent with fill    */
+    "pending",            /* type ahead pending flag                  */
+    "popflag",            /* pop-up windows active?                   */
+    "popwait",            /* user wait on end of pop-up window?       */
+    "posflag",            /* display point position on modeline?      */
+    "progname",           /* returns current prog name - "MicroEMACS" */
+    "ram",                /* ram in use by malloc                     */
+    "readhook",           /* read file execution hook                 */
+    "region",             /* current region (read only)               */
+    "replace",            /* replacement pattern                      */
+    "rval",               /* child process return value               */
+    "scrname",            /* current screen name                      */
+    "search",             /* search pattern                           */
+    "searchpnt",          /* differing search styles (term point)     */
+    "seed",               /* current random number seed               */
+    "softtab",            /* current soft tab size                    */
+    "sres",               /* current screen resolution                */
+    "ssave",              /* safe save flag                           */
+    "sscroll",            /* smooth scrolling flag                    */
+    "status",             /* returns the status of the last command   */
+    "sterm",              /* search terminator character              */
+    "target",             /* target for line moves                    */
+    "tbuf",               /* name of tmp. (not existing) buffer (ro)  */
+    "time",               /* date and time                            */
+    "timeflag",           /* display time?                            */
+    "tpause",             /* length to pause for paren matching       */
+    "undoflag",           /* currently processing undos               */
+    "version",            /* current version number                   */
+    "vscrlbar",           /* vertical scroll bar flag                 */
+    "wchars",             /* set of characters legal in words         */
+    "wline",              /* # of lines in current window             */
+    "wraphook",           /* wrap word execution hook                 */
+    "writehook",          /* write file hook                          */
+    "xpos",               /* current mouse X position                 */
+    "yankflag",           /* point placement at yanked/included text  */
+    "ypos"                /* current mouse Y position                 */
 };
 
 /*  and its preprocesor definitions     */
@@ -135,97 +140,99 @@ static NOSHARE CONST char *envars[] =
 # define EVABQUICK       (3)
 # define EVACOUNT        (4)
 # define EVASAVE         (5)
-# define EVBUFHOOK       (6)
-# define EVCBFLAGS       (7)
-# define EVCBUFNAME      (8)
-# define EVCFNAME        (9)
-# define EVCMDHK        (10)
-# define EVCMODE        (11)
-# define EVCQUOTE       (12)
-# define EVCURCHAR      (13)
-# define EVCURCOL       (14)
-# define EVCURLINE      (15)
-# define EVCURWIDTH     (16)
-# define EVCURWIND      (17)
-# define EVCWLINE       (18)
-# define EVDEBUG        (19)
-# define EVDESKCLR      (20)
-# define EVDIAGFLAG     (21)
-# define EVDISCMD       (22)
-# define EVDISINP       (23)
-# define EVDISPHIGH     (24)
-# define EVDISPUNDO     (25)
-# define EVEXBHOOK      (26)
-# define EVEXITHOOK     (27)
-# define EVFCOL         (28)
-# define EVFILLCOL      (29)
-# define EVFLICKER      (30)
-# define EVFMTLEAD      (31)
-# define EVGFLAGS       (32)
-# define EVGMODE        (33)
-# define EVHARDTAB      (34)
-# define EVHILITE       (35)
-# define EVHJUMP        (36)
-# define EVHSCRLBAR     (37)
-# define EVHSCROLL      (38)
-# define EVISTERM       (39)
-# define EVKILL         (40)
-# define EVLANG         (41)
-# define EVLASTKEY      (42)
-# define EVLASTMESG     (43)
-# define EVLINE         (44)
-# define EVLTERM        (45)
-# define EVLWIDTH       (46)
-# define EVMATCH        (47)
-# define EVMMOVE        (48)
-# define EVMODEFLAG     (49)
-# define EVMSFLAG       (50)
-# define EVNEWSCRN      (51)
-# define EVNUMWIND      (52)
-# define EVOQUOTE       (53)
-# define EVORGCOL       (54)
-# define EVORGROW       (55)
-# define EVOS           (56)
-# define EVOVERLAP      (57)
-# define EVPAGELEN      (58)
-# define EVPALETTE      (59)
-# define EVPARALEAD     (60)
-# define EVPARINDENT    (61)
-# define EVPENDING      (62)
-# define EVPOPFLAG      (63)
-# define EVPOPWAIT      (64)
-# define EVPOSFLAG      (65)
-# define EVPROGNAME     (66)
-# define EVRAM          (67)
-# define EVREADHK       (68)
-# define EVREGION       (69)
-# define EVREPLACE      (70)
-# define EVRVAL         (71)
-# define EVSCRNAME      (72)
-# define EVSEARCH       (73)
-# define EVSEARCHPNT    (74)
-# define EVSEED         (75)
-# define EVSOFTTAB      (76)
-# define EVSRES         (77)
-# define EVSSAVE        (78)
-# define EVSSCROLL      (79)
-# define EVSTATUS       (80)
-# define EVSTERM        (81)
-# define EVTARGET       (82)
-# define EVTBUF         (83)
-# define EVTIME         (84)
-# define EVTIMEFLAG     (85)
-# define EVTPAUSE       (86)
-# define EVUNDOFLAG     (87)
-# define EVVERSION      (88)
-# define EVVSCRLBAR     (89)
-# define EVWCHARS       (90)
-# define EVWLINE        (91)
-# define EVWRAPHK       (92)
-# define EVWRITEHK      (93)
-# define EVXPOS         (94)
-# define EVYANKFLAG     (95)
-# define EVYPOS         (96)
+# define EVBOF           (6)
+# define EVBUFHOOK       (7)
+# define EVCBFLAGS       (8)
+# define EVCBUFNAME      (9)
+# define EVCFNAME       (10)
+# define EVCMDHK        (11)
+# define EVCMODE        (12)
+# define EVCQUOTE       (13)
+# define EVCURCHAR      (14)
+# define EVCURCOL       (15)
+# define EVCURLINE      (16)
+# define EVCURWIDTH     (17)
+# define EVCURWIND      (18)
+# define EVCWLINE       (19)
+# define EVDEBUG        (20)
+# define EVDESKCLR      (21)
+# define EVDIAGFLAG     (22)
+# define EVDISCMD       (23)
+# define EVDISINP       (24)
+# define EVDISPHIGH     (25)
+# define EVDISPUNDO     (26)
+# define EVEOF          (27)
+# define EVEXBHOOK      (28)
+# define EVEXITHOOK     (29)
+# define EVFCOL         (30)
+# define EVFILLCOL      (31)
+# define EVFLICKER      (32)
+# define EVFMTLEAD      (33)
+# define EVGFLAGS       (34)
+# define EVGMODE        (35)
+# define EVHARDTAB      (36)
+# define EVHILITE       (37)
+# define EVHJUMP        (38)
+# define EVHSCRLBAR     (39)
+# define EVHSCROLL      (40)
+# define EVISTERM       (41)
+# define EVKILL         (42)
+# define EVLANG         (43)
+# define EVLASTKEY      (44)
+# define EVLASTMESG     (45)
+# define EVLINE         (46)
+# define EVLTERM        (47)
+# define EVLWIDTH       (48)
+# define EVMATCH        (49)
+# define EVMMOVE        (50)
+# define EVMODEFLAG     (51)
+# define EVMSFLAG       (52)
+# define EVNEWSCRN      (53)
+# define EVNUMWIND      (54)
+# define EVOQUOTE       (55)
+# define EVORGCOL       (56)
+# define EVORGROW       (57)
+# define EVOS           (58)
+# define EVOVERLAP      (59)
+# define EVPAGELEN      (60)
+# define EVPALETTE      (61)
+# define EVPARALEAD     (62)
+# define EVPARINDENT    (63)
+# define EVPENDING      (64)
+# define EVPOPFLAG      (65)
+# define EVPOPWAIT      (66)
+# define EVPOSFLAG      (67)
+# define EVPROGNAME     (68)
+# define EVRAM          (69)
+# define EVREADHK       (70)
+# define EVREGION       (71)
+# define EVREPLACE      (72)
+# define EVRVAL         (73)
+# define EVSCRNAME      (74)
+# define EVSEARCH       (75)
+# define EVSEARCHPNT    (76)
+# define EVSEED         (77)
+# define EVSOFTTAB      (78)
+# define EVSRES         (79)
+# define EVSSAVE        (80)
+# define EVSSCROLL      (81)
+# define EVSTATUS       (82)
+# define EVSTERM        (83)
+# define EVTARGET       (84)
+# define EVTBUF         (85)
+# define EVTIME         (86)
+# define EVTIMEFLAG     (87)
+# define EVTPAUSE       (88)
+# define EVUNDOFLAG     (89)
+# define EVVERSION      (90)
+# define EVVSCRLBAR     (91)
+# define EVWCHARS       (92)
+# define EVWLINE        (93)
+# define EVWRAPHK       (94)
+# define EVWRITEHK      (95)
+# define EVXPOS         (96)
+# define EVYANKFLAG     (97)
+# define EVYPOS         (98)
 
 
 /*  list of recognized user functions   */

@@ -15,7 +15,8 @@
  *      end their C function address. These are used for the bind-to-key
  *      function.
  *
- *      THE TABLE MUST BE SORTED ALPHABETICALLY.
+ *      THE TABLE MUST BE SORTED ALPHABETICALLY AS IT IS LOOKED UP BY
+ *      THE BINARY() function.
  *====================================================================*/
 
 /*====================================================================*/

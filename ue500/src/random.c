@@ -119,31 +119,32 @@ int PASCAL NEAR showcpos P2_(int, f, int, n)
 }
 
 /* GETLINENUM:
- *
+ * 
  * Get the a line number
  */
 long PASCAL NEAR getlinenum P2_(BUFFER *, bp, LINE *, sline)
 /* bp:    Buffer to get current line from */
 /* sline: Line to search for              */
 {
-    REGISTER LINE   *lp;        /* current line */
-    REGISTER long numlines;             /* # of lines before point */
+    REGISTER LINE *lp       = NULL;       /* current line             */
+    REGISTER long numlines  = 0;          /* # of lines before point  */
 
     /* starting at the beginning of the buffer */
     lp = lforw(bp->b_linep);
 
     /* start counting lines */
-    numlines = 0L;
+    numlines = 0;
     while ( lp != bp->b_linep ) {
         /* if we are on the current line, record it */
-        if ( lp == sline )
+        if ( lp == sline )  {
             break;
+        }
         ++numlines;
         lp = lforw(lp);
     }
 
     /* and return the resulting count */
-    return (numlines + 1L);
+    return numlines + 1;
 }
 
 
