@@ -484,7 +484,10 @@ EXTERN char * PASCAL NEAR xstrcat DCL((char *s1, CONST char *s2));
  *  n = snprintf(dst, len, "%s", src);
  */
 EXTERN int PASCAL NEAR  xstrlcpy  DCL((char * s1, CONST char * s2, int n));
-#define BUFCPY(dst, src)  xstrlcpy((dst), (src), SIZEOF((dst)))
+#define BUFCPY(dst, src)  xstrlcpy((char *)(dst),         \
+                                   (CONST char *)(src),   \
+                                   SIZEOF((dst)))
+/**END_OF_DEFINITION**/
 /* XSTRLCCPY:
  *
  * Safe copy of character to string buffer of size n
@@ -514,15 +517,19 @@ EXTERN int PASCAL NEAR  xstrlccat DCL((char * s1, CONST char   c2, int n));
  *                 a warning message.
  */
 EXTERN char * PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
-                                         const char *src,
-                                         const char *file, int line));
+                                         CONST char *src,
+                                         CONST char *file, int line));
 /* Safe string copy (if dst is an array): Do not use if dst is a char
  * array with faked length, e.g. var->txt in
  * typedef struct { ..., char txt[1] } s_T;
  * s_T *var = (s_T *)malloc(42);
  * XSTRCPY(var->txt, .);
  */
-#define XSTRCPY(dst, src) sfstrcpy_((dst), IS_ARRAY((dst)) ? SIZEOF((dst)) : (-1), (src), __FILE__, __LINE__)
+#define XSTRCPY(dst, src) sfstrcpy_((char *)(dst),            \
+                                    IS_ARRAY((dst)) ?         \
+                                        SIZEOF((dst)) : (-1), \
+                                    (CONST char *)(src), __FILE__, __LINE__)
+/**END_OF_DEFINITION**/
 
 /* SFSTRCAT:
  *  if size .GE. 0 append src to dst usling xstrlcat(dst, src, SIZEOF(dst))
@@ -531,10 +538,14 @@ EXTERN char * PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
  */
 EXTERN char * PASCAL NEAR sfstrcat_ DCL((char       *dst,
                                          int        dst_size,
-                                         const char *src,
-                                         const char *file,
+                                         CONST char *src,
+                                         CONST char *file,
                                          int        line));
-#define XSTRCAT(dst, src) sfstrcat_((dst), IS_ARRAY((dst)) ? SIZEOF((dst)) : (-1), (src), __FILE__, __LINE__)
+#define XSTRCAT(dst, src) sfstrcat_((char *)(dst),            \
+                                    IS_ARRAY((dst)) ?         \
+                                        SIZEOF((dst)) : (-1), \
+                                    (CONST char *)(src), __FILE__, __LINE__)
+/**END_OF_DEFINITION**/
 
 /* Like the C99 vsnprintf():                                            */
 /* May be called with NULL == s .AND. 0 == n to get the size that would */

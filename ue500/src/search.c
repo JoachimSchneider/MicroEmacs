@@ -39,7 +39,7 @@ static int  o = 0;       /* For longop() calls.*/
 #endif
 
 /* FORWSEARCH:
- * 
+ *
  * Search forward. Get a search string from the user, and search for
  * the string. If found, reset the "." to be just after the match
  * string, and (perhaps) repaint the display.
@@ -67,7 +67,7 @@ int PASCAL NEAR forwsearch P2_(int, f, int, n)
 }
 
 /* FORWHUNT:
- * 
+ *
  * Search forward for a previously acquired search string. If found,
  * reset the "." to be just after the match string, and (perhaps)
  * repaint the display.
@@ -139,7 +139,7 @@ int PASCAL NEAR forwhunt P2_(int, f, int, n)
 }
 
 /* BACKSEARCH:
- * 
+ *
  * Reverse search. Get a search string from the user, and search,
  * starting at "." and proceeding toward the front of the buffer. If
  * found "." is left pointing at the first character of the pattern
@@ -168,7 +168,7 @@ int PASCAL NEAR backsearch P2_(int, f, int, n)
 }
 
 /* BACKHUNT:
- * 
+ *
  * Reverse search for a previously acquired search string, starting at
  * "." and proceeding toward the front of the buffer. If found "." is
  * left pointing at the first character of the pattern (the last
@@ -242,7 +242,7 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
 #if MAGIC
 
 /* MCSCANNER:
- * 
+ *
  * Search for a meta-pattern in either direction. If found, reset the
  * "." to be at the start or just after the match string, and (perhaps)
  * repaint the display.
@@ -327,7 +327,7 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
 # endif
         if ( amatch(mcpatrn, direct, &curline, &curoff) ) {
             /* A SUCCESSFULL MATCH!!!
-             * 
+             *
              * Flag that we have moved, reset the global "." pointers.
              */
             curwp->w_markp[SEARCH_HIGHLIGHT] = matchline;
@@ -490,7 +490,7 @@ int PASCAL NEAR amatch P4_(MC *,    mcptr,
     }                                           /* End of mcptr loop  */
 
     /* A SUCCESSFULL MATCH!!!
-     * 
+     *
      * Reset the "." pointers.
      */
 success: *pcwline = curline;
@@ -566,7 +566,7 @@ int PASCAL NEAR scanner P3_(int, direct, int, beg_or_end, int, repeats)
             }
 
             /* A SUCCESSFULL MATCH!!!
-             * 
+             *
              * Flag that we have moved and reset the global "."
              * pointers.
              */
@@ -772,7 +772,7 @@ static VOID make_delta P2_(CONST char *, pstring, DELTA *, tbl)
 VOID PASCAL NEAR setjtable P0_()
 {
     make_delta((CONST char *)pat, &deltapat);
-    BUFCPY((char *)tap, (char *)pat);
+    BUFCPY(tap, (char *)pat);
     make_delta(strrev((char *)tap), &tapatled);
 }
 
