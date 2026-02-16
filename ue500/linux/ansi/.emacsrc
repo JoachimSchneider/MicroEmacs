@@ -597,7 +597,7 @@ store-procedure auml-to-ae
 !endm
 
 
-store-procedure utf8-to-ae
+store-procedure utf8-to-ascii
   local %curbuf
   local %tbuf
 
@@ -630,8 +630,22 @@ store-procedure utf8-to-ae
   replace-string "~xE2~x80~x9C" "''"
   beginning-of-file
   replace-string "~xE2~x80~x93" "---"
+  ; That is \cdot
   beginning-of-file
-  replace-string "~xC2~xA7"     "Paragraph"
+  replace-string "~xC2~xB7"     "*"
+  ; That is \cdot
+  beginning-of-file
+  replace-string "~xE2~x88~x99" "*"
+  beginning-of-file
+  replace-string "~xC2~xA7"     "Paragraph "
+  beginning-of-file
+  replace-string "~xE2~x80~x99" "'"
+  beginning-of-file
+  replace-string "~xE2~x82~xAC" "EUR "
+  beginning-of-file
+  replace-string "~xC2~xBB"     ">>"
+  beginning-of-file
+  replace-string "~xC2~xAB"     "<<"
 
   beginning-of-file
   set-mark
