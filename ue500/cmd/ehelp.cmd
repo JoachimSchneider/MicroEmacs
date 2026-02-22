@@ -182,14 +182,21 @@ store-procedure clearsel		;clear the current selection
 
 store-procedure nextcmd
 
+        local %istr
+
 	!if &seq $pending FALSE
 		update-screen
 	!endif
 
 	set %cmd &gtcmd
+	set %istr %cmd
 
 	!if &or &not &seq $os "UNIX" &not &seq %cmd "^C"
 		!force set %cmd &bind %cmd
+		; Allow binding of `^M' to something other than `newline'.
+		!if &seq %istr "^M"
+			set %cmd "newline"
+		!endif
 	!else
 		!if &not $pending
 			write-message "FN-"
