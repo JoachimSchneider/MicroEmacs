@@ -630,6 +630,8 @@ store-procedure utf8-to-ascii
   replace-string "~xE2~x80~x9C" "''"
   beginning-of-file
   replace-string "~xE2~x80~x93" "---"
+  beginning-of-file
+  replace-string "~xE2~x80~x94" "---"
   ; That is \cdot
   beginning-of-file
   replace-string "~xC2~xB7"     "*"
@@ -915,8 +917,10 @@ store-procedure wrap-proc-emacs
   local %llength
   local %chrcount
   local %curchr
+  local %curcol
 
   wrap-word
+  set %curcol $curcol
   previous-line
   set %chrcount 1
   set %line $line
@@ -935,7 +939,7 @@ store-procedure wrap-proc-emacs
   !force next-line
   beginning-of-line
   insert-string %line
-  end-of-line
+  %curcol forward-character
 !endm
 
 ; One needs raw-nl-mode to copy-and-paste from other applications into
