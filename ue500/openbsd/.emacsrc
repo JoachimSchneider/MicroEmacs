@@ -515,11 +515,33 @@ store-procedure print-region
   select-buffer %curbuf
   delete-buffer %tbuf
 !endm
+!endif
 
 store-procedure execute-region
   local %curbuf
   local %tbuf
   local %dummy
+  local %shell
+
+  ; Find a shell to execute the commands:
+  !if &not &sequal &env "UE_SHELL" ""
+    set %shell &env "UE_SHELL"
+  !else
+    !if &not &sequal &env "SHELL" ""
+      set %shell &cat &env "SHELL" " 2>&1"
+    !else
+      !if &not &sequal &env "shell" ""
+        set %shell &env "shell"
+      !else
+        !if &not &sequal &env "COMSPEC" ""
+          set %shell &env "COMSPEC"
+        !else
+          print "Cannot find any shell --- please set UE_SHELL environment var"
+          !return
+        !endif
+      !endif
+    !endif
+  !endif
 
   set %tbuf $tbuf
   !force delete-buffer %tbuf
@@ -534,7 +556,7 @@ store-procedure execute-region
   end-of-file
   trim-region
   ; The '1' causes `filter-buffer' to *not* change the buffer flags.
-  1 filter-buffer "/bin/sh  2>&1"
+  1 filter-buffer %shell
   beginning-of-file
   set-mark
   end-of-file
@@ -555,8 +577,6 @@ store-procedure execute-region
   newline
   delete-buffer %tbuf
 !endm
-!endif
-
 
 store-procedure auml-to-ae
   local %curbuf
