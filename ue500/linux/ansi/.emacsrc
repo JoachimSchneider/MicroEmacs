@@ -647,7 +647,11 @@ store-procedure utf8-to-ascii
   beginning-of-file
   replace-string "~xE2~x80~x9E" "``"
   beginning-of-file
-  replace-string "~xE2~x80~x9C" "''"
+  replace-string "~xE2~x80~x9C" "~x22"
+  beginning-of-file
+  replace-string "~xE2~x80~x9D" "~x22"
+  beginning-of-file
+  replace-string "~xE2~x80~xA6" "..."
   beginning-of-file
   replace-string "~xE2~x80~x93" "---"
   beginning-of-file

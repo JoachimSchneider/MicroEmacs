@@ -101,7 +101,9 @@ set $posflag TRUE
 ;;
 ;
 ; Set the word characters: This makes e.g. "fill-paragraph" work with TeX-Files:
-set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()-_=+{}[]\\|;:\"'<>,./?~`"
+; Added "\~"$^{}[]" to $wchars: `~x' is `x'.
+set $wchars "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_\~"$^{}[]"
+set $abfull TRUE
 ; Default paragraph indent used with fill-*
 set $parindent 0
 ; Default is " \t" which means that indents are recognized as BOP.
@@ -112,6 +114,8 @@ set $paralead ""
 
 ;add-global-mode "blue"
 ;add-global-mode "WHITE"
+; Do not `add-global-mode "MAGIC"' as it will destroy the help facility
+add-mode "MAGIC"
 ;bind-to-key meta-prefix `      ;for annoying keyboards with ` at the top left
 
 ;       Toggle function key window display
@@ -348,9 +352,35 @@ bind-to-key exit-emacs                  FN0
 
         set $discmd TRUE
 
+
 ;===============================================================================
 ; Local additions
 ;===============================================================================
+
+;-------------------------------------------------------------------------------
+; Constants
+;-------------------------------------------------------------------------------
+set %TAB        &chr 9
+set %SPACE      &chr 32
+set %CMODE      2
+;-------------------------------------------------------------------------------
+
+;-------------------------------------------------------------------------------
+; Global variables
+;-------------------------------------------------------------------------------
+set %g_overw    0
+set %g_raw_nl   0
+;-------------------------------------------------------------------------------
+
+store-procedure get-abbrevs
+        !if &seq &find .emacs-abbrevs ""
+                write-message "[Can not find .emacs-abbrevs]"
+                !return
+        !endif
+        execute-file .emacs-abbrevs
+!endm
+execute-procedure get-abbrevs
+
 store-procedure redraw-screen
         clear-and-redraw
         execute-procedure toggle-fkeys
@@ -364,11 +394,16 @@ store-procedure out-tab
 ; ^T was originally bound to transpose-characters
 macro-to-key out-tab ^T
 
+; M-e was originally bound to set-encryption-key
+bind-to-key end-of-word M-e
+
 2 handle-tab
 set $softtab 2
 set $hardtab 8
 bind-to-key set-mark ^@
 set $dispundo TRUE
+; Display 8-Bit characters in readable form:
+set $disphigh TRUE
 ; turn off highlighting:
 set $hilight 255
 ;===============================================================================
@@ -418,6 +453,560 @@ store-procedure german-umlaut-Ue
         insert-string "Ü"
 !endm
 macro-to-key german-umlaut-Ue M-^U
+
+;-------------------------------------------------------------------------------
+; Was bound to add-global-mode
+bind-to-key goto-matching-fence M-m
+
+store-procedure start-search
+        add-mode "MAGIC"
+        !force execute-named-command query-replace-string
+!endm
+; Was bound to replace-string
+macro-to-key start-search M-r
+
+store-procedure unfill-region
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  add-mode "MAGIC"
+  beginning-of-file
+  replace-string "\([^~r~n]\)[~r~n][ ~t]*\([^~r~n]\)" "\1 \2"
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+macro-to-key unfill-region M-^Q
+
+
+!if &seq $os "UNIX"
+store-procedure print-region
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  copy-region
+  set %curbuf $cbufname
+  ; The '1' sets the BFINVS flag: So it may be deleted later without
+  ; a user inquiry.
+  1 select-buffer %tbuf
+  yank
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+  1 filter-buffer "lpr"
+  select-buffer %curbuf
+  delete-buffer %tbuf
+!endm
+!endif
+
+store-procedure execute-region
+  local %curbuf
+  local %tbuf
+  local %dummy
+  local %shell
+
+  ; Find a shell to execute the commands:
+  !if &not &sequal &env "UE_SHELL" ""
+    set %shell &env "UE_SHELL"
+  !else
+    !if &not &sequal &env "SHELL" ""
+      set %shell &cat &env "SHELL" " 2>&1"
+    !else
+      !if &not &sequal &env "shell" ""
+        set %shell &env "shell"
+      !else
+        !if &not &sequal &env "COMSPEC" ""
+          set %shell &env "COMSPEC"
+        !else
+          print "Cannot find any shell --- please set UE_SHELL environment var"
+          !return
+        !endif
+      !endif
+    !endif
+  !endif
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  copy-region
+  set %curbuf $cbufname
+  ; The '1' sets the BFINVS flag: So it may be deleted later without
+  ; a user inquiry.
+  1 select-buffer %tbuf
+  yank
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  ; The '1' causes `filter-buffer' to *not* change the buffer flags.
+  1 filter-buffer %shell
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  ;---------------------------------------------------------------------
+  ; TODO: You wan't see the command-output here --- why?
+  ;---------------------------------------------------------------------
+  ;print "Press any key ..."
+  ;set %dummy  &gtk
+  ;---------------------------------------------------------------------
+  copy-region
+  select-buffer %curbuf
+  beginning-of-line
+  insert-string "# --- BEGIN: Command Output ---"
+  newline
+  yank
+  insert-string "# ---   END: Command Output ---"
+  newline
+  delete-buffer %tbuf
+!endm
+
+store-procedure auml-to-ae
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  delete-mode "MAGIC"
+  add-mode    "EXACT"
+
+  beginning-of-file
+  replace-string "&auml;"   "ae"
+  beginning-of-file
+  replace-string "&ouml;"   "oe"
+  beginning-of-file
+  replace-string "&uuml;"   "ue"
+  beginning-of-file
+  replace-string "&Auml;"   "Ae"
+  beginning-of-file
+  replace-string "&Ouml;"   "Oe"
+  beginning-of-file
+  replace-string "&Uuml;"   "Ue"
+  beginning-of-file
+  replace-string "&szlig;"  "ss"
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+
+store-procedure utf8-to-ascii
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  delete-mode "MAGIC"
+  add-mode    "EXACT"
+
+  beginning-of-file
+  replace-string "~xc3~xa4"     "ae"
+  beginning-of-file
+  replace-string "~xc3~xb6"     "oe"
+  beginning-of-file
+  replace-string "~xc3~xbc"     "ue"
+  beginning-of-file
+  replace-string "~xc3~x84"     "Ae"
+  beginning-of-file
+  replace-string "~xc3~x96"     "Oe"
+  beginning-of-file
+  replace-string "~xc3~x9c"     "Ue"
+  beginning-of-file
+  replace-string "~xc3~x9f"     "ss"
+  beginning-of-file
+  replace-string "~xE2~x80~x9E" "``"
+  beginning-of-file
+  replace-string "~xE2~x80~x9C" "~x22"
+  beginning-of-file
+  replace-string "~xE2~x80~x9D" "~x22"
+  beginning-of-file
+  replace-string "~xE2~x80~xA6" "..."
+  beginning-of-file
+  replace-string "~xE2~x80~x93" "---"
+  beginning-of-file
+  replace-string "~xE2~x80~x94" "---"
+  ; That is \cdot
+  beginning-of-file
+  replace-string "~xC2~xB7"     "*"
+  ; That is \cdot
+  beginning-of-file
+  replace-string "~xE2~x88~x99" "*"
+  beginning-of-file
+  replace-string "~xC2~xA7"     "Paragraph "
+  beginning-of-file
+  replace-string "~xE2~x80~x99" "'"
+  beginning-of-file
+  replace-string "~xE2~x82~xAC" "EUR "
+  beginning-of-file
+  replace-string "~xC2~xBB"     ">>"
+  beginning-of-file
+  replace-string "~xC2~xAB"     "<<"
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+
+; Re-format C-clock comments:
+;
+; MARK
+; |
+; v      /* Something
+;           ...
+;           ...
+; ^
+; |
+; POINT
+;
+;        /* Something
+;         * ...
+;         * ...
+;
+; The comments text will be filled to $fillcol
+;
+; We call the function `*-cmnt0' because one might introduce a
+; `*-cmnt1' with other comment-style in the future.
+store-procedure fmt-c-cmnt0
+  local %pattern
+  local %line
+  local %curbuf
+  local %tbuf
+  local %llength
+  local %chrcount
+  local %curchr
+  local %dummy
+  local %cmnt_start_pos
+  local %leading_ws
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  ; The '1' sets the BFINVS flag: So it may be deleted later without
+  ; a user inquiry.
+  1 select-buffer %tbuf
+  yank
+  add-mode "MAGIC"
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+
+
+; Verify that mark was placed on a line starting a comment:
+
+; First line: ... /* ...
+  beginning-of-file
+  beginning-of-line
+  set %pattern  "^\([~x20~x09]*\)/\*[~x20~x09]*"
+  set %line $line
+  !force 1 search-forward %pattern
+  !if &not &and &seq TRUE $status &equ 1 $curline
+    print &cat &cat "Marked line `" %line "' does *not* have a staring C-comment `/*' --- Press any key ..."
+    set %dummy  &gtk
+    select-buffer %curbuf
+    1 undo
+    delete-buffer %tbuf
+
+    !return
+  !else
+    beginning-of-line
+  !endif
+
+
+; Remove all C-comments:
+
+  ; Start with closing comments '*/'"
+  beginning-of-file
+  replace-string "[~x20~x09]*\*/$" ""
+
+  beginning-of-file
+  1 replace-string &cat %pattern "\(.*\)$" "\1   \2"
+  ; ===> The first line has at least three trailing space characters now
+  ; ===> But *only* if it matches the given Pattern --- that is the
+  ; ===> reason why we checked with `search-forward %pattern' above.
+
+; Next lines
+
+; ... /* ...
+  beginning-of-file
+  beginning-of-line
+  !force next-line
+  replace-string "^\([~x20~x09]*\)/\*[~x20~x09]*\(.*\)$" "\1   \2"
+
+; ... * ...
+  beginning-of-file
+  beginning-of-line
+  !force next-line
+  replace-string "^\([~x20~x09]*\)\*[~x20~x09]*\(.*\)$" "\1  \2"
+
+  ; Need the `trim-region' for a successful later `fill-region' --- but
+  ; unfortunately this will remove the leading white space from empty
+  ; lines: We need to re-insert it later ...
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+
+
+; Remove empty lines at start or end of comment block --- 1st time:
+
+  beginning-of-file
+  !while  &and &not $eof &seq $line ""
+    ; `kill-to-end-of-line' moves to the next line!
+    kill-to-end-of-line
+  !endwhile
+
+  end-of-file
+  !while  &and &not $bof &seq $line ""
+    !force kill-to-end-of-line
+    !force previous-line
+  !endwhile
+
+; Reformat comment to $fillcol:
+  beginning-of-file
+  set-mark
+  end-of-file
+  fill-region
+
+; Remove empty lines at start or end of comment block --- 2nd time:
+
+  beginning-of-file
+  !while  &and &not $eof &seq $line ""
+    ; `kill-to-end-of-line' moves to the next line!
+    kill-to-end-of-line
+  !endwhile
+
+  end-of-file
+  !while  &and &not $bof &seq $line ""
+    !force kill-to-end-of-line
+    !force previous-line
+  !endwhile
+
+; ===> All but the empty lines lines have at least three trailing space
+;      characters now
+
+; Get the indentation of the comment block:
+  beginning-of-file
+  beginning-of-line
+
+  set %chrcount 1
+  set %llength &add &length $line 1
+  !if &not &equal %llength 1
+    set %curchr &mid $line %chrcount 1
+    !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
+      set %chrcount &add %chrcount 1
+      set %curchr &mid $line %chrcount 1
+    !endwhile
+  !endif
+  set %chrcount &sub %chrcount 1
+
+; Insert C-comments:
+
+; -- Insert C-comment for first line:
+  beginning-of-file
+  beginning-of-line
+  %chrcount forward-character
+  !force backward-character
+  !force backward-character
+  !force backward-character
+  overwrite-string "/* "
+
+; Get leading white space of first line i.e. `....'/*
+  beginning-of-file
+  beginning-of-line
+  set %leading_ws $line
+  set %cmnt_start_pos &sindex %leading_ws "/*"
+  set %leading_ws &left %leading_ws &sub %cmnt_start_pos 1
+
+; Re-insert leading white space into empty lines:
+  beginning-of-file
+  beginning-of-line
+  !while  &not $eof
+    !if &seq $line ""
+      beginning-of-line
+      insert-string %leading_ws
+    !endif
+    !force next-line
+  !endwhile
+
+; -- Insert C-comments for next lines:
+  beginning-of-file
+  beginning-of-line
+  !force next-line
+  !while  &not $eof
+    beginning-of-line
+    %chrcount forward-character
+    !force backward-character
+    !force backward-character
+    !force backward-character
+    overwrite-string " * "
+
+    !force next-line
+  !endwhile
+
+; -- Insert C-comment for the last line:
+  end-of-file
+  insert-string  &cat %leading_ws " */"
+
+
+; Copy result
+  beginning-of-file
+  set-mark
+  end-of-file
+  copy-region
+
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+store-procedure toggle-overw
+  !if &equ 0 %g_overw
+    set %g_overw 1
+    add-mode OVER
+  !else
+    set %g_overw 0
+    delete-mode OVER
+  !endif
+!endm
+
+store-procedure nl-indent
+  local %chrcount
+  local %line
+  local %llength
+  local %curchr
+
+  set %chrcount 1
+  set %line $line
+  set %llength &add &length %line 1
+  !if &not &equal %llength 1
+    set %curchr &mid %line %chrcount 1
+    !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
+      set %chrcount &add %chrcount 1
+      set %curchr &mid %line %chrcount 1
+    !endwhile
+    !if &less $curcol %chrcount
+      beginning-of-line
+      newline
+      previous-line
+    !else
+      newline
+      insert-string &left %line &sub %chrcount 1
+    !endif
+  !else
+    newline
+  !endif
+!endm
+
+store-procedure wrap-proc-emacs
+  local %line
+  local %llength
+  local %chrcount
+  local %curchr
+  local %curcol
+
+  wrap-word
+  set %curcol $curcol
+  previous-line
+  set %chrcount 1
+  set %line $line
+  set %llength &add &length %line 1
+  !if &not &equal %llength 1
+    set %curchr &mid %line %chrcount 1
+    !while &and &less %chrcount %llength &or &sequal %curchr %SPACE &sequal %curchr %TAB
+      set %chrcount &add %chrcount 1
+      set %curchr &mid %line %chrcount 1
+    !endwhile
+    set %line &left %line &sub %chrcount 1
+  !else
+    set %line ""
+  !endif
+  end-of-line
+  !force next-line
+  beginning-of-line
+  insert-string %line
+  %curcol forward-character
+!endm
+
+; One needs raw-nl-mode to copy-and-paste from other applications into
+; the MicroEMACS windows
+store-procedure toggle-raw-nl
+  !if &equ 0 %g_raw_nl
+    set %g_raw_nl 1
+    print "RAW <NL> is ON"
+  !else
+    set %g_raw_nl 0
+    print "RAW <NL> is OFF"
+  !endif
+!endm
+
+store-procedure do-newline-and-indent
+  !if &equ 0 %g_raw_nl
+    ; CMODE uses it's builtin indentation function `cinsert()'
+    !if &not &equ &band $cmode %CMODE 0
+      newline
+    !else
+      ; Does at the beginning of line not what we expect --- therefore
+      ; we use our own implementation:
+      ;newline-and-indent
+      nl-indent
+    !endif
+  !else
+    newline
+  !endif
+!endm
+
+store-procedure do-newline
+  newline
+!endm
+
+;-------------------------------------------------------------------------------
+macro-to-key do-newline-and-indent  ^M
+macro-to-key do-newline             ^J
+macro-to-key toggle-overw           FNC
+;macro-to-key toggle-raw-nl          ^~x20
+macro-to-key toggle-raw-nl          M-~x20
+set $wraphook wrap-proc-emacs
+;-------------------------------------------------------------------------------
+
+
+
 ;===============================================================================
 
 
