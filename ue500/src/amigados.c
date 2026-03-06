@@ -943,7 +943,7 @@ int size;       /* # of bytes for newly allocated block */
     char *nptr;                 /* newly allocated pointer */
 
     /* allocate the new memory block */
-    nptr = malloc(size);
+    nptr = xmalloc(size);
     if ( nptr == NULL )
         return (NULL);
 
@@ -954,7 +954,7 @@ int size;       /* # of bytes for newly allocated block */
         *dest++ = *src++;
 
     /* and free the old one */
-    free(ptr);
+    xfree(ptr);
 
     return (nptr);
 }

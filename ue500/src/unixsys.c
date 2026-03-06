@@ -485,7 +485,7 @@ static VOIDP  umc_opendir P1_(CONST char *, name)
         return NULL;
     } else if ( 0 > (fd = open(name, O_RDONLY)) )                     {
         return NULL;
-    } else if ( NULL == (res = (UMC_DIR *)calloc(1, SIZEOF(*res))) )  {
+    } else if ( NULL == (res = (UMC_DIR *)xmalloc(SIZEOF(*res))) )    {
         return NULL;
     }
 
@@ -542,7 +542,7 @@ static int  umc_closedir P1_(VOIDP, dirp)
     if ( 0 != close(((UMC_DIR *)dirp)->fd) ) {
         return (-1);
     }
-    free(dirp);
+    xfree(dirp);
 
     return 0;
 # else

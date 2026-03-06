@@ -388,7 +388,7 @@ KEYDEF *ftable;         /* table to save definitions to */
         ftable[index].kf_len = len;
 
         /* and the keystrokes */
-        sp = malloc(len);
+        sp = xmalloc(len);
         if ( sp == NULL )
             return;
 

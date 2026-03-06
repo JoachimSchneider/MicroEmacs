@@ -776,6 +776,22 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 # define MTC(arg)                 NOOP
 # define MTCK(arg, file, line)    NOOP
 #endif
+
+#ifdef UEMACS_DEBUG_XMALLOC
+/* Heap TraCe:  */
+# define HTC(arg) do {                                \
+        DebugMessage_fname_ = (CONST char *)__FILE__; \
+        DebugMessage_lnno_  = __LINE__;               \
+        DebugMessage_tag_   = (CONST char *)"HTC";    \
+        DebugMessage arg;                             \
+    } while ( 0 )
+# define HTCK(arg, file, line)  do {                  \
+        DebugMessage_fname_ = (CONST char *)(file);   \
+        DebugMessage_lnno_  = (line);                 \
+        DebugMessage_tag_   = (CONST char *)"HTC";    \
+        DebugMessage arg;                             \
+    } while ( 0 )
+#endif
 /*--------------------------------------------------------------------*/
 /**********************************************************************/
 
@@ -840,7 +856,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
     char **pp__ = (char **)&(p);      \
                                       \
     if ( NULL != *pp__ )  {           \
-        free(*pp__);                  \
+        xfree(*pp__);                 \
         *pp__ = NULL;                 \
     }                                 \
 } while ( 0 )
@@ -853,7 +869,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
                                           \
     umc_memcpy(&p__, z__, sizeof(p__));   \
     if ( NULL != p__ )  {                 \
-        free(p__);                        \
+        xfree(p__);                       \
         p__ = NULL;                       \
         umc_memcpy(z__, &p__, sizeof(p)); \
     }                                     \
@@ -1707,6 +1723,8 @@ EXTERN int PASCAL NEAR  get_w_doto_ DCL((EWINDOW *wp,
 EXTERN int PASCAL NEAR  set_w_doto_ DCL((EWINDOW *wp, int doto,
                                          CONST char *fnam, int lno));
 #define set_w_doto(wp, doto)  ( set_w_doto_((wp), (doto), __FILE__, __LINE__) )
+/**#define AtWinBOL(wp)          ( get_w_doto((wp)) == 0) )**/
+#define AtWinEOL(wp)          ( get_w_doto((wp)) == get_lused((wp)->w_dotp) )
 /**********************************************************************/
 
 #define WFFORCE 0x01                    /* Window needs forced reframe  */
@@ -1823,6 +1841,8 @@ EXTERN int PASCAL NEAR  get_b_doto_ DCL((BUFFER *bp,
 EXTERN int PASCAL NEAR  set_b_doto_ DCL((BUFFER *bp, int doto,
                                          CONST char *fnam, int lno));
 #define set_b_doto(bp, doto)  ( set_b_doto_((bp), (doto), __FILE__, __LINE__) )
+/**#define AtBufBOL(bp)          ( get_b_doto((bp)) == 0) )**/
+/**#define AtBufEOL(bp)          ( get_b_doto((bp)) == get_lused((bp)->b_dotp) )**/
 /**********************************************************************/
 
 #define BFINVS  0x01                    /* Internal invisable buffer    */
@@ -2264,6 +2284,7 @@ EXTERN char * PASCAL NEAR       ab_taillookup DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_delete DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_clean DCL((void));
 EXTERN BUFFER * PASCAL NEAR     bfind DCL((CONST char *bname, int cflag, int bflag));
+EXTERN int PASCAL NEAR          subst_lines DCL((LINE *lp_new, LINE *lp_old));
 EXTERN BUFFER * PASCAL NEAR     getcbuf DCL((CONST char *prompt, CONST char *defval, int createflag));
 EXTERN BUFFER * PASCAL NEAR     getdefb DCL((void));
 EXTERN BUFFER * PASCAL NEAR     getoldb DCL((void));
@@ -2275,6 +2296,12 @@ EXTERN int PASCAL NEAR          insert_screen DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          select_screen DCL((SCREEN_T *sp, int announce));
 EXTERN VOID PASCAL NEAR         free_screen DCL((SCREEN_T *sp));
 EXTERN char *                   Eallocate DCL((unsigned nbytes));
+EXTERN char * PASCAL NEAR       xmalloc_ DCL((int size, CONST char *file, int line));
+#define xmalloc(size)           xmalloc_((size), __FILE__, __LINE__)
+EXTERN VOID PASCAL NEAR         xfree_ DCL((char *p, CONST char *file, int line));
+#define xfree(p)                xfree_((char *)(p), __FILE__, __LINE__)
+EXTERN char * PASCAL NEAR       xrealloc_ DCL((char *q, int size, CONST char *file, int line));
+#define xrealloc(q, size)       xrealloc_((char *)(q), (size), __FILE__, __LINE__)
 EXTERN char *                   dolock DCL((CONST char *fname));
 EXTERN char * PASCAL NEAR       bytecopy DCL((char *dst, CONST char *src, int maxlen));
 EXTERN char * PASCAL NEAR       getecnam DCL((int c, char *seq, int seqsiz));
@@ -2424,10 +2451,17 @@ EXTERN int PASCAL NEAR          mceq DCL((unsigned char bc, MC *mt));
 EXTERN VOID PASCAL NEAR         maxlines DCL((int lines));
 #endif
 # if MAGIC
-EXTERN int PASCAL NEAR          mcscanner DCL((MC   *mcpatrn,
-                                               int  direct,
-                                               int  beg_or_end,
-                                               int  repeats));
+EXTERN int PASCAL NEAR          mcscanner_ofs DCL((MC   *mcpatrn,
+                                                   int  direct,
+                                                   int  beg_or_end,
+                                                   int  repeats,
+                                                   int  offset));
+#  define mcscanner(mcpatrn, direct, beg_or_end, repeats)   \
+              mcscanner_ofs((mcpatrn),                      \
+                            (direct),                       \
+                            (beg_or_end),                   \
+                            (repeats), 0)
+/**END_OF_DEFINITION**/
 # endif
 EXTERN int PASCAL NEAR          mcstr DCL((void));
 EXTERN int PASCAL NEAR          mlprompt DCL((CONST char *, CONST char *, int));

@@ -139,7 +139,7 @@ static VOID PASCAL  PushMLHist (void)
         MLHistNew = (MLHistNew + 1) & MLHISTMASK;
         if ( MLHistOld == MLHistNew ) {
             /* the history is full. This old entry needs to be discarded */
-            free (MLHistory[MLHistOld]);
+            xfree (MLHistory[MLHistOld]);
             MLHistOld = (MLHistOld + 1) & MLHISTMASK;
         }
     }
@@ -171,7 +171,7 @@ int EXPORT FAR PASCAL  MLHistDlgProc (
                                 LB_ADDSTRING,
                                 0,
                                 (LPARAM)MLHistory[MLHistOld]);
-            free (MLHistory[MLHistOld]);
+            xfree (MLHistory[MLHistOld]);
             MLHistOld = (MLHistOld + 1) & MLHISTMASK;
         }
         /*-scroll the last message into view */

@@ -1,0 +1,605 @@
+head	1.8;
+access;
+symbols;
+locks
+	joachim:1.8; strict;
+comment	@ * @;
+
+
+1.8
+date	2026.03.11.10.40.43;	author joachim;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2026.03.11.10.39.26;	author joachim;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2026.03.11.10.28.11;	author joachim;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2026.03.11.08.16.38;	author joachim;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2026.03.11.08.12.27;	author joachim;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2026.03.10.21.33.30;	author joachim;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2026.03.09.16.35.26;	author joachim;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2026.03.09.10.33.13;	author joachim;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@/* SOF(xmalloc.c) */
+/*====================================================================*/
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#undef NDEBUG
+#include <assert.h>
+#include "xmalloc.h"
+
+
+#ifndef UEMACS_DEBUG_XMALLOC
+
+
+char *xmalloc_(int size, CONST char *file, int line)
+{
+    char  *res    = NULL;
+
+    if ( size <= 0 )  {
+        return NULL;
+    }
+    res = (char *)malloc(size);
+    assert(NULL != res);
+    memset(res, 0, size);
+
+    return  res;
+}
+
+VOID  xfree_(char *p, CONST char *file, int line)
+{
+    if ( NULL == p )  {
+        return;
+    }
+
+    free(p);
+
+    return;
+}
+
+char *xrealloc_(char *q, int size, CONST char *file, int line)
+{
+    char  *res    = NULL;
+
+    if ( size < 0 ) {
+        return NULL;
+    }
+    if ( size == 0 )  {   /* As in GNU extension  */
+        xfree_(q, file, line);
+    }
+    res = (char *)realloc(q, size);
+    assert(NULL != res);
+
+    return res;
+}
+
+
+#else
+
+
+typedef struct  ptr_info_s {
+    char  *p;
+    int   size;
+} ptr_info_t;
+
+
+/*====================================================================*/
+/* By using the data structures and functions below i.e.              */
+/* - p_list_node_t                                                    */
+/* - {get,ins,del}_xmalloc_info()                                     */
+/* it wiil ll be possible to switch the linked list implementation to */
+/* a more efficient hash table implemnentation if this is needed in   */
+/* the future.                                                        */
+/*====================================================================*/
+
+typedef struct p_list_node_s  p_list_node_t;
+
+typedef struct  p_list_node_s {
+    ptr_info_t    info;
+    p_list_node_t *next;
+} p_list_node_t;
+
+
+static p_list_node_t  *g_p_list = NULL;
+
+
+static ptr_info_t *get_xmalloc_info(char *q)
+{
+    p_list_node_t *node = g_p_list;
+
+    assert(NULL != q);
+
+    while ( NULL != node )  {
+        if ( q == node->info.p )  {
+            return &node->info;
+        } else              {
+            node  = node->next;
+        }
+    }
+
+    return NULL;
+}
+
+static int  del_xmalloc_info(char *q)
+{
+    p_list_node_t *node = g_p_list;
+    p_list_node_t *prev = NULL;
+
+    assert(NULL != q);
+
+    /* Special handling at start of search: */
+    if ( NULL == node ) {
+        return FALSE;
+    } else              {
+        if ( q == node->info.p )  {
+            g_p_list  = node->next;
+            memset(node, 0, sizeof(*node));
+            free(node);
+
+            return TRUE;
+        } else                    {
+            prev  = node;
+        }
+    }
+
+    while ( NULL != prev->next )  {
+        if ( q == prev->next->info.p )  {
+            node        = prev->next;
+            prev->next  = node->next;
+
+            memset(node, 0, sizeof(*node));
+            free(node);
+
+            return TRUE;
+        } else              {
+            prev  = prev->next;
+        }
+    }
+
+    return FALSE;
+}
+
+static int  ins_xmalloc_info(ptr_info_t *p_info)
+{
+    p_list_node_t *node = NULL;
+
+    assert(NULL != p_info);
+
+    if ( NULL != get_xmalloc_info(p_info->p) )  {
+        return FALSE;
+    }
+    node  = (p_list_node_t *)malloc(sizeof(*node));
+    assert(NULL != node);
+    memset(node, 0, sizeof(*node));
+    memcpy(&node->info, p_info, sizeof(node->info));
+    node->next  = g_p_list;
+    g_p_list  = node;
+
+    return TRUE;
+}
+
+/*====================================================================*/
+
+
+char *xmalloc_(int size, CONST char *file, int line)
+{
+    char        *res  = NULL;
+    ptr_info_t  info;
+
+    ZEROMEM(info);
+
+    if ( size <= 0 )  {
+        return NULL;
+    }
+    res = (char *)malloc(size);
+    assert(NULL != res);
+    memset(res, 0, size);
+    info.p    = res;
+    info.size = size;
+
+    if ( ! ins_xmalloc_info(&info) )  {
+        fflush(NULL);
+        fprintf(stderr,
+                "*** ERROR: xmalloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                file, line, "Pointer already registered");
+        abort();
+    }
+
+    return  res;
+}
+
+VOID  xfree_(char *p, CONST char *file, int line)
+{
+    ptr_info_t  *p_info = NULL;
+    ptr_info_t  info;
+
+    ZEROMEM(info);
+
+    if ( NULL == p )  {
+        return;
+    }
+
+    if ( NULL == (p_info = get_xmalloc_info(p)) ) {
+        fflush(NULL);
+        fprintf(stderr,
+                "*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                file, line, "Pointer to free not found");
+        abort();
+    }
+    memcpy(&info, p_info, sizeof(info));
+    if ( ! del_xmalloc_info(p) )  {
+        fflush(NULL);
+        fprintf(stderr,
+                "*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                file, line, "Pointer info not found");
+        abort();
+    }
+
+    /* Try to force SIGSEGV when accessing free'd memory: */
+    memset(info.p, 0, info.size);
+    free(info.p);
+
+    return;
+}
+
+char *xrealloc_(char *q, int size, CONST char *file, int line)
+{
+    char        *res    = NULL;
+    ptr_info_t  *p_info = NULL;
+
+    if ( size < 0 ) {
+        return NULL;
+    }
+    if ( size == 0 )  {   /* As in GNU extension  */
+        xfree_(q, file, line);
+    }
+    if ( NULL == q )  {
+        return  xmalloc(size);
+    } else            {
+        if ( NULL == (p_info = get_xmalloc_info(q)) ) {
+            fflush(NULL);
+            fprintf(stderr,
+                    "*** ERROR: xrealloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                    file, line, "Pointer to re-allocate not found");
+            abort();
+        }
+        res = xmalloc(size);
+        memcpy(res, q, MIN2(size, p_info->size));
+        xfree_(q, file, line);
+
+        return res;
+    }
+}
+
+
+#endif
+
+
+
+/*====================================================================*/
+/* EOF(xmalloc.c) */
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d74 2
+a79 2
+
+typedef struct p_list_node_s  p_list_node_t;
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@a58 2
+typedef struct p_list_node_s  p_list_node_t;
+
+d64 10
+d79 2
+d159 2
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d14 1
+a14 1
+char *xmalloc(int size)
+d61 1
+a61 1
+typedef struct  p_info_s {
+d64 1
+a64 1
+} p_info_t;
+d67 1
+a67 1
+    p_info_t      info;
+d75 1
+a75 1
+char *xmalloc(int size)
+d77 80
+a156 1
+    char  *res    = NULL;
+d164 2
+d167 6
+a172 19
+    if ( NULL == g_p_list ) {
+        g_p_list  = (p_list_node_t *)malloc(sizeof(*g_p_list));
+        assert(NULL != g_p_list);
+        memset(g_p_list, 0, sizeof(*g_p_list));
+        g_p_list->info.p    = res;
+        g_p_list->info.size = size;
+        g_p_list->next      = NULL;
+    } else                {
+        p_list_node_t *node = g_p_list;
+
+        while ( NULL != node->next )  {
+            node  = node->next;
+        }
+        node->next  = (p_list_node_t *)malloc(sizeof(*node->next));
+        assert(NULL != node->next);
+        memset(node->next, 0, sizeof(*node->next));
+        node->next->info.p    = res;
+        node->next->info.size = size;
+        node->next->next      = NULL;
+d180 4
+a183 3
+    p_list_node_t *node = g_p_list;
+    p_list_node_t *prev = NULL;
+    int       found = 0;
+d189 1
+a189 1
+    if ( NULL == node ) {
+d193 1
+a193 1
+                file, line, "Initial node is NULL");
+d196 2
+a197 32
+    do  {
+        if ( p == node->info.p )  {
+            found = 1;
+
+            if ( NULL == prev ) { /* First entry  */
+                assert(node == g_p_list);
+                g_p_list  = node->next;
+
+                /* Try to force SIGSEGV when accessing free'd memory: */
+                memset(node->info.p, 0, node->info.size);
+                free(node->info.p);
+                memset(node, 0, sizeof(*node));
+                free(node);
+            } else              {
+                /* Remove node: */
+                prev->next  = node->next;
+
+                /* Try to force SIGSEGV when accessing free'd memory: */
+                memset(node->info.p, 0, node->info.size);
+                free(node->info.p);
+                memset(node, 0, sizeof(*node));
+                free(node);
+            }
+
+            break;
+        } else              {
+            prev  = node;
+            node  = node->next;
+        }
+    } while ( NULL != node );
+
+    if ( ! found )  {
+d201 1
+a201 1
+                file, line, "Pointer not found");
+d205 4
+d214 2
+a215 3
+    char          *res  = NULL;
+    p_list_node_t *node = g_p_list;
+    int       found = 0;
+d226 1
+a226 18
+        if ( NULL == node ) {
+            fflush(NULL);
+            fprintf(stderr,
+                    "*** ERROR: xrealloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                    file, line, "Initial node is NULL");
+            abort();
+        }
+        do  {
+            if ( q == node->info.p )  {
+                found = 1;
+
+                break;
+            } else              {
+                node  = node->next;
+            }
+        } while ( NULL != node );
+
+        if ( ! found )  {
+d234 1
+a234 1
+        memcpy(res, q, MIN2(size, node->info.size));
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d123 1
+a123 1
+                "ERROR: xfree(), %s:%d:\n\t%s.\n\t--- calling abort()\n",
+d161 1
+a161 1
+                "ERROR: xfree(), %s:%d:\n\t%s.\n\t--- calling abort()\n",
+d187 1
+a187 1
+                    "ERROR: xrealloc(), %s:%d:\n\t%s.\n\t--- calling abort()\n",
+d204 1
+a204 1
+                    "ERROR: xrealloc(), %s:%d:\n\t%s.\n\t--- calling abort()\n",
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d59 1
+a59 1
+typedef struct p_node_s p_node_t;
+d61 4
+a64 5
+typedef struct  p_node_s  {
+    char      *p;
+    int       size;
+    p_node_t  *next;
+} p_node_t;
+d66 4
+d71 2
+a72 1
+static p_node_t *g_p_list = NULL;
+d87 1
+a87 1
+        g_p_list  = (p_node_t *)malloc(sizeof(*g_p_list));
+d90 3
+a92 3
+        g_p_list->p     = res;
+        g_p_list->size  = size;
+        g_p_list->next  = NULL;
+d94 1
+a94 1
+        p_node_t  *node = g_p_list;
+d99 1
+a99 1
+        node->next  = (p_node_t *)malloc(sizeof(*node->next));
+d102 3
+a104 3
+        node->next->p     = res;
+        node->next->size  = size;
+        node->next->next  = NULL;
+d112 2
+a113 2
+    p_node_t  *node = g_p_list;
+    p_node_t  *prev = NULL;
+d128 1
+a128 1
+        if ( p == node->p ) {
+d136 2
+a137 2
+                memset(node->p, 0, node->size);
+                free(node->p);
+d145 2
+a146 2
+                memset(node->p, 0, node->size);
+                free(node->p);
+d171 2
+a172 2
+    char      *res  = NULL;
+    p_node_t  *node = g_p_list;
+d192 1
+a192 1
+            if ( q == node->p ) {
+d209 1
+a209 1
+        memcpy(res, q, MIN2(size, node->size));
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d39 16
+d163 47
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d11 32
+d57 1
+a57 1
+    char              *res    = NULL;
+d62 1
+a62 1
+    res = malloc(size);
+d67 1
+a67 1
+        g_p_list  = malloc(sizeof(*g_p_list));
+d79 1
+a79 1
+        node->next  = malloc(sizeof(*node->next));
+d90 1
+a90 1
+int  xfree_(char *p, const char *file, int line)
+d95 1
+a95 1
+    
+d97 1
+a97 1
+        return 0;
+d110 1
+a110 1
+            
+d146 1
+a146 1
+    return 0;
+d149 5
+a153 2
+    
+    
+@

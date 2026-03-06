@@ -1334,12 +1334,14 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
  * bottom mode line and is updated whenever it is changed.
  */
 
-# undef  malloc
-# undef  free
+# if ( 0 )  /* Removed with introduction of xmalloc() and friends.  */
+#  undef  malloc
+#  undef  free
 
-# if     VMS & OPTMEM           /* these routines are faster! */
-#  define malloc  VAXC$MALLOC_OPT
-#  define free    VAXC$FREE_OPT
+#  if     VMS & OPTMEM           /* these routines are faster! */
+#   define malloc  VAXC$MALLOC_OPT
+#   define free    VAXC$FREE_OPT
+#  endif
 # endif
 
 /* EALLOCATE:
@@ -1350,7 +1352,7 @@ char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
 {
     char *mp;           /* ptr returned from malloc */
 
-    mp = malloc(nbytes);
+    mp = xmalloc(nbytes);
 
 # if     RAMTRCK
     TRC(("Allocating %u bytes at %u:%u\n", nbytes, FP_SEG(mp),

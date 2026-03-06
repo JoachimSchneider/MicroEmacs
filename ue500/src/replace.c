@@ -21,6 +21,23 @@
 #include "edef.h"
 #include "elang.h"
 
+/*====================================================================*/
+/*** TODO: Searches in MAGIC Mode will not recognize
+ ***       - '^' on the first and
+ ***       - '$' on the last line
+ ***       of a buffer.
+ ***
+ ***       Also `search and replace' of `$' will re-recognize `$' after
+ ***       text has been inserted: This should be avoided!
+ ***
+ ***       The code enclosed in the JES_REP_MAGIC_BORDER preprocessor
+ ***       conditional tries to repair this bug.
+ ***
+ ***       Test until 2026-04-05 than delete the JES_REP_MAGIC_BORDER.
+ ***/
+#define JES_REP_MAGIC_BORDER    ( 1 )
+
+
 static int  replen        = 0;      /* length of replacement string */
 static char *oldpatmatch  = NULL;   /* allocated memory for un-do.  */
 
@@ -49,60 +66,62 @@ int PASCAL NEAR qreplace P2_(int, f, int, n)
 
 /* REPLACES:
  *
- * Search for a string and replace it with another string.  Query
- * might be enabled (according to kind).
+ * Search for a string and replace it with another string. Query might
+ * be enabled (according to kind).
  */
 int PASCAL NEAR replaces P3_(int, kind, int, f, int, n)
 /* kind:  Query enabled flag  */
 /* f: Default flag            */
 /* n: # of repetitions wanted */
 {
-    REGISTER int  status      = 0;    /* success flag on pattern inputs */
-    REGISTER int  nummatch    = 0;    /* number of found matches */
-    long          numsub      = 0;    /* number of substitutions */
-    int           nlflag      = 0;    /* last char of search string a <NL>? */
+    REGISTER int  status      = 0;    /* success flag on pattern inputs       */
+    REGISTER int  nummatch    = 0;    /* number of found matches              */
+    long          numsub      = 0;    /* number of substitutions              */
+    int           nlflag      = 0;    /* last char of search string a <NL>?   */
     int           nlrepl      = 0;    /* was a replace done on the last line? */
-    char          c           = '\0'; /* input char for query */
-    LINE          *origline   = NULL; /* original "." position */
-    int           origoff     = 0;    /* and offset (for . query option) */
-    LINE          *lastline   = NULL; /* position of last replace and */
-    int           lastoff     = 0;    /* offset (for 'u' query option) */
-    int           oldmatchlen = 0;    /* Closure may alter the match length.*/
+    char          c           = '\0'; /* input char for query                 */
+    LINE          *origline   = NULL; /* original "." position                */
+    int           origoff     = 0;    /* and offset (for . query option)      */
+    LINE          *lastline   = NULL; /* position of last replace and         */
+    int           lastoff     = 0;    /* offset (for 'u' query option)        */
+    int           oldmatchlen = 0;    /* Closure may alter the match length.  */
+#if     MAGIC
+    int           offset      = 0;    /* Skip so many char's at next search.  */
+#endif
 
-    /*
-     * Don't allow this command if we are in read only mode.
-     */
-    if ( curbp->b_mode & MDVIEW )
-        return ( rdonly() );
+    /* Don't allow this command if we are in read only mode. */
+    if ( curbp->b_mode & MDVIEW ) {
+        return rdonly();
+    }
 
-    /* Check for negative repetitions.
-     */
-    if ( f && n < 0 )
-        return (FALSE);
+    /* Check for negative repetitions. */
+    if ( f && n < 0 ) {
+        return FALSE;
+    }
 
-    /* Ask the user for the text of a pattern.
-     */
-    if ( ( status =
-               readpattern(kind ? TEXT85 : TEXT84, (char *) &pat[0],
-                           TRUE) ) != TRUE )
-/*              "Replace" */
-/*                      "Query replace" */
-        return (status);
+    /* Ask the user for the text of a pattern. */
+    if ( TRUE != (status = readpattern(kind ? TEXT85 : TEXT84,
+/*                                     "Replace"        */
+/*                                     "Query replace"  */
+                                       (char *) &pat[0], TRUE)) ) {
+        return status;
+    }
 
-    /* Ask for the replacement string, and get its length.
-     */
-    if ( ( status = readpattern(TEXT86, (char *) &rpat[0], FALSE) ) == ABORT )
-/*              "with" */
-        return (status);
+    /* Ask for the replacement string, and get its length. */
+    if ( ABORT == (status = readpattern(TEXT86,
+/*                                      "with"  */
+                                        (char *) &rpat[0], FALSE)) )  {
+        return status;
+    }
 
-    /* Set up flags so we can make sure not to do a recursive replace on the
-     * last line.
+    /* Set up flags so we can make sure not to do a recursive replace
+     * on the last line.
      */
     nlflag = (pat[STRLEN( (char *)pat ) - 1] == '\r');
     nlrepl = FALSE;
 
-    /* Save original . position, reset the number of matches and substitutions,
-     * and scan through the file.
+    /* Save original . position, reset the number of matches and
+     * substitutions, and scan through the file.
      */
     origline = curwp->w_dotp;
     origoff = get_w_doto(curwp);
@@ -112,78 +131,80 @@ int PASCAL NEAR replaces P3_(int, kind, int, f, int, n)
     mmove_flag = FALSE;         /* disable mouse move events          */
 
     while ( (f == FALSE || n > nummatch) &&
-            (nlflag == FALSE || nlrepl == FALSE) ) {
+            (nlflag == FALSE || nlrepl == FALSE) )  {
         /* let the undo checkpoint out position each q-replacement */
-        if ( kind )
+        if ( kind ) {
             undo_insert(OP_CMND, 1, obj);
+        }
 
-        /* Search for the pattern. If we search with a regular expression,
-         * matchlen is reset to the true length of the matched string.
+        /* Search for the pattern. If we search with a regular
+         * expression, matchlen is reset to the true length of the
+         * matched string.
          */
 #if     MAGIC
-        if ( magical && (curwp->w_bufp->b_mode & MDMAGIC) ) {
-            if ( !mcscanner(&mcpat[0], FORWARD, PTBEG, 1) )
+        if ( magical && (curwp->w_bufp->b_mode & MDMAGIC) )         {
+            if ( !mcscanner_ofs(&mcpat[0], FORWARD, PTBEG, 1, offset) ) {
                 break;
-        } else if ( !mcscanner(&mcdeltapat[0], FORWARD, PTBEG, 1) )
+            }
+        } else if ( !mcscanner_ofs(&mcdeltapat[0], FORWARD, PTBEG, 1, offset) ) {
             break;                      /* all done */
+        }
 #else
-        if ( !scanner(FORWARD, PTBEG, 1) )
-            break;              /* all done */
+        if ( !scanner(FORWARD, PTBEG, 1) )  {
+            break;              /* all done                           */
+        }
 #endif
 
-        ++nummatch;                     /* Increment # of matches */
+        ++nummatch;             /* Increment # of matches             */
 
-        /* Check if we are on the last line.
-         */
+        /* Check if we are on the last line. */
         nlrepl = (lforw(curwp->w_dotp) == curwp->w_bufp->b_linep);
 
-        /* Check for query.
-         */
+        /* Check for query. */
         if ( kind ) {
-            /* Get the query.
-             */
-pprompt:    mlrquery();
+            /* Get the query. */
+pprompt:
+            mlrquery();
 qprompt:
-            /* Show the proposed place to change, and update the position on the
-             * modeline if needed.
+            /* Show the proposed place to change, and update the
+             * position on the modeline if needed.
              */
-            if ( posflag )
+            if ( posflag )  {
                 upmode();
+            }
             update(TRUE);
-            c = tgetc();                /* and input */
-            mlerase();                  /* and clear it */
+            c = tgetc();        /* and input                          */
+            mlerase();          /* and clear it                       */
 
-            /* And respond appropriately.
-             */
+            /* And respond appropriately. */
             switch ( c ) {
 #if     FRENCH
-            case 'o':                           /* oui, substitute */
+            case 'o':           /* oui, substitute                    */
             case 'O':
 #endif
-            case 'y':                   /* yes, substitute */
+            case 'y':           /* yes, substitute                    */
             case 'Y':
-            case 'l':                   /* last substitute */
+            case 'l':           /* last substitute                    */
             case 'L':
             case ' ':
                 break;
 
-            case 'n':                   /* no, onward */
+            case 'n':           /* no, onward                         */
             case 'N':
                 forwchar(FALSE, 1);
                 continue;
 
-            case '!':                   /* yes/stop asking */
+            case '!':           /* yes/stop asking                    */
                 kind = FALSE;
                 break;
 
-            case 'u':                   /* undo last and re-prompt */
+            case 'u':           /* undo last and re-prompt            */
             case 'U':
-                /* Restore old position.
-                 */
+                /* Restore old position. */
                 if ( lastline == (LINE *) NULL ) {
-                    /* There is nothing to undo.
-                     */
+                    /* There is nothing to undo. */
                     TTbeep();
+
                     goto pprompt;
                 }
                 curwp->w_dotp = lastline;
@@ -191,49 +212,50 @@ qprompt:
                 lastline = NULL;
                 lastoff = 0;
 
-                /* Delete the new string, restore the old match.
-                 */
+                /* Delete the new string, restore the old match. */
                 backchar(FALSE, replen);
                 status = delins(replen, oldpatmatch, FALSE);
                 if ( status != TRUE ) {
                     mmove_flag = TRUE;
 
-                    return (status);
+                    return status;
                 }
 
-                /* Record one less substitution, backup, save our place, and
-                 * reprompt.
+                /* Record one less substitution, backup, save our
+                 * place, and reprompt.
                  */
                 --numsub;
                 backchar(FALSE, oldmatchlen);
                 matchlen = oldmatchlen;
                 matchline = curwp->w_dotp;
                 matchoff = get_w_doto(curwp);
+
                 continue;
 
-            case '.':                   /* abort! and return */
+            case '.':           /* abort! and return                  */
                 /* restore old position */
                 curwp->w_dotp = origline;
                 set_w_doto(curwp, origoff);
                 curwp->w_flag |= WFMOVE;
 
-            case BELL:                  /* abort! and stay */
+            case BELL:          /* abort! and stay                    */
                 mlwrite(TEXT89);
 /*                      "Aborted!" */
                 mmove_flag = TRUE;
 
                 return (FALSE);
 
-            default:                    /* bitch and beep */
+            default:            /* bitch and beep                     */
                 TTbeep();
 
-            case '?':                   /* help me */
+            case '?':           /* help me                            */
                 mlwrite(TEXT90);
-/*"(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: "*/
+/* "(Y)es, (N)o, (!)Do rest, (U)ndo last, (^G)Abort, (.)Abort back, (?)Help: " */
+
                 goto qprompt;
 
-            }                           /* end of switch */
-        }                       /* end of "if kind" */
+            }                   /* end of switch                      */
+        }                       /* end of "if kind"                   */
 
         /* if this is the point origin, flag so we a can reset it */
         if ( curwp->w_dotp == origline ) {
@@ -258,44 +280,96 @@ qprompt:
             return (status);
         }
 
-        numsub++;                       /* increment # of substitutions */
+        numsub++;               /* increment # of substitutions       */
 
-        /* Save our position, the match length, and the string matched if we are
-         * query-replacing, as we may undo the replacement. If we are not
-         * querying, check to make sure that we didn't replace an empty string
-         * (possible in MAGIC mode), because we'll infinite loop.
+        /* Save our position, the match length, and the string matched
+         * if we are query-replacing, as we may undo the replacement.
+         * If we are not querying, check to make sure that we didn't
+         * replace an empty string (possible in MAGIC mode), because
+         * we'll infinite loop.
          */
         if ( kind ) {
-            if ( c == 'l' || c == 'L' )
+            if ( c == 'l' || c == 'L' ) {
                 break;
+            }
             lastline = curwp->w_dotp;
             lastoff = get_w_doto(curwp);
-            oldmatchlen = matchlen;             /* Save the length for un-do.*/
+            oldmatchlen = matchlen;   /* Save the length for un-do.   */
 
-            if ( ( oldpatmatch = REROOM(oldpatmatch, matchlen + 1) ) == NULL ) {
+            if ( NULL == (oldpatmatch = REROOM(oldpatmatch,
+                                               matchlen + 1)) ) {
                 mlabort(TEXT94);
-/*                  "%%Out of memory" */
+/*                      "%%Out of memory" */
                 mmove_flag = TRUE;
 
-                return (ABORT);
+                return ABORT;
             }
             xstrlcpy(oldpatmatch, patmatch, matchlen + 1);
-        } else if ( matchlen == 0 ) {
-            mlwrite(TEXT91);
-/*              "Empty string replaced, stopping." */
-            mmove_flag = TRUE;
 
-            return (FALSE);
+#if JES_REP_MAGIC_BORDER
+# if  MAGIC
+            if ( matchlen == 0 )  {
+                if        ( AtWinEOL(curwp) ) {
+                    /* We must have been at EOL at the previous
+                     * iteration and the next iteration would end at
+                     * the same position:
+                     * ===> Skip EOL
+                     */
+                    offset  = 1;
+                } else if ( 0 == replen ) {
+                    /* Next iteration will end at the same position.
+                     * ===> As we are interactive we don't do anything
+                     */
+                    offset  = 0;
+                }
+            } else                {
+                offset  = 0;
+            }
+# endif
+#endif
+        } else      {           /* !kind                              */
+#if JES_REP_MAGIC_BORDER
+# if  MAGIC
+            if ( matchlen == 0 )  {
+                if        ( AtWinEOL(curwp) ) {
+                    /* We must have been at EOL at the previous
+                     * iteration and the next iteration would end at
+                     * the same position:
+                     * ===> Skip EOL
+                     */
+                    offset  = 1;
+                } else if ( 0 == replen ) {
+                    /* Next iteration will end at the same position:
+                     * ===> Non-interactive we must stop here!
+                     */
+                    offset  = 0;
+
+                    mlwrite(TEXT91);
+/*                          "Empty string replaced, stopping." */
+                    mmove_flag = TRUE;
+
+                    return FALSE;
+                }
+            }
+# endif
+#else
+            if ( matchlen == 0 ) {
+                mlwrite(TEXT91);
+/*                      "Empty string replaced, stopping." */
+                mmove_flag = TRUE;
+
+                return FALSE;
+            }
+#endif
         }
     }
 
-    /* And report the results.
-     */
+    /* And report the results. */
     mlwrite(TEXT92, numsub);
-/*      "%d substitutions" */
+/*          "%d substitutions" */
     mmove_flag = TRUE;
 
-    return (TRUE);
+    return TRUE;
 }
 
 /* MLRQUERY:

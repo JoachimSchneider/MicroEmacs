@@ -1,0 +1,6 @@
+
+store-procedure set-default-mode
+        insert-string X
+!endm
+set $readhook set-default-mode
+

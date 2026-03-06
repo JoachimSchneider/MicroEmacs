@@ -189,7 +189,7 @@ LINE * PASCAL NEAR lalloc P1_(REGISTER int, used)
         return (NULL);
     }
     lp->l_size_ = used;
-    /*** TODO: Setting l_used to 0 here dos *not* work, but I don't
+    /*** TODO: Setting l_used to 0 here does *not* work, but I don't
      ***       know why.
      ***/
     lp->l_used_ = used;
@@ -220,6 +220,10 @@ int PASCAL NEAR lfree P1_(LINE *, lp)
     SCREEN_T          *scrp   = NULL; /* screen to fix pointers in  */
     REGISTER EWINDOW  *wp     = NULL;
     REGISTER int      cmark   = 0;    /* current mark               */
+
+    if ( NULL == lp ) {
+        return 0;
+    }
 
     /* in all screens.... */
     scrp = first_screen;
@@ -388,16 +392,17 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
     int               cmark = 0;    /* current mark               */
 
-    if ( curbp->b_mode & MDVIEW )     /* don't allow this command if  */
-        return ( rdonly() );          /* we are in read only mode     */
-
+    if ( curbp->b_mode & MDVIEW ) {   /* don't allow this command if  */
+        return rdonly();              /* we are in read only mode     */
+    }
     /* a zero insert means do nothing! */
-    if ( n == 0 )
-        return (TRUE);
-
+    if ( n == 0 ) {
+        return TRUE;
+    }
     /* Negative numbers of inserted characters are right out! */
-    if ( n < 1 )
-        return (FALSE);
+    if ( n < 1 )  {
+        return FALSE;
+    }
 
 #if UEMACS_FEATURE_SMART_EOW_NL
     curwp->w_linsert_at_eow = FALSE;
@@ -415,47 +420,55 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     /* mark the current window's buffer as changed */
     lchange(WFEDIT);
 
-    lp1 = curwp->w_dotp;                          /* Current line     */
-    if ( lp1 == curbp->b_linep ) {                /* At the end: special  */
+    lp1 = curwp->w_dotp;                            /* Current line   */
+    /* We use `curwp->w_bufp' instead of `curbp' as these are not
+     * always syncronized
+     */
+    if ( lp1 == curwp->w_bufp->b_linep )  {   /* At the end: special  */
         if ( get_w_doto(curwp) != 0 ) {
             mlwrite(TEXT170);
-/*                              "bug: linsert" */
+/*                  "bug: linsert" */
 
-            return (FALSE);
+            return FALSE;
         }
-        if ( ( lp2 = lalloc(LBSIZE(n)) ) == NULL ) /* Allocate new line    */
-            return (FALSE);
+        if ( (lp2 = lalloc(LBSIZE(n))) == NULL )  { /* Insert line    */
+            return FALSE;
+        }
 
         set_lused(lp2, n);
-        lp3 = lp1->l_bp;                          /* Previous line        */
-        lp3->l_fp = lp2;                          /* Link in              */
+
+        lp3 = lp1->l_bp;                            /* Previous line  */
+        lp3->l_fp = lp2;                            /* Link in        */
         lp2->l_fp = lp1;
         lp1->l_bp = lp2;
         lp2->l_bp = lp3;
-        for ( i = 0; i < n; ++i )
+
+        for ( i = 0; i < n; ++i ) {
             lputc(lp2, i, c);
+        }
         curwp->w_dotp = lp2;
         set_w_doto(curwp, n);
 
-        return (TRUE);
+        return TRUE;
     }
     doto = get_w_doto(curwp);                     /* Save for later.  */
     if ( get_lused(lp1) + n > get_lsize(lp1) ) {  /* Hard: reallocate */
-        if ( ( lp2 = lalloc(LBSIZE(get_lused(lp1) + n)) ) == NULL )
+        if ( (lp2 = lalloc(LBSIZE(get_lused(lp1) + n))) == NULL ) {
             return (FALSE);
+        }
 
         set_lused(lp2, get_lused(lp1) + n);
         cp1 = lgetcp(lp1, 0);
         cp2 = lgetcp(lp2, 0);
-        while ( cp1 < lgetcp(lp1, doto) )
+        while ( cp1 < lgetcp(lp1, doto) ) {
             *cp2++ = *cp1++;
+        }
         cp2 += n;
-        while ( cp1 < lgetcp(lp1, get_lused(lp1)) )
+        while ( cp1 < lgetcp(lp1, get_lused(lp1)) ) {
             *cp2++ = *cp1++;
-        lp1->l_bp->l_fp = lp2;
-        lp2->l_fp = lp1->l_fp;
-        lp1->l_fp->l_bp = lp2;
-        lp2->l_bp = lp1->l_bp;
+        }
+
+        subst_lines(lp2, lp1);
         /** DO NOT USE CLROOM(), DON'T CHANGE lp1: IT'S USED BELOW  **/
         /** TO CHECK IF OTHER WINDOWS USE IT AS DOT OR MARKS.       **/
         DEROOM(lp1);
@@ -464,28 +477,34 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         set_lused(lp2, get_lused(lp2) + n);
         cp2 = lgetcp(lp1, get_lused(lp1));
         cp1 = cp2 - n;
-        while ( cp1 > lgetcp(lp1, doto) )
+        while ( cp1 > lgetcp(lp1, doto) ) {
             *--cp2 = *--cp1;
+        }
     }
-    for ( i = 0; i < n; ++i )                  /* Add the characters  */
+    for ( i = 0; i < n; ++i ) {                 /* Add the characters */
         lputc(lp2, doto + i, c);
+    }
+
     /* in all screens.... */
     scrp = first_screen;
     while ( scrp ) {
         wp = scrp->s_first_window;
-        while ( wp != NULL ) {
-            if ( wp->w_linep == lp1 )
+        while ( wp != NULL )  {
+            if ( wp->w_linep == lp1 ) {
                 wp->w_linep = lp2;
-            if ( wp->w_dotp == lp1 ) {
-                wp->w_dotp = lp2;
-                if ( wp == curwp || get_w_doto(wp) > doto )
-                    set_w_doto(wp, get_w_doto(wp) + n);
             }
-            for ( cmark = 0; cmark < NMARKS; cmark++ ) {
-                if ( wp->w_markp[cmark] == lp1 ) {
+            if ( wp->w_dotp == lp1 )  {
+                wp->w_dotp = lp2;
+                if ( wp == curwp || get_w_doto(wp) > doto ) {
+                    set_w_doto(wp, get_w_doto(wp) + n);
+                }
+            }
+            for ( cmark = 0; cmark < NMARKS; cmark++ )  {
+                if ( wp->w_markp[cmark] == lp1 )  {
                     wp->w_markp[cmark] = lp2;
-                    if ( wp->w_marko[cmark] > doto )
+                    if ( wp->w_marko[cmark] > doto )  {
                         wp->w_marko[cmark] += n;
+                    }
                 }
             }
             wp = wp->w_wndp;
@@ -494,9 +513,10 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
         /* next screen! */
         scrp = scrp->s_next_screen;
     }
+
     /**lp1 = NULL;**/
 
-    return (TRUE);
+    return TRUE;
 }
 
 /* LOWRITE:

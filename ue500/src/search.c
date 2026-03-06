@@ -21,6 +21,23 @@
 #include "edef.h"
 #include "elang.h"
 
+/*====================================================================*/
+/*** TODO: Searches in MAGIC Mode will not recognize
+ ***       - '^' on the first and
+ ***       - '$' on the last line
+ ***       of a buffer.
+ ***
+ ***       Also `search and replace' of `$' will re-recognize `$' after
+ ***       text has been inserted: This should be avoided!
+ ***
+ ***       The code enclosed in the JES_REP_MAGIC_BORDER preprocessor
+ ***       conditional tries to repair this bug.
+ ***
+ ***       Test until 2026-04-05 than delete the JES_REP_MAGIC_BORDER.
+ ***/
+#define JES_REP_MAGIC_BORDER    ( 1 )
+
+
 /* BE CAREFUL: The related C-variable is `hilite', the macro variable
  * is `$hilight'  */
 #define SEARCH_HIGHLIGHT        (10)    /* mark # used to highlight   */
@@ -247,7 +264,11 @@ int PASCAL NEAR backhunt P2_(int, f, int, n)
  * "." to be at the start or just after the match string, and (perhaps)
  * repaint the display.
  */
-int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, repeats)
+int PASCAL NEAR mcscanner_ofs P5_(MC *, mcpatrn,
+                                  int,  direct,
+                                  int,  beg_or_end,
+                                  int,  repeats,
+                                  int,  offset)
 {
     LINE  *curline  = NULL;   /* current line during scan */
     int   curoff    = 0;      /* position within current line */
@@ -274,6 +295,10 @@ int PASCAL NEAR mcscanner P4_(MC *, mcpatrn, int, direct, int, beg_or_end, int, 
     /* Setup local scan pointers to global ".". */
     curline = curwp->w_dotp;
     curoff  = get_w_doto(curwp);
+
+    while ( 0 < offset-- && !boundry(curline, curoff, direct) ) {
+        nextch(&curline, &curoff, direct);
+    }
 
     /* Scan each character until we hit the head link record. */
     while ( !boundry(curline, curoff, direct) ) {
@@ -901,16 +926,24 @@ int PASCAL NEAR savematch P0_()
  */
 int PASCAL NEAR boundry P3_(LINE *, curline, int, curoff, int, dir)
 {
-    REGISTER int border;
+    REGISTER int  border  = 0;
 
+#if JES_REP_MAGIC_BORDER
+    if ( curbp->b_linep == curline )  {
+        border  = TRUE;
+    } else                            {
+        border  = FALSE;
+    }
+#else
     if ( dir == FORWARD ) {
         border = ( curoff == get_lused(curline) ) &&
                  (lforw(curline) == curbp->b_linep);
     } else {
         border = (curoff == 0) &&(lback(curline) == curbp->b_linep);
     }
+#endif
 
-    return (border);
+    return border;
 }
 
 /* NEXTCH:

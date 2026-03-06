@@ -608,11 +608,54 @@ BUFFER * PASCAL NEAR bfind P3_(CONST char *, bname, int, cflag, int, bflag)
 #endif
         bp->b_numargs = NOTPROC;
         bp->b_args = (PARG *)NULL;
+        /* THIS LINE IS ITS OWN PREDECESSOR AND ITS OWN SUCCESSOR ---
+         *
+         * BE CAREFUL: DONT TRUST ON PRECONDITIONS LIKE
+         * `lp->l_fp != lp' OR `lp->l_bp != lp':
+         *
+         * CREATED THE SUBROUTINE `subst_lines()' BELOW TO HANDLE
+         * THIS SITUATION.
+         */
         lp->l_fp = lp;
         lp->l_bp = lp;
     }
 
     return (bp);
+}
+
+/* SUBST_LINES:
+ *
+ * Prepare lp_old to be substituted by lp_new and be deallocated later.
+ *
+ * RETURN:
+ *  - TRUE:   Normal situation
+ *  - FALSE:  Old line was it's own predecessor or its own successor.
+ */
+int PASCAL NEAR subst_lines P2_(LINE *, lp_new, LINE *, lp_old)
+{
+    int   res   = TRUE;
+    LINE  *l_fp = lp_new;
+    LINE  *l_bp = lp_new;
+
+    ASRT(NULL != lp_old);
+    ASRT(NULL != lp_new);
+
+    if ( lp_old->l_fp == lp_old ) {
+        res = FALSE;
+    } else                        {
+        l_fp        = lp_old->l_fp;
+        l_fp->l_bp  = lp_new;
+    }
+    if ( lp_old->l_bp == lp_old ) {
+        res = FALSE;
+    } else                        {
+        l_bp        = lp_old->l_bp;
+        l_bp->l_fp  = lp_new;
+    }
+    lp_new->l_fp  = l_fp;
+    lp_new->l_bp  = l_bp;
+
+    return res;
 }
 
 /* BCLEAR:

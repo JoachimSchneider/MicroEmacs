@@ -1257,7 +1257,7 @@ char * cmd;                             /* Palette command      */
             return (1);
 
         /* Move color code to capability structure */
-        capbind[CAP_C0 + code].store = malloc(STRLEN(cp) + 1);
+        capbind[CAP_C0 + code].store = xmalloc(STRLEN(cp) + 1);
         if ( capbind[CAP_C0 + code].store )
             xstrcpy(capbind[CAP_C0 + code].store, cp);
     }

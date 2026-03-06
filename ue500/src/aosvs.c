@@ -1567,7 +1567,7 @@ char *dir_name;
     char t_name[$MXPL];
 
     err = 0;
-    dir_stream = (DIR *) malloc( SIZEOF (DIR) );
+    dir_stream = (DIR *) xmalloc( SIZEOF (DIR) );
     zero( (char *) dir_stream, SIZEOF (DIR) );
     zero( (char *) &aosvs$bsd_gnfn_pkt, SIZEOF (aosvs$bsd_gnfn_pkt) );
     zero( (char *) &gopen_pkt, SIZEOF (gopen_pkt) );
@@ -1579,7 +1579,7 @@ char *dir_name;
 
     /* Try to ?GOPEN the file. */
     if ( err = sys($GOPEN, &aosvs$ac0, &aosvs$ac1, &aosvs$ac2) ) {
-        free(dir_stream);       /* Error Will Robinson! Error! Error! */
+        xfree(dir_stream);      /* Error Will Robinson! Error! Error! */
 
         return (NULL);
     }
@@ -1589,7 +1589,7 @@ char *dir_name;
          (gopen_pkt.opty_type != $FCPD) ) { /* AOS/VS 7.62 directory types. */
         dir_stream->dd_fd = (int)gopen_pkt.opch;
         closedir(dir_stream);
-        free(dir_stream);       /* Error Will Robinson! Error! Error! */
+        xfree(dir_stream);      /* Error Will Robinson! Error! Error! */
 
         return (NULL);
     }
@@ -1615,7 +1615,7 @@ DIR *dir_stream;
     aosvs$ac0.in = 0;
     aosvs$ac1.in = dir_stream->dd_fd;   /* load channel number */
 
-    dptr = (struct direct *) malloc( SIZEOF (struct direct) );
+    dptr = (struct direct *) xmalloc( SIZEOF (struct direct) );
     zero( (char *)dptr, SIZEOF (struct direct) );
 
     if ( dir_stream->dd_loc )
@@ -1643,7 +1643,7 @@ DIR *dir_stream;
         return (dptr);
     }
 
-    free(dptr);
+    xfree(dptr);
 
     return (NULL);
 }
@@ -1870,11 +1870,11 @@ char *fspec;    /* pattern to match */
     /* clean up from our last time in here... */
     if ( gnfndir ) {
         closedir(gnfndir);
-        free(gnfndir);
+        xfree(gnfndir);
     }
 
     if ( gnfndirect )
-        free(gnfndirect);
+        xfree(gnfndirect);
 
     /* init. some things... */
     zero(gnfnpath, NFILEN);
@@ -1913,7 +1913,7 @@ char * PASCAL NEAR getnfile()
     /* and call for the next file */
     if ( ( gnfndirect = readdir(gnfndir) ) == NULL ) {
         closedir(gnfndir);
-        free(gnfndir);
+        xfree(gnfndir);
         gnfndir = NULL;
 
         return (NULL);
@@ -1923,7 +1923,7 @@ char * PASCAL NEAR getnfile()
     xstrcpy(gnfnrbuf, gnfnpath);
     xstrcat(gnfnrbuf, gnfndirect->d_name);
     mklower(gnfnrbuf);
-    free(gnfndirect);
+    xfree(gnfndirect);
     gnfndirect = NULL;
 
     return (gnfnrbuf);

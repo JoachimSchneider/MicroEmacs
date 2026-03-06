@@ -15,7 +15,6 @@
 
 /*====================================================================*/
 #include <stdio.h>
-#include <assert.h>
 #include "estruct.h"
 #if b_IS_UNIX /**CYGWIN**/
 # if ( !b_IS_ANCIENT_UNIX )
@@ -119,7 +118,7 @@ int PASCAL NEAR showcpos P2_(int, f, int, n)
 }
 
 /* GETLINENUM:
- * 
+ *
  * Get the a line number
  */
 long PASCAL NEAR getlinenum P2_(BUFFER *, bp, LINE *, sline)
@@ -1530,6 +1529,7 @@ int PASCAL NEAR lkp_color P1_(char *, sp)
 /* functions found in newer C libraries.                              */
 /*====================================================================*/
 
+/*--------------------------------------------------------------------*/
 /* We want to use a working `assert' inside of some of these
  * functions therefor we use the following construct:
  */
@@ -1537,6 +1537,278 @@ int PASCAL NEAR lkp_color P1_(char *, sp)
 # define  NDEBUG_WAS_DEFINED_
 # undef   NDEBUG
 #endif
+#include <assert.h>
+/*--------------------------------------------------------------------*/
+
+/*======================================================================
+ * Debug malloc and free:
+ *
+ * Additional features:
+ * - xmalloc() Zeros out the memory returned
+ * - the functions won't return NULL on error but abort() via assert()
+ *====================================================================*/
+#ifndef UEMACS_DEBUG_XMALLOC
+
+
+char * PASCAL NEAR  xmalloc_ P3_(int, size,
+                                 CONST char *, file, int, line)
+{
+    char  *res    = NULL;
+
+    if ( size <= 0 )  {
+        return NULL;
+    }
+    res = (char *)malloc(size);
+    assert(NULL != res);
+    memset(res, 0, size);
+
+    return  res;
+}
+
+VOID PASCAL NEAR  xfree_ P3_(char *, p,
+                             CONST char *, file, int, line)
+{
+    if ( NULL == p )  {
+        return;
+    }
+
+    free(p);
+
+    return;
+}
+
+char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
+                                  CONST char *, file, int, line)
+{
+    char  *res    = NULL;
+
+    if ( size < 0 ) {
+        return NULL;
+    }
+    if ( size == 0 )  {   /* As in GNU extension  */
+        xfree_(q, file, line);
+    }
+    res = (char *)realloc(q, size);
+    assert(NULL != res);
+
+    return res;
+}
+
+
+#else
+
+
+typedef struct  ptr_info_s {
+    char  *p;
+    int   size;
+} ptr_info_t;
+
+
+/*====================================================================*/
+/* By using the data structures and functions below i.e.              */
+/* - p_list_node_t                                                    */
+/* - {get,ins,del}_xmalloc_info()                                     */
+/* it will be possible to switch the linked list implementation to    */
+/* a more efficient hash table implemnentation if this is needed in   */
+/* the future.                                                        */
+/*====================================================================*/
+
+typedef struct p_list_node_s  p_list_node_t;
+
+typedef struct  p_list_node_s {
+    ptr_info_t    info;
+    p_list_node_t *next;
+} p_list_node_t;
+
+
+static p_list_node_t  *g_p_list = NULL;
+
+
+static ptr_info_t *get_xmalloc_info P1_(char *, q)
+{
+    p_list_node_t *node = g_p_list;
+
+    assert(NULL != q);
+
+    while ( NULL != node )  {
+        if ( q == node->info.p )  {
+            return &node->info;
+        } else              {
+            node  = node->next;
+        }
+    }
+
+    return NULL;
+}
+
+static int  del_xmalloc_info P1_(char *, q)
+{
+    p_list_node_t *node = g_p_list;
+    p_list_node_t *prev = NULL;
+
+    assert(NULL != q);
+
+    /* Special handling at start of search: */
+    if ( NULL == node ) {
+        return FALSE;
+    } else              {
+        if ( q == node->info.p )  {
+            g_p_list  = node->next;
+            memset(node, 0, sizeof(*node));
+            free(node);
+
+            return TRUE;
+        } else                    {
+            prev  = node;
+        }
+    }
+
+    while ( NULL != prev->next )  {
+        if ( q == prev->next->info.p )  {
+            node        = prev->next;
+            prev->next  = node->next;
+
+            memset(node, 0, sizeof(*node));
+            free(node);
+
+            return TRUE;
+        } else              {
+            prev  = prev->next;
+        }
+    }
+
+    return FALSE;
+}
+
+static int  ins_xmalloc_info P1_(ptr_info_t *, p_info)
+{
+    p_list_node_t *node = NULL;
+
+    assert(NULL != p_info);
+
+    if ( NULL != get_xmalloc_info(p_info->p) )  {
+        return FALSE;
+    }
+    node  = (p_list_node_t *)malloc(sizeof(*node));
+    assert(NULL != node);
+    memset(node, 0, sizeof(*node));
+    memcpy(&node->info, p_info, sizeof(node->info));
+    node->next  = g_p_list;
+    g_p_list  = node;
+
+    return TRUE;
+}
+
+/*====================================================================*/
+
+
+char * PASCAL NEAR  xmalloc_ P3_(int, size,
+                                 CONST char *, file, int, line)
+{
+    char        *res  = NULL;
+    ptr_info_t  info;
+
+    ZEROMEM(info);
+
+    if ( size <= 0 )  {
+        return NULL;
+    }
+    res = (char *)malloc(size);
+    assert(NULL != res);
+    memset(res, 0, size);
+    info.p    = res;
+    info.size = size;
+
+    if ( ! ins_xmalloc_info(&info) )  {
+        fflush(NULL);
+        fprintf(stderr,
+                "*** ERROR: xmalloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                file, line, "Pointer already registered");
+        abort();
+    }
+
+    HTCK(("xmalloc():  p = 0x%016lX, size = %8d",
+          (unsigned long int)res, (int)size), file, line);
+
+    return  res;
+}
+
+VOID PASCAL NEAR  xfree_ P3_(char *, p,
+                             CONST char *, file, int, line)
+{
+    ptr_info_t  *p_info = NULL;
+    ptr_info_t  info;
+
+    ZEROMEM(info);
+
+    if ( NULL == p )  {
+        return;
+    }
+
+    if ( NULL == (p_info = get_xmalloc_info(p)) ) {
+        fflush(NULL);
+        fprintf(stderr,
+                "*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                file, line, "Pointer to free not found");
+        abort();
+    }
+    memcpy(&info, p_info, sizeof(info));
+    if ( ! del_xmalloc_info(p) )  {
+        fflush(NULL);
+        fprintf(stderr,
+                "*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                file, line, "Pointer info not found");
+        abort();
+    }
+
+    /* Try to force SIGSEGV when accessing free'd memory: */
+    memset(info.p, 0, info.size);
+#ifndef UEMACS_DEBUG_XMALLOC_FREE_OFF
+    free(info.p);
+#endif
+
+    HTCK(("xfree():    p = 0x%016lX, size = %8d",
+          (unsigned long int)(info.p), (int)(info.size)), file, line);
+
+    return;
+}
+
+char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
+                                  CONST char *, file, int, line)
+{
+    char        *res    = NULL;
+    ptr_info_t  *p_info = NULL;
+
+    if ( size < 0 ) {
+        return NULL;
+    }
+    if ( size == 0 )  {   /* As in GNU extension  */
+        xfree_(q, file, line);
+    }
+    if ( NULL == q )  {
+        return  xmalloc_(size, file, line);
+    } else            {
+        if ( NULL == (p_info = get_xmalloc_info(q)) ) {
+            fflush(NULL);
+            fprintf(stderr,
+                    "*** ERROR: xrealloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                    file, line, "Pointer to re-allocate not found");
+            abort();
+        }
+        res = xmalloc_(size, file, line);
+        memcpy(res, q, MIN2(size, p_info->size));
+        xfree_(q, file, line);
+
+        HTCK(("xrealloc(): p = 0x%016lX, size = %8d",
+              (unsigned long int)res, (int)size), file, line);
+
+        return res;
+    }
+}
+
+
+#endif
+/*====================================================================*/
 
 
 /*======================================================================
@@ -1882,6 +2154,7 @@ FILE *uetmpfile_ P1_(int, delmode)
         if ( !delmode ) {
             CONST char  *fname  = NULL;
             FILE        *fp     = NULL;
+            char        *cp     = NULL;
 
             if ( NULL == (fname = gettmpfname("t")) ) {
                 TRC(("%s", "uetmpfile(): gettmpfname() failed"));
@@ -1908,16 +2181,23 @@ FILE *uetmpfile_ P1_(int, delmode)
                 while ( fname_list_pos >= fname_list_len )  {
                     fname_list_len  *= 2;
                 }
-                /* Avoid REROOM() in this very low level function and
-                 * take care of non standard realloc() behaviour:
+                /* Avoid REROOM() and even xrealloc in this very low
+                 * level function and be prepared for non standard
+                 * conforming behaviour of realloc, i.e. a
+                 * NULL argument:
                  */
                 if ( NULL == fname_list ) {
-                    ASRT( NULL != (fname_list = (CONST char **)calloc(fname_list_len, SIZEOF(*fname_list))));
+                    fname_list = (CONST char **)malloc(fname_list_len * SIZEOF(*fname_list));
                 } else                    {
-                    ASRT(NULL != (fname_list = (CONST char **)realloc(fname_list, fname_list_len * SIZEOF(*fname_list))));
+                    fname_list = (CONST char **)realloc(fname_list, fname_list_len * SIZEOF(*fname_list));
                 }
+                assert(NULL != fname_list);
             }
-            fname_list[fname_list_pos++]  = xstrdup(fname);
+
+            cp  = (char *)malloc(STRLEN(fname) + 1);
+            assert(NULL != cp);
+            xstrcpy(cp, fname); /**UNSAFE_OK**/
+            fname_list[fname_list_pos++]  = cp;
 #  endif
 
             return fp;
@@ -1926,9 +2206,9 @@ FILE *uetmpfile_ P1_(int, delmode)
 
             for ( i = 0; i < fname_list_pos; i++ )  {
                 umc_unlink(fname_list[i]);
-                FREE_(fname_list[i]);
+                free((VOIDP)(fname_list[i]));
             }
-            FREE_(fname_list);
+            free((VOIDP)fname_list);
 
             return NULL;
         }
@@ -2115,7 +2395,8 @@ int CDECL NEAR  xsnprintf V3_(char *, s, size_t, n, CONST char *, fmt)
 /* XVASPRINTF:
  *
  * Like GNU C vasprintf:
- * Allocate (using malloc()) a string large enough to hold the
+ *
+ * Allocate (using ROOM()) a string large enough to hold the
  * resulting string.
  */
 int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
@@ -2151,7 +2432,8 @@ int PASCAL NEAR xvasprintf P3_(char **, ret, CONST char *, fmt, va_list, ap)
 /* XASPRINTF:
  *
  * Like GNU C asprintf:
- * Allocate (using malloc()) a string large enough to hold the
+ *
+ * Allocate (using ROOM()) a string large enough to hold the
  * resulting string.
  */
 #if VARG
@@ -2253,8 +2535,8 @@ int CDECL NEAR  xasprintf V2_(char **, ret, CONST char *, fmt)
 
 /* YASPRINTF:
  *
- * Allocate (using malloc()) a string large enough to hold the
- * resulting string and return this string or NULL on error.
+ * Allocate (using ROOM()) a string large enough to hold the resulting
+ * string and return this string or NULL on error.
  */
 #if VARG
 CONST char * CDECL NEAR yasprintf (va_alist)
@@ -2480,8 +2762,8 @@ int PASCAL NEAR strend P2_(CONST char *, end, CONST char *, test)
 
 /* ACHRCAT:
  *
- * Concatenate character c to string str and malloc the result.
- * Input string must either be NULL or malloced.
+ * Concatenate character c to string str and ROOM the result. Input
+ * string must either be NULL or malloced.
  */
 char * PASCAL NEAR  achrcat P2_(CONST char *, str, CONST char, c)
 {
@@ -2503,8 +2785,8 @@ char * PASCAL NEAR  achrcat P2_(CONST char *, str, CONST char, c)
 
 /* ASTRCAT:
  *
- * Concatenate string d to string str and malloc the result.
- * Input string must either be NULL or malloced.
+ * Concatenate string d to string str and ROOM the result. Input string
+ * must either be NULL or obtained via ROOM().
  */
 char * PASCAL NEAR  astrcat P2_(CONST char *, str, CONST char *, s)
 {
@@ -2744,6 +3026,7 @@ CONST char *gettmpbufnam P0_()
 }
 
 
+/*--------------------------------------------------------------------*/
 /* We want to use a working `assert' inside of some of these
  * functions therefor we use the following construct:
  */
@@ -2751,6 +3034,8 @@ CONST char *gettmpbufnam P0_()
 # define  NDEBUG
 # undef   NDEBUG_WAS_DEFINED_
 #endif
+#include <assert.h>
+/*--------------------------------------------------------------------*/
 
 /*====================================================================*/
 
@@ -3299,10 +3584,11 @@ static int PASCAL NEAR  dsplen P1_(CONST char *, s)
     return  res;
 }
 
-/* Format the space separated words in input into a paragraph, where each
- * line starts with start and its length should not exceed fcol (except
- * if start + first word already exceed fcol).
- * The result will be allocated with malloc().
+/* Format the space separated words in input into a paragraph, where
+ * each line starts with start and its length should not exceed fcol
+ * (except if start + first word already exceed fcol).
+ *
+ * The result will be allocated with ROOM().
  *
  * The routine skips leading and ignores trailing blanks. Words may be
  * separated by one ore more blanks.

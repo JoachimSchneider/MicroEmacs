@@ -81,7 +81,7 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
         undo_size += (int)count;
 
     /* and allocate the memory */
-    up = (UNDO_OBJ *)calloc(undo_size, 1);  /* Don't use room() here  */
+    up = (UNDO_OBJ *)xmalloc(undo_size);  /* Don't use room() here  */
     if ( up == (UNDO_OBJ *)NULL )
         return;
 
@@ -513,14 +513,14 @@ VOID undo_dump P0_()
 static char *AirBag_  = NULL;
 
 /* ROOM:
- *
- * Allocate memory using malloc() on failure, discard oldest undo
+ * 
+ * Allocate memory using xmalloc() on failure, discard oldest undo
  * information and retry. Memory region is initialized to zero.
- *
+ * 
  * Return NULL on error.
  */
 char *room P3_(int, nbytes, CONST char *, file, int, line)
-/* nbytes:  Number of bytes to malloc() */
+/* nbytes:  Number of bytes to xmalloc() */
 {
     char      *ptr  = NULL;   /* temporary pointer */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from */
@@ -532,7 +532,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
     if ( firstcall )  {
         firstcall = 0;
 
-        ASRT( NULL != (AirBag_ = (char *)malloc(AIRBAG_SIZE_)) );
+        ASRT( NULL != (AirBag_ = (char *)xmalloc_(AIRBAG_SIZE_, file, line)) );
     }
 
     ASRT(0 <= nbytes);
@@ -541,7 +541,7 @@ char *room P3_(int, nbytes, CONST char *, file, int, line)
     ptr = NULL;
     for ( ;; )  {
         /* attempt to allocate the memory */
-        ptr = (char *)malloc(nbytes);
+        ptr = (char *)xmalloc_(nbytes, file, line);
         if ( ptr != NULL )  {
             umc_memset(ptr, 0, nbytes);
 
@@ -586,14 +586,14 @@ nextbuf:
 }
 
 /* XROOM:
- *
- * Allocate memory using malloc() on failure, discard oldest undo
+ * 
+ * Allocate memory using xmalloc() on failure, discard oldest undo
  * information and retry. Memory region is initialized to zero.
- *
+ * 
  * On Error: Write a message to Message-Line/STDERR/Trace and abort().
  */
 char *xroom P3_(int, nbytes, CONST char *, file, int, line)
-/* nbytes:  Number of bytes to malloc() */
+/* nbytes:  Number of bytes to xmalloc() */
 {
     char  *res  = NULL;
 
@@ -614,15 +614,15 @@ char *xroom P3_(int, nbytes, CONST char *, file, int, line)
 }
 
 /* REROOM:
- *
- * Allocate memory using realloc() on failure, discard oldest undo
+ * 
+ * Allocate memory using xrealloc() on failure, discard oldest undo
  * information and retry
- *
+ * 
  * Return NULL on error.
  */
 char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
-/* orig_ptr:  Pointer to re-allocate      */
-/* nbytes:    Number of bytes to malloc() */
+/* orig_ptr:  Pointer to re-allocate        */
+/* nbytes:    Number of bytes to xmalloc()  */
 {
     char      *ptr  = NULL;   /* temporary pointer              */
     BUFFER    *bp   = NULL;   /* buffer to dealloc memory from  */
@@ -632,10 +632,9 @@ char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
     ASRT(0 <= nbytes);
     if ( 0 >= nbytes ) return NULL;
 
-    /*
-     * Avoid the whole problem of non-ANSI realloc() functions that don't handle
-     * NULL pointers correctly by calling malloc() (by way of room()) directly
-     * if orig_ptr is NULL.
+    /* Avoid the whole problem of non-ANSI realloc() functions that
+     * don't handle NULL pointers correctly by calling xmalloc() (by
+     * way of room()) directly if orig_ptr is NULL.
      */
     if ( orig_ptr == NULL ) {
         return ( room(nbytes, file, line) );
@@ -644,7 +643,7 @@ char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
     /* ptr == NULL  */
     for ( ;; )  {
         /* attempt to allocate the memory */
-        ptr = (char *)realloc(orig_ptr, nbytes);
+        ptr = (char *)xrealloc(orig_ptr, nbytes);
         if ( ptr != NULL )  {
             return ptr;
         }
@@ -693,8 +692,8 @@ nxtbuf:
  * On Error: Write a message to Message-Line/STDERR/Trace and abort().
  */
 char *xreroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
-/* orig_ptr:  Pointer to re-allocate      */
-/* nbytes:    Number of bytes to malloc() */
+/* orig_ptr:  Pointer to re-allocate        */
+/* nbytes:    Number of bytes to xmalloc()  */
 {
     char  *res  = NULL;
 
@@ -721,7 +720,7 @@ char *xreroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
 VOID deroom P3_(VOIDP, p, CONST char *, file, int, line)
 {
     if ( NULL != p )  {
-        free(p);
+        xfree_(p, file, line);
     }
 }
 /**********************************************************************/
