@@ -144,7 +144,7 @@ int PASCAL NEAR viewfile P2_(int, f, int, n)
  *
  * Reset the encryption key if needed
  */
-int PASCAL NEAR resetkey P0_()
+static int PASCAL NEAR  resetkey P1_(BUFFER *, bp)
 {
     REGISTER int s;     /* return status */
 
@@ -152,11 +152,11 @@ int PASCAL NEAR resetkey P0_()
     cryptflag = FALSE;
 
     /* if we are in crypt mode */
-    if ( curbp->b_mode & MDCRYPT ) {
-        if ( curbp->b_key[0] == 0 ) {
-            s = setekey(FALSE, 0);
+    if ( bp->b_mode & MDCRYPT ) {
+        if ( bp->b_key[0] == 0 ) {
+            s = bufsetekey(FALSE, 0, bp);
             if ( s != TRUE )
-                return (s);
+                return s;
         }
 
         /* let others know... */
@@ -165,11 +165,11 @@ int PASCAL NEAR resetkey P0_()
         /* and set up the key to be used! */
         /* de-encrypt it */
         ecrypt( (char *)NULL, 0 );
-        ecrypt( curbp->b_key, STRLEN(curbp->b_key) );
+        ecrypt( bp->b_key, STRLEN(bp->b_key) );
 
         /* re-encrypt it...seeding it to start */
         ecrypt( (char *)NULL, 0 );
-        ecrypt( curbp->b_key, STRLEN(curbp->b_key) );
+        ecrypt( bp->b_key, STRLEN(bp->b_key) );
     }
 
     return (TRUE);
@@ -322,14 +322,14 @@ int PASCAL NEAR readinx P5_(const char *, fname,
 
     /* let a user macro get hold of things...if he wants */
     if ( hook ) {
-        execkey(&readhook, FALSE, 1);
+        execkey_(&readhook, FALSE, 1, bp);
     }
 
 #if     CRYPT
     /* set up for decryption */
-    s = resetkey();
+    s = resetkey(bp);
     if ( s != TRUE )  {
-        return (s);
+        return s;
     }
 #endif
 
@@ -671,7 +671,7 @@ int PASCAL NEAR writeout P2_(CONST char *, fn, CONST char *, mode)
 
 #if     CRYPT
     /* set up for file encryption */
-    status = resetkey();
+    status = resetkey(curbp);
     if ( status != TRUE )
         return (status);
 #endif
@@ -810,16 +810,14 @@ int PASCAL NEAR ifile P1_(CONST char *, fname)
     REGISTER LINE *lp1;
     REGISTER LINE *lp2;
     REGISTER int i;
-    REGISTER BUFFER *bp;
     REGISTER int s;
     REGISTER long nline;
     int nbytes;
     int cmark;          /* current mark */
     char mesg[NSTRING];
 
-    bp = curbp;                                 /* Cheap.       */
-    bp->b_flag |= BFCHG;                        /* we have changed  */
-    bp->b_flag &= ~BFINVS;                      /* and are not temporary*/
+    curbp->b_flag |= BFCHG;                     /* we have changed  */
+    curbp->b_flag &= ~BFINVS;                   /* and are not temporary*/
     if ( ( s=ffropen(fname) ) == FIOERR )       /* Hard file open.  */
         goto out;
     if ( s == FIOFNF ) {                        /* File not found.  */
@@ -832,7 +830,7 @@ int PASCAL NEAR ifile P1_(CONST char *, fname)
 /*              "[Inserting file]" */
 
 #if     CRYPT
-    s = resetkey();
+    s = resetkey(curbp);
     if ( s != TRUE )
         return (s);
 

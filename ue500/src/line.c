@@ -221,9 +221,7 @@ int PASCAL NEAR lfree P1_(LINE *, lp)
     REGISTER EWINDOW  *wp     = NULL;
     REGISTER int      cmark   = 0;    /* current mark               */
 
-    if ( NULL == lp ) {
-        return 0;
-    }
+    ASRT(NULL != lp);
 
     /* in all screens.... */
     scrp = first_screen;
@@ -265,8 +263,7 @@ int PASCAL NEAR lfree P1_(LINE *, lp)
         }
         bp = bp->b_bufp;
     }
-    lp->l_bp->l_fp = lp->l_fp;
-    lp->l_fp->l_bp = lp->l_bp;
+    unlink_line(lp);
     CLROOM(lp);
 #if     WINDOW_MSWIN
     {
@@ -316,6 +313,7 @@ int PASCAL NEAR lchange P1_(int, flag)
         /* next screen! */
         scrp = scrp->s_next_screen;
     }
+
 
     return 0;
 }
@@ -389,8 +387,8 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     REGISTER int      doto  = 0;
     REGISTER int      i     = 0;
     REGISTER EWINDOW  *wp   = NULL;
-    SCREEN_T          *scrp = NULL; /* screen to fix pointers in  */
-    int               cmark = 0;    /* current mark               */
+    SCREEN_T          *scrp = NULL;   /* screen to fix pointers in    */
+    int               cmark = 0;      /* current mark                 */
 
     if ( curbp->b_mode & MDVIEW ) {   /* don't allow this command if  */
         return rdonly();              /* we are in read only mode     */
@@ -420,11 +418,8 @@ int PASCAL NEAR linsert P2_(int, n, char, c)
     /* mark the current window's buffer as changed */
     lchange(WFEDIT);
 
-    lp1 = curwp->w_dotp;                            /* Current line   */
-    /* We use `curwp->w_bufp' instead of `curbp' as these are not
-     * always syncronized
-     */
-    if ( lp1 == curwp->w_bufp->b_linep )  {   /* At the end: special  */
+    lp1 = curwp->w_dotp;              /* Current line         */
+    if ( lp1 == curbp->b_linep )  {   /* At the end: special  */
         if ( get_w_doto(curwp) != 0 ) {
             mlwrite(TEXT170);
 /*                  "bug: linsert" */
@@ -573,11 +568,11 @@ int PASCAL NEAR lnewline P0_()
     REGISTER LINE     *lp2  = NULL;
     REGISTER int      doto  = 0;
     REGISTER EWINDOW  *wp   = NULL;
-    SCREEN_T          *scrp = NULL;     /* screen to fix pointers in  */
-    int               cmark = 0;        /* current mark               */
+    SCREEN_T          *scrp = NULL;   /* screen to fix pointers in    */
+    int               cmark = 0;      /* current mark                 */
 
-    if ( curbp->b_mode&MDVIEW )         /* don't allow this command if  */
-        return ( rdonly() );            /* we are in read only mode     */
+    if ( curbp->b_mode&MDVIEW )       /* don't allow this command if  */
+        return ( rdonly() );          /* we are in read only mode     */
 
 #if JES_REP_EOB_LN
 # if UEMACS_FEATURE_SMART_EOW_NL
@@ -718,18 +713,18 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
     REGISTER EWINDOW  *wp   = NULL;
     REGISTER int      cmark = 0;  /* current mark */
 
-    if ( curbp->b_mode&MDVIEW )   /* don't allow this command if  */
-        return ( rdonly() );      /* we are in read only mode     */
+    if ( curbp->b_mode&MDVIEW ) {   /* don't allow this command if  */
+        return rdonly();            /* we are in read only mode     */
+    }
 
     /* going Forward? */
     if ( n >= 0 ) {
-
         while ( n > 0 ) {
 #if     DBCS
             /* never start forward on a 2 byte char */
             if ( get_w_doto(curwp) > 0 &&
-                 is2byte(lgetcp(curwp->w_dotp,                 0),
-                         lgetcp(curwp->w_dotp, get_w_doto(curwp) - 1)) ) {
+                 is2byte(lgetcp(curwp->w_dotp,                     0),
+                         lgetcp(curwp->w_dotp, get_w_doto(curwp) - 1)) )  {
                 set_w_doto(curwp, get_w_doto(curwp) - 1);
                 n++;
             }
@@ -745,22 +740,24 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
 #endif
 
             /* can't delete past the end of the buffer */
-            if ( dotp == curbp->b_linep )
-                return (FALSE);
+            if ( dotp == curbp->b_linep ) {
+                return FALSE;
+            }
 
             /* find out how many chars to delete on this line */
             chunk = get_lused(dotp) - doto;   /* Size of chunk.   */
-            if ( chunk > n )
+            if ( chunk > n )  {
                 chunk = n;
+            }
 
             /* if at the end of a line, merge with the next */
             if ( chunk == 0 ) {
-
                 /* flag that we are making a hard change */
                 lchange(WFHARD);
                 if ( ldelnewline() == FALSE ||
-                     (kflag != FALSE &&kinsert(FORWARD, '\r')==FALSE) )
-                    return (FALSE);
+                     (kflag != FALSE && kinsert(FORWARD, '\r') == FALSE)) {
+                    return FALSE;
+                }
 
                 --n;
                 continue;
@@ -774,7 +771,7 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
             cp2 = cp1 + chunk;
 #if     DBCS
             /* never leave half a character */
-            if ( is2byte(lgetcp(dotp, 0), cp2 - 1) ) {
+            if ( is2byte(lgetcp(dotp, 0), cp2 - 1) )  {
                 ++chunk;
                 ++cp2;
                 ++n;
@@ -789,9 +786,10 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
 
             /* save the text to the kill buffer */
             if ( kflag != FALSE ) {
-                while ( cp1 != cp2 ) {
-                    if ( kinsert(FORWARD, *cp1) == FALSE )
-                        return (FALSE);
+                while ( cp1 != cp2 )  {
+                    if ( kinsert(FORWARD, *cp1) == FALSE )  {
+                        return FALSE;
+                    }
 
                     ++cp1;
                 }
@@ -799,27 +797,28 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
             }
 
             /* copy what is left of the line upward */
-            while ( cp2 < lgetcp(dotp, get_lused(dotp)) )
+            while ( cp2 < lgetcp(dotp, get_lused(dotp)) ) {
                 *cp1++ = *cp2++;
+            }
             /* See `ASRT(0 <= get_lused(dotp) - doto)' above. */
             set_lused(dotp, get_lused(dotp) - chunk);
 
             /* fix any other windows with the same text displayed */
             wp = wheadp;
-            while ( wp != NULL ) {
-
+            while ( wp != NULL )  {
                 /* reset the dot if needed */
                 if ( wp->w_dotp==dotp && get_w_doto(wp) >= doto ) {
                     set_w_doto(wp, MAX2(get_w_doto(wp) - chunk, doto));
                 }
 
                 /* reset any marks if needed */
-                for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+                for ( cmark = 0; cmark < NMARKS; cmark++ )  {
                     if ( wp->w_markp[cmark]==dotp &&
                          wp->w_marko[cmark]>=doto ) {
                         wp->w_marko[cmark] -= chunk;
-                        if ( wp->w_marko[cmark] < doto )
+                        if ( wp->w_marko[cmark] < doto )  {
                             wp->w_marko[cmark] = doto;
+                        }
                     }
                 }
 
@@ -835,8 +834,8 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
 #if     DBCS
             /* never start backwards on the 1st of a 2 byte character */
             if ( get_w_doto(curwp) > 1 &&
-                 is2byte(lgetcp(curwp->w_dotp,                 0),
-                         lgetcp(curwp->w_dotp, get_w_doto(curwp) - 1)) ) {
+                 is2byte(lgetcp(curwp->w_dotp,                     0),
+                         lgetcp(curwp->w_dotp, get_w_doto(curwp) - 1)) )  {
                 set_w_doto(curwp, get_w_doto(curwp) + 1);
                 n--;
             }
@@ -846,23 +845,25 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
             doto = get_w_doto(curwp);
 
             /* can't delete past the beginning of the buffer */
-            if ( dotp == lforw(curbp->b_linep) && (doto == 0) )
-                return (FALSE);
+            if ( dotp == lforw(curbp->b_linep) && (doto == 0) ) {
+                return FALSE;
+            }
 
             /* find out how many chars to delete on this line */
-            chunk = doto;                       /* Size of chunk.   */
-            if ( chunk > -n )
+            chunk = doto;                       /* Size of chunk. */
+            if ( chunk > -n ) {
                 chunk = -n;
+            }
 
             /* if at the beginning of a line, merge with the last */
             if ( chunk == 0 ) {
-
                 /* flag that we are making a hard change */
                 lchange(WFHARD);
                 backchar(TRUE, 1);
                 if ( ldelnewline() == FALSE ||
-                     (kflag != FALSE &&kinsert(REVERSE, '\r')==FALSE) )
-                    return (FALSE);
+                     (kflag != FALSE &&kinsert(REVERSE, '\r')==FALSE) ) {
+                    return FALSE;
+                }
 
                 ++n;
                 continue;
@@ -875,7 +876,7 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
             cp1 = lgetcp(dotp, doto);
             cp2 = cp1 - chunk;
 #if     DBCS
-            if ( is2byte(lgetcp(dotp, 0), cp2 - 1) ) {
+            if ( is2byte(lgetcp(dotp, 0), cp2 - 1) )  {
                 ++chunk;
                 --cp2;
                 ++n;
@@ -893,36 +894,39 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
             /* save the text to the kill buffer */
             if ( kflag != FALSE ) {
                 while ( cp1 > cp2 ) {
-                    if ( kinsert( REVERSE, *(--cp1) ) == FALSE )
-                        return (FALSE);
+                    if ( kinsert( REVERSE, *(--cp1) ) == FALSE )  {
+                        return FALSE;
+                    }
                 }
                 cp1 = lgetcp(dotp, doto);
             }
 
             /* copy what is left of the line downward */
-            while ( cp1 < lgetcp(dotp, get_lused(dotp)) )
+            while ( cp1 < lgetcp(dotp, get_lused(dotp)) ) {
                 *cp2++ = *cp1++;
+            }
             set_lused(dotp, get_lused(dotp) - chunk);
             set_w_doto(curwp, get_w_doto(curwp) - chunk);
 
             /* fix any other windows with the same text displayed */
             wp = wheadp;
-            while ( wp != NULL ) {
-
+            while ( wp != NULL )  {
                 /* reset the dot if needed */
                 if ( wp->w_dotp==dotp && get_w_doto(wp) >= doto ) {
                     set_w_doto(wp, get_w_doto(wp) - chunk);
-                    if ( get_w_doto(wp) < doto )
+                    if ( get_w_doto(wp) < doto )  {
                         set_w_doto(wp, doto);
+                    }
                 }
 
                 /* reset any marks if needed */
-                for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+                for ( cmark = 0; cmark < NMARKS; cmark++ )  {
                     if ( wp->w_markp[cmark]==dotp &&
                          wp->w_marko[cmark]>=doto ) {
                         wp->w_marko[cmark] -= chunk;
-                        if ( wp->w_marko[cmark] < doto )
+                        if ( wp->w_marko[cmark] < doto )  {
                             wp->w_marko[cmark] = doto;
+                        }
                     }
                 }
 
@@ -935,7 +939,7 @@ int PASCAL NEAR ldelete P2_(long, n, int, kflag)
         }
     }
 
-    return (TRUE);
+    return TRUE;
 }
 
 /* GETCTEXT:
@@ -1017,8 +1021,8 @@ int PASCAL NEAR ldelnewline P0_()
 
     lp1 = curwp->w_dotp;
     lp2 = lp1->l_fp;
-    if ( lp2 == curbp->b_linep ) {              /* At the buffer end.   */
-        if ( get_lused(lp1) == 0 )              /* Blank line.          */
+    if ( lp2 == curbp->b_linep ) {            /* At the buffer end.   */
+        if ( get_lused(lp1) == 0 )            /* Blank line.          */
             lfree(lp1);
 
         return (TRUE);
@@ -1032,7 +1036,6 @@ int PASCAL NEAR ldelnewline P0_()
         /* in all screens.... */
         scrp = first_screen;
         while ( scrp ) {
-
             wp = scrp->s_first_window;
             while ( wp != NULL ) {
                 if ( wp->w_linep == lp2 )
@@ -1079,7 +1082,6 @@ int PASCAL NEAR ldelnewline P0_()
     /* in all screens.... */
     scrp = first_screen;
     while ( scrp ) {
-
         wp = scrp->s_first_window;
         while ( wp != NULL ) {
             if ( wp->w_linep==lp1 || wp->w_linep==lp2 )

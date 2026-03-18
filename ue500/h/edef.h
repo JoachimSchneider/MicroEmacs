@@ -166,6 +166,7 @@ DCLDEF NOSHARE int            notquiescent        INIT_(1);             /* <=0 o
                                                                          * by editloop()                    */
 DCLDEF NOSHARE int            fbusy               INIT_(FALSE);         /* indicates file activity if FREADING or FWRITING.
                                                                          * Used by abort mechanism          */
+DCLDEF NOSHARE int            in_swbuffer         INIT_(FALSE);         /* We are switching buffers now     */
 DCLDEF NOSHARE int            hilite              INIT_(10);            /* current region to highlight (255 if none)  */
 #define hilite_IsValid()      ( 0 <= hilite && hilite < NMARKS - 1 )
 #define hilite_InValidate()   ( hilite = 0xFF )
@@ -193,7 +194,10 @@ DCLDEF NOSHARE int            thisflag;           /* Flags, this command        
 DCLDEF NOSHARE int            lastflag;           /* Flags, last command                    */
 DCLDEF NOSHARE int            curgoal;            /* Goal for C-P, C-N                      */
 DCLDEF NOSHARE EWINDOW        *curwp;             /* Current window                         */
+/**TODO: Remove completely undit 2026-04-16**/
+#if BEGIN_COMMENT_
 DCLDEF NOSHARE BUFFER         *curbp;             /* Current buffer                         */
+#endif
 DCLDEF NOSHARE EWINDOW        *wheadp;            /* Head of list of windows                */
 DCLDEF NOSHARE BUFFER         *bheadp;            /* Head of list of buffers                */
 DCLDEF NOSHARE UTABLE         *uv_head;           /* head of list of user variables         */

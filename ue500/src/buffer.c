@@ -52,7 +52,7 @@ int PASCAL NEAR usebuffer P2_(int, f, int, n)
     }
 
     /* switch to it in any case */
-    return ( swbuffer(bp) );
+    return swbuffer(bp);
 }
 
 /* NEXTBUFFER:
@@ -85,6 +85,87 @@ int PASCAL NEAR nextbuffer P2_(int, f, int, n)
     return (status);
 }
 
+
+/*======================================================================
+ *
+ * We use setcurbp()/getcurbp() here because it is possible to trigger
+ * siutuations were `g_curbp != curwp->w_bufp', e.g:
+ *
+ * .emacsrc:
+ * ```
+ * store-procedure set-default-mode
+ *         insert-string X
+ * !endm
+ * set $readhook set-default-mode
+ * ```
+ *
+ * And then call `emacs /tmp/X.c': This would lead to such a diference
+ * in line.c::linsert() at
+ * ```
+ *   lp1 = curwp->w_dotp;              /o Current line         o/
+ *   if ( lp1 == curbp->b_linep )  {   /o At the end: special  o/
+ * ```
+ * leading to a lot of confusion.
+ *====================================================================*/
+
+static BUFFER *g_curbp  = NULL;
+
+/* SETCURBP:
+ *
+ * Set effective current buffer pointer
+ */
+VOID PASCAL NEAR  setcurbp_ P3_(BUFFER *, in, char *, file, int, line)
+{
+    TRCK(("Setting g_curbp = %p", in), file, line);
+
+    g_curbp = in;
+}
+
+/* GETCURBP:
+ *
+ * Get effective current buffer pointer
+ */
+BUFFER * PASCAL NEAR  getcurbp_ P2_(CONST char *, file, int, line)
+{
+    if ( in_swbuffer )  {
+        if ( NULL != curwp && NULL != curwp->w_bufp ) {
+            if ( g_curbp != curwp->w_bufp ) {
+                TRCK(("%s", "Called in swbuffer()"), file, line);
+                TRCK(("g_curbp(%s) = %p and curwp->w_bufp(%s) = %p differ",
+                      g_curbp->b_bname, g_curbp, curwp->w_bufp->b_bname, curwp->w_bufp),
+                      file, line);
+                TRCK(("curwp->w_bufp->last_access = %ld, g_curbp->last_access = %ld",
+                      curwp->w_bufp->last_access, g_curbp->last_access), file, line);
+            }
+
+            return curwp->w_bufp;
+        }
+
+        TRCK(("%s", "Called in swbuffer()"), file, line);
+        TRCK(("curwp->w_bufp invalid: curwp: %p, returning g_curbp: %p",
+              curwp, g_curbp), file, line);
+
+        return g_curbp;
+    } else              {
+        if ( NULL != curwp && NULL != curwp->w_bufp ) {
+            if ( g_curbp != curwp->w_bufp ) {
+                TRCK(("%s", "Called outside of swbuffer()"), file, line);
+                TRCK(("g_curbp(%s) = %p and curwp->w_bufp(%s) = %p differ",
+                      g_curbp->b_bname, g_curbp, curwp->w_bufp->b_bname, curwp->w_bufp),
+                      file, line);
+            }
+        } else                                        {
+            TRCK(("%s", "Called outside of swbuffer()"), file, line);
+            TRCK(("curwp->w_bufp invalid: curwp: %p", curwp), file, line);
+        }
+
+        return g_curbp;
+    }
+}
+
+/*====================================================================*/
+
+
 /* SWBUFFER:
  *
  * Make buffer BP current
@@ -113,19 +194,21 @@ int PASCAL NEAR swbuffer P1_(BUFFER *, bp)
     /* let time march forward! */
     access_time++;
 
-    curbp = bp;                                 /* Switch.      */
+    in_swbuffer = TRUE;
+
+    setcurbp(bp);                             /* Switch.              */
     bp->last_access = access_time;
-    if ( curbp->b_active != TRUE ) {            /* buffer not active yet*/
+    if ( bp->b_active != TRUE ) {           /* buffer not active yet  */
         /* read it in and activate it */
-        readin( curbp->b_fname, ( (curbp->b_mode&MDVIEW) == 0 ) );
-        curbp->b_dotp = lforw(curbp->b_linep);
-        set_b_doto(curbp, 0);
-        curbp->b_active = TRUE;
+        readinbuf(bp->b_fname, ((bp->b_mode&MDVIEW) == 0), bp);
+        bp->b_dotp = lforw(bp->b_linep);
+        set_b_doto(bp, 0);
+        bp->b_active = TRUE;
     }
     curwp->w_bufp  = bp;
-    curwp->w_linep = bp->b_linep;               /* For macros, ignored. */
-    curwp->w_flag |= WFMODE|WFFORCE|WFHARD;     /* Quite nasty.     */
-    if ( bp->b_nwnd++ == 0 ) {                  /* First use.       */
+    curwp->w_linep = bp->b_linep;             /* For macros, ignored. */
+    curwp->w_flag |= WFMODE|WFFORCE|WFHARD;   /* Quite nasty.         */
+    if ( bp->b_nwnd++ == 0 ) {                /* First use.           */
         curwp->w_dotp  = bp->b_dotp;
         set_w_doto(curwp, get_b_doto(bp));
         for ( cmark = 0; cmark < NMARKS; cmark++ ) {
@@ -157,6 +240,8 @@ int PASCAL NEAR swbuffer P1_(BUFFER *, bp)
             scrp = scrp->s_next_screen;
         }
     }
+
+    in_swbuffer = FALSE;
 
     /* let a user macro get hold of things...if he wants */
     execkey(&bufhook, FALSE, 1);
@@ -658,6 +743,41 @@ int PASCAL NEAR subst_lines P2_(LINE *, lp_new, LINE *, lp_old)
     return res;
 }
 
+/* UNLINK_LINE:
+ *
+ * Unlink lp from ringbuffer an close ringbuffer if possible
+ *
+ * RETURN:
+ *  - TRUE:   Normal situation: ringbuffer could be closed
+ *  - FALSE:  Old line was it's own predecessor or its own successor:
+ *            Ringbuffer could not be closed
+ */
+int PASCAL NEAR unlink_line P1_(LINE *, lp)
+{
+    ASRT(NULL != lp);
+
+    if        ( lp->l_bp != lp && lp->l_fp != lp )  {
+        lp->l_bp->l_fp  = lp->l_fp;
+        lp->l_fp->l_bp  = lp->l_bp;
+
+        return TRUE;
+    } else if  (lp->l_bp == lp && lp->l_fp == lp )  {
+        return FALSE;
+    } else if  (lp->l_bp != lp && lp->l_fp == lp )  {
+        lp->l_bp->l_fp  = lp->l_bp;
+
+        return FALSE;
+    } else if  (lp->l_bp == lp && lp->l_fp != lp )  {
+        lp->l_fp->l_bp  = lp->l_fp;
+
+        return FALSE;
+    } else                                          {
+        ASRT(IMPOSSIBLE);
+
+        return FALSE;
+    }
+}
+
 /* BCLEAR:
  *
  * This routine blows away all of the text in a buffer. If the buffer is marked
@@ -668,8 +788,7 @@ int PASCAL NEAR subst_lines P2_(LINE *, lp_new, LINE *, lp_old)
  */
 int PASCAL NEAR bclear P1_(BUFFER *, bp)
 {
-    REGISTER LINE *lp   = NULL;
-    int           cmark = 0;      /* current mark */
+    int cmark = 0;    /* current mark */
 
     ASRT(NULL != bp);
 
@@ -681,8 +800,9 @@ int PASCAL NEAR bclear P1_(BUFFER *, bp)
     }
 
     bp->b_flag  &= ~BFCHG;                    /* Not changed          */
-    while ( ( lp=lforw(bp->b_linep) ) != bp->b_linep )  {
-        lfree(lp);
+    /* Yes, it's a bit subtle, but it works:  */
+    while ( lforw(bp->b_linep) != bp->b_linep ) {
+        lfree(lforw(bp->b_linep));
     }
     bp->b_dotp  = bp->b_linep;                /* Fix "."              */
     set_b_doto(bp, 0);

@@ -1121,9 +1121,10 @@ CONST char * PASCAL NEAR transbind P1_(CONST char *, skey)
  *
  * Execute a function bound to a key
  */
-int PASCAL NEAR execkey P3_(KEYTAB *, key, int , f, int, n)
-/* key:   Key to execute          */
-/* f, n:  Arguments to C function */
+int PASCAL NEAR execkey_ P4_(KEYTAB *, key, int , f, int, n, BUFFER *, bp)
+/* key:   Key to execute                                      */
+/* f, n:  Arguments to C function                             */
+/* bp:    Buffer for which undo information will be recorded  */
 {
     REGISTER int  status;       /* error return */
     char          outseq[32];
@@ -1135,7 +1136,7 @@ int PASCAL NEAR execkey P3_(KEYTAB *, key, int , f, int, n)
         getecnam(key->k_code, &outseq[0], SIZEOF(outseq));
         MTC(("<[%s] %s %s %d>", outseq, getfname(key),
              f == TRUE ? "TRUE" : "FALSE", n));
-        undo_insert(OP_CMND, 1, obj);
+        undo_insert_(OP_CMND, 1, obj, bp);
 
         return ( ( *(key->k_ptr.fp) )(f, n) );
     }

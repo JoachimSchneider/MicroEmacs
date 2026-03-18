@@ -23,12 +23,13 @@
 
 static int PASCAL NEAR mod95 DCL((int));
 
-/* SETEKEY:
+/* BUFSETEKEY:
  *
- * Reset encryption key of current buffer
+ * Reset encryption key of buffer
  */
-int PASCAL NEAR setekey P2_(int, f, int, n)
+int PASCAL NEAR bufsetekey P3_(int, f, int, n, BUFFER *, bp)
 /* f, n:  Default flag and argument */
+/* bp:    Buffer to work with       */
 {
     REGISTER int status;        /* return status */
     int odisinp;                /* original vlaue of disinp */
@@ -50,10 +51,20 @@ int PASCAL NEAR setekey P2_(int, f, int, n)
     ecrypt( key, (unsigned int) STRLEN(key) );
 
     /* and save it off */
-    XSTRCPY(curbp->b_key, key);
+    XSTRCPY(bp->b_key, key);
     mlwrite(" ");               /* clear it off the bottom line */
 
     return (TRUE);
+}
+
+/* SETEKEY:
+ *
+ * Reset encryption key of current buffer
+ */
+int PASCAL NEAR setekey P2_(int, f, int, n)
+/* f, n:  Default flag and argument */
+{
+    return bufsetekey(f, n, curbp);
 }
 
 /**********

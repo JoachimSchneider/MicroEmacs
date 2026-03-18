@@ -44,7 +44,7 @@ static int PASCAL NEAR  undolist DCL((void));
  * Insert an editing operation at the top of the current buffer's
  * undo stack.
  */
-VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
+VOID undo_insert_ P4_(OPTYPE, op_type, long, count, OBJECT, op_erand, BUFFER *, bp)
 /* op_type:   Type of operation being recorded  */
 /* count:     Operand count                     */
 /* op_erand:  The operand of the operation      */
@@ -62,15 +62,15 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
 
     /* if it is a command object, and the last one pushed was one as well, don't
      * bother */
-    if ( (curbp->undo_head != (UNDO_OBJ *)NULL) &&(op_type == OP_CMND) &&
-         (curbp->undo_head->type == OP_CMND) )
+    if ( (bp->undo_head != (UNDO_OBJ *)NULL) &&(op_type == OP_CMND) &&
+         (bp->undo_head->type == OP_CMND) )
         return;
 
     /* if it is a insert char, and the last one pushed was one as well, just
      * increment its count */
-    if ( (curbp->undo_head != (UNDO_OBJ *)NULL) &&(op_type == OP_INSC) &&
-         (curbp->undo_head->type == OP_INSC) ) {
-        curbp->undo_head->count++;
+    if ( (bp->undo_head != (UNDO_OBJ *)NULL) &&(op_type == OP_INSC) &&
+         (bp->undo_head->type == OP_INSC) ) {
+        bp->undo_head->count++;
 
         return;
     }
@@ -88,11 +88,16 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
     umc_memset(up, 0, undo_size);
 
     /* update the buffer undo count */
-    curwp->w_bufp->undo_count++;
+    bp->undo_count++;
 
     /* record the buffer position and undo object type */
-    up->line_num = getlinenum(curbp, curwp->w_dotp);
-    up->offset = get_w_doto(curwp);
+    if ( curwp && curwp->w_bufp == bp ) {
+        up->line_num = getlinenum(bp, curwp->w_dotp);
+        up->offset = get_w_doto(curwp);
+    } else                              {
+        up->line_num = getlinenum(bp, bp->b_dotp);
+        up->offset = get_b_doto(bp);
+    }
     up->type = op_type;
     up->count = count;
 
@@ -117,8 +122,8 @@ VOID undo_insert P3_(OPTYPE, op_type, long, count, OBJECT, op_erand)
     }
 
     /* and add it to the head of the current buffer's undo list */
-    up->next = curbp->undo_head;
-    curbp->undo_head = up;
+    up->next = bp->undo_head;
+    bp->undo_head = up;
 
     return;
 }

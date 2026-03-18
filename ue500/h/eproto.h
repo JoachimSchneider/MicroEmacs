@@ -358,10 +358,8 @@ EXTERN int  strncmp DCL((CONST char *, CONST char *, int));
 EXTERN int  strcmp  DCL((CONST char *, CONST char *));
 # if     XVT == 0 || XVTDRIVER == 0
 EXTERN int  strlen DCL((CONST char *));
-#  if RAMSIZE == 0
 EXTERN char *malloc DCL((int));
 EXTERN VOID free DCL((char *));
-#  endif
 EXTERN char *realloc DCL((char *block, int siz));
 EXTERN int  errno;
 # endif
@@ -777,7 +775,7 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 # define MTCK(arg, file, line)    NOOP
 #endif
 
-#ifdef UEMACS_DEBUG_XMALLOC
+#if ( RAMSIZE )
 /* Heap TraCe:  */
 # define HTC(arg) do {                                \
         DebugMessage_fname_ = (CONST char *)__FILE__; \
@@ -2271,7 +2269,10 @@ EXTERN int PASCAL NEAR          rmc_list DCL((int f, int n));
 EXTERN VOID PASCAL NEAR         mctype_cat DCL((char pline[], int mc_type));
 #endif
 
-EXTERN VOID                     undo_insert DCL((OPTYPE op_type, long count, OBJECT op_erand));
+EXTERN VOID                     undo_insert_ DCL((OPTYPE op_type, long count, OBJECT op_erand, BUFFER *bp));
+#define                         undo_insert(op_type, count, op_erand) \
+                                    undo_insert_((op_type), (count), (op_erand), curbp)
+/**END_OF_DEFINITION**/
 EXTERN int                      undo_op DCL((void));
 EXTERN VOID                     undo_dump DCL((void));
 EXTERN VOID                     undo_zot DCL((BUFFER *bp));
@@ -2285,6 +2286,7 @@ EXTERN int PASCAL NEAR          ab_delete DCL((CONST char *sym));
 EXTERN int PASCAL NEAR          ab_clean DCL((void));
 EXTERN BUFFER * PASCAL NEAR     bfind DCL((CONST char *bname, int cflag, int bflag));
 EXTERN int PASCAL NEAR          subst_lines DCL((LINE *lp_new, LINE *lp_old));
+EXTERN int PASCAL NEAR          unlink_line DCL((LINE *lp));
 EXTERN BUFFER * PASCAL NEAR     getcbuf DCL((CONST char *prompt, CONST char *defval, int createflag));
 EXTERN BUFFER * PASCAL NEAR     getdefb DCL((void));
 EXTERN BUFFER * PASCAL NEAR     getoldb DCL((void));
@@ -2295,7 +2297,6 @@ EXTERN int PASCAL NEAR          screen_index DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          insert_screen DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          select_screen DCL((SCREEN_T *sp, int announce));
 EXTERN VOID PASCAL NEAR         free_screen DCL((SCREEN_T *sp));
-EXTERN char *                   Eallocate DCL((unsigned nbytes));
 EXTERN char * PASCAL NEAR       xmalloc_ DCL((int size, CONST char *file, int line));
 #define xmalloc(size)           xmalloc_((size), __FILE__, __LINE__)
 EXTERN VOID PASCAL NEAR         xfree_ DCL((char *p, CONST char *file, int line));
@@ -2346,7 +2347,7 @@ EXTERN CONST char * PASCAL NEAR getfilname DCL((CONST char *prompt));
 EXTERN CONST char * PASCAL NEAR getfncname DCL((CONST char *prompt));
 EXTERN CONST char * PASCAL NEAR getprcname DCL((CONST char *prompt));
 EXTERN int PASCAL NEAR          asc_int DCL((CONST char *st));
-EXTERN int                      dspram DCL((void));
+EXTERN VOID                     dspram DCL((void));
 EXTERN VOID                     lckerror DCL((char *errstr));
 EXTERN int                      xlock DCL((CONST char *fname));
 EXTERN int                      lockchk DCL((CONST char *fname));
@@ -2386,7 +2387,10 @@ EXTERN int PASCAL NEAR          echochar DCL((unsigned char c));
 EXTERN int PASCAL NEAR          echostring DCL((CONST char *, int, int));
 EXTERN int PASCAL NEAR          eq DCL((unsigned char bc, unsigned char pc));
 EXTERN long PASCAL NEAR         ernd DCL((void));
-EXTERN int PASCAL NEAR          execkey DCL((KEYTAB *key, int f, int n));
+EXTERN int PASCAL NEAR          execkey_ DCL((KEYTAB *key, int f, int n, BUFFER *bp));
+#define                         execkey(key, f, n)                    \
+                                    execkey_((key), (f), (n), curbp)
+/**END_OF_DEFINITION**/
 #if VMS
 EXTERN void PASCAL NEAR         expandargs DCL((int *pargc, char ***pargv));
 #endif
@@ -2502,7 +2506,6 @@ EXTERN int PASCAL NEAR          vtinit DCL((void));
 EXTERN int PASCAL NEAR          yank DCL((int f, int n));
 EXTERN int PASCAL NEAR          yank_pop DCL((int f, int n));
 EXTERN int PASCAL NEAR          z000_dsp_args DCL((int f, int n));
-EXTERN int                      Erelease DCL((char *mp));
 EXTERN int                      set_key DCL((KEYTAB *key, CONST char *name));
 EXTERN int                      xunlock DCL((char *fname));
 EXTERN KEYTAB *                 getbind DCL((int c));
@@ -2703,11 +2706,13 @@ EXTERN int PASCAL NEAR          readinx DCL((const char *fname,
                                              BUFFER     *bp,
                                              int        hook,
                                              int        chgflags));
-#define                         readin(fname, lockfl)                 \
+#define                         readinbuf(fname, lockfl, bp)          \
                                     ( readinx((fname), (lockfl),      \
-                                               curbp,                 \
+                                               (bp),                  \
                                                TRUE,                  \
                                                TRUE) )
+#define                         readin(fname, lockfl)                 \
+                                    readinbuf((fname), (lockfl), curbp)
 /**END_OF_DEFINITION**/
 /* readinfncA() won't change buffer flags when f == TRUE and n == 1.  */
 /* Why `A'? Might need `B', `C', ... later on.                        */
@@ -2720,7 +2725,6 @@ EXTERN int PASCAL NEAR          readinx DCL((const char *fname,
 EXTERN int PASCAL NEAR          refresh DCL((int f, int n));
 EXTERN int PASCAL NEAR          remmark DCL((int f, int n));
 EXTERN int PASCAL NEAR          reposition DCL((int f, int n));
-EXTERN int PASCAL NEAR          resetkey DCL((void));
 EXTERN int PASCAL NEAR          resize DCL((int f, int n));
 EXTERN int PASCAL NEAR          resizm DCL((int f, int n));
 EXTERN int PASCAL NEAR          resizm2 DCL((int f, int n));
@@ -2734,6 +2738,7 @@ EXTERN int PASCAL NEAR          scwrite DCL((int  row,
                                              int  revleft,
                                              int  revright));
 EXTERN int PASCAL NEAR          setccol DCL((int pos));
+EXTERN int PASCAL NEAR          bufsetekey DCL((int f, int n, BUFFER *bp));
 EXTERN int PASCAL NEAR          setekey DCL((int f, int n));
 EXTERN int PASCAL NEAR          setfillcol DCL((int f, int n));
 EXTERN int PASCAL NEAR          setgmode DCL((int f, int n));
@@ -2753,6 +2758,10 @@ EXTERN int PASCAL NEAR          startup DCL((CONST char *sfname));
 EXTERN int PASCAL NEAR          storeproc DCL((int f, int n));
 EXTERN int PASCAL NEAR          strinc DCL((CONST char *source, CONST char *sub));
 EXTERN int PASCAL NEAR          swapmark DCL((int f, int n));
+EXTERN VOID PASCAL NEAR         setcurbp_ DCL((BUFFER *in, char *file, int line));
+#define                         setcurbp(in)  setcurbp_((in), __FILE__, __LINE__)
+EXTERN BUFFER * PASCAL NEAR     getcurbp_ DCL((CONST char *file, int line));
+#define                         curbp ( getcurbp_(__FILE__, __LINE__) )
 EXTERN int PASCAL NEAR          swbuffer DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR          tab DCL((int f, int n));
 EXTERN int PASCAL NEAR          TfmBuffer DCL((filter_func_T filter, VOIDP argp));

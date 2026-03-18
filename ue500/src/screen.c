@@ -403,7 +403,7 @@ int PASCAL NEAR select_screen P2_(SCREEN_T *, sp, int, announce)
     /* reset the current screen, window and buffer */
     wheadp = first_screen->s_first_window;
     curwp = first_screen->s_cur_window;
-    curbp = curwp->w_bufp;
+    setcurbp(curwp->w_bufp);
 
     /* let the display driver know we need a full screen update */
 #if     WINDOW_MSWIN

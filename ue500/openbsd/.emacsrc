@@ -187,11 +187,17 @@ store-procedure clean
 ;       Set up auto CMODE
 
 store-procedure set-default-mode
-        set %rctmp &sin $cfname "."
-        !if &equ %rctmp 0
+        local %rctmp
+        local %str0
+        local %ppos
+
+        set %str0 &rev $cfname
+        set %ppos &sin %str0 "."
+        !if &equ %ppos 0
                 !return
         !endif
-        set %rctmp &mid $cfname &add %rctmp 1 5
+        set %ppos &sub &add 1 &len $cfname %ppos
+        set %rctmp &mid $cfname &add %ppos 1 5
         !if &or &seq %rctmp "c" &seq %rctmp "h"
                 add-mode "cmode"
         !endif
@@ -208,7 +214,6 @@ set $readhook set-default-mode
 ;       a legitimate place to call up function keys using the mouse
 
 store-procedure mouse-clicks
-
         ;remember where we started, and do the mouse movement
         save-window
         !force mouse-move-down
@@ -630,6 +635,9 @@ store-procedure utf8-to-ascii
   delete-mode "MAGIC"
   add-mode    "EXACT"
 
+  ;=====================================================================
+  ; Insert your translations into this section
+  ;=====================================================================
   beginning-of-file
   replace-string "~xc3~xa4"     "ae"
   beginning-of-file
@@ -663,6 +671,8 @@ store-procedure utf8-to-ascii
   beginning-of-file
   replace-string "~xE2~x88~x99" "*"
   beginning-of-file
+  replace-string "~xE2~x80~xA2" "-"
+  beginning-of-file
   replace-string "~xC2~xA7"     "Paragraph "
   beginning-of-file
   replace-string "~xE2~x80~x99" "'"
@@ -672,6 +682,11 @@ store-procedure utf8-to-ascii
   replace-string "~xC2~xBB"     ">>"
   beginning-of-file
   replace-string "~xC2~xAB"     "<<"
+  beginning-of-file
+  replace-string "~xE2~x89~xA4" ".LE. "
+  beginning-of-file
+  replace-string "~xE2~x89~xA5" ".GE. "
+  ;=====================================================================
 
   beginning-of-file
   set-mark

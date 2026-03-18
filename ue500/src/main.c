@@ -845,7 +845,7 @@ VOID PASCAL NEAR edinit P1_(char *, bname /* name of buffer to initialize */)
         meexit(1);
 
     /* set the current default screen/buffer/window */
-    curbp = bp;
+    setcurbp(bp);
     curwp = wheadp = first_screen->s_cur_window = first_screen->s_first_window;
 }
 
@@ -1046,20 +1046,19 @@ int PASCAL NEAR quickexit P2_(int, f /* prefix flag */,
 #endif
     bp = bheadp;
     while ( bp != NULL ) {
-
-        if ( (bp->b_flag & BFCHG) != 0          /* Changed.     */
-             && (bp->b_flag & BFINVS) == 0 ) {           /* Real. */
-            curbp = bp;                 /* make that buffer cur */
+        if ( (bp->b_flag & BFCHG) != 0            /* Changed.         */
+             && (bp->b_flag & BFINVS) == 0 ) {    /* Real.            */
+            setcurbp(bp);                     /* make that buffer cur */
             mlwrite(TEXT103, bp->b_fname);
-/*              "[Saving %s]" */
+/*                  "[Saving %s]" */
             mlwrite("\n");
             if ( ( status = filesave(f, n) ) != TRUE ) {
-                curbp = oldcb;                  /* restore curbp */
+                setcurbp(oldcb);                  /* restore curbp    */
 
-                return (status);
+                return status;
             }
         }
-        bp = bp->b_bufp;                /* on to the next buffer */
+        bp = bp->b_bufp;                    /* on to the next buffer  */
     }
     quit(f, n);                         /* conditionally quit   */
 
@@ -1319,111 +1318,6 @@ char * PASCAL NEAR copystr P1_(CONST char *, sp /* string to copy */)
 
     return (dp);
 }
-
-/*****      Compiler specific Library functions ****/
-
-#if     RAMSIZE
-/*
- * These routines will allow me to track memory usage by placing a
- * layer on top of the standard system malloc() and free() calls.
- *
- * with this code defined, the environment variable, $RAM, will report
- * on the number of bytes allocated via malloc.
- *
- * with RAMSHOW defined, the number is also posted on the end of the
- * bottom mode line and is updated whenever it is changed.
- */
-
-# if ( 0 )  /* Removed with introduction of xmalloc() and friends.  */
-#  undef  malloc
-#  undef  free
-
-#  if     VMS & OPTMEM           /* these routines are faster! */
-#   define malloc  VAXC$MALLOC_OPT
-#   define free    VAXC$FREE_OPT
-#  endif
-# endif
-
-/* EALLOCATE:
- *
- * Allocate nbytes and track
- */
-char *Eallocate P1_(unsigned, nbytes /* # of bytes to allocate */)
-{
-    char *mp;           /* ptr returned from malloc */
-
-    mp = xmalloc(nbytes);
-
-# if     RAMTRCK
-    TRC(("Allocating %u bytes at %u:%u\n", nbytes, FP_SEG(mp),
-         FP_OFF(mp)));
-# endif
-
-    if ( mp ) {
-# if     MSC
-        envram += nbytes;
-# else
-        envram += 1;
-# endif
-# if     RAMSHOW
-        dspram();
-# endif
-    }
-
-    return (mp);
-}
-
-/* ERELEASE:
- *
- * Release malloced memory and track
- */
-Erelease P1_(char *, mp /* chunk of RAM to release */)
-{
-    unsigned *lp;       /* ptr to the long containing the block size */
-# if     RAMTRCK
-    TRC(("Freeing %u:%u\n", FP_SEG(mp), FP_OFF(mp)));
-# endif
-
-    if ( mp ) {
-        /* update amount of ram currently malloced */
-# if     MSC
-        lp = ( (unsigned *)mp ) - 1;
-        envram -= (long)*lp - 2;
-# else
-        envram -= 1;
-# endif
-        CLROOM(mp);
-# if     RAMSHOW
-        dspram();
-# endif
-    }
-}
-
-# if     RAMSHOW
-
-VOID dspram P0_() /* display the amount of RAM currently malloced */
-{
-    char mbuf[20];
-    char *sp;
-
-    TTmove(term.t_nrow - 0, 70);
-#  if     COLOR
-    TTforg(7);
-    TTbacg(0);
-#  endif
-    sprintf(mbuf, "[%lu]", envram);
-    sp = &mbuf[0];
-    while ( *sp )
-        TTputc(*sp++);
-    TTmove(term.t_nrow, 0);
-    movecursor(term.t_nrow, 0);
-#  if RAMTRCK
-    TRC(("Total allocation at %lu bytes\n", envram));
-    TRC(("Stack space at %u bytes\n", stackavail()));
-#  endif
-}
-# endif /* RAMSHOW  */
-#endif  /* RAMSIZE  */
 
 
 

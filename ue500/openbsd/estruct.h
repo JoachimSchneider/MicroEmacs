@@ -166,7 +166,6 @@
 #if BEGIN_COMMENT_
 #define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
 #define RAMSHOW         0 /* auto dynamic RAM reporting               */
-#define RAMTRCK         0 /* send debug info to EMACS.LOG             */
 #define DEBUG_SEARCH    0 /* pop some search info on patterns         */
 #endif  /*END_COMMENT_*/
 
@@ -1020,17 +1019,12 @@ execl(va_alist)
 
 /*===== Dynamic RAM tracking and reporting redefinitions =============*/
 
-#if     RAMSIZE
-# define malloc  Eallocate
-# define free    Erelease
-#else
-# if     VMS & OPTMEM
-#  define malloc  VAXC$MALLOC_OPT
-#  define free    VAXC$FREE_OPT
-#  define calloc  VAXC$CALLOC_OPT
-#  define realloc VAXC$REALLOC_OPT
-#  define cfree   VAXC$CFREE_OPT
-# endif
+#if     VMS & OPTMEM
+# define malloc   VAXC$MALLOC_OPT
+# define free     VAXC$FREE_OPT
+# define calloc   VAXC$CALLOC_OPT
+# define realloc  VAXC$REALLOC_OPT
+# define cfree    VAXC$CFREE_OPT
 #endif
 
 /*

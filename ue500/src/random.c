@@ -1546,8 +1546,18 @@ int PASCAL NEAR lkp_color P1_(char *, sp)
  * Additional features:
  * - xmalloc() Zeros out the memory returned
  * - the functions won't return NULL on error but abort() via assert()
+ *----------------------------------------------------------------------
+ *
+ * These routines will allow me to track memory usage by placing a
+ * layer on top of the standard system malloc() and free() calls.
+ *
+ * with this code defined, the environment variable, $RAM, will report
+ * on the number of bytes allocated via malloc.
+ *
+ * with RAMSHOW defined, the number is also posted on the end of the
+ * bottom mode line and is updated whenever it is changed.
  *====================================================================*/
-#ifndef UEMACS_DEBUG_XMALLOC
+#if   ( ! RAMSIZE )
 
 
 char * PASCAL NEAR  xmalloc_ P3_(int, size,
@@ -1609,7 +1619,7 @@ typedef struct  ptr_info_s {
 /* - p_list_node_t                                                    */
 /* - {get,ins,del}_xmalloc_info()                                     */
 /* it will be possible to switch the linked list implementation to    */
-/* a more efficient hash table implemnentation if this is needed in   */
+/* a more efficient hash table implementation if this is needed in    */
 /* the future.                                                        */
 /*====================================================================*/
 
@@ -1727,6 +1737,10 @@ char * PASCAL NEAR  xmalloc_ P3_(int, size,
         abort();
     }
 
+    envram += size;
+# if  ( RAMSHOW )
+    dspram();
+# endif
     HTCK(("xmalloc():  p = 0x%016lX, size = %8d",
           (unsigned long int)res, (int)size), file, line);
 
@@ -1763,10 +1777,14 @@ VOID PASCAL NEAR  xfree_ P3_(char *, p,
 
     /* Try to force SIGSEGV when accessing free'd memory: */
     memset(info.p, 0, info.size);
-#ifndef UEMACS_DEBUG_XMALLOC_FREE_OFF
+# ifndef UEMACS_DEBUG_XMALLOC_FREE_OFF
     free(info.p);
-#endif
+# endif
 
+    envram -= info.size;
+# if  ( RAMSHOW )
+    dspram();
+# endif
     HTCK(("xfree():    p = 0x%016lX, size = %8d",
           (unsigned long int)(info.p), (int)(info.size)), file, line);
 
@@ -1806,8 +1824,31 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
     }
 }
 
+# if ( RAMSHOW )
+VOID dspram P0_() /* display the amount of RAM currently malloced */
+{
+    char  mbuf[C_20];
+    char  *sp = NULL;
 
-#endif
+    ZEROMEM(mbuf);
+
+    TTmove(term.t_nrow - 0, term.t_ncol / 2 - 6);
+#  if COLOR
+    TTforg(7);
+    TTbacg(0);
+#  endif
+    xsnprintf(mbuf, SIZEOF(mbuf), "[%010lu]", envram);
+    sp = &mbuf[0];
+    while ( *sp ) {
+        TTputc(*sp++);
+    }
+    TTmove(term.t_nrow, 0);
+    movecursor(term.t_nrow, 0);
+}
+# endif
+
+
+#endif  /** ( 0 == RAMSIZE ) **/
 /*====================================================================*/
 
 
