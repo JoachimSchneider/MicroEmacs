@@ -1770,6 +1770,166 @@ It will use the getfncname() completion function.       ===> DONE
 The CMP_* macros should be moved away from estruct.h    ===> DONE
 
 
+[2026-03-20.00]
+
+Three Problems (maybee regressions)
+
+(1) MicroEMACS crashes in random.c:xsnprintf() at
+
+    ```
+    ASRT( NULL != ( fp = uetmpfile() ) );
+    ```
+
+    - One sees a lot of '/tmp/uetiXX' files are trued out' and *two*
+      failed assertions.
+
+    - One sees *two* Assertion failed messages. Is there an assertion
+      inside of an assertion? We need to check if `xsnprintf' is used
+      in the ASR... code.
+
+    - The line number is incredibly high, like 2XXX XXXX , or was it
+      even more like `(unsigned int)(-1)'?
+
+    - The Error number (2) was resolved into an error message which
+      isn't done by ASRT*.
+
+      `#define ENOENT           2      /* No such file or directory */'
+
+      and this is the correct error message.
+
+
+    The `RAMSHOW'-options was turned on *and* the `EMACS_TRC_FILE'-envar
+    was set.
+
+    IT WAS NOT POSSIBLE TO REPRODUCE THIS ERROR.
+
+    ===> NO USE OF `xsnprintf()'. The errno to string resolution is in
+    ===> unx_stat_() which is indirectly called by xsnprintf() and
+    ===> calls TRC(()), but TRC(()) doesn *not* call xsnprintf(())
+    ===> --- MMM.
+
+    NOT SOLVED YET!
+
+(2) When the curser is on the *last* buffer line, i.e. on
+    <Buffer>->b_linep a `search backward is *not* possible.
+
+    ===> Solved
+
+(3) A `.emacsrc'
+
+    ```
+    store-procedure set-default-mode add-mode "cmode" !endm set
+    $readhook set-default-mode ```
+
+    *will* set CMODE when executing a `find-file /tmp/X.c' but *will
+    not* set CMODE when '/tmp/X.c' is given as command line.
+
+    Trace output shows that the mode setting function `adjustmode()'
+    which uses `curbp' is called in the swbuffer() function.
+
+    This means that it will be using the `curwp->w_bufp' buffer.
+
+    ===> Solved
+
+
+[2026-03-20.01]
+
+xmalloc* optimization:
+
+We create a 100 character line:
+
+End:   [0000256115/0000006985]  6985 xmalloc calls
+Start: [0000246467/0000006780]  6780 xmalloc calls.
+---------------------------------------------------
+                                 205 xmalloc calls
+
+We try to "optimize" xrealloc a little bit ...
+
+End:   [0000256115/0000006985]
+Start: [0000246467/0000006780]
+
+Start: [0000434244/0000006780]
+End:   [0000459844/0000006985]
+
+Start: [0000391050/0000006780]
+End:   [0000403978/0000006985]
+
+$ PATH=:$PATH perf record  -- ./emacs TST_FILE
+$ perf report
+
+  97.96%  emacs    emacs                 [.] get_xmalloc_info
+   0.33%  emacs    emacs                 [.] del_xmalloc_info
+   0.31%  emacs    emacs                 [.] ul2s10_memacs
+   0.17%  emacs    emacs                 [.] xstrlcpy
+   0.13%  emacs    emacs                 [.] ttputc
+   0.11%  emacs    emacs                 [.] readinx
+   0.11%  emacs    libc.so.6             [.] __strlen_avx2
+   0.08%  emacs    emacs                 [.] ansiparm
+   0.08%  emacs    emacs                 [.] lputc_
+   0.08%  emacs    libc.so.6             [.] malloc
+   0.07%  emacs    libc.so.6             [.] _IO_getc
+   0.05%  emacs    emacs                 [.] ffgetline
+   0.05%  emacs    libc.so.6             [.] _int_malloc
+   0.04%  emacs    libc.so.6             [.] __memset_avx2_unaligned_erms
+   0.03%  emacs    emacs                 [.] umc_memset
+   0.03%  emacs    emacs                 [.] dspram
+   0.02%  emacs    emacs                 [.] ansimove
+   0.02%  emacs    emacs                 [.] GetTrcFP
+   0.02%  emacs    [unknown]             [k] 0xffffffffaba01280
+   0.02%  emacs    emacs                 [.] lfree
+   0.02%  emacs    emacs                 [.] roundup2
+
+
+[2026-03-22.00]
+
+Reading 64000 lenes from TST_FILE:
+
+$ date; ./emacs TST_FILE; date
+Sun Mar 22 12:05:12 CET 2026
+Terminal type not 'vt100'!
+Sun Mar 22 12:05:29 CET 2026
+$ date; ./emacs TST_FILE; date
+Sun Mar 22 12:05:47 CET 2026
+
+... takes 17 seconds.
+
+
+We switched to a tree implementation of xmalloc's helper functions:
+
+$ date; ./emacs TST_FILE; date
+Sun Mar 22 17:38:34 CET 2026
+Terminal type not 'vt100'!
+Sun Mar 22 17:38:36 CET 2026
+$ date; ./emacs TST_FILE; date
+Sun Mar 22 17:38:43 CET 2026
+Terminal type not 'vt100'!
+Sun Mar 22 17:38:45 CET 2026
+
+... it takes 2 seconds!
+
+$ PATH=:$PATH perf record  -- ./emacs TST_FILE
+$ perf report
+
+  67.71%  emacs    emacs                 [.] get_cmp_ulong
+  19.38%  emacs    emacs                 [.] ins_xmalloc_info_
+   1.82%  emacs    emacs                 [.] info_LT
+   1.73%  emacs    emacs                 [.] ul2s10_memacs
+   1.51%  emacs    emacs                 [.] info_GT
+   0.83%  emacs    libc.so.6             [.] _IO_getc
+   0.74%  emacs    emacs                 [.] xstrlcpy
+   0.70%  emacs    emacs                 [.] ttputc
+   0.65%  emacs    libc.so.6             [.] __memset_avx2_unaligned_erms
+   0.60%  emacs    emacs                 [.] lputc_
+   0.42%  emacs    emacs                 [.] ffgetline
+   0.35%  emacs    emacs                 [.] readinx
+   0.33%  emacs    emacs                 [.] ansiparm
+   0.27%  emacs    emacs                 [.] xstrlcat
+   0.27%  emacs    emacs                 [.] dspram
+   0.26%  emacs    libc.so.6             [.] __strlen_avx2
+   0.25%  emacs    emacs                 [.] get_xmalloc_info_
+   0.22%  emacs    libc.so.6             [.] _int_malloc
+
+
 
 #============================== TODO LIST ==============================
 

@@ -1610,18 +1610,74 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
 
 typedef struct  ptr_info_s {
     char  *p;
-    int   size;
+    int   used_size;
+    int   alloc_size; /* .GE. used_size */
 } ptr_info_t;
+
+/* Return the smallest power of 2 which is .GT. x */
+static int roundup2a(int x)
+{
+    unsigned int  q = (unsigned int)x;
+    unsigned int  n = 1;
+
+    if ( x < 0 )  {
+        return ( 0 );
+    }
+
+    while ( 0 != q )  {
+        q >>= 1;
+        n <<= 1;
+    }
+
+    return (int)n;
+}
+
+/* Return the smallest power of 2 which is .GE. x */
+static int roundup2b(int x)
+{
+    if ( x < 0 )          {
+        return ( 0 );
+    } else if ( x == 0 )  {
+        return ( 1 );
+    }
+
+    return roundup2a(x - 1);
+}
+
+static int xmalloc_roundup(int x)
+{
+    if ( x <= 0 ) {
+        return ( 0 );
+    }
+
+#if ( 0 ) /* Doesn't help here as we've only a few xrealloc() calls */
+    x *= C_3;
+    x /= C_2;
+
+    return roundup2a(x);
+#else
+    x *= C_10;
+    x /= C_9;
+
+    return roundup2b(x);
+#endif
+}
 
 
 /*====================================================================*/
 /* By using the data structures and functions below i.e.              */
 /* - p_list_node_t                                                    */
 /* - {get,ins,del}_xmalloc_info()                                     */
-/* it will be possible to switch the linked list implementation to    */
-/* a more efficient hash table implementation if this is needed in    */
-/* the future.                                                        */
+/* it is possible to switch the linked list implementation to the     */
+/* more efficient binary tree implementation below.                   */
 /*====================================================================*/
+
+
+# if ( 0 )  /* We use the binary tree implementation below */
+
+
+/* ---- Linked List Implementation ---- */
+
 
 typedef struct p_list_node_s  p_list_node_t;
 
@@ -1664,7 +1720,7 @@ static int  del_xmalloc_info P1_(char *, q)
     } else              {
         if ( q == node->info.p )  {
             g_p_list  = node->next;
-            memset(node, 0, sizeof(*node));
+            memset(node, 0, SIZEOF(*node));
             free(node);
 
             return TRUE;
@@ -1678,7 +1734,7 @@ static int  del_xmalloc_info P1_(char *, q)
             node        = prev->next;
             prev->next  = node->next;
 
-            memset(node, 0, sizeof(*node));
+            memset(node, 0, SIZEOF(*node));
             free(node);
 
             return TRUE;
@@ -1699,35 +1755,221 @@ static int  ins_xmalloc_info P1_(ptr_info_t *, p_info)
     if ( NULL != get_xmalloc_info(p_info->p) )  {
         return FALSE;
     }
-    node  = (p_list_node_t *)malloc(sizeof(*node));
+    node  = (p_list_node_t *)malloc(SIZEOF(*node));
     assert(NULL != node);
-    memset(node, 0, sizeof(*node));
-    memcpy(&node->info, p_info, sizeof(node->info));
+    memset(node, 0, SIZEOF(*node));
+    memcpy(&node->info, p_info, SIZEOF(node->info));
     node->next  = g_p_list;
     g_p_list  = node;
 
     return TRUE;
 }
 
+
+# else
+
+
+/* ---- Binary Tree Implementation ---- */
+
+
+typedef struct p_tree_node_s  p_tree_node_t;
+
+typedef struct  p_tree_node_s {
+    ptr_info_t    info;
+    int           info_is_valid;  /* For lazy deletion  */
+    p_tree_node_t *left;
+    p_tree_node_t *right;
+} p_tree_node_t;
+
+static p_tree_node_t  *g_p_tree = NULL;
+
+
+/* We expect the pointers to come more or less numerically ordered from
+ * the OS's malloc(). So we modify the values bijectively in a way that
+ * we expect to get them unordered: We want to create a binary tree
+ * that should not degenerate into a linked list.
+ */
+static unsigned long int  get_cmp_ulong(char *p)
+{
+#define B0_ZMASK_     ( (unsigned long int)(-1) ^ 0x00FF )
+#define B1_ZMASK_     ( (unsigned long int)(-1) ^ 0xFF00 )
+/* THIS CODE ONLY WORKS IF A BYTE HAS 8 BITS: */
+#define BITS_IN_BYTE_ C_8
+    unsigned long int res       = 0;
+    unsigned long int x         = (unsigned long int)p;
+    unsigned long int byte0     = x & 0x00FF;
+    unsigned long int byte1     = (x & 0xFF00) >> BITS_IN_BYTE_;
+    int               i         = 0;
+
+    /* Swap byte0 and byte1 because byte0 might be restricted by
+     * alignement conditions */
+    x = (x & B0_ZMASK_) | byte1;
+    x = (x & B1_ZMASK_) | (byte0 << BITS_IN_BYTE_);
+
+    /* Revert order of bytes in x:  */
+    for ( i = 0; i < SIZEOF(x); i++ ) {
+        unsigned long int res_byte  = x & 0xFF;
+
+        res <<= BITS_IN_BYTE_;
+        x   >>= BITS_IN_BYTE_;
+
+        res |= res_byte;
+    }
+
+    return res;
+#undef B0_ZMASK_
+#undef B1_ZMASK_
+#undef BITS_IN_BYTE_
+}
+
+
+/* We call the functions below `info_(EQ|LT|GT)()': Yes they only work
+ * with the pointers in the ptr_info_t structures, but semantically
+ * they are used to compare the ptr_info_t structures as these are
+ * uniqely identified by these pointers.
+ */
+
+static int  info_EQ(char *p1, char *p2)
+{
+    return get_cmp_ulong(p1) == get_cmp_ulong(p2);
+}
+
+static int  info_LT(char *p1, char *p2)
+{
+    return get_cmp_ulong(p1) < get_cmp_ulong(p2);
+}
+
+static int  info_GT(char *p1, char *p2)
+{
+    return get_cmp_ulong(p1) > get_cmp_ulong(p2);
+}
+
+
+static p_tree_node_t  *get_xmalloc_info_(char *q, p_tree_node_t *node)
+{
+    assert(NULL != q);
+
+    if ( NULL == node ) {
+        return NULL;
+    }
+
+    if        ( info_LT(q, node->info.p) ) {
+        return get_xmalloc_info_(q, node->left);
+    } else if ( info_GT(q, node->info.p) ) {
+        return get_xmalloc_info_(q, node->right);
+    } else                                 {
+        assert(info_EQ(q, node->info.p));
+
+        return node;
+    }
+}
+
+static ptr_info_t *get_xmalloc_info(char *q)
+{
+    p_tree_node_t *node = NULL;
+
+    assert(NULL != q);
+
+    if ( NULL == (node = get_xmalloc_info_(q, g_p_tree)) )  {
+        return NULL;
+    }
+
+    if ( node->info_is_valid )  {
+        return  &node->info;
+    } else                      {
+        return NULL;
+    }
+}
+
+
+static int  ins_xmalloc_info_(ptr_info_t *p_info, p_tree_node_t **p_node)
+{
+    assert(NULL != p_info);
+
+    if        ( NULL == *p_node )                     {
+        *p_node = (p_tree_node_t *)malloc(SIZEOF(**p_node));
+        assert(NULL != *p_node);
+        memset(*p_node, 0, SIZEOF(**p_node));
+        memcpy(&(*p_node)->info, p_info, SIZEOF((*p_node)->info));
+        (*p_node)->info_is_valid  = TRUE;
+        (*p_node)->left           = NULL;
+        (*p_node)->right          = NULL;
+
+        return TRUE;
+    } else if ( info_LT(p_info->p, (*p_node)->info.p) ) {
+        return ins_xmalloc_info_(p_info, &(*p_node)->left);
+    } else if ( info_GT(p_info->p, (*p_node)->info.p) ) {
+        return ins_xmalloc_info_(p_info, &(*p_node)->right);
+    } else                                            {
+        assert(info_EQ(p_info->p, (*p_node)->info.p));
+
+        if ( (*p_node)->info_is_valid ) {
+            return FALSE;
+        } else                          {
+            memcpy(&(*p_node)->info, p_info, SIZEOF((*p_node)->info));
+            (*p_node)->info_is_valid  = TRUE;
+
+            return TRUE;
+        }
+    }
+}
+
+static int  ins_xmalloc_info(ptr_info_t *p_info)
+{
+    assert(NULL != p_info);
+
+    return ins_xmalloc_info_(p_info, &g_p_tree);
+}
+
+static int  del_xmalloc_info(char *q)
+{
+    p_tree_node_t *node = NULL;
+
+    assert(NULL != q);
+
+    if ( NULL == (node = get_xmalloc_info_(q, g_p_tree)) )  {
+        return FALSE;
+    }
+
+    if ( node->info_is_valid )  {
+        /* Only Lazy Delete!  */
+        node->info_is_valid = FALSE;
+
+        return TRUE;
+    } else                      {
+        return FALSE;
+    }
+}
+
+
+# endif
+
+
+# if ( RAMSHOW )
+static unsigned long int count_xmalloc  = 0;
+# endif
 /*====================================================================*/
 
 
 char * PASCAL NEAR  xmalloc_ P3_(int, size,
                                  CONST char *, file, int, line)
 {
-    char        *res  = NULL;
+    char        *res        = NULL;
     ptr_info_t  info;
+    int         alloc_size  = 0;
 
     ZEROMEM(info);
 
     if ( size <= 0 )  {
         return NULL;
     }
-    res = (char *)malloc(size);
+    alloc_size  = xmalloc_roundup(size);
+    res = (char *)malloc(alloc_size);
     assert(NULL != res);
-    memset(res, 0, size);
-    info.p    = res;
-    info.size = size;
+    memset(res, 0, alloc_size);   /* Use alloc_size: See xrealloc()   */
+    info.p          = res;
+    info.used_size  = size;
+    info.alloc_size = alloc_size;
 
     if ( ! ins_xmalloc_info(&info) )  {
         fflush(NULL);
@@ -1737,7 +1979,10 @@ char * PASCAL NEAR  xmalloc_ P3_(int, size,
         abort();
     }
 
-    envram += size;
+    envram += info.alloc_size;
+# if ( RAMSHOW )
+    count_xmalloc++;
+# endif
 # if  ( RAMSHOW )
     dspram();
 # endif
@@ -1766,7 +2011,7 @@ VOID PASCAL NEAR  xfree_ P3_(char *, p,
                 file, line, "Pointer to free not found");
         abort();
     }
-    memcpy(&info, p_info, sizeof(info));
+    memcpy(&info, p_info, SIZEOF(info));
     if ( ! del_xmalloc_info(p) )  {
         fflush(NULL);
         fprintf(stderr,
@@ -1776,17 +2021,17 @@ VOID PASCAL NEAR  xfree_ P3_(char *, p,
     }
 
     /* Try to force SIGSEGV when accessing free'd memory: */
-    memset(info.p, 0, info.size);
+    memset(info.p, 0, info.alloc_size);
 # ifndef UEMACS_DEBUG_XMALLOC_FREE_OFF
     free(info.p);
 # endif
 
-    envram -= info.size;
+    envram -= info.alloc_size;
 # if  ( RAMSHOW )
     dspram();
 # endif
     HTCK(("xfree():    p = 0x%016lX, size = %8d",
-          (unsigned long int)(info.p), (int)(info.size)), file, line);
+          (unsigned long int)(info.p), (int)(info.used_size)), file, line);
 
     return;
 }
@@ -1813,9 +2058,14 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
                     file, line, "Pointer to re-allocate not found");
             abort();
         }
-        res = xmalloc_(size, file, line);
-        memcpy(res, q, MIN2(size, p_info->size));
-        xfree_(q, file, line);
+        if ( p_info->alloc_size >= size ) {
+            /* It was already initialized to zero in xmalloc() above  */
+            p_info->used_size = size;
+        } else                            {
+            res = xmalloc_(size, file, line);
+            memcpy(res, q, MIN2(size, p_info->used_size));
+            xfree_(q, file, line);
+        }
 
         HTCK(("xrealloc(): p = 0x%016lX, size = %8d",
               (unsigned long int)res, (int)size), file, line);
@@ -1827,17 +2077,34 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
 # if ( RAMSHOW )
 VOID dspram P0_() /* display the amount of RAM currently malloced */
 {
-    char  mbuf[C_20];
+    char  mbuf[C_30];
     char  *sp = NULL;
 
     ZEROMEM(mbuf);
 
-    TTmove(term.t_nrow - 0, term.t_ncol / 2 - 6);
+#  if ( 0 )   /* Show it centered in the status line          */
+    TTmove(term.t_nrow - 0, term.t_ncol / 2 - (SIZEOF(mbuf) - 1) / 2);
+#  else       /* Show it at the right side of the bottom line */
+    TTmove(term.t_nrow - 1, term.t_ncol - (SIZEOF(mbuf) - 1));
+#  endif
 #  if COLOR
     TTforg(7);
     TTbacg(0);
 #  endif
-    xsnprintf(mbuf, SIZEOF(mbuf), "[%010lu]", envram);
+    /* 1 + C_10 + 1 + C_10 + 1 + 1 = C_24               */
+    /* `xstrlcat()' is much simpler than `xsnprintf()'  */
+#  if ( 1 )
+    xstrlcat(mbuf, "[",                                 SIZEOF(mbuf));
+    xstrlcat(mbuf, "HEAP: ",                            SIZEOF(mbuf));
+    xstrlcat(mbuf, ul2s10_memacs(envram, C_10),         SIZEOF(mbuf));
+    xstrlcat(mbuf, "/",                                 SIZEOF(mbuf));
+    xstrlcat(mbuf, ul2s10_memacs(count_xmalloc, C_10),  SIZEOF(mbuf));
+    xstrlcat(mbuf, "]",                                 SIZEOF(mbuf));
+#  else
+    xsnprintf(mbuf, SIZEOF(mbuf), "[HEAP: %010lu/%010lu]",
+              (unsigned long int)envram,
+              (unsigned long int)count_xmalloc);
+#  endif
     sp = &mbuf[0];
     while ( *sp ) {
         TTputc(*sp++);

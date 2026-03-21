@@ -929,10 +929,18 @@ int PASCAL NEAR boundry P3_(LINE *, curline, int, curoff, int, dir)
     REGISTER int  border  = 0;
 
 #if JES_REP_MAGIC_BORDER
-    if ( curbp->b_linep == curline )  {
-        border  = TRUE;
-    } else                            {
-        border  = FALSE;
+    if ( dir == FORWARD ) {
+        if ( curbp->b_linep == curline )  {
+            border  = TRUE;
+        } else                            {
+            border  = FALSE;
+        }
+    } else                {
+        if ( curbp->b_linep == lback(curline) ) {
+            border  = TRUE;
+        } else                                  {
+            border  = FALSE;
+        }
     }
 #else
     if ( dir == FORWARD ) {

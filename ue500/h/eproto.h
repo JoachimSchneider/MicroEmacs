@@ -41,11 +41,13 @@
 #define C_6    6
 #define C_7    7
 #define C_8    8
+#define C_9    9
 #define C_10  10
 #define C_14  14
 #define C_16  16
 #define C_18  18
 #define C_20  20
+#define C_24  24
 #define C_25  25
 #define C_30  30
 #define C_36  36
@@ -995,22 +997,27 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 
 
 /**********************************************************************/
-/* Unsigned int i to base 10, 16 or 36 strings:                       */
+/* Unsigned (long) int i to base 10, 16 or 36 strings:                */
 /* - l if non-negative gives the desired zerp padded output wide      */
 /*   which might truncate the result(!); negative l doesn't truncate  */
 /*   the result und doesn't pad it with zeroes.                       */
 /* - u if TRUE gives an uppercase result.                             */
 /*--------------------------------------------------------------------*/
-EXTERN CONST char * PASCAL NEAR ui2s10_memacs DCL((unsigned int i,
+EXTERN CONST char * PASCAL NEAR ul2s10_memacs DCL((unsigned long int i,
                                                    int l));
-EXTERN CONST char * PASCAL NEAR ui2s16_memacs DCL((unsigned int i,
+EXTERN CONST char * PASCAL NEAR ul2s16_memacs DCL((unsigned long int i,
                                                    int l, int u));
-EXTERN CONST char * PASCAL NEAR ui2s36_memacs DCL((unsigned int i,
+EXTERN CONST char * PASCAL NEAR ul2s36_memacs DCL((unsigned long int i,
                                                    int l, int u));
+#define ui2s10_memacs(i, l)     ul2s10_memacs((unsigned long int)(i), (l))
+#define ui2s16_memacs(i, l, u)  ul2s16_memacs((unsigned long int)(i), (l), (u))
+#define ui2s36_memacs(i, l, u)  ul2s36_memacs((unsigned long int)(i), (l), (u))
+
 #ifdef MAIN_C_
-CONST char * PASCAL NEAR  ui2s10_memacs P2_(unsigned int, i, int, l)
+CONST char * PASCAL NEAR  ul2s10_memacs P2_(unsigned long int, i,
+                                            int, l)
 {
-    unsigned int  base  = C_10;
+    unsigned long int base  = C_10;
 
     /*******************************************************************
      * a hat n (> 0) Dezimalstellen <==> 10^(n-1) <= a < 10^n
@@ -1034,10 +1041,10 @@ CONST char * PASCAL NEAR  ui2s10_memacs P2_(unsigned int, i, int, l)
      ******************************************************************/
     static CONST char tab[] = "0123456789";
     CASRT(C_10 + 1 == SIZEOF(tab));
-    static char buf[NSTRING];
+    static char       buf[NSTRING];
     CASRT(1 + 3 * SIZEOF(i) + 1 <= SIZEOF(buf));
     int               pos   = SIZEOF(buf) - 2;
-    unsigned int      rest  = 0;
+    unsigned long int rest  = 0;
 
     umc_memset(buf, '0', SLTLEN(buf));
     buf[SIZEOF(buf) - 1]    = '\0';
@@ -1062,10 +1069,10 @@ CONST char * PASCAL NEAR  ui2s10_memacs P2_(unsigned int, i, int, l)
     }
 }
 
-CONST char * PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
-                                           int, u)
+CONST char * PASCAL NEAR ul2s16_memacs P3_(unsigned long int, i,
+                                           int, l, int, u)
 {
-    unsigned int  base  = C_16;
+    unsigned long int base  = C_16;
 
     /*******************************************************************
      * a hat n (> 0) Hexadezimalstellen <==> 16^(n-1) <= a < 16^n
@@ -1094,8 +1101,8 @@ CONST char * PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
     CONST char        *tab    = tabl;
     static char buf[NSTRING];
     CASRT(1 + 2 * SIZEOF(i) + 1 <= SIZEOF(buf));
-    int           pos         = SIZEOF(buf) - 2;
-    unsigned int  rest        = 0;
+    int               pos         = SIZEOF(buf) - 2;
+    unsigned long int rest        = 0;
 
     umc_memset(buf, '0', SLTLEN(buf));
     buf[SIZEOF(buf) - 1]  = '\0';
@@ -1124,10 +1131,10 @@ CONST char * PASCAL NEAR ui2s16_memacs P3_(unsigned int, i, int, l,
     }
 }
 
-CONST char * PASCAL NEAR ui2s36_memacs P3_(unsigned int, i, int, l,
-                                           int, u)
+CONST char * PASCAL NEAR ul2s36_memacs P3_(unsigned long int, i,
+                                           int, l, int, u)
 {
-    unsigned int  base  = C_36;
+    unsigned long int base  = C_36;
 
     /*******************************************************************
      * a hat n (> 0) 36er-Stellen   <==> 36^(n-1) <= a < 36^n
@@ -1159,7 +1166,7 @@ CONST char * PASCAL NEAR ui2s36_memacs P3_(unsigned int, i, int, l,
     static char buf[NSTRING];
     CASRT(1 + 2 * SIZEOF(i) + 1 <= SIZEOF(buf));
     int               pos     = SIZEOF(buf) - 2;
-    unsigned int      rest    = 0;
+    unsigned long int rest    = 0;
 
     umc_memset(buf, '0', SLTLEN(buf));
     buf[SIZEOF(buf) - 1]  = '\0';
@@ -2758,10 +2765,10 @@ EXTERN int PASCAL NEAR          startup DCL((CONST char *sfname));
 EXTERN int PASCAL NEAR          storeproc DCL((int f, int n));
 EXTERN int PASCAL NEAR          strinc DCL((CONST char *source, CONST char *sub));
 EXTERN int PASCAL NEAR          swapmark DCL((int f, int n));
-EXTERN VOID PASCAL NEAR         setcurbp_ DCL((BUFFER *in, char *file, int line));
-#define                         setcurbp(in)  setcurbp_((in), __FILE__, __LINE__)
-EXTERN BUFFER * PASCAL NEAR     getcurbp_ DCL((CONST char *file, int line));
-#define                         curbp ( getcurbp_(__FILE__, __LINE__) )
+EXTERN VOID PASCAL NEAR         set_curbp_ DCL((BUFFER *in, char *file, int line));
+#define                         set_curbp(in)  set_curbp_((in), __FILE__, __LINE__)
+EXTERN BUFFER * PASCAL NEAR     get_curbp_ DCL((CONST char *file, int line));
+#define                         curbp ( get_curbp_(__FILE__, __LINE__) )
 EXTERN int PASCAL NEAR          swbuffer DCL((BUFFER *bp));
 EXTERN int PASCAL NEAR          tab DCL((int f, int n));
 EXTERN int PASCAL NEAR          TfmBuffer DCL((filter_func_T filter, VOIDP argp));

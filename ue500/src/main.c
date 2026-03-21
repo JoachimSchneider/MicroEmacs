@@ -845,7 +845,7 @@ VOID PASCAL NEAR edinit P1_(char *, bname /* name of buffer to initialize */)
         meexit(1);
 
     /* set the current default screen/buffer/window */
-    setcurbp(bp);
+    set_curbp(bp);
     curwp = wheadp = first_screen->s_cur_window = first_screen->s_first_window;
 }
 
@@ -1048,12 +1048,12 @@ int PASCAL NEAR quickexit P2_(int, f /* prefix flag */,
     while ( bp != NULL ) {
         if ( (bp->b_flag & BFCHG) != 0            /* Changed.         */
              && (bp->b_flag & BFINVS) == 0 ) {    /* Real.            */
-            setcurbp(bp);                     /* make that buffer cur */
+            set_curbp(bp);                    /* make that buffer cur */
             mlwrite(TEXT103, bp->b_fname);
 /*                  "[Saving %s]" */
             mlwrite("\n");
             if ( ( status = filesave(f, n) ) != TRUE ) {
-                setcurbp(oldcb);                  /* restore curbp    */
+                set_curbp(oldcb);                 /* restore curbp    */
 
                 return status;
             }

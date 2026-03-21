@@ -1,0 +1,1 @@
+../../tools/scancode.c

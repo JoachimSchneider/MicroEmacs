@@ -104,7 +104,7 @@ int PASCAL NEAR nextwind P2_(int, f, int, n)
     } else if ( (wp = curwp->w_wndp) == NULL )
         wp = wheadp;
     curwp = wp;
-    setcurbp(wp->w_bufp);
+    set_curbp(wp->w_bufp);
     upmode();
 
     return (TRUE);
@@ -136,7 +136,7 @@ int PASCAL NEAR prevwind P2_(int, f, int, n)
         wp1 = wp1->w_wndp;
 
     curwp = wp1;
-    setcurbp(wp1->w_bufp);
+    set_curbp(wp1->w_bufp);
     upmode();
 
     return (TRUE);
@@ -345,7 +345,7 @@ int PASCAL NEAR delwind P2_(int, f, int, n)
     CLROOM(curwp);
     curwp = wp;
     wp->w_flag |= WFHARD;
-    setcurbp(wp->w_bufp);
+    set_curbp(wp->w_bufp);
     upmode();
 
     return (TRUE);
@@ -705,7 +705,7 @@ int PASCAL NEAR restwnd P2_(int, f, int, n)
     while ( wp != NULL ) {
         if ( wp == swindow ) {
             curwp = wp;
-            setcurbp(wp->w_bufp);
+            set_curbp(wp->w_bufp);
             upmode();
 
             return (TRUE);
@@ -795,7 +795,7 @@ int PASCAL NEAR newsize P2_(int, f, int, n)
                 /* update curwp and lastwp if needed */
                 if ( wp == curwp )
                     curwp = wheadp;
-                setcurbp(curwp->w_bufp);
+                set_curbp(curwp->w_bufp);
                 if ( lastwp != NULL )
                     lastwp->w_wndp = NULL;
 

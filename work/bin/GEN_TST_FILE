@@ -1,0 +1,16 @@
+#!/bin/sh -
+umask 022
+PATH="/bin:/usr/bin"
+LANG=C
+LC_ALL=C
+export PATH LANG LC_ALL
+
+awk 'BEGIN {
+  for ( i = 0; i < 64000; i++ )
+  {
+      printf "Das ist nun Zeile Nr %05d\n", i;
+  }
+}'
+
+
+# EOF

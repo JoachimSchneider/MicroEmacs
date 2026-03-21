@@ -86,81 +86,70 @@ int PASCAL NEAR nextbuffer P2_(int, f, int, n)
 }
 
 
-/*======================================================================
- *
- * We use setcurbp()/getcurbp() here because it is possible to trigger
- * siutuations were `g_curbp != curwp->w_bufp', e.g:
- *
- * .emacsrc:
- * ```
- * store-procedure set-default-mode
- *         insert-string X
- * !endm
- * set $readhook set-default-mode
- * ```
- *
- * And then call `emacs /tmp/X.c': This would lead to such a diference
- * in line.c::linsert() at
- * ```
- *   lp1 = curwp->w_dotp;              /o Current line         o/
- *   if ( lp1 == curbp->b_linep )  {   /o At the end: special  o/
- * ```
- * leading to a lot of confusion.
- *====================================================================*/
+/*====================================================================*/
 
 static BUFFER *g_curbp  = NULL;
 
-/* SETCURBP:
+
+/* SET_CURBP:
  *
  * Set effective current buffer pointer
  */
-VOID PASCAL NEAR  setcurbp_ P3_(BUFFER *, in, char *, file, int, line)
+VOID PASCAL NEAR  set_curbp_ P3_(BUFFER *, in, char *, file, int, line)
 {
-    TRCK(("Setting g_curbp = %p", in), file, line);
+    CONST static char *FNAM = "set_curbp";
+
+    if ( ! in_swbuffer )  {
+        TRCK(("%s: Outside of `swbuffer()' --- Setting g_curbp = %p",
+             FNAM, in), file, line);
+    }
 
     g_curbp = in;
 }
 
-/* GETCURBP:
+/* GET_CURBP:
  *
  * Get effective current buffer pointer
  */
-BUFFER * PASCAL NEAR  getcurbp_ P2_(CONST char *, file, int, line)
+BUFFER * PASCAL NEAR  get_curbp_ P2_(CONST char *, file, int, line)
 {
+    CONST static char *FNAM = "get_curbp";
+
     if ( in_swbuffer )  {
         if ( NULL != curwp && NULL != curwp->w_bufp ) {
             if ( g_curbp != curwp->w_bufp ) {
-                TRCK(("%s", "Called in swbuffer()"), file, line);
-                TRCK(("g_curbp(%s) = %p and curwp->w_bufp(%s) = %p differ",
+                TRCK(("%s: %s", FNAM, "Called in swbuffer()"),
+                      file, line);
+                TRCK(("  g_curbp(%s) = %p and curwp->w_bufp(%s) = %p differ",
                       g_curbp->b_bname, g_curbp, curwp->w_bufp->b_bname, curwp->w_bufp),
                       file, line);
-                TRCK(("curwp->w_bufp->last_access = %ld, g_curbp->last_access = %ld",
+                TRCK(("  curwp->w_bufp->last_access = %ld, g_curbp->last_access = %ld",
                       curwp->w_bufp->last_access, g_curbp->last_access), file, line);
             }
-
-            return curwp->w_bufp;
+        } else                                        {
+            TRCK(("%s: %s", FNAM, "Called in swbuffer()"), file, line);
+            TRCK(("  curwp->w_bufp invalid: curwp: %p", curwp), file, line);
         }
-
-        TRCK(("%s", "Called in swbuffer()"), file, line);
-        TRCK(("curwp->w_bufp invalid: curwp: %p, returning g_curbp: %p",
-              curwp, g_curbp), file, line);
-
-        return g_curbp;
     } else              {
         if ( NULL != curwp && NULL != curwp->w_bufp ) {
             if ( g_curbp != curwp->w_bufp ) {
-                TRCK(("%s", "Called outside of swbuffer()"), file, line);
-                TRCK(("g_curbp(%s) = %p and curwp->w_bufp(%s) = %p differ",
+                TRCK(("%s: %s", FNAM, "Called outside of swbuffer()"),
+                      file, line);
+                TRCK(("  g_curbp(%s) = %p and curwp->w_bufp(%s) = %p differ",
                       g_curbp->b_bname, g_curbp, curwp->w_bufp->b_bname, curwp->w_bufp),
                       file, line);
+                TRCK(("  curwp->w_bufp->last_access = %ld, g_curbp->last_access = %ld",
+                      curwp->w_bufp->last_access, g_curbp->last_access), file, line);
             }
         } else                                        {
-            TRCK(("%s", "Called outside of swbuffer()"), file, line);
-            TRCK(("curwp->w_bufp invalid: curwp: %p", curwp), file, line);
+            TRCK(("%s: %s", FNAM, "Called outside of swbuffer()"),
+                  file, line);
+            TRCK(("  curwp->w_bufp invalid: curwp: %p", curwp),
+                  file, line);
         }
-
-        return g_curbp;
     }
+
+    return g_curbp;
 }
 
 /*====================================================================*/
@@ -168,70 +157,71 @@ BUFFER * PASCAL NEAR  getcurbp_ P2_(CONST char *, file, int, line)
 
 /* SWBUFFER:
  *
- * Make buffer BP current
+ * Make buffer bp current
  * hook: Execute `exbhook' if TRUE
  */
 int PASCAL NEAR swbuffer P1_(BUFFER *, bp)
 {
-    REGISTER EWINDOW *wp;
-    SCREEN_T *scrp;             /* screen to fix pointers in */
-    REGISTER int cmark;                 /* current mark */
+    REGISTER EWINDOW  *wp       = NULL;
+    SCREEN_T          *scrp     = NULL; /* screen to fix pointers in  */
+    REGISTER int      cmark     = 0;          /* current mark         */
+
+    TRC(("BEGIN: %s", "swbuffer()"));
+    in_swbuffer = TRUE;
+
+#define INIT_curwp_(bp) do  {                             \
+        curwp->w_dotp = bp->b_dotp;                       \
+        set_w_doto(curwp, get_b_doto(bp));                \
+        for ( cmark = 0; cmark < NMARKS; cmark++ ) {      \
+            curwp->w_markp[cmark] = bp->b_markp[cmark];   \
+            curwp->w_marko[cmark] = bp->b_marko[cmark];   \
+        }                                                 \
+        curwp->w_fcol  = bp->b_fcol;                      \
+    } while ( 0 )
+/**END_OF_DEFINITION**/
 
     /* let a user macro get hold of things...if he wants */
     execkey(&exbhook, FALSE, 1);
 
     /* unuse the current buffer, saving window info to buffer struct */
-    if ( --curbp->b_nwnd == 0 ) {               /* Last use.        */
-        curbp->b_dotp  = curwp->w_dotp;
+    if ( --curbp->b_nwnd == 0 ) {             /* Last use.            */
+        curbp->b_dotp = curwp->w_dotp;
         set_b_doto(curbp, get_w_doto(curwp));
-        for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+        for ( cmark = 0; cmark < NMARKS; cmark++ )  {
             curbp->b_markp[cmark] = curwp->w_markp[cmark];
             curbp->b_marko[cmark] = curwp->w_marko[cmark];
         }
-        curbp->b_fcol  = curwp->w_fcol;
+        curbp->b_fcol = curwp->w_fcol;
     }
 
-    /* let time march forward! */
-    access_time++;
+    set_curbp(bp);                            /* Switch.              */
 
-    in_swbuffer = TRUE;
-
-    setcurbp(bp);                             /* Switch.              */
-    bp->last_access = access_time;
-    if ( bp->b_active != TRUE ) {           /* buffer not active yet  */
-        /* read it in and activate it */
-        readinbuf(bp->b_fname, ((bp->b_mode&MDVIEW) == 0), bp);
-        bp->b_dotp = lforw(bp->b_linep);
-        set_b_doto(bp, 0);
-        bp->b_active = TRUE;
-    }
     curwp->w_bufp  = bp;
+    /* From now on: curbp == curwp->w_bufp  */
     curwp->w_linep = bp->b_linep;             /* For macros, ignored. */
     curwp->w_flag |= WFMODE|WFFORCE|WFHARD;   /* Quite nasty.         */
-    if ( bp->b_nwnd++ == 0 ) {                /* First use.           */
-        curwp->w_dotp  = bp->b_dotp;
-        set_w_doto(curwp, get_b_doto(bp));
-        for ( cmark = 0; cmark < NMARKS; cmark++ ) {
-            curwp->w_markp[cmark] = bp->b_markp[cmark];
-            curwp->w_marko[cmark] = bp->b_marko[cmark];
-        }
-        curwp->w_fcol  = bp->b_fcol;
-    } else {
+
+    if ( bp->b_nwnd != 0 )  {                 /* Already used.        */
         /* in all screens.... */
         scrp = first_screen;
-        while ( scrp ) {
+        while ( scrp )  {
             wp = scrp->s_first_window;
-            while ( wp != NULL ) {
-                if ( wp!=curwp && wp->w_bufp==bp ) {
+            while ( wp != NULL )  {
+                if ( wp != curwp && wp->w_bufp == bp )  {
+                    /* If there is already a window displaying this
+                     * buffer use it's attributes for the current
+                     * window */
                     curwp->w_dotp  = wp->w_dotp;
                     set_w_doto(curwp, get_w_doto(wp));
-                    for ( cmark = 0; cmark < NMARKS; cmark++ ) {
+                    for ( cmark = 0; cmark < NMARKS; cmark++ )  {
                         curwp->w_markp[cmark] = wp->w_markp[cmark];
                         curwp->w_marko[cmark] = wp->w_marko[cmark];
                     }
-                    curwp->w_fcol  = wp->w_fcol;
+                    curwp->w_fcol = wp->w_fcol;
+
                     break;
                 }
+
                 /* next window */
                 wp = wp->w_wndp;
             }
@@ -241,12 +231,48 @@ int PASCAL NEAR swbuffer P1_(BUFFER *, bp)
         }
     }
 
-    in_swbuffer = FALSE;
+    if ( bp->b_active != TRUE ) {           /* buffer not active yet  */
+        /* We *must* init curwp here as we do *not* know what will be
+         * done in readinbuf() via e.g. $readhook. Simply use this
+         * `.emacsrc' and run `emacs /tmp/X.c' to create an error
+         * situation:
+         * ```
+         * store-procedure set-default-mode
+         *        insert-string X
+         * !endm
+         * set $readhook set-default-mode
+         *```
+         */
+        if ( bp->b_nwnd == 0 )  {           /* First use.             */
+            INIT_curwp_(bp);
+        }
+
+        /* read it in and activate it */
+        readinbuf(bp->b_fname, ((bp->b_mode&MDVIEW) == 0), bp);
+        bp->b_dotp = lforw(bp->b_linep);
+        set_b_doto(bp, 0);
+        bp->b_active = TRUE;
+    }
+
+    if ( bp->b_nwnd == 0 )  {               /* First use.             */
+        INIT_curwp_(bp);
+    }
+
+    /* Increment window count */
+    bp->b_nwnd++;
+    /* let time march forward! */
+    access_time++;
+    bp->last_access = access_time;
 
     /* let a user macro get hold of things...if he wants */
     execkey(&bufhook, FALSE, 1);
 
-    return (TRUE);
+    in_swbuffer = FALSE;
+    TRC(("  END: %s", "swbuffer()"));
+
+    return TRUE;
+
+#undef INIT_curwp_
 }
 
 /* KILLBUFFER:
