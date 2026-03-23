@@ -864,9 +864,9 @@ int PASCAL NEAR unmark P2_(int, f, int, n)
  */
 BUFFER * PASCAL NEAR getoldb P0_()
 {
-    BUFFER *bp;         /* current buffer */
-    BUFFER *old_bp;     /* ptr to oldest buffer */
-    long old_count;     /* oldest count */
+    BUFFER  *bp       = NULL;   /* current buffer       */
+    BUFFER  *old_bp   = NULL;   /* ptr to oldest buffer */
+    long    old_count = 0;      /* oldest count         */
 
     /* Find the next buffer, which will be the default */
     bp = bheadp;
@@ -875,11 +875,10 @@ BUFFER * PASCAL NEAR getoldb P0_()
 
     /* Scan the buffer list */
     while ( bp ) {
-
         /* if this one is older..... */
         if ( (bp->last_access > 0L) &&
-             ( (old_bp == (BUFFER *)NULL) ||(bp->last_access < old_count) ) ) {
-
+                ((old_bp == (BUFFER *)NULL)
+                  || (bp->last_access < old_count)) ) {
             /* record this as the oldest buffer */
             old_bp = bp;
             old_count = bp->last_access;

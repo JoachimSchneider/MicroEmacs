@@ -518,10 +518,10 @@ VOID undo_dump P0_()
 static char *AirBag_  = NULL;
 
 /* ROOM:
- * 
+ *
  * Allocate memory using xmalloc() on failure, discard oldest undo
  * information and retry. Memory region is initialized to zero.
- * 
+ *
  * Return NULL on error.
  */
 char *room P3_(int, nbytes, CONST char *, file, int, line)
@@ -576,6 +576,11 @@ nextbuf:
         /* dump the last undo structure */
         lp = NULL;
         up = bp->undo_head;
+        if ( up->next == NULL ) {
+            bp->last_access = 0;
+
+            goto nextbuf;
+        }
         while ( up->next != NULL )  {
             lp = up;
             up = up->next;
@@ -591,10 +596,10 @@ nextbuf:
 }
 
 /* XROOM:
- * 
+ *
  * Allocate memory using xmalloc() on failure, discard oldest undo
  * information and retry. Memory region is initialized to zero.
- * 
+ *
  * On Error: Write a message to Message-Line/STDERR/Trace and abort().
  */
 char *xroom P3_(int, nbytes, CONST char *, file, int, line)
@@ -619,10 +624,10 @@ char *xroom P3_(int, nbytes, CONST char *, file, int, line)
 }
 
 /* REROOM:
- * 
+ *
  * Allocate memory using xrealloc() on failure, discard oldest undo
  * information and retry
- * 
+ *
  * Return NULL on error.
  */
 char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
@@ -656,7 +661,7 @@ char *reroom P4_(VOIDP, orig_ptr, int, nbytes, CONST char *, file, int, line)
         FREE_(AirBag_);
         TRCK(("%s", "reroom(): Malloc failed! Trying to release undo"), file, line);
         /* find the oldest visited buffer */
-nxtbuf:
+nextbuf:
         bp = getoldb();
 
         /* no buffers left to check? */
@@ -669,12 +674,18 @@ nxtbuf:
         /* any undo info to discard? */
         if ( bp->undo_count == 0 ) {
             bp->last_access = 0;
-            goto nxtbuf;
+
+            goto nextbuf;
         }
 
         /* dump the last undo structure */
         lp = NULL;
         up = bp->undo_head;
+        if ( up->next == NULL ) {
+            bp->last_access = 0;
+
+            goto nextbuf;
+        }
         while ( up->next != NULL )  {
             lp = up;
             up = up->next;

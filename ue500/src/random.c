@@ -1590,14 +1590,17 @@ VOID PASCAL NEAR  xfree_ P3_(char *, p,
 char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
                                   CONST char *, file, int, line)
 {
-    char  *res    = NULL;
+    char  *res  = NULL;
 
     if ( size < 0 ) {
         return NULL;
     }
     if ( size == 0 )  {   /* As in GNU extension  */
         xfree_(q, file, line);
+
+        return NULL;
     }
+
     res = (char *)realloc(q, size);
     assert(NULL != res);
 
@@ -1613,6 +1616,7 @@ typedef struct  ptr_info_s {
     int   used_size;
     int   alloc_size; /* .GE. used_size */
 } ptr_info_t;
+
 
 /* Return the smallest power of 2 which is .GT. x */
 static int roundup2a(int x)
@@ -1650,7 +1654,9 @@ static int xmalloc_roundup(int x)
         return ( 0 );
     }
 
-#if ( 0 ) /* Doesn't help here as we've only a few xrealloc() calls */
+/* Consumes too much memory and doesn't help here as we've only a few
+ * xrealloc() calls:  */
+#if ( 0 )
     x *= C_3;
     x /= C_2;
 
@@ -1673,7 +1679,14 @@ static int xmalloc_roundup(int x)
 /*====================================================================*/
 
 
-# if ( 0 )  /* We use the binary tree implementation below */
+/* Until now we do not use the tree implementation by default:
+ *
+ * We've only implemented `lazu delete' which consumes a lot of memory.
+ *
+ * TODO: Implement a real `delete'-operation
+ */
+
+# ifndef  UEMACS_DEBUG_XMALLOC_USE_TREE
 
 
 /* ---- Linked List Implementation ---- */
@@ -2047,9 +2060,12 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
     }
     if ( size == 0 )  {   /* As in GNU extension  */
         xfree_(q, file, line);
+
+        return NULL;
     }
+
     if ( NULL == q )  {
-        return  xmalloc_(size, file, line);
+        res = xmalloc_(size, file, line);
     } else            {
         if ( NULL == (p_info = get_xmalloc_info(q)) ) {
             fflush(NULL);
@@ -2061,6 +2077,8 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
         if ( p_info->alloc_size >= size ) {
             /* It was already initialized to zero in xmalloc() above  */
             p_info->used_size = size;
+
+            res = q;
         } else                            {
             res = xmalloc_(size, file, line);
             memcpy(res, q, MIN2(size, p_info->used_size));
@@ -2069,9 +2087,9 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
 
         HTCK(("xrealloc(): p = 0x%016lX, size = %8d",
               (unsigned long int)res, (int)size), file, line);
-
-        return res;
     }
+
+    return res;
 }
 
 # if ( RAMSHOW )

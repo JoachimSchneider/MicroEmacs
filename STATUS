@@ -1930,6 +1930,118 @@ $ perf report
    0.22%  emacs    libc.so.6             [.] _int_malloc
 
 
+Reading in a file with 64000 Lines shows this deep of the tree:
+
+(gdb) print *g_p_tree->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right->right
+$32 = {info = {p = 0x1bcbffc0 "@", used_size = 40, alloc_size = 64},
+info_is_valid = 1, left = 0x0, right = 0x0}
+
+(gdb)
+
+...
+
+g_p_tree
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+right
+
+echo '2009 1943 - p' | dc
+# --- BEGIN: Command Output ---
+66
+# ---   END: Command Output ---
+
+                          y =nNodes    n = Depth
+................................................
+            O                 1           0
+           / \
+          /   \
+         /     \
+        /       \
+       O         O            3           1
+      / \       / \
+     /   \     /   \
+    /     \   /     \
+   O       O O       O        7           2
+
+                             15           3
+
+  y(n) - y(n - 1) = 2^n, y(0) = 1
+
+  We guess: y(n) = 2^(n+1) - 1
+
+  ===> n + 1 = ld(y + 1)
+       n  = ld(y + 1) - 1
+       n  = ln(y + 1)/ln(2) - 1
+
+y = 64000 ===> n = 16
+
+We measure n = 66: The tree is not degenrated into a list (n = 64000)
+but it seems not to be balanced.
+
+
 
 #============================== TODO LIST ==============================
 
