@@ -1807,24 +1807,23 @@ static unsigned long int  get_cmp_ulong(char *p)
 #define B0_ZMASK_     ( (unsigned long int)(-1) ^ 0x00FF )
 #define B1_ZMASK_     ( (unsigned long int)(-1) ^ 0xFF00 )
 /* THIS CODE ONLY WORKS IF A BYTE HAS 8 BITS: */
-#define BITS_IN_BYTE_ C_8
     unsigned long int res       = 0;
     unsigned long int x         = (unsigned long int)p;
     unsigned long int byte0     = x & 0x00FF;
-    unsigned long int byte1     = (x & 0xFF00) >> BITS_IN_BYTE_;
+    unsigned long int byte1     = (x & 0xFF00) >> BITS_IN_BYTE;
     int               i         = 0;
 
     /* Swap byte0 and byte1 because byte0 might be restricted by
      * alignement conditions */
     x = (x & B0_ZMASK_) | byte1;
-    x = (x & B1_ZMASK_) | (byte0 << BITS_IN_BYTE_);
+    x = (x & B1_ZMASK_) | (byte0 << BITS_IN_BYTE);
 
     /* Revert order of bytes in x:  */
     for ( i = 0; i < SIZEOF(x); i++ ) {
         unsigned long int res_byte  = x & 0xFF;
 
-        res <<= BITS_IN_BYTE_;
-        x   >>= BITS_IN_BYTE_;
+        res <<= BITS_IN_BYTE;
+        x   >>= BITS_IN_BYTE;
 
         res |= res_byte;
     }
@@ -1832,7 +1831,6 @@ static unsigned long int  get_cmp_ulong(char *p)
     return res;
 #undef B0_ZMASK_
 #undef B1_ZMASK_
-#undef BITS_IN_BYTE_
 }
 
 
@@ -2478,10 +2476,13 @@ FILE *uetmpfile_ P1_(int, delmode)
         static int        fname_list_len  = 0;
 
         if ( !delmode ) {
+#  define ITTER_MAX_  (C_100)
             CONST char  *fname  = NULL;
             FILE        *fp     = NULL;
             char        *cp     = NULL;
+            int         i       = 0;
 
+nexttry:
             if ( NULL == (fname = gettmpfname("t")) ) {
                 TRC(("%s", "uetmpfile(): gettmpfname() failed"));
 
@@ -2489,6 +2490,9 @@ FILE *uetmpfile_ P1_(int, delmode)
             }
             if ( NULL == (fp = fopen(fname, "wb+")) ) {
                 TRC(("uetmpfile(): fopen(\"%s\") failed", fname));
+                if ( ITTER_MAX_ >= ++i )  {
+                    goto nexttry;
+                }
 
                 return NULL;
             }
@@ -2527,6 +2531,7 @@ FILE *uetmpfile_ P1_(int, delmode)
 #  endif
 
             return fp;
+#  undef ITTER_MAX_
         } else {
             int i = 0;
 
@@ -3480,29 +3485,32 @@ int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 #endif
 {
     int   rc    = 0;
-    FILE  *TFP  = GetTrcFP();
 
-    if ( TFP )  {
-        va_list     ap;
+    BEGIN_ERRNO_ENV {
+        FILE  *TFP  = GetTrcFP();
+
+        if ( TFP )  {
+            va_list     ap;
 #if VARG
-        CONST char  *fmt  = NULL;
+            CONST char  *fmt  = NULL;
 #endif
 
-        ZEROMEM(ap);
+            ZEROMEM(ap);
 
-        fprintf(TFP, "%3s (%12s/%04d): ", DebugMessage_tag_,
-                xbasenam(DebugMessage_fname_), DebugMessage_lnno_);
+            fprintf(TFP, "%3s (%12s/%04d): ", DebugMessage_tag_,
+                    xbasenam(DebugMessage_fname_), DebugMessage_lnno_);
 #if VARG
-        va_start(ap);
-        fmt = va_arg(ap, CONST char *);
+            va_start(ap);
+            fmt = va_arg(ap, CONST char *);
 #else
-        va_start(ap, fmt);
+            va_start(ap, fmt);
 #endif
-        RC_VFPRINTF(rc, TFP, fmt, ap);
-        va_end(ap);
-        fprintf(TFP, "%s", "\n");
-        fflush(TFP);
-    }
+            RC_VFPRINTF(rc, TFP, fmt, ap);
+            va_end(ap);
+            fprintf(TFP, "%s", "\n");
+            fflush(TFP);
+        }
+    } END_ERRNO_ENV;
 
     return rc;
 }

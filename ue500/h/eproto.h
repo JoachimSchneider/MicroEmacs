@@ -34,34 +34,36 @@
 /* Some constants:                                                    */
 /**********************************************************************/
 /* No braces `()' here!                                               */
-#define C_1    1
-#define C_2    2
-#define C_3    3
-#define C_4    4
-#define C_6    6
-#define C_7    7
-#define C_8    8
-#define C_9    9
-#define C_10  10
-#define C_14  14
-#define C_16  16
-#define C_18  18
-#define C_20  20
-#define C_24  24
-#define C_25  25
-#define C_30  30
-#define C_36  36
-#define C_40  40
+#define C_1        1
+#define C_2        2
+#define C_3        3
+#define C_4        4
+#define C_6        6
+#define C_7        7
+#define C_8        8
+#define C_9        9
+#define C_10      10
+#define C_14      14
+#define C_16      16
+#define C_18      18
+#define C_20      20
+#define C_24      24
+#define C_25      25
+#define C_30      30
+#define C_36      36
+#define C_40      40
 #if     BEGIN_COMMENT_
-#define C_50  50
-#define C_60  60
-#define C_70  70
+#define C_50      50
+#define C_60      60
+#define C_70      70
 #endif  /*END_COMMENT_*/
-#define C_80  80
+#define C_80      80
 #if     BEGIN_COMMENT_
-#define C_90  90
+#define C_90      90
 #endif  /*END_COMMENT_*/
-#define C_95  95
+#define C_95      95
+#define C_100    100
+#define C_1000  1000
 /*====================================================================*/
 #define UMC_UCHAR_MAX   ( 0xFF/***(int)(unsigned char)(-1)***/ )
 /**********************************************************************/
@@ -222,6 +224,22 @@ CRASH(NOOP undefined);
 #endif
 #endif
 #endif
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* Save and restore errno:                                            */
+/*....................................................................*/
+#define BEGIN_ERRNO_ENV do {    \
+    int errno_save_ = errno;    \
+                                \
+    {
+/**END_OF_DEFINITION**/
+#define END_ERRNO_ENV           \
+    }                           \
+    errno = errno_save_;        \
+} while ( 0 )
+/**END_OF_DEFINITION**/
 /**********************************************************************/
 
 
@@ -742,17 +760,21 @@ COMMON CONST char *DebugMessage_tag_;
 EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 /*--------------------------------------------------------------------*/
 #if TRC_ON
-# define TRC(arg) do {                                \
-        DebugMessage_fname_ = (CONST char *)__FILE__; \
-        DebugMessage_lnno_  = __LINE__;               \
-        DebugMessage_tag_   = (CONST char *)"TRC";    \
-        DebugMessage arg;                             \
+# define TRC(arg) do {                                    \
+        BEGIN_ERRNO_ENV {                                 \
+            DebugMessage_fname_ = (CONST char *)__FILE__; \
+            DebugMessage_lnno_  = __LINE__;               \
+            DebugMessage_tag_   = (CONST char *)"TRC";    \
+            DebugMessage arg;                             \
+        } END_ERRNO_ENV;                                  \
     } while ( 0 )
-# define TRCK(arg, file, line)  do {                  \
-        DebugMessage_fname_ = (CONST char *)(file);   \
-        DebugMessage_lnno_  = (line);                 \
-        DebugMessage_tag_   = (CONST char *)"TRC";    \
-        DebugMessage arg;                             \
+# define TRCK(arg, file, line)  do {                      \
+        BEGIN_ERRNO_ENV {                                 \
+            DebugMessage_fname_ = (CONST char *)(file);   \
+            DebugMessage_lnno_  = (line);                 \
+            DebugMessage_tag_   = (CONST char *)"TRC";    \
+            DebugMessage arg;                             \
+        } END_ERRNO_ENV;                                  \
     } while ( 0 )
 #else
 # define TRC(arg)                 NOOP
@@ -760,17 +782,21 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 #endif
 /*--------------------------------------------------------------------*/
 #if MTC_ON
-# define MTC(arg)  do {                               \
-        DebugMessage_fname_ = (CONST char *)__FILE__; \
-        DebugMessage_lnno_  = __LINE__;               \
-        DebugMessage_tag_   = (CONST char *)"MTC";    \
-        DebugMessage arg;                             \
+# define MTC(arg)  do {                                   \
+        BEGIN_ERRNO_ENV {                                 \
+            DebugMessage_fname_ = (CONST char *)__FILE__; \
+            DebugMessage_lnno_  = __LINE__;               \
+            DebugMessage_tag_   = (CONST char *)"MTC";    \
+            DebugMessage arg;                             \
+        } END_ERRNO_ENV;                                  \
     } while ( 0 )
-# define MTCK(arg, file, line)  do {                  \
-        DebugMessage_fname_ = (CONST char *)(file);   \
-        DebugMessage_lnno_  = (line);                 \
-        DebugMessage_tag_   = (CONST char *)"MTC";    \
-        DebugMessage arg;                             \
+# define MTCK(arg, file, line)  do {                      \
+        BEGIN_ERRNO_ENV {                                 \
+            DebugMessage_fname_ = (CONST char *)(file);   \
+            DebugMessage_lnno_  = (line);                 \
+            DebugMessage_tag_   = (CONST char *)"MTC";    \
+            DebugMessage arg;                             \
+        } END_ERRNO_ENV;                                  \
     } while ( 0 )
 #else
 # define MTC(arg)                 NOOP
@@ -779,17 +805,21 @@ EXTERN int CDECL NEAR DebugMessage DCL((CONST char *fmt, ...));
 
 #if ( RAMSIZE )
 /* Heap TraCe:  */
-# define HTC(arg) do {                                \
-        DebugMessage_fname_ = (CONST char *)__FILE__; \
-        DebugMessage_lnno_  = __LINE__;               \
-        DebugMessage_tag_   = (CONST char *)"HTC";    \
-        DebugMessage arg;                             \
+# define HTC(arg) do {                                    \
+        BEGIN_ERRNO_ENV {                                 \
+            DebugMessage_fname_ = (CONST char *)__FILE__; \
+            DebugMessage_lnno_  = __LINE__;               \
+            DebugMessage_tag_   = (CONST char *)"HTC";    \
+            DebugMessage arg;                             \
+        } END_ERRNO_ENV;                                  \
     } while ( 0 )
-# define HTCK(arg, file, line)  do {                  \
-        DebugMessage_fname_ = (CONST char *)(file);   \
-        DebugMessage_lnno_  = (line);                 \
-        DebugMessage_tag_   = (CONST char *)"HTC";    \
-        DebugMessage arg;                             \
+# define HTCK(arg, file, line)  do {                      \
+        BEGIN_ERRNO_ENV {                                 \
+            DebugMessage_fname_ = (CONST char *)(file);   \
+            DebugMessage_lnno_  = (line);                 \
+            DebugMessage_tag_   = (CONST char *)"HTC";    \
+            DebugMessage arg;                             \
+        } END_ERRNO_ENV;                                  \
     } while ( 0 )
 #endif
 /*--------------------------------------------------------------------*/
@@ -1212,7 +1242,9 @@ EXTERN VOID PASCAL NEAR ASRT_WriteStr_  DCL((CONST char *s));
 #ifdef MAIN_C_
 VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *, s)
 {
-    trcs_(s);
+    if ( stderr != GetTrcFP() ) { /* Avoid Duplicates ... */
+        trcs_(s);
+    }
     VOIDCAST fputs(s, stderr);
 # if ( 0 )
     VOIDCAST( GetTrcFP()? fflush(GetTrcFP()) : 0 );
@@ -1467,6 +1499,12 @@ BEGIN_DO_ONCE {
 
 
 /**********************************************************************/
+/* Compile time asserts of certain system properties                  */
+/**********************************************************************/
+/*--------------------------------------------------------------------*/
+/* We want to assure these charcacter constants can always be         */
+/* processed as unsigned characters.                                  */
+/*--------------------------------------------------------------------*/
 CASRT(0 <= 'a');
 CASRT(0 <= 'b');
 CASRT(0 <= 'c');
@@ -1564,6 +1602,19 @@ CASRT(0 <= '/');
 CASRT(0 <= '?');
 CASRT(0 <= '`');
 CASRT(0 <= '~');
+/*--------------------------------------------------------------------*/
+typedef unsigned char     byte_t;
+typedef unsigned int      uint_t;
+typedef long int          long_t;
+typedef unsigned long int ulong_t;
+#define BITS_IN_BYTE  (C_8)
+/* LHS: 2^BITS_IN_BYTE - 1,
+ * RHS: 1..1, i.e. a sequence of BITS_IN_BYTE ones
+ */
+CASRT( (((uint_t)1 << BITS_IN_BYTE) - 1) == ((byte_t)(~(uint_t)0)) );
+/* This is needed e.g. by ernd(): */
+CASRT( 4 <= SIZEOF(long_t) );
+CASRT( 4 <= SIZEOF(ulong_t) );
 /**********************************************************************/
 
 
@@ -2393,7 +2444,7 @@ EXTERN int PASCAL NEAR          dispvar DCL((int f, int n));
 EXTERN int PASCAL NEAR          echochar DCL((unsigned char c));
 EXTERN int PASCAL NEAR          echostring DCL((CONST char *, int, int));
 EXTERN int PASCAL NEAR          eq DCL((unsigned char bc, unsigned char pc));
-EXTERN long PASCAL NEAR         ernd DCL((void));
+EXTERN long_t PASCAL NEAR       ernd DCL((void));
 EXTERN int PASCAL NEAR          execkey_ DCL((KEYTAB *key, int f, int n, BUFFER *bp));
 #define                         execkey(key, f, n)                    \
                                     execkey_((key), (f), (n), curbp)

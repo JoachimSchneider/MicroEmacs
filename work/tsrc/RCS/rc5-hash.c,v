@@ -1,0 +1,1009 @@
+head	1.13;
+access;
+symbols;
+locks
+	joachim:1.13; strict;
+comment	@ * @;
+
+
+1.13
+date	2026.04.05.16.52.13;	author joachim;	state Exp;
+branches;
+next	1.12;
+
+1.12
+date	2026.04.05.16.12.29;	author joachim;	state Exp;
+branches;
+next	1.11;
+
+1.11
+date	2026.04.05.15.07.01;	author joachim;	state Exp;
+branches;
+next	1.10;
+
+1.10
+date	2026.04.05.15.05.30;	author joachim;	state Exp;
+branches;
+next	1.9;
+
+1.9
+date	2026.04.05.14.03.13;	author joachim;	state Exp;
+branches;
+next	1.8;
+
+1.8
+date	2026.04.05.13.43.39;	author joachim;	state Exp;
+branches;
+next	1.7;
+
+1.7
+date	2026.04.04.15.09.24;	author joachim;	state Exp;
+branches;
+next	1.6;
+
+1.6
+date	2026.04.03.16.22.19;	author joachim;	state Exp;
+branches;
+next	1.5;
+
+1.5
+date	2026.04.03.10.33.26;	author joachim;	state Exp;
+branches;
+next	1.4;
+
+1.4
+date	2026.04.03.10.28.42;	author joachim;	state Exp;
+branches;
+next	1.3;
+
+1.3
+date	2026.04.03.10.25.38;	author joachim;	state Exp;
+branches;
+next	1.2;
+
+1.2
+date	2026.04.01.20.09.41;	author joachim;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2026.04.01.19.55.12;	author joachim;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.13
+log
+@*** empty log message ***
+@
+text
+@/* RC5REF.C -- Reference implementation of RC5-32/12/16 in C. */
+/* Copyright (C) 1995 RSA Data Security, Inc.                 */
+/* R.L. Rivest                                                */
+/* Small change - ADD(), SUB() - working on 64-bit systems.   */
+
+
+#include <stdio.h>
+#ifdef __STDC__
+# include <string.h>
+# include <stdlib.h>
+#endif
+#undef NDEBUG
+#include <assert.h>
+
+
+#define BYTE_BITS      (8)    /* Bits In Byte */
+#define T_MAX         (64)
+#define C_1            1
+#define C_2            2
+#define C_3            3
+#define C_4            4
+#define C_8            8
+#define C_16          16
+#define C_32          32
+#define FALSE         (0)
+#define TRUE          (1)
+#define BEGIN_COMMENT (0)
+#ifdef __STDC__
+typedef void *        voidp_t;
+#else
+typedef char *        voidp_t;
+#endif
+#define VOIDP         voidp_t
+#define VOID          void
+#define CONST         const
+
+
+#define CRASH(x)  (0 = 0)
+/**********************************************************************/
+/*....................................................................*/
+/* You may use                                                        */
+/* - `CASRT'  at places where a declaration is syntactically correct  */
+/* - `CASRTS' at places where a statement is syntactically correct    */
+/*....................................................................*/
+#define CASRT(cond)                         \
+  extern int casrt_dummy_x_[1];             \
+  extern int casrt_dummy_x_[(cond)? 1 : 2]
+/**END_OF_DEFINITION**/
+#define CASRTS(cond)  do { CASRT((cond)); } while ( 0 )
+/**********************************************************************/
+
+typedef unsigned char      byte_t;
+typedef unsigned short int ushort_t;
+typedef unsigned       int uint_t;
+typedef unsigned long  int ulong_t;
+
+/* - K&R-1978 does *not* require this, but it's example platforms
+ *   respect these restrictions.
+ * - K&R-1989 require these restrictions.
+ */
+CASRT(C_1              == sizeof(byte_t));
+CASRT(C_2              <= sizeof(ushort_t));
+CASRT(sizeof(ushort_t) <= sizeof(uint_t));
+CASRT(sizeof(uint_t)   <= sizeof(ulong_t));
+CASRT(C_4              <= sizeof(ulong_t));
+CASRT(sizeof(VOIDP) == sizeof(ulong_t));        /* Excludes OS/400    */
+
+
+#ifdef __STDC__
+# define MIN_ULONG_MAX  4294967295UL            /* 32-Bit max ulong_t */
+# include <limits.h>                            /* ANSI-C has it!     */
+# if  MIN_ULONG_MAX < ULONG_MAX          /* Conclusion: 64-Bit System */
+   CASRT(C_8 == sizeof(VOIDP));
+#  define PTR_SIZE    (C_8)
+#  define WORD_BITS   (C_32)
+# if  MIN_ULONG_MAX <= UINT_MAX                 /* uint_t has 32 Bits */
+#  define WORD_T_     uint_t
+# else
+#  define WORD_T_     ulong_t
+# endif
+# else
+# if  MIN_ULONG_MAX == ULONG_MAX
+   CASRT(C_4== sizeof(VOIDP));
+#  define PTR_SIZE    (C_4)
+#  define WORD_BITS   (C_16)
+#  define WORD_T_     ushort_t
+# else
+    CRASH();
+# endif
+# endif
+#else
+  CASRT(C_4 == sizeof(VOIDP));
+# define PTR_SIZE     (C_4)
+# define WORD_BITS    (C_16)
+# define WORD_T_      ushort_t
+#endif
+CASRT(WORD_BITS * 2 / BYTE_BITS == PTR_SIZE);
+
+
+typedef struct  rc5_parm_s_ {
+    int     valid;  /* boolean: data have been set                */
+    int     w;      /* word size in bits                          */
+    WORD_T_ m;      /* Bitmask for word                           */
+    int     r;      /* number of rounds                           */
+    int     t;      /* (<= T_MAX) nelem of table S: 2*(r+1) words */
+    WORD_T_ P;      /* magic constant                             */
+    WORD_T_ Q;      /* magic constant                             */
+    WORD_T_ S[T_MAX]; /* expanded key table                       */
+} rc5_parm_t;
+
+
+static  rc5_parm_t  rc5_8_parm;
+static  rc5_parm_t  rc5_16_parm;
+static  rc5_parm_t  rc5_32_parm;
+
+
+/* Rotation operators, x must be unsigned, to get logical right shift */
+#define ROTL(x,y, w)  ( ((x)<<((y)&((w)-1))) | ((x)>>((w)-((y)&((w)-1)))) )
+#define ROTR(x,y, w)  ( ((x)>>((y)&((w)-1))) | ((x)<<((w)-((y)&((w)-1)))) )
+#define ADD(x, y, m)  ( ((x) + (y)) & (m) )
+#define SUB(x, y, m)  ( ((x) - (y)) & (m) )
+#define MAX2(x, y)    ( (x) > (y) ? (x) : (y) )
+
+
+static int xmemset(VOIDP x, char c, int len)
+{
+    char  *cp = (char *)x;
+    int   i   = 0;
+
+    for ( i = 0; i < len; i++ ) {
+        cp[i] = c;
+    }
+
+    return 0;
+}
+
+#define ZEROMEM(x)    ( xmemset(&(x), 0, sizeof((x))) )
+#define MIN2(x, y)    ( (x) < (y) ? (x) : (y) )
+
+
+static VOID RC5_ENCRYPT(rc5_parm_t *R,
+                        WORD_T_    *pt,   /* 2 Word input pt  */
+                        WORD_T_    *ct    /* 2 Word output ct */
+                       )
+{
+    int     i = 0;
+    WORD_T_ A = ADD(pt[0], R->S[0], R->m);
+    WORD_T_ B = ADD(pt[1], R->S[1], R->m);
+
+    for ( i = 1; i <= R->r; i++ ) {
+        A = ADD(ROTL(A ^ B, B, R->w), R->S[2*i], R->m);
+        B = ADD(ROTL(B ^ A, A, R->w), R->S[2*i+1], R->m);
+    }
+    ct[0] = A;
+    ct[1] = B;
+}
+
+static VOID RC5_DECRYPT(rc5_parm_t *R,
+                        WORD_T_    *ct, /* 2 Word input ct  */
+                        WORD_T_    *pt  /* 2 Word output pt */
+                       )
+{
+    int     i = 0;
+    WORD_T_ A = ct[0];
+    WORD_T_ B = ct[1];
+
+    for ( i = R->r; i > 0; i-- )  {
+        B = ROTR(SUB(B, R->S[2*i+1], R->m), A, R->w) ^ A;
+        A = ROTR(SUB(A, R->S[2*i], R->m),   B, R->w) ^ B;
+    }
+    pt[0] = SUB(A, R->S[0], R->m);
+    pt[1] = SUB(B, R->S[1], R->m);
+}
+
+VOID RC5_INIT(rc5_parm_t *R, int w, int r)
+{
+    int     i = 0;
+    int     k = 0;
+    WORD_T_ A = 0;
+    WORD_T_ B = 0;
+
+    assert(NULL != R);
+    assert(0 < w);
+    assert(0 == (w % 2));
+    assert(0 == (w % 8));
+    assert(w <= 32);
+    assert(0 <= r);
+
+#if BEGIN_COMMENT /* Fields to initialize:  */
+    int     valid;  /* boolean: data have been set                */
+    int     w;      /* word size in bits                          */
+    WORD_T_ m;      /* Bitmask for word                           */
+    int     r;      /* number of rounds                           */
+    int     t;      /* (<= T_MAX) nelem of table S: 2*(r+1) words */
+    WORD_T_ P;      /* magic constant                             */
+    WORD_T_ Q;      /* magic constant                             */
+    WORD_T_ S[T_MAX]; /* expanded key table                       */
+#endif
+
+    R->valid  = TRUE;
+    R->w      = w;
+    R->r      = r;
+    R->t      = 2 * (r + 1);
+    assert(R->t <= T_MAX);
+
+    switch ( w )  {
+#if C_8 <= WORD_BITS
+        case  C_8:
+            R->m  = 0xFF;
+            R->P  = 0xb7;
+            R->Q  = 0x9F;
+
+            break;
+#endif
+
+#if C_16 <= WORD_BITS
+        case C_16:
+            R->m  = 0xFFFF;
+            R->P  = 0xb7e1;
+            R->Q  = 0x9e37;
+
+            break;
+#endif
+
+#if C_32 <= WORD_BITS
+        case C_32:
+            R->m  = 0xFFFFFFFF;
+            R->P  = 0xb7e15163;
+            R->Q  = 0x9e3779b9;
+
+            break;
+#endif
+
+        default:
+            assert(0);
+            break;
+    }
+    ZEROMEM(R->S);
+    for ( R->S[0] = R->P, i = 1; i < R->t; i++ )  {
+        R->S[i] = ADD(R->S[i-1], R->Q, R->m);
+    }
+    for ( A = B = i = k = 0;
+          k < 3 * R->t;
+          k++, i = (i + 1) % R->t )
+    {
+        A = R->S[i] = ROTL(ADD(R->S[i], ADD(A, B, R->m), R->m), C_3, R->w);
+        B =           ROTL(ADD(A, B, R->m), ADD(A, B, R->m), R->w);
+    }
+}
+
+
+ulong_t mix_ulong(ulong_t x)
+{
+    ulong_t           res     = 0;
+    WORD_T_           in[2];
+    WORD_T_           out[2];
+    static rc5_parm_t parm;
+
+    if ( ! parm.valid )  {
+        RC5_INIT(&parm, WORD_BITS, C_8);
+    }
+    in[1] = (x >> WORD_BITS);
+    in[0] = x & parm.m;
+
+#if 1
+    RC5_ENCRYPT(&parm, in, out);
+#else
+    memcpy(out, in, MIN2(sizeof(out), sizeof(in)));
+#endif
+
+    res |=  out[1];
+    res <<= WORD_BITS;
+    res |=  out[0];
+
+    return res;
+}
+
+
+#define USAGE_EXIT  (42)
+
+static int usage(CONST char *pgm)
+{
+    fprintf(stderr, "%s: Usage %s [-t <Unsigned Long Int>|-c]\n", pgm, pgm);
+    fprintf(stderr, "\t%s\n", "-c: This will generate an infinate random byte stream to stdout");
+
+    exit(USAGE_EXIT);
+}
+
+
+int main(int argc, char *argv[])
+{
+    int         rc          = 0;
+    int         i           = 0;
+    WORD_T_     pt1[2];
+    WORD_T_     pt2[2];
+    WORD_T_     ct[2];
+
+    if ( 1>= argc ) {
+        /* Setup parameters */
+#if C_8 <= WORD_BITS
+        RC5_INIT(&rc5_8_parm,   8, 4);
+#endif
+#if C_16 <= WORD_BITS
+        RC5_INIT(&rc5_16_parm, 16, 6);
+#endif
+#if C_32 <= WORD_BITS
+        RC5_INIT(&rc5_32_parm, 32, 8);
+#endif
+
+#if C_32 <= WORD_BITS
+        printf("%s\n", "RC5-32/8/0 examples:");
+        ZEROMEM(pt1);
+        ZEROMEM(pt2);
+        ZEROMEM(ct);
+        for ( i = 1; i < 6; i++ ) {
+            /* Initialize pt1 and key pseudorandomly based on previous ct */
+            pt1[0] = ct[0];
+            pt1[1] = ct[1];
+            /* encrypt, and decrypt */
+            RC5_ENCRYPT(&rc5_32_parm, pt1, ct);
+            RC5_DECRYPT(&rc5_32_parm, ct, pt2);
+            /* Print out results, checking for decryption failure */
+            printf("\n%d.", (int)i);
+            printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+                   (ulong_t)pt1[0], (ulong_t)pt1[1], (ulong_t)ct[0], (ulong_t)ct[1]);
+            if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+                printf("DecryptionError!");
+                rc++;
+            }
+        }
+#endif
+
+#if C_16 <= WORD_BITS
+        printf("%s\n", "RC5-16/6/0 examples:");
+        ZEROMEM(pt1);
+        ZEROMEM(pt2);
+        ZEROMEM(ct);
+        for ( i = 1; i < 6; i++ ) {
+            /* Initialize pt1 and key pseudorandomly based on previous ct */
+            pt1[0] = ct[0];
+            pt1[1] = ct[1];
+            /* encrypt, and decrypt */
+            RC5_ENCRYPT(&rc5_16_parm, pt1, ct);
+            RC5_DECRYPT(&rc5_16_parm, ct, pt2);
+            /* Print out results, checking for decryption failure */
+            printf("\n%d.", (int)i);
+            printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+                   (ulong_t)pt1[0], (ulong_t)pt1[1], (ulong_t)ct[0], (ulong_t)ct[1]);
+            if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+                printf("DecryptionError!");
+                rc++;
+            }
+        }
+#endif
+
+#if C_8 <= WORD_BITS
+        printf("%s\n", "RC5-8/4/0 examples:");
+        ZEROMEM(pt1);
+        ZEROMEM(pt2);
+        ZEROMEM(ct);
+        for ( i = 1; i < 6; i++ ) {
+            /* Initialize pt1 and key pseudorandomly based on previous ct */
+            pt1[0] = ct[0];
+            pt1[1] = ct[1];
+            /* encrypt, and decrypt */
+            RC5_ENCRYPT(&rc5_8_parm, pt1, ct);
+            RC5_DECRYPT(&rc5_8_parm, ct, pt2);
+            /* Print out results, checking for decryption failure */
+            printf("\n%d.", (int)i);
+            printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+                   (ulong_t)pt1[0], (ulong_t)pt1[1], (ulong_t)ct[0], (ulong_t)ct[1]);
+            if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+                printf("DecryptionError!");
+                rc++;
+            }
+        }
+#endif
+    } else            {
+        CONST char  *progname = argv[0];
+
+        argv++;
+
+        while ( NULL != *argv ) {
+            if ( 0 == strcmp(*argv, "-t") ) {
+                ulong_t in  = 0;
+                ulong_t out = 0;
+
+                argv++;
+                if ( NULL == *argv )  {
+                    usage(progname);
+                }
+                in  = strtoul(*argv, NULL, C_16);
+                out = mix_ulong(in);
+                fprintf(stdout, "0x%lX\n", out);
+            } else if ( 0 == strcmp(*argv, "-c") )  {
+                ulong_t i = 0;
+
+                for ( ;;i++ ) {
+                    ulong_t res = mix_ulong(i);
+                    int     j   = 0;
+
+                    for ( j = 0; j < sizeof(res); j++ ) {
+                        unsigned char c = res & 0xFF;
+
+                        putc(c, stdout);
+
+                        res >>= BYTE_BITS;
+                    }
+                }
+            } else                                  {
+                usage(progname);
+            }
+
+            argv++;
+        }
+    }
+
+    return rc;
+}
+
+
+/* EOF */
+@
+
+
+1.12
+log
+@*** empty log message ***
+@
+text
+@d260 1
+a260 1
+        RC5_INIT(&parm, WORD_BITS, C_3);
+d262 1
+a262 1
+    in[1]= (x >> WORD_BITS) & parm.m;
+d275 1
+a275 1
+    return res;    
+d283 2
+a284 1
+    fprintf(stderr, "%s: Usage %s [-t <Unsigned Long Int>]\n", pgm, pgm);
+d298 1
+a298 1
+    if ( 0 == argc )  {
+d387 1
+a387 1
+                
+d395 17
+d413 1
+@
+
+
+1.11
+log
+@*** empty log message ***
+@
+text
+@d8 4
+d35 1
+d97 1
+d138 1
+d252 37
+d297 2
+a298 1
+    /* Setup parameters */
+d300 1
+a300 1
+    RC5_INIT(&rc5_8_parm,   8, 4);
+d303 1
+a303 1
+    RC5_INIT(&rc5_16_parm, 16, 6);
+d306 1
+a306 1
+    RC5_INIT(&rc5_32_parm, 32, 8);
+d310 19
+a328 18
+    printf("%s\n", "RC5-32/8/0 examples:");
+    ZEROMEM(pt1);
+    ZEROMEM(pt2);
+    ZEROMEM(ct);
+    for ( i = 1; i < 6; i++ ) {
+        /* Initialize pt1 and key pseudorandomly based on previous ct */
+        pt1[0] = ct[0];
+        pt1[1] = ct[1];
+        /* encrypt, and decrypt */
+        RC5_ENCRYPT(&rc5_32_parm, pt1, ct);
+        RC5_DECRYPT(&rc5_32_parm, ct, pt2);
+        /* Print out results, checking for decryption failure */
+        printf("\n%d.", (int)i);
+        printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+               (ulong_t)pt1[0], (ulong_t)pt1[1], (ulong_t)ct[0], (ulong_t)ct[1]);
+        if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+            printf("DecryptionError!");
+            rc++;
+a329 1
+    }
+d333 19
+a351 18
+    printf("%s\n", "RC5-16/6/0 examples:");
+    ZEROMEM(pt1);
+    ZEROMEM(pt2);
+    ZEROMEM(ct);
+    for ( i = 1; i < 6; i++ ) {
+        /* Initialize pt1 and key pseudorandomly based on previous ct */
+        pt1[0] = ct[0];
+        pt1[1] = ct[1];
+        /* encrypt, and decrypt */
+        RC5_ENCRYPT(&rc5_16_parm, pt1, ct);
+        RC5_DECRYPT(&rc5_16_parm, ct, pt2);
+        /* Print out results, checking for decryption failure */
+        printf("\n%d.", (int)i);
+        printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+               (ulong_t)pt1[0], (ulong_t)pt1[1], (ulong_t)ct[0], (ulong_t)ct[1]);
+        if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+            printf("DecryptionError!");
+            rc++;
+a352 1
+    }
+d356 40
+a395 18
+    printf("%s\n", "RC5-8/4/0 examples:");
+    ZEROMEM(pt1);
+    ZEROMEM(pt2);
+    ZEROMEM(ct);
+    for ( i = 1; i < 6; i++ ) {
+        /* Initialize pt1 and key pseudorandomly based on previous ct */
+        pt1[0] = ct[0];
+        pt1[1] = ct[1];
+        /* encrypt, and decrypt */
+        RC5_ENCRYPT(&rc5_8_parm, pt1, ct);
+        RC5_DECRYPT(&rc5_8_parm, ct, pt2);
+        /* Print out results, checking for decryption failure */
+        printf("\n%d.", (int)i);
+        printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+               (ulong_t)pt1[0], (ulong_t)pt1[1], (ulong_t)ct[0], (ulong_t)ct[1]);
+        if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+            printf("DecryptionError!");
+            rc++;
+a397 1
+#endif
+@
+
+
+1.10
+log
+@*** empty log message ***
+@
+text
+@a7 3
+#ifdef __STDC__
+# include <string.h>
+#endif
+@
+
+
+1.9
+log
+@*** empty log message ***
+@
+text
+@d8 3
+a10 1
+#include <string.h>
+d121 14
+a134 1
+#define ZEROMEM(x)    ( memset(&(x), 0, sizeof((x))) )
+d252 3
+a254 3
+    WORD_T_     pt1[2]      = { 0, 0 };
+    WORD_T_     pt2[2]      = { 0, 0 };
+    WORD_T_     ct[2]       = { 0, 0 };
+d312 1
+a312 1
+    
+@
+
+
+1.8
+log
+@*** empty log message ***
+@
+text
+@d21 1
+d188 2
+a189 1
+        case  8:
+d195 4
+a198 1
+        case 16:
+d204 4
+a207 1
+        case 32:
+d213 2
+d242 1
+d244 2
+d247 2
+d250 1
+d252 1
+d273 1
+d275 1
+d296 3
+a298 1
+
+d319 1
+@
+
+
+1.7
+log
+@*** empty log message ***
+@
+text
+@d13 1
+a13 1
+#define BIB           (8)   /* Bits In Byte */
+d15 6
+a20 3
+#define C_2           2
+#define C_3           3
+#define C_4           4
+d24 6
+d33 1
+d47 1
+a47 1
+
+a51 1
+
+d56 1
+d61 1
+d64 29
+a92 1
+#define WORD_T_ ulong_t
+a102 8
+    VOID    (*Encrypt)(struct rc5_parm_s_ *R,
+                       WORD_T_            *pt,  /* 2 Word input pt  */
+                       WORD_T_            *ct   /* 2 Word output ct */
+                      );
+    VOID    (*Decrypt)(struct rc5_parm_s_ *R,
+                       WORD_T_            *pt,  /* 2 Word input pt  */
+                       WORD_T_            *ct   /* 2 Word output ct */
+                      );
+d155 1
+a155 1
+VOID rc5_parm_t_Init(rc5_parm_t *R, int w, int r)
+a184 2
+    R->Encrypt  = &RC5_ENCRYPT;
+    R->Decrypt  = &RC5_DECRYPT;
+d232 3
+a234 3
+    rc5_parm_t_Init(&rc5_8_parm,   8, 4);
+    rc5_parm_t_Init(&rc5_16_parm, 16, 6);
+    rc5_parm_t_Init(&rc5_32_parm, 32, 8);
+d245 2
+a246 2
+        rc5_32_parm.Encrypt(&rc5_32_parm, pt1, ct);
+        rc5_32_parm.Decrypt(&rc5_32_parm, ct, pt2);
+d250 1
+a250 1
+               pt1[0], pt1[1], ct[0], ct[1]);
+d266 2
+a267 2
+        rc5_16_parm.Encrypt(&rc5_16_parm, pt1, ct);
+        rc5_16_parm.Decrypt(&rc5_16_parm, ct, pt2);
+d271 1
+a271 1
+               pt1[0], pt1[1], ct[0], ct[1]);
+d287 2
+a288 2
+        rc5_8_parm.Encrypt(&rc5_8_parm, pt1, ct);
+        rc5_8_parm.Decrypt(&rc5_8_parm, ct, pt2);
+d292 1
+a292 1
+               pt1[0], pt1[1], ct[0], ct[1]);
+@
+
+
+1.6
+log
+@*** empty log message ***
+@
+text
+@d21 2
+d64 8
+d90 4
+a93 4
+void RC5_ENCRYPT(rc5_parm_t *R,
+                 WORD_T_    *pt,  /* 2 Word input pt  */
+                 WORD_T_    *ct   /* 2 Word output ct */
+                )
+d107 4
+a110 4
+void RC5_DECRYPT(rc5_parm_t *R,
+                 WORD_T_    *ct,  /* 2 Word input ct  */
+                 WORD_T_    *pt   /* 2 Word output pt */
+                )
+d124 1
+a124 1
+void RC5_SETUP(rc5_parm_t *R, int w, int r)
+d154 2
+d203 3
+a205 3
+    RC5_SETUP(&rc5_8_parm,   8, 4);
+    RC5_SETUP(&rc5_16_parm, 16, 6);
+    RC5_SETUP(&rc5_32_parm, 32, 8);
+d216 2
+a217 2
+        RC5_ENCRYPT(&rc5_32_parm, pt1, ct);
+        RC5_DECRYPT(&rc5_32_parm, ct, pt2);
+d237 2
+a238 2
+        RC5_ENCRYPT(&rc5_16_parm, pt1, ct);
+        RC5_DECRYPT(&rc5_16_parm, ct, pt2);
+d258 2
+a259 2
+        RC5_ENCRYPT(&rc5_8_parm, pt1, ct);
+        RC5_DECRYPT(&rc5_8_parm, ct, pt2);
+@
+
+
+1.5
+log
+@*** empty log message ***
+@
+text
+@d13 8
+a20 5
+#define BIB     (8)   /* Bits In Byte                     */
+#define T_MAX   (64)
+#define C_3     3
+#define FALSE   (0)
+#define TRUE    (1)
+d36 16
+a51 1
+typedef unsigned long int WORD_T_;
+d128 1
+a128 1
+#if ( 0 ) /* Fields to initialize:  */
+@
+
+
+1.4
+log
+@*** empty log message ***
+@
+text
+@d47 2
+a49 1
+static  rc5_parm_t  rc5_16_parm;
+d102 1
+a102 1
+    
+d132 1
+a132 1
+            
+d138 1
+a138 1
+            
+d144 1
+a144 1
+            
+d149 1
+a149 1
+    }    
+d173 2
+a175 1
+    RC5_SETUP(&rc5_16_parm, 16, 6);
+d197 1
+d209 21
+@
+
+
+1.3
+log
+@*** empty log message ***
+@
+text
+@d171 4
+d183 1
+a183 2
+        /* Setup, encrypt, and decrypt */
+        RC5_SETUP(&rc5_32_parm, 32, 8);
+d203 1
+a203 2
+        /* Setup, encrypt, and decrypt */
+        RC5_SETUP(&rc5_16_parm, 16, 6);
+@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@d9 2
+d13 2
+a14 2
+#define BIB    (8)    /* Bits In Byte                     */
+#define T_MAX (64)
+d16 2
+d19 12
+a30 1
+#define CASRT(stmt)
+d33 2
+a34 1
+typedef unsigned long int ulong_t;
+d36 3
+a38 2
+    ulong_t w;      /* word size in bits                          */
+    ulong_t m;      /* Bitmask for word                           */
+d41 3
+a43 3
+    ulong_t P;      /* magic constant                             */
+    ulong_t Q;      /* magic constant                             */
+    ulong_t S[T_MAX]; /* expanded key table                       */
+d47 2
+a48 19
+static  rc5_parm_t  rc5_32_parm = {
+                            32,           /* w:      word size in bits  */
+                            0xFFFFFFFF,   /* m:     bitmask for word    */
+                            8,            /* r:     number of rounds    */
+                            18,           /* t:     nelem of S: 2*(r+1) */
+                            0xb7e15163,   /* P:     magic constant      */
+                            0x9e3779b9    /* Q:     magic constant      */
+                            /**  S[T_MAX]:          expanded key table  */
+                        };
+
+static  rc5_parm_t  rc5_16_parm = {
+                            16,           /* w:      word size in bits  */
+                            0xFFFF,       /* m:     bitmask for word    */
+                            6,            /* r:     number of rounds    */
+                            14,           /* t:     nelem of S: 2*(r+1) */
+                            0xb7e1,       /* P:     magic constant      */
+                            0x9e37        /* Q:     magic constant      */
+                            /**  S[T_MAX]:          expanded key table  */
+                        };
+d61 3
+a63 3
+void RC5_ENCRYPT(rc5_parm_t *P,
+                 ulong_t    *pt,  /* 2 Word input pt  */
+                 ulong_t    *ct   /* 2 Word output ct */
+d67 2
+a68 2
+    ulong_t A = ADD(pt[0], P->S[0], P->m);
+    ulong_t B = ADD(pt[1], P->S[1], P->m);
+d70 3
+a72 3
+    for ( i = 1; i <= P->r; i++ ) {
+        A = ADD(ROTL(A ^ B, B, P->w), P->S[2*i], P->m);
+        B = ADD(ROTL(B ^ A, A, P->w), P->S[2*i+1], P->m);
+d78 3
+a80 3
+void RC5_DECRYPT(rc5_parm_t *P,
+                 ulong_t    *ct,  /* 2 Word input ct  */
+                 ulong_t    *pt   /* 2 Word output pt */
+d84 2
+a85 2
+    ulong_t A = ct[0];
+    ulong_t B = ct[1];
+d87 3
+a89 3
+    for ( i = P->r; i > 0; i-- )  {
+        B = ROTR(SUB(B, P->S[2*i+1], P->m), A, P->w) ^ A;
+        A = ROTR(SUB(A, P->S[2*i], P->m),   B, P->w) ^ B;
+d91 2
+a92 2
+    pt[0] = SUB(A, P->S[0], P->m);
+    pt[1] = SUB(B, P->S[1], P->m);
+d95 1
+a95 1
+void RC5_SETUP(rc5_parm_t *P)
+d99 53
+a151 6
+    ulong_t A = 0;
+    ulong_t B = 0;
+
+    ZEROMEM(P->S);
+    for ( P->S[0] = P->P, i = 1; i < P->t; i++ )  {
+        P->S[i] = ADD(P->S[i-1], P->Q, P->m);
+d154 2
+a155 2
+          k < 3 * P->t;
+          k++, i = (i + 1) % P->t )
+d157 2
+a158 2
+        A = P->S[i] = ROTL(ADD(P->S[i], ADD(A, B, P->m), P->m), C_3, P->w);
+        B =           ROTL(ADD(A, B, P->m), ADD(A, B, P->m), P->w);
+d167 3
+a169 3
+    ulong_t     pt1[2]      = { 0, 0 };
+    ulong_t     pt2[2]      = { 0, 0 };
+    ulong_t     ct[2]       = { 0, 0 };
+d180 1
+a180 1
+        RC5_SETUP(&rc5_32_parm);
+d201 1
+a201 1
+        RC5_SETUP(&rc5_16_parm);
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d23 1
+a23 1
+    int     t;      /* (<= T_MAX) size of table S = 2*(r+1) words */
+d34 1
+a34 1
+                            18,           /* t:     S = 2*(r+1) words   */
+d40 10
+d52 2
+a53 2
+#define ROTL(x,y, w)  (((x)<<((y)&((w)-1))) | ((x)>>((w)-((y)&((w)-1)))))
+#define ROTR(x,y, w)  (((x)>>((y)&((w)-1))) | ((x)<<((w)-((y)&((w)-1)))))
+a122 1
+    rc5_parm_t  *RC5ParmPtr = & rc5_32_parm;
+d125 24
+d154 3
+a156 3
+        RC5_SETUP(RC5ParmPtr);
+        RC5_ENCRYPT(RC5ParmPtr, pt1, ct);
+        RC5_DECRYPT(RC5ParmPtr, ct, pt2);
+@

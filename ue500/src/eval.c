@@ -2180,22 +2180,26 @@ int PASCAL NEAR absv P1_(int, x)
  *
  * - m = 2^31 - 1, the function uses Schrage's algorithm.
  *
- * - It returns an integer in the range 0 ... m - 1 which fits into the
+ * - seed must be an integer int the range 1 .. m - 1
+ *
+ * - It returns an integer in the range 1 ... m - 1 which fits into the
  *   range of a signed four byte integer.
+ *
+ * - It has the maximum possible period of m - 1
  */
-long PASCAL NEAR ernd P0_()
+long_t PASCAL NEAR  ernd P0_()
 {
-    long int  a = 16807L, m = 2147483647L, q = 127773L, r = 2836L;
-    long int  lo = 0, hi = 0, test = 0;
+    long_t a = 16807L, m = 2147483647L, q = 127773L, r = 2836L;
+    long_t lo = 0, hi = 0, test = 0;
 
-    CASRT(4 <= SIZEOF(long));
+    CASRT(4 <= SIZEOF(long_t));
 
     hi = seed / q;
     lo = seed % q;
     test = a * lo - r * hi;
     seed = (test > 0) ? test : test + m;
 
-    return (seed);
+    return seed;
 }
 
 /* SINDEX:

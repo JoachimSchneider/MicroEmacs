@@ -3017,11 +3017,17 @@ int unx_rename_ P2_(CONST char *, from, CONST char *, to)
 # endif
 }
 
+/* UNX_STAT_:
+ *
+ * Substitute for UNIX stat().
+ *
+ * - errno is evaluated by caller!
+ */
 int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
 {
-    int         rc      = 0;
-    int         fd      = 0;
-    CONST char  *upath  = NULL;
+    int         rc        = 0;
+    int         fd        = 0;
+    CONST char  *upath    = NULL;
 
     ASRT(NULL != path);
     ASRT(NULL != sb);
@@ -3030,10 +3036,20 @@ int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
      * static buffer, because we *know* that `stat' won't call
      * GetPathUNX
      */
+    errno = 0;
     rc  = stat(upath = GetPathUNX(path), sb);
-    TRC(("unx_stat_(): upath = %s, path = %s, stat rc: %d", upath, path, rc));
     if ( 0 == rc )  {
+        TRC(("unx_stat_(): upath = %s, path = %s, stat rc: %d", upath, path, rc));
+        errno = 0;
+
         return 0;
+    } else          {
+        int errno_sv  = errno;
+
+        BEGIN_ERRNO_ENV {
+            TRC(("unx_stat_(): upath = %s, path = %s, stat rc: %d, errno = %d: %s",
+                 upath, path, rc, errno_sv, umc_strerror(errno_sv)));
+        } END_ERRNO_ENV;
     }
 
     /* On CygWin, DJGPP and similar environments an `open()'
@@ -3042,21 +3058,26 @@ int unx_stat_ P2_(CONST char *, path, struct stat *, sb)
      * convertable to some UNIX-path. The workaround here enables
      * us to do a `stat()' also for such path's.
      */
+    errno = 0;
     fd  = open(path, O_RDONLY);
-
     if ( 0 > fd ) {
         int errno_sv  = errno;
 
-        TRC(("unx_stat_(): open(%s, O_RDONLY) failed, errno = %d: %s",
-             path, errno_sv, umc_strerror(errno_sv)));
+        BEGIN_ERRNO_ENV {
+            TRC(("unx_stat_(): open(%s, O_RDONLY) failed, errno = %d: %s",
+                 path, errno_sv, umc_strerror(errno_sv)));
+        } END_ERRNO_ENV;
 
         return (-1);
     }
 
+    errno = 0;
     rc  = fstat(fd, sb);
-    close(fd);
-    TRC(("unx_stat_(): stat(%s) failed, open(%s, O_RDONLY) gave %d and fstat() returned %d.",
-         upath, path, fd, rc));
+    BEGIN_ERRNO_ENV {
+        close(fd);
+        TRC(("unx_stat_(): stat(%s) failed, open(%s, O_RDONLY) gave %d and fstat() returned %d.",
+             upath, path, fd, rc));
+    } END_ERRNO_ENV;
 
     return rc;
 }

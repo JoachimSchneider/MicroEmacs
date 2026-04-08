@@ -1,0 +1,110 @@
+/* RC5REF.C -- Reference implementation of RC5-32/12/16 in C. */
+/* Copyright (C) 1995 RSA Data Security, Inc.                 */
+/* R.L. Rivest                                                */
+/* Small change - ADD(), SUB() - working on 64-bit systems.   */
+
+#include <stdio.h>
+#include <string.h>
+
+
+typedef unsigned long int WORD; /* Should be 32-bit = 4 bytes         */
+#define BIB   (8)               /* Bits In Byte                       */
+#define w     16                /* word size in bits                  */
+#define wmask 0xFFFF
+#define r      6                /* number of rounds                   */
+#define t     (2*(r+1))         /* size of table S = 2*(r+1) words    */
+WORD S[t];                      /* expanded key table                 */
+WORD P = 0xb7e1, Q = 0x9e37;    /* magic constants                    */
+
+/* Rotation operators, x must be unsigned, to get logical right shift */
+#define ROTL(x,y)   (((x)<<((y)&(w-1))) | ((x)>>(w-((y)&(w-1)))))
+#define ROTR(x,y)   (((x)>>((y)&(w-1))) | ((x)<<(w-((y)&(w-1)))))
+#define ADD(x, y)   ( ((x) + (y)) & wmask )
+#define SUB(x, y)   ( ((x) - (y)) & wmask )
+#define MAX2(x, y)  ( (x) > (y) ? (x) : (y) )
+
+#define ZEROMEM(x)  ( memset(&(x), 0, sizeof((x))) )
+
+void RC5_ENCRYPT(WORD *pt, WORD *ct) /* 2 WDRD input pt/output ct     */
+{
+    int   i = 0;
+    WORD  A =ADD(pt[0], S[0]);
+    WORD  B =ADD(pt[1], S[1]);
+
+    for ( i = 1; i <= r; i++ )  {
+        A = ADD(ROTL(A ^ B, B), S[2*i]);
+        B = ADD(ROTL(B ^ A, A), S[2*i+1]);
+    }
+    ct[0] = A;
+    ct[1] = B;
+}
+
+void RC5_DECRYPT(WORD *ct, WORD *pt)  /* 2 WORD input ct/output pt    */
+{
+    int   i = 0;
+    WORD  A = ct[0];
+    WORD  B = ct[1];
+
+    for ( i = r; i > 0; i-- ) {
+        B = ROTR(SUB(B, S[2*i+1]), A) ^ A;
+        A = ROTR(SUB(A, S[2*i]),   B) ^ B;
+    }
+    pt[0] = SUB(A, S[0]);
+    pt[1] = SUB(B, S[1]);
+}
+
+void RC5_SETUP(void)
+{
+    int   i = 0;
+    int   k = 0;
+    WORD  A = 0;
+    WORD  B = 0;
+
+    for ( S[0] = P, i = 1; i < t; i++ ) {
+        S[i] = ADD(S[i-1], Q);
+    }
+    for ( A = B = i = k = 0;
+          k < 3 * t;
+          k++, i = (i + 1) % t )
+    {
+        A = S[i] = ROTL(ADD(S[i], ADD(A, B)), 3);
+        B =        ROTL(ADD(A, B), ADD(A, B));
+    }
+}
+
+
+int main(int argc, char *argv[])
+{
+    int   rc      = 0;
+    int   i       = 0;
+    WORD  pt1[2]  = { 0, 0 };
+    WORD  pt2[2]  = { 0, 0 };
+    WORD  ct[2]   = { 0, 0 };
+
+    if ( sizeof(WORD) != 4 )  {
+        printf("RC5 warning: WORD has %d bytes.\n", (int)sizeof(WORD));
+    }
+    printf("%s\n", "RC5-32/8/0 examples:");
+    for ( i = 1; i < 6; i++ ) {
+        /* Initialize pt1 and key pseudorandomly based on previous ct */
+        pt1[0] = ct[0];
+        pt1[1] = ct[1];
+        /* Setup, encrypt, and decrypt */
+        RC5_SETUP();
+        RC5_ENCRYPT(pt1, ct);
+        RC5_DECRYPT(ct, pt2);
+        /* Print out results, checking for decryption failure */
+        printf("\n%d.", (int)i);
+        printf("\n   plaintext %.8lX %.8lX ---> ciphertext %.8lX %.8lX \n",
+               pt1[0], pt1[1], ct[0], ct[1]);
+        if ( pt1[0] != pt2[0] || pt1[1] != pt2[1] ) {
+            printf("DecryptionError!");
+            rc++;
+        }
+    }
+
+    return rc;
+}
+
+
+/* EOF */

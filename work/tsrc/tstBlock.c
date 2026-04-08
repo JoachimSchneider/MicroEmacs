@@ -1,0 +1,74 @@
+/* SOF */
+
+
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#undef NDEBUG
+#include <assert.h>
+
+
+#define C_42  42
+#define C_16  16
+#define C_8    8
+
+
+#define ZEROMEM(x)    ( memset(&(x), 0, sizeof((x)) )
+#define MIX2(x, y)    ( (x) < (y) ? (x) : (y) )
+#define cmpArr(x, y)  ( memcmp(&(x), &(y), MIN2(sizeof((x)), sizeof((y)))) )
+#define cpArr(x, y)   ( memcpy(&(x), &(y), MIN2(sizeof((x)), sizeof((y)))) )
+#define CASRT(expr)   /**TODO**/
+
+typedef unsigned char     byte_t;
+typedef unsigned int      uint_t;
+typedef unsigned long int ulong_t;
+typedef byte_t            uint64_t[C_8];
+#define init_uint64(x)    ( memset(&(x)[0], 0,  sizeof(uint64_t)) )
+#define cmp_uint64(x, y)  ( memcmp(&(x), &(y),  sizeof(uint64_t)) )
+#define cp_uint64(x, y)   ( memcpy(&(x), &(y),  sizeof(uint64_t)) )
+#define BITS_IN_BYTE      (C_8)
+
+CASRT(sizeof(uint64_t) >= sizeof(ulong_t));
+CASRT(sizeof(char *) == sizeof(ulong_t) );
+
+void ulong2uint64(uint64_t out, ulong_t in)
+{
+    int i = 0;
+
+    init_uint64(out);
+    for ( i = 0; i < sizeof(ulong_t); i++)
+    {
+        out[i]  = (byte_t) ( ((in) & (((ulong_t)0xFF) << (i * BITS_IN_BYTE))) >> (i * BITS_IN_BYTE) );
+    }
+}
+
+void encDES(uint64_t out, uint64_t in);
+
+
+int main(int argc, char *argv[])
+{
+    ulong_t   arg = 0;
+    uint64_t  out;
+    int       i   = 0;
+    
+    if ( 2 != argc )  {
+        fprintf(stderr, "Usage: %s <Number>\n", argv[0]);
+
+        exit(C_42);
+    }
+    arg = strtoul(argv[1], NULL, C_16);
+    
+    ulong2uint64(out, (ulong_t)arg);
+
+    fprintf(stdout, "%s", "0x");
+    for ( i = sizeof(out) - 1; i >=0; i-- ) {
+        fprintf(stdout, "%02X", (uint_t)out[i]);
+    }
+    fprintf(stdout, "%s", "\n");
+
+    return 0;
+}
+
+
+
+/* EOF */

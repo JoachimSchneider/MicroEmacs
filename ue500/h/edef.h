@@ -136,7 +136,7 @@ DCLDEF NOSHARE int            kbdmode             INIT_(STOP);          /* curre
 DCLDEF NOSHARE int            kbdrep              INIT_(0);             /* number of repetitions            */
 DCLDEF NOSHARE int            restflag            INIT_(FALSE);         /* restricted use?                  */
 DCLDEF NOSHARE int            lastkey             INIT_(0);             /* last keystoke                    */
-DCLDEF NOSHARE long           seed                INIT_(1L);            /* random number seed               */
+DCLDEF NOSHARE long_t         seed                INIT_(1L);            /* random number seed               */
 DCLDEF NOSHARE long           envram              INIT_(0l);            /* # of bytes current in use by malloc  */
 DCLDEF NOSHARE long           access_time         INIT_(0L);            /* counter of buffer access         */
 DCLDEF NOSHARE int            macbug              INIT_(FALSE);         /* macro debugging flag             */
