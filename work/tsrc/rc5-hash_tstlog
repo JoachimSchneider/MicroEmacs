@@ -1,0 +1,41 @@
+# SOF(rc5-hash_tstlog)
+
+$ date;./a.out -q 400000000;date
+Thu Apr  9 10:23:44 CEST 2026
+0x6FC24EFC2E6FC895
+Thu Apr  9 10:23:54 CEST 2026
+
+Nach Umstellen auf Preprozessorkonstanten (Immediate-Werte):
+
+$ gcc -Wall -O2 rc5-hash.c
+$ date;./a.out -q 400000000;date
+Thu Apr  9 12:30:46 CEST 2026
+0x6FC24EFC2E6FC895
+Thu Apr  9 12:30:52 CEST 2026
+
+Nur noch 69 Prozent der Laufzeit noetig.
+
+Nach Umstellung von 4 auf 5 Runden im RC5 und
+
+$ ./a.out -c > /tmp/TSTCOMP
+$ xz -9 < /tmp/TSTCOMP > /tmp/TSTCOMP.xz
+
+Sehen wir:
+
+-rw-r--r--   1 joachim  joachim  493371392 Apr  9 12:44 TSTCOMP
+drwxrwxrwt  19 root     root           900 Apr  9 12:45 .
+-rw-r--r--   1 joachim  joachim  493394468 Apr  9 12:46 TSTCOM.xz
+
+D.h. `xz -9' kann den Output nicht mehr komprimieren, das war bei 4
+Runden noch etwas anders. Ausserdem habe ich irgendwo gelesen, dass
+eine ungerade Rundenzahl besser waere.
+
+Und der 5-Runden RC5 braucht auch nur 7 statt 6 Sekunden:
+
+$ date;./a.out -q 400000000;date
+Thu Apr  9 12:51:11 CEST 2026
+0xAABBBF2D36726C29
+Thu Apr  9 12:51:18 CEST 2026
+
+
+# EOF(rc5-hash_tstlog)

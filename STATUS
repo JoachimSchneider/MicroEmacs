@@ -2221,7 +2221,7 @@ $ perf report
 
 [2026-03-22.00]
 
-Reading 64000 lenes from TST_FILE:
+Reading 64000 lines from TST_FILE:
 
 $ date; ./emacs TST_FILE; date
 Sun Mar 22 12:05:12 CET 2026
@@ -2379,6 +2379,93 @@ y = 64000 ===> n = 16
 
 We measure n = 66: The tree is not degenrated into a list (n = 64000)
 but it seems not to be balanced.
+
+
+[2026-04-12.00]
+
+
+The MIX_DWORD()-Optimization in xmalloc():
+
+
+(I) Reading a file with 640000 lines:
+
+=================================================================
+
+(A) Using mix_dword()
+
+$ date; ./emacs /tmp/TST_FILE ;date
+Sun Apr 12 19:06:53 CEST 2026
+Sun Apr 12 19:06:58 CEST 2026
+$ date; ./emacs /tmp/TST_FILE ;date
+Sun Apr 12 19:06:59 CEST 2026
+Sun Apr 12 19:07:04 CEST 2026
+$ date; ./emacs /tmp/TST_FILE ;date
+Sun Apr 12 19:07:05 CEST 2026
+Sun Apr 12 19:07:10 CEST 2026
+
+AVG = 5s
+
+
+(B) Swapping bytes in a smart way:
+
+$ date; ./emacs /tmp/TST_FILE ;date
+Sun Apr 12 19:08:46 CEST 2026
+Sun Apr 12 19:09:08 CEST 2026
+$ date; ./emacs /tmp/TST_FILE ;date
+Sun Apr 12 19:09:09 CEST 2026
+Sun Apr 12 19:09:28 CEST 2026
+$ date; ./emacs /tmp/TST_FILE ;date
+Sun Apr 12 19:09:31 CEST 2026
+Sun Apr 12 19:09:58 CEST 2026
+
+
+AVG = (22 + 19 + 17) / 3 = 19 s
+
+
+$ PATH=:$PATH perf record  -- ./emacs /tmp/TST_FILE
+$ perf report
+
+  35.37%  emacs    emacs             [.] RC5_ENCRYPT_32
+  27.61%  emacs    emacs             [.] ins_xmalloc_info_
+   9.22%  emacs    emacs             [.] MIX_DWORD_32
+   4.42%  emacs    emacs             [.] ul2s10_memacs
+   3.13%  emacs    emacs             [.] xstrlcpy
+   2.13%  emacs    emacs             [.] lputc_
+   2.04%  emacs    emacs             [.] ttputc
+   1.95%  emacs    emacs             [.] mix_dword
+   1.67%  emacs    libc.so.6         [.] __memset_avx2_unaligned_erms
+   1.45%  emacs    emacs             [.] ffgetline
+   1.32%  emacs    libc.so.6         [.] _IO_getc
+   1.28%  emacs    emacs             [.] info_LT
+   1.01%  emacs    emacs             [.] readinx
+   0.97%  emacs    emacs             [.] dspram
+   0.83%  emacs    emacs             [.] ansiparm
+   0.82%  emacs    libc.so.6         [.] _int_malloc
+   0.70%  emacs    libc.so.6         [.] __strlen_avx2
+   0.70%  emacs    emacs             [.] info_GT
+   0.47%  emacs    emacs             [.] xstrlcat
+   0.32%  emacs    libc.so.6         [.] malloc
+   0.28%  emacs    emacs             [.] roundup2a
+   0.28%  emacs    emacs             [.] xmalloc_
+   0.22%  emacs    emacs             [.] umc_memset
+   0.19%  emacs    emacs             [.] ansimove
+   0.18%  emacs    [unknown]         [k] 0xffffffffa6e01280
+   0.17%  emacs    emacs             [.] room
+
+
+We gdb-attach to a running emacs that ans a 64000-Lines file as input:
+
+```
+(gdb) print *g_p_tree->right->right->right->right->right->right->right->right
+$5 = {info = {p = 0xb792dc0 "@.y\v", used_size = 58, alloc_size = 64}, info_is_valid = 1, left = 0xb7f0790, right = 0x0}
+(gdb) print *g_p_tree->left->left->left->left->left->left->left->left->left->left->left
+$8 = {info = {p = 0xb5c58c0 "@Y\\\v", used_size = 58, alloc_size = 64}, info_is_valid = 1, left = 0x0, right = 0xb882890}
+(gdb)
+```
+
+We have got an average depth of 11:
+
+y(n) = 2^(n+1) - 1, n = 11 ===> y = 2^12 - 1 = 4095
 
 
 

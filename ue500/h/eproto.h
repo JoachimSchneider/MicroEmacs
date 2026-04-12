@@ -38,6 +38,7 @@
 #define C_2        2
 #define C_3        3
 #define C_4        4
+#define C_5        5
 #define C_6        6
 #define C_7        7
 #define C_8        8
@@ -50,6 +51,7 @@
 #define C_24      24
 #define C_25      25
 #define C_30      30
+#define C_32      32
 #define C_36      36
 #define C_40      40
 #if     BEGIN_COMMENT_
@@ -1501,6 +1503,7 @@ BEGIN_DO_ONCE {
 /**********************************************************************/
 /* Compile time asserts of certain system properties                  */
 /**********************************************************************/
+
 /*--------------------------------------------------------------------*/
 /* We want to assure these charcacter constants can always be         */
 /* processed as unsigned characters.                                  */
@@ -1603,18 +1606,59 @@ CASRT(0 <= '?');
 CASRT(0 <= '`');
 CASRT(0 <= '~');
 /*--------------------------------------------------------------------*/
-typedef unsigned char     byte_t;
-typedef unsigned int      uint_t;
-typedef long int          long_t;
-typedef unsigned long int ulong_t;
+
+/*--------------------------------------------------------------------*/
+typedef unsigned char      byte_t;
+typedef unsigned short int ushort_t;
+typedef unsigned       int uint_t;
+typedef unsigned long  int ulong_t;
+typedef          long  int long_t;
+
+/* - K&R-1978 does *not* require this, but it's example platforms
+ *   respect these restrictions.
+ * - K&R-1989 require these restrictions.
+ */
+CASRT(C_1              == sizeof(byte_t));
+CASRT(C_2              <= sizeof(ushort_t));
+CASRT(sizeof(ushort_t) <= sizeof(uint_t));
+CASRT(sizeof(uint_t)   <= sizeof(ulong_t));
+CASRT(C_4              <= sizeof(ulong_t));
+/* This is needed e.g. by ernd(): */
+CASRT(C_4              <= sizeof(long_t));
+/*--------------------------------------------------------------------*/
+
+/*--------------------------------------------------------------------*/
 #define BITS_IN_BYTE  (C_8)
 /* LHS: 2^BITS_IN_BYTE - 1,
  * RHS: 1..1, i.e. a sequence of BITS_IN_BYTE ones
  */
 CASRT( (((uint_t)1 << BITS_IN_BYTE) - 1) == ((byte_t)(~(uint_t)0)) );
-/* This is needed e.g. by ernd(): */
-CASRT( 4 <= SIZEOF(long_t) );
-CASRT( 4 <= SIZEOF(ulong_t) );
+/*--------------------------------------------------------------------*/
+/**********************************************************************/
+
+
+/**********************************************************************/
+/* Get minimum sizeof(ulong_t) at preprocessing(!) time:              */
+/**********************************************************************/
+#if defined(__STDC__)
+# define MIN_ULONG_MAX  4294967295UL            /* 32-Bit max ulong_t */
+# include <limits.h>                            /* ANSI-C has it!     */
+# if  MIN_ULONG_MAX < ULONG_MAX         /* Conclusion: 64-Bit System  */
+#  define HAS_64_BIT_ULONG
+#  define MIN_ULONG_SIZE    C_8
+# else
+# if  MIN_ULONG_MAX == ULONG_MAX
+#  define HAS_32_BIT_ULONG
+#  define MIN_ULONG_SIZE    C_4
+# else
+#  CRASH();                                 /* K&R-1989: Impossible!  */
+# endif
+# endif
+#else                       /* Pre-ANSI-C: We assume a 32-Bit system: */
+# define  HAS_32_BIT_ULONG
+# define MIN_ULONG_SIZE     C_4
+#endif
+CASRT(MIN_ULONG_SIZE <= sizeof(ulong_t)); /* e.g. not a 48-Bit System */
 /**********************************************************************/
 
 
@@ -2355,6 +2399,7 @@ EXTERN int PASCAL NEAR          screen_index DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          insert_screen DCL((SCREEN_T *sp));
 EXTERN int PASCAL NEAR          select_screen DCL((SCREEN_T *sp, int announce));
 EXTERN VOID PASCAL NEAR         free_screen DCL((SCREEN_T *sp));
+EXTERN ulong_t PASCAL NEAR      mix_dword DCL((ulong_t x));
 EXTERN char * PASCAL NEAR       xmalloc_ DCL((int size, CONST char *file, int line));
 #define xmalloc(size)           xmalloc_((size), __FILE__, __LINE__)
 EXTERN VOID PASCAL NEAR         xfree_ DCL((char *p, CONST char *file, int line));

@@ -25,6 +25,9 @@ WARNFLAGS = -Wall -Wno-unused-variable
 #WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
  CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS)
+# Use the `-m32'-variant to detect C-Code that depends on
+# 32/64-Bit properties
+#CFLAGS = -m32 -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS)
 # Use the `-funsigned-char'-variant only to detect C-code that does not
 # handle char signedness in an invariant way.
 #CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS) -O2 -funsigned-char

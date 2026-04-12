@@ -1,0 +1,97 @@
+/**SOF(rc5-hash2.c)**/
+#ifndef RC5_HASH_H_
+#define RC5_HASH_H_
+
+
+#define BYTE_BITS      (8)    /* Bits In Byte */
+#define C_1            1
+#define C_2            2
+#define C_3            3
+#define C_4            4
+#define C_5            5
+#define C_8            8
+#define C_10          10
+#define C_16          16
+#define C_32          32
+#define FALSE         (0)
+#define TRUE          (1)
+#define BEGIN_COMMENT (0)
+#ifdef __STDC__
+typedef void *        voidp_t;
+#else
+typedef char *        voidp_t;
+#endif
+#define VOIDP         voidp_t
+#define VOID          void
+#define CONST         const
+
+
+#define CRASH(x)  (0 = 0)
+/**********************************************************************/
+/*....................................................................*/
+/* You may use                                                        */
+/* - `CASRT'  at places where a declaration is syntactically correct  */
+/* - `CASRTS' at places where a statement is syntactically correct    */
+/*....................................................................*/
+#define CASRT(cond)                         \
+  extern int casrt_dummy_x_[1];             \
+  extern int casrt_dummy_x_[(cond)? 1 : 2]
+/**END_OF_DEFINITION**/
+#define CASRTS(cond)  do { CASRT((cond)); } while ( 0 )
+/**********************************************************************/
+
+/**********************************************************************/
+typedef unsigned char      byte_t;
+typedef unsigned short int ushort_t;
+typedef unsigned       int uint_t;
+typedef unsigned long  int ulong_t;
+typedef          long  int long_t;
+
+/* - K&R-1978 does *not* require this, but it's example platforms
+ *   respect these restrictions.
+ * - K&R-1989 require these restrictions.
+ */
+CASRT(C_1              == sizeof(byte_t));
+CASRT(C_2              <= sizeof(ushort_t));
+CASRT(sizeof(ushort_t) <= sizeof(uint_t));
+CASRT(sizeof(uint_t)   <= sizeof(ulong_t));
+CASRT(C_4              <= sizeof(ulong_t));
+/**********************************************************************/
+
+
+/*====================================================================*/
+/* Get minimum sizeof(ulong_t) at preprocessing(!) time:              */
+/*====================================================================*/
+#if defined(__STDC__)
+# define MIN_ULONG_MAX  4294967295UL            /* 32-Bit max ulong_t */
+# include <limits.h>                            /* ANSI-C has it!     */
+# if  MIN_ULONG_MAX < ULONG_MAX         /* Conclusion: 64-Bit System  */
+#  define HAS_64_BIT_ULONG
+#  define MIN_ULONG_SIZE    C_8
+# else
+# if  MIN_ULONG_MAX == ULONG_MAX
+#  define HAS_32_BIT_ULONG
+#  define MIN_ULONG_SIZE    C_4
+# else
+#  CRASH();                                 /* K&R-1989: Impossible!  */
+# endif
+# endif
+#else                       /* Pre-ANSI-C: We assume a 32-Bit system: */
+# define  HAS_32_BIT_ULONG
+# define MIN_ULONG_SIZE     C_4
+#endif
+CASRT(MIN_ULONG_SIZE <= sizeof(ulong_t)); /* e.g. not a 48-Bit System */
+/*====================================================================*/
+
+
+/*====================================================================*/
+#define USAGE_EXIT  (42)
+
+#define ZEROMEM(x)    ( xmemset(&(x), 0, sizeof((x))) )
+#define MIN2(x, y)    ( (x) < (y) ? (x) : (y) )
+#define MAX2(x, y)    ( (x) > (y) ? (x) : (y) )
+
+
+
+#endif
+/**EOF(rc5-hash2.c)**/

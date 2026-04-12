@@ -1540,6 +1540,79 @@ int PASCAL NEAR lkp_color P1_(char *, sp)
 #include <assert.h>
 /*--------------------------------------------------------------------*/
 
+
+/*======================================================================
+ * The MIX_DWORD function below is implemented via the RC5 block
+ * chiffre.
+ *====================================================================*/
+
+/*====================================================================*/
+/* Include rc5-hash.inc with specific defines:                        */
+/*====================================================================*/
+/*--------------------------------------------------------------------*/
+/* We use WORD/DWORD in the sence used for PPC64 systems: A pointer   */
+/* is a DWORD and we have `lw' and `ld' assembly instructions.        */
+/*--------------------------------------------------------------------*/
+
+#if C_8 <= MIN_ULONG_SIZE
+# define  USE_32_BIT_WORDS
+#  include  "rc5-hash.inc"
+# undef   USE_32_BIT_WORDS
+#else
+#if C_4 <= MIN_ULONG_SIZE
+# define  USE_16_BIT_WORDS
+#  include  "rc5-hash.inc"
+# undef   USE_16_BIT_WORDS
+#else
+#if C_2 <= MIN_ULONG_SIZE
+# define  USE_8_BIT_WORDS
+#  include  "rc5-hash.inc"
+# undef   USE_8_BIT_WORDS
+#else
+  CRASH(0);
+#endif
+#endif
+#endif
+/*====================================================================*/
+
+
+/* MIX_DWORD:
+ *
+ * A bijective hash function (i.e. a permutation) on
+ * (ulong_t ---> ulong_): We may use it for e.g.
+ * - Hashing ordered numbers into "white noise" to
+ *   store them into trees that won't degenerate
+ *   into lists.
+ * - Generate high quality randum numbers by applying
+ *   the MIX_DWORD to { n, n+1, n+2, ... }
+ */
+ulong_t PASCAL NEAR mix_dword P1_(ulong_t, x)
+{
+#if C_8 <= MIN_ULONG_SIZE
+    /* Assert (ulong_t ---> ulong_t) is bijectiv: */
+    CASRT(sizeof(DWORD_32_T) == sizeof(ulong_t));
+
+    return MIX_DWORD_32(x);
+#else
+#if C_4 <= MIN_ULONG_SIZE
+    /* Assert (ulong_t ---> ulong_t) is bijectiv: */
+    CASRT(sizeof(DWORD_16_T) == sizeof(ulong_t));
+
+    return MIX_DWORD_16(x);
+#else
+#if C_2 <= MIN_ULONG_SIZE
+    /* Assert (ulong_t ---> ulong_t) is bijectiv: */
+    CASRT(sizeof(DWORD_8_T) == sizeof(ulong_t));
+
+    return MIX_DWORD_8(x);
+#else
+  CRASH(0);
+#endif
+#endif
+#endif
+}
+
+
 /*======================================================================
  * Debug malloc and free:
  *
@@ -1802,10 +1875,16 @@ static p_tree_node_t  *g_p_tree = NULL;
  * we expect to get them unordered: We want to create a binary tree
  * that should not degenerate into a linked list.
  */
-static unsigned long int  get_cmp_ulong(char *p)
+CASRT( sizeof(char *) == sizeof(ulong_t) );
+/* On a 3 GHz Intel system we read in a file with 640 000 lines:
+ * - Using get_cmp_ulong() it takes 19 s.
+ * - Using mix_dword we need only 5 s.
+ */
+#if ( 0 )
+static ulong_t  get_cmp_ulong(char *p)
 {
-#define B0_ZMASK_     ( (unsigned long int)(-1) ^ 0x00FF )
-#define B1_ZMASK_     ( (unsigned long int)(-1) ^ 0xFF00 )
+# define B0_ZMASK_     ( (unsigned long int)(-1) ^ 0x00FF )
+# define B1_ZMASK_     ( (unsigned long int)(-1) ^ 0xFF00 )
 /* THIS CODE ONLY WORKS IF A BYTE HAS 8 BITS: */
     unsigned long int res       = 0;
     unsigned long int x         = (unsigned long int)p;
@@ -1829,9 +1908,12 @@ static unsigned long int  get_cmp_ulong(char *p)
     }
 
     return res;
-#undef B0_ZMASK_
-#undef B1_ZMASK_
+# undef B0_ZMASK_
+# undef B1_ZMASK_
 }
+#else
+# define get_cmp_ulong(p)   mix_dword((ulong_t)(p))
+#endif
 
 
 /* We call the functions below `info_(EQ|LT|GT)()': Yes they only work
