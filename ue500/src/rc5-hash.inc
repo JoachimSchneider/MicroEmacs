@@ -103,7 +103,7 @@ typedef DWORD_T_      DWORD_8_T;
 # define MAGIC_P      ((WORD_T_)0xb7e1)
 # define MAGIC_Q      ((WORD_T_)0x9e37)
 # define WORD_T_      ushort_t
-# if ( defined(__STDC__) )
+# if b_IS_ANSI_C
 #  undef  MIN_ULONG_MAX
 #  define MIN_ULONG_MAX   4294967295UL          /* 32-Bit max ulong_t */
 #  include <limits.h>                           /* ANSI-C has it!     */
@@ -129,7 +129,7 @@ typedef DWORD_T_      DWORD_16_T;
 # define WORD_MASK   ((WORD_T_)0xFFFFFFFF)
 # define MAGIC_P     ((WORD_T_)0xb7e15163)
 # define MAGIC_Q     ((WORD_T_)0x9e3779b9)
-# if ( defined(__STDC__) )
+# if b_IS_ANSI_C
 #  undef  MIN_ULONG_MAX
 #  define MIN_ULONG_MAX   4294967295UL          /* 32-Bit max ulong_t */
 #  include <limits.h>                           /* ANSI-C has it!     */

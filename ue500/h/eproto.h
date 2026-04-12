@@ -1640,7 +1640,7 @@ CASRT( (((uint_t)1 << BITS_IN_BYTE) - 1) == ((byte_t)(~(uint_t)0)) );
 /**********************************************************************/
 /* Get minimum sizeof(ulong_t) at preprocessing(!) time:              */
 /**********************************************************************/
-#if defined(__STDC__)
+#if b_IS_ANSI_C
 # define MIN_ULONG_MAX  4294967295UL            /* 32-Bit max ulong_t */
 # include <limits.h>                            /* ANSI-C has it!     */
 # if  MIN_ULONG_MAX < ULONG_MAX         /* Conclusion: 64-Bit System  */
