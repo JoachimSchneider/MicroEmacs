@@ -55,19 +55,6 @@
 #define SUB(x, y)     SUB_((x), (y), WORD_MASK)
 
 
-static char *xmemset_(char *cp, int c, int len)
-{
-    int   i   = 0;
-
-    for ( i = 0; i < len; i++ ) {
-        ((unsigned char *)cp)[i]  = (unsigned char)c;
-    }
-
-    return cp;
-}
-#define xmemset(cp, c, len)   xmemset_((char *)(cp), (c), (len))
-
-
 #endif  /**RC5_HASH_INC_**/
 /*--------------------------------------------------------------------*/
 
@@ -171,7 +158,7 @@ static VOID RC5_INIT(WORD_T_ *S)
     WORD_T_ A = 0;
     WORD_T_ B = 0;
 
-    xmemset(S, 0, sizeof(WORD_T_) * TAB_SIZE);
+    umc_memset(S, 0, sizeof(WORD_T_) * TAB_SIZE);
     for ( S[0] = MAGIC_P, i = 1; i < TAB_SIZE; i++ ) {
         S[i] = ADD(S[i-1], MAGIC_Q);
     }

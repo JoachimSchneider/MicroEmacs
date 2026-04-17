@@ -18,7 +18,7 @@ HDIR = ../../h
 OPTFLAGS = -fno-strict-aliasing
 #WARNFLAGS = -Wall
 #DEFINES   = -DTEST_UEMACS=1
-DEFINES   = -DUEMACS_DEBUG_XMALLOC_USE_TREE
+#DEFINES   = -DUEMACS_DEBUG_XMALLOC_USE_LIST
 #DEFINES   = -DUSE_NOBLOCK_READ=1
 #DEFINES   = -DUEMACS_DEBUG_XMALLOC_FREE_OFF
 WARNFLAGS = -Wall -Wno-unused-variable
@@ -47,7 +47,7 @@ HFILES = estruct.h $(HDIR)/ebind.h $(HDIR)/edef.h           \
           $(HDIR)/elang.h $(HDIR)/epath.h $(HDIR)/eproto.h
 
 
-#list of object files
+# list of object files
 
 F1 = $(OBJD)/abbrev.o $(OBJD)/ansi.o $(OBJD)/basic.o $(OBJD)/bind.o     \
       $(OBJD)/buffer.o
@@ -113,7 +113,7 @@ $(OBJD)/main.o: $(SRCD)/main.c $(HFILES) $(HDIR)/efunc.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c
-$(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
+$(OBJD)/random.o: $(SRCD)/random.c $(SRCD)/rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/region.o $(SRCD)/region.c

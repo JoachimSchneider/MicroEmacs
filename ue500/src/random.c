@@ -1643,7 +1643,7 @@ char * PASCAL NEAR  xmalloc_ P3_(int, size,
     }
     res = (char *)malloc(size);
     assert(NULL != res);
-    memset(res, 0, size);
+    umc_memset(res, 0, size);
 
     return  res;
 }
@@ -1686,61 +1686,8 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
 
 typedef struct  ptr_info_s {
     char  *p;
-    int   used_size;
-    int   alloc_size; /* .GE. used_size */
+    int   size;
 } ptr_info_t;
-
-
-/* Return the smallest power of 2 which is .GT. x */
-static int roundup2a(int x)
-{
-    unsigned int  q = (unsigned int)x;
-    unsigned int  n = 1;
-
-    if ( x < 0 )  {
-        return ( 0 );
-    }
-
-    while ( 0 != q )  {
-        q >>= 1;
-        n <<= 1;
-    }
-
-    return (int)n;
-}
-
-/* Return the smallest power of 2 which is .GE. x */
-static int roundup2b(int x)
-{
-    if ( x < 0 )          {
-        return ( 0 );
-    } else if ( x == 0 )  {
-        return ( 1 );
-    }
-
-    return roundup2a(x - 1);
-}
-
-static int xmalloc_roundup(int x)
-{
-    if ( x <= 0 ) {
-        return ( 0 );
-    }
-
-/* Consumes too much memory and doesn't help here as we've only a few
- * xrealloc() calls:  */
-#if ( 0 )
-    x *= C_3;
-    x /= C_2;
-
-    return roundup2a(x);
-#else
-    x *= C_10;
-    x /= C_9;
-
-    return roundup2b(x);
-#endif
-}
 
 
 /*====================================================================*/
@@ -1752,14 +1699,16 @@ static int xmalloc_roundup(int x)
 /*====================================================================*/
 
 
-/* Until now we do not use the tree implementation by default:
+/* We use the tree implementation by default:
  *
- * We've only implemented `lazu delete' which consumes a lot of memory.
+ * - We've only implemented `lazy delete' which consumes
+ *   additional memory.
+ * - But it is so much faster than the tree variant.
  *
  * TODO: Implement a real `delete'-operation
  */
 
-# ifndef  UEMACS_DEBUG_XMALLOC_USE_TREE
+# ifdef  UEMACS_DEBUG_XMALLOC_USE_LIST
 
 
 /* ---- Linked List Implementation ---- */
@@ -1806,7 +1755,7 @@ static int  del_xmalloc_info P1_(char *, q)
     } else              {
         if ( q == node->info.p )  {
             g_p_list  = node->next;
-            memset(node, 0, SIZEOF(*node));
+            umc_memset(node, 0, SIZEOF(*node));
             free(node);
 
             return TRUE;
@@ -1820,7 +1769,7 @@ static int  del_xmalloc_info P1_(char *, q)
             node        = prev->next;
             prev->next  = node->next;
 
-            memset(node, 0, SIZEOF(*node));
+            umc_memset(node, 0, SIZEOF(*node));
             free(node);
 
             return TRUE;
@@ -1843,8 +1792,8 @@ static int  ins_xmalloc_info P1_(ptr_info_t *, p_info)
     }
     node  = (p_list_node_t *)malloc(SIZEOF(*node));
     assert(NULL != node);
-    memset(node, 0, SIZEOF(*node));
-    memcpy(&node->info, p_info, SIZEOF(node->info));
+    umc_memset(node, 0, SIZEOF(*node));
+    umc_memcpy(&node->info, p_info, SIZEOF(node->info));
     node->next  = g_p_list;
     g_p_list  = node;
 
@@ -1861,11 +1810,34 @@ static int  ins_xmalloc_info P1_(ptr_info_t *, p_info)
 typedef struct p_tree_node_s  p_tree_node_t;
 
 typedef struct  p_tree_node_s {
+#if ( 0 )
+    byte_t        info_is_invalid;
+#endif
     ptr_info_t    info;
-    int           info_is_valid;  /* For lazy deletion  */
     p_tree_node_t *left;
     p_tree_node_t *right;
 } p_tree_node_t;
+
+#if ( 0 )
+# define INFO_IS_VALID(node)    ( (node)->info_is_invalid == 0 )
+# define SET_INFO_INVALID(node) do {  \
+    (node)->info_is_invalid = 1;      \
+} while ( 0 )
+#else
+/* Optimnization: No extra INVALID-flag needed in p_tree_node_t
+ * We choose `size > 0' as condition because:
+ * - We initialize all structures with zeroes, so they are
+ *   automatically invalid at the beginning.
+ * - We might later choose negative sizes to indicate special
+ *   conditions.
+ */
+# define INFO_IS_VALID(node)    ( (node)->info.size > 0 )
+# define SET_INFO_INVALID(node) do {  \
+    (node)->info.size = 0;            \
+} while ( 0 )
+/**END_OF_DEFINITION**/
+#endif
+
 
 static p_tree_node_t  *g_p_tree = NULL;
 
@@ -1967,7 +1939,7 @@ static ptr_info_t *get_xmalloc_info(char *q)
         return NULL;
     }
 
-    if ( node->info_is_valid )  {
+    if ( INFO_IS_VALID(node) )  {
         return  &node->info;
     } else                      {
         return NULL;
@@ -1982,9 +1954,9 @@ static int  ins_xmalloc_info_(ptr_info_t *p_info, p_tree_node_t **p_node)
     if        ( NULL == *p_node )                     {
         *p_node = (p_tree_node_t *)malloc(SIZEOF(**p_node));
         assert(NULL != *p_node);
-        memset(*p_node, 0, SIZEOF(**p_node));
-        memcpy(&(*p_node)->info, p_info, SIZEOF((*p_node)->info));
-        (*p_node)->info_is_valid  = TRUE;
+        umc_memset(*p_node, 0, SIZEOF(**p_node));
+        umc_memcpy(&(*p_node)->info, p_info, SIZEOF((*p_node)->info));
+        assert(INFO_IS_VALID(*p_node));
         (*p_node)->left           = NULL;
         (*p_node)->right          = NULL;
 
@@ -1996,11 +1968,11 @@ static int  ins_xmalloc_info_(ptr_info_t *p_info, p_tree_node_t **p_node)
     } else                                            {
         assert(info_EQ(p_info->p, (*p_node)->info.p));
 
-        if ( (*p_node)->info_is_valid ) {
+        if ( INFO_IS_VALID(*p_node) ) {
             return FALSE;
-        } else                          {
-            memcpy(&(*p_node)->info, p_info, SIZEOF((*p_node)->info));
-            (*p_node)->info_is_valid  = TRUE;
+        } else                        {
+            umc_memcpy(&(*p_node)->info, p_info, SIZEOF((*p_node)->info));
+            assert(INFO_IS_VALID(*p_node));
 
             return TRUE;
         }
@@ -2024,9 +1996,9 @@ static int  del_xmalloc_info(char *q)
         return FALSE;
     }
 
-    if ( node->info_is_valid )  {
+    if ( INFO_IS_VALID(node) )  {
         /* Only Lazy Delete!  */
-        node->info_is_valid = FALSE;
+        SET_INFO_INVALID(node);
 
         return TRUE;
     } else                      {
@@ -2040,6 +2012,7 @@ static int  del_xmalloc_info(char *q)
 
 # if ( RAMSHOW )
 static unsigned long int count_xmalloc  = 0;
+static unsigned long int count_xfree    = 0;
 # endif
 /*====================================================================*/
 
@@ -2049,30 +2022,28 @@ char * PASCAL NEAR  xmalloc_ P3_(int, size,
 {
     char        *res        = NULL;
     ptr_info_t  info;
-    int         alloc_size  = 0;
 
     ZEROMEM(info);
 
     if ( size <= 0 )  {
         return NULL;
     }
-    alloc_size  = xmalloc_roundup(size);
-    res = (char *)malloc(alloc_size);
+    res = (char *)malloc(size);
     assert(NULL != res);
-    memset(res, 0, alloc_size);   /* Use alloc_size: See xrealloc()   */
-    info.p          = res;
-    info.used_size  = size;
-    info.alloc_size = alloc_size;
+    umc_memset(res, 0, size);
+    info.p    = res;
+    info.size = size;
 
     if ( ! ins_xmalloc_info(&info) )  {
         fflush(NULL);
         fprintf(stderr,
-                "*** ERROR: xmalloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                "\n*** ERROR: xmalloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
                 file, line, "Pointer already registered");
+
         abort();
     }
 
-    envram += info.alloc_size;
+    envram += info.size;
 # if ( RAMSHOW )
     count_xmalloc++;
 # endif
@@ -2100,31 +2071,36 @@ VOID PASCAL NEAR  xfree_ P3_(char *, p,
     if ( NULL == (p_info = get_xmalloc_info(p)) ) {
         fflush(NULL);
         fprintf(stderr,
-                "*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                "\n*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
                 file, line, "Pointer to free not found");
+
         abort();
     }
-    memcpy(&info, p_info, SIZEOF(info));
+    umc_memcpy(&info, p_info, SIZEOF(info));
     if ( ! del_xmalloc_info(p) )  {
         fflush(NULL);
         fprintf(stderr,
-                "*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                "\n*** ERROR: xfree(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
                 file, line, "Pointer info not found");
+
         abort();
     }
 
     /* Try to force SIGSEGV when accessing free'd memory: */
-    memset(info.p, 0, info.alloc_size);
+    umc_memset(info.p, 0, info.size);
 # ifndef UEMACS_DEBUG_XMALLOC_FREE_OFF
     free(info.p);
 # endif
 
-    envram -= info.alloc_size;
+    envram -= info.size;
+# if ( RAMSHOW )
+    count_xfree++;
+# endif
 # if  ( RAMSHOW )
     dspram();
 # endif
     HTCK(("xfree():    p = 0x%016lX, size = %8d",
-          (unsigned long int)(info.p), (int)(info.used_size)), file, line);
+          (unsigned long int)(info.p), (int)(info.size)), file, line);
 
     return;
 }
@@ -2150,18 +2126,18 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
         if ( NULL == (p_info = get_xmalloc_info(q)) ) {
             fflush(NULL);
             fprintf(stderr,
-                    "*** ERROR: xrealloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
+                    "\n*** ERROR: xrealloc(), %s:%d:\n*** \t%s.\n*** \t--- calling abort()\n",
                     file, line, "Pointer to re-allocate not found");
+
             abort();
         }
-        if ( p_info->alloc_size >= size ) {
-            /* It was already initialized to zero in xmalloc() above  */
-            p_info->used_size = size;
+        if ( p_info->size >= size ) {
+            p_info->size  = size;
 
             res = q;
         } else                            {
             res = xmalloc_(size, file, line);
-            memcpy(res, q, MIN2(size, p_info->used_size));
+            umc_memcpy(res, q, p_info->size);
             xfree_(q, file, line);
         }
 
@@ -2175,33 +2151,40 @@ char * PASCAL NEAR  xrealloc_ P4_(char *, q, int, size,
 # if ( RAMSHOW )
 VOID dspram P0_() /* display the amount of RAM currently malloced */
 {
-    char  mbuf[C_30];
+    char  mbuf[C_40 + 1];
     char  *sp = NULL;
 
     ZEROMEM(mbuf);
 
 #  if ( 0 )   /* Show it centered in the status line          */
     TTmove(term.t_nrow - 0, term.t_ncol / 2 - (SIZEOF(mbuf) - 1) / 2);
+#  else
+#  if ( 1 )   /* Show it at the right side of the status line */
+    TTmove(term.t_nrow - 0, term.t_ncol - (SIZEOF(mbuf) - 1));
 #  else       /* Show it at the right side of the bottom line */
     TTmove(term.t_nrow - 1, term.t_ncol - (SIZEOF(mbuf) - 1));
+#  endif
 #  endif
 #  if COLOR
     TTforg(7);
     TTbacg(0);
 #  endif
-    /* 1 + C_10 + 1 + C_10 + 1 + 1 = C_24               */
-    /* `xstrlcat()' is much simpler than `xsnprintf()'  */
+    /* 1 + 6 + C_10 + 1 + C_10 + 1 + C_10 + 1 + 1 = C_40 + 1  */
+    /* `xstrlcat()' is much simpler than `xsnprintf()'        */
 #  if ( 1 )
     xstrlcat(mbuf, "[",                                 SIZEOF(mbuf));
     xstrlcat(mbuf, "HEAP: ",                            SIZEOF(mbuf));
     xstrlcat(mbuf, ul2s10_memacs(envram, C_10),         SIZEOF(mbuf));
     xstrlcat(mbuf, "/",                                 SIZEOF(mbuf));
     xstrlcat(mbuf, ul2s10_memacs(count_xmalloc, C_10),  SIZEOF(mbuf));
+    xstrlcat(mbuf, "/",                                 SIZEOF(mbuf));
+    xstrlcat(mbuf, ul2s10_memacs(count_xfree, C_10),    SIZEOF(mbuf));
     xstrlcat(mbuf, "]",                                 SIZEOF(mbuf));
 #  else
-    xsnprintf(mbuf, SIZEOF(mbuf), "[HEAP: %010lu/%010lu]",
+    xsnprintf(mbuf, SIZEOF(mbuf), "[HEAP: %010lu/%010lu/%010lu]",
               (unsigned long int)envram,
               (unsigned long int)count_xmalloc);
+              (unsigned long int)count_xfree);
 #  endif
     sp = &mbuf[0];
     while ( *sp ) {

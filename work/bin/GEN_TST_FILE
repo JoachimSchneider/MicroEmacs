@@ -6,7 +6,7 @@ LC_ALL=C
 export PATH LANG LC_ALL
 
 awk 'BEGIN {
-  for ( i = 0; i < 64000; i++ )
+  for ( i = 0; i < 640000; i++ )
   {
       printf "Das ist nun Zeile Nr %05d\n", i;
   }
