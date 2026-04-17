@@ -224,7 +224,7 @@ $(OBJ)\MSWMENU.obj : $(SRC)\MSWMENU.C $(H_FILES) $(INC)\mswin.h\
 
 $(OBJ)\MSWSYS.obj : $(SRC)\MSWSYS.C $(H_FILES) $(INC)\mswin.h $(INC)\mswrid.h
 
-$(OBJ)\RANDOM.obj : $(SRC)\RANDOM.C $(H_FILES)
+$(OBJ)\RANDOM.obj : $(SRC)\RANDOM.C $(SRC)\RC5-HASH.INC $(H_FILES)
 
 $(OBJ)\REGION.obj : $(SRC)\REGION.C $(H_FILES)
 

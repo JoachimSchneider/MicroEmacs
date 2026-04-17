@@ -91,7 +91,7 @@ $(OBJD)\mouse.obj: $(SRCD)\mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\msdos.obj: $(SRCD)\msdos.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
-$(OBJD)\random.obj: $(SRCD)\random.c $(HFILES)
+$(OBJD)\random.obj: $(SRCD)\random.c $(SRCD)\rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c
 $(OBJD)\region.obj: $(SRCD)\region.c $(HFILES)
 	$(CC) $(CFLAGS) -o$(OBJD)\$&.obj $(SRCD)\$&.c

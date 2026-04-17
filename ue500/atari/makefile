@@ -74,7 +74,7 @@ $(OBJD)\main.o: $(SRCD)\main.c $(HFILES)
 	$(CC) $(CFLAGS) -o $(OBJD)\main.o -c $(SRCD)\main.c
 $(OBJD)\mouse.o: $(SRCD)\mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -o $(OBJD)\mouse.o -c $(SRCD)\mouse.c
-$(OBJD)\random.o: $(SRCD)\random.c $(HFILES)
+$(OBJD)\random.o: $(SRCD)\random.c $(SRCD)\rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -o $(OBJD)\random.o -c $(SRCD)\random.c
 $(OBJD)\region.o: $(SRCD)\region.c $(HFILES)
 	$(CC) $(CFLAGS) -o $(OBJD)\region.o -c $(SRCD)\region.c

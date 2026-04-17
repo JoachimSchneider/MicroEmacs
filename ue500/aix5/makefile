@@ -94,7 +94,7 @@ $(OBJD)/unixsys.o: $(SRCD)/unixsys.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/unixsys.o $(SRCD)/unixsys.c
 $(OBJD)/unixterm.o: $(SRCD)/unixterm.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/unixterm.o $(SRCD)/unixterm.c
-$(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
+$(OBJD)/random.o: $(SRCD)/random.c $(SRCD)/rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/region.o $(SRCD)/region.c

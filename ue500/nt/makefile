@@ -183,7 +183,7 @@ $(OBJD)\nt.obj: $(SRCD)\nt.c $(HFILES)
 $(OBJD)\ntconio.obj: $(SRCD)\ntconio.c $(HFILES)
     $(cc) $(cflags) $(cvars) /Fo$(OBJD)\ntconio.obj $(SRCD)\ntconio.c
     $(cvtobj) $(OBJD)\ntconio.obj
-$(OBJD)\random.obj: $(SRCD)\random.c $(HFILES)
+$(OBJD)\random.obj: $(SRCD)\random.c $(SRCD)\rc5-hash.inc $(HFILES)
     $(cc) $(cflags) $(cvars) /Fo$(OBJD)\random.obj $(SRCD)\random.c
     $(cvtobj) $(OBJD)\random.obj
 $(OBJD)\region.obj: $(SRCD)\region.c $(HFILES)

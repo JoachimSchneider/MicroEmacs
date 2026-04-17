@@ -92,7 +92,7 @@ $(OBJD)/screen.o: $(SRCD)/screen.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/screen.o $(SRCD)/screen.c
 $(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/unix.o $(SRCD)/unix.c
-$(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
+$(OBJD)/random.o: $(SRCD)/random.c $(SRCD)/rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/region.o $(SRCD)/region.c

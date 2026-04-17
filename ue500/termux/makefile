@@ -96,7 +96,7 @@ $(OBJD)/main.o: $(SRCD)/main.c $(HFILES) $(HDIR)/efunc.inc
 	$(CC) $(CFLAGS) -c -o $(OBJD)/main.o $(SRCD)/main.c
 $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/mouse.o $(SRCD)/mouse.c
-$(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
+$(OBJD)/random.o: $(SRCD)/random.c $(SRCD)/rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/random.o $(SRCD)/random.c
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o $(OBJD)/region.o $(SRCD)/region.c

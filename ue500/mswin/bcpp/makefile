@@ -221,7 +221,7 @@ $(OBJ)\search.obj: $(SRC)\search.c
 $(OBJ)\tags.obj: $(SRC)\tags.c 
 	$(CC) $(COPTS) -c -o$(OBJ)\tags.obj $(SRC)\tags.c
 
-$(OBJ)\random.obj: $(SRC)\random.c 
+$(OBJ)\random.obj: $(SRC)\random.c $(SRC)\rc5-hash.inc
 	$(CC) $(COPTS) -c -o$(OBJ)\random.obj $(SRC)\random.c
 
 $(OBJ)\region.obj: $(SRC)\region.c 

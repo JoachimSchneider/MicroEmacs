@@ -95,7 +95,7 @@ $(OBJD)/mouse.o: $(SRCD)/mouse.c $(HFILES)
 $(OBJD)/unix.o: $(SRCD)/unix.c $(HFILES)
 	$(CC) $(CFLAGS) -c -o unix.o $(SRCD)/unix.c
 	mv unix.o $(OBJD)
-$(OBJD)/random.o: $(SRCD)/random.c $(HFILES)
+$(OBJD)/random.o: $(SRCD)/random.c $(SRCD)/rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) -c -o random.o $(SRCD)/random.c
 	mv random.o $(OBJD)
 $(OBJD)/region.o: $(SRCD)/region.c $(HFILES)

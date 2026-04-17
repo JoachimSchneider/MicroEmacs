@@ -99,7 +99,7 @@ $(OBJD)\mouse.obj: $(SRCD)\mouse.c $(HFILES)
 	$(CC) $(CFLAGS) /Fo$(OBJD)\mouse.obj $(SRCD)\mouse.c
 $(OBJD)\xvtdos.obj: $(SRCD)\xvtdos.c $(HFILES)
 	$(CC) $(CFLAGS) /Fo$(OBJD)\xvtdos.obj $(SRCD)\xvtdos.c
-$(OBJD)\random.obj: $(SRCD)\random.c $(HFILES)
+$(OBJD)\random.obj: $(SRCD)\random.c $(SRCD)\rc5-hash.inc $(HFILES)
 	$(CC) $(CFLAGS) /Fo$(OBJD)\random.obj $(SRCD)\random.c
 $(OBJD)\region.obj: $(SRCD)\region.c $(HFILES)
 	$(CC) $(CFLAGS) /Fo$(OBJD)\region.obj $(SRCD)\region.c
