@@ -164,8 +164,10 @@
 
 /*      Debugging options                                             */
 #if BEGIN_COMMENT_
-#define RAMSIZE         0 /* dynamic RAM memory usage tracking        */
-#define RAMSHOW         0 /* auto dynamic RAM reporting               */
+#endif  /*END_COMMENT_*/
+#define RAMSIZE         1 /* dynamic RAM memory usage tracking        */
+#define RAMSHOW         1 /* auto dynamic RAM reporting               */
+#if BEGIN_COMMENT_
 #define DEBUG_SEARCH    0 /* pop some search info on patterns         */
 #endif  /*END_COMMENT_*/
 

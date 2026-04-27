@@ -16,12 +16,16 @@ HDIR = ../h
 #
 ##
 OPTFLAGS = -fno-strict-aliasing
+#DEFINES   = -DTEST_UEMACS=1
+#DEFINES   = -DUEMACS_DEBUG_XMALLOC_USE_LIST
+#DEFINES   = -DUSE_NOBLOCK_READ=1
+#DEFINES   = -DUEMACS_DEBUG_XMALLOC_FREE_OFF
 #WARNFLAGS = -Wall
 WARNFLAGS = -Wall -Wno-unused-variable
 #WARNFLAGS = -Wall -Wno-unused-local-typedefs
 ##
-#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS)
- CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(OPTFLAGS) -O2
+#CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS)
+ CFLAGS = -I. -I$(HDIR) -g $(WARNFLAGS) $(DEFINES) $(OPTFLAGS) -O2
 ##
 
 # Where to find the termcap/cureses library:
