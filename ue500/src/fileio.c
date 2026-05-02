@@ -29,13 +29,15 @@
 #if !(AOSVS | MV_UX)
 static
 #endif
-NOSHARE FILE *ffp;              /* File pointer, all functions. */
-static int eofflag;             /* end-of-file flag */
+NOSHARE FILE *ffp;                /* File pointer, all functions. */
+static int eofflag;               /* end-of-file flag */
 
 #if     (MSC || TURBO || IC) && MSDOS
-# define FILE_BUFSIZE    4096
-static char file_buffer[FILE_BUFSIZE];
+# define FILE_BUFSIZE    C_4096
+#else
+# define FILE_BUFSIZE    BUFSIZ   /* setbuf MUST use BUFSIZ */
 #endif
+static char file_buffer[FILE_BUFSIZE];
 
 #if !(VMS & RMSIO)
 /* If using RMS under VMS, the code following is in VMS.C */
@@ -49,9 +51,12 @@ int PASCAL NEAR ffropen P1_(CONST char *, fn)
     if ( ( ffp=fopen(fn, "r") ) == NULL )
         return (FIOFNF);
 
-# if     (MSC || TURBO || IC) && MSDOS
     /* tell the library to give us a LARGE buffer to speed I/O */
+# if     (MSC || TURBO || IC) && MSDOS
     setvbuf(ffp, file_buffer, _IOFBF, FILE_BUFSIZE);
+# else
+    /* No setvbuf() for e.g.ANCIENT_UNIX */
+    setbuf(ffp, file_buffer);
 # endif
 
 # if     WINDOW_MSWIN
@@ -91,10 +96,13 @@ int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
         return (FIOERR);
     }
 
-#  if     (MSC || TURBO || IC) && MSDOS
     /* tell the library to give us a LARGE buffer to speed I/O */
+# if     (MSC || TURBO || IC) && MSDOS
     setvbuf(ffp, file_buffer, _IOFBF, FILE_BUFSIZE);
-#  endif
+# else
+    /* No setvbuf() for e.g.ANCIENT_UNIX */
+    setbuf(ffp, file_buffer);
+# endif
 
 #  if     WINDOW_MSWIN
     fbusy = FWRITING;
@@ -198,6 +206,36 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
     return (FIOSUC);
 }
 
+# if 0 < OPT_CODE_LEVEL
+/* Normally we'd expect the OS to do this kind of optimization: But on
+ * Linux with GNU libc version 2.40 it does not --- JES, 2026-05-03.
+ */
+static int  uegetc P1_(FILE *, fp)
+{
+    static char buf_[FILE_BUFSIZE];
+    /* Position of next character to read. The buffer is filled by
+     * fread() which reads at most SIZEOF(buf_) charcters.
+     * First position: 0
+     * Last  position: SIZEOF(buf_) - 1
+     */
+    static int  buf_pos_  = (-1);
+    static int  read_res_ = (-1);
+
+    if ( 0  > buf_pos_  || read_res_ - 1 < buf_pos_  )  {
+        errno = 0;
+        if ( 0 == (read_res_ = fread(buf_, 1, SIZEOF(buf_), fp)) )  {
+            return EOF;
+        }
+
+        buf_pos_ = 0;
+    }
+
+    return (int)(unsigned char)buf_[buf_pos_++];
+}
+# else
+#  define uegetc  getc
+# endif
+
 /* FFGETLINE:
  *
  * Read a line from a file, and store the bytes in the supplied buffer. The
@@ -207,12 +245,13 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
  */
 int PASCAL NEAR ffgetline P1_(int *, nbytes)
 {
-    REGISTER int c;             /* current character read */
-    REGISTER int i;             /* current index into fline */
+    REGISTER int  c = 0;    /* current character read   */
+    REGISTER int  i = 0;    /* current index into fline */
 
     /* if we are at the end...return it */
-    if ( eofflag )
-        return (FIOEOF);
+    if ( eofflag )  {
+        return FIOEOF;
+    }
 
     /* dump fline if it ended up too big */
     if ( flen > NSTRING && fline != NULL ) {
@@ -220,33 +259,34 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
     }
 
     /* if we don't have an fline, allocate one */
-    if ( fline == NULL )
-        if ( ( fline = ROOM(flen = NSTRING) ) == NULL )
-            return (FIOMEM);
-
-
+    if ( fline == NULL )  {
+        if ( ( fline = ROOM(flen = NSTRING) ) == NULL ) {
+            return FIOMEM;
+        }
+    }
 
     /* read the line in */
     i = 0;
-    while ( ( c = getc(ffp) ) != EOF && c != '\n' ) {
+    while ( ( c = uegetc(ffp) ) != EOF && c != '\n' ) {
         fline[i++] = c;
         /* if it's longer, get more room */
         if ( i >= flen ) {
 # if     MSDOS
-            if ( flen >= 16636 )
-                return (FIOMEM);
-
+            if ( flen >= C_16636 )  {
+                return FIOMEM;
+            }
 # endif
             flen *= 2;
             if ( ( fline = REROOM(fline, flen) ) == NULL ) {
-                return (FIOMEM);
+                return FIOMEM;
             }
         }
     }
 
     /* dump any extra line terminators at the end */
-    while ( i > 0 && (fline[i-1] == 10 || fline[i-1] == 13) )
+    while ( i > 0 && (fline[i - 1] == '\n' || fline[i - 1] == '\r') ) {
         i--;
+    }
 
     /* and save the length for our caller... */
     *nbytes = i;
@@ -257,25 +297,27 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
     if ( c == EOF ) {
         if ( ferror(ffp) ) {
             mlwrite(TEXT158);
+/*                  "File read error" */
 
-/*                              "File read error" */
-            return (FIOERR);
+            return FIOERR;
         }
 
-        if ( i != 0 )
+        if ( i != 0 ) {
             eofflag = TRUE;
-        else
-            return (FIOEOF);
+        } else        {
+            return FIOEOF;
+        }
     }
 
     /* terminate and decrypt the string */
     fline[i] = 0;
 # if     CRYPT
-    if ( cryptflag )
-        ecrypt( fline, STRLEN(fline) );
+    if ( cryptflag )  {
+        ecrypt(fline, STRLEN(fline));
+    }
 # endif
 
-    return (FIOSUC);
+    return FIOSUC;
 }
 
 #endif  /* !(VMS & RMSIO) */

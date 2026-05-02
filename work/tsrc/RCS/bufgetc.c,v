@@ -1,0 +1,144 @@
+head	1.2;
+access;
+symbols;
+locks
+	joachim:1.2; strict;
+comment	@ * @;
+
+
+1.2
+date	2026.05.02.11.29.36;	author joachim;	state Exp;
+branches;
+next	1.1;
+
+1.1
+date	2026.05.02.10.54.53;	author joachim;	state Exp;
+branches;
+next	;
+
+
+desc
+@@
+
+
+1.2
+log
+@*** empty log message ***
+@
+text
+@/** SOF **/
+
+
+#include <stdio.h>
+#include <stdlib.h>
+#undef NDEBUG
+#include <assert.h>
+#include <errno.h>
+
+#define ASRT      assert
+#define SIZEOF(x) ( (int)sizeof((x)) )
+
+#if ( 1 )
+# define UEGETC_BUFSIZ  (8192)
+#else
+# define UEGETC_BUFSIZ  (13)
+#endif
+
+
+int uegetc(FILE *fp)
+{
+    static char buf_[UEGETC_BUFSIZ];
+    /* Position of next character to read. The buffer is filled by fread()
+     * which reads at most SIZEOF(buf_) charcters.
+     * First position: 0
+     * Last  position: SIZEOF(buf_) - 1
+     */
+    static int  buf_pos_  = (-1);
+    static int  read_res_ = (-1);
+
+    if ( 0  > buf_pos_  || read_res_ - 1 < buf_pos_  )  {
+        errno = 0;
+        if ( 0 == (read_res_ = fread(buf_, 1, SIZEOF(buf_), fp)) )  {
+            return EOF;
+        }
+
+        buf_pos_ = 0;
+    }
+
+    return (int)(unsigned char)buf_[buf_pos_++];
+}
+
+
+int main(int argc, char *argv[])
+{
+    int c = 0;
+
+#if ( 1 )
+    while ( EOF != (c = uegetc(stdin)) )  {
+        /**fputc(c, stdout);**/
+    }
+#else
+    while ( EOF != (c = getc(stdin)) )  {
+        /**fputc(c, stdout);**/
+    }
+#endif
+
+    return 0;
+}
+
+
+
+/** EOF **/
+@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d13 2
+a14 2
+#if ( 0 )
+# define UEGETC_BUFSIZ  (4096)
+a18 8
+static char uegetc_buf_[UEGETC_BUFSIZ];
+/* Position of next character to read. The buffer is filled by fgets()
+ * which reads at most SIZEOF(uegetc_buf_) - 1 charcters.
+ * First position: 0
+ * Last  position: SIZEOF(uegetc_buf_) - 1 - 1
+ */
+static int  uegetc_buf_pos_ = (-1);
+
+d22 8
+a29 6
+    int next  = '\0';
+
+fillbuf:
+    if ( 0                       > uegetc_buf_pos_  ||
+         SIZEOF(uegetc_buf_) - 2 < uegetc_buf_pos_ )  {
+        char  *res  = NULL;
+d31 1
+d33 1
+a33 2
+        res = fgets(uegetc_buf_, SIZEOF(uegetc_buf_), fp);
+        if ( NULL == res )  {
+d37 1
+a37 8
+        uegetc_buf_pos_ = 0;
+    }
+
+    if ( '\0' == (next =
+            (int)(unsigned char)uegetc_buf_[uegetc_buf_pos_++]) ) {
+            uegetc_buf_pos_ = (-1);
+
+            goto fillbuf;
+d40 1
+a40 1
+    return next;    
+d48 1
+d50 5
+a54 1
+        fputc(c, stdout);
+d56 1
+@

@@ -34,38 +34,40 @@
 /* Some constants:                                                    */
 /**********************************************************************/
 /* No braces `()' here!                                               */
-#define C_1        1
-#define C_2        2
-#define C_3        3
-#define C_4        4
-#define C_5        5
-#define C_6        6
-#define C_7        7
-#define C_8        8
-#define C_9        9
-#define C_10      10
-#define C_14      14
-#define C_16      16
-#define C_18      18
-#define C_20      20
-#define C_24      24
-#define C_25      25
-#define C_30      30
-#define C_32      32
-#define C_36      36
-#define C_40      40
+#define C_1         1
+#define C_2         2
+#define C_3         3
+#define C_4         4
+#define C_5         5
+#define C_6         6
+#define C_7         7
+#define C_8         8
+#define C_9         9
+#define C_10       10
+#define C_14       14
+#define C_16       16
+#define C_18       18
+#define C_20       20
+#define C_24       24
+#define C_25       25
+#define C_30       30
+#define C_32       32
+#define C_36       36
+#define C_40       40
 #if     BEGIN_COMMENT_
-#define C_50      50
-#define C_60      60
-#define C_70      70
+#define C_50       50
+#define C_60       60
+#define C_70       70
 #endif  /*END_COMMENT_*/
-#define C_80      80
+#define C_80       80
 #if     BEGIN_COMMENT_
-#define C_90      90
+#define C_90       90
 #endif  /*END_COMMENT_*/
-#define C_95      95
-#define C_100    100
-#define C_1000  1000
+#define C_95       95
+#define C_100     100
+#define C_1000   1000
+#define C_4096   4096
+#define C_16636 16636
 /*====================================================================*/
 #define UMC_UCHAR_MAX   ( 0xFF/***(int)(unsigned char)(-1)***/ )
 /**********************************************************************/

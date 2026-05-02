@@ -5,8 +5,14 @@ LANG=C
 LC_ALL=C
 export PATH LANG LC_ALL
 
-awk 'BEGIN {
-  for ( i = 0; i < 640000; i++ )
+numlines=640000
+
+if [ -n "$1" ]; then
+  numlines=`expr 0 + "$1"`
+fi
+
+awk -v "numlines=${numlines}" 'BEGIN {
+  for ( i = 0; i < numlines; i++ )
   {
       printf "Das ist nun Zeile Nr %05d\n", i;
   }

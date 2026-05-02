@@ -20,6 +20,7 @@ OPTFLAGS = -fno-strict-aliasing
 #DEFINES   = -DUEMACS_DEBUG_XMALLOC_USE_LIST
 #DEFINES   = -DUSE_NOBLOCK_READ=1
 #DEFINES   = -DUEMACS_DEBUG_XMALLOC_FREE_OFF
+DEFINES   = -DOPT_CODE_LEVEL=2
 #WARNFLAGS = -Wall
 WARNFLAGS = -Wall -Wno-unused-variable
 #WARNFLAGS = -Wall -Wno-unused-local-typedefs

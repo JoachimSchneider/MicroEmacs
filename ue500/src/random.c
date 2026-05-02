@@ -3587,17 +3587,30 @@ int CDECL NEAR  DebugMessage V1_(CONST char *, fmt)
 char PASCAL NEAR  lputc_ P5_(LINE *, lp, int, n, char, c,
                              CONST char *, fnam, int, lno)
 {
+#if OPT_CODE_LEVEL <= 0
     ASRTK(NULL != lp,                 fnam, lno);
-#if ( !0 )
+# if  ( !0 )
     ASRTK(lp->l_used_ <= lp->l_size_, fnam, lno);
-#else
+# else
     ASRTK_TRC(lp->l_used_ <= lp->l_size_,
               ("lp->l_used_ = %d, lp->lsize_ = %d",
               lp->l_used_, lp->l_size_),
               fnam, lno);
-#endif
+# endif
     ASRTK(0 <= n,                     fnam, lno);
     ASRTK(n < lp->l_size_,            fnam, lno);
+#else
+#if OPT_CODE_LEVEL <= 1
+    /* Minimize number of asserts for OPT_CODE_LEVEL == 1:  */
+    ASRTK((NULL != lp)                  &&
+          (lp->l_used_ <= lp->l_size_)  &&
+          (0 <= n)                      &&
+          (n < lp->l_size_),
+          fnam, lno);
+#else
+    /* No asserts for higher OPT_CODE_LEVEL:  */
+#endif
+#endif
 
     return ( lp->l_text_[n] = c );
 }
