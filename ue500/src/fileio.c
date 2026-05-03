@@ -2,8 +2,8 @@
  *  FILEIO.C:   Low level file i/o routines
  *              MicroEMACS 3.12
  *
- * The routines in this file read and write ASCII files from the disk. All of
- * the knowledge about files are here.
+ * The routines in this file read and write ASCII files from the disk.
+ * All of the knowledge about files are here.
  *====================================================================*/
 
 /*====================================================================*/
@@ -43,7 +43,7 @@ static int    eofflag;            /* end-of-file flag */
 # endif
 static char file_buffer[FILE_BUFSIZE];
 
-# if 0 < OPT_CODE_LEVEL
+# if ( 1 )
 /* Normally we'd expect the OS to do this kind of optimization: But on
  * - Linux with GNU libc version 2.40
  * - CYGWIN 3.3.5(0.341/5/3)
@@ -117,8 +117,9 @@ static int  ueputc P2_(int, c, FILE *, fp)
  */
 int PASCAL NEAR ffropen P1_(CONST char *, fn)
 {
-    if ( ( ffp=fopen(fn, "r") ) == NULL )
-        return (FIOFNF);
+    if ( ( ffp = fopen(fn, "r") ) == NULL ) {
+        return FIOFNF;
+    }
 
     /* tell the library to give us a LARGE buffer to speed I/O */
 # if     (MSC || TURBO || IC) && MSDOS
@@ -133,12 +134,13 @@ int PASCAL NEAR ffropen P1_(CONST char *, fn)
 # endif
     eofflag = FALSE;
 
-    return (FIOSUC);
+    return FIOSUC;
 }
 
-/*
- * Open a file for writing. Return TRUE if all is well, and FALSE on error
- * (cannot create).
+/* FFWOPEN:
+ *
+ * Open a file for writing. Return TRUE if all is well, and FALSE on
+ * error (cannot create).
  */
 # if  !(AOSVS | MV_UX)
 int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
@@ -147,21 +149,22 @@ int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
 {
     char xmode[6];              /* extended file open mode */
 
+    ZEROMEM(xmode);
     /* nonstandard line terminators? */
     if ( *lterm ) {
         /* open in binary mode */
-        XSTRCPY(xmode, mode);
-        XSTRCAT(xmode, "b");
+        BUFCPY(xmode, mode);
+        BUFCAT(xmode, "b");
         ffp = fopen(fn, xmode);
-    } else {
+    } else        {
         /* open in ascii(text) mode */
         ffp = fopen(fn, mode);
     }
 
     if ( ffp == NULL ) {
         mlwrite(TEXT155);
+/*              "Cannot open file for writing" */
 
-/*          "Cannot open file for writing" */
         return (FIOERR);
     }
 
@@ -177,7 +180,7 @@ int PASCAL NEAR ffwopen P2_(CONST char *, fn, CONST char *, mode)
     fbusy = FWRITING;
 #  endif
 
-    return (FIOSUC);
+    return FIOSUC;
 }
 # endif
 
@@ -208,25 +211,25 @@ int PASCAL NEAR ffclose P0_()
         mlwrite(TEXT156);
 /*              "Error closing file" */
 
-        return (FIOERR);
+        return FIOERR;
     }
 
-    return (FIOSUC);
+    return FIOSUC;
 
 # else
 
     fclose(ffp);
 
-    return (FIOSUC);
+    return FIOSUC;
 
 # endif
 }
 
 /* FFPUTLINE:
  *
- * Write a line to the already opened file. The "buf" points to the buffer, and
- * the "nbuf" is its length, less the free newline. Return the status. Check
- * only at the newline.
+ * Write a line to the already opened file. The "buf" points to the
+ * buffer, and the "nbuf" is its length, less the free newline. Return
+ * the status. Check only at the newline.
  */
 int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
 {
@@ -267,7 +270,7 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
         mlwrite(TEXT157);
 /*              "Write I/O error" */
 
-        return (FIOERR);
+        return FIOERR;
     }
 
 # if     WINDOW_MSWIN
@@ -281,15 +284,15 @@ int PASCAL NEAR ffputline P2_(char *, buf, int, nbuf)
     }
 # endif
 
-    return (FIOSUC);
+    return FIOSUC;
 }
 
 /* FFGETLINE:
  *
- * Read a line from a file, and store the bytes in the supplied buffer. The
- * "nbuf" is the length of the buffer. Complain about long lines and lines at
- * the end of the file that don't have a newline present. Check for I/O errors
- * too. Return status.
+ * Read a line from a file, and store the bytes in the supplied buffer.
+ * The "nbuf" is the length of the buffer. Complain about long lines
+ * and lines at the end of the file that don't have a newline present.
+ * Check for I/O errors too. Return status.
  */
 int PASCAL NEAR ffgetline P1_(int *, nbytes)
 {
@@ -302,7 +305,7 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
     }
 
     /* dump fline if it ended up too big */
-    if ( flen > NSTRING && fline != NULL ) {
+    if ( flen > NSTRING && fline != NULL )  {
         CLROOM(fline);
     }
 
@@ -314,7 +317,6 @@ int PASCAL NEAR ffgetline P1_(int *, nbytes)
     }
 
     /* read the line in */
-    i = 0;
     while ( ( c = uegetc(ffp) ) != EOF && c != '\n' ) {
         fline[i++] = c;
         /* if it's longer, get more room */
