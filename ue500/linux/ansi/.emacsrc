@@ -653,6 +653,8 @@ store-procedure utf8-to-ascii
   beginning-of-file
   replace-string "~xc3~x9f"     "ss"
   beginning-of-file
+  replace-string "~xc2~xad"     ""
+  beginning-of-file
   replace-string "~xE2~x80~x9E" "``"
   beginning-of-file
   replace-string "~xE2~x80~x9C" "~x22"
@@ -661,7 +663,7 @@ store-procedure utf8-to-ascii
   beginning-of-file
   replace-string "~xE2~x80~xA6" "..."
   beginning-of-file
-  replace-string "~xE2~x80~x93" "---"
+  replace-string "~xE2~x80~x93" "--"
   beginning-of-file
   replace-string "~xE2~x80~x94" "---"
   ; That is \cdot
@@ -686,6 +688,85 @@ store-procedure utf8-to-ascii
   replace-string "~xE2~x89~xA4" ".LE. "
   beginning-of-file
   replace-string "~xE2~x89~xA5" ".GE. "
+  ;=====================================================================
+
+  beginning-of-file
+  set-mark
+  end-of-file
+  trim-region
+  kill-region
+  select-buffer %curbuf
+  yank
+  delete-buffer %tbuf
+!endm
+
+
+store-procedure utf8-to-uml
+  local %curbuf
+  local %tbuf
+
+  set %tbuf $tbuf
+  !force delete-buffer %tbuf
+  kill-region
+  set %curbuf $cbufname
+  1 select-buffer %tbuf
+  yank
+  delete-mode "MAGIC"
+  add-mode    "EXACT"
+
+  ;=====================================================================
+  ; Insert your translations into this section
+  ;=====================================================================
+  beginning-of-file
+  replace-string "~xc3~xa4"     "&auml;"
+  beginning-of-file
+  replace-string "~xc3~xb6"     "&ouml;"
+  beginning-of-file
+  replace-string "~xc3~xbc"     "&uuml;"
+  beginning-of-file
+  replace-string "~xc3~x84"     "&Auml;"
+  beginning-of-file
+  replace-string "~xc3~x96"     "&Ouml;"
+  beginning-of-file
+  replace-string "~xc3~x9c"     "&Uuml;"
+  beginning-of-file
+  replace-string "~xc3~x9f"     "&szlig;"
+  beginning-of-file
+  replace-string "~xc2~xad"     "&shy;"
+  beginning-of-file
+  replace-string "~xE2~x80~x9E" "``"
+  beginning-of-file
+  replace-string "~xE2~x80~x9C" "~x22"
+  beginning-of-file
+  replace-string "~xE2~x80~x9D" "~x22"
+  beginning-of-file
+  replace-string "~xE2~x80~xA6" "..."
+  beginning-of-file
+  replace-string "~xE2~x80~x93" "&ndash;"
+  beginning-of-file
+  replace-string "~xE2~x80~x94" "&mdash;"
+  ; That is \cdot
+  beginning-of-file
+  replace-string "~xC2~xB7"     "*"
+  ; That is \cdot
+  beginning-of-file
+  replace-string "~xE2~x88~x99" "*"
+  beginning-of-file
+  replace-string "~xE2~x80~xA2" "-"
+  beginning-of-file
+  replace-string "~xC2~xA7"     "&sect;"
+  beginning-of-file
+  replace-string "~xE2~x80~x99" "'"
+  beginning-of-file
+  replace-string "~xE2~x82~xAC" "&euro;"
+  beginning-of-file
+  replace-string "~xC2~xBB"     ">>"
+  beginning-of-file
+  replace-string "~xC2~xAB"     "<<"
+  beginning-of-file
+  replace-string "~xE2~x89~xA4" "&le;"
+  beginning-of-file
+  replace-string "~xE2~x89~xA5" "&ge;"
   ;=====================================================================
 
   beginning-of-file
