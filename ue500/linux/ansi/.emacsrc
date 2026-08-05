@@ -734,7 +734,7 @@ store-procedure utf8-to-uml
   beginning-of-file
   replace-string "~xc2~xad"     "&shy;"
   beginning-of-file
-  replace-string "~xE2~x80~x9E" "``"
+  replace-string "~xE2~x80~x9E" "&quot;"
   beginning-of-file
   replace-string "~xE2~x80~x9C" "&quot;"
   beginning-of-file
