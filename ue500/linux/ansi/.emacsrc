@@ -736,9 +736,9 @@ store-procedure utf8-to-uml
   beginning-of-file
   replace-string "~xE2~x80~x9E" "``"
   beginning-of-file
-  replace-string "~xE2~x80~x9C" "~x22"
+  replace-string "~xE2~x80~x9C" "&quot;"
   beginning-of-file
-  replace-string "~xE2~x80~x9D" "~x22"
+  replace-string "~xE2~x80~x9D" "&quot;"
   beginning-of-file
   replace-string "~xE2~x80~xA6" "..."
   beginning-of-file
@@ -760,9 +760,9 @@ store-procedure utf8-to-uml
   beginning-of-file
   replace-string "~xE2~x82~xAC" "&euro;"
   beginning-of-file
-  replace-string "~xC2~xBB"     ">>"
+  replace-string "~xC2~xBB"     "&raquo;"
   beginning-of-file
-  replace-string "~xC2~xAB"     "<<"
+  replace-string "~xC2~xAB"     "&laquo;"
   beginning-of-file
   replace-string "~xE2~x89~xA4" "&le;"
   beginning-of-file
