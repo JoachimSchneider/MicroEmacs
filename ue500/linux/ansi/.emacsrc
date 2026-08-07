@@ -681,9 +681,14 @@ store-procedure utf8-to-ascii
   beginning-of-file
   replace-string "~xE2~x82~xAC" "EUR "
   beginning-of-file
+  replace-string "~xE2~x80~xB9" "<"
+  beginning-of-file
+  replace-string "~xE2~x80~xBA" ">"
+  beginning-of-file
   replace-string "~xC2~xBB"     ">>"
   beginning-of-file
   replace-string "~xC2~xAB"     "<<"
+
   beginning-of-file
   replace-string "~xE2~x89~xA4" ".LE. "
   beginning-of-file
@@ -759,6 +764,10 @@ store-procedure utf8-to-uml
   replace-string "~xE2~x80~x99" "'"
   beginning-of-file
   replace-string "~xE2~x82~xAC" "&euro;"
+  beginning-of-file
+  replace-string "~xE2~x80~xB9" "&lsaquo;"
+  beginning-of-file
+  replace-string "~xE2~x80~xBA" "&rsaquo;"
   beginning-of-file
   replace-string "~xC2~xBB"     "&raquo;"
   beginning-of-file
