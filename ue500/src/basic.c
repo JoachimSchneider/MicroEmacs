@@ -197,26 +197,30 @@ int PASCAL NEAR gotoeob P2_(int, f, int, n)
 int PASCAL NEAR forwline P2_(int, f, int, n)
 /* f, n:  Argument flag and argument  */
 {
-    REGISTER LINE   *dlp;
+    REGISTER LINE *dlp  = NULL;
 
-    if ( n < 0 )
+    if ( n < 0 )  {
         return ( backline(f, -n) );
+    }
 
     /* if we are on the last line as we start....fail the command */
-    if ( curwp->w_dotp == curbp->b_linep )
-        return (FALSE);
+    if ( PointAtFinalLn(curwp) )  {
+        return FALSE;
+    }
 
     /* if the last command was not note a line move, reset the goal column */
-    if ( (lastflag&CFCPCN) == 0 )
+    if ( (lastflag&CFCPCN) == 0 ) {
         curgoal = getccol(FALSE);
+    }
 
     /* flag this command as a line move */
     thisflag |= CFCPCN;
 
     /* and move the point down */
     dlp = curwp->w_dotp;
-    while ( n-- && dlp!=curbp->b_linep )
+    while ( n-- && dlp != curbp->b_linep )  {
         dlp = lforw(dlp);
+    }
 
     /* reseting the current position */
     curwp->w_dotp  = dlp;
@@ -228,7 +232,7 @@ int PASCAL NEAR forwline P2_(int, f, int, n)
 
 #else
 
-    return (TRUE);
+    return TRUE;
 
 #endif
 }
@@ -243,27 +247,30 @@ int PASCAL NEAR forwline P2_(int, f, int, n)
 int PASCAL NEAR backline P2_(int, f, int, n)
 /* f, n:  Argument flag and num */
 {
-    REGISTER LINE   *dlp;
+    REGISTER LINE *dlp  = NULL;
 
-    if ( n < 0 )
+    if ( n < 0 )  {
         return ( forwline(f, -n) );
+    }
 
-
-    /* if we are on the last line as we start....fail the command */
-    if ( lback(curwp->w_dotp) == curbp->b_linep )
-        return (FALSE);
+    /* if we are on the first line as we start....fail the command */
+    if ( PointAtFirstLn(curwp) )  {
+        return FALSE;
+    }
 
     /* if the last command was not note a line move, reset the goal column */
-    if ( (lastflag&CFCPCN) == 0 )
+    if ( (lastflag&CFCPCN) == 0 ) {
         curgoal = getccol(FALSE);
+    }
 
     /* flag this command as a line move */
     thisflag |= CFCPCN;
 
     /* and move the point up */
     dlp = curwp->w_dotp;
-    while ( n-- && lback(dlp)!=curbp->b_linep )
+    while ( n-- && lback(dlp) != curbp->b_linep ) {
         dlp = lback(dlp);
+    }
 
     /* reseting the current position */
     curwp->w_dotp  = dlp;
@@ -275,7 +282,7 @@ int PASCAL NEAR backline P2_(int, f, int, n)
 
 #else
 
-    return (TRUE);
+    return TRUE;
 
 #endif
 }
@@ -289,63 +296,67 @@ int PASCAL NEAR backline P2_(int, f, int, n)
 int PASCAL NEAR gotobop P2_(int, f, int, n)
 /* f, n:  Default Flag & Numeric argument */
 {
-    REGISTER int suc;           /* success of last backchar */
-    REGISTER int c;             /* current character in scan */
-    REGISTER char *sp;          /* ptr into character leadin lists */
+    REGISTER int  suc = 0;      /* success of last backchar */
+    REGISTER int  c   = 0;      /* current character in scan */
+    REGISTER char *sp = NULL;   /* ptr into character leadin lists */
 
-    if ( n < 0 )        /* the other way...*/
-        return ( gotoeop(f, -n) );
+    if ( n < 0 )  {             /* the other way...*/
+        return gotoeop(f, -n);
+    }
 
     while ( n-- > 0 ) {         /* for each one asked for */
-
         /* first scan back until we are in a word */
-        suc = backchar(FALSE, 1);
-        while ( !inword() && suc )
+        suc = !PointAtBOB(curwp);
+        while ( suc && !PointAtBOL(curwp) && !inword() )  {
             suc = backchar(FALSE, 1);
+        }
         set_w_doto(curwp, 0);   /* and go to the B-O-Line */
 
         /* scan back through the text */
-        while ( lback(curwp->w_dotp) != curbp->b_linep ) {
-
-            /* at blank line */
-            if ( get_lused(curwp->w_dotp) == 0 )
+        while ( !PointAtFirstLn(curwp) )  {
+            if ( PointAtBlankLn(curwp) )  {
                 break;
+            }
 
             /* current line start with member of $paralead? */
             c = lgetc(curwp->w_dotp, 0);
             sp = paralead;
             while ( *sp ) {
-                if ( c == *sp )
+                if ( c == *sp ) {
                     break;
+                }
                 ++sp;
             }
-            if ( c == *sp )
+            if ( c == *sp ) {
                 break;
+            }
 
             /* last line start with member of $fmtlead? */
             c = lgetc(lback(curwp->w_dotp), 0);
             sp = fmtlead;
             while ( *sp ) {
-                if ( c == *sp )
+                if ( c == *sp ) {
                     break;
+                }
                 ++sp;
             }
-            if ( c == *sp )
+            if ( c == *sp ) {
                 break;
+            }
 
             /* back one line... */
             curwp->w_dotp = lback(curwp->w_dotp);
         }
 
         /* and then forward until we are in a word */
-/*      suc = forwchar(FALSE, 1); */
-        suc = TRUE;
-        while ( suc && !inword() )
+        suc = !PointAtEOB(curwp);
+        while ( suc && !inword() )  {
             suc = forwchar(FALSE, 1);
+        }
     }
-    curwp->w_flag |= WFMOVE;            /* force screen update */
+    curwp->w_flag |= WFMOVE;    /* force screen update */
 
-    return (TRUE);
+    return TRUE;
 }
 
 /* GOTOEOP:
@@ -357,51 +368,54 @@ int PASCAL NEAR gotobop P2_(int, f, int, n)
 int PASCAL NEAR gotoeop P2_(int, f, int, n)
 /* f, n:  Default Flag & Numeric argument */
 {
-    REGISTER int suc;           /* success of last backchar */
-    REGISTER int c;             /* current character in scan */
-    REGISTER char *sp;          /* ptr into character leadin lists */
+    REGISTER int  suc = 0;      /* success of last backchar */
+    REGISTER int  c   = 0;      /* current character in scan */
+    REGISTER char *sp = NULL;   /* ptr into character leadin lists */
 
-    if ( n < 0 )        /* the other way...*/
-        return ( gotobop(f, -n) );
+    if ( n < 0 )  {             /* the other way...*/
+        return gotobop(f, -n);
+    }
 
     while ( n-- > 0 ) {         /* for each one asked for */
-
         /* first scan forward until we are in a word */
-        suc = forwchar(FALSE, 1);
-        while ( !inword() && suc )
+        suc = !PointAtEOB(curwp);
+        while ( suc && !PointAtEOL(curwp) && !inword() )  {
             suc = forwchar(FALSE, 1);
+        }
 
-        /* and go to the B-O-Line */
+        /* and go to the B-O-Line         */
         set_w_doto(curwp, 0);
-
-        /* of next line if not at EOF */
-        if ( suc )
+        /* ... of next line if not at EOW */
+        if ( suc )  {
             curwp->w_dotp = lforw(curwp->w_dotp);
+        }
 
         /* scan forward */
-        while ( curwp->w_dotp != curbp->b_linep ) {
-
-            /* at blank line */
-            if ( get_lused(curwp->w_dotp) == 0 )
+        while ( !PointAtFinalLn(curwp) )  {
+            if ( PointAtBlankLn(curwp) )  {
                 break;
+            }
 
             /* current line start with member of $paralead? */
             c = lgetc(curwp->w_dotp, 0);
             sp = paralead;
             while ( *sp ) {
-                if ( c == *sp )
+                if ( c == *sp ) {
                     break;
+                }
                 ++sp;
             }
-            if ( c == *sp )
+            if ( c == *sp ) {
                 break;
+            }
 
             /* current line start with member of $fmtlead? */
             c = lgetc(curwp->w_dotp, 0);
             sp = fmtlead;
             while ( *sp ) {
-                if ( c == *sp )
+                if ( c == *sp ) {
                     break;
+                }
                 ++sp;
             }
             if ( c == *sp )
@@ -412,15 +426,15 @@ int PASCAL NEAR gotoeop P2_(int, f, int, n)
         }
 
         /* and then backward until we are in a word */
-        suc = backchar(FALSE, 1);
-        while ( suc && !inword() ) {
+        suc = !PointAtBOB(curwp);
+        while ( suc && !inword() )  {
             suc = backchar(FALSE, 1);
         }
         set_w_doto(curwp, get_lused(curwp->w_dotp));  /* and to the EOL */
     }
-    curwp->w_flag |= WFMOVE;            /* force screen update */
+    curwp->w_flag |= WFMOVE;    /* force screen update */
 
-    return (TRUE);
+    return TRUE;
 }
 
 /* GETGOAL:

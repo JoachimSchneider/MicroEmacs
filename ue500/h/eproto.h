@@ -1266,11 +1266,11 @@ VOID PASCAL NEAR  ASRT_WriteStr_ P1_(CONST char *, s)
  * `ASRT(NULL != (fp = fopen("FileName", "rw")));' is correct!
  */
 /**********************************************************************/
-EXTERN VOID PASCAL NEAR ASRT_Catch DCL((CONST char *file, int line,
+EXTERN int PASCAL NEAR  ASRT_Catch DCL((CONST char *file, int line,
                                         CONST char *cond));
 #ifdef MAIN_C_
-VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
-                                CONST char *, cond)
+int PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
+                               CONST char *, cond)
 {
     int errno_sv_ = errno;
 
@@ -1285,28 +1285,38 @@ VOID PASCAL NEAR ASRT_Catch P3_(CONST char *, file, int, line,
     asrs_("OS ERRNO: "); asri_(errno_sv_); asrs_("\n");
     asrs_("--- abort ...\n");
     abort();
+
+    return 0;
 }
 #endif
 
-EXTERN VOID PASCAL NEAR ASRTM_Catch DCL((CONST char *file,
+EXTERN int PASCAL NEAR  ASRTM_Catch DCL((CONST char *file,
                                          int line,
                                          CONST char *cond,
                                          CONST char *msg));
 #ifdef MAIN_C_
-VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
-                                  CONST char *, cond, CONST char *, msg)
+int PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
+                                 CONST char *, cond, CONST char *, msg)
 {
     int errno_sv_ = errno;
 
     asrs_("File: "); asrs_(file); asrs_(", Line: ");
     asri_(line); asrs_("\n");
-    asrs_("\t"); asrs_(msg); asrs_("\n");
-    asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
+    if ( msg && *msg )  {
+        asrs_("\t"); asrs_(msg); asrs_("\n");
+    }
+    if ( cond && *cond )  {
+        asrs_("\tAssertion `"); asrs_(cond); asrs_("' failed!\n");
+    }
     asrs_("OS ERRNO: "); asri_(errno_sv_); asrs_("\n");
     asrs_("--- abort ...\n");
     abort();
+
+    return 0;
 }
 #endif
+
+#define PANIC(msg)  ( ASRTM_Catch(__FILE__, __LINE__, NULL, (msg)) )
 
 
 /*
@@ -1318,6 +1328,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 #define ASRT(e) do {                                                    \
         if ( !(e) )                                                     \
         {                                                               \
+            VOIDCAST                                                    \
             ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
@@ -1325,6 +1336,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 #define ASRTM(e, m) do {                                                \
         if ( !(e) )                                                     \
         {                                                               \
+            VOIDCAST                                                    \
             ASRTM_Catch (__FILE__, __LINE__, MKSTRING(e), m);           \
         }                                                               \
     } while (0)
@@ -1332,6 +1344,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 #define ASRTK(e, file, line) do {                                       \
         if ( !(e) )                                                     \
         {                                                               \
+            VOIDCAST                                                    \
             ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
@@ -1340,6 +1353,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
 #define ASRTMK(e, m, file, line) do {                                   \
         if ( !(e) )                                                     \
         {                                                               \
+            VOIDCAST                                                    \
             ASRTM_Catch (file, line, MKSTRING(e), m);                   \
         }                                                               \
     } while (0)
@@ -1350,6 +1364,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         if ( !(e) )                                                     \
         {                                                               \
             TRCK(a, __FILE__, __LINE__);                                \
+            VOIDCAST                                                    \
             ASRT_Catch (__FILE__, __LINE__, MKSTRING(e));               \
         }                                                               \
     } while (0)
@@ -1359,6 +1374,7 @@ VOID PASCAL NEAR ASRTM_Catch  P4_(CONST char *, file, int, line,
         if ( !(e) )                                                     \
         {                                                               \
             TRCK(a, file, line);                                        \
+            VOIDCAST                                                    \
             ASRT_Catch (file, line, MKSTRING(e));                       \
         }                                                               \
     } while (0)
@@ -1824,8 +1840,36 @@ EXTERN int PASCAL NEAR  get_w_doto_ DCL((EWINDOW *wp,
 EXTERN int PASCAL NEAR  set_w_doto_ DCL((EWINDOW *wp, int doto,
                                          CONST char *fnam, int lno));
 #define set_w_doto(wp, doto)  ( set_w_doto_((wp), (doto), __FILE__, __LINE__) )
-/**#define AtWinBOL(wp)          ( get_w_doto((wp)) == 0) )**/
-#define AtWinEOL(wp)          ( get_w_doto((wp)) == get_lused((wp)->w_dotp) )
+
+/*--------------------------------------------------------------------*/
+/* These macros query the position of point in the window *wp:        */
+/*--------------------------------------------------------------------*/
+#define PointAtBlankLn(wp)  ( get_lused((wp)->w_dotp) == 0 )
+#define PointAtBOL(wp)      ( get_w_doto((wp)) == 0 )
+#define PointAtEOL(wp)      ( get_w_doto((wp)) == get_lused((wp)->w_dotp) )
+#define PointAtFirstLn(wp)  ( lback((wp)->w_dotp) == curbp->b_linep )
+#define PointAtLastLn(wp)   ( lforw((wp)->w_dotp) == curbp->b_linep )
+/* This is the "Header Line", a blank line at the end of the buffer:  */
+#define PointAtFinalLn(wp)  ( (wp)->w_dotp == curbp->b_linep )
+#define PointAtBOB(wp)      ( PointAtFirstLn((wp)) && PointAtBOL((wp)) )
+#if ( 0 ) /* Final Line must have PointAtEOL()  */
+# define PointAtEOB(wp)     ( PointAtFinalLn((wp)) && PointAtEOL((wp)) )
+#else
+#if ( 0 ) /* TODO: Remove Assert (i.e. 0 --> 1) after Testing Phase */
+# define PointAtEOB(wp)     ( PointAtFinalLn((wp)) )
+#else
+# define PointAtEOB(wp)     (                                                   \
+                              ( PointAtFinalLn((wp)) )                          \
+                                  &&                                            \
+                              (                                                 \
+                                PointAtEOL((wp))                                \
+                                  ||                                            \
+                                PANIC("PointAtFinalLn() but not PointAtEOL()")  \
+                              )                                                 \
+                            )
+#endif
+#endif
+/*--------------------------------------------------------------------*/
 /**********************************************************************/
 
 #define WFFORCE 0x01                    /* Window needs forced reframe  */
@@ -1942,8 +1986,6 @@ EXTERN int PASCAL NEAR  get_b_doto_ DCL((BUFFER *bp,
 EXTERN int PASCAL NEAR  set_b_doto_ DCL((BUFFER *bp, int doto,
                                          CONST char *fnam, int lno));
 #define set_b_doto(bp, doto)  ( set_b_doto_((bp), (doto), __FILE__, __LINE__) )
-/**#define AtBufBOL(bp)          ( get_b_doto((bp)) == 0) )**/
-/**#define AtBufEOL(bp)          ( get_b_doto((bp)) == get_lused((bp)->b_dotp) )**/
 /**********************************************************************/
 
 #define BFINVS  0x01                    /* Internal invisable buffer    */

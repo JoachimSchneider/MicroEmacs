@@ -309,7 +309,7 @@ qprompt:
 #if JES_REP_MAGIC_BORDER
 # if  MAGIC
             if ( matchlen == 0 )  {
-                if        ( AtWinEOL(curwp) ) {
+                if        ( PointAtEOL(curwp) ) {
                     /* We must have been at EOL at the previous
                      * iteration and the next iteration would end at
                      * the same position:
@@ -331,7 +331,7 @@ qprompt:
 #if JES_REP_MAGIC_BORDER
 # if  MAGIC
             if ( matchlen == 0 )  {
-                if        ( AtWinEOL(curwp) ) {
+                if        ( PointAtEOL(curwp) ) {
                     /* We must have been at EOL at the previous
                      * iteration and the next iteration would end at
                      * the same position:
