@@ -179,6 +179,9 @@ int main P2_(int, argc, char **, argv)
     mcdeltapat[1].mc_type = tapatledcm[1].mc_type = MCNIL;
 # endif
 
+    /* Process Global Startup File: */
+    startup(NULL);
+
     /* Process the command line and let the user edit */
 # if     VMS
     expandargs(&argc, &argv);           /* expand VMS wildcards.*/
@@ -276,17 +279,17 @@ int PASCAL NEAR clean P0_()
 VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this the first time in? */)
 {
     REGISTER BUFFER *bp;        /* temp buffer pointer */
-    REGISTER int firstfile;             /* first file flag */
+    REGISTER int firstfile;     /* first file flag */
     REGISTER int carg;          /* current arg to scan */
-    REGISTER int startflag;             /* startup executed flag */
+    REGISTER int startflag;     /* startup executed flag */
     BUFFER *firstbp = NULL;     /* ptr to first buffer in cmd line */
     int viewflag;               /* are we starting in view mode? */
     int gotoflag;               /* do we need to goto a line at start? */
-    int gline;                          /* if so, what line? */
-    int gchar;                          /* and what character? */
+    int gline;                  /* if so, what line? */
+    int gchar;                  /* and what character? */
     int searchflag;             /* Do we need to search at start? */
     int errflag;                /* C error processing? */
-    VDESC vd;                           /* variable num/type */
+    VDESC vd;                   /* variable num/type */
     char bname[NBUFN];          /* buffer name of file to read */
 #if     MSDOS | OS2
     unsigned char *scan;        /* scan pointer for filenames */
@@ -300,7 +303,7 @@ VOID PASCAL NEAR dcline P3_(int, argc, char **, argv, int, firstflag /* is this 
     viewflag = FALSE;           /* view mode defaults off in command line */
     gotoflag = FALSE;           /* set to off to begin with */
     gline = 1;
-    gchar = 1;                          /* line and character to go to */
+    gchar = 1;                  /* line and character to go to */
     searchflag = FALSE;         /* set to off to begin with */
     firstfile = TRUE;           /* no file to edit yet */
     startflag = FALSE;          /* startup file not executed yet */

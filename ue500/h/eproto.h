@@ -531,6 +531,7 @@ EXTERN int PASCAL NEAR  xstrlcat  DCL((char * s1, CONST char * s2, int n));
  * Safe append of character to string buffer of size n
  */
 EXTERN int PASCAL NEAR  xstrlccat DCL((char * s1, CONST char   c2, int n));
+#define BUFCCAT(dst, src) xstrlccat((dst), (src), SIZEOF((dst)))
 
 /* SFSTRCPY:
  *  if size .GE. 0 copy src to dst using xstrlcpy(dst, src, SIZEOF(dst))
@@ -553,8 +554,8 @@ EXTERN char * PASCAL NEAR sfstrcpy_ DCL((char *dst, int dst_size,
 /**END_OF_DEFINITION**/
 
 /* SFSTRCAT:
- *  if size .GE. 0 append src to dst usling xstrlcat(dst, src, SIZEOF(dst))
- *  else           append src to dst usling xstrcat(dst, src) and log a
+ *  if size .GE. 0 append src to dst using xstrlcat(dst, src, SIZEOF(dst))
+ *  else           append src to dst using xstrcat(dst, src) and log a
  *                 warning message.
  */
 EXTERN char * PASCAL NEAR sfstrcat_ DCL((char       *dst,

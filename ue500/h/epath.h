@@ -1,6 +1,6 @@
 /*======================================================================
  *      EPATH:  This file contains certain info needed to locate the
- *              MicroEMACS files on a system dependant basis.
+ *              MicroEMACS files on a system dependent basis.
  *
  *      possible names and paths of help files under different OSs
  *====================================================================*/
@@ -20,9 +20,10 @@
 
 
 /*======================================================================
- * pathname[0]:             Startup File
- * pathname[1]:             Help File
- * pathname[2:NPNAMES - 1]: Search Path for bind.c:flook(),
+ * spathnam[0]:             Global Startup File
+ * spathnam[1]:             Local Startup File
+ * spathnam[2]:             Help File
+ * spathnam[3:NPNAMES - 1]: Search Path for bind.c:flook(),
  *                          `""' would result in current directory, but
  *                          won't get activated as this case is
  *                          handled separately in flook().
@@ -32,29 +33,30 @@
  * - In bind.c:startup() it is used to locate the startup file.
  *====================================================================*/
 
-static NOSHARE CONST char *pathname[] =
+static NOSHARE CONST char *spathnam[] =
 
 # if     AMIGA
 {
-    ".emacsrc", "emacs.hlp", "", "c:", ":t/", ":s/"
+    "emacs.ini", ".emacsrc", "emacs.hlp", "", "c:", ":t/", ":s/"
 };
 
 # else
 # if   TOS
 {
-    "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\"
+    "emacs.ini", "emacs.rc", "emacs.hlp", "\\", "\\bin\\", "\\util\\"
 };
 
 # else
 # if   FINDER
 {
-    "emacs.rc", "emacs.hlp", "/bin/", "/sys/public/"
+    "emacs.ini", "emacs.rc", "emacs.hlp", "/bin/", "/sys/public/"
 };
 
 # else
 # if   MSDOS || WINNT || WINXP || CYGWIN || DJGPP_DOS
 {
-    "emacs.rc", "emacs.hlp", "\\sys\\public\\", "\\usr\\bin\\", "\\bin\\", "\\"
+    "emacs.ini", "emacs.rc", "emacs.hlp", "\\sys\\public\\",
+    "\\usr\\bin\\", "\\bin\\", "\\"
 };
 
 # else
@@ -67,19 +69,21 @@ static NOSHARE CONST char *pathname[] =
 # else
 # if   b_IS_UNIX
 {
-    ".emacsrc", "emacs.hlp", "/usr/local/", "/usr/lib/"
+    "emacs.ini", ".emacsrc", "emacs.hlp", "/usr/local/",
+    "/usr/lib/"
 };
 
 # else
 # if   VMS
 {
-    "emacs.rc", "emacs.hlp", "SYS$LOGIN:", "MICROEMACS$LIB:"
+    "emacs.ini", "emacs.rc", "emacs.hlp", "SYS$LOGIN:",
+    "MICROEMACS$LIB:"
 };
 
 # else
 # if   WMCS
 {
-    "emacs.rc", "emacs.hlp", "", "sys$disk/syslib.users/"
+    "emacs.ini", "emacs.rc", "emacs.hlp", "", "sys$disk/syslib.users/"
 };
 
 # else
@@ -88,18 +92,18 @@ static NOSHARE CONST char *pathname[] =
  *   NOTE: you must use the Unix style pathnames here!
  */
 {
-    "emacs.rc", "emacs.hlp", "", "/macros/", "/help/"
+    "emacs.ini", "emacs.rc", "emacs.hlp", "", "/macros/", "/help/"
 };
 
 # else
 # if   MPE
 {
-    "emacsrc", "emacshlp", ".pub", ".pub.sys"
+    "emacs.ini", "emacsrc", "emacshlp", ".pub", ".pub.sys"
 };
 
 # else
 {
-    "", "", "", "", ""
+    "", "", "", "", "", ""
 };
 # endif
 # endif
@@ -112,7 +116,7 @@ static NOSHARE CONST char *pathname[] =
 # endif
 # endif
 
-# define NPNAMES ( SIZEOF (pathname)/SIZEOF (char *) )
+# define NPNAMES ( SIZEOF (spathnam)/SIZEOF (char *) )
 
 
 #endif  /* BIND_C_  */

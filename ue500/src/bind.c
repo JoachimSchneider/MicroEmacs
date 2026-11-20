@@ -36,7 +36,7 @@ int PASCAL NEAR help P2_(int, f, int, n /* prefix flag and argument */)
     bp = bfind("emacs.hlp", FALSE, BFINVS);
 
     if ( bp == NULL ) {
-        fname = flook(pathname[1], FALSE, TRUE);
+        fname = flook(spathnam[2], FALSE, TRUE);
         if ( fname == NULL ) {
             mlwrite(TEXT12);
 
@@ -623,25 +623,35 @@ unsigned int PASCAL NEAR getckey P1_(int, mflag)
  * Execute the startup file
  */
 int PASCAL NEAR startup P1_(CONST char *, sfname)
-/* sfname:  Name of startup file (null if default)  */
+/* sfname:  Name of startup file:
+ * - NULL:  Global Startup File
+ * - "":    Local Startup File
+ */
 {
     CONST char  *fname  = NULL;   /* resulting file name to execute */
     char        name[NSTRING];    /* name with extention */
 
     ZEROMEM(name);
-    ASRT(NULL != sfname);
 
     /* look up the startup file */
-    if ( *sfname )  {
+    if ( NULL == sfname )         {
+        /* Global Startup File: DON'T AUTOMATICALLY LOAD FROM
+         * - HOME DIRECTORY,
+         * - CURRENT DIRECTORY:
+         */
+        fname = flook(spathnam[0], FALSE, FALSE);
+    } else if ( '\0' == *sfname ) {
+        /* Local Startup File:  DON'T AUTOMATICALLY LOAD FROM
+         * - CURRENT DIRECTORY:
+         */
+        fname = flook(spathnam[1], TRUE, FALSE);
+    } else                        {
         /* default the extention */
-        XSTRCPY(name, sfname);
-        if ( sindex(name, ".") == 0 )
-            XSTRCAT(name, ".cmd");
-
+        BUFCPY(name, sfname);
+        if ( sindex(name, ".") == 0 ) {
+            BUFCAT(name, ".cmd");
+        }
         fname = flook(name, TRUE, TRUE);
-    } else          {
-        /* DON'T AUTOMATICALLY LOAD STARTUP FROM CURRENT DIRECTORY: */
-        fname = flook(pathname[0], TRUE, FALSE);
     }
 
     /* if it isn't around, don't sweat it */
@@ -674,17 +684,16 @@ CONST char * PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
 /* hflag: Look in the HOME environment variable first?  */
 /* cflag: Use current directory?                        */
 {
-    REGISTER char       *home = NULL;   /* path to home directory   */
-    REGISTER char       *path = NULL;   /* environmental PATH var   */
-    REGISTER CONST char *cp   = NULL;   /* temp pointer CONST str   */
-    REGISTER char       *sp   = NULL;   /* pointer into path spec   */
-    REGISTER int        i     = 0;      /* index                    */
-    static char         fspec[NFILEN];  /* full path spec to search */
+    static char         fspec[NFILEN];  /* RET: Full path spec / NULL */
+    REGISTER char       *home = NULL;   /* path to home directory     */
+    REGISTER char       *path = NULL;   /* environmental PATH var     */
+    REGISTER CONST char *cp   = NULL;   /* temp pointer CONST str     */
+    REGISTER int        i     = 0;      /* index                      */
 
     ZEROMEM(fspec);
     ASRT(NULL != fname);
 
-    /* If we have a qualified path.. check only there!  */
+    /* If we have a qualified path ... check only there!  */
     cp = fname;
     while ( *cp ) {
 #if     AMIGA
@@ -715,37 +724,38 @@ CONST char * PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
         {
             if ( ffropen(fname) == FIOSUC ) {
                 ffclose();
+                BUFCPY(fspec, fname);
 
-                return (fname);
-            } else
-                return (NULL);
+                return fspec;
+            } else                          {
+                return NULL;
+            }
         }
         ++cp;
     }
 
 #if ENVFUNC
-
     if ( hflag ) {
 # if WMCS
         home = getenv("SYS$HOME");
 # else
         home = getenv("HOME");
 # endif
-        if ( home != NULL ) {
+        if ( home != NULL  && *home != '\0' ) {
             /* build home dir file spec */
-            XSTRCPY(fspec, home);
+            BUFCPY(fspec, home);
 # if WMCS
-            XSTRCAT(fspec, fname);
+            BUFCAT(fspec, fname);
 # else
-            XSTRCAT(fspec, DIRSEPSTR);
-            XSTRCAT(fspec, fname);
+            BUFCAT(fspec, DIRSEPSTR);
+            BUFCAT(fspec, fname);
 # endif
 
             /* and try it out */
             if ( ffropen(fspec) == FIOSUC ) {
                 ffclose();
 
-                return (fspec);
+                return fspec;
             }
         }
     }
@@ -756,8 +766,9 @@ CONST char * PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
     if ( cflag )  {
         if ( ffropen(fname) == FIOSUC ) {
             ffclose();
+            BUFCPY(fspec, fname);
 
-            return (fname);
+            return fspec;
         }
     }
 
@@ -772,28 +783,32 @@ CONST char * PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
     path = getenv("PATH");
 #  endif
 # endif
-    if ( path != NULL )
+    if ( path != NULL && *path != '\0' )  {
         while ( *path ) {
+            int l = 0;
+
             /* build next possible file spec */
-            sp = fspec;
+            ZEROMEM(fspec);
 # if     TOS
             while ( *path && (*path != PATHCHR) && (*path != ',') )
 # else
             while ( *path && (*path != PATHCHR) )
 # endif
-                *sp++ = *path++;
-
+            {
+                BUFCCAT(fspec, *path++);
+                l++;
+            }
             /* add a terminating dir separator if we need it */
-            if ( (sp != fspec) && (*(sp-1) != DIRSEPCHAR) )
-                *sp++ = DIRSEPCHAR;
-            *sp = 0;
-            XSTRCAT(fspec, fname);
+            if ( l > 0 && fspec[l - 1] != DIRSEPCHAR )  {
+                BUFCCAT(fspec, DIRSEPCHAR);
+            }
+            BUFCAT(fspec, fname);
 
             /* and try it out */
             if ( ffropen(fspec) == FIOSUC ) {
                 ffclose();
 
-                return (fspec);
+                return fspec;
             }
 
 # if     TOS && MWC
@@ -801,23 +816,26 @@ CONST char * PASCAL NEAR flook P3_(CONST char *, fname, int, hflag, int, cflag)
 # else
             if ( *path == PATHCHR )
 # endif
+            {
                 ++path;
+            }
         }
+    }
 #endif  /* ENVFUNC */
 
     /* look it up via the old table method */
-    for ( i = 2; i < NPNAMES; i++ ) {
-        if ( !*pathname[i] && !cflag )  {
+    for ( i = 3; i < NPNAMES; i++ ) {
+        if ( !*spathnam[i] && !cflag )  {
             continue;
         }
-        XSTRCPY(fspec, pathname[i]);
-        XSTRCAT(fspec, fname);
+        BUFCPY(fspec, spathnam[i]);
+        BUFCAT(fspec, fname);
 
         /* and try it out */
         if ( ffropen(fspec) == FIOSUC ) {
             ffclose();
 
-            return (fspec);
+            return fspec;
         }
     }
 
